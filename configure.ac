@@ -148,6 +148,14 @@ AC_CHECK_LIB(dl, dlopen)
 
 AC_SEARCH_LIBS(pthread_create, [gthread pthread])
 
+dnl Check for X11
+AC_PATH_XTRA
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_PRE_LIBS)
+AC_SUBST(X_EXTRA_LIBS)
+AC_SUBST(X_LIBS)
+AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
+
 dnl
 dnl Check for gtk
 dnl THis is neccesary for the utils/gtk subdirectory
