@@ -11,7 +11,7 @@
 dnl AC_PATH_LQT([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND], [USE-LQT-INCLUDES], [MODULES...])
 dnl Test for libquicktime, and define LQT_CFLAGS, LQT_LIBS, LQT_PLUGIN_DIR, LQT_PLUGIN_CFLAGS, and LQT_PLUGIN_LIBS
 dnl
-AC_DEFUN(AC_PATH_LQT,
+AC_DEFUN([AC_PATH_LQT],
 [dnl 
 dnl Get the cflags and libraries from the lqt-config script
 dnl

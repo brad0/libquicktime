@@ -784,7 +784,8 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                 
 #undef SP
 
-                codec->com.ffcodec_enc->rc_buffer_size = 1024*1024;
+                if(codec->com.ffcodec_enc->rc_max_rate)
+                  codec->com.ffcodec_enc->rc_buffer_size = 128 * 1024;
                 if(avcodec_open(codec->com.ffcodec_enc, codec->com.ffc_enc) != 0)
 			return -1;
                 codec->com.init_enc = 1;

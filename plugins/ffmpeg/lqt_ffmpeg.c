@@ -642,7 +642,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"dvc ", (char *)0 },
           encoding_colormodels: encoding_colormodels_dvc,
           do_encode: 1 },
-#if 0
         {
           id: CODEC_ID_DVVIDEO,
 	  index: -1,
@@ -655,7 +654,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"dvcp", "dvpp", (char *)0 },
           encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1 },
-#endif
 };
 
 struct CODECIDMAP codecidmap_a[] = {
