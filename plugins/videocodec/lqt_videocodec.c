@@ -9,6 +9,7 @@ void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v408(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v410(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
@@ -21,6 +22,8 @@ static char * fourccs_v408[] = { QUICKTIME_YUVA4444 ,     (char*)0 };
 static char * fourccs_v410[] = { QUICKTIME_YUV444_10bit , (char*)0 };
 
 static char * fourccs_yuv2[] = { QUICKTIME_YUV422 ,       (char*)0 };
+
+static char * fourccs_2vuy[] = { "2vuy"           ,       (char*)0 };
 
 static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 
@@ -172,9 +175,24 @@ static lqt_codec_info_static_t codec_info_v410 =
 static lqt_codec_info_static_t codec_info_yuv2 =
   {
   name:        "yuv2",
-  long_name:   "8 bit Packed YUV 4:2:2",     /* Long name of the codec */
+  long_name:   "8 bit Packed YUV 4:2:2 (yuv2)",     /* Long name of the codec */
   description: "8 bit Packed YUV 4:2:2 (yuv2)",      /* Description            */
   fourccs:     fourccs_yuv2,
+  type:        LQT_CODEC_VIDEO,
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_yuv2,
+  decoding_colormodel: BC_YUV422
+
+  };
+
+static lqt_codec_info_static_t codec_info_2vuy =
+  {
+  name:        "2vuy",
+  long_name:   "8 bit Packed YUV 4:2:2 (2vuy)",     /* Long name of the codec */
+  description: "8 bit Packed YUV 4:2:2 (2vuy)",      /* Description            */
+  fourccs:     fourccs_2vuy,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
@@ -216,7 +234,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 7; }
+extern int get_num_codecs() { return 8; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -242,6 +260,9 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
       break;
     case 6: /* vy12 */
       return &codec_info_yv12;
+      break;
+    case 7: /* 2vuy */
+      return &codec_info_2vuy;
       break;
     }
   return (lqt_codec_info_static_t*)0;
@@ -271,6 +292,9 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
       break;
     case 6: /* vy12 */
       return quicktime_init_codec_yv12;
+      break;
+    case 7: /* 2vuy */
+      return quicktime_init_codec_2vuy;
       break;
     }
   return (lqt_init_video_codec_func_t)0;

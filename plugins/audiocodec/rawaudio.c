@@ -139,6 +139,8 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
                                                              track, file->atracks[track].current_chunk,
                                                              &(codec->decode_buffer),
                                                              &(codec->decode_buffer_alloc));
+            if(codec->decode_buffer_size <= 0)
+              return 0;
             codec->decode_buffer_ptr = codec->decode_buffer;
             }
           else
@@ -182,6 +184,8 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
                                                                &(codec->decode_buffer),
                                                                &(codec->decode_buffer_alloc));
               
+              if(codec->decode_buffer_size <= 0)
+                return 0;
               codec->decode_buffer_ptr = codec->decode_buffer;
               }
 

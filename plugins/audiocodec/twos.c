@@ -246,6 +246,8 @@ static int decode(quicktime_t *file,
                                                                track, file->atracks[track].current_chunk,
                                                                &(codec->decode_buffer),
                                                                &(codec->decode_buffer_alloc));
+              if(codec->decode_buffer_size <= 0)
+                return 0;
               /* Handle AVI byte order */
               if(codec->le)
 		swap_bytes(codec->decode_buffer, 

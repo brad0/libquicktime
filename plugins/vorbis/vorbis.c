@@ -141,14 +141,14 @@ static int next_chunk(quicktime_t * file, int track)
                                     track, track_map->current_chunk,
                                     &(codec->chunk_buffer),
                                     &(codec->chunk_buffer_alloc));
-
-  track_map->current_chunk++;
-  
-  if(!chunk_size)
+  if(chunk_size <= 0)
     {
-    fprintf(stderr, "Shit\n");
+    //    fprintf(stderr, "Shit\n");
     return 0;
     }
+  
+  track_map->current_chunk++;
+  
   buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
   memcpy(buffer, codec->chunk_buffer, chunk_size);
   ogg_sync_wrote(&codec->dec_oy, chunk_size);
