@@ -593,11 +593,12 @@ if test "x$RPM_OPT_FLAGS" = "x" ; then
     fi
     
     # basic optimization
-    AC_TRY_CFLAGS([-malign-double -fschedule-insns2],
-                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -malign-double -fschedule-insns2"])
-    AC_TRY_CFLAGS([-O6],
-                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O6"],
-		  AC_TRY_CFLAGS([-O3],[RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O3"]))
+dnl    AC_TRY_CFLAGS([-malign-double -fschedule-insns2],
+dnl                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -malign-double -fschedule-insns2"])
+dnl    AC_TRY_CFLAGS([-O6],
+dnl                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O6"],
+dnl                   AC_TRY_CFLAGS([-O3],[RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O3"]))
+
 else
     # use optimization as required for RPM host CPU
     RTJPEG_CFLAGS="$RTJPEG_CFLAGS $RPM_OPT_FLAGS"

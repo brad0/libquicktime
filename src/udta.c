@@ -65,7 +65,8 @@ int quicktime_udta_delete(quicktime_udta_t *udta)
 	{
 		free(udta->album);
 	}
-	quicktime_udta_init(udta);
+        // Libquicktime: No, no, this makes a memleak
+	// quicktime_udta_init(udta);
 	return 0;
 }
 

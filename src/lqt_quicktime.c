@@ -1277,28 +1277,35 @@ void quicktime_init_maps(quicktime_t * file)
   int i, track;
   /* get tables for all the different tracks */
   file->total_atracks = quicktime_audio_tracks(file);
-  file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
-  
-  for(i = 0, track = 0; i < file->total_atracks; i++)
+
+  if(file->total_atracks)
     {
-    while(!file->moov.trak[track]->mdia.minf.is_audio)
-      track++;
-    quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track],
-                             file->wr,
-                             (lqt_codec_info_t*)0);
+    file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
+    for(i = 0, track = 0; i < file->total_atracks; i++)
+      {
+      while(!file->moov.trak[track]->mdia.minf.is_audio)
+        track++;
+      quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track],
+                               file->wr,
+                               (lqt_codec_info_t*)0);
+      }
     }
-  
+
   file->total_vtracks = quicktime_video_tracks(file);
-  file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
-  
-  for(track = 0, i = 0; i < file->total_vtracks; i++)
+
+  if(file->total_vtracks)
     {
-    while(!file->moov.trak[track]->mdia.minf.is_video)
-      track++;
+    file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
     
-    quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track],
-                             file->wr,
-                             (lqt_codec_info_t*)0);
+    for(track = 0, i = 0; i < file->total_vtracks; i++)
+      {
+      while(!file->moov.trak[track]->mdia.minf.is_video)
+        track++;
+      
+      quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track],
+                               file->wr,
+                               (lqt_codec_info_t*)0);
+      }
     }
   }
 

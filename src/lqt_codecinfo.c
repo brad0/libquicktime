@@ -141,7 +141,12 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
     free(ptr->long_name);
   if(ptr->description)        /* Long name of the codec         */
     free(ptr->description);
+  if(ptr->module_filename)        /* Module filename       */
+    free(ptr->module_filename);
 
+  if(ptr->encoding_colormodels)
+    free(ptr->encoding_colormodels);
+  
   if(ptr->encoding_parameters)
     {
     for(i = 0; i < ptr->num_encoding_parameters; i++)
