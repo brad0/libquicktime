@@ -1,4 +1,4 @@
-#include <quicktime/quicktime.h>
+#include <quicktime/lqt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,9 +48,10 @@ int main(int argc, char** argv)
 		int iFrameNum = 0;
 		int iSamplesPerFrame =
 			ceilf( quicktime_sample_rate( pxQuicktimeInput, 0 ) / fFrameRate );
-		int iNAudioOutputs = quicktime_track_channels( pxQuicktimeInput, 0 );
+		int iNAudioOutputs = lqt_total_channels( pxQuicktimeInput );
 		FILE **pxAudioOutputs;
-		int16_t *piAudioBuffer;
+		int16_t **ppiAudioBuffer;
+		int16_t *piAudioBufferLinear;
 
 		{
 			int cpus = 1;
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
 		}
 		
 		quicktime_set_video( pxQuicktimeOutput, 1, iFrameWidth, iFrameHeight,
-							 fFrameRate, QUICKTIME_DV );
+							 fFrameRate, QUICKTIME_MJPA );
 		
 		pFrameBufferLinear = malloc( iFrameHeight * iFrameWidth * 3 *
 									 sizeof( unsigned char ) + 1000 );
@@ -69,11 +70,22 @@ int main(int argc, char** argv)
 		ppFrameBuffer = calloc( iFrameHeight, sizeof( unsigned char * ) );
 		for( i = 0; i < iFrameHeight; i++ )
 		{
-			ppFrameBuffer[i] = pFrameBufferLinear + (iFrameWidth * 3 * i) + i;
+			ppFrameBuffer[i] = pFrameBufferLinear + (iFrameWidth * 3 * i);
 		}
 
 		pxAudioOutputs = malloc( iNAudioOutputs * sizeof( FILE * ) );
-		piAudioBuffer = malloc( iSamplesPerFrame * sizeof( int16_t ) );
+		
+		//piAudioBuffer = malloc( iSamplesPerFrame * sizeof( int16_t ) );
+		piAudioBufferLinear = malloc( iNAudioOutputs * iSamplesPerFrame
+									  * sizeof( int16_t ) );
+			
+		ppiAudioBuffer = calloc( iNAudioOutputs, sizeof( int16_t * ) );
+		for( i = 0; i < iNAudioOutputs; i++ )
+		{
+			//ppiAudioBuffer[i] = malloc( iSamplesPerFrame * sizeof( int16_t ) );
+			ppiAudioBuffer[i] = piAudioBufferLinear + (iSamplesPerFrame * i);
+		}
+		
 		for( i = 0; i < iNAudioOutputs; i++ )
 		{
 			char sName[64];
@@ -91,17 +103,23 @@ int main(int argc, char** argv)
 
 		while( iFrameNum < quicktime_video_length( pxQuicktimeInput, 0 ) )
 		{
-			long int iAudioPos = quicktime_audio_position( pxQuicktimeInput, 0 );
+			//long int iAudioPos = quicktime_audio_position( pxQuicktimeInput, 0 );
 			
 			quicktime_decode_video( pxQuicktimeInput, ppFrameBuffer, 0 );
 			quicktime_encode_video( pxQuicktimeOutput, ppFrameBuffer, 0 );
 
+			lqt_decode_audio( pxQuicktimeInput, ppiAudioBuffer,
+							  NULL, iSamplesPerFrame );
+			
 			for( i = 0; i < iNAudioOutputs; i++ )
 			{
-				quicktime_set_audio_position( pxQuicktimeInput, iAudioPos, 0 );
-				quicktime_decode_audio( pxQuicktimeInput, piAudioBuffer,
-										NULL, iSamplesPerFrame, i );
-				fwrite( piAudioBuffer, iSamplesPerFrame, sizeof( int16_t ),
+				/*
+				  quicktime_set_audio_position( pxQuicktimeInput, iAudioPos, 0 );
+				  quicktime_decode_audio( pxQuicktimeInput, ppiAudioBuffer[0],
+				  NULL, iSamplesPerFrame, i );
+				*/
+				
+				fwrite( ppiAudioBuffer[i], iSamplesPerFrame, sizeof( int16_t ),
 						pxAudioOutputs[i] );
 			}
 
