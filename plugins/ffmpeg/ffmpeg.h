@@ -28,16 +28,19 @@
 typedef struct
 {
 	AVCodecContext params;
-	AVCodecContext ffcodec;
-	AVCodec * ffc;
-	int init;
 
 	/* Compression stuff */
+	AVCodecContext ffcodec_enc;
+	AVCodec * ffc_enc;
+	int init_enc;
 	unsigned char * encode_frame;
 	unsigned char * write_buffer;
 	int write_buffer_size;
 	
 	/* DeCompression stuff */
+	AVCodecContext ffcodec_dec;
+	AVCodec * ffc_dec;
+	int init_dec;
 	unsigned char * read_buffer;
 	int read_buffer_size;
 	longest last_frame;
@@ -53,8 +56,4 @@ typedef struct
 
 #endif
 
-void quicktime_init_codec_ffmpeg_video_enc(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_ffmpeg_video_dec(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_ffmpeg_audio_enc(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_ffmpeg_audio_dec(quicktime_video_map_t *vtrack);
-AVCodec * fcc_to_codec(char * fcc, int enc, int vid);
+void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);

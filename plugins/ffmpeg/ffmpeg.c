@@ -28,8 +28,10 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	
-	if(codec->init)
-		avcodec_close(&codec->ffcodec);
+	if(codec->init_enc)
+		avcodec_close(&codec->ffcodec_enc);
+	if(codec->init_dec)
+		avcodec_close(&codec->ffcodec_dec);
 
 	if(codec->encode_frame) free(codec->encode_frame);
 	if(codec->write_buffer) free(codec->write_buffer);
@@ -76,7 +78,7 @@ static int decode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 	int ofmt = PIX_FMT_YUV420P;
 	unsigned char *dp, *sp;
 
-	if(!codec->init) {
+	if(!codec->init_dec) {
 		switch(file->color_model) {
 			case BC_YUV420P: ofmt = PIX_FMT_YUV420P; break;
 //			case BC_YUV422: ofmt = PIX_FMT_YUV422; break;
@@ -87,16 +89,16 @@ static int decode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 				fprintf(stderr, "unsupported pixel format!\n");
 				return -1;
 		}
-		codec->ffcodec.width = file->in_w;
-		codec->ffcodec.height = file->in_h;
-#define SP(x) codec->ffcodec.x = codec->params.x
+		codec->ffcodec_dec.width = file->in_w;
+		codec->ffcodec_dec.height = file->in_h;
+#define SP(x) codec->ffcodec_dec.x = codec->params.x
 		SP(workaround_bugs);
 		SP(error_resilience);
 		SP(flags);
 #undef SP
-		if(avcodec_open(&codec->ffcodec, codec->ffc) != 0)
+		if(avcodec_open(&codec->ffcodec_dec, codec->ffc_dec) != 0)
 			return -1;
-		codec->init = 1;
+		codec->init_dec = 1;
 	}
 	
 	if((quicktime_has_keyframes(file, track)) &&
@@ -109,7 +111,7 @@ static int decode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 		while(frame1 < frame2) {
 			buffer_size = read_video_frame(file, codec, frame1, track);
 			if(buffer_size > 0) {
-				avcodec_decode_video(&codec->ffcodec,
+				avcodec_decode_video(&codec->ffcodec_dec,
 					&pic_dec,
 					&got_pic,
 					codec->read_buffer,
@@ -123,7 +125,7 @@ static int decode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 	buffer_size = read_video_frame(file, codec, vtrack->current_position, track);
 	if(buffer_size > 0) {
 		if(!result) {
-			t = avcodec_decode_video(&codec->ffcodec,
+			t = avcodec_decode_video(&codec->ffcodec_dec,
 				&pic_dec,
 				&got_pic,
 				codec->read_buffer,
@@ -142,7 +144,7 @@ static int decode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 				img_convert(&pic_out,
 					ofmt,
 					&pic_dec,
-					codec->ffcodec.pix_fmt,
+					codec->ffcodec_dec.pix_fmt,
 					width,
 					height);
 			}
@@ -163,11 +165,11 @@ static int encode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 	int width = trak->tkhd.track_width;
 	AVPicture pic;
 
-	if(!codec->init) {
-		codec->ffcodec.frame_rate = (int)(quicktime_frame_rate(file, track) * (float)FRAME_RATE_BASE);
-		codec->ffcodec.width = width;
-		codec->ffcodec.height = height;
-#define SP(x) codec->ffcodec.x = codec->params.x
+	if(!codec->init_enc) {
+		codec->ffcodec_enc.frame_rate = (int)(quicktime_frame_rate(file, track) * (float)FRAME_RATE_BASE);
+		codec->ffcodec_enc.width = width;
+		codec->ffcodec_enc.height = height;
+#define SP(x) codec->ffcodec_enc.x = codec->params.x
 		SP(bit_rate);
 		SP(bit_rate_tolerance);
 		SP(gop_size);
@@ -192,9 +194,9 @@ static int encode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 		SP(me_method);
 		SP(aspect_ratio_info);		
 #undef SP
-		if(avcodec_open(&codec->ffcodec, codec->ffc) != 0)
+		if(avcodec_open(&codec->ffcodec_enc, codec->ffc_enc) != 0)
 			return -1;
-		codec->init = 1;
+		codec->init_enc = 1;
 		if(file->color_model != BC_YUV420P) {
 			codec->encode_frame = malloc(width * height * 3 / 2);
 			if(!codec->encode_frame)
@@ -243,7 +245,7 @@ static int encode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 		pic.linesize[2] = width / 2;
 	}
 
-	i = avcodec_encode_video(&codec->ffcodec,
+	i = avcodec_encode_video(&codec->ffcodec_enc,
 		codec->write_buffer,
 		codec->write_buffer_size,
 		&pic);
@@ -261,7 +263,7 @@ static int encode_video(quicktime_t *file, unsigned char **row_pointers, int tra
 		i);
 
 	file->vtracks[track].current_chunk++;
-	if(codec->ffcodec.key_frame)
+	if(codec->ffcodec_enc.key_frame)
 		quicktime_insert_keyframe(file, file->vtracks[track].current_position, track);
 	return result;
 }
@@ -403,21 +405,21 @@ static int decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, l
 	int ad_length;
 	int t, i, j, n;
 	
-	if(!codec->init) {
-#define SP(x) codec->ffcodec.x = codec->params.x
+	if(!codec->init_dec) {
+#define SP(x) codec->ffcodec_dec.x = codec->params.x
 		SP(workaround_bugs);
 		SP(error_resilience);
 		SP(flags);
 #undef SP
-		if(avcodec_open(&codec->ffcodec, codec->ffc) != 0)
+		if(avcodec_open(&codec->ffcodec_dec, codec->ffc_dec) != 0)
 			return -1;
 		codec->ad_buf = malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
 		if(!codec->ad_buf)
 			return -1;
-		codec->read_buffer = malloc(codec->ffcodec.frame_size * 2 * channels);
+		codec->read_buffer = malloc(codec->ffcodec_dec.frame_size * 2 * channels);
 		if(!codec->read_buffer)
 			return -1;
-		codec->init = 1;
+		codec->init_dec = 1;
 	}
 
 	j = 0;
@@ -439,7 +441,7 @@ static int decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, l
 	result = !quicktime_read_data(file, codec->read_buffer, buffer_size);
 	if((buffer_size > 0) && (!result)) {
 		ad_length = DEC_BUFFER;
-		t = avcodec_decode_audio(&codec->ffcodec,
+		t = avcodec_decode_audio(&codec->ffcodec_dec,
 			codec->ad_buf,
 			&ad_length,
 			codec->read_buffer,
@@ -469,7 +471,7 @@ static int decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, l
 /* Fill ae_buf with up to samples of data */
 void fill_buffer(quicktime_ffmpeg_codec_t *codec, int16_t **input_i, float **input_f, int samples, int *spos, int channels)
 {
-	int aemax = codec->ffcodec.frame_size * channels;
+	int aemax = codec->ffcodec_dec.frame_size * channels;
 	channels--; /* 0 or 1 */
 	if(input_i) {
 		while((codec->ae_pos < aemax) && (*spos < samples)) {
@@ -503,10 +505,10 @@ static int encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, i
 	int spos = 0;
 	samples *= channels; /* shorts */
 	
-	if(!codec->init) {
-		codec->ffcodec.sample_rate = samplerate;
-		codec->ffcodec.channels = channels;
-#define SP(x) codec->ffcodec.x = codec->params.x
+	if(!codec->init_enc) {
+		codec->ffcodec_enc.sample_rate = samplerate;
+		codec->ffcodec_enc.channels = channels;
+#define SP(x) codec->ffcodec_enc.x = codec->params.x
 		SP(bit_rate);
 		SP(bit_rate_tolerance);
 		SP(quality);
@@ -526,14 +528,14 @@ static int encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, i
 		SP(error_resilience);
 		SP(flags);
 #undef SP
-		if(avcodec_open(&codec->ffcodec, codec->ffc) != 0)
+		if(avcodec_open(&codec->ffcodec_enc, codec->ffc_enc) != 0)
 			return -1;
-		codec->init = 1;
-		codec->write_buffer_size = codec->ffcodec.frame_size * 2 * channels * 2;
+		codec->init_enc = 1;
+		codec->write_buffer_size = codec->ffcodec_enc.frame_size * 2 * channels * 2;
 		codec->write_buffer = malloc(codec->write_buffer_size);
 		if(!codec->write_buffer)
 			return -1;
-		codec->ae_buf = malloc(codec->ffcodec.frame_size * 2 * channels);
+		codec->ae_buf = malloc(codec->ffcodec_enc.frame_size * 2 * channels);
 		if(!codec->ae_buf)
 			return -1;
 	}
@@ -542,8 +544,8 @@ static int encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, i
 		/* Fill codec->ae_buf */
 		fill_buffer(codec, input_i, input_f, samples, &spos, channels);
 		/* If buffer is full, write a chunk. */
-		if(codec->ae_pos == (codec->ffcodec.frame_size * channels)) {
-			size = avcodec_encode_audio(&codec->ffcodec,
+		if(codec->ae_pos == (codec->ffcodec_enc.frame_size * channels)) {
+			size = avcodec_encode_audio(&codec->ffcodec_enc,
 				codec->write_buffer,
 				codec->write_buffer_size,
 				codec->ae_buf);
@@ -565,7 +567,7 @@ static int encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, i
 	return result;
 }
 
-void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, int enc, int vid)
+void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_codec_t *codec;
@@ -577,30 +579,20 @@ void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, int enc, int vid
 		return;
 	memset(codec, 0, sizeof(quicktime_ffmpeg_codec_t));
 
-	codec->ffc = fcc_to_codec(compressor, enc, vid);
-	if(!codec->ffc)
-		return;
+	codec->ffc_enc = encoder;
+	codec->ffc_dec = decoder;
 	
 	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-	if((vid)&&(!enc)&&(codec->ffc->decode))
-		((quicktime_codec_t*)vtrack->codec)->decode_video = decode_video;
-	if((vid)&&(enc)&&(codec->ffc->encode))
+	if((encoder) && (encoder->type == CODEC_TYPE_VIDEO))
 		((quicktime_codec_t*)vtrack->codec)->encode_video = encode_video;
-	if((!vid)&&(!enc)&&(codec->ffc->decode))
-		((quicktime_codec_t*)vtrack->codec)->decode_audio = decode_audio;
-	if((!vid)&&(enc)&&(codec->ffc->encode))
+	if((encoder) && (encoder->type == CODEC_TYPE_AUDIO))
 		((quicktime_codec_t*)vtrack->codec)->encode_audio = encode_audio;
+	if((decoder) && (decoder->type == CODEC_TYPE_VIDEO))
+		((quicktime_codec_t*)vtrack->codec)->decode_video = decode_video;
+	if((decoder) && (decoder->type == CODEC_TYPE_AUDIO))
+		((quicktime_codec_t*)vtrack->codec)->decode_audio = decode_audio;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
 	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
 	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 }
-
-void quicktime_init_codec_ffmpeg_video_enc(quicktime_video_map_t *vtrack)
-{ return quicktime_init_codec_ffmpeg(vtrack, 1, 1); }
-void quicktime_init_codec_ffmpeg_video_dec(quicktime_video_map_t *vtrack)
-{ return quicktime_init_codec_ffmpeg(vtrack, 0, 1); }
-void quicktime_init_codec_ffmpeg_audio_enc(quicktime_video_map_t *vtrack)
-{ return quicktime_init_codec_ffmpeg(vtrack, 1, 0); }
-void quicktime_init_codec_ffmpeg_audio_dec(quicktime_video_map_t *vtrack)
-{ return quicktime_init_codec_ffmpeg(vtrack, 0, 0); }

@@ -33,7 +33,6 @@ AC_ENABLE_STATIC
 
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
-AC_PROG_RANLIB
 
 AC_PROG_CC
 AC_LANG_C
@@ -449,6 +448,34 @@ AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
 
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
+
+dnl
+dnl Check for libavcodec (ffmpeg)
+dnl
+
+AH_TEMPLATE([HAVE_LIBAVCODEC],
+            [Do we have libavcodec installed?])
+
+have_libavcodec=false
+
+OLD_LIBS=$LIBS
+LIBS="-lavcodec -lm"
+
+AC_MSG_CHECKING(for libavcodec)
+AC_TRY_LINK([#include <ffmpeg/avcodec.h>],
+            [avcodec_init();],
+	    [have_libavcodec=true])
+
+case $have_libavcodec in
+  true) AC_DEFINE(HAVE_LIBAVCODEC)
+        AC_MSG_RESULT(yes);;
+  false) AC_MSG_RESULT(no);;
+  * ) AC_MSG_RESULT("Somethings wrong: $have_libavcodec");;
+esac
+
+LIBS=$OLD_LIBS
+
+AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
 
 dnl
 dnl Check for libpng

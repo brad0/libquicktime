@@ -7,8 +7,7 @@ opendivx \
 ferguson \
 rtjpeg \
 xanim \
-svq \
-ffmpeg
+svq
 
 if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
@@ -34,5 +33,11 @@ else
 vorbis_subdirs=
 endif
 
+if HAVE_LIBAVCODEC
+libavcodec_subdirs=ffmpeg
+else
+libavcodec=
+endif
+
 SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
-	$(png_subdirs) $(vorbis_subdirs)
+	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs)
