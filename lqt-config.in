@@ -13,7 +13,7 @@ Usage: lqt-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--use-lqt-includes]
                   [--plugin-dir] [--version] [--libs | --plugin-libs] 
                   [--cflags | --plugin-cflags] [modules...]
 
-Available modules are: quicktime1394
+Available modules are: quicktime1394 cinelerra (prints libs for cinelerra)
 EOF
   exit 1
 }
@@ -40,7 +40,11 @@ while test $# -gt 0; do
       the_libs="$the_libs @LQT1394_LIBS@"
       the_cflags="$the_cflags @LQT1394_CFLAGS@"
       ;;
-
+# cinelerra
+    cinelerra)
+      the_libs="$the_libs -lquicktime_mjpeg @JPEG_LIBS@ @CINELERRA_FIREWIRE_LIBS@ @VORBISFILE_LIBS@ @VORBISENC_LIBS@ @VORBIS_LIBS@ @LQT1394_LIBS@"
+      the_cflags="$the_cflags @LQT1394_CFLAGS@"
+      ;;
 # options
     --prefix=*)
       prefix=$optarg

@@ -278,6 +278,8 @@ dnl
 dnl Check for quicktime1394 junk
 dnl
 
+CINELERRA_FIREWIRE_LIBS=""
+
 AH_TEMPLATE([HAVE_FIREWIRE],
             [tell libdv.c to support firewire])
 AH_TEMPLATE([HAVE_LIBRAW1394],
@@ -306,26 +308,6 @@ fi
 AC_MSG_RESULT($enable_firewire)
 
 if test "x$enable_firewire" = xyes; then
-dnl 	FIREWIRE_SUBDIRS=""
-dnl 	FIREWIRE_LIBS="unknown"
- 
-dnl 	if test -d libraw1394; then
- 
-dnl 	AC_ARG_WITH(internal-raw1394,
-dnl [  --with-internal-raw1394 Use libraw1394 from the distribution. The default is to use
-dnl                           versions installed on the system if possible. ],
-dnl 	     [case "${withval}" in
-dnl 	       yes) FIREWIRE_SUBDIRS="libraw1394"
-dnl 		    FIREWIRE_LIBS="libraw1394/src/libraw1394.la"
-dnl 		    FIREWIRE_CFLAGS="" ;;
-dnl 	       no) FIREWIRE_LIBS="unknown";;
-dnl 	       *) AC_MSG_ERROR(bad value ${enableval} for --disable-final) ;;
-dnl 	     esac],[ FIREWIRE_LIBS="unknown" ])
-
-dnl 	fi
-
-dnl 	if test "x$FIREWIRE_LIBS" = "xunknown"; then
-dnl 	fi
 
 	FIREWIRE_LIBS="$GLIB_LIBS $LIBDV_LIBS"
 	FIREWIRE_CFLAGS="$GLIB_CFLAGS $LIBDV_CFLAGS"
@@ -340,6 +322,8 @@ dnl 	fi
 	if test "x$have_libraw1394" != "xtrue"; then
 	  enable_firewire=no
 	  AC_MSG_WARN([libraw1394 is not available, so firewire support will be disabled.])
+        else
+	  CINELERRA_FIREWIRE_LIBS="$FIREWIRE_LIBS"
 	fi
 
 	OLD_LIBS=$LIBS
@@ -643,6 +627,7 @@ LQT1394_LIBS="$FIREWIRE_LIBS -lquicktime1394"
 
 AC_SUBST(LQT1394_CFLAGS)
 AC_SUBST(LQT1394_LIBS)
+AC_SUBST(CINELERRA_FIREWIRE_LIBS)
 
 dnl Write all the makefiles and other stuff
 
