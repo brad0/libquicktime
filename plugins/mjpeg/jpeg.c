@@ -10,7 +10,6 @@
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int i;
 
 	mjpeg_delete(codec->mjpeg);
 	if(codec->buffer)
@@ -102,7 +101,6 @@ static int decode(quicktime_t *file,
 			file->out_w == track_width &&
 			file->out_h == track_height)
 		{
-			int i;
 //printf("decode 6\n");
 			mjpeg_decompress(codec->mjpeg, 
 				codec->buffer, 
@@ -177,7 +175,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
-	int64_t offset = quicktime_position(file);
 	int result = 0;
 	long field2_offset;
         quicktime_atom_t chunk_atom;
@@ -283,7 +280,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_jpeg_codec_t *codec;
-	int i, jpeg_type=0;
+	int jpeg_type=0;
 
 	if(quicktime_match_32(compressor, QUICKTIME_JPEG))
 		jpeg_type = JPEG_PROGRESSIVE;

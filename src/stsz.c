@@ -84,7 +84,7 @@ void quicktime_read_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 
 void quicktime_write_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 {
-	int i, result;
+	int i;
 	quicktime_atom_t atom;
 	quicktime_atom_write_header(file, &atom, "stsz");
 
@@ -130,7 +130,6 @@ void quicktime_update_stsz(quicktime_stsz_t *stsz,
 	long sample, 
 	long sample_size)
 {
-	int i;
 
 	if(!stsz->sample_size)
 	{

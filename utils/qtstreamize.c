@@ -2,7 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-	int i;
 	if(argc < 3 || argv[1][0] == '-')
 	{
 		printf("usage: %s <in filename> <out filename>\n", argv[0]);

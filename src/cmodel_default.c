@@ -815,7 +815,7 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_TRANSPARENCY: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_BITCOUNTER \
 					transfer_RGBA8888_to_TRANSPARENCY((output), (input), &bit_counter); \
 					TRANSFER_FRAME_TAIL \
 					break; \

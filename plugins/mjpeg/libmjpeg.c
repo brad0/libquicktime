@@ -217,7 +217,6 @@ typedef mjpeg_source_mgr* mjpeg_src_ptr;
 
 METHODDEF(void) init_source(j_decompress_ptr cinfo)
 {
-    mjpeg_src_ptr src = (mjpeg_src_ptr) cinfo->src;
 }
 
 METHODDEF(boolean) fill_input_buffer(j_decompress_ptr cinfo)
@@ -573,7 +572,6 @@ static void decompress_field(mjpeg_compressor *engine)
 	long buffer_offset = engine->instance * mjpeg->input_field2;
 	unsigned char *buffer = mjpeg->input_data + buffer_offset;
 	long buffer_size;
-	int i, j;
 
 //printf("decompress_field %02x%02x %d\n", buffer[0], buffer[1], engine->instance * mjpeg->input_field2);
 	if(engine->instance == 0 && mjpeg->fields > 1)
@@ -668,7 +666,6 @@ void mjpeg_decompress_loop(mjpeg_compressor *engine)
 
 static void compress_field(mjpeg_compressor *engine)
 {
-	int i, j;
 	mjpeg_t *mjpeg = engine->mjpeg;
 
 //printf("compress_field 1\n");
@@ -906,7 +903,7 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 	int color_model,
 	int cpus)
 {
-	int i, result = 0;
+	int i;
 	mjpeg_compressor *engine;
 	int corrected_fields = mjpeg->fields;
 	mjpeg->color_model = color_model;
@@ -1035,7 +1032,7 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 	int cpus)
 {
 	mjpeg_compressor *engine;
-	int i, result = 0;
+	int i;
 
 //printf("mjpeg_decompress 1 %ld %ld\n", buffer_len, input_field2);
 	if(buffer_len == 0) return 1;
@@ -1203,7 +1200,6 @@ mjpeg_t* mjpeg_new(int w,
 	int fields)
 {
 	mjpeg_t *result = calloc(1, sizeof(mjpeg_t));
-	int i;
 
 	result->output_w = w;
 	result->output_h = h;
@@ -1341,7 +1337,6 @@ static inline void write_int32(unsigned char *data, long *offset, long length, u
 
 static int next_marker(unsigned char *buffer, long *offset, long buffer_size)
 {
-	int c, done = 0;  /* 1 - completion    2 - error */
 
 	while(*offset < buffer_size - 1)
 	{
@@ -1394,7 +1389,6 @@ static int find_marker(unsigned char *buffer,
 	unsigned long marker_type)
 {
 	long result = 0;
-	long marker_len;
 
 	while(!result && *offset < buffer_size)
 	{
@@ -1426,7 +1420,6 @@ void insert_lml33_markers(unsigned char **buffer,
 	long *buffer_allocated)
 {
 	long marker_offset = -1;
-	int marker_exists;
 
 /* Search for existing marker to replace */
 //	marker_offset = find_marker(*buffer, *buffer_size, LML_MARKER_TAG);
@@ -1688,9 +1681,7 @@ long mjpeg_get_quicktime_field2(unsigned char *buffer, long buffer_size)
 
 long mjpeg_get_field2(unsigned char *buffer, long buffer_size)
 {
-	long result = 0;
 	int total_fields = 0;
-	long offset = 0;
 	long field2_offset = 0;
 	int i;
 

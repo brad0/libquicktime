@@ -438,17 +438,9 @@ int64_t quicktime_sample_range_size(quicktime_trak_t *trak,
 {
 
 int64_t i, total;
-        /* LQT: For VBR audio, quicktime_sample_rage_size makes no sense */
-        if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
+        /* LQT: For audio, quicktime_sample_rage_size makes no sense */
+        if(trak->mdia.minf.is_audio)
           return 0;
-	if(trak->mdia.minf.is_audio)
-          {
-/* assume audio */
-		return quicktime_samples_to_bytes(trak, sample - chunk_sample);
-/* 		return (sample - chunk_sample) * trak->mdia.minf.stbl.stsz.sample_size  */
-/* 			* trak->mdia.minf.stbl.stsd.table[0].channels  */
-/* 			* trak->mdia.minf.stbl.stsd.table[0].sample_size / 8; */
-          }
 	else
           {
           /* All frames have the same size */

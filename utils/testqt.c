@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 							sizeof( int16_t ),
 							pxAudioOutputs[i] );
 				}
-				printf( "a %d(%d) < %d ", iFrameNum*iSamplesPerFrame, iSamplesPerFrame, quicktime_audio_length( pxQuicktimeInput, 0 ) );
+				printf( "a %d(%d) < %ld ", iFrameNum*iSamplesPerFrame, iSamplesPerFrame, quicktime_audio_length( pxQuicktimeInput, 0 ) );
 			}
 
 			printf( "At frame #%d\n", iFrameNum );

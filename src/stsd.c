@@ -111,7 +111,6 @@ void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd)
 void quicktime_read_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd)
 {
 	int i;
-	quicktime_atom_t leaf_atom;
 
 	stsd->version = quicktime_read_char(file);
 	stsd->flags = quicktime_read_int24(file);

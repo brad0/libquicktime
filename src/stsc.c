@@ -117,7 +117,6 @@ void quicktime_write_stsc(quicktime_t *file, quicktime_stsc_t *stsc)
 
 int quicktime_update_stsc(quicktime_stsc_t *stsc, long chunk, long samples)
 {
-	long i;
 
 	if(chunk > stsc->entries_allocated)
 	{

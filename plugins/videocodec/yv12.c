@@ -36,13 +36,14 @@ static int reads_colormodel(quicktime_t *file,
 		colormodel == BC_YUV420P);
 }
 
+#if 0
 static int writes_colormodel(quicktime_t *file, 
 		int colormodel, 
 		int track)
 {
 	return (colormodel == BC_YUV420P);
 }
-
+#endif
 static void initialize(quicktime_video_map_t *vtrack)
 {
 	quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
@@ -63,18 +64,13 @@ static void initialize(quicktime_video_map_t *vtrack)
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t bytes, x, y;
+	int64_t bytes;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	unsigned char *buffer;
-	unsigned char *output_row0, *output_row1, *y_plane0, *y_plane1, *u_plane, *v_plane;
 	int64_t y_size, u_size, v_size;
 	int result = 0;
-	int y1, u, v, y2, r, g, b, y3, y4;
-	int i;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
 	initialize(vtrack);
 
 	y_size = codec->coded_h * codec->coded_w;
@@ -128,19 +124,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
 	int result = 0;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	unsigned char *y_plane0, *y_plane1, *u_plane, *v_plane;
 	int64_t y_size, u_size, v_size;
-	unsigned char *input_row0, *input_row1;
-	int x, y;
-	int y1, u, y2, v, y3, y4, subscript;
-	int r, g, b;
 	int64_t bytes = (int64_t)0;
 	quicktime_atom_t chunk_atom;
 	initialize(vtrack);
@@ -195,7 +185,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack)
 {
-	int i;
 	quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
 
 /* Init public items */

@@ -217,7 +217,6 @@ int quicktime_write_data(quicktime_t *file, char *data, int size)
         int data_offset = 0;
         int writes_attempted = 0;
         int writes_succeeded = 0;
-        int iterations = 0;
 //printf("quicktime_write_data 1 %d\n", size);
                                                                                                                   
 // Flush existing buffer and seek to new position

@@ -49,7 +49,7 @@ static void putbits(unsigned char **data,
 	int count, 
 	uint64_t value)
 {
-	value &= 0xffffffffffffffff >> (64 - count);
+	value &= 0xffffffffffffffffLL >> (64 - count);
 
 	while(64 - *bit_pos < count)
 	{
@@ -96,7 +96,6 @@ int quicktime_divx_write_vol(unsigned char *data_start,
 	unsigned char *data = data_start;
 	int bit_pos;
 	uint64_t bit_store;
-	int i, j;
 
 	bit_store = 0;
 	bit_pos = 0;

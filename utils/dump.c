@@ -9,7 +9,6 @@
 int main(int argc, char *argv[])
 {
 	quicktime_t *file;
-	int result = 0;
 	
 	if(argc < 2)
 	{

@@ -1,4 +1,5 @@
-#include <quicktime/quicktime.h>
+#include <quicktime/lqt.h>
+#include <lqt_funcprotos.h>
 
 int usage(void)
 {
@@ -15,7 +16,7 @@ int main(int argc, char *argv[])
 	char *buffer_in, *y_out, *u_out, *v_out;
 	char *y_out1, *y_out2, *u_out1, *v_out1;
 	char *input_row;
-	int i, j, k, l, m;
+	int i, j, k;
 
 	if(argc < 3)
 	{

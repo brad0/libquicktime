@@ -36,7 +36,6 @@ void quicktime_read_idx1(quicktime_t *file,
 	quicktime_atom_t *parent_atom)
 {
 	int i;
-	quicktime_riff_t *first_riff = file->riff[0];
 	quicktime_idx1_t *idx1 = &riff->idx1;
 
 //printf("quicktime_read_idx1 1 %llx\n", quicktime_position(file));

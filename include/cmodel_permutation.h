@@ -3822,15 +3822,26 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 
 
 // ******************************** Loops *************************************
+// 
+
+
+#define TRANSFER_FRAME_HEAD_BITCOUNTER \
+	for(i = 0; i < out_h; i++) \
+	{ \
+		unsigned char *output_row = output_rows[i + out_y] + out_x * out_pixelsize; \
+		unsigned char *input_row = input_rows[row_table[i]]; \
+                int bit_counter = 7; \
+		for(j = 0; j < out_w; j++) \
+		{
 
 #define TRANSFER_FRAME_HEAD \
 	for(i = 0; i < out_h; i++) \
 	{ \
 		unsigned char *output_row = output_rows[i + out_y] + out_x * out_pixelsize; \
 		unsigned char *input_row = input_rows[row_table[i]]; \
-		int bit_counter = 7; \
 		for(j = 0; j < out_w; j++) \
 		{
+
 
 #define TRANSFER_FRAME_TAIL \
 		} \
@@ -3946,3 +3957,7 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 	int bg_r, \
 	int bg_g, \
 	int bg_b
+
+void cmodel_yuv420p(PERMUTATION_ARGS);
+void cmodel_yuv422p(PERMUTATION_ARGS);
+void cmodel_yuv444p(PERMUTATION_ARGS);

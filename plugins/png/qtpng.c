@@ -26,7 +26,6 @@ static int source_cmodel(quicktime_t *file, int track)
 void quicktime_set_png(quicktime_t *file, int compression_level)
 {
 	int i;
-	char *compressor;
 
 	for(i = 0; i < file->total_vtracks; i++)
 	{
@@ -164,9 +163,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t offset = quicktime_position(file);
 	int result = 0;
-	int i;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;

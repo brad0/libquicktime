@@ -270,7 +270,7 @@ LqtGtkCodecConfigWidget *
 lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
                                   int num_parameters)
   {
-  int i, j, parameter_index;
+  int i, parameter_index;
   GtkWidget * table;
   GtkWidget * notebook;
   GtkWidget * tab_label;

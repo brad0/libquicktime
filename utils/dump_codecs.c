@@ -22,7 +22,6 @@ static char * footer =
 int main(int argc, char ** argv)
   {
   int i;
-  int num_codecs;
   lqt_codec_info_t ** codecs;
   lqt_registry_init();
 

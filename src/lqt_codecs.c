@@ -787,6 +787,7 @@ void quicktime_flush_vcodec(quicktime_t *file, int track)
 	((quicktime_codec_t*)file->vtracks[track].codec)->flush(file, track);
 }
 
+#if 0
 int64_t quicktime_samples_to_bytes(quicktime_trak_t *track, long samples)
 {
 	char *compressor = track->mdia.minf.stbl.stsd.table[0].format;
@@ -801,7 +802,7 @@ int64_t quicktime_samples_to_bytes(quicktime_trak_t *track, long samples)
 /* Default use the sample size specification for TWOS and RAW */
 	return samples * channels * track->mdia.minf.stbl.stsd.table[0].sample_size / 8;
 }
-
+#endif
 int quicktime_codecs_flush(quicktime_t *file)
 {
 	int result = 0;

@@ -45,7 +45,7 @@ static int quicktime_delete_codec_yuv2(quicktime_video_map_t *vtrack)
 	free(codec);
 	return 0;
 }
-
+#if 0
 static int quicktime_reads_colormodel_yuv2(quicktime_t *file, 
 		int colormodel, 
 		int track)
@@ -54,7 +54,7 @@ static int quicktime_reads_colormodel_yuv2(quicktime_t *file,
 		colormodel == BC_YUV888 ||
 		colormodel == BC_YUV422P);
 }
-
+#endif
 static void encode_sign_change(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
 	int y, x;
@@ -138,17 +138,12 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t bytes, x, y;
+	int64_t bytes, y;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = quicktime_video_width(file, track);
 	int height = quicktime_video_height(file, track);
-	unsigned char *buffer;
-	char *input_row;
-	unsigned char *output_row, *y_plane, *u_plane, *v_plane;
 	int result = 0;
-	int y1, u, v, y2, r, g, b;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
 	initialize(vtrack, codec, width, height);
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
@@ -202,7 +197,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
@@ -211,10 +205,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int height = vtrack->track->tkhd.track_height;
 	int64_t bytes;
 	unsigned char *buffer;
-	int x, y;
-	int y1, u, y2, v;
-	int r, g, b, i;
-	int bytes_per_row = width * 3;
+	int i;
 	quicktime_atom_t chunk_atom;
 
 	initialize(vtrack, codec, width, height);
@@ -274,8 +265,6 @@ static int reads_colormodel(quicktime_t *file,
 		int colormodel, 
 		int track)
 {
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 
 	return (colormodel == BC_RGB888 ||
 		colormodel == BC_YUV888 ||
@@ -287,8 +276,6 @@ static int writes_colormodel(quicktime_t *file,
 		int colormodel, 
 		int track)
 {
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 
 	return (colormodel == BC_RGB888 ||
 		colormodel == BC_YUV888 ||

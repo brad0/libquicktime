@@ -242,7 +242,6 @@ static int transcode_init(transcode_handle * h,
   lqt_codec_info_t ** codec_info;
   int * colormodels;
   int i;
-  int bytes_per_line;
   
   h->in_file = quicktime_open(in_file, 1, 0);
   if(!h->in_file)

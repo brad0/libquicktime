@@ -33,7 +33,6 @@ int lqt_is_qtvr(quicktime_t  *file)
 /* write dummy node */
 int lqt_qtvr_write_dummy_node(quicktime_t *file)
 {
-        int64_t offset = quicktime_position(file);
         int result = 0;
 	char *dummy;
         quicktime_atom_t chunk_atom, atom;
@@ -194,7 +193,7 @@ int lqt_qtvr_set_fov(quicktime_t  *file, float fov)
 {
     if (fov > 0) 
     { 
-	file->moov.udta.navg.fieldofview;
+	file->moov.udta.navg.fieldofview = fov;
 	return 1;
     }
     else return 0;

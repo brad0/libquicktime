@@ -510,15 +510,13 @@ static void gl_init(Widget widget, int iw, int ih)
 static quicktime_t *qt = NULL;
 static int qt_hasvideo,qt_hasaudio, qt_ispanorama;
 
-static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
+static int qt_width = 320, qt_height = 32;
 static unsigned char *qt_frame,**qt_rows;
 static XImage *qt_ximage;
 static XvImage *qt_xvimage;
 static GC qt_gc;
 
-static int16_t *qt_audio,*qt1,*qt2;
 
-static int qt_size,qt_offset,qt_stereo;
 static int qt_cmodel = BC_RGB888;
 
 static void qt_init(FILE *fp, char *filename)
@@ -851,7 +849,6 @@ static void decode_loop()
 {
 	XEvent event;
 
-    struct timeval start, wait;
     /* enter main loop */ 
     int startpos;
     if (!decodeinit) {
@@ -869,7 +866,6 @@ static void decode_loop()
 
     for (;;) {
 	struct timespec time;
-	int rc,max;
 	
 //      printf("loop pos :%ld\n",quicktime_video_position(qt,0));
 	if (quicktime_video_position(qt,0) >= startpos + lqt_qtvr_get_loop_frames(qt)) {
@@ -1021,7 +1017,6 @@ static String res[] = {
 
 int main(int argc, char *argv[])
 {
-    struct timeval start,wait;
     
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
 				  opt_desc, opt_count,
