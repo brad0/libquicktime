@@ -1,7 +1,7 @@
 AC_INIT(src/lqt_quicktime.c)
 dnl AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
 dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(libquicktime, 0.9.0pre1)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.0)
 AM_CONFIG_HEADER([config.h include/quicktime/lqt1394_config.h])
 
 AC_CANONICAL_HOST
