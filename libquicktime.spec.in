@@ -21,7 +21,9 @@ BuildRequires:	libjpeg-devel >=   @JPEG_REQUIRED@
 BuildRequires:	libvorbis-devel >= @VORBIS_REQUIRED@
 BuildRequires:	libdv-devel >=     @LIBDV_REQUIRED@
 BuildRequires:  gtk+-devel >=      @GTK_REQUIRED@
-BuildRequires:  lame >=            @LAME_REQUIRED@
+BuildRequires:  lame-devel >=      @LAME_REQUIRED@
+BuildRequires:	libraw1394-devel
+
 BuildRoot:	/tmp/libquicktime
 
 %description
@@ -46,14 +48,6 @@ Group(pt_BR):	Desenvolvimento/Bibliotecas
 Group(ru):	òÁÚÒÁÂÏÔËÁ/âÉÂÌÉÏÔÅËÉ
 Group(uk):	òÏÚÒÏÂËÁ/â¦ÂÌ¦ÏÔÅËÉ
 Requires:	%{name} = %{version}
-Requires:	glib-devel
-Requires:	libpng-devel >= 1.0.8
-Requires:	libjpeg-devel
-Requires:	libdv-devel
-Requires:	libraw1394-devel
-Requires:	libavc1394_0-devel
-Requires:	libogg-devel
-Requires:  	libvorbis-devel
 
 %description devel
 Header files and development documentation for libquicktime.
@@ -80,7 +74,6 @@ Po¿yteczne narzêdzia od operowania na plikach w formacie QuickTime.
 Summary:	Libquicktime plugin supporting the Ogg Vorbis codec
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:  libvorbis-devel = @VORBIS_REQUIRED@
 
 %description vorbis
 Libquicktime plugin supporting the Ogg Vorbis codec
@@ -97,8 +90,6 @@ Libquicktime plugin supporting the OpenDivX codec
 Summary:	Libquicktime plugin supporting the DV codec
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:	libdv-devel >= @LIBDV_REQUIRED@
-BuildRequires:	libraw1394-devel
 Requires:	libdv >= @LIBDV_REQUIRED@
 Requires:	libraw1394
 
@@ -109,7 +100,6 @@ Libquicktime plugin supporting the DV codec
 Summary:	Libquicktime plugin based on libjpeg
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:	libjpeg-devel >= @JPEG_REQUIRED@
 Requires:	libjpeg >= @JPEG_REQUIRED@
 
 %description jpeg
@@ -119,7 +109,6 @@ Libquicktime plugin based on libjpeg
 Summary:	PNG plugin for Libquicktime
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:	libpng-devel >= @PNG_REQUIRED@
 Requires:	libpng >= @PNG_REQUIRED@
 
 %description png
@@ -129,7 +118,6 @@ Libquicktime plugin based on libpng
 Summary:	Lame plugin for Libquicktime
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:	lame-devel >= @LAME_REQUIRED@
 Requires:	lame >= @LAME_REQUIRED@
 
 %description lame
@@ -147,7 +135,6 @@ ffmpeg plugins for Libquicktime
 Summary:	Plugin configurator for Libquicktime
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
-BuildRequires:	gtk+-devel >= @GTK_REQUIRED@
 Requires:	gtk+ >= @GTK_REQUIRED@
 
 %description plugincfg
