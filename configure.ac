@@ -530,6 +530,7 @@ AC_SUBST(LQT1394_LIBS)
 dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile \
+libquicktime.spec \
 src/Makefile \
 quicktime1394/Makefile \
 include/Makefile \
