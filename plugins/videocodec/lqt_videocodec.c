@@ -161,7 +161,7 @@ static lqt_codec_info_static_t codec_info_v408 =
 static lqt_codec_info_static_t codec_info_v410 =
   {
   name:        "v410",
-  long_name:   "10 bit Planar YUV 4:4:4",
+  long_name:   "10 bit Planar YUV 4:4:4 (v410)",
   description: "10 bit Planar YUV 4:4:4 (v410)",
   fourccs:     fourccs_v410,
   type:        LQT_CODEC_VIDEO,

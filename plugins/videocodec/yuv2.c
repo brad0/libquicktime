@@ -19,15 +19,6 @@
 
 typedef struct
 {
-	int use_float;
-	long rtoy_tab[256], gtoy_tab[256], btoy_tab[256];
-	long rtou_tab[256], gtou_tab[256], btou_tab[256];
-	long rtov_tab[256], gtov_tab[256], btov_tab[256];
-
-	long vtor_tab[256], vtog_tab[256];
-	long utog_tab[256], utob_tab[256];
-	long *vtor, *vtog, *utog, *utob;
-	
 	unsigned char *work_buffer;
 	int coded_w, coded_h;
 
@@ -36,6 +27,7 @@ typedef struct
 	int initialized;
 
         int is_2vuy;
+        uint8_t ** rows;
   } quicktime_yuv2_codec_t;
 
 static int quicktime_delete_codec_yuv2(quicktime_video_map_t *vtrack)
@@ -44,7 +36,8 @@ static int quicktime_delete_codec_yuv2(quicktime_video_map_t *vtrack)
 
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	if(codec->work_buffer) free(codec->work_buffer);
-	free(codec);
+        if(codec->rows) free(codec->rows);
+        free(codec);
 	return 0;
 }
 #if 0
@@ -101,10 +94,10 @@ static void convert_encode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **r
 		unsigned char *in_row = row_pointers[y];
 		for(x = 0; x < codec->bytes_per_line; )
 		{
-			out_row[0] = in_row[3];
-			out_row[1] = in_row[0];
-			out_row[2] = in_row[1];
-			out_row[3] = in_row[2];
+                        out_row[0] = in_row[1]; /* Y */
+			out_row[1] = in_row[0]; /* U */
+			out_row[2] = in_row[3]; /* Y */
+			out_row[3] = in_row[2]; /* V */
 			x += 4;
                         out_row += 4;
                         in_row += 4;
@@ -114,23 +107,21 @@ static void convert_encode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **r
 
 static void convert_decode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
-        unsigned char tmp[4];
+        uint8_t swap;
         int y, x;
 	for(y = 0; y < codec->coded_h; y++)
 	{
 		unsigned char *in_row = row_pointers[y];
 		for(x = 0; x < codec->bytes_per_line; )
 		{
-                        tmp[0] = in_row[0];
-                        tmp[1] = in_row[1];
-                        tmp[2] = in_row[2];
-                        tmp[3] = in_row[3];
+                        swap = in_row[0];
+                        in_row[0] = in_row[1];
+                        in_row[1] = swap;
 
-                        in_row[0] = tmp[1];
-                        in_row[1] = tmp[2];
-                        in_row[2] = tmp[3];
-                        in_row[3] = tmp[0];
-
+                        swap = in_row[2];
+                        in_row[2] = in_row[3];
+                        in_row[3] = swap;
+                        
                         x += 4;
 			in_row += 4;
 		}
@@ -141,40 +132,9 @@ static void convert_decode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **r
 static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *codec,
                        int width, int height)
 {
-	int i;
 	if(!codec->initialized)
 	{
 /* Init private items */
-               for(i = 0; i < 256; i++) {
-/* compression */
-			codec->rtoy_tab[i] = (long)( 0.2990 * 65536 * i);
-			codec->rtou_tab[i] = (long)(-0.1687 * 65536 * i);
-			codec->rtov_tab[i] = (long)( 0.5000 * 65536 * i);
-
-			codec->gtoy_tab[i] = (long)( 0.5870 * 65536 * i);
-			codec->gtou_tab[i] = (long)(-0.3320 * 65536 * i);
-			codec->gtov_tab[i] = (long)(-0.4187 * 65536 * i);
-
-			codec->btoy_tab[i] = (long)( 0.1140 * 65536 * i);
-			codec->btou_tab[i] = (long)( 0.5000 * 65536 * i);
-			codec->btov_tab[i] = (long)(-0.0813 * 65536 * i);
-		}
-
-		codec->vtor = &(codec->vtor_tab[128]);
-		codec->vtog = &(codec->vtog_tab[128]);
-		codec->utog = &(codec->utog_tab[128]);
-		codec->utob = &(codec->utob_tab[128]);
-
-		for(i = -128; i < 128; i++)
-		{
-/* decompression */
-			codec->vtor[i] = (long)( 1.4020 * 65536 * i);
-			codec->vtog[i] = (long)(-0.7141 * 65536 * i);
-
-			codec->utog[i] = (long)(-0.3441 * 65536 * i);
-			codec->utob[i] = (long)( 1.7720 * 65536 * i);
-		}
-
 		codec->coded_w = (int)((float)width / 4 + 0.5) * 4;
                 //		codec->coded_h = (int)((float)vtrack->track->tkhd.track_height / 4 + 0.5) * 4;
                 codec->coded_h = height;
@@ -213,17 +173,18 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	}
 	else
 	{
-		unsigned char *input_rows[height];
-		result = !quicktime_read_data(file, codec->work_buffer, bytes);
+                if(!codec->rows)
+                  codec->rows = malloc(height * sizeof(*(codec->rows)));
+                result = !quicktime_read_data(file, codec->work_buffer, bytes);
 		for(y = 0; y < height; y++)
-			input_rows[y] = &codec->work_buffer[y * codec->bytes_per_line];
+			codec->rows[y] = &codec->work_buffer[y * codec->bytes_per_line];
                 if(codec->is_2vuy)
-                  convert_decode_2vuy(codec, input_rows);
+                  convert_decode_2vuy(codec, codec->rows);
                 else
-                  convert_decode_yuv2(codec, input_rows);
+                  convert_decode_yuv2(codec, codec->rows);
 
 		cmodel_transfer(row_pointers, 
-			input_rows,
+			codec->rows,
 			row_pointers[0],
 			row_pointers[1],
 			row_pointers[2],
@@ -278,11 +239,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	}
 	else
 	{
-		unsigned char **temp_rows = malloc(sizeof(unsigned char*) * height);
 		for(i = 0; i < height; i++)
-			temp_rows[i] = buffer + i * codec->bytes_per_line;
+			codec->rows[i] = buffer + i * codec->bytes_per_line;
 
-		cmodel_transfer(temp_rows, 
+		cmodel_transfer(codec->rows, 
 			row_pointers,
 			0,
 			0,
@@ -304,13 +264,12 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			width,
 			codec->coded_w);
                 if(codec->is_2vuy)
-                  convert_encode_2vuy(codec, temp_rows);
+                  convert_encode_2vuy(codec, codec->rows);
                 else
-                  convert_encode_yuv2(codec, temp_rows);
+                  convert_encode_yuv2(codec, codec->rows);
 
 		quicktime_write_chunk_header(file, trak, &chunk_atom);
 		result = !quicktime_write_data(file, buffer, bytes);
-		free(temp_rows);
 	}
 
 	quicktime_write_chunk_footer(file, 

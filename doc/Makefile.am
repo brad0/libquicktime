@@ -1,4 +1,5 @@
 EXTRA_DIST = \
+api_usage.html \
 codecs.html \
 qt4l_building.html \
 qt4l_codecs.html \
