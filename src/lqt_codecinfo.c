@@ -178,6 +178,8 @@ static void copy_parameter_value(lqt_parameter_value_t * dst,
       else
         dst->val_string = (char*)0;
       break;
+    case LQT_PARAMETER_SECTION:
+      break;
     }
 
   }
@@ -212,6 +214,8 @@ copy_parameter_info(lqt_parameter_info_t * ret,
         ret->stringlist_options[i] =
           __lqt_strdup(info->stringlist_options[i]);
 
+      break;
+    case LQT_PARAMETER_SECTION: /* String with options */
       break;
     }
 
@@ -1054,6 +1058,8 @@ static void dump_codec_parameter(lqt_parameter_info_t * p)
         fprintf(stderr, "%s ", p->stringlist_options[i]);
       fprintf(stderr, "\n");
       break;
+    case LQT_PARAMETER_SECTION:
+      fprintf(stderr, "Section");
     }
   }
 
@@ -1535,6 +1541,8 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
           parameter_name,
           codec_name, parameter_info[i].val_default.val_string);
 #endif
+      break;
+    case LQT_PARAMETER_SECTION:
       break;
     }
 

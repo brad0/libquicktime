@@ -1448,7 +1448,10 @@ static void apply_default_parameters(quicktime_t * file,
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_string));
         break;
+      case LQT_PARAMETER_SECTION:
+        break; /* NOP */
       }
+
     }                      
   }
 
@@ -1585,11 +1588,14 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
       }
     else /* Last chunk: Take the end of the mdat atom */
       {
-      ret[i] = file->mdat.atom.end - trak->mdia.minf.stbl.stco.table[i].offset;
-      // HACK: Somethings wrong here
+      ret[i] = file->mdat.atom.start +  file->mdat.atom.size - trak->mdia.minf.stbl.stco.table[i].offset;
       if(ret[i] < 0)
         ret[i] = 0;
-      fprintf(stderr, "Chunk size %lld, next_offset: %lld\n", ret[i], next_offset);
+#if 0
+      fprintf(stderr, "Chunk size %lld, file->mdat.atom.start: %lld file->mdat.atom.size: %lld, trak->mdia.minf.stbl.stco.table[i].offset: %lld\n",
+              ret[i], file->mdat.atom.start, file->mdat.atom.size,
+              trak->mdia.minf.stbl.stco.table[i].offset);
+#endif
       }
     }
   free(chunk_indices);

@@ -224,95 +224,6 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   return 0;
   }
 
-#if 0
-
-static void allocate_output(quicktime_mp3_codec_t *codec,
-                           int samples)
-  {
-  int new_size = codec->encoder_output_size + samples * 4;
-  if(codec->encoder_output_allocated < new_size)
-    {
-    unsigned char *new_output = calloc(1, new_size);
-    
-    if(codec->encoder_output)
-      {
-      memcpy(new_output, 
-             codec->encoder_output, 
-             codec->encoder_output_size);
-      free(codec->encoder_output);
-      }
-    codec->encoder_output = new_output;
-    codec->encoder_output_allocated = new_size;
-    }
-  
-  }
-
-// Empty the output buffer of frames
-static int write_frames(quicktime_t *file, 
-                        quicktime_audio_map_t *track_map,
-                        quicktime_trak_t *trak,
-                        quicktime_mp3_codec_t *codec)
-  {
-  int result = 0;
-  int i, j;
-  int frames_end = 0;
-
-  // Write to chunks
-  for(i = 0; i < codec->encoder_output_size - 4; )
-    {
-    unsigned char *header = codec->encoder_output + i;
-    int frame_size = get_frame_size(header);
-    //    fprintf(stderr, "Write frames %d\n", frame_size);
-
-    if(frame_size)
-      {
-      // Frame is finished before end of buffer
-      if(i + frame_size <= codec->encoder_output_size)
-        {
-        // Write the chunk
-        int64_t offset;
-
-        quicktime_write_chunk_header(file, trak, &chunk_atom);
-        result = !quicktime_write_data(file, header, frame_size);
-        // Knows not to save the chunksizes for audio
-        quicktime_write_chunk_footer(file, 
-                                     trak, 
-                                     track_map->current_chunk,
-                                     &chunk_atom, 
-                                     codec->samples_per_frame);
-
-        track_map->current_chunk++;
-        i += frame_size;
-        frames_end = i;
-        }
-      else
-        // Frame isn't finished before end of buffer.
-        {
-        frames_end = i;
-        break;
-        }
-      }
-    else
-      // Not the start of a frame.  Skip it.
-      {
-      i++;
-      frames_end = i;
-      }
-    }
-
-  if(frames_end > 0)
-    {
-    for(i = frames_end, j = 0; i < codec->encoder_output_size; i++, j++)
-      {
-      codec->encoder_output[j] = codec->encoder_output[i];
-      }
-    codec->encoder_output_size -= frames_end;
-    }
-  return result;
-  }
-
-#endif
-
 static int encode(quicktime_t *file, 
                   int16_t **input_i, 
                   float **input_f, 
@@ -329,6 +240,7 @@ static int encode(quicktime_t *file,
   int i, j;
   int frames_end = 0;
   quicktime_atom_t chunk_atom;
+
   if(!codec->encode_initialized)
     {
     codec->encode_initialized = 1;
@@ -337,11 +249,15 @@ static int encode(quicktime_t *file,
     lame_set_quality(codec->lame_global, 0);
     lame_set_in_samplerate(codec->lame_global, 
                            trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+    lame_set_out_samplerate(codec->lame_global, 
+                            trak->mdia.minf.stbl.stsd.table[0].sample_rate);
     
     /* Also support Mono streams */
     
     codec->stereo = (trak->mdia.minf.stbl.stsd.table[0].channels == 1) ? 0 : 1;
     lame_set_num_channels(codec->lame_global, (codec->stereo ? 2 : 1));
+
+    lame_set_scale(codec->lame_global, 1.0);
     
     if((result = lame_init_params(codec->lame_global)) < 0)
       printf(" lame_init_params returned %d\n", result);

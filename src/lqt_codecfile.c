@@ -67,6 +67,7 @@ static const char * module_file_time_key = "FileTime: ";
 static const char * type_int            = "Integer";
 static const char * type_string         = "String";
 static const char * type_stringlist     = "Stringlist";
+static const char * type_section        = "Section";
 
 static const char * num_encoding_parameters_key  = "NumEncodingParameters: ";
 static const char * num_decoding_parameters_key  = "NumDecodingParameters: ";
@@ -131,6 +132,8 @@ static void read_parameter_value(char * pos,
     case LQT_PARAMETER_STRINGLIST:
       ret->val_string = __lqt_strdup(pos);
       break;
+    case LQT_PARAMETER_SECTION:
+      break;
     }
   }
 
@@ -188,6 +191,11 @@ static void read_parameter_info(FILE * input,
       else if(!strcmp(pos, type_string))
         {
         info->type = LQT_PARAMETER_STRING;
+        info->val_default.val_string = (char*)0;
+        }
+      else if(!strcmp(pos, type_section))
+        {
+        info->type = LQT_PARAMETER_SECTION;
         info->val_default.val_string = (char*)0;
         }
       }
@@ -581,6 +589,9 @@ static void write_parameter_info(FILE * output,
     case LQT_PARAMETER_STRINGLIST:
       tmp = type_stringlist;
       break;
+    case LQT_PARAMETER_SECTION:
+      tmp = type_section;
+      break;
     }
 
   fprintf(output, "%s%s\n", type_key, tmp);
@@ -614,6 +625,8 @@ static void write_parameter_info(FILE * output,
       
       for(i = 0; i < info->num_stringlist_options; i++)
         fprintf(output, "%s%s\n", option_key, info->stringlist_options[i]);
+      break;
+    case LQT_PARAMETER_SECTION:
       break;
     }
 

@@ -56,11 +56,28 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
 	quicktime_write_fixed32(file, table->sample_rate);
 }
 
+/* LQT: This reads the extradata */
+
+static void read_extradata(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
+  {
+  int64_t old_position;
+
+  old_position = quicktime_position(file);
+
+  table->extradata_size = parent_atom->end - (parent_atom->start+4);
+  table->extradata = malloc(parent_atom->size);
+  quicktime_set_position(file, parent_atom->start+4);
+  quicktime_read_data(file, table->extradata, table->extradata_size);
+  quicktime_set_position(file, old_position);
+  }
+
 void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
 {
 	quicktime_atom_t leaf_atom;
 	int len;
-	
+
+        read_extradata(file, table, parent_atom);
+        
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, table->vendor, 4);
@@ -211,7 +228,10 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 
 void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
 {
-	quicktime_ctab_delete(&(table->ctab));
+        /* LQT: Delete extradata as well */
+        if(table->extradata)
+          free(table->extradata);
+        quicktime_ctab_delete(&(table->ctab));
 	quicktime_mjqt_delete(&(table->mjqt));
 	quicktime_mjht_delete(&(table->mjht));
 }

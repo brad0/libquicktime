@@ -43,52 +43,12 @@ int ffmpeg_num_video_codecs = -1;
           (char**)0\
 	}
 
-#define ENCODE_PARAM_VIDEO \
-	{\
-	  "bit_rate",\
-          "Bit rate (kbps)",\
-	  LQT_PARAMETER_INT,\
-          { 800 },\
-          0,\
-          0,\
-          (char**)0\
-	},\
-  	{\
-          "bit_rate_tolerance",\
-          "Bit rate tolernce",\
-          LQT_PARAMETER_INT,\
-          { 1024 * 8 },\
-          4,\
-          24000,\
-          (char**)0\
-	},\
-	{\
-          "flags_fix",\
-          "Fixed quality (VBR)",\
-          LQT_PARAMETER_INT,\
-          { 0 },\
-          0,\
-          1,\
-          (char**)0\
-        },\
-	{\
-          "quality",\
-          "VBR Quality",\
-          LQT_PARAMETER_INT,\
-          { 1 },\
-          1,\
-          31,\
-          (char**)0\
-	},\
-	{\
-          "flags_hq",\
-          "High quality (non realtime) mode",\
-          LQT_PARAMETER_INT,\
-          { 0 },\
-          0,\
-          1,\
-          (char**)0\
-        },\
+#define ENCODE_PARAM_VIDEO_GENERAL \
+        { \
+        "general", \
+        "General", \
+        LQT_PARAMETER_SECTION, \
+        }, \
         {\
           "flags_gray",\
           "Gray scale only mode",\
@@ -97,184 +57,215 @@ int ffmpeg_num_video_codecs = -1;
           0,\
           1,\
           (char**)0\
+        }, \
+	{ \
+	"strict_std_compliance", \
+	"Standard compilance", \
+	LQT_PARAMETER_INT, \
+	{ 0 }, \
+	0, \
+	2, \
+	(char**)0 \
+	}, \
+        {  \
+        "aspect_ratio_info", \
+        "Aspect Ratio", \
+	LQT_PARAMETER_STRINGLIST, \
+        {val_string:  "Square" }, \
+        0, \
+        0, \
+        (char*[]){ "Square", "4:3", "16:9", (char*)0 } \
         }
   
-#define ENCODE_PARAM_MOTION_EST \
+#define ENCODE_PARAM_VIDEO_BITRATE \
+        { \
+        "bitrate", \
+        "Bitrate", \
+        LQT_PARAMETER_SECTION, \
+        }, \
+        {\
+	  "bit_rate",\
+          "Bit rate (kbps)",\
+	  LQT_PARAMETER_INT,\
+          { 800 },\
+          0,\
+          0,\
+          (char**)0\
+	},\
+        { \
+          "bit_rate_tolerance",\
+          "Bitrate Tolerance (kbps)\n",\
+          LQT_PARAMETER_INT,\
+          { 4000 } \
+        }, \
+        { \
+          "rc_min_rate",\
+          "Minimum bitrate (kbps)\n",\
+          LQT_PARAMETER_INT,\
+          { 0 } \
+        }, \
+        { \
+          "rc_max_rate",\
+          "Maximum bitrate (kbps)\n",\
+          LQT_PARAMETER_INT,\
+          { 0 } \
+        }, \
+        { \
+        "qcompress", \
+        "Qscale change between easy and hard scenes", \
+        LQT_PARAMETER_INT, \
+        { 50 }, \
+        0, \
+        100, \
+        (char**)0 \
+        }, \
+        { \
+        "qblur", \
+        "Qscale smoothing over time", \
+        LQT_PARAMETER_INT, \
+        { 50 }, \
+        0, \
+        100, \
+        (char**)0 \
+        }
+  
+#define ENCODE_PARAM_VIDEO_VBR \
+        { \
+        "vbr", \
+        "VBR Options", \
+        LQT_PARAMETER_SECTION, \
+        }, \
+        {\
+          "qscale", \
+          "VBR quantizer scale (0 = CBR)", \
+          LQT_PARAMETER_INT, \
+          { 0 }, \
+          0, \
+          31 \
+        }, \
+        {\
+          "qmin", \
+          "min quantiser scale (VBR)", \
+          LQT_PARAMETER_INT, \
+          { 2 }, \
+          0, \
+          31 \
+        }, \
+        {\
+          "qmax", \
+          "max quantiser scale (VBR)", \
+          LQT_PARAMETER_INT, \
+          { 31 }, \
+          0, \
+          31 \
+        }, \
+        {\
+          "mb_qmin", \
+          "min macroblock quantiser scale (VBR)", \
+          LQT_PARAMETER_INT, \
+          { 2 }, \
+          0, \
+          31 \
+        }, \
+        {\
+          "mb_qmax", \
+          "max macroblock quantiser scale (VBR)", \
+          LQT_PARAMETER_INT, \
+          { 31 }, \
+          0, \
+          31 \
+        }, \
+        {\
+          "qdiff", \
+          "max difference between the quantiser scale (VBR)", \
+          LQT_PARAMETER_INT, \
+          { 3 }, \
+          0, \
+          31 \
+        } \
+
+#define ENCODE_PARAM_VIDEO_TEMPORAL \
+        { \
+        "temporal_compression", \
+        "Temporal Compression", \
+        LQT_PARAMETER_SECTION \
+        }, \
 	{\
-		"me_method",\
-		"Motion estimation method",\
-		LQT_PARAMETER_STRINGLIST,\
-		{val_string: "Zero"},\
-		0,\
-		100,\
-		((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0})\
+	"me_method",\
+	"Motion estimation method",\
+	LQT_PARAMETER_STRINGLIST,\
+	{val_string: "Zero"},\
+        0, \
+        0, \
+	((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0})\
 	},\
 	{\
-		"flags_4mv",\
-		"4MV mode",\
-		LQT_PARAMETER_INT,\
-		{ 0 },\
-		0,\
-		1,\
-		(char**)0\
-	}
-  
-#define ENCODE_PARAM_MPEGVIDEO \
-  { \
-    "gop_size", \
-    "GOP size", \
-    LQT_PARAMETER_INT, \
-    { 250 }, \
-    0, \
-    300, \
-    (char**)0 \
-  }, \
-  { \
-    "aspect_ratio_info",\
-    "Aspect ratio",\
-    LQT_PARAMETER_STRINGLIST,\
-    {val_string: "Square"},\
-    0,\
-    100,\
-    ((char *[]){"Square", "4:3 (625)", "4:3 (525)",\
-                "16:9 (625)", "16:9 (525)", (char *)0})\
-  },\
-  { \
-    "luma_elim_threshold",\
-    "Luma elimination threshold",\
-    LQT_PARAMETER_INT,\
-    { 0 },\
-    0,\
-    99,\
-    (char**)0\
-  },\
-  { \
-    "chroma_elim_threshold",\
-    "Chroma elimination threshold",\
-    LQT_PARAMETER_INT,\
-    { 0 },\
-    0,\
-    99,\
-    (char**)0 \
-  }, \
-  { \
-    "flags_part", \
-    "Data partitioning mode", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    1, \
-    (char**)0 \
-    }, \
-    { \
-    "flags_pass", \
-    "Pass (0 = single pass)", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    2, \
-    (char**)0 \
-  }, \
-  { \
-    "max_b_frames", \
-    "Maximum B frames", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    FF_MAX_B_FRAMES, \
-    (char**)0 \
-  }, \
-  { \
-    "b_frame_strategy", \
-    "B Frame strategy", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    1, \
-    (char**)0 \
-  }, \
-  { \
-    "b_quant_factor", \
-    "Scale factor btw IPS and B frames", \
-    LQT_PARAMETER_INT, \
-    { 2 }, \
-    0, \
-    31, \
-    (char**)0 \
-  }, \
-  { \
-    "b_quant_offset", \
-    "Scale offset btw IPS and B frames", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    31, \
-    (char**)0 \
-  }, \
-  { \
-    "qcompress", \
-    "Qscale change between easy and hard scenes", \
-    LQT_PARAMETER_INT, \
-    { 50 }, \
-    0, \
-    100, \
-    (char**)0 \
-  }, \
-  { \
-    "qblur", \
-    "Qscale smoothing over time", \
-    LQT_PARAMETER_INT, \
-    { 50 }, \
-    0, \
-    100, \
-    (char**)0 \
-  }, \
-  { \
-    "qmin", \
-    "Minimum qscale", \
-    LQT_PARAMETER_INT, \
-    { 3 }, \
-    1, \
-    31, \
-    (char**)0 \
-  }, \
-  { \
-    "qmax", \
-    "Maximum qscale", \
-    LQT_PARAMETER_INT, \
-    { 15 }, \
-    1, \
-    31, \
-    (char**)0 \
-  }, \
-  { \
-    "max_qdiff", \
-    "Maximum qscale difference", \
-    LQT_PARAMETER_INT, \
-    { 3 }, \
-    1, \
-    31, \
-    (char**)0 \
-  }, \
-  { \
-    "rc_strategy", \
-    "RC strategy", \
-    LQT_PARAMETER_INT, \
-    { 2 }, \
-    0, \
-    2, \
-    (char**)0 \
-  }, \
-  { \
-    "rtp_payload_size", \
-    "Packet size (0 = variable)", \
-    LQT_PARAMETER_INT, \
-    { 0 }, \
-    0, \
-    1000000, \
-    (char**)0 \
-  }
+	"mb_decision",\
+	"MB decision mode",\
+	LQT_PARAMETER_STRINGLIST,\
+	{val_string: "Simple"},\
+        0, \
+        0, \
+	((char *[]){"Simple", "Fewest bits", "Rate distoration", (char *)0})\
+	},\
+        { \
+        "gop_size", \
+        "GOP size (0 = intra only)", \
+        LQT_PARAMETER_INT, \
+        { val_int: 250 }, \
+        0, \
+        300, \
+        (char**)0 \
+        } \
+ 
+#define ENCODE_PARAM_VIDEO_MPEG4 \
+        { \
+        "mpeg4", \
+        "MPEG-4 Options", \
+        LQT_PARAMETER_SECTION \
+        }, \
+	{\
+	"flags_4mv",\
+	"Use four motion vector by macroblock",\
+	LQT_PARAMETER_INT,\
+	{ 0 },\
+	0,\
+	1,\
+	(char**)0\
+	}, \
+        { \
+        "flags_part", \
+        "Data partitioning mode", \
+        LQT_PARAMETER_INT, \
+        { 0 }, \
+        0, \
+        1, \
+        (char**)0 \
+        }
 
+
+#define ENCODE_PARAM_VIDEO_H263P \
+        { \
+        "h263p", \
+        "H263+ Options", \
+        LQT_PARAMETER_SECTION \
+        }, \
+        { \
+        "flags_h263p_aic", \
+        "Advanced intra coding", \
+        LQT_PARAMETER_INT, \
+        { 0 }, \
+        0, \
+        1 \
+        }, \
+        { \
+        "flags_h263p_umv", \
+        "Unlimited Motion Vector", \
+        LQT_PARAMETER_INT, \
+        { 0 }, \
+        0, \
+        1 \
+        }
 
 #define DECODE_PARAM_AUDIO
 
@@ -296,34 +287,47 @@ int ffmpeg_num_video_codecs = -1;
           0,\
           1,\
           (char**)0\
+        }, \
+        { \
+          "error_resilience", \
+          "Error resilience", \
+          LQT_PARAMETER_STRINGLIST, \
+          { val_string: "Careful" }, \
+          0, \
+          0, \
+          (char *[]){"None", "Careful", "Compilant", "Agressive", "Very Agressive", (char *)0 } \
         }
-  
+         
 static lqt_parameter_info_static_t encode_parameters_video[] = {
-  ENCODE_PARAM_VIDEO,
+  ENCODE_PARAM_VIDEO_GENERAL,
+  ENCODE_PARAM_VIDEO_BITRATE,
+  ENCODE_PARAM_VIDEO_VBR,
   { /* End of parameters */ }
 };
 
 static lqt_parameter_info_static_t encode_parameters_mpegvideo[] = {
-  ENCODE_PARAM_VIDEO,
-  ENCODE_PARAM_MOTION_EST,
-  ENCODE_PARAM_MPEGVIDEO,
+  ENCODE_PARAM_VIDEO_GENERAL,
+  ENCODE_PARAM_VIDEO_BITRATE,
+  ENCODE_PARAM_VIDEO_VBR,
+  ENCODE_PARAM_VIDEO_TEMPORAL,
   { /* End of parameters */ }
 };
 
 static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
-  ENCODE_PARAM_VIDEO,
-  ENCODE_PARAM_MOTION_EST,
-  ENCODE_PARAM_MPEGVIDEO,
-  // Encoding mpeg4
-	{
-		"strict_std_compliance",
-		"Comply strictly with standards",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
+  ENCODE_PARAM_VIDEO_GENERAL,
+  ENCODE_PARAM_VIDEO_BITRATE,
+  ENCODE_PARAM_VIDEO_VBR,
+  ENCODE_PARAM_VIDEO_TEMPORAL,
+  ENCODE_PARAM_VIDEO_MPEG4,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_h263p[] = {
+  ENCODE_PARAM_VIDEO_GENERAL,
+  ENCODE_PARAM_VIDEO_BITRATE,
+  ENCODE_PARAM_VIDEO_VBR,
+  ENCODE_PARAM_VIDEO_TEMPORAL,
+  ENCODE_PARAM_VIDEO_H263P,
   { /* End of parameters */ }
 };
 
@@ -340,15 +344,6 @@ static lqt_parameter_info_static_t decode_parameters_video[] = {
 
 static lqt_parameter_info_static_t decode_parameters_mpeg4[] = {
   DECODE_PARAM_VIDEO,
-	{
-		"error_resilience",
-		"Error resilience",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
   { /* End of parameters */ }
 };
 
@@ -456,7 +451,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_mpegvideo,
+          encode_parameters: encode_parameters_h263p,
           decode_parameters: decode_parameters_video,
 	  short_name: "h263p",
 	  name: "H263+",
@@ -493,6 +488,16 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "svq1",
 	  name: "Sorenson Video 1",
 	  fourccs: {"SVQ1", (char *)0} },
+	{
+          id: CODEC_ID_SVQ3,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "svq3",
+	  name: "Sorenson Video 3",
+	  fourccs: {"SVQ3", (char *)0} },
 	{
           id: CODEC_ID_MJPEG,
 	  index: -1,

@@ -23,7 +23,9 @@ typedef enum
   {
     LQT_PARAMETER_INT,
     LQT_PARAMETER_STRING,
-    LQT_PARAMETER_STRINGLIST /* String with options */
+    LQT_PARAMETER_STRINGLIST, /* String with options */
+    /* This dummy type is used to separate sections (real_name will be on tab-label) */
+    LQT_PARAMETER_SECTION
   } lqt_parameter_type_t;
 
 /*

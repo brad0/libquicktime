@@ -64,6 +64,8 @@ static void parameter_widget_apply(LqtGtkParameterWidget * w)
         w->parameter_info->val_default.val_int =
           gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(w->widget));
         }
+    case LQT_PARAMETER_SECTION:
+      break;
     }
   
   }
@@ -75,8 +77,10 @@ static void parameter_widget_update(LqtGtkParameterWidget * pw)
   switch(pw->parameter_info->type)
     {
     case LQT_PARAMETER_INT:
+#ifndef NDEBUG
       fprintf(stderr, "Parameter: %s: %d\n", pw->parameter_info->name,
               pw->parameter_info->val_default.val_int);
+#endif
       /* Boolean */
       if((pw->parameter_info->val_min == 0) && (pw->parameter_info->val_max == 1))
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pw->widget),
@@ -91,15 +95,18 @@ static void parameter_widget_update(LqtGtkParameterWidget * pw)
                                   pw->parameter_info->val_default.val_int);
       break;
     case LQT_PARAMETER_STRING:
+#ifndef NDEBUG
       fprintf(stderr, "Parameter: %s: %s\n", pw->parameter_info->name,
               pw->parameter_info->val_default.val_string);
+#endif
       gtk_entry_set_text(GTK_ENTRY(pw->widget),
                          pw->parameter_info->val_default.val_string);
       break;
     case LQT_PARAMETER_STRINGLIST:    /* String with options */
+#ifndef NDEBUG
       fprintf(stderr, "Parameter: %s: %s\n", pw->parameter_info->name,
               pw->parameter_info->val_default.val_string);
-
+#endif
       for(i = 0; i < pw->parameter_info->num_stringlist_options; i++)
         {
         if(!strcmp(pw->parameter_info->stringlist_options[i],
@@ -109,8 +116,9 @@ static void parameter_widget_update(LqtGtkParameterWidget * pw)
                                       i);
           break;
           }
-        break;
         }
+    case LQT_PARAMETER_SECTION:
+      break;
     }
   }
 
@@ -118,7 +126,6 @@ LqtGtkParameterWidget *
 lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
   {
   int i;
-  int item_index;
   LqtGtkParameterWidget * ret = calloc(1, sizeof(LqtGtkParameterWidget));
 
   ret->parameter_info = info;
@@ -136,6 +143,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
       else if(info->val_min < info->val_max)
         {
         ret->label = gtk_label_new(info->real_name);
+        gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
         ret->adjustment = gtk_adjustment_new((gfloat) info->val_min,
                                              (gfloat) info->val_min,
                                              (gfloat) info->val_max,
@@ -152,6 +160,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
       else
         {
         ret->label = gtk_label_new(info->real_name);
+        gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
         ret->adjustment = gtk_adjustment_new(0.0,
                                              -1.0e8,
                                              1.0e8,
@@ -165,13 +174,13 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
       break;
     case LQT_PARAMETER_STRING:
       ret->label = gtk_label_new(info->real_name);
+      gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
       ret->widget = gtk_entry_new();
       break;
     case LQT_PARAMETER_STRINGLIST:    /* String with options */
       ret->selected = 0;
-      item_index = 0;
       ret->label = gtk_label_new(info->real_name);
-
+      gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
       ret->menu = gtk_menu_new();
       ret->menuitems = calloc(info->num_stringlist_options,
                               sizeof(GtkWidget*));
@@ -192,10 +201,11 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
       ret->widget = gtk_option_menu_new();
       gtk_option_menu_set_menu(GTK_OPTION_MENU(ret->widget), ret->menu);
       break;
+    case LQT_PARAMETER_SECTION:
+      break;
     }
 
   gtk_widget_set_usize(ret->widget, 100, ret->widget->requisition.height);
-
   parameter_widget_update(ret);
 
   gtk_widget_show(ret->widget);
@@ -218,53 +228,111 @@ lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget * w)
  *  Create Codec config widget
  */
 
-LqtGtkCodecConfigWidget *
-lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
-                                  int num_parameters)
+static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
+                                LqtGtkParameterWidget ** widgets,
+                                int num_parameters)
   {
   int i;
-  LqtGtkCodecConfigWidget * ret = calloc(1, sizeof(LqtGtkCodecConfigWidget));
-
-  ret->parameter_info = parameter_info;
-  ret->num_parameters = num_parameters;
-
-  /* Create the parameter widgets */
-
-  ret->parameter_widgets = calloc(num_parameters,
-                                  sizeof(LqtGtkParameterWidget *));
-
-  ret->widget = gtk_table_new(num_parameters, 2, 0);
-  gtk_container_set_border_width(GTK_CONTAINER(ret->widget),
+  GtkWidget * ret;
+  ret = gtk_table_new(num_parameters, 2, 0);
+  gtk_container_set_border_width(GTK_CONTAINER(ret),
                                  10);
-  gtk_table_set_row_spacings(GTK_TABLE(ret->widget),
+  gtk_table_set_row_spacings(GTK_TABLE(ret),
                              5);
-  gtk_table_set_col_spacings(GTK_TABLE(ret->widget),
+  gtk_table_set_col_spacings(GTK_TABLE(ret),
                              5);
     
   for(i = 0; i < num_parameters; i++)
     {
-    ret->parameter_widgets[i] =
+    widgets[i] =
       lqtgtk_create_parameter_widget(&parameter_info[i]);
 
     /* Bool parameters have no labels */
 
-    if(ret->parameter_widgets[i]->label)
+    if(widgets[i]->label)
       {    
-      gtk_table_attach(GTK_TABLE(ret->widget),
-                       ret->parameter_widgets[i]->label,
+      gtk_table_attach(GTK_TABLE(ret), widgets[i]->label,
                        0, 1, i, i+1, GTK_FILL, GTK_FILL, 0, 0);
-      gtk_table_attach_defaults(GTK_TABLE(ret->widget),
-                                ret->parameter_widgets[i]->widget,
-                                1, 2, i, i+1);
+      gtk_table_attach(GTK_TABLE(ret), widgets[i]->widget,
+                       1, 2, i, i+1, GTK_EXPAND | GTK_FILL, GTK_FILL, 0, 0);
       }
     else
       {
-      gtk_table_attach_defaults(GTK_TABLE(ret->widget),
-                                ret->parameter_widgets[i]->widget,
-                                0, 2, i, i+1);
+      gtk_table_attach(GTK_TABLE(ret), widgets[i]->widget,
+                       0, 2, i, i+1, GTK_EXPAND | GTK_FILL, GTK_FILL, 0, 0);
       }
     }
-  gtk_widget_show(ret->widget);
+  gtk_widget_show(ret);
+  return ret;
+  }
+
+LqtGtkCodecConfigWidget *
+lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
+                                  int num_parameters)
+  {
+  int i, j, parameter_index;
+  GtkWidget * table;
+  GtkWidget * notebook;
+  GtkWidget * tab_label;
+  int num_sections = 0;
+  int parameters_in_section;
+  LqtGtkCodecConfigWidget * ret = calloc(1, sizeof(LqtGtkCodecConfigWidget));
+  
+  if(parameter_info[0].type == LQT_PARAMETER_SECTION)
+    {
+    for(i = 0; i < num_parameters; i++)
+      {
+      if(parameter_info[i].type == LQT_PARAMETER_SECTION)
+        num_sections++;
+      }
+    }
+  
+  ret->parameter_info = parameter_info;
+  ret->num_parameters = num_parameters - num_sections;
+
+  /* Create the parameter widgets */
+
+  ret->parameter_widgets = calloc(num_parameters - num_sections,
+                                  sizeof(LqtGtkParameterWidget *));
+
+  if(num_sections)
+    {
+    parameter_index = 1;
+    notebook = gtk_notebook_new();
+    for(i = 0; i < num_sections; i++)
+      {
+      /* Count parameters in this section */
+
+      parameters_in_section = 0;
+      while((parameters_in_section + parameter_index < num_parameters) &&
+            (parameter_info[parameters_in_section + parameter_index].type != LQT_PARAMETER_SECTION))
+        {
+        parameters_in_section++;
+        }
+      
+      /* Create table */
+      table = create_table(&(parameter_info[parameter_index]),
+                           &(ret->parameter_widgets[parameter_index - i - 1]),
+                           parameters_in_section);
+      
+      /* Append table */
+
+      tab_label = gtk_label_new(parameter_info[parameter_index-1].real_name);
+      gtk_widget_show(tab_label);
+      gtk_notebook_append_page(GTK_NOTEBOOK(notebook), table, tab_label);
+      
+      /* Increment */
+
+      parameter_index += parameters_in_section + 1;
+      }
+    gtk_widget_show(notebook);
+    ret->widget = notebook;
+    }
+  else
+    ret->widget = create_table(parameter_info,
+                               ret->parameter_widgets,
+                               num_parameters);
+  
   return ret;
   }
 
@@ -555,8 +623,7 @@ static void codec_config_window_button_callback(GtkWidget * w, gpointer data)
 
     /*    fprintf(stderr, "Restoring parameters %d %d\n", encode, decode); */
     
-    lqt_restore_default_parameters(ccw->codec_info,
-                                   encode, decode);
+    lqt_restore_default_parameters(ccw->codec_info, encode, decode);
 
     if(encode)
       {
@@ -583,19 +650,19 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
 
   ret->codec_info = codec_info;
   
-  if(encode)
+  if(encode && codec_info->num_encoding_parameters)
     ret->encode_widget =
       lqtgtk_create_codec_config_widget(codec_info->encoding_parameters,
                                         codec_info->num_encoding_parameters);
 
-  if(decode)
+  if(decode && codec_info->num_decoding_parameters)
     ret->decode_widget =
       lqtgtk_create_codec_config_widget(codec_info->decoding_parameters,
                                         codec_info->num_decoding_parameters);
 
   if(encode && decode)
     {
-    ret->hbox = gtk_hbox_new(1, 10);
+    ret->hbox = gtk_hbox_new(0, 5);
     if(codec_info->num_encoding_parameters)
       {
       ret->encoding_frame = gtk_frame_new("Encoding Options");
@@ -683,7 +750,7 @@ void lqtgtk_codec_config_window_run(LqtGtkCodecConfigWindow *w)
 
 void lqtgtk_codec_config_window_apply(LqtGtkCodecConfigWindow *w)
   {
-  int i;
+  int i, index;
 
   /*
    *  First, all parameter widgets transfer their values to the
@@ -692,25 +759,32 @@ void lqtgtk_codec_config_window_apply(LqtGtkCodecConfigWindow *w)
 
   if(w->encode_widget)
     {
+    index = 0;
     for(i = 0; i < w->codec_info->num_encoding_parameters; i++)
       {
-      parameter_widget_apply(w->encode_widget->parameter_widgets[i]);
+      if(w->codec_info->encoding_parameters[i].type == LQT_PARAMETER_SECTION)
+        continue;
+      parameter_widget_apply(w->encode_widget->parameter_widgets[index]);
       lqt_set_default_parameter(w->codec_info->type,
                                 1, w->codec_info->name,
                                 w->codec_info->encoding_parameters[i].name,
                                 &(w->encode_widget->parameter_info[i].val_default));
-
+      index++;
       }
     }
   if(w->decode_widget)
     {
+    index = 0;
     for(i = 0; i < w->codec_info->num_decoding_parameters; i++)
       {
-      parameter_widget_apply(w->decode_widget->parameter_widgets[i]);
+      if(w->codec_info->decoding_parameters[i].type == LQT_PARAMETER_SECTION)
+        continue;
+      parameter_widget_apply(w->decode_widget->parameter_widgets[index]);
       lqt_set_default_parameter(w->codec_info->type,
                                 0, w->codec_info->name,
                                 w->codec_info->decoding_parameters[i].name,
                                 &(w->decode_widget->parameter_info[i].val_default));
+      index++;
       }
     }
   }
@@ -737,12 +811,18 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   LqtGtkCodecInfoWidget * ret = calloc(1, sizeof(LqtGtkCodecInfoWidget));
 
   ret->real_name = gtk_label_new(info->long_name);
+  gtk_misc_set_alignment(GTK_MISC(ret->real_name), 0.0, 0.5);
   ret->short_name_label = gtk_label_new("Internal name: ");
+  gtk_misc_set_alignment(GTK_MISC(ret->short_name_label), 0.0, 0.5);
   ret->short_name = gtk_label_new(info->name);
+  gtk_misc_set_alignment(GTK_MISC(ret->short_name), 0.0, 0.5);
   ret->description = gtk_label_new(info->description);
-
+  gtk_misc_set_alignment(GTK_MISC(ret->description), 0.0, 0.5);
+  
   ret->module_filename = gtk_label_new(info->module_filename);
+  gtk_misc_set_alignment(GTK_MISC(ret->module_filename), 0.0, 0.5);
   ret->module_filename_label = gtk_label_new("Module: ");
+  gtk_misc_set_alignment(GTK_MISC(ret->module_filename_label), 0.0, 0.5);
   
   gtk_widget_show(ret->real_name);
   gtk_widget_show(ret->short_name);

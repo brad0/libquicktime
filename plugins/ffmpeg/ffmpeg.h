@@ -22,60 +22,34 @@
 #ifndef QUICKTIME_FFMPEG_H
 #define QUICKTIME_FFMPEG_H
 
-#include "ffmpeg/avcodec.h"
+#include <ffmpeg/avcodec.h>
 #include <quicktime/quicktime.h>
-
-#if 0
-
-typedef struct
-  {
-
-  
-  /* Encoding only */
-  
-  int sample_buffer_pos;
-
-  /* Decoding only */
-  
-  
-  /* Index of the first sample in buffer relative to start of stream */
-  
-  int64_t sample_buffer_offset;
-        
-  /* Buffer for a single frame */
-  
-  char * frame_buffer;
-  int frame_buffer_size;
-  int next_frame_bytes;
-  
-
-  } quicktime_ffmpeg_codec_t;
-
-#endif
+#include <quicktime/lqt.h>
 
 typedef struct
   {
   AVCodecContext params;
   
   /* Compression stuff */
-  AVCodecContext ffcodec_enc;
+  AVCodecContext * ffcodec_enc;
   AVCodec * ffc_enc;
   int init_enc;
 
   /* DeCompression stuff */
-  AVCodecContext ffcodec_dec;
+  AVCodecContext * ffcodec_dec;
   AVCodec * ffc_dec;
   int init_dec;
-
+  int bitrate;
   } quicktime_ffmpeg_codec_common_t;
-
 
 typedef struct
   {
   quicktime_ffmpeg_codec_common_t com;
-  long current_chunk;
-  int16_t * sample_buffer;
+  int64_t current_chunk;
 
+  /* Interleaved samples as avcodec needs them */
+    
+  int16_t * sample_buffer;
   int sample_buffer_size; 
   int samples_in_buffer;
 
@@ -97,7 +71,7 @@ typedef struct
   {
   quicktime_ffmpeg_codec_common_t com;
 
-  unsigned char * encode_frame;
+  unsigned char * encode_buffer;
   unsigned char * write_buffer;
   int write_buffer_size;
   
@@ -105,6 +79,19 @@ typedef struct
   int read_buffer_size;
   int64_t last_frame;
 
+  AVFrame * frame;
+  uint8_t * frame_buffer;
+
+  /* Colormodel */
+
+  int lqt_colormodel;
+  int do_imgconvert;
+    
+  unsigned char * tmp_buffer;
+  
+  /* Quality must be passed to the individual frame */
+
+  int qscale;
   } quicktime_ffmpeg_video_codec_t;
 
 

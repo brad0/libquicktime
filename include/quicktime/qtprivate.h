@@ -139,6 +139,13 @@ typedef struct
         int16_t compression_id;
 	int packet_size;
 	float sample_rate;
+
+/* LQT: We store the complete atom (starting witht he fourcc)
+   here, because this must be passed to the Sorenson 3 decoder */
+
+        unsigned char * extradata;
+        int extradata_size;
+
 } quicktime_stsd_table_t;
 
 
