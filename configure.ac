@@ -220,7 +220,7 @@ have_libdv="false"
 
 LIBDV_REQUIRED="0.102"
 
-PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true")
+PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true", have_libdv="false")
 AC_SUBST(LIBDV_REQUIRED)
 AC_SUBST(LIBDV_LIBS)
 AC_SUBST(LIBDV_CFLAGS)
