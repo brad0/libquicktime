@@ -5,9 +5,9 @@
 #include <libdv/dv.h>
 
 
-// static char * fourccs_dv[]  = { QUICKTIME_DV, QUICKTIME_DV_AVID, QUICKTIME_DV_AVID_A, (char*)0 };
+static char * fourccs_dv[]  = { QUICKTIME_DV, QUICKTIME_DV_AVID, QUICKTIME_DV_AVID_A, (char*)0 };
 
-static char * fourccs_dv[]  = { (char*)0 };
+// static char * fourccs_dv[]  = { (char*)0 };
 
 
 static int encoding_colormodels_dv[] =
