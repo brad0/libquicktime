@@ -1,36 +1,24 @@
 
-EXTRA_DIST=autogen.sh
-
 local_headers= \
 	cmodel_permutation.h \
 	codecs.h \
-	divx.h \
-	dv.h \
 	fastjpg.h \
 	fastjpgmacro.h \
 	funcprotos.h \
 	graphics.h \
-	ima4.h \
-	jpeg.h \
-	jpeg_old.h \
-	libdv.h \
-	libmjpeg.h \
 	mmx.h \
-	qtpng.h \
-	qtvorbis.h \
-	raw.h \
-	rawaudio.h \
 	rtjpeg.h \
 	rtjpeg_core.h \
-	twos.h \
-	ulaw.h \
-	v308.h \
-	v408.h \
-	v410.h \
 	workarounds.h \
-	yuv2.h \
-	yuv4.h \
-	yv12.h
+        lqt_codecinfo_private.h
+
+include_headers = \
+quicktime.h \
+qtprivate.h \
+colormodels.h \
+lqt.h  \
+lqt_codecinfo.h \
+lqt_codecapi.h
 
 # The following must be commented out, because otherwise, the utils
 # directory will go into make dist for gmerlin (which it shouldn't)
@@ -39,24 +27,21 @@ local_headers= \
 # For LIBQUICKTIME
 #
 
-SUBDIRS = libdv \
-          decore50 \
-          encore50 \
+SUBDIRS = \
           @FIREWIRE_SUBDIRS@ \
           . \
+          plugins \
           utils
 
-include_HEADERS=quicktime.h qtprivate.h colormodels.h libdv.h 
+include_HEADERS=$(include_headers) 
 noinst_HEADERS=$(local_headers)
 
 #
 # For GMERLIN
 #
 
-# SUBDIRS=libdv \
-# 	decore50 \
-# 	encore50
-# noinst_HEADERS=quicktime.h qtprivate.h colormodels.h libdv.h $(local_headers)
+# SUBDIRS=plugins
+# noinst_HEADERS=$(include_headers) $(local_headers)
 
 # ENDIF
 
@@ -73,26 +58,24 @@ noinst_HEADERS=$(local_headers)
 #	utils
 
 DIST_SUBDIRS= libdv \
-	decore50 \
-	encore50 \
+        plugins \
 	utils \
 	@COMPLETE_DIST@
 
 lib_LTLIBRARIES= libquicktime.la
 
-libquicktime_la_LIBADD= \
-	libdv/libdv.la \
-	decore50/libdecore50.la \
-	encore50/libencore50.la \
-	@FIREWIRE_LIBS@ \
-	@VORBISENC_LIBS@ @VORBIS_LIBS@ @VORBISFILE_LIBS@ \
-	@JPEG_LIBS@ @PNG_LIBS@
+#
+# Library dependencies are emtpy no
+# Maybe we need zlib to read compressed quicktime headers
+#
+
+libquicktime_la_LDFLAGS = -export-dynamic
 
 #	libogg-1.0rc2/src/libogg.la \
 
 
 #CLAGS += @JPEG_CFLAGS@ -Ilibdv @VORBIS_CFLAGS@ @FIREWIRE_CFLAGS@
-CFLAGS = @CFLAGS@ -Ilibdv @VORBIS_CFLAGS@ @FIREWIRE_CFLAGS@ @JPEG_CFLAGS@ @PNG_CFLAGS@
+CFLAGS = @CFLAGS@
 
 CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 CFLAGS += -include $(CONFIG_HEADER)
@@ -107,47 +90,27 @@ backup: clean
 
 # build only the files, which can be compiled
 
-if HAVE_LIBJPEG
-jpeg_sources = jpeg.c \
-	libmjpeg.c \
-	jpeg_old.c
-else
-jpeg_sources=
-endif
+# Different files for dynamic plugins and others
 
-if HAVE_LIBPNG
-png_sources=qtpng.c
-else
-png_sources=
-endif
+lqt_sources = lqt_codecs.c  lqt_plugin.c lqt_quicktime.c
 
-if HAVE_VORBIS
-vorbis_sources=vorbis.c
-else
-vorbis_sources=
-endif
+# lqt_sources = codecs.c  plugin.c quicktime.c
+
 
 libquicktime_la_SOURCES= \
-        $(jpeg_sources) \
-        $(png_sources) \
-        $(vorbis_sources) \
+        $(lqt_sources) \
         atom.c \
 	cmodel_default.c \
 	cmodel_yuv420p.c \
 	cmodel_yuv422.c \
-	codecs.c \
 	colormodels.c \
 	ctab.c \
 	dinf.c \
-	divx.c \
 	dref.c \
-	dv.c \
 	edts.c \
 	elst.c \
 	graphics.c \
 	hdlr.c \
-	ima4.c \
-	libdv.c \
 	matrix.c \
 	mdat.c \
 	mdhd.c \
@@ -155,10 +118,6 @@ libquicktime_la_SOURCES= \
 	minf.c \
 	moov.c \
 	mvhd.c \
-	plugin.c \
-	quicktime.c \
-	raw.c \
-	rawaudio.c \
 	smhd.c \
 	stbl.c \
 	stco.c \
@@ -170,18 +129,13 @@ libquicktime_la_SOURCES= \
 	stts.c \
 	tkhd.c \
 	trak.c \
-	twos.c \
 	udta.c \
-	ulaw.c \
 	util.c \
-	v308.c \
-	v408.c \
-	v410.c \
 	vmhd.c \
 	workarounds.c \
-	yuv2.c \
-	yuv4.c \
-	yv12.c 
+        lqt_codecfile.c \
+        lqt_codecinfo.c \
+        lqt_loader.c
 
 #configure : configure.in
 #	aclocal

@@ -6,7 +6,7 @@ AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
 
-AC_LIBTOOL_PICMODE(no)
+dnl AC_LIBTOOL_PICMODE(no)
 
 dnl
 dnl set GMERLIN to "true" for gmerlin compilation
@@ -40,10 +40,10 @@ AC_SUBST(ASFLAGS)
 
 dnl Build CFLAGS
 
-COMMON_CFLAGS=" -W -Wall -Wno-unused -Winline"
+COMMON_CFLAGS=" -finline-functions -W -Wall -Wno-unused -Winline"
 PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
 DEBUG_CFLAGS=" -g3"
-OPTIMIZE_CFLAGS=" -O2"
+OPTIMIZE_CFLAGS=" -O3 -funroll-all-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2"
 
 # -Wno-unused-variable -Wno-unused-parameter
 # -std=gnu99 
@@ -463,13 +463,41 @@ if test x$gmerlin = xtrue; then
      exec_prefix="${prefix}"
   fi
   libdir=$exec_prefix/lib/gmerlin
+  plugin_dir="$exec_prefix/lib/gmerlin/$PACKAGE"
+else
+  if test "x$prefix" = xNONE; then
+     prefix="${ac_default_prefix}"
+  fi
+  if test "x$exec_prefix" = xNONE; then
+     exec_prefix="${prefix}"
+  fi
+     plugin_dir="$exec_prefix/lib/$PACKAGE"
 fi
+
+AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
+
+AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
+
+MODULE_LIBADD=../../libquicktime.la
+AC_SUBST(MODULE_LIBADD)
 
 dnl
 dnl LIBQUICKTIME
 dnl
 
-AC_OUTPUT([Makefile libdv/Makefile decore50/Makefile encore50/Makefile utils/Makefile])
+AC_OUTPUT([Makefile \
+plugins/Makefile \
+plugins/dv/Makefile \
+plugins/dv/libdv/Makefile \
+plugins/mjpeg/Makefile \
+plugins/audiocodec/Makefile \
+plugins/videocodec/Makefile \
+plugins/vorbis/Makefile \
+plugins/png/Makefile \
+plugins/opendivx/Makefile \
+plugins/opendivx/decore50/Makefile \
+plugins/opendivx/encore50/Makefile \
+utils/Makefile])
 
 dnl
 dnl GMERLIN

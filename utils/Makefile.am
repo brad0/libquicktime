@@ -1,9 +1,12 @@
-noinst_PROGRAMS=testqt dump dechunk
+noinst_PROGRAMS=test_codec testqt dump dechunk
 
 bin_PROGRAMS=qtinfo qtstreamize
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=../libquicktime.la
+
+test_codec_SOURCES=test_codec.c
+test_codec_LDADD=../libquicktime.la
 
 qtinfo_SOURCES=qtinfo.c
 qtinfo_LDADD=../libquicktime.la

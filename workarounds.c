@@ -1,8 +1,8 @@
 
 #define EX_INLINE
 
-#include "libdv/vlc.h"
-#include "libdv/mmx.h"
+/* #include "libdv/vlc.h" */
+/* #include "libdv/mmx.h" */
 
 #include "qtprivate.h"
 #include "workarounds.h"
