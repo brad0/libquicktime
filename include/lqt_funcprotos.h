@@ -273,6 +273,24 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, int time_scale);
 void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd);
 
+/* colr.c */
+void quicktime_colr_init(quicktime_colr_t *colr);
+void quicktime_colr_delete(quicktime_colr_t *colr);
+void quicktime_colr_dump(quicktime_colr_t *colr);
+void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr);
+void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr);
+int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+
+/* clap.c */
+void quicktime_clap_init(quicktime_clap_t *clap);
+void quicktime_clap_delete(quicktime_clap_t *clap);
+void quicktime_clap_dump(quicktime_clap_t *clap);
+void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap);
+void quicktime_write_clap(quicktime_t *file, quicktime_clap_t *clap);
+int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+
 /* pasp.c */
 void quicktime_pasp_init(quicktime_pasp_t *pasp);
 void quicktime_pasp_delete(quicktime_pasp_t *pasp);

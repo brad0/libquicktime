@@ -32,6 +32,8 @@ avi_movi.c \
 avi_odml.c \
 avi_riff.c \
 avi_strl.c \
+colr.c \
+clap.c \
 cmodel_default.c \
 cmodel_yuv420p.c \
 cmodel_yuv422.c \

@@ -129,6 +129,16 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 			quicktime_read_pasp(file, &(table->pasp));
 		}
 		else
+		if (quicktime_atom_is(&leaf_atom, "clap"))
+		{
+			quicktime_read_clap(file, &(table->clap));
+		}
+		else
+		if (quicktime_atom_is(&leaf_atom, "colr"))
+		{
+			quicktime_read_colr(file, &(table->colr));
+		}
+		else
 /* 		if(quicktime_atom_is(&leaf_atom, "mjqt")) */
 /* 		{ */
 /* 			quicktime_read_mjqt(file, &(table->mjqt)); */
@@ -164,6 +174,10 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 
 	if (table->pasp.hSpacing)
 		quicktime_write_pasp(file, &(table->pasp));
+	if (table->clap.cleanApertureWidthN)
+		quicktime_write_clap(file, &(table->clap));
+	if (table->colr.colorParamType)
+		quicktime_write_colr(file, &(table->colr));
 
 	if(table->fields)
 	{
@@ -230,6 +244,8 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->fields = 0;
 	table->field_dominance = 1;
 	quicktime_pasp_init(&(table->pasp));
+	quicktime_clap_init(&(table->clap));
+	quicktime_colr_init(&(table->colr));
 	quicktime_mjqt_init(&(table->mjqt));
 	quicktime_mjht_init(&(table->mjht));
 	
@@ -272,6 +288,10 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 
 	if (table->pasp.hSpacing)
 		quicktime_pasp_dump(&(table->pasp));
+	if (table->clap.cleanApertureWidthN)
+		quicktime_clap_dump(&(table->clap));
+	if (table->colr.colorParamType)
+		quicktime_colr_dump(&(table->colr));
 
 	if(table->fields)
 	{
