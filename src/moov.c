@@ -50,7 +50,8 @@ static int read_cmov(quicktime_t *file,
         quicktime_atom_t *moov_atom)
 {
         quicktime_atom_t leaf_atom;
-
+        unsigned char *data_in, *data_out;
+        z_stream zlib;
 
         do
         {
@@ -92,11 +93,10 @@ static int read_cmov(quicktime_t *file,
                                         uncompressed_size);
                         }
 
-                        unsigned char *data_in = calloc(1, compressed_size);
+                        data_in = calloc(1, compressed_size);
                         quicktime_read_data(file, data_in, compressed_size);
 /* Decompress to another buffer */
-                        unsigned char *data_out = calloc(1, uncompressed_size + 0x400);
-                        z_stream zlib;
+                        data_out = calloc(1, uncompressed_size + 0x400);
                         zlib.zalloc = zalloc;
                         zlib.zfree = zfree;
                         zlib.opaque = NULL;
