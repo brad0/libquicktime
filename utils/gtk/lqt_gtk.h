@@ -170,7 +170,7 @@ typedef struct
   lqt_codec_type type;
 
   int selected;
-  
+  int num_codecs;
   } LqtGtkCodecBrowser;
 
 LqtGtkCodecBrowser * lqtgtk_create_codec_browser(lqt_codec_type type,

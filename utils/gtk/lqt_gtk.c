@@ -311,25 +311,62 @@ static void browser_select_row_callback(GtkWidget * w,
   LqtGtkCodecBrowser * cb = (LqtGtkCodecBrowser *)data;
 
   if(cb->selected == -1)
-    {
     gtk_widget_set_sensitive(cb->info_button, 1);
-    gtk_widget_set_sensitive(cb->up_button, 1);
-    gtk_widget_set_sensitive(cb->down_button, 1);
-    }
-  
+     
   cb->selected = row;
   
   cb->codec_info = cb->codecs[row];
 
   if((cb->encode && cb->codec_info->num_encoding_parameters) ||
      (cb->decode && cb->codec_info->num_decoding_parameters))
-    {
     gtk_widget_set_sensitive(cb->parameters_button, 1);
-    }
   else
-    {
     gtk_widget_set_sensitive(cb->parameters_button, 0);
-    }
+
+  if(cb->selected == 0)
+    gtk_widget_set_sensitive(cb->up_button, 0);
+  else
+    gtk_widget_set_sensitive(cb->up_button, 1);
+  
+  if(cb->selected == cb->num_codecs - 1)
+    gtk_widget_set_sensitive(cb->down_button, 0);
+  else
+    gtk_widget_set_sensitive(cb->down_button, 1);
+  
+  }
+
+static void browser_move_codec(LqtGtkCodecBrowser * cb, int pos, int new_pos)
+  {
+  lqt_codec_info_t * tmp_info;
+  
+  gtk_clist_swap_rows(GTK_CLIST(cb->list), pos, new_pos);
+
+  tmp_info = cb->codecs[pos];
+  cb->codecs[pos] = cb->codecs[new_pos];
+  cb->codecs[new_pos] = tmp_info;
+
+  /* Enable up button */ 
+  
+  if(!cb->selected && new_pos)
+    gtk_widget_set_sensitive(cb->up_button, 1);
+
+  /* Enable down button */
+
+  if((cb->selected == cb->num_codecs - 1) && (new_pos < cb->num_codecs - 1))
+    gtk_widget_set_sensitive(cb->down_button, 1);
+
+  /* Disable up button */
+ 
+  if(!new_pos)
+    gtk_widget_set_sensitive(cb->up_button, 0);
+
+  /* Disable down button */
+
+  if(new_pos == cb->num_codecs - 1)
+    gtk_widget_set_sensitive(cb->down_button, 0);
+  
+  cb->selected = new_pos;    
+  
   }
 
 static void browser_button_callback(GtkWidget * w, gpointer data)
@@ -339,15 +376,10 @@ static void browser_button_callback(GtkWidget * w, gpointer data)
   LqtGtkCodecConfigWindow * codec_config_window;
   LqtGtkCodecInfoWindow * codec_info_window;
   
-  
   if(w == cb->up_button)
-    {
-
-    }
+    browser_move_codec(cb, cb->selected, cb->selected-1);
   else if(w == cb->down_button)
-    {
-
-    }
+    browser_move_codec(cb, cb->selected, cb->selected+1);
   else if(w == cb->parameters_button)
     {
     codec_config_window =
@@ -447,7 +479,7 @@ LqtGtkCodecBrowser * lqtgtk_create_codec_browser(lqt_codec_type type,
 void lqtgtk_codec_browser_update(LqtGtkCodecBrowser * b)
   {
   int i;
-  int num_codecs = 0;
+  b->num_codecs = 0;
   
   if(b->codecs)
     lqt_destroy_codec_info(b->codecs);
@@ -461,13 +493,13 @@ void lqtgtk_codec_browser_update(LqtGtkCodecBrowser * b)
 
   while(1)
     {
-    if(b->codecs[num_codecs])
-      num_codecs++;
+    if(b->codecs[b->num_codecs])
+      b->num_codecs++;
     else
       break;
     }
 
-  for(i = 0; i < num_codecs; i++)
+  for(i = 0; i < b->num_codecs; i++)
     {
     gtk_clist_append(GTK_CLIST(b->list),
                      &(b->codecs[i]->long_name));
@@ -498,12 +530,12 @@ static void codec_config_window_button_callback(GtkWidget * w, gpointer data)
     {
     lqtgtk_codec_config_window_apply(ccw);
     }
-  if(w == ccw->close_button)
+  else if(w == ccw->close_button)
     {
     gtk_widget_hide(ccw->window);
     gtk_main_quit();
     }
-  if(w == ccw->restore_button)
+  else if(w == ccw->restore_button)
     {
     encode = (ccw->encode_widget) ? 1 : 0;
     decode = (ccw->decode_widget) ? 1 : 0;
