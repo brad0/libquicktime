@@ -1,0 +1,13 @@
+EXTRA_DIST = \
+codecs.html \
+qt4l_building.html \
+qt4l_codecs.html \
+qt4l_firewire.html \
+qt4l_index.html \
+qt4l_license.html \
+qt4l_opening.html \
+qt4l_positioning.html \
+qt4l_reading.html \
+qt4l_util.html \
+qt4l_writing.html
+
