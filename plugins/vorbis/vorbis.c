@@ -9,13 +9,14 @@
 #include <string.h>
 #include <time.h>
 
-// Attempts to read more samples than this will crash
-#define OUTPUT_ALLOCATION 0x100000
-#define CLAMP(x, y, z) ((x) = ((x) <  (y) ? (y) : ((x) > (z) ? (z) : (x))))
-
 typedef struct
 {
-	int max_bitrate;
+
+/* Common stuff */
+        float ** sample_buffer;
+        int sample_buffer_alloc; 
+/* Encoder stuff */
+        int max_bitrate;
 	int nominal_bitrate;
 	int min_bitrate;
 	int use_vbr;
@@ -39,6 +40,8 @@ ogg_packet enc_op;
         int chunk_started;
         quicktime_atom_t chunk_atom;
 
+/* Decoder stuff */
+
 	ogg_sync_state   dec_oy; /* sync and verify incoming physical bitstream */
 	ogg_stream_state dec_os; /* take physical pages, weld into a logical
 				stream of packets */
@@ -52,12 +55,8 @@ ogg_packet enc_op;
 	vorbis_block     dec_vb; /* local working space for packet->PCM decode */
 
 	int decode_initialized;
-        float **output;
         int stream_initialized;
 
-/* Decoding stuff */
-        float ** sample_buffer;
-        int sample_buffer_alloc; 
   
   /* Buffer for the entire chunk */
 
@@ -90,39 +89,39 @@ ogg_packet enc_op;
 /* =================================== public for vorbis */
 
 static int delete_codec(quicktime_audio_map_t *atrack)
-{
-	quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
-	int i;
+  {
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  int i;
 
-	if(codec->encode_initialized)
-	{
-		ogg_stream_clear(&codec->enc_os);
-		vorbis_block_clear(&codec->enc_vb);
-		vorbis_dsp_clear(&codec->enc_vd);
-		vorbis_comment_clear(&codec->enc_vc);
-		vorbis_info_clear(&codec->enc_vi);
-	}
+  if(codec->encode_initialized)
+    {
+    ogg_stream_clear(&codec->enc_os);
+    vorbis_block_clear(&codec->enc_vb);
+    vorbis_dsp_clear(&codec->enc_vd);
+    vorbis_comment_clear(&codec->enc_vc);
+    vorbis_info_clear(&codec->enc_vi);
+    }
 
-	if(codec->decode_initialized)
-	{
-		if(codec->output) 
-		{
-			for(i = 0; i < atrack->channels; i++)
-				free(codec->output[i]);
+  if(codec->decode_initialized)
+    {
+    ogg_stream_clear(&codec->dec_os);
+    vorbis_block_clear(&codec->dec_vb);
+    vorbis_dsp_clear(&codec->dec_vd);
+    vorbis_comment_clear(&codec->dec_vc);
+    vorbis_info_clear(&codec->dec_vi);
+    }
 
-			free(codec->output);
-		}
+  if(codec->sample_buffer) 
+    {
+    for(i = 0; i < atrack->channels; i++)
+      free(codec->sample_buffer[i]);
+    free(codec->sample_buffer);
+    }
 
-		ogg_stream_clear(&codec->dec_os);
-		vorbis_block_clear(&codec->dec_vb);
-		vorbis_dsp_clear(&codec->dec_vd);
-		vorbis_comment_clear(&codec->dec_vc);
-		vorbis_info_clear(&codec->dec_vi);
-	}
-
-	free(codec);
-	return 0;
-}
+        
+  free(codec);
+  return 0;
+  }
 
 static int next_chunk(quicktime_t * file, int track)
   {
@@ -355,7 +354,7 @@ static int decode(quicktime_t *file,
   if(file->atracks[track].last_position != file->atracks[track].current_position)
     {
     if((file->atracks[track].current_position < codec->sample_buffer_start) || 
-       (file->atracks[track].current_position + samples >= codec->sample_buffer_end))
+       (file->atracks[track].current_position + samples > codec->sample_buffer_end))
       {
       /* Get the next chunk */
 
@@ -408,7 +407,7 @@ static int decode(quicktime_t *file,
         if(!decode_frame(file, track))
           break;
         }
-#if 0
+#if 1
       fprintf(stderr, "Cur: %lld, start: %lld end: %lld\n", track_map->current_position,
               codec->sample_buffer_start, codec->sample_buffer_end);
 #endif
@@ -468,18 +467,18 @@ static int decode(quicktime_t *file,
 
 
   
-  samples_copied = lqt_copy_audio(output_i,                                     // int16_t ** dst_i
-                                  output_f,                                     // float ** dst_f
-                                  (int16_t**)0,                // int16_t ** src_i
-                                  codec->sample_buffer,                 // float ** src_f
-                                  0,                                            // int dst_pos
-                                  0,                                            // int src_pos
-                                  samples,                                      // int dst_size
-                                  samples,                                      // int src_size
-                                  file->atracks[track].channels);               // int num_channels
-
+  samples_copied = lqt_copy_audio(output_i,             // int16_t ** dst_i
+                                  output_f,             // float ** dst_f
+                                  (int16_t**)0,         // int16_t ** src_i
+                                  codec->sample_buffer, // float ** src_f
+                                  0,                    // int dst_pos
+                                  0,                    // int src_pos
+                                  samples,              // int dst_size
+                                  samples,              // int src_size
+                                  file->atracks[track].channels); // int num_channels
+  
   file->atracks[track].last_position = file->atracks[track].current_position + samples_copied;
-
+  
   //  fprintf(stderr, "Last pos: %ld\n", file->atracks[track].last_position);
   
   return samples_copied;
