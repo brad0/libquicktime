@@ -550,7 +550,7 @@ static int oss_init(char *dev, int channels, int rate)
 /* ------------------------------------------------------------------------ */
 /* quicktime code                                                           */
 
-static quicktime_t *qt;
+static quicktime_t *qt = NULL;
 static int qt_hasvideo,qt_hasaudio;
 
 static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
@@ -654,6 +654,12 @@ static void qt_init(FILE *fp, char *filename)
 	exit(1);
     }
 }
+
+static void qt_cleanup()
+  {
+  if(qt)
+    quicktime_close(qt);
+  }
 
 static int qt_frame_blit(void)
 {
@@ -998,5 +1004,6 @@ int main(int argc, char *argv[])
 		    break;
 	}
     }
+    qt_cleanup();    
     return 0;
 }
