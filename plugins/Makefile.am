@@ -1,6 +1,6 @@
 # These are always here
 
-base_subdirs = audiocodec videocodec opendivx ferguson rtjpeg
+base_subdirs = audiocodec videocodec opendivx ferguson rtjpeg xanim
 
 if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
