@@ -1604,10 +1604,11 @@ int quicktime_close(quicktime_t *file)
                                                                                                                   
                 if(file->use_avi)
                 {
+#if 0
                         quicktime_atom_t junk_atom;
                         int i;
                         int64_t position = quicktime_position(file);
-                                                                                                                  
+#endif
 // Finalize last header
                         quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
                                                                                                                   
@@ -1910,6 +1911,8 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
 
   if(chunk > file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
     {
+    /* Read beyond EOF */
+    file->atracks[track].eof = 1;
     return 0;
     }
 #if 0

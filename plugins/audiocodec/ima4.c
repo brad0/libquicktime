@@ -353,11 +353,9 @@ static int decode(quicktime_t *file,
                                                                &(codec->decode_buffer),
                                                                &(codec->decode_buffer_alloc));
               if(codec->decode_buffer_size <= 0)
-                return 0;
+                break;
               codec->decode_buffer_ptr = codec->decode_buffer;
               }
-            if(!codec->decode_buffer_size)
-              break;
             
             /* Decode one frame */
 

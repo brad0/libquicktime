@@ -756,6 +756,8 @@ typedef struct
         long last_position;
 	void *codec;
 
+        int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
+
 } quicktime_audio_map_t;
 
 typedef struct

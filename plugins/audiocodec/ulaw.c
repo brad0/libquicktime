@@ -339,12 +339,10 @@ static int quicktime_decode_ulaw(quicktime_t *file,
                                                                &(codec->decode_buffer_alloc));
               
               if(codec->decode_buffer_size <= 0)
-                return 0;
+                break;
               codec->decode_buffer_ptr = codec->decode_buffer;
               }
 
-            if(!codec->decode_buffer_size)
-              break;
             
             codec->decode_sample_buffer_size = codec->decode_buffer_size / codec->decode_block_align;
             if(codec->decode_sample_buffer_size > SAMPLES_PER_BLOCK)
