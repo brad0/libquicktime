@@ -6,7 +6,7 @@ AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
 
-dnl AC_LIBTOOL_PICMODE(no)
+AC_LIBTOOL_PICMODE
 
 dnl
 dnl set GMERLIN to "true" for gmerlin compilation
@@ -19,10 +19,12 @@ dnl Gmerlin does not need static libs
 if test x$gmerlin = xtrue; then
 AC_DISABLE_STATIC
 AM_DISABLE_STATIC
+else
+AC_ENABLE_STATIC
 fi
 
 AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 AC_PROG_RANLIB
 
 AC_PROG_CC
@@ -190,23 +192,6 @@ AC_CHECK_FUNCS(gettimeofday)
 ENCORE_DIR=encore50
 DECORE_DIR=decore50
 
-dnl AC_ARG_WITH( [encore2],
-dnl [  --with-encore2          Use encore2 instead of encore50. If you don't know what 
-dnl			   this means you don't need it.],
-dnl [case "${enableval}" in
-dnl	yes) ENCORE_DIR=encore2 ;;
-dnl	no) ;;
-dnl	*) AC_MSG_ERROR(bad value ${enableval} for option) ;;
-dnl esac] )
-dnl AC_ARG_WITH( [decore2],
-dnl [  --with-decore2          Use decore2 instead of decore50. If you don't know what 
-dnl			   this means you don't need it.],
-dnl [case "${enableval}" in
-dnl	yes) DECORE_DIR=decore2 ;;
-dnl	no) ;;
-dnl	*) AC_MSG_ERROR(bad value ${enableval} for option) ;;
-dnl esac] )
-
 AH_TEMPLATE([ENCORE_INCLUDE],
             [Which encore library to use.])
 AH_TEMPLATE([DECORE_INCLUDE],
@@ -294,41 +279,49 @@ AC_SUBST(FIREWIRE_LIBS)
 AC_SUBST(FIREWIRE_CFLAGS)
 AC_SUBST(FIREWIRE_SUBDIRS)
 
-dnl VORBIS_SUBDIRS=""
-dnl VORBIS_LIBS="unknown"
+dnl
+dnl Check for libdv
+dnl
 
-dnl if test -d libvorbis-1.0rc2 && test -d libogg-1.0rc2; then
+have_libdv=false
 
-dnl AC_ARG_WITH(internal-vorbis,
-dnl [  --with-internal-vorbis  Use libogg and libvorbis from the distribution. The
-dnl                          default is to use versions installed on the system if
-dnl                          possible. ],
-dnl     [case "${withval}" in
-dnl       yes) VORBIS_LIBS="libvorbis-1.0rc2/lib/libvorbis.la libvorbis-1.0rc2/lib/libvorbisenc.la"
-dnl	 VORBIS_SUBDIRS="libogg-1.0rc2 libvorbis-1.0rc2"
-dnl	 VORBIS_CFLAGS="-Ilibvorbis-1.0rc2/include -Ilibogg-1.0rc2/include" ;;
-dnl       no) VORBIS_LIBS="unknown";;
-dnl       *) AC_MSG_ERROR(bad value ${enableval} for --disable-final) ;;
-dnl     esac],[ VORBIS_LIBS="unknown" ])
-dnl fi
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
 
-dnl if test "x$VORBIS_LIBS" = "xunknown"; then
-dnl	dnl AM_PATH_OGG
-dnl	VORBIS_LIBS=""
-dnl	AM_PATH_VORBIS([ dnl VORBIS_CFLAGS="$CPPFLAGS $VORBIS_CFLAGS"; 
-dnl			 VORBIS_LIBS="$VORBIS_LIBS $VORBISENC_LIBS" ],
-dnl  [  VORBIS_LIBS="libvorbis-1.0rc2/lib/libvorbis.la libvorbis-1.0rc2/lib/libvorbisenc.la"
-dnl    VORBIS_SUBDIRS="libogg-1.0rc2 libvorbis-1.0rc2"
-dnl    VORBIS_CFLAGS="-Ilibvorbis-1.0rc2/include -Ilibogg-1.0rc2/include" ] )
-dnl fi
+LIBS=-ldv
+CFLAGS=""
 
-dnl AC_SUBST(VORBIS_SUBDIRS)
+AC_MSG_CHECKING(for libdv with encoder)
+AC_TRY_LINK([#include <stdio.h>
+             #include <libdv/dv.h>],
+            [dv_decoder_t *decoder;
+	     unsigned char *data, **frame;
+	     int *pitches;
+             decoder = dv_decoder_new();
+	     dv_decode_full_frame( decoder, data,
+				   e_dv_color_rgb, frame,
+				   pitches );
+	     dv_encode_full_frame( frame, data, e_dv_color_yuv,
+				   0, 0, 3, 0, DV_DCT_AUTO );],
+	    [have_libdv=true])
 
-dnl AM_PATH_VORBIS checks for vorbis and does AC_SUBST for:
-dnl VORBIS_CFLAGS
-dnl VORBIS_LIBS
-dnl VORBISFILE_LIBS
-dnl VORBISENC_LIBS
+
+case $have_libdv in
+  true) dnl AC_DEFINE(HAVE_LIBDV)
+        AC_MSG_RESULT(yes)
+	LIBDV_LIBS=$LIBS;
+	LIBDV_CFLAGS=$CFLAGS;;
+  false) AC_MSG_RESULT(no); LIBDV_LIBS=""; LIBDV_CFLAGS="";;
+  * ) AC_MSG_RESULT("Somethings wrong: $have_libdv") ;;
+esac
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+AC_SUBST(LIBDV_LIBS)
+AC_SUBST(LIBDV_CFLAGS)
+
+AM_CONDITIONAL(HAVE_LIBDV, test x$have_libdv = xtrue)
 
 dnl
 dnl Check for Vorbis
