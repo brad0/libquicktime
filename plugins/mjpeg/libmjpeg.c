@@ -1096,10 +1096,12 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 	for(i = 0; i < mjpeg->fields; i++)
 	{
 		engine = mjpeg->decompressors[i];
+		pthread_mutex_lock(&engine->output_lock);
 		while	(engine->output_ready == 0)
 			pthread_cond_wait(&engine->output_cond,
 					  &engine->output_lock);
 		engine->output_ready = 0;
+		pthread_mutex_unlock(&engine->output_lock);
 	}
 
 #else
