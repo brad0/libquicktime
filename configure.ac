@@ -639,6 +639,7 @@ dnl Write all the makefiles and other stuff
 AC_OUTPUT([Makefile \
 libquicktime.spec \
 doc/Makefile \
+debian/Makefile \
 src/Makefile \
 quicktime1394/Makefile \
 include/Makefile \

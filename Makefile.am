@@ -24,6 +24,7 @@ m4data_DATA = lqt.m4
 
 
 DIST_SUBDIRS= \
+debian \
 doc \
 src \
 include \
