@@ -3,6 +3,10 @@
 #include <string.h>
 #include <dlfcn.h>
 
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -159,7 +163,7 @@ static int colormodel_get_bits(int colormodel)
  *  Get the "Price" of a colormodel conversion
  */
 
-int get_conversion_price(int in_colormodel, int out_colormodel)
+static int get_conversion_price(int in_colormodel, int out_colormodel)
   {
   int input_is_rgb  = colormodel_is_rgb(in_colormodel);
   int output_is_rgb = colormodel_is_rgb(out_colormodel);
@@ -167,6 +171,9 @@ int get_conversion_price(int in_colormodel, int out_colormodel)
   int input_is_yuv  = colormodel_is_yuv(in_colormodel);
   int output_is_yuv = colormodel_is_yuv(out_colormodel);
 
+  int input_has_alpha  = colormodel_has_alpha(in_colormodel);
+  int output_has_alpha = colormodel_has_alpha(out_colormodel);
+  
   /* Zero conversions are for free :-) */
   
   if(in_colormodel == out_colormodel)
@@ -183,18 +190,26 @@ int get_conversion_price(int in_colormodel, int out_colormodel)
     fprintf(stderr,
             "Input colorspace is neither RGB nor YUV, can't predict conversion price\n");
 #endif
-    return 5;
+    return 6;
     }
   
-  if(!output_is_rgb && !input_is_yuv)
+  if(!output_is_rgb && !output_is_yuv)
     {
 #ifndef NDEBUG
     fprintf(stderr,
             "Output colorspace is neither RGB nor YUV, can't predict conversion price\n");
 #endif
-    return 5;
+    return 6;
     }
 
+  /*
+   *  Adding or removing the alpha channel means losing information or
+   *  adding unneccesary information -> too bad
+   */
+
+  if(input_has_alpha != output_has_alpha)
+    return 5;
+  
   /*
    *  YUV <-> RGB conversion costs 4
    */
@@ -222,20 +237,20 @@ int get_conversion_price(int in_colormodel, int out_colormodel)
   return 1;
   }
 
-int lqt_get_decoder_colormodel(quicktime_t * file, int track,
-                               int * exact)
+static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
+                                              int * exact,
+                                              lqt_codec_info_t ** codec_info)
   {
   int codec_info_colormodel;
-  quicktime_codec_t * codec = (quicktime_codec_t *)(file->vtracks[track].codec);
+  quicktime_codec_t * codec =
+    (quicktime_codec_t *)(file->vtracks[track].codec);
   void * module = codec->module;
   int module_index;
   int (*get_stream_colormodel)(quicktime_t*,int, int, int *);
     
-  lqt_codec_info_t ** codec_info = lqt_video_codec_from_file(file, track);
   codec_info_colormodel = codec_info[0]->decoding_colormodel;
   module_index = codec_info[0]->module_index;
   
-  lqt_destroy_codec_info(codec_info);
     
   /* Check, if the decoder has a fixed colormodel */
   
@@ -255,6 +270,155 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track,
     return LQT_COLORMODEL_NONE;
   
   return get_stream_colormodel(file, track, module_index, exact);
+  }
+
+int lqt_get_decoder_colormodel(quicktime_t * file, int track,
+                               int * exact)
+  {
+  int ret;
+  lqt_codec_info_t ** codec_info = lqt_video_codec_from_file(file, track);
+
+  ret = lqt_get_decoder_colormodel_private(file, track, exact, codec_info);
+
+  lqt_destroy_codec_info(codec_info);
+  return ret;
+  }
+
+static int
+lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
+  {
+  int ret = LQT_COLORMODEL_NONE;
+
+  int index;
+
+  int best_conversion_price;
+  int conversion_price;
+  
+  int decoder_colormodel = LQT_COLORMODEL_NONE;
+  int decoder_colormodel_exact = 1;
+
+  decoder_colormodel = lqt_get_decoder_colormodel(file, track,
+                                                  &decoder_colormodel_exact);
+
+  /* Check, if the decoder colormodel is directly supported */
+
+  if(decoder_colormodel != LQT_COLORMODEL_NONE)
+    {
+    index = 0;
+    while(supported[index] != LQT_COLORMODEL_NONE)
+      {
+      if(decoder_colormodel == supported[index])
+        {
+        ret = supported[index];
+        break;
+        }
+      else
+        index++;
+      }
+    }
+  else
+    ret = BC_RGB888;
+  
+
+  if(ret != LQT_COLORMODEL_NONE)
+    {
+    index = 0;
+
+    best_conversion_price = 10;
+
+    while(supported[index] != LQT_COLORMODEL_NONE)
+      {
+      if(quicktime_reads_cmodel(file, supported[index], track))
+        {
+        conversion_price
+          = get_conversion_price(decoder_colormodel, supported[index]);
+        
+        if(conversion_price < best_conversion_price)
+          {
+          best_conversion_price = conversion_price;
+          ret = supported[index];
+          }
+        }
+      index++;
+      }
+    }
+  if(ret != LQT_COLORMODEL_NONE)
+    ret = BC_RGB888;
+  return ret;
+  }
+
+static int
+lqt_get_best_colormodel_encode(quicktime_t * file, int track,
+                               int * supported)
+  {
+  int index_supported;
+  int i;
+
+  int conversion_price, best_conversion_price;
+  int ret = LQT_COLORMODEL_NONE;
+
+  lqt_codec_info_t ** codec_info = lqt_video_codec_from_file(file, track);
+
+  
+  index_supported = 0;
+
+  while(supported[index_supported] != LQT_COLORMODEL_NONE)
+    {
+    for(i = 0; i < codec_info[0]->num_encoding_colormodels; i++)
+      {
+      if(codec_info[0]->encoding_colormodels[i] == supported[index_supported])
+        {
+        ret = supported[index_supported];
+        break;
+        }
+      }
+    if(ret != LQT_COLORMODEL_NONE)
+      break;
+    index_supported++;
+    }
+  
+  if(ret == LQT_COLORMODEL_NONE)
+    {
+    index_supported = 0;
+
+    best_conversion_price = 10;
+    
+    while(supported[index_supported] != LQT_COLORMODEL_NONE)
+      {
+      if(quicktime_writes_cmodel(file, supported[index_supported], track))
+        {
+        for(i = 0; i < codec_info[0]->num_encoding_colormodels; i++)
+          {
+          conversion_price =
+            get_conversion_price(codec_info[0]->encoding_colormodels[i],
+                                 supported[index_supported]);
+
+          if(conversion_price < best_conversion_price) 
+            {
+            best_conversion_price = conversion_price;
+            ret = supported[index_supported];
+            }
+          }
+        }
+      index_supported++;
+      }
+    }
+  
+  lqt_destroy_codec_info(codec_info);
+
+  if(ret == LQT_COLORMODEL_NONE)
+    ret = BC_RGB888;
+  
+  return ret;
+  }
+
+int lqt_get_best_colormodel(quicktime_t * file, int track,
+                            int * supported)
+  {
+  if(file->wr)
+    return lqt_get_best_colormodel_encode(file, track, supported);
+  else
+    return lqt_get_best_colormodel_decode(file, track, supported);
   }
 
 const char * lqt_colormodel_to_string(int colormodel)

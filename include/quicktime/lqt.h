@@ -52,6 +52,16 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track,
                                int * exact);
 
 /*
+ *   Convenience function for application developers:
+ *   It takes an array with supported colormodels
+ *   (Terminated with LQT_COLORMODEL_NONE) and returns
+ *   the best colormodel
+ *   Works for en- and decoding
+ */
+
+int lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);
+  
+/*
  *   Versions of quicktime_set_audio and quicktime_set_video,
  *   which take codec infos as arguments
  */
