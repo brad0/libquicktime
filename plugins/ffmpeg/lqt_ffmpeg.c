@@ -19,6 +19,11 @@
     
 */
 
+/* WARNING: Don't even think about adding support
+   for ffmpeg's PCM codecs because they will crash.
+   
+*/
+
 #include <ctype.h>
 #include <string.h>
 #include <quicktime/lqt.h>
