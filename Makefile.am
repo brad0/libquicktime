@@ -14,7 +14,7 @@ include \
 plugins \
 utils
 
-EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4 lqt_avcodec.m4
+EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4
 
 bin_SCRIPTS = lqt-config
 
