@@ -1,11 +1,17 @@
 # These are always here
 
-base_subdirs = dv audiocodec videocodec opendivx
+base_subdirs = audiocodec videocodec opendivx
 
 if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
 else
 jpeg_subdirs=
+endif
+
+if HAVE_LIBDV
+dv_subdirs = dv
+else
+dv_subdirs=
 endif
 
 if HAVE_LIBPNG
@@ -20,4 +26,5 @@ else
 vorbis_subdirs=
 endif
 
-SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(png_subdirs) $(vorbis_subdirs)
+SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
+	$(png_subdirs) $(vorbis_subdirs)
