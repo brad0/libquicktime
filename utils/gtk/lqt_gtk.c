@@ -345,6 +345,13 @@ static void browser_move_codec(LqtGtkCodecBrowser * cb, int pos, int new_pos)
   cb->codecs[pos] = cb->codecs[new_pos];
   cb->codecs[new_pos] = tmp_info;
 
+  /* We immediately apply this in the registry */
+
+  if(cb->type == LQT_CODEC_AUDIO)
+    lqt_reorder_audio_codecs(cb->codecs);
+  else if(cb->type == LQT_CODEC_VIDEO)
+    lqt_reorder_video_codecs(cb->codecs);
+    
   /* Enable up button */ 
   
   if(!cb->selected && new_pos)
@@ -365,7 +372,13 @@ static void browser_move_codec(LqtGtkCodecBrowser * cb, int pos, int new_pos)
   if(new_pos == cb->num_codecs - 1)
     gtk_widget_set_sensitive(cb->down_button, 0);
   
-  cb->selected = new_pos;    
+  cb->selected = new_pos;
+
+  /* The selected codec should still be visible */
+
+  if(gtk_clist_row_is_visible(GTK_CLIST(cb->list), cb->selected) !=
+     GTK_VISIBILITY_FULL)
+    gtk_clist_moveto (GTK_CLIST(cb->list), cb->selected, 0, 0.5, 0.5);
   
   }
 

@@ -25,6 +25,11 @@
 
 int lqt_get_codec_api_version() { return LQT_CODEC_API_VERSION; }
 
+/* Forward declaration */
+
+static lqt_codec_info_t *
+sort_codecs_internal(lqt_codec_info_t * original, char * names);
+
 /*
  *  Quick and dirty strdup function for the case it's not there
  */
@@ -646,6 +651,9 @@ void lqt_registry_destroy()
 
 void lqt_registry_init()
   {
+  char * audio_order = (char*)0;
+  char * video_order = (char*)0;
+  
   lqt_codec_info_t * file_codecs;
   lqt_codec_info_t * tmp_file_codecs;
 
@@ -657,7 +665,7 @@ void lqt_registry_init()
     return;
     }
   
-  file_codecs = lqt_registry_read();
+  file_codecs = lqt_registry_read(&audio_order, &video_order);
 
   /* Scan for the plugins, use cached values if possible */
   
@@ -681,11 +689,26 @@ void lqt_registry_init()
   /*
    *  Write the file again, so we can use it the next time
    */
+
+  /* Sort the codecs */
+
+  if(audio_order)
+    {
+    lqt_audio_codecs =
+      sort_codecs_internal(lqt_audio_codecs, audio_order);
+    free(audio_order);
+    }
+
+  if(video_order)
+    {
+    lqt_video_codecs =
+      sort_codecs_internal(lqt_video_codecs, video_order);
+    free(video_order);
+    }
+  
   lqt_registry_unlock();
   
   lqt_registry_write();
-
-  
   }
 
 /*
@@ -1516,6 +1539,147 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   if(info_from_module)
     destroy_codec_info(info_from_module);
   
+  }
+
+/*
+ *  Sort audio and video codecs
+ */
+
+/*
+ * This is the actual sort function: It takes the original chained list
+ * of the codecs and a string containing a comma separated list of the
+ * codecs as arguments. It returns the newly sorted list.
+ *
+ * This string will also be saved in the codec file.
+ */
+
+static lqt_codec_info_t *
+sort_codecs_internal(lqt_codec_info_t * original, char * names)
+  {
+  char * pos;
+  char * end_pos;
+  int len;
+  lqt_codec_info_t * before;
+  lqt_codec_info_t * ptr;
+  lqt_codec_info_t * start = original;
+  lqt_codec_info_t * ret = (lqt_codec_info_t*)0;
+  lqt_codec_info_t * ret_end = (lqt_codec_info_t*)0;
+  
+  pos = names;
+
+  end_pos = strchr(pos, ',');
+  if(!end_pos)
+    end_pos = pos + strlen(pos);
+
+#ifndef NDEBUG
+  fprintf(stderr, "Sorting codecs, sort string: %s\n", pos);
+#endif
+  
+  while(1)
+    {
+    /* Seek the codec in the list */
+    
+    ptr = start;
+    before = ptr;
+    
+    len = end_pos - pos;
+        
+    while(ptr)
+      {
+      if(!strncmp(pos, ptr->name, len)) /* Found the codec */
+        break;
+      before = ptr;
+      ptr = ptr->next;
+      }
+
+    if(ptr)
+      {
+      /* Remove codec from the list */
+
+      if(ptr == start)
+        start = start->next;
+      else
+        before->next = ptr->next;
+            
+      ptr->next = (lqt_codec_info_t*)0;
+
+      /* Append it to the returned list */
+
+      if(!ret)
+        {
+        ret = ptr;
+        ret_end = ret;
+        }
+      else
+        {
+        ret_end->next = ptr;
+        ret_end = ret_end->next;
+        }
+      }
+
+    /* Get the next codec name */
+
+    pos = end_pos;
+
+    if(*pos == '\0')
+      break;
+
+    pos++;
+    end_pos = strchr(pos, ',');
+    if(!end_pos)
+      end_pos = pos + strlen(pos);
+    }
+
+  /* Append the rest of the list */
+
+  if(start)
+    ret_end->next = start;
+
+  return ret;
+  }
+
+static char * create_seek_string(lqt_codec_info_t ** info)
+  {
+  int i;
+
+  int num_codecs = 0;
+  int string_length = 0;
+  char * ret;
+  
+  while(info[num_codecs])
+    {
+    string_length += strlen(info[num_codecs]->name) + 1;
+    num_codecs++;
+    }
+
+  ret = malloc(string_length);
+  *ret = '\0';
+  
+  for(i = 0; i < num_codecs; i++)
+    {
+    strcat(ret, info[i]->name);
+    if(i != num_codecs - 1)
+      strcat(ret, ",");
+    }
+  return ret;
+  }
+
+void lqt_reorder_audio_codecs(lqt_codec_info_t ** info)
+  {
+  char * seek_string = create_seek_string(info);
+  lqt_registry_lock();
+  lqt_audio_codecs = sort_codecs_internal(lqt_audio_codecs, seek_string);
+  lqt_registry_unlock();
+  free(seek_string);
+  }
+
+void lqt_reorder_video_codecs(lqt_codec_info_t ** info)
+  {
+  char * seek_string = create_seek_string(info);
+  lqt_registry_lock();
+  lqt_video_codecs = sort_codecs_internal(lqt_video_codecs, seek_string);
+  lqt_registry_unlock();
+  free(seek_string);
   }
 
 /***************************************************************

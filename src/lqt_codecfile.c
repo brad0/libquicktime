@@ -79,6 +79,11 @@ static const char * num_encoding_colormodels_key = "NumEncodingColormodels: ";
 static const char * encoding_colormodel_key =      "EncodingColormodel: ";
 static const char * decoding_colormodel_key =      "DecodingColormodel: ";
 
+/* Codec order */
+
+static const char * audio_order_key = "AudioOrder: ";
+static const char * video_order_key = "VideoOrder: ";
+
 #define READ_BUFFER_SIZE 2048
 
 #define CHECK_KEYWORD(key) (!strncmp(line, key, strlen(key)))
@@ -416,7 +421,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
   }
 
 
-lqt_codec_info_t * lqt_registry_read()
+lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   {
   FILE * input;
   char * line;
@@ -466,6 +471,25 @@ lqt_codec_info_t * lqt_registry_read()
     if(*pos == '#')
       continue;
 
+    else if(CHECK_KEYWORD(audio_order_key))
+      {
+      if(audio_order)
+        {
+        pos += strlen(audio_order_key);
+        *audio_order = __lqt_strdup(pos);
+        }
+      continue;
+      }
+    else if(CHECK_KEYWORD(video_order_key))
+      {
+      if(video_order)
+        {
+        pos += strlen(video_order_key);
+        *video_order = __lqt_strdup(pos);
+        }
+      continue;
+      }
+    
     else if(CHECK_KEYWORD(begin_codec_key))
       {
       if(!ret_end)
@@ -691,6 +715,39 @@ void lqt_registry_write()
 # It is automatically generated and should not be edited.\n\
 # If you canged it, and your libquicktime program doesn't work\n\
 # anymore, delete it, and you will get a new one\n");
+
+  /* Write the sort strings */
+
+  if(lqt_num_audio_codecs)
+    {
+    codec_info = lqt_audio_codecs;
+    
+    fprintf(output, audio_order_key);
+    for(i = 0; i < lqt_num_audio_codecs; i++)
+      {
+      fprintf(output, codec_info->name);
+      if(i == lqt_num_audio_codecs - 1)
+        fprintf(output, "\n");
+      else
+        fprintf(output, ",");
+      codec_info = codec_info->next;
+      }
+    }
+
+  if(lqt_num_video_codecs)
+    {
+    codec_info = lqt_video_codecs;
+    fprintf(output, video_order_key);
+    for(i = 0; i < lqt_num_video_codecs; i++)
+      {
+      fprintf(output, codec_info->name);
+      if(i == lqt_num_video_codecs - 1)
+        fprintf(output, "\n");
+      else
+        fprintf(output, ",");
+      codec_info = codec_info->next;
+      }
+    }
   
   codec_info = lqt_audio_codecs;
   

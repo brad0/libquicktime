@@ -209,8 +209,20 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name);
 lqt_codec_info_t ** lqt_audio_codec_from_file(quicktime_t *, int track);
 
 lqt_codec_info_t ** lqt_video_codec_from_file(quicktime_t *, int track);
-                              
 
+/*
+ *  Reorder video and audio codecs in the registry.
+ *  The argument is a NULL terminated array
+ *  of codec info structures as returned by the above functions.
+ *  You can simply call lqt_query_registry() for getting audio or video
+ *  codecs, reorder the returned array and pass this to the functions
+ *  below.
+ */
+
+void lqt_reorder_audio_codecs(lqt_codec_info_t ** codec_info);
+void lqt_reorder_video_codecs(lqt_codec_info_t ** codec_info);
+ 
+  
 /*
  *  Destroys the codec info structure returned by the functions
  *  above
@@ -218,6 +230,7 @@ lqt_codec_info_t ** lqt_video_codec_from_file(quicktime_t *, int track);
 
 void lqt_destroy_codec_info(lqt_codec_info_t ** info);
 
+  
 /******************************************************************
  * Store default values in the registry (also thread save)
  ******************************************************************/

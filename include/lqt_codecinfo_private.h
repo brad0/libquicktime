@@ -16,10 +16,11 @@ extern lqt_codec_info_t * lqt_video_codecs;
 
 /*
  *  Read codec file and return single zero terminated list of all
- *  contained cocecs
+ *  contained cocecs.
+ *  audio_order and video_order retrurn sort strings.
  */
 
-lqt_codec_info_t * lqt_registry_read();
+lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order);
 
 void lqt_register_audio_codec(lqt_codec_info_t * info);
   
