@@ -434,6 +434,7 @@ void lqt_destroy_codec_info()
 void lqt_init_codec_info()
   {
   lqt_codec_info_t * file_codecs;
+  lqt_codec_info_t * tmp_file_codecs;
 
   char * home_dir;
   char * filename_buffer = malloc(PATH_MAX + 1);
@@ -456,9 +457,24 @@ void lqt_init_codec_info()
   scan_for_plugins(PLUGIN_DIR, &file_codecs);
 
   /*
+   *  If there were codecs in the database, which have
+   *  disappeared, they must be deleted now
+   */
+  
+  while(file_codecs)
+    {
+#ifndef NDEBUG
+    fprintf(stderr, "Removing codec %s from registry\n", file_codecs->name);
+#endif
+    tmp_file_codecs = file_codecs;
+    file_codecs = file_codecs->next;
+    destroy_codec_info(tmp_file_codecs);
+    }
+  
+  /*
    *  Write the file again, so we can use it the next time
    */
-
+  
   lqt_write_codec_file(filename_buffer);
 
   free(filename_buffer);
