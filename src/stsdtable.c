@@ -124,6 +124,11 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 			table->field_dominance = quicktime_read_char(file);
 		}
 		else
+		if (quicktime_atom_is(&leaf_atom, "pasp"))
+		{
+			quicktime_read_pasp(file, &(table->pasp));
+		}
+		else
 /* 		if(quicktime_atom_is(&leaf_atom, "mjqt")) */
 /* 		{ */
 /* 			quicktime_read_mjqt(file, &(table->mjqt)); */
@@ -156,6 +161,9 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 	quicktime_write_data(file, table->compressor_name, 31);
 	quicktime_write_int16(file, table->depth);
 	quicktime_write_int16(file, table->ctab_id);
+
+	if (table->pasp.hSpacing)
+		quicktime_write_pasp(file, &(table->pasp));
 
 	if(table->fields)
 	{
@@ -221,6 +229,7 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->gamma = 0;
 	table->fields = 0;
 	table->field_dominance = 1;
+	quicktime_pasp_init(&(table->pasp));
 	quicktime_mjqt_init(&(table->mjqt));
 	quicktime_mjht_init(&(table->mjht));
 	
@@ -260,10 +269,14 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 	printf("       depth %d\n", table->depth);
 	printf("       ctab_id %d\n", table->ctab_id);
 	printf("       gamma %f\n", table->gamma);
+
+	if (table->pasp.hSpacing)
+		quicktime_pasp_dump(&(table->pasp));
+
 	if(table->fields)
 	{
-		printf("       fields %d\n", table->fields);
-		printf("       field dominance %d\n", table->field_dominance);
+		printf("     fields %d\n", table->fields);
+		printf("     field dominance %d\n", table->field_dominance);
 	}
 	if(!table->ctab_id) quicktime_ctab_dump(&(table->ctab));
 	quicktime_mjqt_dump(&(table->mjqt));

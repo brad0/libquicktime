@@ -50,6 +50,7 @@ mdia.c \
 minf.c \
 moov.c \
 mvhd.c \
+pasp.c \
 smhd.c \
 stbl.c \
 stco.c \
