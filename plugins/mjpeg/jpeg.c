@@ -282,7 +282,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_jpeg_codec_t *codec;
-	int i, jpeg_type;
+	int i, jpeg_type=0;
 
 	if(quicktime_match_32(compressor, QUICKTIME_JPEG))
 		jpeg_type = JPEG_PROGRESSIVE;

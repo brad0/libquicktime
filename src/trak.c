@@ -536,7 +536,7 @@ int quicktime_update_tables(quicktime_t *file,
 							longest sample_size)
 {
 if(file->use_avi)
-printf(__FUNCTION__ ": replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n");
+printf("%s: replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n\n", __FUNCTION__ );
 
 	if(offset + sample_size > file->mdat.atom.size) 
 		file->mdat.atom.size = offset + sample_size;

@@ -52,7 +52,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	u_size = codec->coded_h * codec->coded_w / 4;
 	v_size = codec->coded_h * codec->coded_w / 4;
 
-	vtrack->track->tkhd.track_width;
+        /*	vtrack->track->tkhd.track_width; */
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 

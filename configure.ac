@@ -51,10 +51,10 @@ AC_SUBST(ASFLAGS)
 
 dnl Build CFLAGS
 
-COMMON_CFLAGS=" -finline-functions -W -Wall -Wno-unused -Winline"
+COMMON_CFLAGS=" -finline-functions -Wall -Wno-unused -Winline"
 PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
 DEBUG_CFLAGS=" -g3"
-OPTIMIZE_CFLAGS=" -O3 -funroll-all-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2"
+OPTIMIZE_CFLAGS=" -O3 -funroll-all-loops -fomit-frame-pointer -falign-loops=2 -falign-jumps=2 -falign-functions=2"
 
 # large file support
 COMMON_FLAGS="$COMMON_FLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"

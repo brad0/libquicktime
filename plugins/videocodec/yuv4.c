@@ -48,7 +48,7 @@ static int quicktime_decode_yuv4(quicktime_t *file, unsigned char **row_pointers
 	int r, g, b;
 	int bytes_per_row = width * cmodel_calculate_pixelsize(file->color_model);
 
-	vtrack->track->tkhd.track_width;
+        /*	vtrack->track->tkhd.track_width; */
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 	switch(file->color_model)
