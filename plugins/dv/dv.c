@@ -1,7 +1,7 @@
-#include "colormodels.h"
-#include "funcprotos.h"
-#include "libdv.h"
-#include "quicktime.h"
+#include <quicktime/colormodels.h>
+#include <funcprotos.h>
+#include <libdv.h>
+#include <quicktime/quicktime.h>
 
 
 typedef struct

@@ -25,7 +25,7 @@
  *  The libdv homepage is http://libdv.sourceforge.net/.  
  */
 
-#include "colormodels.h"
+#include <quicktime/colormodels.h>
 #include "libdv.h"
 
 #include <pthread.h>

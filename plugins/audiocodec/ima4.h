@@ -1,7 +1,7 @@
 #ifndef QUICKTIME_IMA4_H
 #define QUICKTIME_IMA4_H
 
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

@@ -20,3 +20,5 @@ ima4.h \
 rawaudio.h \
 twos.h \
 ulaw.h
+
+INCLUDES = -I../../include

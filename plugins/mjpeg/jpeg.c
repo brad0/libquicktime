@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "colormodels.h"
-#include "funcprotos.h"
+#include <quicktime/colormodels.h>
+#include <funcprotos.h>
 #include "jpeg.h"
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {

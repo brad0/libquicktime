@@ -1,5 +1,5 @@
-#include "colormodels.h"
-#include "funcprotos.h"
+#include <quicktime/colormodels.h>
+#include <funcprotos.h>
 #include "yuv4.h"
 
 /* U V values are signed but Y R G B values are unsigned! */

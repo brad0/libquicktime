@@ -1,4 +1,4 @@
-#include "funcprotos.h"
+#include <funcprotos.h>
 #include "ima4.h"
 
 static int ima4_step[89] = 

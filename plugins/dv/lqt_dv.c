@@ -1,5 +1,5 @@
-#include "../../lqt.h"
-#include "../../lqt_codecapi.h"
+#include <quicktime/lqt.h>
+#include <quicktime/lqt_codecapi.h>
 #include "dv.h"
 
 /*

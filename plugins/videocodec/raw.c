@@ -1,8 +1,8 @@
-#include "colormodels.h"
-#include "funcprotos.h"
-#include "quicktime.h"
-#include "funcprotos.h"
-#include "graphics.h"
+#include <quicktime/colormodels.h>
+#include <funcprotos.h>
+#include <quicktime/quicktime.h>
+#include <funcprotos.h>
+#include <graphics.h>
 
 typedef struct
 {

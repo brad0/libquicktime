@@ -14,3 +14,4 @@ lqt_dv_la_LIBADD = libdv/libdv.la @FIREWIRE_LIBS@ @MODULE_LIBADD@
 
 noinst_HEADERS = dv.h libdv.h
 
+INCLUDES = -I../../include

@@ -26,3 +26,5 @@ v410.h \
 yuv2.h \
 yuv4.h \
 yv12.h
+
+INCLUDES = -I../../include

@@ -1,6 +1,6 @@
 /* 	Qtinfo by Elliot Lee <sopwith@redhat.com> */
 
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 static void file_info(char *filename);
 

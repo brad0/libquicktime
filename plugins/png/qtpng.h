@@ -2,7 +2,7 @@
 #define QUICKTIME_PNG_H
 
 #include <png.h>
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

@@ -1,8 +1,8 @@
 #ifndef QUICKTIME_YUV2_H
 #define QUICKTIME_YUV2_H
 
-#include "colormodels.h"
-#include "quicktime.h"
+#include <quicktime/colormodels.h>
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

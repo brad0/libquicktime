@@ -2,7 +2,7 @@
 #define QUICKTIME_ULAW_H
 
 #include <stdint.h>
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

@@ -1,7 +1,7 @@
 #ifndef QUICKTIME_RAWAUDIO_H
 #define QUICKTIME_RAWAUDIO_H
 
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

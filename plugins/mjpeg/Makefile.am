@@ -11,9 +11,10 @@ libmjpeg.c \
 lqt_mjpeg.c
 
 lqt_mjpeg_la_LDFLAGS = -avoid-version -module
-lqt_mjpeg_la_LIBADD = @JPEG_LIBS@ ../../libquicktime.la @MODULE_LIBADD@
+lqt_mjpeg_la_LIBADD = @JPEG_LIBS@ @MODULE_LIBADD@
 
 noinst_HEADERS = \
 jpeg.h \
 libmjpeg.h
 
+INCLUDES = -I../../include

@@ -1,7 +1,7 @@
 #ifndef QUICKTIME_YUV4_H
 #define QUICKTIME_YUV4_H
 
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 typedef struct
 {

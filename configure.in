@@ -1,6 +1,6 @@
-AC_INIT(quicktime.c)
+AC_INIT(src/lqt_quicktime.c)
 dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(libquicktime, 1.5.1-ap012502)
+AM_INIT_AUTOMAKE(libquicktime, 1.5.1.ap012502)
 AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST
@@ -478,14 +478,20 @@ AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 
 AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
 
-MODULE_LIBADD=../../libquicktime.la
+MODULE_LIBADD=../../src/libquicktime.la
 AC_SUBST(MODULE_LIBADD)
+
+UTIL_LIBADD=../src/libquicktime.la
+AC_SUBST(UTIL_LIBADD)
 
 dnl
 dnl LIBQUICKTIME
 dnl
 
 AC_OUTPUT([Makefile \
+src/Makefile \
+include/Makefile \
+include/quicktime/Makefile \
 plugins/Makefile \
 plugins/dv/Makefile \
 plugins/dv/libdv/Makefile \

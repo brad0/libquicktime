@@ -1,10 +1,16 @@
-#include <quicktime.h>
+#include <quicktime/quicktime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int main(int argc, char** argv)
 {
+	char *pcInputFN = argv[1];
+	char *pcOutputFN = argv[2];
+
+	quicktime_t *pxQuicktimeInput = quicktime_open( pcInputFN, 1, 0 );
+	quicktime_t *pxQuicktimeOutput = quicktime_open( pcOutputFN, 0, 1 );
+
 	if( argc != 3 )
 	{
 		printf( "usage: testqt <input file> <output file>\n"
@@ -12,18 +18,12 @@ int main(int argc, char** argv)
 				"\tfile as a raw RGB MOV.\n" );
 		exit(3);
 	}
-
-	char *pcInputFN = argv[1];
-	char *pcOutputFN = argv[2];
-
-	quicktime_t *pxQuicktimeInput = quicktime_open( pcInputFN, 1, 0 );
 	if( pxQuicktimeInput == NULL )
 	{
 		printf( "Error opening: %s\n", pcInputFN );
 		exit(1);
 	}
 
-	quicktime_t *pxQuicktimeOutput = quicktime_open( pcOutputFN, 0, 1 );
 	if( pxQuicktimeOutput == NULL )
 	{
 		printf( "Error opening: %s\n", pcOutputFN );

@@ -1,4 +1,4 @@
-#include "funcprotos.h"
+#include <funcprotos.h>
 #include "ulaw.h"
 
 /* ==================================== private for ulaw */

@@ -1,4 +1,4 @@
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
 
 
 
