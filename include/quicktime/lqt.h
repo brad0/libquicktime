@@ -4,6 +4,11 @@
 #include "quicktime.h"
 #include "lqt_codecinfo.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
 /* Call quicktime_set_parameter with our codec info */
 
 void lqt_set_parameter(quicktime_t *file, lqt_parameter_value_t * value,
@@ -46,4 +51,30 @@ int lqt_get_colormodel(int index);
 int lqt_get_decoder_colormodel(quicktime_t * file, int track,
                                int * exact);
 
+/*
+ *   Versions of quicktime_set_audio and quicktime_set_video,
+ *   which take codec infos as arguments
+ */
+
+int lqt_set_video(quicktime_t *file, int tracks, 
+                  int frame_w, int frame_h,
+                  float frame_rate,
+                  lqt_codec_info_t * info);
+
+int lqt_set_audio(quicktime_t *file, int channels,
+                  long sample_rate,  int bits,
+                  lqt_codec_info_t * codec_info);
+
+/*
+ *  Same as quicktime_decode_video but doesn't force BC_RGB888
+ */
+
+int lqt_decode_video(quicktime_t *file,
+                     unsigned char **row_pointers, int track);
+  
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+  
 #endif

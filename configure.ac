@@ -271,7 +271,7 @@ AH_TEMPLATE([HAVE_LIBRAW1394],
 AH_TEMPLATE([HAVE_LIBROM1394],
             [Define if you have librom1394 (-lrom1394).])
 AH_TEMPLATE([HAVE_LIBAVC1394],
-            [Define if you have the `avc1394' library (-lavc1394).])
+            [Define if you have the `avc1394` library (-lavc1394).])
 
 AC_MSG_CHECKING(whether to enable firewire support)
 

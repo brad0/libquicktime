@@ -1,11 +1,10 @@
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include <quicktime/quicktime.h>
-//#include <glib.h>
+#include <quicktime/lqt.h>
+#include <lqt_private.h>
+#include <funcprotos.h>
 #include <sys/stat.h>
 #include <string.h>
-
-#include <lqt_funcprotos.h>
 
 static longest get_file_length(quicktime_t *file)
 {
@@ -255,23 +254,59 @@ int quicktime_set_audio(quicktime_t *file,
 		file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t));
 		trak = quicktime_add_track(&(file->moov));
 		quicktime_trak_init_audio(file, trak, channels, sample_rate, bits, compressor);
-		quicktime_init_audio_map(&(file->atracks[0]), trak, file->wr);
+		quicktime_init_audio_map(&(file->atracks[0]), trak, file->wr,
+                                         (lqt_codec_info_t*)0);
 		file->atracks[file->total_atracks].track = trak;
 		file->atracks[file->total_atracks].channels = channels;
 		file->atracks[file->total_atracks].current_position = 0;
 		file->atracks[file->total_atracks].current_chunk = 1;
 		file->total_atracks++;
 	}
+        lqt_set_default_audio_parameters(file);
 	return 1;   /* Return the number of tracks created */
 }
 
-int quicktime_set_video(quicktime_t *file, 
-						int tracks, 
-						int frame_w, 
-						int frame_h,
-						float frame_rate,
-						char *compressor)
+int lqt_set_audio(quicktime_t *file, int channels,
+                  long sample_rate,  int bits,
+                  lqt_codec_info_t * codec_info)
 {
+         char * compressor = codec_info->fourccs[0];
+         quicktime_trak_t *trak;
+
+/* allocate an arbitrary number of tracks */
+	if(channels)
+	{
+/* Fake the bits parameter for some formats. */
+		if(quicktime_match_32(compressor, QUICKTIME_ULAW) ||
+                   quicktime_match_32(compressor, QUICKTIME_IMA4))
+                  bits = 16;
+
+		file->atracks =
+                  (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t));
+		trak = quicktime_add_track(&(file->moov));
+		quicktime_trak_init_audio(file, trak, channels,
+                                          sample_rate, bits, compressor);
+
+                quicktime_init_audio_map(&(file->atracks[0]), trak, file->wr,
+                                         codec_info);
+		file->atracks[file->total_atracks].track = trak;
+		file->atracks[file->total_atracks].channels = channels;
+		file->atracks[file->total_atracks].current_position = 0;
+		file->atracks[file->total_atracks].current_chunk = 1;
+		file->total_atracks++;
+	}
+        lqt_set_default_audio_parameters(file);
+	return 1;   /* Return the number of tracks created */
+}
+
+
+int quicktime_set_video(quicktime_t *file, 
+                        int tracks, 
+                        int frame_w, 
+                        int frame_h,
+                        float frame_rate,
+                        char *compressor)
+  {
 	int i;
 	quicktime_trak_t *trak;
 
@@ -291,14 +326,54 @@ int quicktime_set_video(quicktime_t *file,
 //printf("quicktime_set_video 2\n");
 			quicktime_trak_init_video(file, trak, frame_w, frame_h, frame_rate, compressor);
 //printf("quicktime_set_video 3\n");
-			quicktime_init_video_map(&(file->vtracks[i]), trak, file->wr);
+			quicktime_init_video_map(&(file->vtracks[i]), trak, file->wr, (lqt_codec_info_t*)0);
 //printf("quicktime_set_video 3\n");
 		}
 //printf("quicktime_set_video 4\n");
 	}
 //printf("quicktime_set_video 5\n");
+        lqt_set_default_video_parameters(file);
 	return 0;
 }
+
+
+int lqt_set_video(quicktime_t *file, 
+                  int tracks, 
+                  int frame_w, 
+                  int frame_h,
+                  float frame_rate,
+                  lqt_codec_info_t * info)
+  {
+	int i;
+        char * compressor = info->fourccs[0];
+	quicktime_trak_t *trak;
+
+	if(tracks)
+	{
+//printf("quicktime_set_video 1\n");
+		quicktime_mhvd_init_video(file, &(file->moov.mvhd), frame_rate);
+//printf("quicktime_set_video 1\n");
+		file->total_vtracks = tracks;
+//printf("quicktime_set_video 1\n");
+		file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
+//printf("quicktime_set_video 1\n");
+		for(i = 0; i < tracks; i++)
+		{
+//printf("quicktime_set_video 2\n");
+			trak = quicktime_add_track(&(file->moov));
+//printf("quicktime_set_video 2\n");
+			quicktime_trak_init_video(file, trak, frame_w, frame_h, frame_rate, compressor);
+//printf("quicktime_set_video 3\n");
+			quicktime_init_video_map(&(file->vtracks[i]), trak, file->wr, info);
+//printf("quicktime_set_video 3\n");
+		}
+//printf("quicktime_set_video 4\n");
+	}
+//printf("quicktime_set_video 5\n");
+        lqt_set_default_video_parameters(file);
+	return 0;
+}
+
 
 void quicktime_set_framerate(quicktime_t *file, float framerate)
 {
@@ -878,12 +953,15 @@ int quicktime_read_frame_end(quicktime_t *file, int track)
 	return 0;
 }
 
-int quicktime_init_video_map(quicktime_video_map_t *vtrack, quicktime_trak_t *trak, int encode)
+int quicktime_init_video_map(quicktime_video_map_t *vtrack,
+                             quicktime_trak_t *trak,
+                             int encode,
+                             lqt_codec_info_t * info)
 {
 	vtrack->track = trak;
 	vtrack->current_position = 0;
 	vtrack->current_chunk = 1;
-	quicktime_init_vcodec(vtrack, encode);
+	quicktime_init_vcodec(vtrack, encode, info);
 	return 0;
 }
 
@@ -894,13 +972,13 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
-int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *trak, int encode)
+int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *trak, int encode, lqt_codec_info_t * info)
 {
 	atrack->track = trak;
 	atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
 	atrack->current_position = 0;
 	atrack->current_chunk = 1;
-	quicktime_init_acodec(atrack, encode);
+	quicktime_init_acodec(atrack, encode, info);
 	return 0;
 }
 
@@ -976,7 +1054,7 @@ int quicktime_read_info(quicktime_t *file)
 		{
 			while(!file->moov.trak[track]->mdia.minf.is_audio)
 				track++;
-			quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track], file->wr);
+			quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track], file->wr, (lqt_codec_info_t*)0);
 		}
 
 		file->total_vtracks = quicktime_video_tracks(file);
@@ -987,7 +1065,7 @@ int quicktime_read_info(quicktime_t *file)
 			while(!file->moov.trak[track]->mdia.minf.is_video)
 				track++;
 
-			quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track], file->wr);
+			quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track], file->wr, (lqt_codec_info_t*)0);
 		}
 	}
 
@@ -1123,7 +1201,17 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 		}
 
 //printf("quicktime_open 5 %llx %llx\n", new_file->ftell_position, new_file->file_position);
-	return new_file;
+
+        if(rd)
+          {
+          /* Set default decoding parameters */
+          lqt_set_default_audio_parameters(new_file);
+          lqt_set_default_video_parameters(new_file);
+          
+          }
+        
+
+        return new_file;
 }
 
 int quicktime_close(quicktime_t *file)
@@ -1144,3 +1232,83 @@ int quicktime_close(quicktime_t *file)
 	free(file);
 	return result;
 }
+
+/*
+ *  Apply default parameters for a codec
+ */
+
+static void apply_default_parameters(quicktime_t * file,
+                                     int track,
+                                     quicktime_codec_t * codec,
+                                     lqt_codec_info_t * codec_info,
+                                     int encode)
+  {
+  int num_parameters;
+  lqt_parameter_info_t * parameter_info;
+  int j;
+  
+  if(encode)
+    {
+    num_parameters = codec_info->num_encoding_parameters;
+    parameter_info = codec_info->encoding_parameters;
+    }
+  else
+    {
+    num_parameters = codec_info->num_decoding_parameters;
+    parameter_info = codec_info->decoding_parameters;
+    }
+  
+  for(j = 0; j < num_parameters; j++)
+    {
+    switch(parameter_info[j].type)
+      {
+      case LQT_PARAMETER_INT:
+#ifndef NDEBUG
+        fprintf(stderr, "Setting Parameter %s to %d\n",
+                parameter_info[j].name,
+                parameter_info[j].val_default.val_int);
+#endif
+        codec->set_parameter(file, track, parameter_info[j].name,
+                             &(parameter_info[j].val_default.val_int));
+        break;
+      case LQT_PARAMETER_STRING:
+      case LQT_PARAMETER_STRINGLIST:
+#ifndef NDEBUG
+        fprintf(stderr, "Setting Parameter %s to %s\n",
+                parameter_info[j].name,
+                parameter_info[j].val_default.val_string);
+#endif
+        codec->set_parameter(file, track, parameter_info[j].name,
+                             &(parameter_info[j].val_default.val_string));
+        break;
+      }
+    }                      
+  }
+
+void lqt_set_default_video_parameters(quicktime_t * file)
+  {
+  int i;
+  lqt_codec_info_t ** codec_info;
+  quicktime_codec_t * codec;
+  for(i = 0; i < file->total_vtracks; i++)
+    {
+    codec = (quicktime_codec_t*)(file->vtracks[i].codec);
+    codec_info = lqt_find_video_codec_by_name(codec->codec_name);
+    apply_default_parameters(file, i, codec, *codec_info, file->wr);
+    lqt_destroy_codec_info(codec_info);
+    }
+  }
+
+void lqt_set_default_audio_parameters(quicktime_t * file)
+  {
+  int i;
+  lqt_codec_info_t ** codec_info;
+  quicktime_codec_t * codec;
+  for(i = 0; i < file->total_atracks; i++)
+    {
+    codec = (quicktime_codec_t*)(file->atracks[i].codec);
+    codec_info = lqt_find_audio_codec_by_name(codec->codec_name);
+    apply_default_parameters(file, i, codec, *codec_info, file->wr);
+    lqt_destroy_codec_info(codec_info);
+    }
+  }

@@ -1,20 +1,9 @@
 Before "real" (stable or whatever) Release:
 
 - Check, if we want another codec fuction get_best_colormodel() and
-  export this to a public quicktime_get_best_colormodel(). This would
+  export this to a public lqt_get_best_colormodel(). This would
   be possible for most codecs and enable optimized video handling in
   applications.
-
-Before binary release (prepare for having codecs as separate packages from different
-people):
-
-- Write a libquicktime-config script. This should have an option --plugin-dir, so it can
-  be used by install scripts of binary only plugins.
-
-- Write a libquicktime.m4 file with a macro AM_PATH_LIBQUICKTIME(). (will be installed in
-  /usr/share/aclocal) Everyone hijacks this from gtk :-). The macro should also define the
-  plugin directory, so it can be used for "make install" of 3rd party plugins. Here, we
-  could eventually pass the minimum library version (or a codec API version?).
 
 Library:
 
@@ -22,7 +11,6 @@ Library:
 
 - Research, how we can overload the reading and writing functions. With this, we can write
   modules for files, http, rtsp, ftp, output to a streaming server etc.
-
 
 - Write a small C program, which is installed in the $PATH and updates the plugin registry.
   This can also be called by install scripts and makefiles.

@@ -1,7 +1,7 @@
 #include <dlfcn.h>
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include <quicktime/lqt.h>
+#include <funcprotos.h>
 #include <lqt_codecinfo_private.h>
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
@@ -137,14 +137,14 @@ static int get_acodec_index(char *compressor)
  *  Original quicktime4linux function changed for dynamic loading
  */
 
-int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
+int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
+                          lqt_codec_info_t * codec_info)
   {
-  lqt_codec_info_t * codec_info;
+  lqt_codec_info_t ** codec_array = (lqt_codec_info_t**)0;
   
   lqt_init_video_codec_func_t init_codec;
   lqt_init_video_codec_func_t (*get_codec)(int);
-  
-  
+    
   void * module = (void*)0;
   
   char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
@@ -155,22 +155,25 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
   ((quicktime_codec_t*)vtrack->codec)->module = (void*)0;
   
   /* Try to find the codec */
-  
-#ifndef NDEBUG
-  fprintf(stderr, "Trying to find %s for fourcc \"%s\"...",
-          (encode ? "Encoder" : "Decoder"), compressor);
-#endif
 
-  lqt_registry_lock();
-  codec_info = lqt_find_video_codec(compressor, encode);
-  
   if(!codec_info)
     {
-    lqt_registry_unlock();
+    
 #ifndef NDEBUG
-    fprintf(stderr, "failed\n");
+    fprintf(stderr, "Trying to find %s for fourcc \"%s\"...",
+            (encode ? "Encoder" : "Decoder"), compressor);
 #endif
-    return -1;
+    
+    codec_array = lqt_find_video_codec(compressor, encode);
+  
+    if(!codec_array)
+      {
+#ifndef NDEBUG
+      fprintf(stderr, "failed\n");
+#endif
+      return -1;
+      }
+    codec_info = *codec_array;
     }
   
 #ifndef NDEBUG
@@ -186,25 +189,22 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
   
   if(!module)
     {
-    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed, %s\n", dlerror());
 #endif
+
+    if(codec_array)
+      lqt_destroy_codec_info(codec_array);
+
     return -1;
     }
 #ifndef NDEBUG
   fprintf(stderr, "Success\n");
 #endif
-
+  
   ((quicktime_codec_t*)vtrack->codec)->codec_name =
     malloc(strlen(codec_info->name)+1);
   strcpy(((quicktime_codec_t*)vtrack->codec)->codec_name, codec_info->name);
-  
-  /*
-   *  Registry is no longer needed so we unlock it here
-   */
-  
-  lqt_registry_unlock();
   
   /* Set the module */
   
@@ -220,6 +220,9 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
     {
     fprintf(stderr, "Module %s contains no function get_video_codec",
             codec_info->module_filename);
+    if(codec_array)
+      lqt_destroy_codec_info(codec_array);
+
     return -1;
     }
   
@@ -228,14 +231,17 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
   init_codec = get_codec(codec_info->module_index);
   
   init_codec(vtrack);
+  if(codec_array)
+    lqt_destroy_codec_info(codec_array);
+
   return 0;
   
   }
 
-int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
+int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
+                          lqt_codec_info_t * codec_info)
   {
-  lqt_codec_info_t * codec_info;
-  
+  lqt_codec_info_t ** codec_array = (lqt_codec_info_t**)0;
   lqt_init_audio_codec_func_t init_codec;
   lqt_init_audio_codec_func_t (*get_codec)(int);
     
@@ -249,22 +255,25 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   ((quicktime_codec_t*)(atrack->codec))->module = (void*)0;
   
   /* Try to find the codec */
-  
-#ifndef NDEBUG
-  fprintf(stderr, "Trying to find Audio %s for fourcc \"%s\"...",
-          (encode ? "Encoder" : "Decoder"), compressor);
-#endif
 
-  lqt_registry_lock();
-  codec_info = lqt_find_audio_codec(compressor, encode);
-  
   if(!codec_info)
     {
-    lqt_registry_unlock();
+    
 #ifndef NDEBUG
-    fprintf(stderr, "failed\n");
+    fprintf(stderr, "Trying to find Audio %s for fourcc \"%s\"...",
+            (encode ? "Encoder" : "Decoder"), compressor);
 #endif
-    return -1;
+    
+    codec_array = lqt_find_audio_codec(compressor, encode);
+    
+    if(!codec_array)
+      {
+#ifndef NDEBUG
+      fprintf(stderr, "failed\n");
+#endif
+      return -1;
+      }
+    codec_info = *codec_array;
     }
   
 #ifndef NDEBUG
@@ -280,10 +289,11 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   
   if(!module)
     {
-    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed, %s\n", dlerror());
 #endif
+    if(codec_array)
+      lqt_destroy_codec_info(codec_array);
     return -1;
     }
 #ifndef NDEBUG
@@ -293,12 +303,6 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   ((quicktime_codec_t*)atrack->codec)->codec_name = malloc(strlen(codec_info->name)+1);
   strcpy(((quicktime_codec_t*)atrack->codec)->codec_name, codec_info->name);
     
-  /*
-   *  Registry is no longer needed so we unlock it here
-   */
-  
-  lqt_registry_unlock();
-  
   /* Set the module */
   
   ((quicktime_codec_t*)((quicktime_codec_t*)atrack->codec))->module = module;
@@ -313,6 +317,8 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
     {
     fprintf(stderr, "Module %s contains no function get_audio_codec",
             codec_info->module_filename);
+    if(codec_array)
+      lqt_destroy_codec_info(codec_array);
     return -1;
     }
   
@@ -321,6 +327,9 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   init_codec = get_codec(codec_info->module_index);
   
   init_codec(atrack);
+
+  if(codec_array)
+    lqt_destroy_codec_info(codec_array);
   return 0;
   }
 
@@ -390,6 +399,35 @@ int quicktime_decode_video(quicktime_t *file,
 // Fake scaling parameters
 	file->do_scaling = 0;
 	file->color_model = BC_RGB888;
+	file->in_x = 0;
+	file->in_y = 0;
+	file->in_w = track_width;
+	file->in_h = track_height;
+	file->out_w = track_width;
+	file->out_h = track_height;
+
+//printf("quicktime_decode_video 1\n");
+	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
+	file->vtracks[track].current_position++;
+//printf("quicktime_decode_video 2\n");
+	return result;
+}
+
+/*
+ *  Same as quicktime_decode_video but doesn't force BC_RGB888
+ */
+
+int lqt_decode_video(quicktime_t *file,
+                     unsigned char **row_pointers, int track)
+{
+	int result;
+	quicktime_trak_t *trak = file->vtracks[track].track;
+	int track_height = trak->tkhd.track_height;
+	int track_width = trak->tkhd.track_width;
+
+//printf("quicktime_decode_video 1\n");
+// Fake scaling parameters
+	file->do_scaling = 0;
 	file->in_x = 0;
 	file->in_y = 0;
 	file->in_w = track_width;

@@ -137,6 +137,30 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
   free(ptr);
   }
 
+static void copy_parameter_value(lqt_parameter_value_t * dst,
+                                 const lqt_parameter_value_t * src,
+                                 lqt_parameter_type_t type)
+  {
+  switch(type)
+    {
+    case LQT_PARAMETER_INT:
+      dst->val_int = src->val_int;
+      break;
+    case LQT_PARAMETER_STRING:
+    case LQT_PARAMETER_STRINGLIST: /* String with options */
+
+      if(dst->val_string)
+        free(dst->val_string);
+
+      if(src->val_string)
+        dst->val_string = __lqt_strdup(src->val_string);
+      else
+        dst->val_string = (char*)0;
+      break;
+    }
+
+  }
+
 static void
 copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * info)
   {
@@ -154,18 +178,10 @@ copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * inf
     case LQT_PARAMETER_INT:
       ret->val_min = info->val_min;
       ret->val_max = info->val_max;
-      ret->val_default.val_int = info->val_default.val_int;
       break;
     case LQT_PARAMETER_STRING:
-      if(info->val_default.val_string)
-        ret->val_default.val_string =
-          __lqt_strdup(info->val_default.val_string);
       break;
     case LQT_PARAMETER_STRINGLIST: /* String with options */
-      if(info->val_default.val_string)
-        ret->val_default.val_string =
-          __lqt_strdup(info->val_default.val_string);
-
       ret->num_stringlist_options = info->num_stringlist_options;
       ret->stringlist_options = calloc(ret->num_stringlist_options,
                                        sizeof(char*));
@@ -176,6 +192,11 @@ copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * inf
 
       break;
     }
+
+  copy_parameter_value(&(ret->val_default),
+                       &(info->val_default),
+                       info->type);
+
   }
 
 /*
@@ -1036,56 +1057,83 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
  *   This returns a pointer to the codec info or NULL if there is none.
  */
 
-lqt_codec_info_t * lqt_find_audio_codec(char * fourcc, int encode)
+lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
   {
   int j;
-  lqt_codec_info_t * ret;
-  if(!lqt_audio_codecs)
-    lqt_registry_init();
+  lqt_codec_info_t * tmp_ptr = (lqt_codec_info_t*)0;
+  lqt_codec_info_t * ptr;
 
-  ret = lqt_audio_codecs;
+  lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
   
-  while(ret)
+  lqt_registry_lock();
+  
+  ptr = lqt_audio_codecs;
+  
+  while(ptr)
     {
-    for(j = 0; j < ret->num_fourccs; j++)
+    for(j = 0; j < ptr->num_fourccs; j++)
       {
-      if(MATCH_FOURCC(ret->fourccs[j], fourcc))
+      if(MATCH_FOURCC(ptr->fourccs[j], fourcc))
         {
-        if((encode) & (ret->direction != LQT_DIRECTION_DECODE))
-          return ret;
-        else if(ret->direction != LQT_DIRECTION_ENCODE)
-          return ret;
+        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (ptr->direction != LQT_DIRECTION_ENCODE))
+          {
+          tmp_ptr = ptr;
+          break;
+          }
         }
       }
-    ret = ret->next;
+    if(tmp_ptr)
+      break;
+    ptr = ptr->next;
     }
-  return (lqt_codec_info_t*)0;
+  if(tmp_ptr)
+    {
+    ret = calloc(2, sizeof(lqt_codec_info_t*));
+    *ret = copy_codec_info(tmp_ptr);
+    }
+  lqt_registry_unlock();
+  return ret;
   }
 
-lqt_codec_info_t * lqt_find_video_codec(char * fourcc, int encode)
+lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
   {
   int j;
-  lqt_codec_info_t * ret;
-  if(!lqt_video_codecs)
-    lqt_registry_init();
+  lqt_codec_info_t * tmp_ptr = (lqt_codec_info_t*)0;
+  lqt_codec_info_t * ptr;
 
-  ret = lqt_video_codecs;
+  lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
   
-  while(ret)
+  lqt_registry_lock();
+  
+  ptr = lqt_video_codecs;
+  
+  while(ptr)
     {
-    for(j = 0; j < ret->num_fourccs; j++)
+    for(j = 0; j < ptr->num_fourccs; j++)
       {
-      if(MATCH_FOURCC(ret->fourccs[j], fourcc))
+      if(MATCH_FOURCC(ptr->fourccs[j], fourcc))
         {
-        if((encode) & (ret->direction != LQT_DIRECTION_DECODE))
-          return ret;
-        else if(ret->direction != LQT_DIRECTION_ENCODE)
-          return ret;
+        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (ptr->direction != LQT_DIRECTION_ENCODE))
+          {
+          tmp_ptr = ptr;
+          break;
+          }
         }
       }
-    ret = ret->next;
+    if(tmp_ptr)
+      break;
+    ptr = ptr->next;
     }
-  return (lqt_codec_info_t*)0;
+  if(tmp_ptr)
+    {
+    ret = calloc(2, sizeof(lqt_codec_info_t*));
+    *ret = copy_codec_info(tmp_ptr);
+    }
+  lqt_registry_unlock();
+
+  return ret;
   }
 
 /*
@@ -1179,6 +1227,16 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
       info = info->next;
     }
   lqt_registry_unlock();
+
+#ifndef NDEBUG
+  if(ret)
+    fprintf(stderr, "lqt_find_audio_codec_by_name(%s) success\n",
+            name);
+  else
+    fprintf(stderr, "lqt_find_audio_codec_by_name(%s) failed\n",
+            name);
+#endif
+
   return ret;
   }
 
@@ -1187,7 +1245,7 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
   const lqt_codec_info_t * info;
   int i;
   lqt_codec_info_t ** ret = (lqt_codec_info_t**)0;
-    
+  
   lqt_registry_lock();
 
   info = lqt_get_video_codec_info(0);
@@ -1204,6 +1262,16 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
       info = info->next;
     }
   lqt_registry_unlock();
+
+#ifndef NDEBUG
+  if(ret)
+    fprintf(stderr, "lqt_find_video_codec_by_name(%s) success\n",
+            name);
+  else
+    fprintf(stderr, "lqt_find_video_codec_by_name(%s) failed\n",
+            name);
+#endif
+
   return ret;
   }
 
@@ -1346,7 +1414,101 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
   return;
   }
 
+/*
+ *  I don't want to depend on one of the 1000s of MIN MAX macros out
+ *  there
+ */
 
+#define __LQT_MIN(a, b) ((a<b)?a:b)
+
+/*
+ *  Load the module and restore default parameters.
+ *  Parameters are only stored in the return value,
+ *  NOT in the registry
+ */
+
+void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
+                                    int encode, int decode)
+  {
+  lqt_codec_info_t * info_from_module;
+  lqt_codec_info_static_t * (*get_codec_info)(int);
+  void * module;
+
+  int i, imax;
+  
+  module = dlopen(codec_info->module_filename, RTLD_NOW);
+  if(!module)
+    return;
+  
+  get_codec_info = (lqt_codec_info_static_t*(*)(int))(dlsym(module, "get_codec_info"));
+  if(!get_codec_info)
+    {
+    fprintf(stderr, "Symbol %s not found in %s\n",
+            "get_codec_info", codec_info->module_filename);
+    return;
+    }
+  
+  info_from_module = lqt_create_codec_info(get_codec_info(codec_info->module_index));
+  
+  if(!info_from_module)
+    {
+    fprintf(stderr, "Couldn't get codec info for %s from_module %s\n",
+            codec_info->long_name, codec_info->module_filename);
+    return;
+    }
+
+  if(encode)
+    {
+    imax = __LQT_MIN(info_from_module->num_encoding_parameters,
+                     codec_info->num_encoding_parameters);
+    
+    for(i = 0; i < imax; i++)
+      {
+      /* Small check prevents evil bugs in ill conditioned applications */
+      
+      if(!strcmp(codec_info->encoding_parameters[i].name, 
+                 info_from_module->encoding_parameters[i].name))
+        {
+        copy_parameter_value(&(codec_info->encoding_parameters[i].val_default),
+                             &(info_from_module->encoding_parameters[i].val_default),
+                             codec_info->encoding_parameters[i].type);
+#ifndef NDEBUG
+        fprintf(stderr, "Setting encoding parameter %s\n",
+                codec_info->encoding_parameters[i].name);
+#endif
+
+        }
+      }
+    }
+  
+  if(decode)
+    {
+    imax = __LQT_MIN(info_from_module->num_decoding_parameters,
+                     codec_info->num_decoding_parameters);
+    
+    for(i = 0; i < imax; i++)
+      {
+      if(!strcmp(codec_info->decoding_parameters[i].name, 
+                 info_from_module->decoding_parameters[i].name))
+        {
+        copy_parameter_value(&(codec_info->decoding_parameters[i].val_default),
+                             &(info_from_module->decoding_parameters[i].val_default),
+                             codec_info->encoding_parameters[i].type);
+#ifndef NDEBUG
+        fprintf(stderr, "Setting decoding parameter %s\n",
+                codec_info->decoding_parameters[i].name);
+#endif
+
+        }
+      }
+    }
+
+  if(module)
+    dlclose(module);
+  if(info_from_module)
+    destroy_codec_info(info_from_module);
+  
+  }
 
 /***************************************************************
  * This will hopefully make the destruction for dynamic loading

@@ -1,10 +1,16 @@
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+/*
+ *  Widget for one parameter
+ */
 
 typedef struct
   {
   GtkWidget * label;
-  
   GtkWidget * widget;
-  
   GtkObject * adjustment;
 
   GtkWidget * menu;
@@ -19,8 +25,7 @@ typedef struct
 LqtGtkParameterWidget *
 lqtgtk_create_parameter_widget(lqt_parameter_info_t * info);
 
-void
-lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget*);
+void lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget*);
 
 
 void lqtgtk_set_parameter_value(LqtGtkParameterWidget * w,
@@ -28,6 +33,10 @@ void lqtgtk_set_parameter_value(LqtGtkParameterWidget * w,
 
 void lqtgtk_get_parameter_value(LqtGtkParameterWidget * w,
                                 lqt_parameter_value_t * value);
+
+/*
+ *  Widget for all parameters of one codec
+ */
 
 typedef struct
   {
@@ -45,6 +54,10 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
 
 void lqtgtk_destroy_codec_config_widget(LqtGtkCodecConfigWidget *);
 
+/*
+ *  Same as above but a complete window with buttons
+ */
+
 typedef struct
   {
   lqt_codec_info_t * codec_info;
@@ -58,7 +71,8 @@ typedef struct
   GtkWidget * window;
   GtkWidget * apply_button;
   GtkWidget * close_button;
-
+  GtkWidget * restore_button;
+  
   GtkWidget * buttonbox;
   GtkWidget * mainbox;
   GtkWidget * hbox;
@@ -76,6 +90,10 @@ void lqtgtk_codec_config_window_run(LqtGtkCodecConfigWindow *w);
 
 void lqtgtk_codec_config_window_apply(LqtGtkCodecConfigWindow *w);
 
+/*
+ *  Widget, which displays all codec informations
+ */
+ 
 typedef struct
   {
   GtkWidget * label_table;
@@ -108,13 +126,17 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t *);
 
 void lqtgtk_destroy_codec_info_widget(LqtGtkCodecInfoWidget *);
 
+/*
+ *  Same as above, but a complete window
+ */
+
 typedef struct
   {
   LqtGtkCodecInfoWidget * info_widget;
   GtkWidget * close_button;
   GtkWidget * window;
   GtkWidget * mainbox;
-  }LqtGtkCodecInfoWindow;
+  } LqtGtkCodecInfoWindow;
 
 LqtGtkCodecInfoWindow *
 lqtgtk_create_codec_info_window(const lqt_codec_info_t *);
@@ -125,6 +147,9 @@ lqtgtk_destroy_codec_info_window(LqtGtkCodecInfoWindow *);
 void
 lqtgtk_codec_info_window_run(LqtGtkCodecInfoWindow *);
 
+/*
+ *  Codec browser
+ */
 
 typedef struct
   {
@@ -157,3 +182,48 @@ void lqtgtk_destroy_codec_browser(LqtGtkCodecBrowser * );
 
 void lqtgtk_codec_browser_update(LqtGtkCodecBrowser * b);
 
+/*
+ *  Stuff for selecting encoders. This makes an option menu with the
+ *  codecs as well as functional "info" and "options" buttons 
+ */
+
+typedef struct
+  {
+  GtkWidget * optionmenu;
+  GtkWidget * info_button;
+  GtkWidget * parameters_button;
+
+  lqt_codec_info_t * current_encoder;
+  
+  /* Private members */
+
+  lqt_codec_type type;
+  
+  lqt_codec_info_t ** encoders;
+
+  int selected;
+
+  int num_menu_items;
+  int num_encoders;
+  GtkWidget * menu;
+  GtkWidget ** menu_items;
+  
+  } LqtGtkEncoderWidget;
+
+LqtGtkEncoderWidget * lqtgtk_create_encoder_widget(lqt_codec_type);
+void lqtgtk_destroy_encoder_widget(LqtGtkEncoderWidget *);
+
+/* Sync the widget with the registry */
+
+void lqtgtk_encoder_widget_update(LqtGtkEncoderWidget * ew);
+
+/* Set and get the name of the current encoder */
+  
+const char * lqtgtk_encoder_widget_get_encoder(LqtGtkEncoderWidget * ew);
+
+void lqtgtk_encoder_widget_set_encoder(LqtGtkEncoderWidget * ew,
+                                       const char * name);
+  
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

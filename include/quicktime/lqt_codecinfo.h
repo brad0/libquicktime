@@ -8,6 +8,11 @@
 #ifndef _LQT_CODEC_INFO_H_
 #define _LQT_CODEC_INFO_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
 /*
  *  Parameter types:
  *  Right now, only int is present, but the structure itself
@@ -37,13 +42,14 @@ typedef union
 
 typedef struct
   {
-  char * name;         /* Parameter name (to be passed to quicktime_set_parameter() ) */
-  char * real_name;    /* Other name (for making dialogs)                             */
+  /* Parameter name (to be passed to quicktime_set_parameter() ) */
+  char * name;
+  char * real_name; /* Other name (for making dialogs) */
   
   lqt_parameter_type_t type;
-    
+  
   lqt_parameter_value_t val_default;
-
+  
   /*
    *   Minimum and maximum values:
    *   These are only valid for numeric types and if val_min < val_max
@@ -221,12 +227,23 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
                                const char * parameter_name,
                                lqt_parameter_value_t * val);
 
+/*****************************************************************
+ * Restore codec parameters from the module
+ *****************************************************************/
 
+void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
+                                    int encode, int decode);
+    
+                                      
 /*
  *  Dump codec info, only for debugging + testing
  */
 
 void lqt_dump_codec_info(const lqt_codec_info_t * info);
-  
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 
 #endif /* _LQT_CODEC_INFO_H_ */

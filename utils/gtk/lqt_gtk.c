@@ -68,6 +68,52 @@ static void parameter_widget_apply(LqtGtkParameterWidget * w)
   
   }
 
+
+static void parameter_widget_update(LqtGtkParameterWidget * pw)
+  {
+  int i;
+  switch(pw->parameter_info->type)
+    {
+    case LQT_PARAMETER_INT:
+      fprintf(stderr, "Parameter: %s: %d\n", pw->parameter_info->name,
+              pw->parameter_info->val_default.val_int);
+      /* Boolean */
+      if((pw->parameter_info->val_min == 0) && (pw->parameter_info->val_max == 1))
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pw->widget),
+                                     pw->parameter_info->val_default.val_int);
+      /* Integer with limits -> slider */
+      else if(pw->parameter_info->val_min < pw->parameter_info->val_max)
+        gtk_adjustment_set_value(GTK_ADJUSTMENT(pw->adjustment),
+                                 pw->parameter_info->val_default.val_int);
+      /* Spinbutton */
+      else
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(pw->widget),
+                                  pw->parameter_info->val_default.val_int);
+      break;
+    case LQT_PARAMETER_STRING:
+      fprintf(stderr, "Parameter: %s: %s\n", pw->parameter_info->name,
+              pw->parameter_info->val_default.val_string);
+      gtk_entry_set_text(GTK_ENTRY(pw->widget),
+                         pw->parameter_info->val_default.val_string);
+      break;
+    case LQT_PARAMETER_STRINGLIST:    /* String with options */
+      fprintf(stderr, "Parameter: %s: %s\n", pw->parameter_info->name,
+              pw->parameter_info->val_default.val_string);
+
+      for(i = 0; i < pw->parameter_info->num_stringlist_options; i++)
+        {
+        if(!strcmp(pw->parameter_info->stringlist_options[i],
+                   pw->parameter_info->val_default.val_string))
+          {
+          gtk_option_menu_set_history(GTK_OPTION_MENU(pw->widget),
+                                      i);
+          break;
+          }
+        break;
+        }
+    }
+  }
+
 LqtGtkParameterWidget *
 lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
   {
@@ -85,8 +131,6 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
       if((info->val_min == 0) && (info->val_max == 1))
         {
         ret->widget = gtk_check_button_new_with_label(info->real_name);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ret->widget),
-                                     info->val_default.val_int);
         }
       /* Integer with limits -> slider */
       else if(info->val_min < info->val_max)
@@ -103,8 +147,6 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
                                 GTK_POS_LEFT);
         
         gtk_scale_set_digits(GTK_SCALE(ret->widget), 0);
-        gtk_adjustment_set_value(GTK_ADJUSTMENT(ret->adjustment),
-                                 info->val_default.val_int);
         }
       /* Spinbutton */
       else
@@ -119,15 +161,11 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
         ret->widget = gtk_spin_button_new(GTK_ADJUSTMENT(ret->adjustment),
                                           0.0,
                                           0);
-        gtk_spin_button_set_value(GTK_SPIN_BUTTON(ret->widget),
-                                  info->val_default.val_int);
         }
       break;
     case LQT_PARAMETER_STRING:
       ret->label = gtk_label_new(info->real_name);
       ret->widget = gtk_entry_new();
-      gtk_entry_set_text(GTK_ENTRY(ret->widget),
-                         info->val_default.val_string);
       break;
     case LQT_PARAMETER_STRINGLIST:    /* String with options */
       ret->selected = 0;
@@ -141,10 +179,6 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
         {
         ret->menuitems[i] =
           gtk_menu_item_new_with_label(info->stringlist_options[i]);
-
-        if(!strcmp(info->stringlist_options[i],
-                   info->val_default.val_string))
-          item_index = i;
         
         gtk_signal_connect(GTK_OBJECT(ret->menuitems[i]),
                            "activate",
@@ -157,17 +191,16 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
 
       ret->widget = gtk_option_menu_new();
       gtk_option_menu_set_menu(GTK_OPTION_MENU(ret->widget), ret->menu);
-      gtk_option_menu_set_history(GTK_OPTION_MENU(ret->widget),
-                                  item_index);
       break;
     }
 
   gtk_widget_set_usize(ret->widget, 100, ret->widget->requisition.height);
+
+  parameter_widget_update(ret);
+
   gtk_widget_show(ret->widget);
   if(ret->label)
-    {
     gtk_widget_show(ret->label);
-    }
   return ret;
   }
 
@@ -238,6 +271,20 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
 /* 
  * 
  */
+
+void codec_config_widget_apply(LqtGtkCodecConfigWidget * ccw)
+  {
+  int i;
+  for(i = 0; i < ccw->num_parameters; i++)
+    parameter_widget_apply(ccw->parameter_widgets[i]);
+  }
+
+void codec_config_widget_update(LqtGtkCodecConfigWidget * ccw)
+  {
+  int i;
+  for(i = 0; i < ccw->num_parameters; i++)
+    parameter_widget_update(ccw->parameter_widgets[i]);
+  }
 
 void lqtgtk_destroy_codec_config_widget(LqtGtkCodecConfigWidget * w)
   {
@@ -444,6 +491,8 @@ void lqtgtk_destroy_codec_browser(LqtGtkCodecBrowser * b)
 
 static void codec_config_window_button_callback(GtkWidget * w, gpointer data)
   {
+  int encode, decode;
+  
   LqtGtkCodecConfigWindow * ccw = (LqtGtkCodecConfigWindow *)data;
   if(w == ccw->apply_button)
     {
@@ -453,6 +502,29 @@ static void codec_config_window_button_callback(GtkWidget * w, gpointer data)
     {
     gtk_widget_hide(ccw->window);
     gtk_main_quit();
+    }
+  if(w == ccw->restore_button)
+    {
+    encode = (ccw->encode_widget) ? 1 : 0;
+    decode = (ccw->decode_widget) ? 1 : 0;
+
+    /*    fprintf(stderr, "Restoring parameters %d %d\n", encode, decode); */
+    
+    lqt_restore_default_parameters(ccw->codec_info,
+                                   encode, decode);
+
+    if(encode)
+      {
+      /*      fprintf(stderr, "Updating encoding parameters\n"); */
+      codec_config_widget_update(ccw->encode_widget);
+      }
+    if(decode)
+      {
+      /*      fprintf(stderr, "Updating decoding parameters\n"); */
+      codec_config_widget_update(ccw->decode_widget);
+      }
+      
+    
     }
   }
 
@@ -506,6 +578,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
   
   ret->apply_button = gtk_button_new_with_label("Apply");
   ret->close_button = gtk_button_new_with_label("Close");
+  ret->restore_button = gtk_button_new_with_label("Restore Defaults");
 
   gtk_signal_connect(GTK_OBJECT(ret->apply_button),
                      "clicked",
@@ -517,31 +590,35 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
                      GTK_SIGNAL_FUNC(codec_config_window_button_callback),
                      (gpointer)ret);
 
+  gtk_signal_connect(GTK_OBJECT(ret->restore_button),
+                     "clicked",
+                     GTK_SIGNAL_FUNC(codec_config_window_button_callback),
+                     (gpointer)ret);
+
   GTK_WIDGET_SET_FLAGS (ret->apply_button, GTK_CAN_DEFAULT);
   GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
+  GTK_WIDGET_SET_FLAGS (ret->restore_button, GTK_CAN_DEFAULT);
 
   gtk_widget_show(ret->apply_button);
   gtk_widget_show(ret->close_button);
+  gtk_widget_show(ret->restore_button);
 
   ret->buttonbox = gtk_hbutton_box_new();
   ret->mainbox = gtk_vbox_new(0, 5);
   gtk_container_set_border_width(GTK_CONTAINER(ret->mainbox), 10);
 
   if(encode && decode)
-    {
     gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->hbox);
-    }
   else if(encode)
     gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox),
                                 ret->encode_widget->widget);
   else if(decode)
     gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox),
                                 ret->decode_widget->widget);
-  
-
-  
+    
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->apply_button);
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->close_button);
+  gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->restore_button);
 
   gtk_widget_show(ret->buttonbox);
   gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->buttonbox);
@@ -722,16 +799,19 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
 
   ret->table = gtk_table_new(3, 2, 0);
 
-  gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->label_table, 0, 2, 0, 1);
+  gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->label_table,
+                            0, 2, 0, 1);
 
   if(info->type == LQT_CODEC_VIDEO)
     {
-    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame, 0, 1, 1, 2);
-    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame, 1, 2, 1, 2);
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
+                              0, 1, 1, 2);
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
+                              1, 2, 1, 2);
     }
   else
-    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame, 0, 2, 1, 2);
-    
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
+                              0, 2, 1, 2);
   gtk_widget_show(ret->table);
   ret->widget = ret->table;
   return ret;
@@ -756,6 +836,7 @@ lqtgtk_create_codec_info_window(const lqt_codec_info_t *info)
   ret->info_widget = lqtgtk_create_codec_info_widget(info);
   ret->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(ret->window), info->long_name);
+  gtk_window_set_modal(GTK_WINDOW(ret->window), TRUE);
 
   ret->mainbox = gtk_vbox_new(0, 10);
 
@@ -767,7 +848,6 @@ lqtgtk_create_codec_info_window(const lqt_codec_info_t *info)
                      (gpointer)ret);
     
   gtk_widget_show(ret->close_button);
-  
   
   gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->info_widget->widget);
   gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->close_button);
@@ -793,3 +873,192 @@ lqtgtk_codec_info_window_run(LqtGtkCodecInfoWindow * w)
   gtk_widget_show(w->window);
   }
 
+/*
+ *   LqtGtkEncoderWidget
+ */
+
+static void
+encoder_widget_button_callback(GtkWidget * w, gpointer data)
+  {
+  LqtGtkEncoderWidget * ew = (LqtGtkEncoderWidget*)data;
+  LqtGtkCodecInfoWindow * iw;
+  LqtGtkCodecConfigWindow * cw;
+  if(w == ew->info_button)
+    {
+    iw = lqtgtk_create_codec_info_window(ew->encoders[ew->selected]);
+    lqtgtk_codec_info_window_run(iw);
+    }
+  else if(w == ew->parameters_button)
+    {
+    cw = lqtgtk_create_codec_config_window(ew->encoders[ew->selected], 1, 0);
+    lqtgtk_codec_config_window_run(cw);
+    }
+  }
+
+LqtGtkEncoderWidget *
+lqtgtk_create_encoder_widget(lqt_codec_type type)
+  {
+  LqtGtkEncoderWidget * ret = calloc(1, sizeof(LqtGtkEncoderWidget));
+  ret->type = type;
+  ret->info_button = gtk_button_new_with_label("Info...");
+  ret->parameters_button = gtk_button_new_with_label("Parameters...");
+
+  gtk_signal_connect(GTK_OBJECT(ret->info_button), "clicked",
+                     GTK_SIGNAL_FUNC(encoder_widget_button_callback),
+                     (gpointer)ret);
+  gtk_signal_connect(GTK_OBJECT(ret->parameters_button), "clicked",
+                     GTK_SIGNAL_FUNC(encoder_widget_button_callback),
+                     (gpointer)ret);
+    
+  gtk_widget_show(ret->info_button);
+  gtk_widget_show(ret->parameters_button);
+
+  ret->optionmenu = gtk_option_menu_new();
+  
+  ret->menu = gtk_menu_new();
+  gtk_widget_show(ret->menu);
+  
+  gtk_option_menu_set_menu(GTK_OPTION_MENU(ret->optionmenu), ret->menu);
+  gtk_widget_show(ret->optionmenu);
+  /*  gtk_widget_set_usize(ret->optionmenu, 100, ret->optionmenu->requisition.height); */
+  
+  return ret;
+  }
+
+void lqtgtk_destroy_encoder_widget(LqtGtkEncoderWidget * ew)
+  {
+  if(ew->encoders)
+    lqt_destroy_codec_info(ew->encoders);
+  }
+
+static void encoder_widget_update_selected(LqtGtkEncoderWidget * ew)
+  {
+  gtk_option_menu_set_history(GTK_OPTION_MENU(ew->optionmenu), ew->selected);
+  ew->current_encoder = ew->encoders[ew->selected];
+  if(ew->current_encoder->num_encoding_parameters)
+    gtk_widget_set_sensitive(ew->parameters_button, 1);
+  else
+    gtk_widget_set_sensitive(ew->parameters_button, 0);
+  }
+
+static void encoder_widget_menu_callback(GtkWidget * w, gpointer data)
+  {
+  int i;
+  
+  LqtGtkEncoderWidget * ew = (LqtGtkEncoderWidget*)data;
+  
+  for(i = 0; i < ew->num_encoders; i++)
+    {
+    if(w == ew->menu_items[i])
+      {
+      ew->selected = i;
+      encoder_widget_update_selected(ew);
+      }
+    }
+  
+  }
+
+void lqtgtk_encoder_widget_update(LqtGtkEncoderWidget * ew)
+  {
+  GtkWidget ** new_items;
+  int i;
+
+  if(ew->encoders)
+    lqt_destroy_codec_info(ew->encoders);
+    
+  if(ew->type == LQT_CODEC_AUDIO)
+    ew->encoders = lqt_query_registry(1, 0, 1, 0);
+  else
+    ew->encoders = lqt_query_registry(0, 1, 1, 0);
+
+  /* Count the codecs */
+  ew->num_encoders = 0;
+    
+  while(1)
+    {
+    if(!(ew->encoders[ew->num_encoders]))
+      break;
+    else
+      ew->num_encoders++;
+    }
+
+  /* Create new menu items */
+  
+  if(ew->num_menu_items < ew->num_encoders)
+    {
+    new_items = calloc(1, ew->num_encoders * sizeof(GtkWidget*));
+
+    /* Copy old items */
+
+    if(ew->menu_items)
+      {
+      for(i = 0; i < ew->num_menu_items; i++)
+        new_items[i] = ew->menu_items[i];
+      free(ew->menu_items);
+      }
+    ew->menu_items = new_items;
+        
+    /* Create new items */
+    
+    for(i = ew->num_menu_items; i < ew->num_encoders; i++)
+      {
+      ew->menu_items[i] = gtk_menu_item_new_with_label(" ");
+      gtk_signal_connect(GTK_OBJECT(ew->menu_items[i]),
+                         "activate",
+                         encoder_widget_menu_callback,
+                         (gpointer)ew);
+      gtk_menu_append(GTK_MENU(ew->menu), ew->menu_items[i]);
+      }
+    
+    ew->num_menu_items = ew->num_encoders;
+    }
+
+  /* Update menu labels and show all active items */
+
+  for(i = 0; i < ew->num_encoders; i++)
+    {
+    if(GTK_BIN(ew->menu_items[i])->child)
+      {
+      gtk_label_set_text(GTK_LABEL(GTK_BIN(ew->menu_items[i])->child),
+                         ew->encoders[i]->long_name);
+      }
+    else
+      {
+      gtk_label_set_text(GTK_LABEL(GTK_OPTION_MENU(ew->optionmenu)->button.child),
+                         ew->encoders[i]->long_name);
+      
+      }
+    gtk_widget_show(ew->menu_items[i]);
+    }
+
+  /* Hide other items */
+
+  for(i = ew->num_encoders; i < ew->num_menu_items; i++)
+    gtk_widget_hide(ew->menu_items[i]);
+
+  if(ew->selected >= ew->num_encoders)
+    ew->selected = 0;
+  encoder_widget_update_selected(ew);
+  }
+
+const char * lqtgtk_encoder_widget_get_encoder(LqtGtkEncoderWidget * ew)
+  {
+  return ew->current_encoder->name;
+  }
+
+void lqtgtk_encoder_widget_set_encoder(LqtGtkEncoderWidget * ew,
+                                       const char * name)
+  {
+  int i;
+  ew->selected = 0;
+
+  for(i = 0; i < ew->num_encoders; i++)
+    {
+    if(!strcmp(ew->encoders[i]->name, name))
+      {
+      ew->selected = i;
+      break;
+      }
+    }
+  encoder_widget_update_selected(ew);
+  }

@@ -11,7 +11,7 @@ noinst_PROGRAMS=test_codec testqt
 bin_PROGRAMS=qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
 
 testqt_SOURCES=testqt.c
-testqt_LDADD=@UTIL_LIBADD@
+testqt_LDADD=@UTIL_LIBADD@ -lm
 
 test_codec_SOURCES=test_codec.c
 test_codec_LDADD=@UTIL_LIBADD@

@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <dlfcn.h>
-#include <funcprotos.h>
 #include <string.h>
 #include <quicktime/quicktime.h>
+#include <quicktime/lqt.h>
+#include <funcprotos.h>
 #include "config.h"
 
 static int total_vcodecs = 0;
