@@ -1187,7 +1187,7 @@ static int qt_oss_audio_write(void)
 	qt_hasaudio = 0;
 	break;
     default:
-        qt_audio_samples_in_buffer -= rc * qt_channels * sizeof(*qt_audio);
+        qt_audio_samples_in_buffer -= rc / (qt_channels * sizeof(*qt_audio));
         qt_audio_ptr += rc / sizeof(*qt_audio);
         break;
     }
