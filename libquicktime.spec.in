@@ -46,6 +46,7 @@ Group(pt):	Aplicações/Gráficos
 Requires:	%{name} = %{version}
 Requires:	libraw1394 >= @LIBRAW1394_REQUIRED@
 Requires:	libavc1394 >= @LIBAVC1394_REQUIRED@
+Requires:       libdv >=      @LIBDV_REQUIRED@
 
 %description firewire
 Firewire Support for libquicktime
@@ -99,6 +100,7 @@ Po¿yteczne narzêdzia od operowania na plikach w formacie QuickTime.
 Summary:	Libquicktime plugin supporting the Ogg Vorbis codec
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
+Requires:       libvorbis >=  @VORBIS_REQUIRED@ 
 
 %description vorbis
 Libquicktime plugin supporting the Ogg Vorbis codec
@@ -248,6 +250,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qt* 
 %attr(755,root,root) %{_bindir}/lqt_transcode
+%attr(755,root,root) %{_bindir}/lqtplay
+%attr(644,root,root) %{_datadir}/man/man1/lqtplay.1.gz
 
 %files jpeg
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_mjpeg.so
@@ -273,6 +277,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files dv
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_dv.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_dv.la
+
+%files lame
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_lame.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_lame.la
 
 %define date	%(echo `LC_ALL="C" date +"%a %b %d %Y"`)
 %changelog
