@@ -405,6 +405,9 @@ int dv_start_playback(dv_playback_t *playback, int port, int channel)
 
 #endif // HAVE_FIREWIRE
 
+
+#if 0
+
 #define DV_WIDTH 720
 #define DV_HEIGHT 576
 
@@ -473,7 +476,7 @@ int dv_read_video(dv_t *dv,
 	dv_macroblock_t *mb;
 	int pixel_size;
 	int pitches[3];
-	int use_temp = color_model != BC_YUV422;
+	int use_temp = color_model != BC_YUV422 && color_model != BC_RGB888;
 	unsigned char *pixels[3];
 
 //printf("dv_read_video 1 %d\n", color_model);
@@ -629,6 +632,104 @@ void dv_write_video(dv_t *dv,
 		int color_model,
 		int norm)
 {
+	int dif = 0;
+	int lost_coeffs = 0;
+	long offset = 0;
+	int isPAL = 0;
+	int is61834 = 0;
+	int numDIFseq;
+	int ds;
+	int i, v, b, m;
+	dv_block_t *bl;
+	long mb_offset;
+	dv_sample_t sampling;
+	dv_macroblock_t *mb;
+	int pixel_size;
+	int pitches[3];
+	int use_temp = color_model != BC_YUV422;
+	unsigned char *pixels[3];
+
+//printf("dv_read_video 1 %d\n", color_model);
+	pthread_mutex_lock(&dv_lock);
+	switch(bytes)
+	{
+		case DV_PAL_SIZE:
+			break;
+		case DV_NTSC_SIZE:
+			break;
+		default:
+			return 1;
+			break;
+	}
+
+	if(data[0] != 0x1f) return 1;
+
+	pitches[0] = DV_WIDTH * 2;
+	pitches[1] = 0;
+	pitches[2] = 0;
+	pixels[1] = 0;
+	pixels[2] = 0;
+
+	dv_parse_header(dv->decoder, data);
+
+	if(!use_temp)
+	{
+//printf("dv_read_video 1\n");
+		pixels[0] = output_rows[0];
+		dv_decode_full_frame(dv->decoder, 
+			data, 
+			e_dv_color_yuv, 
+			output_rows, 
+			pitches);
+//printf("dv_read_video 2\n");
+	}
+	else
+	{
+		unsigned char *temp_rows[DV_HEIGHT];
+		if(!dv->temp_video)
+			dv->temp_video = calloc(1, DV_WIDTH * DV_HEIGHT * 2);
+
+		for(i = 0; i < DV_HEIGHT; i++)
+		{
+			temp_rows[i] = dv->temp_video + i * DV_WIDTH * 2;
+		}
+
+		pixels[0] = dv->temp_video;
+//printf("dv_read_video 3 %p\n", data);
+		dv_decode_full_frame(dv->decoder, 
+			data, 
+			e_dv_color_yuv, 
+			pixels, 
+			pitches);
+//printf("dv_read_video 4\n");
+
+		cmodel_transfer(output_rows, 
+			temp_rows,
+			output_rows[0],
+			output_rows[1],
+			output_rows[2],
+			0,
+			0,
+			0,
+			0, 
+			0, 
+			DV_WIDTH, 
+			dv->decoder->height,
+			0, 
+			0, 
+			DV_WIDTH, 
+			dv->decoder->height,
+			BC_YUV422, 
+			color_model,
+			0,
+			DV_WIDTH,
+			DV_WIDTH);
+	}
+	dv->decoder->prev_frame_decoded = 1;
+	pthread_mutex_unlock(&dv_lock);
+	return 0;
+
+#if 0
 	dv_videosegment_t videoseg ALIGN64;
 	int numDIFseq;
 	int ds;
@@ -699,7 +800,8 @@ void dv_write_video(dv_t *dv,
 	
 	
 	write_meta_data(target, 0, isPAL, &now);
-	
+
+#endif // 0
 }
 
 
@@ -713,3 +815,4 @@ void dv_write_audio(dv_t *dv,
 }
 
 
+#endif // 0

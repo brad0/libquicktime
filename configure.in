@@ -494,7 +494,6 @@ include/Makefile \
 include/quicktime/Makefile \
 plugins/Makefile \
 plugins/dv/Makefile \
-plugins/dv/libdv/Makefile \
 plugins/mjpeg/Makefile \
 plugins/audiocodec/Makefile \
 plugins/videocodec/Makefile \
