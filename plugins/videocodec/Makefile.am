@@ -27,4 +27,4 @@ yuv2.h \
 yuv4.h \
 yv12.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

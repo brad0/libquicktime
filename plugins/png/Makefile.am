@@ -12,4 +12,4 @@ lqt_png_la_LIBADD = @PNG_LIBS@ @MODULE_LIBADD@
 
 noinst_HEADERS = qtpng.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

@@ -212,8 +212,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 							 width_i * cmodel_calculate_pixelsize(file->color_model),
 							 height );
 
-	if( ( file->color_model == BC_YUV422
-		  || file->color_model == BC_RGB888 ) &&
+	// file->color_model == BC_YUV422 ||
+	if( file->color_model == BC_RGB888 &&
 		width == width_i &&
 		height == height_i &&
 		is_sequential )
@@ -222,13 +222,13 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		encode_colormodel = file->color_model;
 		switch( file->color_model )
 		{
-			case BC_YUV422:
+			/*case BC_YUV422:
 				encode_dv_colormodel = e_dv_color_yuv;
 printf( "dv.c encode: e_dv_color_yuv\n" );
-				break;
+				break;*/
 			case BC_RGB888:
 				encode_dv_colormodel = e_dv_color_rgb;
-printf( "dv.c encode: e_dv_color_rgb\n" );
+//printf( "dv.c encode: e_dv_color_rgb\n" );
 				break;
 			default:
 				return 0;
@@ -239,14 +239,12 @@ printf( "dv.c encode: e_dv_color_rgb\n" );
 	{
 		if(!codec->temp_frame)
 		{
-			codec->temp_frame = malloc(720 * 576 * 2);
+			codec->temp_frame = malloc(720 * 576 * 3);
 			codec->temp_rows = malloc(sizeof(unsigned char*) * 576);
 			for(i = 0; i < 576; i++)
-				codec->temp_rows[i] = codec->temp_frame + 720 * 2 * i;
+				codec->temp_rows[i] = codec->temp_frame + 720 * 3 * i;
 		}
 		
-printf( "dv.c encode: doing cmodel_transfer. BUGGY CODE!!!\n" );
-
         cmodel_transfer(codec->temp_rows, /* Leave NULL if non existent */
 			row_pointers,
 			codec->temp_rows[0], /* Leave NULL if non existent */
@@ -264,15 +262,15 @@ printf( "dv.c encode: doing cmodel_transfer. BUGGY CODE!!!\n" );
 			MIN(width, width_i), 
 			MIN(height, height_i),
 			file->color_model, 
-			BC_YUV422,
+			BC_RGB888,
 			0,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 			width,       /* For planar use the luma rowspan */
 			width_i);
 
 
 		input_rows = codec->temp_rows;
-		encode_colormodel = BC_YUV422;
-		encode_dv_colormodel = e_dv_color_yuv;
+		encode_colormodel = BC_RGB888;
+		encode_dv_colormodel = e_dv_color_rgb;
 	}
 
 //printf("dv.c encode: 1 %d %d %d\n", width_i, height_i, encode_dv_colormodel);

@@ -10,4 +10,10 @@
 
 #define LQT_CODEC_API_VERSION @LQT_CODEC_API_VERSION@
 
+/*
+ * libquicktime library version
+ */
+
+#define LQT_VERSION "@LQT_VERSION@"
+
 #endif /* __LQT_VERSION_H_ */

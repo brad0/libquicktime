@@ -1,0 +1,101 @@
+#!/bin/sh
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+exec_prefix_set=no
+
+old_include_names=yes
+
+function usage
+{
+  cat <<EOF 1>&2
+Usage: lqt-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--use-lqt-includes] 
+                  [--plugin-dir] [--version] [--libs | --plugin-libs] 
+                  [--cflags | --plugin-cflags] [modules...]
+
+Available modules are: quicktime1394
+EOF
+  exit 1
+}
+
+if test $# -eq 0; then
+    usage
+fi
+
+the_libs="@LQT_LIBS@"
+the_cflags="@LQT_CFLAGS@"
+
+echo_libs=no
+echo_cflags=no
+
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) optarg= ;;
+  esac
+
+  case $1 in
+# modules
+    quicktime1394)
+      the_libs="$the_libs @LQT1394_LIBS@"
+      the_cflags="$the_cflags @LQT1394_CFLAGS@"
+      ;;
+
+# options
+    --prefix=*)
+      prefix=$optarg
+      if test $exec_prefix_set = no ; then
+        exec_prefix=$optarg
+      fi
+      ;;
+    --prefix)
+      echo $prefix
+      ;;
+    --exec-prefix=*)
+      exec_prefix=$optarg
+      exec_prefix_set=yes
+      ;;
+    --exec-prefix)
+      echo $exec_prefix
+      ;;
+    --use-lqt-includes)
+      old_include_names=no
+      ;;
+    --version)
+      echo @LQT_VERSION@
+      ;;
+    --plugin-dir)
+      echo @PLUGIN_DIR@
+      ;;
+    --cflags|--plugin-cflags)
+      if test @includedir@ != /usr/include ; then
+          # Handle oddities in Win32 path handling (assumes prefix)
+          prefix=`echo ${prefix} | sed 's,^//\([A-Z]\),\1:,'`
+
+          includes=-I@includedir@
+      fi
+      if test x$old_include_names == xyes; then
+	the_cflags="$includes -I@includedir@/quicktime $the_cflags"
+      else
+	the_cflags="$includes $the_cflags"
+      fi
+      echo_cflags=yes
+      ;;
+    --libs|--plugin-libs)
+      the_libs="-L@libdir@ $the_libs"
+      echo_libs=yes
+      ;;
+    *)
+      usage
+      ;;
+  esac
+  shift
+done
+
+if test x$echo_libs == xyes; then
+  echo $the_libs
+fi
+
+if test x$echo_cflags == xyes; then
+  echo $the_cflags
+fi

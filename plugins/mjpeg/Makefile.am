@@ -17,4 +17,4 @@ noinst_HEADERS = \
 jpeg.h \
 libmjpeg.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

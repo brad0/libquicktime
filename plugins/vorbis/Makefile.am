@@ -11,4 +11,4 @@ lqt_vorbis_la_LIBADD = @VORBISENC_LIBS@ @VORBIS_LIBS@ @VORBISFILE_LIBS@ @MODULE_
 
 noinst_HEADERS = qtvorbis.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

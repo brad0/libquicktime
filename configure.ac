@@ -1,12 +1,20 @@
-AC_INIT(src/lqt_quicktime.c)
+dnl AC_INIT(src/lqt_quicktime.c)
+AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
 dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(libquicktime, 1.5.1.ap012502)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.0)
 AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
 
 AC_LIBTOOL_PICMODE
+
+AH_TEMPLATE([LQT_VERSION],
+            [Libquicktime version])
+
+LQT_VERSION=$VERSION
+AC_DEFINE_UNQUOTED(LQT_VERSION, "$LQT_VERSION")
+AC_SUBST(LQT_VERSION)
 
 dnl
 dnl Libquicktime codec API version
@@ -17,24 +25,10 @@ LQT_CODEC_API_VERSION="2"
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
 
-AC_DEFINE(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
+AC_DEFINE_UNQUOTED(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
 AC_SUBST(LQT_CODEC_API_VERSION)
 
-
-dnl
-dnl set GMERLIN to "true" for gmerlin compilation
-dnl
-
-dnl gmerlin=true
-
-dnl Gmerlin does not need static libs
-
-if test x$gmerlin = xtrue; then
-AC_DISABLE_STATIC
-AM_DISABLE_STATIC
-else
 AC_ENABLE_STATIC
-fi
 
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
@@ -100,27 +94,6 @@ case $compile_mode in
 "profile") CFLAGS="$PROFILE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
 esac
 
-dnl AC_ARG_ENABLE(optimization,
-dnl     [  --disable-optimization  Turn off opimization ],
-dnl      [case "${enableval}" in
-dnl        yes) CFLAGS="$CFLAGS -O2" ;;
-dnl        no) CFLAGS="$CFLAGS -g3 -O0" ;;
-dnl        *) AC_MSG_ERROR(bad value ${enableval} for --disable-optimization) ;;
-dnl      esac],[CFLAGS="$CFLAGS -O2"])
-
-dnl AC_ARG_ENABLE(final,
-dnl     [  --enable-final          Make a binary suitable for distribution  ],
-dnl      [case "${enableval}" in
-dnl        yes) CFLAGS="-O3 -W -Wall -Winline"
-dnl 	AC_DEFINE(NDEBUG) ;;
-dnl        no)  ;;
-dnl        *) AC_MSG_ERROR(bad value ${enableval} for --disable-final) ;;
-dnl      esac],[])
-
-dnl LIBS="$LIBS $SIGC_LIBS"
-dnl CFLAGS="$CFLAGS $SIGC_CFLAGS"
-dnl CFLAGS="$CFLAGS $SIGC_CFLAGS $SIGC_CFLAGS"
-
 AC_SUBST(LIBS)
 
 AH_TEMPLATE([_GNU_SOURCE],
@@ -173,10 +146,6 @@ dnl Checks for libraries.
 
 AC_CHECK_LIB(dl, dlopen)
 
-AC_CHECK_LIB(raw1394, raw1394_write)
-AC_CHECK_LIB(avc1394, avc1394_send_command)
-AC_CHECK_LIB(rom1394, main)
-
 AC_SEARCH_LIBS(pthread_create, [gthread pthread])
 
 dnl
@@ -196,9 +165,6 @@ AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
 
 AC_SUBST(LIBS)
 
-dnl CPPFLAGS="$CPPFLAGS"
-dnl LDFLAGS="$LDFLAGS"
-
 AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h stddef.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -209,6 +175,7 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
 dnl Checks for library functions.
+
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(gettimeofday)
 
@@ -225,82 +192,18 @@ AC_DEFINE_UNQUOTED(DECORE_INCLUDE, "$DECORE_DIR/decore.h")
 
 AC_HEADER_STDC
 
-AC_ARG_ENABLE(complete-dist,
-[  --enable-complete-dist  Include the built copies of the library source if availiable. ])
+dnl AC_ARG_ENABLE(complete-dist,
+dnl [  --enable-complete-dist  Include the built copies of the library source if availiable. ])
 
-COMPLETE_DIST=""; 
+dnl COMPLETE_DIST=""; 
 
-if test "x$enable_complete_dist" == "xyes"; then
-	test -d libraw1394 && COMPLETE_DIST="$COMPLETE_DIST libraw1394";
-	test -d libogg-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libogg-1.0rc2";
-	test -d libvorbis-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libvorbis-1.0rc2";
-fi
+dnl if test "x$enable_complete_dist" == "xyes"; then
+dnl 	test -d libraw1394 && COMPLETE_DIST="$COMPLETE_DIST libraw1394";
+dnl 	test -d libogg-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libogg-1.0rc2";
+dnl 	test -d libvorbis-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libvorbis-1.0rc2";
+dnl fi
 
-AC_SUBST(COMPLETE_DIST)
-
-if test x$gmerlin = xtrue; then
-
-enable_firewire=no
-FIREWIRE_CFLAGS=""
-FIREWIRE_LIBS=""
-FIREWIRE_SUBDIRS=""
-
-else
-
-AH_TEMPLATE([HAVE_FIREWIRE],
-            [tell libdv.c to support firewire])
-
-AC_MSG_CHECKING(whether to enable firewire support)
-
-AC_ARG_ENABLE(firewire,
- [  --disable-firewire      disable ieee1394 (firewire) in the library. This prevents 
-			  Broadcast 2000 and Cinelerra from building. This code will 
-			  not work with recent versions of the linux ieee1394 driver. ],
- [case "${enableval}" in
-       yes) enable_firewire=yes ;;
-       no) enable_firewire=no ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-firewire) ;;
- esac], [enable_firewire=yes])
-
-AC_MSG_RESULT($enable_firewire)
-
-if test x$enable_firewire = xyes; then
- 	AC_DEFINE(HAVE_FIREWIRE, 1)
- 	FIREWIRE_SUBDIRS=""
- 	FIREWIRE_LIBS="unknown"
- 
- 	if test -d libraw1394; then
- 
- 	AC_ARG_WITH(internal-raw1394,
- [  --with-internal-raw1394 Use libraw1394 from the distribution. The default is to use
-                           versions installed on the system if possible. ],
- 	     [case "${withval}" in
- 	       yes) FIREWIRE_SUBDIRS="libraw1394"
- 		    FIREWIRE_LIBS="libraw1394/src/libraw1394.la"
- 		    FIREWIRE_CFLAGS="" ;;
- 	       no) FIREWIRE_LIBS="unknown";;
- 	       *) AC_MSG_ERROR(bad value ${enableval} for --disable-final) ;;
- 	     esac],[ FIREWIRE_LIBS="unknown" ])
-
- 	fi
-
- 	if test "x$FIREWIRE_LIBS" = "xunknown"; then
- 		FIREWIRE_LIBS=""
- 		AC_LIB_RAW1394([0.9], [
- 				 FIREWIRE_CFLAGS="$LIBRAW1394_CPPFLAGS $LIBRAW1394_CFLAGS"; 
- 				 FIREWIRE_LIBS="$LIBRAW1394_LIBS" ],
- 	 [  FIREWIRE_SUBDIRS="libraw1394"
- 	    FIREWIRE_LIBS="libraw1394/src/libraw1394.la"
- 	    FIREWIRE_CFLAGS="" ] )
- 	fi
- 
-fi
-
-fi
-
-AC_SUBST(FIREWIRE_LIBS)
-AC_SUBST(FIREWIRE_CFLAGS)
-AC_SUBST(FIREWIRE_SUBDIRS)
+dnl AC_SUBST(COMPLETE_DIST)
 
 dnl
 dnl Check for libdv
@@ -358,6 +261,110 @@ AC_SUBST(LIBDV_CFLAGS)
 AM_CONDITIONAL(HAVE_LIBDV, test x$have_libdv = xtrue)
 
 dnl
+dnl Check for quicktime1394 junk
+dnl
+
+AH_TEMPLATE([HAVE_FIREWIRE],
+            [tell libdv.c to support firewire])
+AH_TEMPLATE([HAVE_LIBRAW1394],
+            [Define if you have libraw1394 (-lraw1394).])
+AH_TEMPLATE([HAVE_LIBROM1394],
+            [Define if you have librom1394 (-lrom1394).])
+AH_TEMPLATE([HAVE_LIBAVC1394],
+            [Define if you have the `avc1394' library (-lavc1394).])
+
+AC_MSG_CHECKING(whether to enable firewire support)
+
+AC_ARG_ENABLE(firewire,
+ [  --disable-firewire      disable ieee1394 (firewire) in the library. This prevents 
+			  Broadcast 2000 and Cinelerra from building. This code will 
+			  not work with recent versions of the linux ieee1394 driver. ],
+ [case "${enableval}" in
+       yes) enable_firewire=yes ;;
+       no) enable_firewire=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-firewire) ;;
+ esac], [enable_firewire=yes])
+
+if test x$have_libdv != xtrue; then
+  enable_firewire="no (I need libdv)"
+fi
+
+AC_MSG_RESULT($enable_firewire)
+
+if test "x$enable_firewire" = xyes; then
+dnl 	FIREWIRE_SUBDIRS=""
+dnl 	FIREWIRE_LIBS="unknown"
+ 
+dnl 	if test -d libraw1394; then
+ 
+dnl 	AC_ARG_WITH(internal-raw1394,
+dnl [  --with-internal-raw1394 Use libraw1394 from the distribution. The default is to use
+dnl                           versions installed on the system if possible. ],
+dnl 	     [case "${withval}" in
+dnl 	       yes) FIREWIRE_SUBDIRS="libraw1394"
+dnl 		    FIREWIRE_LIBS="libraw1394/src/libraw1394.la"
+dnl 		    FIREWIRE_CFLAGS="" ;;
+dnl 	       no) FIREWIRE_LIBS="unknown";;
+dnl 	       *) AC_MSG_ERROR(bad value ${enableval} for --disable-final) ;;
+dnl 	     esac],[ FIREWIRE_LIBS="unknown" ])
+
+dnl 	fi
+
+dnl 	if test "x$FIREWIRE_LIBS" = "xunknown"; then
+dnl 	fi
+
+	FIREWIRE_LIBS="$GLIB_LIBS $LIBDV_LIBS"
+	FIREWIRE_CFLAGS="$GLIB_CFLAGS $LIBDV_CFLAGS"
+
+	AC_LIB_RAW1394([0.9], 
+			 [ FIREWIRE_CFLAGS="$FIREWIRE_CFLAGS $LIBRAW1394_CPPFLAGS $LIBRAW1394_CFLAGS"; 
+			 FIREWIRE_LIBS="$FIREWIRE_LIBS $LIBRAW1394_LIBS"
+			 AC_DEFINE(HAVE_LIBRAW1394, 1)
+			 have_libraw1394=true ],
+			[ have_libraw1394=false ])
+
+	if test "x$have_libraw1394" != "xtrue"; then
+	  enable_firewire=no
+	  AC_MSG_WARN([libraw1394 is not available, so firewire support will be disabled.])
+	fi
+
+	OLD_LIBS=$LIBS
+	OLD_CFLAGS=$CFLAGS
+	LIBS=$FIREWIRE_LIBS
+	CFLAGS=$FIREWIRE_CFLAGS
+
+	if test "x$enable_firewire" = xyes; then
+	  AC_CHECK_LIB(avc1394, avc1394_send_command, 
+			[LIBS="-lavc1394 $LIBS"; AC_DEFINE(HAVE_LIBAVC1394, 1) ], 
+			[AC_MSG_WARN([libavc1394 is not available, so firewire support will be disabled.])
+			enable_firewire=no])
+	fi
+
+	if test "x$enable_firewire" = xyes; then
+	  AC_CHECK_LIB(rom1394, main, 
+			[LIBS="-lrom1394 $LIBS"; AC_DEFINE(HAVE_LIBROM1394, 1)], 
+			[AC_MSG_WARN([librom1394 is not available, so firewire support will be disabled.])
+			enable_firewire=no])
+	fi
+
+	FIREWIRE_LIBS=$LIBS
+	FIREWIRE_CFLAGS=$CFLAGS
+
+	LIBS=$OLD_LIBS
+	CFLAGS=$OLD_CFLAGS
+
+	if test "x$enable_firewire" = xyes; then
+	  AC_DEFINE(HAVE_FIREWIRE, 1)
+	fi
+fi
+
+AM_CONDITIONAL(HAVE_FIREWIRE, test "x$enable_firewire" = xyes)
+
+AC_SUBST(FIREWIRE_LIBS)
+AC_SUBST(FIREWIRE_CFLAGS)
+AC_SUBST(FIREWIRE_SUBDIRS)
+
+dnl
 dnl Check for Vorbis
 dnl 
 
@@ -378,51 +385,44 @@ dnl
 AH_TEMPLATE([HAVE_LIBJPEG],
             [Do we have libjpeg installed?])
 
-if test x$gmerlin = xtrue; then
-  JPEG_CFLAGS=-I../jpeg-mmx
-  JPEG_LIBS=../jpeg-mmx/libjpeg_mmx.la
-  have_libjpeg=true
-  AC_DEFINE(HAVE_LIBJPEG)
-else
-  have_libjpeg=false
+have_libjpeg=false
 
-  OLD_CFLAGS=$CFLAGS
-  OLD_LIBS=$LIBS
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
 
-  LIBS=-ljpeg-mmx
+LIBS=-ljpeg-mmx
+CFLAGS=""
+
+AC_MSG_CHECKING(for jpeg-mmx)
+AC_TRY_LINK([#include <stdio.h>
+             #include <jpeglib.h>],
+            [struct jpeg_decompress_struct cinfo;
+             jpeg_create_decompress(&cinfo);],
+	    [have_libjpeg=true])
+
+if test x$have_libjpeg = xfalse; then
+  AC_MSG_RESULT(no);
+  LIBS=-ljpeg
   CFLAGS=""
-
-  AC_MSG_CHECKING(for jpeg-mmx)
+  AC_MSG_CHECKING(for libjpeg)
   AC_TRY_LINK([#include <stdio.h>
                #include <jpeglib.h>],
               [struct jpeg_decompress_struct cinfo;
-               jpeg_create_decompress(&cinfo);],
-	       [have_libjpeg=true])
-
-  if test x$have_libjpeg = xfalse; then
-    AC_MSG_RESULT(no);
-    LIBS=-ljpeg
-    CFLAGS=""
-    AC_MSG_CHECKING(for libjpeg)
-    AC_TRY_LINK([#include <stdio.h>
-                 #include <jpeglib.h>],
-                [struct jpeg_decompress_struct cinfo;
-	         jpeg_create_decompress(&cinfo);],
-	         [have_libjpeg=true])
-  fi
-
-  case $have_libjpeg in
-    true) AC_DEFINE(HAVE_LIBJPEG)
-          AC_MSG_RESULT(yes)
-	  JPEG_LIBS=$LIBS;
-	  JPEG_CFLAGS=$CFLAGS;;
-    false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
-    * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
-  esac
-
-  CFLAGS=$OLD_CFLAGS
-  LIBS=$OLD_LIBS
+	       jpeg_create_decompress(&cinfo);],
+	      [have_libjpeg=true])
 fi
+
+case $have_libjpeg in
+  true) AC_DEFINE(HAVE_LIBJPEG)
+        AC_MSG_RESULT(yes)
+	JPEG_LIBS=$LIBS;
+	JPEG_CFLAGS=$CFLAGS;;
+  false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
+  * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
+esac
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
 
 AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
@@ -435,75 +435,54 @@ dnl
 
 AH_TEMPLATE([HAVE_LIBPNG], [Enable png codec])
 
-if test x$gmerlin = xtrue; then
-  PNG_CFLAGS=""
-  PNG_LIBS="-lpng -lz"
-  have_libpng=true
-  AC_DEFINE(HAVE_LIBPNG)
-else
-  have_libpng=false
+have_libpng=false
 
-  OLD_CFLAGS=$CFLAGS
-  OLD_LIBS=$LIBS
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
 
-  LIBS="-lpng -lz"
-  CFLAGS=""
+LIBS="-lpng -lz"
+CFLAGS=""
 
-  AC_MSG_CHECKING(for libpng)
-  AC_TRY_LINK([#include <png.h>],
-              [png_structp png_ptr;
-               png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-	                                        (png_voidp)0,
+AC_MSG_CHECKING(for libpng)
+AC_TRY_LINK([#include <png.h>],
+            [png_structp png_ptr;
+             png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+	                                       (png_voidp)0,
 						NULL, NULL);],
-	       [have_libpng=true])
+	    [have_libpng=true])
 
-  case $have_libpng in
-    true) AC_DEFINE(HAVE_LIBPNG)
-          AC_MSG_RESULT(yes)
-	  PNG_LIBS=$LIBS ;
-	  PNG_CFLAGS=$CFLAGS ;;
-    false) AC_MSG_RESULT(no); PNG_LIBS=""; PNG_CFLAGS="";;
-  esac
+case $have_libpng in
+  true) AC_DEFINE(HAVE_LIBPNG)
+        AC_MSG_RESULT(yes)
+	PNG_LIBS=$LIBS ;
+	PNG_CFLAGS=$CFLAGS ;;
+  false) AC_MSG_RESULT(no); PNG_LIBS=""; PNG_CFLAGS="";;
+esac
   
-  CFLAGS=$OLD_CFLAGS
-  LIBS=$OLD_LIBS
-fi
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
 
 AC_SUBST(PNG_CFLAGS)
 AC_SUBST(PNG_LIBS)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
-dnl AC_LIB_RAW1394(1.0, [LIBRAW1394="-lraw1394"], [AC_CONFIG_SUBDIRS(libraw1394) LIBRAW1394="libraw1394/libraw1394.la"])
-
-dnl AC_CONFIG_SUBDIRS($VORBIS_SUBDIRS $FIREWIRE_SUBDIRS)
-
 dnl jpeg/Makefile
 
-AM_CONDITIONAL(GMERLIN, test x$gmerlin = xtrue)
-
-if test x$gmerlin = xtrue; then
-  if test "x$prefix" = xNONE; then
-     prefix="${ac_default_prefix}"
-  fi
-  if test "x$exec_prefix" = xNONE; then
-     exec_prefix="${prefix}"
-  fi
-  libdir=$exec_prefix/lib/gmerlin
-  plugin_dir="$exec_prefix/lib/gmerlin/$PACKAGE"
-else
-  if test "x$prefix" = xNONE; then
-     prefix="${ac_default_prefix}"
-  fi
-  if test "x$exec_prefix" = xNONE; then
-     exec_prefix="${prefix}"
-  fi
-     plugin_dir="$exec_prefix/lib/$PACKAGE"
+if test "x$prefix" = xNONE; then
+   prefix="${ac_default_prefix}"
 fi
+if test "x$exec_prefix" = xNONE; then
+   exec_prefix="${prefix}"
+fi
+plugin_dir="$exec_prefix/lib/$PACKAGE"
+
 
 AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 
+PLUGIN_DIR=$plugin_dir
 AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
+AC_SUBST(PLUGIN_DIR)
 
 # -L is required so that linker can find libquicktime when DESTDIR is used.
 # libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
@@ -516,12 +495,25 @@ AC_SUBST(UTIL_LIBADD)
 GTKUTIL_LIBADD=../../src/libquicktime.la
 AC_SUBST(GTKUTIL_LIBADD)
 
-dnl
-dnl LIBQUICKTIME
-dnl
+dnl Define flags for application to use.
+
+LQT_CFLAGS=""
+LQT_LIBS="-lquicktime $LIBS"
+
+AC_SUBST(LQT_CFLAGS)
+AC_SUBST(LQT_LIBS)
+
+LQT1394_CFLAGS="$FIREWIRE_CFLAGS"
+LQT1394_LIBS="$FIREWIRE_LIBS -lquicktime1394"
+
+AC_SUBST(LQT1394_CFLAGS)
+AC_SUBST(LQT1394_LIBS)
+
+dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile \
 src/Makefile \
+quicktime1394/Makefile \
 include/Makefile \
 include/quicktime/Makefile \
 include/quicktime/version.h \
@@ -536,14 +528,5 @@ plugins/opendivx/Makefile \
 plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 utils/Makefile \
-utils/gtk/Makefile])
-
-dnl
-dnl GMERLIN
-dnl
-
-dnl AC_OUTPUT([Makefile libdv/Makefile decore50/Makefile encore50/Makefile])
-
-dnl
-dnl ENDIF
-dnl
+utils/gtk/Makefile \
+lqt-config], [chmod a+x lqt-config])

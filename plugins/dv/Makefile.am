@@ -6,11 +6,11 @@ CFLAGS += -include $(CONFIG_HEADER)
 
 pkglib_LTLIBRARIES = lqt_dv.la
 
-lqt_dv_la_SOURCES = dv.c libdv.c lqt_dv.c
+lqt_dv_la_SOURCES = dv.c lqt_dv.c
 lqt_dv_la_LDFLAGS = -avoid-version -module -lm
 
 lqt_dv_la_LIBADD = @FIREWIRE_LIBS@ @LIBDV_LIBS@ @MODULE_LIBADD@
 
-noinst_HEADERS = dv.h libdv.h
+noinst_HEADERS = dv.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

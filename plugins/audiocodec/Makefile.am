@@ -21,4 +21,4 @@ rawaudio.h \
 twos.h \
 ulaw.h
 
-INCLUDES = -I../../include
+INCLUDES = -I$(top_srcdir)/include

@@ -38,6 +38,6 @@ qtyuv4toyuv_SOURCES=yuv4toyuv.c
 qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
 
-INCLUDES = -I../include
+INCLUDES = -I$(top_srcdir)/include
 
 #CFLAGS += -g3 -Werror
