@@ -50,6 +50,11 @@
 			transfer_YUV422_to_RGB888((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
+		case BC_RGBA8888:      \
+			TRANSFER_FRAME_HEAD \
+			transfer_YUV422_to_RGBA8888((output), (input), (input_column)); \
+			TRANSFER_FRAME_TAIL \
+			break; \
 		case BC_YUV888:      \
 			TRANSFER_FRAME_HEAD \
 			transfer_YUV422_to_YUV888((output), (input), (input_column)); \
@@ -58,6 +63,16 @@
 		case BC_YUVA8888:      \
 			TRANSFER_FRAME_HEAD \
 			transfer_YUV422_to_YUVA8888((output), (input), (input_column)); \
+			TRANSFER_FRAME_TAIL \
+			break; \
+		case BC_RGB161616:      \
+			TRANSFER_FRAME_HEAD \
+			transfer_YUV422_to_RGB161616((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_TAIL \
+			break; \
+		case BC_RGBA16161616:      \
+			TRANSFER_FRAME_HEAD \
+			transfer_YUV422_to_RGBA16161616((uint16_t**)(output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_YUV161616:      \

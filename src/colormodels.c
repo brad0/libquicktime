@@ -96,6 +96,7 @@ int cmodel_is_planar(int colormodel)
 	{
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
+                case BC_YUV444P:      return 1; break;
 		case BC_YUV411P:      return 1; break;
 	}
 	return 0;
@@ -150,7 +151,8 @@ int cmodel_calculate_pixelsize(int colormodel)
 // Planar
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
-		case BC_YUV422:       return 2; break;
+                case BC_YUV444P:      return 1; break;
+                case BC_YUV422:       return 2; break;
 		case BC_YUV411P:      return 1; break;
 	}
 	return 0;
@@ -188,6 +190,9 @@ int cmodel_calculate_datasize(int w, int h, int bytes_per_line, int color_model)
 		case BC_YUV422P:
 			return w * h * 2 + 4;
 			break;
+                case BC_YUV444P:
+                        return w * h * 3 + 4;
+                        break;
 
 		default:
 			return h * bytes_per_line + 4;
@@ -315,6 +320,37 @@ void cmodel_transfer(unsigned char **output_rows,
 				bg_g, \
 				bg_b);
 			break;
+                case BC_YUV444P:
+                        cmodel_yuv444p(output_rows,  \
+                                input_rows, \
+                                out_y_plane, \
+                                out_u_plane, \
+                                out_v_plane, \
+                                in_y_plane, \
+                                in_u_plane, \
+                                in_v_plane, \
+                                in_x,  \
+                                in_y,  \
+                                in_w,  \
+                                in_h, \
+                                out_x,  \
+                                out_y,  \
+                                out_w,  \
+                                out_h, \
+                                in_colormodel,  \
+                                out_colormodel, \
+                                bg_color, \
+                                in_rowspan, \
+                                out_rowspan, \
+                                scale, \
+                                out_pixelsize, \
+                                in_pixelsize, \
+                                row_table, \
+                                column_table, \
+                                bg_r, \
+                                bg_g, \
+                                bg_b);
+                        break;
 
 		case BC_YUV422:
 			cmodel_yuv422(output_rows,  \
@@ -439,7 +475,8 @@ int cmodel_is_yuv(int colormodel)
 		case BC_YUV422:
 		case BC_YUV420P:
 		case BC_YUV422P:
-		case BC_YUV411P:
+                case BC_YUV444P:
+                case BC_YUV411P:
 			return 1;
 			break;
 		
