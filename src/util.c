@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <linux/cdrom.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>

@@ -388,8 +388,13 @@ dnl
 
 have_lame="no"
 
-AC_CHECK_LIB(mp3lame, lame_decode_init,
+if test x$have_vorbis = xtrue; then
+    AC_CHECK_LIB(mp3lame, lame_decode_init,
+             [ have_lame="yes" ], [], [ -lm -lvorbis])
+else
+    AC_CHECK_LIB(mp3lame, lame_decode_init,
              [ have_lame="yes" ], [], [ -lm ])
+fi
 
 AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")
 
@@ -483,7 +488,7 @@ have_libpng=false
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
 
-LIBS="-lpng -lz"
+LIBS="-lpng -lm -lz"
 CFLAGS=""
 
 AC_MSG_CHECKING(for libpng)
