@@ -125,6 +125,24 @@ Requires:	libpng >= @PNG_REQUIRED@
 %description png
 Libquicktime plugin based on libpng
 
+%package lame
+Summary:	Lame plugin for Libquicktime
+Group:		Applications/Graphics
+Requires:	%{name} = %{version}
+BuildRequires:	lame-devel >= @LAME_REQUIRED@
+Requires:	lame >= @LAME_REQUIRED@
+
+%description lame
+Lame plugin for Libquicktime
+
+%package ffmpeg
+Summary:	ffmpeg plugins for Libquicktime
+Group:		Applications/Graphics
+Requires:	%{name} = %{version}
+
+%description ffmpeg
+ffmpeg plugins for Libquicktime
+
 %package plugincfg
 Summary:	Plugin configurator for Libquicktime
 Group:		Applications/Graphics
@@ -186,9 +204,13 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/lib*.so.*.*
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_audiocodec.so
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_videocodec.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_ferguson.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_rtjpeg.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_svq.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_xanim.so
 
 %files devel
-%doc docs/*.html
+%doc doc/*.html doc/qt4l/*.html
 %attr(755,root,root) %{_libdir}/lib*.so
 %attr(755,root,root) %{_includedir}/quicktime
 %attr(755,root,root) %{_bindir}/lqt-config
@@ -200,7 +222,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files progs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/qt*
+%attr(755,root,root) %{_bindir}/qt* 
+%attr(755,root,root) %{_bindir}/lqt_transcode
 
 %files jpeg
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_mjpeg.so
