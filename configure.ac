@@ -449,7 +449,7 @@ have_libavcodec=false
 
 AVCODEC_REQUIRED="0.4.8acl"
 
-PKG_CHECK_MODULES(AVCODEC, avcodec = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
+PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
 
 AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
 
