@@ -7,11 +7,9 @@ cmodel_yuv420p.h \
 cmodel_yuv422.h \
 codecs.h \
 colormodels.h \
-fastjpg.h \
 fastjpgmacro.h \
 funcprotos.h \
 graphics.h \
-jpeg_old.h \
 lqt_codecfile.h \
 lqt_codecinfo.h \
 lqt_codecinfo_private.h \

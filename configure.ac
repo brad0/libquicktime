@@ -347,6 +347,15 @@ fi
 
 AC_MSG_RESULT($enable_firewire)
 
+LIBAVC1394_REQUIRED="0.3.1"
+LIBRAW1394_REQUIRED="0.9.0"
+
+AC_SUBST(LIBAVC1394_REQUIRED)
+AC_SUBST(LIBRAW1394_REQUIRED)
+
+have_libavc1394=false
+have_librom1394=false
+
 if test "x$enable_firewire" = xyes; then
 
 	FIREWIRE_LIBS="$GLIB_LIBS $LIBDV_LIBS"
@@ -373,14 +382,14 @@ if test "x$enable_firewire" = xyes; then
 
 	if test "x$enable_firewire" = xyes; then
 	  AC_CHECK_LIB(avc1394, avc1394_send_command, 
-			[LIBS="-lavc1394 $LIBS"; AC_DEFINE(HAVE_LIBAVC1394, 1) ], 
+			[LIBS="-lavc1394 $LIBS"; have_libavc1394=true; AC_DEFINE(HAVE_LIBAVC1394, 1) ], 
 			[AC_MSG_WARN([libavc1394 is not available, so firewire support will be disabled.])
 			enable_firewire=no])
 	fi
 
 	if test "x$enable_firewire" = xyes; then
 	  AC_CHECK_LIB(rom1394, main, 
-			[LIBS="-lrom1394 $LIBS"; AC_DEFINE(HAVE_LIBROM1394, 1)], 
+			[LIBS="-lrom1394 $LIBS"; have_librom1394=true; AC_DEFINE(HAVE_LIBROM1394, 1)], 
 			[AC_MSG_WARN([librom1394 is not available, so firewire support will be disabled.])
 			enable_firewire=no])
 	fi
@@ -668,14 +677,14 @@ else
 echo "Missing"
 fi
 
-echo -n "Vorbis:     "
+echo -n "vorbis:     "
 if test x$have_vorbis = "xtrue"; then
 echo "Yes"
 else
 echo "Missing"
 fi
 
-echo -n "Lame:       "
+echo -n "lame:       "
 if test x$have_lame = "xtrue"; then
 echo "Yes"
 else
@@ -683,26 +692,55 @@ echo "Missing"
 fi
 
 
-echo -n "Libjpeg:    "
+echo -n "libjpeg:    "
 if test x$have_libjpeg = "xtrue"; then
 echo "Yes"
 else
 echo "Missing"
 fi
 
-echo -n "Libpng:     "
+echo -n "libpng:     "
 if test x$have_libpng = "xtrue"; then
 echo "Yes"
 else
 echo "Missing"
 fi
 
-echo -n "Libavcodec: "
+echo -n "libavcodec: "
 if test x$have_libavcodec = "xtrue"; then
 echo "Yes"
 else
 echo "Missing"
 fi
+
+echo -n "libraw1394: "
+if test x$have_libraw1394 = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "libavc1394: "
+if test x$have_libavc1394 = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "librom1394: "
+if test x$have_librom1394 = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "Firewire:   "
+if test "x$enable_firewire" = xyes; then
+echo "Enabled"
+else
+echo "Disabled"
+fi
+
 
 echo -n "gtk-1.x.y   "
 if test x$have_gtk = "xtrue"; then
