@@ -4,7 +4,6 @@
 #include <workarounds.h>
 #include "v308.h"
 
-#include <stdint.h>
 #include <stdlib.h>
 
 
