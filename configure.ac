@@ -200,7 +200,7 @@ dnl Checks for library functions.
 
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(gettimeofday)
-
+AC_CHECK_FUNCS(stat64)
 AC_CHECK_FUNCS(fseeko)
 AM_CONDITIONAL(HAVE_FSEEKO, test x$have_fseeko = xtrue)
 

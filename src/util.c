@@ -11,6 +11,10 @@
 #include <workarounds.h>
 #include <string.h>
 
+#include "config.h"
+#ifndef	HAVE_STAT64
+#define stat64 stat
+#endif
 
 /* Disk I/O */
 
