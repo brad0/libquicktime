@@ -1291,6 +1291,11 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 	quicktime_t *new_file = calloc(1, sizeof(quicktime_t));
 	char flags[10];
 	int result = 0;
+        if(rd && wr)
+          {
+	  fprintf(stderr, "read/write mode is not supported\n");
+          return (quicktime_t*)0;
+          }
 	
 #ifdef PRINT_BANNER
 	static int have_warned = 0;
