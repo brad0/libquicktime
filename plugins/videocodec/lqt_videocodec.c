@@ -2,6 +2,8 @@
 #include <quicktime/lqt_codecapi.h>
 #include "raw.h"
 
+#include <quicktime/colormodels.h>
+
 void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v408(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v410(quicktime_video_map_t *vtrack);
@@ -22,6 +24,49 @@ static char * fourccs_yuv2[] = { QUICKTIME_YUV422 ,       (char*)0 };
 static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 
 static char * fourccs_yv12[] = { QUICKTIME_YUV420 ,       (char*)0 };
+
+static int encoding_colormodels_raw[] =
+  {
+    BC_RGB888,
+    BC_ARGB8888,
+    LQT_COLORMODEL_NONE
+  };
+
+static int encoding_colormodels_v308[] =
+  {
+    BC_VYU888,
+    LQT_COLORMODEL_NONE,
+  };
+
+static int encoding_colormodels_v408[] =
+  {
+    BC_UYVA8888,
+    LQT_COLORMODEL_NONE,
+  };
+
+static int encoding_colormodels_v410[] =
+  {
+    BC_YUV101010,
+    LQT_COLORMODEL_NONE,
+  };
+
+static int encoding_colormodels_yuv2[] =
+  {
+    BC_YUV422,
+    LQT_COLORMODEL_NONE,
+  };
+
+static int encoding_colormodels_yuv4[] =
+  {
+    BC_RGB888,
+    LQT_COLORMODEL_NONE,
+  };
+
+static int encoding_colormodels_yv12[] =
+  {
+    BC_YUV420P,
+    LQT_COLORMODEL_NONE,
+  };
 
 #define DUMMY_PARAMETERS
 
@@ -62,7 +107,7 @@ static lqt_parameter_info_static_t dummy_parameters[] =
 
 static lqt_codec_info_static_t codec_info_raw =
   {
-  name:        "Raw",
+  name:        "raw",
   long_name:   "RGB uncompressed",
   description: "RGB uncompressed. Allows alpha",
   fourccs:     fourccs_raw,
@@ -70,11 +115,12 @@ static lqt_codec_info_static_t codec_info_raw =
   direction:   LQT_DIRECTION_BOTH,
 #ifdef DUMMY_PARAMETERS
   encoding_parameters: dummy_parameters,
-  decoding_parameters: dummy_parameters
+  decoding_parameters: dummy_parameters,
 #else
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
+  encoding_colormodels: encoding_colormodels_raw
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
@@ -86,7 +132,8 @@ static lqt_codec_info_static_t codec_info_v308 =
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_v308
 
   };
 
@@ -99,7 +146,8 @@ static lqt_codec_info_static_t codec_info_v408 =
   type:              LQT_CODEC_VIDEO,
   direction:         LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_v408
 
   };
 
@@ -112,7 +160,8 @@ static lqt_codec_info_static_t codec_info_v410 =
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_v410
 
   };
 
@@ -125,7 +174,8 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_yuv2
 
   };
 
@@ -138,7 +188,8 @@ static lqt_codec_info_static_t codec_info_yuv4 =
     type:        LQT_CODEC_VIDEO,
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    encoding_colormodels: encoding_colormodels_yuv4
 
   };
 
@@ -151,9 +202,9 @@ static lqt_codec_info_static_t codec_info_yv12 =
     type:        LQT_CODEC_VIDEO,
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
-
-    
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    encoding_colormodels: encoding_colormodels_yv12
+        
   };
 
 /* These are called from the plugin loader */

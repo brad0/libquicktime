@@ -19,9 +19,7 @@ extern lqt_codec_info_t * lqt_video_codecs;
  *  contained cocecs
  */
 
-lqt_codec_info_t * lqt_read_codec_file(const char * filename);
-
-void lqt_write_codec_file(const char * filename);
+lqt_codec_info_t * lqt_registry_read();
 
 void lqt_register_audio_codec(lqt_codec_info_t * info);
   
@@ -59,5 +57,5 @@ str[4] = fourcc & 0x00;
 lqt_codec_info_t * lqt_find_audio_codec(char * fourcc, int encode);
 lqt_codec_info_t * lqt_find_video_codec(char * fourcc, int encode);
 
-void lqt_codecs_lock();
-void lqt_codecs_unlock();
+void lqt_registry_lock();
+void lqt_registry_unlock();

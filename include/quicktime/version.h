@@ -8,6 +8,6 @@
  *  cycle but is hopefully constant afterwards
  */
 
-#define LQT_CODEC_API_VERSION 0
+#define LQT_CODEC_API_VERSION 1
 
 #endif /* __LQT_VERSION_H_ */

@@ -1,10 +1,17 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
+#include <quicktime/colormodels.h>
 #include "dv.h"
 #include <libdv/dv.h>
 
 static char * fourccs_dv[]  = { QUICKTIME_DV, (char*)0 };
 
+static int encoding_colormodels_dv[] =
+  {
+    BC_YUV422,
+    LQT_COLORMODEL_NONE
+  };
+  
 static lqt_parameter_info_static_t decode_parameters_dv[] =
   {
      { 
@@ -53,7 +60,8 @@ static lqt_codec_info_static_t codec_info_dv =
     type:        LQT_CODEC_VIDEO,
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: encode_parameters_dv,
-    decoding_parameters: decode_parameters_dv
+    decoding_parameters: decode_parameters_dv,
+    encoding_colormodels: encoding_colormodels_dv
   };
 
 

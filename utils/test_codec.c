@@ -35,10 +35,6 @@ int main()
     lqt_dump_codec_info(lqt_get_video_codec_info(i));
     }
 
-  /* Write a codec file into quicktime_codecs.txt */
-
-  lqt_write_codec_file("quicktime_codecs.txt");
-
 #endif
   return 0;
   }

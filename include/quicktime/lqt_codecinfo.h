@@ -91,12 +91,17 @@ struct lqt_codec_info_s
   
   int num_fourccs;           /* Fourccs, this codec can handle */
   char ** fourccs;
-
+  
   int num_encoding_parameters;
   lqt_parameter_info_t * encoding_parameters;
 
   int num_decoding_parameters;
   lqt_parameter_info_t * decoding_parameters;
+
+  /* Colormodels this codec can handle */
+  
+  int num_encoding_colormodels;
+  int * encoding_colormodels;
   
   /* The following members are set by libquicktime      */
   
@@ -128,9 +133,18 @@ void lqt_registry_init();
 void lqt_registry_destroy();
 
 /*
- *  Routines, you need, when you want to build configuration dialogs
- *  or other fun stuff
+ *  Save the registry file ~/.libquicktime_codecs
+ *  (locks the registry)
  */
+
+void lqt_registry_write();
+
+
+/******************************************************
+ *  Non thread save functions for querying the
+ *  codec registry. Suitable for single threaded
+ *  applications (might become obsolete)
+ ******************************************************/
 
 /*
  *  Get the numbers of codecs
@@ -150,22 +164,55 @@ const lqt_codec_info_t * lqt_get_audio_codec_info(int index);
 
 const lqt_codec_info_t * lqt_get_video_codec_info(int index);
 
+/********************************************************************
+ *  Thread save function for getting codec parameters
+ *  All these functions return a NULL terminated array of local
+ *  copies of the codec data which must be freed using 
+ *  lqt_destroy_codec_info(lqt_codec_info_t ** info) declared below
+ ********************************************************************/
+
 /*
- *   Get corresponding info structures
- *   This creates a local copy of the info structure,
- *   which must be freed by the caller
+ *  Return an array of any combination of audio/video en/decoders
  */
 
-lqt_codec_info_t * lqt_get_audio_codec_info_c(int index);
+lqt_codec_info_t ** lqt_query_registry(int audio, int video,
+                                       int encode, int decode);
 
-lqt_codec_info_t * lqt_get_video_codec_info_c(int index);
+/*
+ *  Find a codec by it's unique (short) name
+ */
+
+lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name);
+
+lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name);
+
+/*
+ *  Get infos about the Codecs of a file
+ *  To be called after quicktime_open() when reading
+ *  or quicktime_set_audio()/quicktime_set_video() when writing
+ */
+
+lqt_codec_info_t ** lqt_audio_codec_from_file(quicktime_t *, int track);
+
+lqt_codec_info_t ** lqt_video_codec_from_file(quicktime_t *, int track);
+                              
 
 /*
  *  Destroys the codec info structure returned by the functions
  *  above
  */
 
-void lqt_destroy_codec_info(lqt_codec_info_t * info);
+void lqt_destroy_codec_info(lqt_codec_info_t ** info);
+
+/******************************************************************
+ * Store default values in the registry (also thread save)
+ ******************************************************************/
+
+void lqt_set_default_parameter(lqt_codec_type type, int encode,
+                               const char * codec_name,
+                               const char * parameter_name,
+                               lqt_parameter_value_t * val);
+
 
 /*
  *  Dump codec info, only for debugging + testing

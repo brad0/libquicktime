@@ -1,3 +1,11 @@
+if HAVE_GTK
+gtk_subdirs=gtk
+else
+gtk_subdirs=
+endif
+
+SUBDIRS = $(gtk_subdirs)
+
 noinst_PROGRAMS=test_codec testqt
 
 bin_PROGRAMS=qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover

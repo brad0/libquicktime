@@ -11,6 +11,7 @@
 extern int get_codec_api_version() { return LQT_CODEC_API_VERSION; }
 #endif
 
+
 /*
  *  Functions and datatypes for exclusive
  *  use by codec modules
@@ -75,6 +76,8 @@ typedef struct
   lqt_parameter_info_static_t * encoding_parameters;
   lqt_parameter_info_static_t * decoding_parameters;
 
+  int * encoding_colormodels;
+   
   } lqt_codec_info_static_t;
 
 /*

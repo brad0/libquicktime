@@ -1,8 +1,17 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
+#include <quicktime/colormodels.h>
 #include "qtpng.h"
 
 static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
+
+static int encoding_colormodels_png[] =
+  {
+    BC_RGB888,
+    BC_RGBA8888,
+    LQT_COLORMODEL_NONE
+  };
+
 
 static lqt_codec_info_static_t codec_info_png =
   {
@@ -13,7 +22,8 @@ static lqt_codec_info_static_t codec_info_png =
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_colormodels: encoding_colormodels_png
   };
 
 /* These are called from the plugin loader */

@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include <limits.h>
 
 #include <quicktime/lqt.h>
 
@@ -73,12 +73,31 @@ static const char * real_name_key       = "RealName: ";
 static const char * num_options_key     = "NumOptions: ";
 static const char * option_key          = "Options: ";
 
+/* Encoding colormodels */
 
-/* Returns a NULL terminated list of all codecs */
+static const char * num_encoding_colormodels_key = "NumEncodingColormodels: ";
+static const char * encoding_colormodel_key =      "EncodingColormodel: ";
+
 
 #define READ_BUFFER_SIZE 2048
 
 #define CHECK_KEYWORD(key) (!strncmp(line, key, strlen(key)))
+
+static char filename_buffer[PATH_MAX];
+
+static void create_filename()
+  {
+  /* Obtain the home directory */
+
+  char * home_dir;
+  
+  home_dir = getenv("HOME");
+    
+  strcpy(filename_buffer, home_dir);
+
+  strcat(filename_buffer, "/.libquicktime_codecs");
+  
+  }
 
 static char * __lqt_strdup(const char * string)
   {
@@ -211,6 +230,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
   int i;
   
   int encoding_parameters_read = 0;
+  int encoding_colormodels_read = 0;
   int decoding_parameters_read = 0;
   
   uint32_t tmp_fourcc;
@@ -369,11 +389,34 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       }
     else if(CHECK_KEYWORD(end_codec_key))
       break;
+
+    /* Number of encoding colormodels */
+
+    else if(CHECK_KEYWORD(num_encoding_colormodels_key))
+      {
+      pos = line + strlen(num_encoding_colormodels_key);
+      codec->num_encoding_colormodels = atoi(pos);
+      if(codec->num_encoding_colormodels)
+        codec->encoding_colormodels =
+          malloc(codec->num_encoding_colormodels *
+                 sizeof(int));
+      else
+        codec->encoding_colormodels = (int*)0;
+      }
+    else if(CHECK_KEYWORD(encoding_colormodel_key))
+      {
+      pos = line + strlen(encoding_colormodel_key);
+      codec->encoding_colormodels[encoding_colormodels_read] =
+        lqt_string_to_colormodel(pos);
+      encoding_colormodels_read++;
+      }
+    
     }
+  
   }
 
 
-lqt_codec_info_t * lqt_read_codec_file(const char * filename)
+lqt_codec_info_t * lqt_registry_read()
   {
   FILE * input;
   char * line;
@@ -385,16 +428,20 @@ lqt_codec_info_t * lqt_read_codec_file(const char * filename)
   int num_audio_codecs = 0;
   int num_video_codecs = 0;
 #endif
-
   
 #ifndef NDEBUG
-  fprintf(stderr, "Reading codec file %s...", filename);
+  fprintf(stderr, "Reading codec file %s...", filename_buffer);
 #endif
+
+  if(*filename_buffer == '\0')
+    create_filename();
   
-  input = fopen(filename, "r");
+  input = fopen(filename_buffer, "r");
  
   if(!input)
     {
+    lqt_registry_unlock();
+
 #ifndef NDEBUG
     fprintf(stderr, "failed\n");
 #endif
@@ -584,28 +631,44 @@ static void write_codec_info(const lqt_codec_info_t * info, FILE * output)
     write_parameter_info(output, &(info->decoding_parameters[i]), 0);
     }
 
+  fprintf(output, "%s%d\n", num_encoding_colormodels_key,
+          info->num_encoding_colormodels);
+
+  for(i = 0; i < info->num_encoding_colormodels; i++)
+    {
+    fprintf(output, "%s%s\n", encoding_colormodel_key,
+            lqt_colormodel_to_string(info->encoding_colormodels[i]));
+    }
+  
   /* Module filename and index */
   fprintf(output, "%s%s\n", module_filename_key, info->module_filename);
   fprintf(output, "%s%d\n", module_index_key, info->module_index);
   fprintf(output, "%s%u\n", module_file_time_key, info->file_time);
-  
-
-  
+    
   fprintf(output, "%s\n", end_codec_key);
   }
 
-void lqt_write_codec_file(const char * filename)
+void lqt_registry_write()
   {
   int i;
   FILE * output;
-
-  lqt_codec_info_t * codec_info;
   
-  output = fopen(filename, "w");
+  lqt_codec_info_t * codec_info;
 
+  lqt_registry_lock();
+  
+  if(*filename_buffer == '\0')
+    create_filename();
+
+#ifndef NDEBUG
+  fprintf(stderr, "Writing codec file %s...", filename_buffer);
+#endif
+  
+  output = fopen(filename_buffer, "w");
+  
   if(!output)
     return;
-
+  
   /*
    *  Write initial comment
    */
@@ -614,7 +677,7 @@ void lqt_write_codec_file(const char * filename)
 # It is automatically generated and should not be edited.\n\
 # If you canged it, and your libquicktime program doesn't work\n\
 # anymore, delete it, and you will get a new one\n");
-
+  
   codec_info = lqt_audio_codecs;
   
   for(i = 0; i < lqt_num_audio_codecs; i++)
@@ -630,4 +693,11 @@ void lqt_write_codec_file(const char * filename)
     codec_info = codec_info->next;
     }
   fclose(output);
+  lqt_registry_unlock();
+
+#ifndef NDEBUG
+  fprintf(stderr, "done\n");
+#endif
+
+
   }

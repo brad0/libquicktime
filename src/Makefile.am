@@ -58,6 +58,7 @@ util.c \
 vmhd.c \
 workarounds.c \
 lqt_codecfile.c \
+lqt_color.c \
 lqt_codecinfo.c \
 lqt_loader.c
 

@@ -179,15 +179,25 @@ AC_CHECK_LIB(rom1394, main)
 
 AC_SEARCH_LIBS(pthread_create, [gthread pthread])
 
+dnl
+dnl Check for gtk
+dnl THis is neccesary for the utils/gtk subdirectory
+dnl
 
-dnl REQUIRES='glib >= 1.2.4'
-dnl PKG_CHECK_MODULES(LIBDV,$REQUIRES)
-AM_PATH_GLIB( [1.2.4] )
+have_gtk=false
+
+AM_PATH_GTK(1.2.8, have_gtk=true)
+
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+
+AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
+
 
 AC_SUBST(LIBS)
 
-CPPFLAGS="$CPPFLAGS $GLIB_CFLAGS"
-LDFLAGS="$LDFLAGS $GLIB_LIBS"
+dnl CPPFLAGS="$CPPFLAGS"
+dnl LDFLAGS="$LDFLAGS"
 
 AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h stddef.h)
 
@@ -486,11 +496,14 @@ AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
 
 # -L is required so that linker can find libquicktime when DESTDIR is used.
 # libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
-MODULE_LIBADD=-L$prefix/lib ../../src/libquicktime.la
+MODULE_LIBADD="-L$prefix/lib ../../src/libquicktime.la"
 AC_SUBST(MODULE_LIBADD)
 
 UTIL_LIBADD=../src/libquicktime.la
 AC_SUBST(UTIL_LIBADD)
+
+GTKUTIL_LIBADD=../../src/libquicktime.la
+AC_SUBST(GTKUTIL_LIBADD)
 
 dnl
 dnl LIBQUICKTIME
@@ -511,7 +524,8 @@ plugins/png/Makefile \
 plugins/opendivx/Makefile \
 plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
-utils/Makefile])
+utils/Makefile \
+utils/gtk/Makefile])
 
 dnl
 dnl GMERLIN

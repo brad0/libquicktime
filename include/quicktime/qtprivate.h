@@ -512,7 +512,8 @@ typedef struct
 		int track);
 
 	void *priv;
-        void *module; /* Needed by libquicktime for dynamic loading */
+        void *module;     /* Needed by libquicktime for dynamic loading */
+        char *codec_name; /* Needed by libquicktime */
 } quicktime_codec_t;
 
 

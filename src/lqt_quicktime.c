@@ -1,7 +1,7 @@
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <glib.h>
+//#include <glib.h>
 #include <sys/stat.h>
 #include <string.h>
 

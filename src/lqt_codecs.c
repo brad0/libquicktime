@@ -5,6 +5,7 @@
 #include <lqt_codecinfo_private.h>
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
+#include <string.h>
 
 static int quicktime_delete_vcodec_stub(quicktime_video_map_t *vtrack)
 {
@@ -133,7 +134,7 @@ static int get_acodec_index(char *compressor)
 #endif /* libquicktime */
 
 /*
- *  Original quicktime4linux function changed for dynamic for dynamic loading
+ *  Original quicktime4linux function changed for dynamic loading
  */
 
 int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
@@ -159,10 +160,13 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
   fprintf(stderr, "Trying to find %s for fourcc \"%s\"...",
           (encode ? "Encoder" : "Decoder"), compressor);
 #endif
+
+  lqt_registry_lock();
   codec_info = lqt_find_video_codec(compressor, encode);
   
   if(!codec_info)
     {
+    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed\n");
 #endif
@@ -182,6 +186,7 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
   
   if(!module)
     {
+    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed, %s\n", dlerror());
 #endif
@@ -190,6 +195,16 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode)
 #ifndef NDEBUG
   fprintf(stderr, "Success\n");
 #endif
+
+  ((quicktime_codec_t*)vtrack->codec)->codec_name =
+    malloc(strlen(codec_info->name)+1);
+  strcpy(((quicktime_codec_t*)vtrack->codec)->codec_name, codec_info->name);
+  
+  /*
+   *  Registry is no longer needed so we unlock it here
+   */
+  
+  lqt_registry_unlock();
   
   /* Set the module */
   
@@ -239,10 +254,13 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   fprintf(stderr, "Trying to find Audio %s for fourcc \"%s\"...",
           (encode ? "Encoder" : "Decoder"), compressor);
 #endif
+
+  lqt_registry_lock();
   codec_info = lqt_find_audio_codec(compressor, encode);
   
   if(!codec_info)
     {
+    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed\n");
 #endif
@@ -262,6 +280,7 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
   
   if(!module)
     {
+    lqt_registry_unlock();
 #ifndef NDEBUG
     fprintf(stderr, "failed, %s\n", dlerror());
 #endif
@@ -270,10 +289,19 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
 #ifndef NDEBUG
   fprintf(stderr, "Success\n");
 #endif
+
+  ((quicktime_codec_t*)atrack->codec)->codec_name = malloc(strlen(codec_info->name)+1);
+  strcpy(((quicktime_codec_t*)atrack->codec)->codec_name, codec_info->name);
+    
+  /*
+   *  Registry is no longer needed so we unlock it here
+   */
+  
+  lqt_registry_unlock();
   
   /* Set the module */
   
-  ((quicktime_codec_t*)atrack->codec)->module = module;
+  ((quicktime_codec_t*)((quicktime_codec_t*)atrack->codec))->module = module;
   
   /* Get the codec finder for the module */
   
@@ -298,10 +326,10 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode)
 
 
 int quicktime_delete_vcodec(quicktime_video_map_t *vtrack)
-{
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec(vtrack);
-        /* Close the module */
-
+  {
+  ((quicktime_codec_t*)vtrack->codec)->delete_vcodec(vtrack);
+  /* Close the module */
+  
 #ifndef NDEBUG
   fprintf(stderr, "Closing module...");
 #endif
@@ -310,27 +338,31 @@ int quicktime_delete_vcodec(quicktime_video_map_t *vtrack)
 #ifndef NDEBUG
   fprintf(stderr, "done\n");
 #endif
-	free(vtrack->codec);
-	vtrack->codec = 0;
-	return 0;
+  if(((quicktime_codec_t*)vtrack->codec)->codec_name)
+    free(((quicktime_codec_t*)vtrack->codec)->codec_name);
+  free(vtrack->codec);
+  vtrack->codec = 0;
+  return 0;
 }
 
 int quicktime_delete_acodec(quicktime_audio_map_t *atrack)
-{
-	((quicktime_codec_t*)atrack->codec)->delete_acodec(atrack);
-        /* Close the module */
+  {
+  ((quicktime_codec_t*)atrack->codec)->delete_acodec(atrack);
+  /* Close the module */
 #ifndef NDEBUG
-        fprintf(stderr, "Closing module...");
+  fprintf(stderr, "Closing module...");
 #endif
-        if(((quicktime_codec_t*)atrack->codec)->module)
-          dlclose(((quicktime_codec_t*)atrack->codec)->module);
+  if(((quicktime_codec_t*)atrack->codec)->module)
+    dlclose(((quicktime_codec_t*)atrack->codec)->module);
 #ifndef NDEBUG
-        fprintf(stderr, "done\n");
+  fprintf(stderr, "done\n");
 #endif
-	free(atrack->codec);
-	atrack->codec = 0;
-	return 0;
-}
+  if(((quicktime_codec_t*)atrack->codec)->codec_name)
+    free(((quicktime_codec_t*)atrack->codec)->codec_name);
+  free(atrack->codec);
+  atrack->codec = 0;
+  return 0;
+  }
 
 int quicktime_supported_video(quicktime_t *file, int track)
 {
