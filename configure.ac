@@ -38,6 +38,8 @@ AC_PROG_RANLIB
 AC_PROG_CC
 AC_LANG_C
 
+AC_C_BIGENDIAN
+
 AC_CACHE_SAVE
 
 dnl This is necessary for libtool assembler support
@@ -636,6 +638,7 @@ plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/ferguson/Makefile \
 plugins/rtjpeg/Makefile \
+plugins/svq/Makefile \
 plugins/xanim/Makefile \
 plugins/xanim/libxanimcodecs/Makefile \
 utils/Makefile \
