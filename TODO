@@ -1,29 +1,9 @@
-Before Prerelease:
-
-- Clarify, if our BC_YUV420P is YV12 or I420 and adapt all plugins for this
-  (Or introduce 2 colormodels?)
-
-- Due to the increased number of header files, we should think, if
-  we want to install our headers in <prefix>/include/libquicktime
-
 Before "real" (stable or whatever) Release:
 
 - Check, if we want another codec fuction get_best_colormodel() and
   export this to a public quicktime_get_best_colormodel(). This would
   be possible for most codecs and enable optimized video handling in
   applications.
-
-- Discuss, which types codec for parameters we want to support (so we can
-  freeze the codec API). Currently, we have int and string, but only int is
-  used for now. Avifile has stringlist as an additional type (string
-  with several options) defined. It could be used for menus like:
-
-  Motion Compensation  Zero
-                       Logarithmic
-                       Fastest
-
-  Also bool could be an own type, but it can also be identified by using integer and
-  setting the minimum value to 0 and the maximum value to 1.
 
 Before binary release (prepare for having codecs as separate packages from different
 people):
@@ -68,9 +48,6 @@ Codecs:
 
 - Wait for xvid (www.videocoding.de) and try this
 
-- Port quicktime codecs from the opensource part of xanim (are are lot, mostly old and
-  simple ones) to libquicktime (Does the xanim license allow this?)
-
 - Copy the twos codec and make a "swot" quicktime codec from this (by just changing
   endianess)
 
@@ -81,8 +58,7 @@ Codecs:
 - Check for the vp3 codec (www.vp3.com). It's opensource but commercial and available as
   quicktime codec on Win32 and Mac AFAIK.
 
-- Check for a loader of dynamic xanim DLLs (for some commercial closed source codecs).
-  According to the codec licenses however, it's not allowed to use binary xanim codecs
-  for something other than xanim.
+- Write a small LGPL library which contains all xanim codecs and the xanim dll loader
+  (Have the permission from xanim author). Write libquicktime plugins for this
 
 - Meditate about loading win32 DLLs to make even cooler things happen.
