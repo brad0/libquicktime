@@ -13,10 +13,18 @@ void quicktime_mdhd_init(quicktime_mdhd_t *mdhd)
 	mdhd->quality = 100;
 }
 
+
+void quicktime_mdhd_init_panorama(quicktime_t *file, 
+								quicktime_mdhd_t *mdhd,
+								int timescale)
+{
+	mdhd->time_scale = timescale;
+//printf("quicktime_mdhd_init_panorama %d %f\n", mdhd->time_scale, frame_rate);
+	mdhd->duration = 0;      /* set this when closing */
+}
+
 void quicktime_mdhd_init_video(quicktime_t *file, 
-								quicktime_mdhd_t *mdhd, 
-								int frame_w,
-								int frame_h, 
+								quicktime_mdhd_t *mdhd,
 								int timescale)
 {
 	mdhd->time_scale = timescale;

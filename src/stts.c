@@ -19,6 +19,18 @@ void quicktime_stts_init_table(quicktime_stts_t *stts)
 	}
 }
 
+
+void quicktime_stts_init_panorama(quicktime_t *file, quicktime_stts_t *stts, int frame_duration)
+{
+	quicktime_stts_table_t *table;
+	quicktime_stts_init_table(stts);
+	table = &(stts->table[0]);
+
+	table->sample_count = 0;      /* need to set this when closing */
+	table->sample_duration = frame_duration;
+//printf("quicktime_stts_init_panorama %d %f\n", time_scale, frame_rate);
+}
+
 void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int frame_duration)
 {
 	quicktime_stts_table_t *table;

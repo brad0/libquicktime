@@ -18,10 +18,10 @@ int quicktime_navg_init(quicktime_navg_t *navg)
 	navg->endHPan = 360;
 	navg->endVPan = -90;
 	navg->startVPan = 90;
-	navg->initialHPan = 340;
-	navg->initialVPan = 60;
+	navg->initialHPan = 180;
+	navg->initialVPan = 30;
 	navg->reserved2 = 0;
-return 0;
+	return 0;
 }
 
 int quicktime_navg_delete(quicktime_navg_t *navg)

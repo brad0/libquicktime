@@ -21,6 +21,16 @@ void quicktime_hdlr_init(quicktime_hdlr_t *hdlr)
 	strcpy(hdlr->component_name, "Linux Media Handler");
 }
 
+
+void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr)
+{
+	hdlr->component_subtype[0] = 'S';
+	hdlr->component_subtype[1] = 'T';
+	hdlr->component_subtype[2] = 'p';
+	hdlr->component_subtype[3] = 'n';
+	strcpy(hdlr->component_name, "Linux Panorama Media Handler");
+}
+
 void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr)
 {
 	hdlr->component_subtype[0] = 'v';
@@ -76,6 +86,7 @@ void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	hdlr->component_flags = quicktime_read_int32(file);
 	hdlr->component_flag_mask = quicktime_read_int32(file);
 	quicktime_read_pascal(file, hdlr->component_name);
+	
 }
 
 void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
@@ -86,7 +97,7 @@ void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	quicktime_write_char(file, hdlr->version);
 	quicktime_write_int24(file, hdlr->flags);
 	quicktime_write_char32(file, hdlr->component_type);
-	quicktime_write_char32(file, hdlr->component_subtype);
+	quicktime_write_char32(file, hdlr->component_subtype); 
 	quicktime_write_int32(file, hdlr->component_manufacturer);
 	quicktime_write_int32(file, hdlr->component_flags);
 	quicktime_write_int32(file, hdlr->component_flag_mask);

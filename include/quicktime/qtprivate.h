@@ -31,6 +31,11 @@
 #define QTVR_OBJ 1
 #define QTVR_PAN 2
 
+#define QTVR_STANDARD_OBJECT 1
+#define QTVR_OLD_NAVIGABLE_MOVIE_SCENE 2 
+#define QTVR_OBJECT_IN_SCENE 3
+
+
 //#include "codecs.h"
 #include <stdio.h>
 #include <inttypes.h>
@@ -130,6 +135,42 @@ typedef struct
 
 typedef struct
 {
+	long reserved1;
+	long reserved2;
+	int version;
+	int revision;
+	
+	long STrack; /* Prefix 'S' == Scene */
+	long LowResSTrack;
+	long reserved3[6];
+	long HSTrack; /* Prefix 'HS' == HotSpot */
+	long reserved4[9];
+	
+	float HPanStart;
+	float HPanEnd;
+	float VPanStart;
+	float VPanEnd;
+	float MinZoom;
+	float MaxZoom;
+	
+	long SHeight;
+	long SWidth;
+	long NumFrames;
+	int reserved5;
+	int SNumFramesHeight;
+	int SNumFramesWidth;
+	int SDepth;
+	
+	long HSHeight;
+	long HSWidth;
+	int reserved6;
+	int HSNumFramesHeight;
+	int HSNumFramesWidth;
+	int HSDepth;
+} quicktime_pano_t;
+
+typedef struct
+{
 	char format[4];
 	char reserved[6];
 	int data_reference;
@@ -160,6 +201,7 @@ typedef struct
 	quicktime_pasp_t pasp;
 	quicktime_colr_t colr;
 	quicktime_clap_t clap;
+	quicktime_pano_t pano;
 
 /* audio description */
 	int channels;
@@ -334,6 +376,28 @@ typedef struct
 	int reserved;
 } quicktime_smhd_t;
 
+
+/* Base media info */
+
+typedef struct
+{
+	int version;
+	long flags;
+	int graphics_mode;
+	int opcolor[3];
+	int balance;
+	int reserved;
+} quicktime_gmin_t;
+
+
+/* Base media header */
+
+typedef struct
+{
+    	quicktime_gmin_t gmin;
+} quicktime_gmhd_t;
+
+
 /* handler reference */
 
 typedef struct
@@ -354,8 +418,11 @@ typedef struct
 {
 	int is_video;
 	int is_audio;
+	int has_baseheader;
+	int is_panorama;
 	quicktime_vmhd_t vmhd;
 	quicktime_smhd_t smhd;
+	quicktime_gmhd_t gmhd;
 	quicktime_stbl_t stbl;
 	quicktime_hdlr_t hdlr;
 	quicktime_dinf_t dinf;
@@ -662,6 +729,30 @@ typedef struct
         int color_model, row_span, row_span_uv;
 
 } quicktime_video_map_t;
+
+/* pHdr */
+
+typedef struct
+{
+    unsigned long    nodeID;
+    float        defHPan;
+    float        defVPan;
+    float        defZoom;
+
+    // constraints for this node; use zero for default
+    float        minHPan;
+    float        minVPan;
+    float        minZoom;
+    float        maxHPan;
+    float        maxVPan;
+    float        maxZoom;
+
+    long        reserved1;        // must be zero
+    long        reserved2;        // must be zero
+    long        nameStrOffset;        // offset into string table atom
+    long        commentStrOffset;    // offset into string table atom
+} quicktime_pHdr_t;
+
 
 /* file descriptor passed to all routines */
 

@@ -86,7 +86,7 @@ void quicktime_udta_dump(quicktime_udta_t *udta)
 	    							  udta->ctyp[1],
 							    	  udta->ctyp[2],
 							          udta->ctyp[3]);
-	if(udta->is_qtvr) quicktime_navg_dump(&(udta->navg));
+	if(quicktime_match_32(udta->ctyp, "stna")) quicktime_navg_dump(&(udta->navg));
 }
 
 int quicktime_read_udta_string(quicktime_t *file, char **string, int *size)
@@ -177,8 +177,8 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_ato
 			udta->ctyp[1] = quicktime_read_char(file);
 			udta->ctyp[2] = quicktime_read_char(file);
 			udta->ctyp[3] = quicktime_read_char(file);
-			if (strcmp(udta->ctyp, "stna") ||
-			    strcmp(udta->ctyp, "STpn")) udta->is_qtvr = 1;
+			if (quicktime_match_32(udta->ctyp, "stna") ||
+			    quicktime_match_32(udta->ctyp, "STpn")) udta->is_qtvr = 1;
                 }
 		else
 		quicktime_atom_skip(file, &leaf_atom);
@@ -256,7 +256,7 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
 	}
         if(udta->is_qtvr)
 	{
-		quicktime_write_navg(file, &(udta->navg));
+		if (quicktime_match_32(udta->ctyp, "stna")) quicktime_write_navg(file, &(udta->navg));
 		
 	    	quicktime_atom_write_header(file, &subatom, "ctyp");
 		quicktime_write_char(file, udta->ctyp[0]);

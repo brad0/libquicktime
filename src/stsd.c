@@ -18,6 +18,25 @@ void quicktime_stsd_init_table(quicktime_stsd_t *stsd)
 	}
 }
 
+
+void quicktime_stsd_init_panorama(quicktime_t *file, 
+								quicktime_stsd_t *stsd,
+								int width,
+								int height)
+{
+	quicktime_stsd_table_t *table;
+	quicktime_stsd_init_table(stsd);
+	
+	table = &(stsd->table[0]);
+	table->format[0] = 'p';
+	table->format[1] = 'a';
+	table->format[2] = 'n';
+	table->format[3] = 'o';
+	table->pano.SWidth = width;
+	table->pano.SHeight = height;
+}
+
+
 void quicktime_stsd_init_video(quicktime_t *file, 
 								quicktime_stsd_t *stsd, 
 								int frame_w,

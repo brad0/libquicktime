@@ -43,6 +43,8 @@ dinf.c \
 dref.c \
 edts.c \
 elst.c \
+gmhd.c \
+gmin.c \
 graphics.c \
 hdlr.c \
 matrix.c \
@@ -52,7 +54,10 @@ mdia.c \
 minf.c \
 moov.c \
 mvhd.c \
+navg.c \
+pano.c \
 pasp.c \
+pHdr.c \
 smhd.c \
 stbl.c \
 stco.c \
@@ -67,7 +72,6 @@ trak.c \
 udta.c \
 util.c \
 vmhd.c \
-navg.c \
 workarounds.c \
 lqt_codecfile.c \
 lqt_color.c \

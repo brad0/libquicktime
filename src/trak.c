@@ -32,10 +32,25 @@ int quicktime_trak_init_video(quicktime_t *file,
                 frame_duration,
                 timescale,
 		compressor);
+
+	return 0;
+}
+
+int quicktime_trak_init_panorama(quicktime_t *file, quicktime_trak_t *trak, int width, int height, int frame_duration, int timescale)
+{
+
+	quicktime_tkhd_init_video(file, 
+		&(trak->tkhd), 
+		height, 
+		height/2);
+	quicktime_mdia_init_panorama(file, 
+		&(trak->mdia), width, height, timescale, frame_duration);
 	quicktime_edts_init_table(&(trak->edts));
 
 	return 0;
 }
+
+
 
 int quicktime_trak_init_audio(quicktime_t *file, 
 							quicktime_trak_t *trak, 
@@ -159,6 +174,7 @@ int quicktime_write_trak(quicktime_t *file,
 	trak->mdia.mdhd.time_scale = timescale;
 
 	quicktime_write_tkhd(file, &(trak->tkhd));
+	if (trak->mdia.minf.is_panorama) trak->edts.elst.total_entries = 1;
 	quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
 	quicktime_write_mdia(file, &(trak->mdia));
 
@@ -511,7 +527,6 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 	int64_t offset = chunk->start;
 	int sample_size = quicktime_position(file) - offset;
 
-
 // Write AVI footer
 	if(file->use_avi)
 	{
@@ -545,6 +560,12 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		current_chunk - 1, 
 		sample_size);
 
+	if(trak->mdia.minf.is_panorama) {
+		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+		current_chunk - 1, 
+		sample_size);	
+	}
+	
 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
 		current_chunk, 
 		samples);
@@ -583,14 +604,15 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 {
 	quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
 	int i;
+
 	*duration = 0;
 
 	for(i = 0; i < stts->total_entries; i++)
 	{
 		*duration += stts->table[i].sample_duration * stts->table[i].sample_count;
 	}
-
 	*timescale = trak->mdia.mdhd.time_scale;
+
 	return 0;
 }
 

@@ -154,6 +154,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 //printf("quicktime_read_stsd_video 2\n");
 }
 
+
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table)
 {
 	quicktime_write_int16(file, table->version);
@@ -203,11 +204,21 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quickt
 	table->format[1] = leaf_atom.type[1];
 	table->format[2] = leaf_atom.type[2];
 	table->format[3] = leaf_atom.type[3];
+
 	quicktime_read_data(file, table->reserved, 6);
 	table->data_reference = quicktime_read_int16(file);
 
-	if(minf->is_audio) quicktime_read_stsd_audio(file, table, &leaf_atom);
-	if(minf->is_video) quicktime_read_stsd_video(file, table, &leaf_atom);
+	/* Panoramas are neither audio nor video */
+	if (quicktime_match_32(leaf_atom.type, "pano"))
+	{	    
+	    minf->is_panorama = 1;
+	    quicktime_read_pano(file, &(table->pano), &leaf_atom);
+	}
+	else 
+	{
+	    if(minf->is_audio) quicktime_read_stsd_audio(file, table, &leaf_atom);
+	    if(minf->is_video) quicktime_read_stsd_video(file, table, &leaf_atom);
+	}
 }
 
 void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
@@ -248,7 +259,8 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	quicktime_colr_init(&(table->colr));
 	quicktime_mjqt_init(&(table->mjqt));
 	quicktime_mjht_init(&(table->mjht));
-	
+	quicktime_pano_init(&(table->pano));
+
 	table->channels = 0;
 	table->sample_size = 0;
 	table->compression_id = 0;
@@ -315,6 +327,7 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
 	printf("       sample_rate %f\n", table->sample_rate);
 }
 
+
 void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 {
 	quicktime_minf_t *minf = minf_ptr;
@@ -324,6 +337,9 @@ void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 
 	if(minf->is_audio) quicktime_stsd_audio_dump(table);
 	if(minf->is_video) quicktime_stsd_video_dump(table);
+
+	if (quicktime_match_32(table->format, "pano"))
+	    quicktime_pano_dump(&(table->pano));
 }
 
 void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table)
@@ -333,9 +349,10 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 /*printf("quicktime_write_stsd_table %c%c%c%c\n", table->format[0], table->format[1], table->format[2], table->format[3]); */
 	quicktime_write_data(file, table->reserved, 6);
 	quicktime_write_int16(file, table->data_reference);
-	
+
 	if(minf->is_audio) quicktime_write_stsd_audio(file, table);
 	if(minf->is_video) quicktime_write_stsd_video(file, table);
+	if(minf->is_panorama) quicktime_write_pano(file, &(table->pano));
 
 	quicktime_atom_write_footer(file, &atom);
 }

@@ -278,6 +278,7 @@ static int transcode_init(transcode_handle * h,
       return 0;
       }
     
+
     /* Set up the output track */
     
     lqt_set_video(h->out_file, 1,
@@ -365,18 +366,24 @@ static int transcode_init(transcode_handle * h,
     h->num_audio_samples = quicktime_audio_length(h->in_file, 0);
     }
 
-    if(!strcmp(qtvr,"obj")) {
-	lqt_qtvr_set_type(h->out_file, QTVR_OBJ);
+    if (qtvr) {
+	if(strncmp(qtvr,"obj", 3) == 0) {
+	    lqt_qtvr_set_type(h->out_file, QTVR_OBJ, 0 , 0, 0, 0, 0);
+	}
+	
+	if(strncmp(qtvr,"pano", 4) == 0) {
+	    lqt_qtvr_set_type(h->out_file, QTVR_PAN, qtvr_columns * h->height, qtvr_rows * h->width, h->frame_duration, h->timescale, 0);
+	}
+	
+	if(qtvr_columns) {
+	    lqt_qtvr_set_columns(h->out_file, (short)qtvr_columns);
+	}
+	
+	if(qtvr_rows) {
+	    lqt_qtvr_set_rows(h->out_file, (short)qtvr_rows);
+	}
     }
-
-    if(qtvr_columns) {
-	lqt_qtvr_set_columns(h->out_file, (short)qtvr_columns);
-    }
-
-    if(qtvr_rows) {
-	lqt_qtvr_set_rows(h->out_file, (short)qtvr_rows);
-    }
-
+    
   if(use_avi)
     quicktime_set_avi(h->out_file, 1);
   return 1;

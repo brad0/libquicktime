@@ -13,6 +13,27 @@ void quicktime_stbl_init(quicktime_stbl_t *stbl)
 	quicktime_stco_init(&(stbl->stco));
 }
 
+
+void quicktime_stbl_init_panorama(quicktime_t *file,
+								quicktime_stbl_t *stbl,
+								int width,
+								int height,
+								int frame_duration)
+{
+//printf("quicktime_stbl_init_panorama 1\n");
+	quicktime_stsd_init_panorama(file, &(stbl->stsd), width, height);
+//printf("quicktime_stbl_init_panorama 1 %d %f\n", time_scale, frame_rate);
+	quicktime_stts_init_panorama(file, &(stbl->stts), frame_duration);
+//printf("quicktime_stbl_init_video 1\n");
+	quicktime_stsc_init_video(file, &(stbl->stsc));
+//printf("quicktime_stbl_init_video 1\n");
+	quicktime_stsz_init_video(file, &(stbl->stsz));
+//printf("quicktime_stbl_init_video 1\n");
+	quicktime_stco_init_common(file, &(stbl->stco));
+//printf("quicktime_stbl_init_video 2\n");
+}
+
+
 void quicktime_stbl_init_video(quicktime_t *file, 
 								quicktime_stbl_t *stbl, 
 								int frame_w,
