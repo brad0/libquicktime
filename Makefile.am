@@ -7,11 +7,12 @@ FIREWIRE_DIR=
 endif
 
 SUBDIRS = \
-	  $(FIREWIRE_DIR) \
-	  src \
-	  include \
-          plugins \
-          utils
+$(FIREWIRE_DIR) \
+doc \
+src \
+include \
+plugins \
+utils
 
 EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4
 
@@ -23,8 +24,9 @@ m4data_DATA = lqt.m4
 
 
 DIST_SUBDIRS= \
-	src \
-	include \
-	plugins \
-	quicktime1394 \
-	utils
+doc \
+src \
+include \
+plugins \
+quicktime1394 \
+utils

@@ -197,7 +197,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_xanim.so
 
 %files devel
-%doc doc/*.html doc/qt4l/*.html
+%doc doc/*.html
 %attr(755,root,root) %{_libdir}/lib*.so
 %attr(755,root,root) %{_includedir}/quicktime
 %attr(755,root,root) %{_bindir}/lqt-config
