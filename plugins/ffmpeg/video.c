@@ -45,9 +45,9 @@ colormodels[] =
     { PIX_FMT_BGR24,    BC_BGR888,   1 },  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
     { PIX_FMT_YUV422P,  BC_YUV422P,  1 },  ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
     { PIX_FMT_YUV444P,  BC_YUV444P,  1 },  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
-    { PIX_FMT_RGBA32,   BC_RGBA8888, 1 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
     { PIX_FMT_YUV411P,  BC_YUV411P,  1 },  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
     { PIX_FMT_RGB565,   BC_RGB565,   1 },  ///< always stored in cpu endianness
+    { PIX_FMT_RGBA32,   BC_RGBA8888, 0 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
     { PIX_FMT_RGB555,   BC_RGB888,   0 },  ///< always stored in cpu endianness, most significant bit to 1
     { PIX_FMT_YUVJ420P, BC_YUV420P,  0 }, ///< Planar YUV 4:2:0 full scale (jpeg)
     { PIX_FMT_YUVJ422P, BC_YUV422P,  0 }, ///< Planar YUV 4:2:2 full scale (jpeg)
@@ -75,6 +75,12 @@ static unsigned char ** alloc_rows(int width, int height, int colormodel)
       ret[0] = malloc(width * height * 3);
       for(i = 1; i < height; i++)
         ret[i] = ret[0] + 3 * i * width;
+      break;
+    case BC_RGBA8888:
+      ret    = malloc(height * sizeof(*ret));
+      ret[0] = malloc(width * height * 4);
+      for(i = 1; i < height; i++)
+        ret[i] = ret[0] + 4 * i * width;
       break;
     case BC_YUV420P:
       ret    = malloc(3 * sizeof(*ret));
@@ -223,6 +229,89 @@ static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *c
 	return i;
 }
 
+/* Convert ffmpeg RGBA32 to BC_RGBA888 */
+
+/* From avcodec.h: */
+
+/*
+ * PIX_FMT_RGBA32 is handled in an endian-specific manner. A RGBA
+ * color is put together as:
+ *  (A << 24) | (R << 16) | (G << 8) | B
+ * This is stored as BGRA on little endian CPU architectures and ARGB on
+ * big endian CPUs.
+ */
+
+/* The only question is: WHY? */
+
+static void convert_image_decode_rgba(AVFrame * in_frame,
+                                      unsigned char ** out_frame,
+                                      int width, int height)
+  {
+  uint32_t r, g, b, a;
+  uint32_t * src_ptr;
+  uint8_t * dst_ptr;
+  int i, j;
+  //  fprintf(stderr, "DECODE RGBA %d %d\n", width, height);
+  for(i = 0; i < height; i++)
+    {
+    src_ptr = (uint32_t*)(in_frame->data[0] + i * in_frame->linesize[0]);
+    dst_ptr = out_frame[i];
+    for(j = 0; j < width; j++)
+      {
+      a = ((*src_ptr) & 0xff000000) >> 24;
+      r = ((*src_ptr) & 0x00ff0000) >> 16;
+      g = ((*src_ptr) & 0x0000ff00) >> 8;
+      b = ((*src_ptr) & 0x000000ff);
+      dst_ptr[0] = r;
+      dst_ptr[1] = g;
+      dst_ptr[2] = b;
+      //      dst_ptr[3] = a;
+      dst_ptr[3] = 0xff;
+      dst_ptr += 4;
+      src_ptr++;
+      }
+    }
+  }
+
+/*
+ *  Do a conversion from a ffmpeg special colorspace
+ *  to a libquicktime special one
+ */
+
+static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
+                                 unsigned char ** out_frame, int out_format,
+                                 int width, int height, int row_span)
+  {
+  AVPicture in_pic;
+  AVPicture out_pic;
+  int i, j;
+
+  /*
+   *  Could someone please tell me, how people can make such a brain dead
+   *  RGBA format like in ffmpeg??
+   */
+  if((in_format = PIX_FMT_RGBA32) && (out_format == BC_RGBA8888))
+    {
+    convert_image_decode_rgba(in_frame, out_frame, width, height);
+    return;
+    }
+  
+  memset(&in_pic,  0, sizeof(in_pic));
+  memset(&out_pic, 0, sizeof(out_pic));
+  
+  in_pic.data[0]      = in_frame->data[0];
+  in_pic.data[1]      = in_frame->data[1];
+  in_pic.data[2]      = in_frame->data[2];
+  in_pic.linesize[0]  = in_frame->linesize[0];
+  in_pic.linesize[1]  = in_frame->linesize[1];
+  in_pic.linesize[2]  = in_frame->linesize[2];
+  
+  fill_avpicture(&out_pic, out_frame, out_format, row_span);
+  img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(out_format),
+              &in_pic,  in_format,
+              width, height);
+  
+  }
 
 int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                                    int track)
@@ -242,8 +331,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   unsigned char *dp, *sp;
   int do_cmodel_transfer;
   int row_span;
-  AVPicture in_pic;
-  AVPicture out_pic;
   quicktime_ctab_t * ctab;
   int exact;
   
@@ -474,6 +561,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                      width*3);
               }
             break;
+#if 0
           case BC_RGBA8888:  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
             for(i = 0; i < height; i++)
               {
@@ -482,6 +570,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                      width*4);
               }
             break;
+#endif
           }
         }
       else if(!codec->do_imgconvert)
@@ -547,17 +636,9 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       else if(!do_cmodel_transfer)
         {
         //        fprintf(stderr, "img_convert...");
-        in_pic.data[0]      = codec->frame->data[0];
-        in_pic.data[1]      = codec->frame->data[1];
-        in_pic.data[2]      = codec->frame->data[2];
-        in_pic.linesize[0]  = codec->frame->linesize[0];
-        in_pic.linesize[1]  = codec->frame->linesize[1];
-        in_pic.linesize[2]  = codec->frame->linesize[2];
-
-        fill_avpicture(&out_pic, row_pointers, codec->lqt_colormodel, row_span);
-        img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(codec->lqt_colormodel),
-                    &in_pic,  codec->com.ffcodec_dec->pix_fmt,
-                    width, height);
+        convert_image_decode(codec->frame, codec->com.ffcodec_dec->pix_fmt,
+                      row_pointers, codec->lqt_colormodel,
+                      width, height, row_span);
         }
       else
         {
@@ -568,22 +649,11 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         if(!codec->tmp_buffer)
           codec->tmp_buffer = alloc_rows(width, height, codec->lqt_colormodel);
 
-        memset(&in_pic,  0, sizeof(in_pic));
-        memset(&out_pic, 0, sizeof(out_pic));
-        
-        in_pic.data[0]      = codec->frame->data[0];
-        in_pic.data[1]      = codec->frame->data[1];
-        in_pic.data[2]      = codec->frame->data[2];
-        in_pic.linesize[0]  = codec->frame->linesize[0];
-        in_pic.linesize[1]  = codec->frame->linesize[1];
-        in_pic.linesize[2]  = codec->frame->linesize[2];
 
-        fill_avpicture(&out_pic, codec->tmp_buffer, codec->lqt_colormodel, width);
+        convert_image_decode(codec->frame, codec->com.ffcodec_dec->pix_fmt,
+                             codec->tmp_buffer, codec->lqt_colormodel,
+                             width, height, width);
         
-        img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(codec->lqt_colormodel),
-                    &in_pic,  codec->com.ffcodec_dec->pix_fmt,
-                    width, height);
-
         cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
                         codec->tmp_buffer,  // unsigned char **input_rows,
                         row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */

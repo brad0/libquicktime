@@ -265,7 +265,7 @@ static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
   void * module = codec->module;
   int module_index;
   int (*get_stream_colormodel)(quicktime_t*,int, int, int *);
-    
+  fprintf(stderr, "lqt_get_decoder_colormodel_private 1\n");
   ret = codec_info[0]->decoding_colormodel;
 
   /* Check, if the decoder has a fixed colormodel */
@@ -276,6 +276,7 @@ static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
       *exact = 1;
     return ret;
     }
+  fprintf(stderr, "lqt_get_decoder_colormodel_private 2\n");
 
   /* Next try: get colormodel from module */
 
@@ -284,7 +285,9 @@ static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
   
   if(!get_stream_colormodel)
     return LQT_COLORMODEL_NONE;
-  
+
+  fprintf(stderr, "lqt_get_decoder_colormodel_private 3\n");
+
 
   module_index = codec_info[0]->module_index;
   ret = get_stream_colormodel(file, track, module_index, exact);

@@ -303,7 +303,7 @@ int ffmpeg_num_video_codecs = -1;
           0, \
           (char *[]){"None", "Careful", "Compilant", "Agressive", "Very Agressive", (char *)0 } \
         }
-         
+
 static lqt_parameter_info_static_t encode_parameters_video[] = {
   ENCODE_PARAM_VIDEO_GENERAL,
   ENCODE_PARAM_VIDEO_BITRATE,
@@ -349,6 +349,11 @@ static lqt_parameter_info_static_t decode_parameters_video[] = {
 };
 
 static lqt_parameter_info_static_t decode_parameters_mpeg4[] = {
+  DECODE_PARAM_VIDEO,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t decode_parameters_rle[] = {
   DECODE_PARAM_VIDEO,
   { /* End of parameters */ }
 };
@@ -820,17 +825,18 @@ extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
 
   map = find_codec(codec_index);
   if(!map)
+    {
+    fprintf(stderr, "Found no codec for %d\n", codec_index);
     return LQT_COLORMODEL_NONE;
-  
-  if(!avcodec_open(avctx, map->decoder) != 0)
+    }
+  if(avcodec_open(avctx, map->decoder) != 0)
+    {
+    fprintf(stderr, "Couldn't open codec No. %d\n", codec_index);
     return LQT_COLORMODEL_NONE;
-  
+    }
   ret = lqt_ffmpeg_get_lqt_colormodel(avctx->pix_fmt, &dummy);
   
   avcodec_close(avctx);
-
-  fprintf(stderr, "LQT Colormodel: %s\n", lqt_colormodel_to_string(ret));
-  
   return ret;
   }
 
