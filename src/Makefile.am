@@ -7,7 +7,6 @@ lib_LTLIBRARIES= libquicktime.la
 
 libquicktime_la_LDFLAGS = -export-dynamic
 
-
 # build only the files, which can be compiled
 
 # Different files for dynamic plugins and others

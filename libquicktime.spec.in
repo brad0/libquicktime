@@ -206,7 +206,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_libdir}/lib*.a
 
-
 %files progs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/qt* 
@@ -214,17 +213,25 @@ rm -rf $RPM_BUILD_ROOT
 
 %files jpeg
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_mjpeg.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_mjpeg.la
+
+%files ffmpeg
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_ffmpeg.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_ffmpeg.la
 
 %files png
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_png.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_png.la
 
 %files vorbis
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_vorbis.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_vorbis.la
 
 %files opendivx
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_opendivx.so
+%attr(644,root,root) %{_libdir}/libquicktime/lqt_opendivx.la
 
 %files dv
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_dv.so
