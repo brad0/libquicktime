@@ -598,6 +598,42 @@
 			break; \
  \
  		case BC_ARGB8888: \
+			switch(out_colormodel) \
+			{ \
+				case BC_RGBA8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_ARGB8888_to_RGBA8888((output), (input)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_ARGB8888: \
+				case BC_ABGR8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_ARGB8888_to_ARGB8888((output), (input)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGB888: \
+					if(bg_color > 0) \
+						TRANSFER_FRAME_HEAD \
+						transfer_ARGB8888_to_RGB888bg((output), (input), bg_r, bg_g, bg_b); \
+						TRANSFER_FRAME_TAIL \
+					else \
+						TRANSFER_FRAME_HEAD \
+						transfer_ARGB8888_to_RGB888((output), (input)); \
+						TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_BGR8888: \
+					if(bg_color > 0) \
+						TRANSFER_FRAME_HEAD \
+						transfer_ARGB8888_to_BGR8888bg((output), (input), bg_r, bg_g, bg_b); \
+						TRANSFER_FRAME_TAIL \
+					else \
+						TRANSFER_FRAME_HEAD \
+						transfer_ARGB8888_to_BGR8888((output), (input)); \
+						TRANSFER_FRAME_TAIL \
+					break; \
+			} \
+			break; \
+ \
  		case BC_ABGR8888: \
 			switch(out_colormodel) \
 			{ \
@@ -663,12 +699,22 @@
 					transfer_RGB888_to_YUV888((output), (input));   \
 					TRANSFER_FRAME_TAIL \
 					break; \
+                                case BC_VYU888: \
+                                        TRANSFER_FRAME_HEAD \
+                                        transfer_RGB888_to_VYU888((output), (input));   \
+                                        TRANSFER_FRAME_TAIL \
+                                        break; \
 				case BC_YUVA8888: \
 					TRANSFER_FRAME_HEAD \
 					transfer_RGB888_to_YUVA8888((output), (input));   \
 					TRANSFER_FRAME_TAIL \
 					break; \
-				case BC_YUV101010: \
+				case BC_UYVA8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGB888_to_UYVA8888((output), (input));   \
+					TRANSFER_FRAME_TAIL \
+					break; \
+                                case BC_YUV101010: \
 					TRANSFER_FRAME_HEAD \
 					transfer_RGB888_to_YUV101010((output), (input));   \
 					TRANSFER_FRAME_TAIL \
@@ -763,6 +809,11 @@
 						transfer_RGBA8888_to_RGBA8888((output), (input)); \
 						TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_ARGB8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_ARGB8888((output), (input)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 				case BC_BGR8888: \
 					if(bg_color > 0) \
 						TRANSFER_FRAME_HEAD \
@@ -780,13 +831,19 @@
 						TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUVA8888: \
-					if(bg_color > 0) \
+/*					if(bg_color > 0) */\
 						TRANSFER_FRAME_HEAD \
 						transfer_RGBA8888_to_YUVA8888((output), (input)); \
 						TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_UYVA8888: \
+/*					if(bg_color > 0) */\
+						TRANSFER_FRAME_HEAD \
+						transfer_RGBA8888_to_UYVA8888((output), (input)); \
+						TRANSFER_FRAME_TAIL \
+					break; \
 				case BC_YUV101010: \
-					if(bg_color > 0) \
+/*					if(bg_color > 0) */\
 						TRANSFER_FRAME_HEAD \
 						transfer_RGBA8888_to_YUV101010((output), (input)); \
 						TRANSFER_FRAME_TAIL \

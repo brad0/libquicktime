@@ -23,9 +23,12 @@ static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
+#include <stdio.h>
+
 static int source_cmodel(quicktime_t *file, int track)
 {
 	int depth = quicktime_video_depth(file, track);
+/*         fprintf(stderr, "%s: source_cmodel: depth: %d\n", __FILE__, depth); */
 	if(depth == 24) 
 		return BC_RGB888;
 	else
@@ -42,8 +45,19 @@ static int reads_colormodel(quicktime_t *file,
       (colormodel == BC_BGR8888);
   else
     return (colormodel == BC_RGBA8888) ||
-      (colormodel == BC_ARGB8888);
+      (colormodel == BC_ARGB8888) ||
+      (colormodel == BC_RGB888) ||
+      (colormodel == BC_BGR8888);
   }
+
+/* static int quicktime_reads_colormodel_raw(quicktime_t *file,  */
+/* 		int colormodel,  */
+/* 		int track) */
+/* { */
+/* 	return (colormodel == BC_RGB888 || */
+/* 		colormodel == BC_BGR8888); */
+/* } */
+
 
 static int writes_colormodel(quicktime_t *file, 
                              int colormodel, 
@@ -247,13 +261,6 @@ int quicktime_raw_rows_consecutive(unsigned char **row_pointers, int w, int h, i
 	return result;
 }
 
-static int quicktime_reads_colormodel_raw(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_BGR8888);
-}
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
 {
@@ -267,7 +274,7 @@ void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = quicktime_reads_colormodel_raw;
+        /*	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = quicktime_reads_colormodel_raw; */
 
 	priv = ((quicktime_codec_t*)vtrack->codec)->priv;
 }

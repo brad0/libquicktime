@@ -52,12 +52,6 @@ static int quicktime_encode_audio_stub(quicktime_t *file,
 }
 
 
-static int quicktime_reads_colormodel_stub(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888);
-}
 
 static int quicktime_writes_colormodel_stub(quicktime_t *file, 
 		int colormodel, 

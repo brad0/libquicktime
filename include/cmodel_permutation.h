@@ -91,16 +91,14 @@ static inline void transfer_ARGB8888_to_ARGB8888(unsigned char *(*output), unsig
 	(*output) += 4;
 }
 
-
-
-
-
-
-
-
-
-
-
+static inline void transfer_ARGB8888_to_RGBA8888(unsigned char *(*output), unsigned char *input)
+{
+        (*output)[0] = input[1];
+        (*output)[1] = input[2];
+        (*output)[2] = input[3];
+        (*output)[3] = input[0];
+        (*output) += 4;
+}
 
 
 
@@ -230,6 +228,19 @@ static inline void transfer_RGB888_to_YUV888(unsigned char *(*output), unsigned 
 	(*output)[2] = v;
 	(*output) += 3;
 }
+
+// static inline void transfer_RGB888_to_VYU888(unsigned char *(*output), unsigned char *input)
+// {
+//         int y, u, v;
+
+//         RGB_TO_YUV(y, u, v, input[0], input[1], input[2]);
+
+//         (*output)[0] = v;
+//         (*output)[1] = y;
+//         (*output)[2] = u;
+//         (*output) += 3;
+// }
+
 
 static inline void transfer_RGB888_to_YUV101010(unsigned char *(*output), unsigned char *input)
 {
@@ -437,11 +448,40 @@ static inline void transfer_RGBA8888_to_BGR8888bg(unsigned char *(*output), unsi
 	(*output) += 4;
 }
 
+// ARGB888 -> RGB888
+
+static inline void transfer_ARGB8888_to_RGB888bg(unsigned char *(*output), unsigned char *input, int bg_r, int bg_g, int bg_b)
+{
+	unsigned int r, g, b, a, anti_a;
+	a = input[0];
+	anti_a = 255 - a;
+	r = (unsigned int)input[1] * a + bg_r * anti_a;
+	g = (unsigned int)input[2] * a + bg_g * anti_a;
+	b = (unsigned int)input[3] * a + bg_b * anti_a;
+	(*output)[0] = (r >> 8) + 1;
+	(*output)[1] = (g >> 8) + 1;
+	(*output)[2] = (b >> 8) + 1;
+	(*output) += 3;
+}
 
 
+// ARGB888 -> BGR888
 
+static inline void transfer_ARGB8888_to_BGR8888bg(unsigned char *(*output), unsigned char *input, int bg_r, int bg_g, int bg_b)
+{
+	unsigned int r, g, b, a, anti_a;
+	a = input[0];
+	anti_a = 255 - a;
 
+	r = (unsigned int)input[1] * a + bg_r * anti_a;
+	g = (unsigned int)input[2] * a + bg_g * anti_a;
+	b = (unsigned int)input[3] * a + bg_b * anti_a;
 
+	(*output)[0] = (b >> 8) + 1;
+	(*output)[1] = (g >> 8) + 1;
+	(*output)[2] = (r >> 8) + 1;
+	(*output) += 4;
+}
 
 // These routines blend in a black background
 
@@ -604,6 +644,42 @@ static inline void transfer_RGBA8888_to_UYVA8888(unsigned char *(*output), unsig
 	(*output) += 4;
 }
 
+static inline void transfer_RGBA8888_to_ARGB8888(unsigned char *(*output), unsigned char *input)
+{
+         (*output)[0] = input[3];
+         (*output)[1] = input[0];
+         (*output)[2] = input[1];
+         (*output)[3] = input[2];
+         (*output) += 4;
+}
+
+// ******************************** ARGB8888 -> *********************************
+
+static inline void transfer_ARGB8888_to_BGR8888(unsigned char *(*output), unsigned char *input)
+{
+	unsigned int r, g, b, a;
+	a = input[0];
+	r = (unsigned int)input[1] * a;
+	g = (unsigned int)input[2] * a;
+	b = (unsigned int)input[3] * a;
+	(*output)[1] = (b >> 8) + 1;
+	(*output)[2] = (g >> 8) + 1;
+	(*output)[3] = (r >> 8) + 1;
+	(*output) += 4;
+}
+
+static inline void transfer_ARGB8888_to_RGB888(unsigned char *(*output), unsigned char *input)
+{
+	unsigned int r, g, b, a;
+	a = input[0];
+	r = (unsigned int)input[1] * a;
+	g = (unsigned int)input[2] * a;
+	b = (unsigned int)input[3] * a;
+	(*output)[0] = (r >> 8) + 1;
+	(*output)[1] = (g >> 8) + 1;
+	(*output)[2] = (b >> 8) + 1;
+	(*output) += 3;
+}
 
 // ******************************** RGB161616 -> *********************************
 

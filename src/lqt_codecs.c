@@ -65,6 +65,7 @@ static int quicktime_reads_colormodel_stub(quicktime_t *file,
 		int colormodel, 
 		int track)
 {
+	fprintf(stderr, "quicktime_reads_colormodel_stub called\n");
 	return (colormodel == BC_RGB888);
 }
 
@@ -615,6 +616,7 @@ int quicktime_reads_cmodel(quicktime_t *file,
 	int track)
 {
 	int result = ((quicktime_codec_t*)file->vtracks[track].codec)->reads_colormodel(file, colormodel, track);
+/*         fprintf(stderr, "quicktime_reads_cmodel: %s\n", lqt_colormodel_to_string(colormodel)); */
 	return result;
 }
 

@@ -173,7 +173,8 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
 
   int input_has_alpha  = colormodel_has_alpha(in_colormodel);
   int output_has_alpha = colormodel_has_alpha(out_colormodel);
-  
+
+ 
   /* Zero conversions are for free :-) */
   
   if(in_colormodel == out_colormodel)
@@ -241,24 +242,22 @@ static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
                                               int * exact,
                                               lqt_codec_info_t ** codec_info)
   {
-  int codec_info_colormodel;
+  int ret = LQT_COLORMODEL_NONE;
   quicktime_codec_t * codec =
     (quicktime_codec_t *)(file->vtracks[track].codec);
   void * module = codec->module;
   int module_index;
   int (*get_stream_colormodel)(quicktime_t*,int, int, int *);
     
-  codec_info_colormodel = codec_info[0]->decoding_colormodel;
-  module_index = codec_info[0]->module_index;
-  
-    
+  ret = codec_info[0]->decoding_colormodel;
+
   /* Check, if the decoder has a fixed colormodel */
   
-  if(codec_info_colormodel != LQT_COLORMODEL_NONE)
+  if(ret != LQT_COLORMODEL_NONE)
     {
     if(exact)
       *exact = 1;
-    return codec_info_colormodel;
+    return ret;
     }
 
   /* Next try: get colormodel from module */
@@ -269,7 +268,10 @@ static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
   if(!get_stream_colormodel)
     return LQT_COLORMODEL_NONE;
   
-  return get_stream_colormodel(file, track, module_index, exact);
+
+  module_index = codec_info[0]->module_index;
+  ret = get_stream_colormodel(file, track, module_index, exact);
+  return ret;
   }
 
 int lqt_get_decoder_colormodel(quicktime_t * file, int track,
@@ -299,7 +301,7 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
 
   decoder_colormodel = lqt_get_decoder_colormodel(file, track,
                                                   &decoder_colormodel_exact);
-
+  
   /* Check, if the decoder colormodel is directly supported */
 
   if(decoder_colormodel != LQT_COLORMODEL_NONE)
@@ -320,7 +322,7 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
     ret = BC_RGB888;
   
 
-  if(ret != LQT_COLORMODEL_NONE)
+  if(ret == LQT_COLORMODEL_NONE)
     {
     index = 0;
 
@@ -332,7 +334,10 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
         {
         conversion_price
           = get_conversion_price(decoder_colormodel, supported[index]);
-        
+/*         fprintf(stderr, "Conversion: %s -> %s: %d\n", */
+/*                 lqt_colormodel_to_string(decoder_colormodel), */
+/*                 lqt_colormodel_to_string(supported[index]), */
+/*                 conversion_price);     */
         if(conversion_price < best_conversion_price)
           {
           best_conversion_price = conversion_price;
@@ -342,7 +347,7 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
       index++;
       }
     }
-  if(ret != LQT_COLORMODEL_NONE)
+  if(ret == LQT_COLORMODEL_NONE)
     ret = BC_RGB888;
   return ret;
   }
@@ -384,8 +389,6 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
     
     while(supported[index_supported] != LQT_COLORMODEL_NONE)
       {
-      fprintf(stderr, "Colormodel: %s\n",
-              lqt_colormodel_to_string(supported[index_supported]));
       if(quicktime_writes_cmodel(file, supported[index_supported], track))
         {
         for(i = 0; i < codec_info[0]->num_encoding_colormodels; i++)
@@ -410,7 +413,6 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
   if(ret == LQT_COLORMODEL_NONE)
     {
     ret = BC_RGB888;
-    fprintf(stderr, "lqt_get_best_colormodel_encode: Defaulting to BC_RGB888 %d\n", best_conversion_price);
     }
   return ret;
   }
