@@ -16,6 +16,15 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        stringlist_options: (char**)0
      },
      { 
+       name:      "vorbis_vbr",
+       real_name: "Use variable bitrate",
+       type:      LQT_PARAMETER_INT,
+       val_default:        { 1 },
+       val_min:            0,
+       val_max:            1,
+       stringlist_options: (char**)0
+     },
+     { 
        name:      "vorbis_max_bitrate",
        real_name: "Maximum Bitrate (-1: no limit)",
        type:      LQT_PARAMETER_INT,
