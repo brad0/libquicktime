@@ -1,3 +1,13 @@
+/*
+ * ./configure test for MMX capable C compiler was failing with:
+     
+     plugins/rtjpeg/mmx.h:47: error: parse error before "int64_t"
+
+ * That's because int64_t wasn't in scope - fix is to use <stdint.h>
+*/
+
+#include <stdint.h>
+
 /*	mmx.h
 
 	MultiMedia eXtensions GCC interface library for IA32.
