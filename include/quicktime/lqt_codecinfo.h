@@ -116,7 +116,8 @@ typedef struct lqt_codec_info_s lqt_codec_info_t;
  *   Scan the codec info files and the codec directories
  */
 
-void lqt_init_codec_info();
+void lqt_registry_init();
+
 
 /*
  *   This frees memory for the whole codec database
@@ -124,7 +125,7 @@ void lqt_init_codec_info();
  *   it exclicitely, if you want to reinitialize the codec database
  */
 
-void lqt_destroy_codec_info();
+void lqt_registry_destroy();
 
 /*
  *  Routines, you need, when you want to build configuration dialogs
@@ -149,6 +150,26 @@ const lqt_codec_info_t * lqt_get_audio_codec_info(int index);
 
 const lqt_codec_info_t * lqt_get_video_codec_info(int index);
 
+/*
+ *   Get corresponding info structures
+ *   This creates a local copy of the info structure,
+ *   which must be freed by the caller
+ */
+
+lqt_codec_info_t * lqt_get_audio_codec_info_c(int index);
+
+lqt_codec_info_t * lqt_get_video_codec_info_c(int index);
+
+/*
+ *  Destroys the codec info structure returned by the functions
+ *  above
+ */
+
+void lqt_destroy_codec_info(lqt_codec_info_t * info);
+
+/*
+ *  Dump codec info, only for debugging + testing
+ */
 
 void lqt_dump_codec_info(const lqt_codec_info_t * info);
   

@@ -32,17 +32,20 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        val_min:            {0},
        val_max:            {0},
        stringlist_options: (char**)0
-     }
+     },
+     { /* End of paramaters */ }
   };
 
 static lqt_codec_info_static_t codec_info_vorbis =
   {
-    name:        "vorbis",
-    long_name:   "Ogg Vorbis audio codec",
-    description: "Patent free audio codec (see http://www.vorbis.com)",
-    fourccs:    fourccs_vorbis,
-    type:       LQT_CODEC_AUDIO,
-    direction:  LQT_DIRECTION_BOTH
+    name:                "vorbis",
+    long_name:           "Ogg Vorbis audio codec",
+    description:         "Patent free audio codec (see http://www.vorbis.com)",
+    fourccs:             fourccs_vorbis,
+    type:                LQT_CODEC_AUDIO,
+    direction:           LQT_DIRECTION_BOTH,
+    encoding_parameters: encode_parameters_vorbis,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 
@@ -53,12 +56,7 @@ extern int get_num_codecs() { return 1; }
 extern lqt_codec_info_t * get_codec_info(int index)
   {
   if(!index)
-    return lqt_create_codec_info(&codec_info_vorbis,
-                                 encode_parameters_vorbis,
-                                 sizeof(encode_parameters_vorbis)/
-                                 sizeof(lqt_parameter_info_static_t),
-                                 (const lqt_parameter_info_static_t*)0,
-                                 0);
+    return lqt_create_codec_info(&codec_info_vorbis);
   
   return (lqt_codec_info_t*)0;
   }

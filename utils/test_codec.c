@@ -17,9 +17,9 @@ int main()
   fprintf(stderr, "Libquicktime codec test, Codec API Version %d\n",
           lqt_get_codec_api_version());
   
-  lqt_init_codec_info();
+  lqt_registry_init();
   
-#if 0
+#if 1
   
   num = lqt_get_num_audio_codecs();
 

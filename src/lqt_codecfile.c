@@ -97,6 +97,7 @@ static void read_parameter_value(char * pos,
       ret->val_int = atoi(pos);
       break;
     case LQT_PARAMETER_STRING:
+    case LQT_PARAMETER_STRINGLIST:
       ret->val_string = __lqt_strdup(pos);
       break;
     }
@@ -142,14 +143,20 @@ static void read_parameter_info(FILE * input,
         info->val_min.val_int = 0;
         info->val_max.val_int = 0;
         }
-      else if(!strcmp(pos, type_string))
+
+      /*
+       *  Important: type_stringlist must be checked
+       *  BEFORE type_string
+       */
+
+      else if(!strcmp(pos, type_stringlist))
         {
-        info->type = LQT_PARAMETER_STRING;
+        info->type = LQT_PARAMETER_STRINGLIST;
         info->val_default.val_string = (char*)0;
         info->val_min.val_string = (char*)0;
         info->val_max.val_string = (char*)0;
         }
-      else if(!strcmp(pos, type_stringlist))
+      else if(!strcmp(pos, type_string))
         {
         info->type = LQT_PARAMETER_STRING;
         info->val_default.val_string = (char*)0;
@@ -190,6 +197,7 @@ static void read_parameter_info(FILE * input,
       {
       pos = line + strlen(option_key);
       info->stringlist_options[options_read] = __lqt_strdup(pos);
+      options_read++;
       }
     else if(CHECK_KEYWORD(end_parameter_key))
       break;

@@ -11,7 +11,9 @@ static lqt_codec_info_static_t codec_info_png =
   description: "Lossless compressing video codec, Allows alpha",
   fourccs:     fourccs_png,
   type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 /* These are called from the plugin loader */
@@ -21,11 +23,7 @@ extern int get_num_codecs() { return 1; }
 extern lqt_codec_info_t * get_codec_info(int index)
   {
   if(!index)
-    return lqt_create_codec_info(&codec_info_png,
-                                 (const lqt_parameter_info_static_t*)0,
-                                 0,
-                                 (const lqt_parameter_info_static_t*)0,
-                                 0);
+    return lqt_create_codec_info(&codec_info_png);
   return (lqt_codec_info_t*)0;
   }
 

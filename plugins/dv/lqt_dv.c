@@ -3,21 +3,9 @@
 #include "dv.h"
 #include <libdv/dv.h>
 
-static char * fourccs_dv[]  = { QUICKTIME_DVm, (char*)0 };
+static char * fourccs_dv[]  = { QUICKTIME_DV, (char*)0 };
 
-static lqt_codec_info_static_t codec_info_dv =
-  {
-    name:        "dv",
-    long_name:   "Quasar DV Codec",
-    description: "Codec for digital video camaras. Based on\
- libdv (http://libdv.sourceforge.net/).",
-    fourccs:     fourccs_dv,
-    type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH
-    
-  };
-
-static lqt_parameter_info_t decode_parameters_dv[] =
+static lqt_parameter_info_static_t decode_parameters_dv[] =
   {
      { 
        name:               "dv_decode_quality",
@@ -27,10 +15,11 @@ static lqt_parameter_info_t decode_parameters_dv[] =
        val_min:            {0},
        val_max:            {DV_QUALITY_BEST},
        stringlist_options: (char**)0
-     }
+     },
+     { /* End of parameters */ }
   };
 
-static lqt_parameter_info_t encode_parameters_dv[] =
+static lqt_parameter_info_static_t encode_parameters_dv[] =
   {
      { /* Set to one if the input is anamorphic 16x9 (stretched letter box). This is produced by many standard DV camcorders in 16x9 mode. */
 	name:               "dv_anamorphic16x9",
@@ -50,8 +39,23 @@ static lqt_parameter_info_t encode_parameters_dv[] =
        val_min:            {1},
        val_max:            {3},
        stringlist_options: (char**)0
-     }
+     },
+     { /* End of parameters */ }
   };
+
+static lqt_codec_info_static_t codec_info_dv =
+  {
+    name:        "dv",
+    long_name:   "Quasar DV Codec",
+    description: "Codec for digital video camaras. Based on\
+ libdv (http://libdv.sourceforge.net/).",
+    fourccs:     fourccs_dv,
+    type:        LQT_CODEC_VIDEO,
+    direction:   LQT_DIRECTION_BOTH,
+    encoding_parameters: encode_parameters_dv,
+    decoding_parameters: decode_parameters_dv
+  };
+
 
 /* These are called from the plugin loader */
 
@@ -60,13 +64,7 @@ extern int get_num_codecs() { return 1; }
 extern lqt_codec_info_t * get_codec_info(int index)
   {
   if(index == 0)
-    return lqt_create_codec_info(&codec_info_dv,
-                                 encode_parameters_dv,
-                                 sizeof(encode_parameters_dv)
-								 / sizeof(lqt_parameter_info_t),
-                                 decode_parameters_dv,
-                                 sizeof(decode_parameters_dv)
-								 / sizeof(lqt_parameter_info_t) );
+    return lqt_create_codec_info(&codec_info_dv);
 
   return (lqt_codec_info_t*)0;
   }

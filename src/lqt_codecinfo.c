@@ -54,18 +54,22 @@ pthread_mutex_t codecs_mutex;
  *  Lock and unlock the codec registry
  */
 
-void lqt_codecs_lock()
+void lqt_registry_lock()
   {
   if(!mutex_initialized)
+    {
     pthread_mutex_init(&codecs_mutex, (pthread_mutexattr_t *)0);
-
+    mutex_initialized = 1;
+    }
   pthread_mutex_lock(&codecs_mutex);
   }
 
-void lqt_codecs_unlock()
+void lqt_registry_unlock()
   {
   pthread_mutex_unlock(&codecs_mutex);
   }
+
+/* Free memory of parameter info */
 
 void destroy_parameter_info(lqt_parameter_info_t * p)
   {
@@ -92,15 +96,17 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
     }
   }
 
-void destroy_codec_info(lqt_codec_info_t * ptr)
+/* Free memory of codec info (public) */
+
+void lqt_destroy_codec_info(lqt_codec_info_t * ptr)
   {
   int i;
   
   if(ptr->name)
-    free(ptr->name);               /* Name of the codec              */
+    free(ptr->name);          /* Name of the codec              */
   if(ptr->long_name)          /* Long name of the codec         */
     free(ptr->long_name);
-  if(ptr->description)          /* Long name of the codec         */
+  if(ptr->description)        /* Long name of the codec         */
     free(ptr->description);
 
   if(ptr->fourccs)
@@ -124,6 +130,97 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
     free(ptr->decoding_parameters);
     }
   free(ptr);
+  }
+
+static void
+copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * info)
+  {
+  int i;
+  
+  if(info->name)
+    ret->name = __lqt_strdup(info->name);
+  if(info->real_name)
+    ret->real_name = __lqt_strdup(info->real_name);
+
+  ret->type = info->type;
+
+  switch(ret->type)
+    {
+    case LQT_PARAMETER_INT:
+      ret->val_min.val_int = info->val_min.val_int;
+      ret->val_max.val_int = info->val_max.val_int;
+      ret->val_default.val_int = info->val_default.val_int;
+      break;
+    case LQT_PARAMETER_STRING:
+      if(info->val_default.val_string)
+        ret->val_default.val_string =
+          __lqt_strdup(ret->val_default.val_string);
+      break;
+    case LQT_PARAMETER_STRINGLIST: /* String with options */
+      if(info->val_default.val_string)
+        ret->val_default.val_string =
+          __lqt_strdup(ret->val_default.val_string);
+
+      ret->num_stringlist_options = info->num_stringlist_options;
+      ret->stringlist_options = calloc(ret->num_stringlist_options,
+                                       sizeof(char*));
+
+      for(i = 0; i < ret->num_stringlist_options; i++)
+        ret->stringlist_options[i] =
+          __lqt_strdup(info->stringlist_options[i]);
+
+      break;
+    }
+  }
+
+/*
+ *  Copy codec Info
+ */
+
+static lqt_codec_info_t *
+copy_codec_info(const lqt_codec_info_t * info)
+  {
+  int i;
+  lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
+
+  if(info->name)
+    ret->name = __lqt_strdup(info->name);
+  if(info->long_name)
+    ret->long_name = __lqt_strdup(info->long_name);
+  if(info->description)
+    ret->description = __lqt_strdup(info->description);
+
+  ret->num_fourccs = info->num_fourccs;
+  if(ret->fourccs)
+    {
+    ret->fourccs = malloc(info->num_fourccs * sizeof(char*));
+    for(i = 0; i < ret->num_fourccs; i++)
+      ret->fourccs[i] = __lqt_strdup(info->fourccs[i]);
+    }
+
+  ret->num_encoding_parameters = info->num_encoding_parameters;
+  
+  if(ret->num_encoding_parameters)
+    {
+    ret->encoding_parameters =
+      calloc(ret->num_encoding_parameters, sizeof(lqt_parameter_info_t));
+
+    for(i = 0; i < ret->num_encoding_parameters; i++)
+      copy_parameter_info(&(ret->encoding_parameters[i]),
+                          &(info->encoding_parameters[i]));
+    }
+
+  ret->num_decoding_parameters = info->num_decoding_parameters;
+  if(ret->num_decoding_parameters)
+    {
+    ret->decoding_parameters =
+      calloc(ret->num_decoding_parameters, sizeof(lqt_parameter_info_t));
+
+    for(i = 0; i < ret->num_decoding_parameters; i++)
+      copy_parameter_info(&(ret->decoding_parameters[i]),
+                          &(info->decoding_parameters[i]));
+    }
+  return ret;
   }
 
 /*
@@ -158,7 +255,7 @@ static lqt_codec_info_t * find_codec_by_filename(lqt_codec_info_t ** list,
         {
         tmp_ptr = ptr->next;
 
-        destroy_codec_info(ptr);
+        lqt_destroy_codec_info(ptr);
         ptr = tmp_ptr;
         }
       else
@@ -479,21 +576,21 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
   closedir(directory);
   }
 
-void lqt_destroy_codec_info()
+void lqt_registry_destroy()
   {
   lqt_codec_info_t * tmp;
 
   while(lqt_audio_codecs)
     {
     tmp = lqt_audio_codecs->next;
-    destroy_codec_info(lqt_audio_codecs);
+    lqt_destroy_codec_info(lqt_audio_codecs);
     lqt_audio_codecs = tmp;
     }
 
   while(lqt_video_codecs)
     {
     tmp = lqt_video_codecs->next;
-    destroy_codec_info(lqt_video_codecs);
+    lqt_destroy_codec_info(lqt_video_codecs);
     lqt_video_codecs = tmp;
     }
 
@@ -502,16 +599,18 @@ void lqt_destroy_codec_info()
   
   }
 
-void lqt_init_codec_info()
+void lqt_registry_init()
   {
   lqt_codec_info_t * file_codecs;
   lqt_codec_info_t * tmp_file_codecs;
 
   char * home_dir;
-  char * filename_buffer = malloc(PATH_MAX + 1);
+  char * filename_buffer;
 
   if(lqt_audio_codecs || lqt_video_codecs)
     return;
+
+  filename_buffer = malloc(PATH_MAX + 1);
   
   /* Obtain the home directory */
 
@@ -539,7 +638,7 @@ void lqt_init_codec_info()
 #endif
     tmp_file_codecs = file_codecs;
     file_codecs = file_codecs->next;
-    destroy_codec_info(tmp_file_codecs);
+    lqt_destroy_codec_info(tmp_file_codecs);
     }
   
   /*
@@ -581,7 +680,6 @@ const lqt_codec_info_t * lqt_get_audio_codec_info(int index)
   return ret;
   }
 
-
 const lqt_codec_info_t * lqt_get_video_codec_info(int index)
   {
   const lqt_codec_info_t * ret;
@@ -598,8 +696,46 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index)
   return ret;
   }
 
+/* Thread save methods of getting codec infos */
+
+lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
+  {
+  const lqt_codec_info_t * info;
+  lqt_codec_info_t * ret;
+
+  lqt_registry_lock();
+
+  info = lqt_get_audio_codec_info(index);
+
+  if(info)
+    ret = copy_codec_info(info);
+  else
+    ret = (lqt_codec_info_t*)0;
+  lqt_registry_unlock();
+  return ret;
+  }
+
+lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
+  {
+  const lqt_codec_info_t * info;
+  lqt_codec_info_t * ret;
+
+  lqt_registry_lock();
+
+  info = lqt_get_video_codec_info(index);
+
+  if(info)
+    ret = copy_codec_info(info);
+  else
+    ret = (lqt_codec_info_t*)0;
+  lqt_registry_unlock();
+  return ret;
+  }
+
+
+
 static void 
-copy_parameter_info(lqt_parameter_info_t * ret,
+create_parameter_info(lqt_parameter_info_t * ret,
                     const lqt_parameter_info_static_t * info)
   {
   int i;
@@ -654,15 +790,8 @@ copy_parameter_info(lqt_parameter_info_t * ret,
   
   }
 
-
 lqt_codec_info_t *
-lqt_create_codec_info(const lqt_codec_info_static_t * template,
-                      const lqt_parameter_info_static_t *
-                      encoding_parameters,
-                      int num_encoding_parameters,
-                      const lqt_parameter_info_static_t *
-                      decoding_parameters,
-                      int num_decoding_parameters)
+lqt_create_codec_info(const lqt_codec_info_static_t * template)
   {
   int i;
   lqt_codec_info_t * ret;
@@ -695,17 +824,29 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template,
   ret->fourccs = malloc(ret->num_fourccs * sizeof(char*));
   for(i = 0; i < ret->num_fourccs; i++)
     ret->fourccs[i] = __lqt_strdup(template->fourccs[i]);
-  
-  ret->num_encoding_parameters = num_encoding_parameters;
-  if(num_encoding_parameters)
+
+  if(template->encoding_parameters)
+    {
+    ret->num_encoding_parameters = 0;
+    while(1)
+      {
+      if(template->encoding_parameters[ret->num_encoding_parameters].name)
+        ret->num_encoding_parameters++;
+      else
+        break;
+      }
+    }
+
+  if(ret->num_encoding_parameters)
     {
     ret->encoding_parameters =
-      calloc(num_encoding_parameters, sizeof(lqt_parameter_info_t));
-    for(i = 0; i < num_encoding_parameters; i++)
+      calloc(ret->num_encoding_parameters,
+             sizeof(lqt_parameter_info_t));
+    for(i = 0; i < ret->num_encoding_parameters; i++)
       {
       /* Copy parameter info */
-      copy_parameter_info(&(ret->encoding_parameters[i]),
-                          &(encoding_parameters[i]));
+      create_parameter_info(&(ret->encoding_parameters[i]),
+                            &(template->encoding_parameters[i]));
       }
     }
   else
@@ -713,16 +854,28 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template,
     ret->encoding_parameters = (lqt_parameter_info_t*)0;
     }
 
-  ret->num_decoding_parameters = num_decoding_parameters;
-  if(num_decoding_parameters)
+  if(template->decoding_parameters)
     {
-    ret->decoding_parameters = calloc(num_decoding_parameters,
-                                      sizeof(lqt_parameter_info_t));
-    for(i = 0; i < num_decoding_parameters; i++)
+    ret->num_decoding_parameters = 0;
+    while(1)
+      {
+      if(template->decoding_parameters[ret->num_decoding_parameters].name)
+        ret->num_decoding_parameters++;
+      else
+        break;
+      }
+    }
+
+  if(ret->num_decoding_parameters)
+    {
+    ret->decoding_parameters =
+      calloc(ret->num_decoding_parameters,
+             sizeof(lqt_parameter_info_t));
+    for(i = 0; i < ret->num_decoding_parameters; i++)
       {
       /* Copy parameter info */
-      copy_parameter_info(&(ret->decoding_parameters[i]),
-                          &(decoding_parameters[i]));
+      create_parameter_info(&(ret->decoding_parameters[i]),
+                            &(template->decoding_parameters[i]));
       }
     }
   else
@@ -832,7 +985,7 @@ lqt_codec_info_t * lqt_find_audio_codec(char * fourcc, int encode)
   int j;
   lqt_codec_info_t * ret;
   if(!lqt_audio_codecs)
-    lqt_init_codec_info();
+    lqt_registry_init();
 
   ret = lqt_audio_codecs;
   
@@ -858,7 +1011,7 @@ lqt_codec_info_t * lqt_find_video_codec(char * fourcc, int encode)
   int j;
   lqt_codec_info_t * ret;
   if(!lqt_video_codecs)
-    lqt_init_codec_info();
+    lqt_registry_init();
 
   ret = lqt_video_codecs;
   
@@ -897,7 +1050,7 @@ static void __lqt_cleanup_codecinfo()
 #ifndef NDEBUG
   fprintf(stderr, "Deleting quicktime codecs\n");
 #endif
-  lqt_destroy_codec_info();
+  lqt_registry_init();
   }
 
 #endif

@@ -15,25 +15,28 @@ static char * fourccs_ulaw[]  = { QUICKTIME_ULAW, (char*)0 };
 
 static lqt_codec_info_static_t codec_info_ima4 =
   {
-    name:        "ima4",
-    long_name:   "ima4",
-    description: "The IMA4 compressor reduces 16 bit audio data to 1/4\
+    name:                "ima4",
+    long_name:           "ima4",
+    description:         "The IMA4 compressor reduces 16 bit audio data to 1/4\
  size, with very good quality",
-    fourccs:     fourccs_ima4,
-    type:        LQT_CODEC_AUDIO,
-    direction:   LQT_DIRECTION_BOTH
-    
+    fourccs:             fourccs_ima4,
+    type:                LQT_CODEC_AUDIO,
+    direction:           LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 static lqt_codec_info_static_t codec_info_raw =
   {
-    name:        "rawaudio",
-    long_name:   "Raw 8 bit audio",
-    description: "Don't use this for anything better than telephone quality",
-    fourccs:     fourccs_raw,
-    type:        LQT_CODEC_AUDIO,
-    direction:   LQT_DIRECTION_BOTH
-    
+    name:                "rawaudio",
+    long_name:           "Raw 8 bit audio",
+    description:         "Don't use this for anything better than telephone \
+quality",
+    fourccs:             fourccs_raw,
+    type:                LQT_CODEC_AUDIO,
+    direction:           LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 static lqt_codec_info_static_t codec_info_twos =
@@ -43,8 +46,9 @@ static lqt_codec_info_static_t codec_info_twos =
     description:  "Twos is the preferred encoding for uncompressed audio",
     fourccs:      fourccs_twos,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_BOTH
-    
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 static lqt_codec_info_static_t codec_info_ulaw =
@@ -54,8 +58,9 @@ static lqt_codec_info_static_t codec_info_ulaw =
     description:  "Ulaw",      /* Description            */
     fourccs:      fourccs_ulaw,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_BOTH
-    
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
 /* These are called from the plugin loader */
@@ -67,33 +72,17 @@ extern lqt_codec_info_t * get_codec_info(int index)
   switch(index)
     {
     case 0: /* ima4 */
-      return lqt_create_codec_info(&codec_info_ima4,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_ima4);
       break;
     case 1: /* raw */
-      return lqt_create_codec_info(&codec_info_raw,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_raw);
 
       break;
     case 2: /* Twos */
-      return lqt_create_codec_info(&codec_info_twos,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_twos);
       break;
     case 3: /* Ulaw */
-      return lqt_create_codec_info(&codec_info_ulaw,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_ulaw);
       break;
     }
   

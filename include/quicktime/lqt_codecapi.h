@@ -72,8 +72,10 @@ typedef struct
   lqt_codec_type type;
   lqt_codec_direction direction;
 
-  } lqt_codec_info_static_t;
+  lqt_parameter_info_static_t * encoding_parameters;
+  lqt_parameter_info_static_t * decoding_parameters;
 
+  } lqt_codec_info_static_t;
 
 /*
  *  Create a lqt_codec_info_t structure from statically defined data
@@ -83,21 +85,13 @@ typedef struct
  *  module.
  *
  *  The get_codec_info() function in your module will then call the
- *  function below to create a lqt_codec_info_t from the arguments.
+ *  function below to create a lqt_codec_info_t from the argument.
  *  All data are copied, so the returned structure can be used after
  *  closing the module.
  *
- *  If the numbers of encoding or decoding parameters are zero
- *  the corresponding pointers can be NULL.
  */
 
 lqt_codec_info_t *
-lqt_create_codec_info(const lqt_codec_info_static_t * template,
-                      const lqt_parameter_info_static_t *
-                      encoding_parameters,
-                      int num_encoding_parameters,
-                      const lqt_parameter_info_static_t *
-                      decoding_parameters,
-                      int num_decoding_parameters);
+lqt_create_codec_info(const lqt_codec_info_static_t * template);
 
 

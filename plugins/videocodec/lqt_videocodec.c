@@ -23,6 +23,43 @@ static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 
 static char * fourccs_yv12[] = { QUICKTIME_YUV420 ,       (char*)0 };
 
+#define DUMMY_PARAMETERS
+
+#ifdef DUMMY_PARAMETERS
+
+static char * dummy_stringlist_options[] =
+  {
+    "Option 1",
+    "Option 2",
+    "Option 3",
+    (char*)0
+  };
+
+static lqt_parameter_info_static_t dummy_parameters[] =
+  {
+     {
+       name:               "dummy_string_test",
+       real_name:          "String Test",
+       type:               LQT_PARAMETER_STRING,
+       val_default:        { (int)"String Test" },
+       val_min:            {0},
+       val_max:            {0},
+       stringlist_options: (char**)0
+     },
+     { 
+       name:      "dummy_stringlist_test",
+       real_name: "Stringlist test",
+       type:      LQT_PARAMETER_STRINGLIST,
+       val_default:        { (int)"Option1" },
+       val_min:            {0},
+       val_max:            {0},
+       stringlist_options: dummy_stringlist_options
+     },
+     { /* End of array */ }
+  };
+
+#endif /* DUMMY_PARAMETERS */
+
 static lqt_codec_info_static_t codec_info_raw =
   {
   name:        "Raw",
@@ -30,7 +67,14 @@ static lqt_codec_info_static_t codec_info_raw =
   description: "RGB uncompressed. Allows alpha",
   fourccs:     fourccs_raw,
   type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH
+  direction:   LQT_DIRECTION_BOTH,
+#ifdef DUMMY_PARAMETERS
+  encoding_parameters: dummy_parameters,
+  decoding_parameters: dummy_parameters
+#else
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
+#endif
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
@@ -40,7 +84,10 @@ static lqt_codec_info_static_t codec_info_v308 =
   description: "8 bit Planar YUV 4:4:4",
   fourccs:     fourccs_v308,
   type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
+
   };
 
 static lqt_codec_info_static_t codec_info_v408 =
@@ -50,7 +97,10 @@ static lqt_codec_info_static_t codec_info_v408 =
   description:       "8 bit Planar YUVA 4:4:4:4",
   fourccs:           fourccs_v408,
   type:              LQT_CODEC_VIDEO,
-  direction:         LQT_DIRECTION_BOTH
+  direction:         LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
+
   };
 
 static lqt_codec_info_static_t codec_info_v410 =
@@ -60,7 +110,10 @@ static lqt_codec_info_static_t codec_info_v410 =
   description: "10 bit Planar YUV 4:4:4:4",
   fourccs:     fourccs_v410,
   type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
+
   };
 
 static lqt_codec_info_static_t codec_info_yuv2 =
@@ -70,7 +123,10 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   description: "8 bit Packed YUV 4:2:2",      /* Description            */
   fourccs:     fourccs_yuv2,
   type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0
+
   };
 
 static lqt_codec_info_static_t codec_info_yuv4 =
@@ -80,7 +136,10 @@ static lqt_codec_info_static_t codec_info_yuv4 =
     description: "YUV 4:2:0 NOT COMPATIBLE WITH STANDARD QUICKTIME",
     fourccs:     fourccs_yuv4,
     type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH
+    direction:   LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
+
   };
 
 static lqt_codec_info_static_t codec_info_yv12 =
@@ -90,7 +149,10 @@ static lqt_codec_info_static_t codec_info_yv12 =
     description: "8 bit Planar YUV 4:2:0",
     fourccs:     fourccs_yv12,
     type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH
+    direction:   LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
+
     
   };
 
@@ -103,54 +165,26 @@ extern lqt_codec_info_t * get_codec_info(int index)
   switch(index)
     {
     case 0: /* raw */
-      return lqt_create_codec_info(&codec_info_raw,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_raw);
       break;
     case 1: /* v308 */
-      return lqt_create_codec_info(&codec_info_v308,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_v308);
       break;
 
     case 2: /* v408 */
-      return lqt_create_codec_info(&codec_info_v408,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_v408);
       break;
     case 3: /* v410 */
-      return lqt_create_codec_info(&codec_info_v410,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_v410);
       break;
     case 4: /* yuv2 */
-      return lqt_create_codec_info(&codec_info_yuv2,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_yuv2);
       break;
     case 5: /* yuv4 */
-      return lqt_create_codec_info(&codec_info_yuv4,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_yuv4);
       break;
     case 6: /* vy12 */
-      return lqt_create_codec_info(&codec_info_yv12,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0,
-                                   (const lqt_parameter_info_static_t*)0,
-                                   0);
+      return lqt_create_codec_info(&codec_info_yv12);
       break;
     }
   return (lqt_codec_info_t*)0;
