@@ -287,6 +287,7 @@ x11_create_ximage(Display *dpy, int width, int height)
 	goto shm_error;
     shmctl(shminfo->shmid, IPC_RMID, 0);
     XSetErrorHandler(old_handler);
+    return ximage;
 
 shm_error:
     if (ximage) {
@@ -350,6 +351,7 @@ xv_create_ximage(Display *dpy, int width, int height, int port, int format)
 	goto shm_error;
     shmctl(shminfo->shmid, IPC_RMID, 0);
     XSetErrorHandler(old_handler);
+    return xvimage;
 
 shm_error:
     if (xvimage) {
