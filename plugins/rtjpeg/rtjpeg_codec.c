@@ -73,7 +73,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		codec->decode_rows[2] = codec->decode_rows[1] + (codec->jpeg_width * codec->jpeg_height) / 4;
 	}
 
-        use_temp = (BC_YUV420P != file->color_model ||
+        use_temp = (BC_YUV420P != file->vtracks[track].color_model ||
 		file->in_x != 0 ||
 		file->in_y != 0 ||
 		file->in_w != codec->qt_width ||
@@ -96,7 +96,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		if(!result)
 			RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->decode_rows);
 	}
-        file_rowspan = file->row_span ? file->row_span : file->out_w;
+        file_rowspan = file->vtracks[track].row_span ? file->vtracks[track].row_span : file->out_w;
 	if(use_temp) {
 		cmodel_transfer(row_pointers, 
 			codec->decode_rows,
@@ -115,7 +115,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			file->out_w, 
 			file->out_h,
 			BC_YUV420P, 
-			file->color_model,
+			file->vtracks[track].color_model,
 			0,
                         codec->jpeg_width,
 			file_rowspan);
@@ -173,8 +173,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		if(!codec->write_buffer)
 			return -1;
 	}
-        file_rowspan = file->row_span ? file->row_span : codec->qt_width;
-        if(file->color_model != BC_YUV420P) {
+        file_rowspan = file->vtracks[track].row_span ? file->vtracks[track].row_span : codec->qt_width;
+        if(file->vtracks[track].color_model != BC_YUV420P) {
 		cmodel_transfer(codec->encode_rows, 
 			row_pointers,
 			codec->encode_rows[0],
@@ -191,7 +191,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			0, 
 			codec->qt_width, 
 			codec->qt_height,
-			file->color_model,
+			file->vtracks[track].color_model,
 			BC_YUV420P, 
 			0,
 			file_rowspan,

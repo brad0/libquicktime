@@ -463,6 +463,20 @@ int quicktime_supported_audio(quicktime_t *file, int track)
         return 1;
 }
 
+static void update_frame_position(quicktime_video_map_t * track)
+  {
+  track->timestamp +=
+    track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_duration;
+
+  track->stts_count++;
+
+  if(track->stts_count >=
+     track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_count)
+    track->stts_index++;
+  
+  track->current_position++;
+  }
+
 int quicktime_decode_video(quicktime_t *file,
                            unsigned char **row_pointers, int track)
 {
@@ -474,7 +488,8 @@ int quicktime_decode_video(quicktime_t *file,
 //printf("quicktime_decode_video 1\n");
 // Fake scaling parameters
 	file->do_scaling = 0;
-	file->color_model = BC_RGB888;
+                
+        file->vtracks[track].color_model = BC_RGB888;
 	file->in_x = 0;
 	file->in_y = 0;
 	file->in_w = track_width;
@@ -482,9 +497,9 @@ int quicktime_decode_video(quicktime_t *file,
 	file->out_w = track_width;
 	file->out_h = track_height;
 
-//printf("quicktime_decode_video 1\n");
+        //printf("quicktime_decode_video 1\n");
 	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-	file->vtracks[track].current_position++;
+        update_frame_position(&(file->vtracks[track]));
 //printf("quicktime_decode_video 2\n");
 	return result;
 }
@@ -514,7 +529,7 @@ int lqt_decode_video(quicktime_t *file,
 //printf("quicktime_decode_video 1\n");
 	result =
           ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-	file->vtracks[track].current_position++;
+        update_frame_position(&(file->vtracks[track]));
 //printf("quicktime_decode_video 2\n");
 	return result;
 }
@@ -533,7 +548,7 @@ long quicktime_decode_scaled(quicktime_t *file,
 	int result;
 
 	file->do_scaling = 1;
-	file->color_model = color_model;
+	file->vtracks[track].color_model = color_model;
 	file->in_x = in_x;
 	file->in_y = in_y;
 	file->in_w = in_w;
@@ -542,7 +557,7 @@ long quicktime_decode_scaled(quicktime_t *file,
 	file->out_h = out_h;
 
 	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-	file->vtracks[track].current_position++;
+        update_frame_position(&(file->vtracks[track]));
 	return result;
 }
 
@@ -646,6 +661,54 @@ int lqt_decode_audio(quicktime_t *file,
 
 	return result;
 }
+
+int lqt_decode_audio_track(quicktime_t *file, 
+                           int16_t **poutput_i, 
+                           float **poutput_f, 
+                           long samples,
+                           int track)
+  {
+  int result = 1;
+  int16_t *output_i;
+  float *output_f;
+  int i;
+  int total_channels = quicktime_track_channels(file, track);
+  
+  for( i=0; i < total_channels; i++ )
+    {
+    
+    if( poutput_i != NULL )
+      {
+      output_i = poutput_i[i];
+      }
+    else
+      output_i = NULL;
+    
+    if( poutput_f != NULL )
+      {
+      output_f = poutput_f[i];
+      }
+    else
+      output_f = NULL;
+    
+    if( output_i != NULL || output_f != NULL )
+      {	
+      result = ((quicktime_codec_t*)file->atracks[track].codec)->decode_audio(
+                                                                              file, 
+                                                                              output_i, 
+                                                                              output_f, 
+                                                                              samples, 
+                                                                              track, 
+                                                                              i );
+      }
+    }
+  
+  file->atracks[track].current_position += samples;
+  
+  return result;
+  }
+
+
 
 /* Since all channels are written at the same time: */
 /* Encode using the compressor for the first audio track. */

@@ -148,13 +148,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	unsigned char *output_row, *y_plane, *u_plane, *v_plane;
 	int result = 0;
 	int y1, u, v, y2, r, g, b;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->color_model);
+	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
 	initialize(vtrack, codec);
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 
-	if(file->color_model == BC_YUV422 &&
+	if(file->vtracks[track].color_model == BC_YUV422 &&
 		file->in_x == 0 && 
 		file->in_y == 0 && 
 		file->in_w == width &&
@@ -190,7 +190,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			file->out_w, 
 			file->out_h,
 			BC_YUV422, 
-			file->color_model,
+			file->vtracks[track].color_model,
 			0,
 			codec->coded_w,
 			file->out_w);
@@ -222,7 +222,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	bytes = height * codec->bytes_per_line;
 	buffer = codec->work_buffer;
-	if(file->color_model == BC_YUV422)
+	if(file->vtracks[track].color_model == BC_YUV422)
 	{
 		encode_sign_change(codec, row_pointers);
 		quicktime_write_chunk_header(file, trak, &chunk_atom);
@@ -250,7 +250,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			0, 
 			width, 
 			height,
-			file->color_model,
+			file->vtracks[track].color_model,
 			BC_YUV422, 
 			0,
 			width,

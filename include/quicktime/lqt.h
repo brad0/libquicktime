@@ -83,6 +83,43 @@ int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track);
 
 /*
+ *  Get the duration of the NEXT frame to be decoded.
+ *  If constant is not NULL it will be set to 1 if the
+ *  frame duration is constant throughout the whole track
+ */
+
+int lqt_frame_duration(quicktime_t * file, int track, int *constant);
+
+/*
+ *  Return the timestamp of the NEXT frame to be decoded.
+ *  Call this BEFORE one of the decoding functions.
+ */
+  
+int64_t lqt_frame_time(quicktime_t * file, int track);
+
+/*
+ *  Get the timescale of the track. Divide the return values
+ *  of lqt_frame_duration and lqt_frame_time by the scale to
+ *  get the time in seconds.
+ */
+  
+int lqt_video_time_scale(quicktime_t * file, int track);
+
+/*
+ *  Return the duration of the entire track
+ */
+
+int64_t lqt_video_duration(quicktime_t * file, int track);
+
+/*
+ *  Set colormodel and row_span on a per track basis
+ */
+
+void lqt_set_cmodel(quicktime_t *file, int track, int colormodel);
+void lqt_set_row_span(quicktime_t *file, int track, int row_span);
+
+  
+/*
  * Same as quicktime_decode_audio, but it grabs all channels at
  * once. Or if you want only some channels you can leave the channels
  * you don't want = NULL in the poutput array. The poutput arrays
@@ -94,6 +131,27 @@ int lqt_decode_audio(quicktime_t *file,
 					 float **output_f, 
 					 long samples);
 
+/*
+ * This decodes all channels from one track
+ * (Was there a reason to hide the difference between tracks and
+ * channels from the user?)
+ */
+  
+  
+int lqt_decode_audio_track(quicktime_t *file, 
+                           int16_t **output_i, 
+                           float **output_f, 
+                           long samples,
+                           int track);
+
+/*
+ *  Seek to a specified time. Use this instead of quicktime_set_video_position
+ *  for streams with nonconstant framerate
+ */
+  
+void lqt_seek_video(quicktime_t * file, int track,
+                    int64_t time);
+  
 /*
  *  AVI Specific stuff
  */

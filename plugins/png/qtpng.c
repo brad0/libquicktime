@@ -80,7 +80,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int width = trak->tkhd.track_width;
 	quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int cmodel = source_cmodel(file, track);
-	int use_temp = (cmodel != file->color_model ||
+	int use_temp = (cmodel != file->vtracks[track].color_model ||
 		file->in_x != 0 ||
 		file->in_y != 0 ||
 		file->in_w != width ||
@@ -150,7 +150,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			file->out_w, 
 			file->out_h,
 			cmodel, 
-			file->color_model,
+			file->vtracks[track].color_model,
 			0,
 			width,
 			file->out_w);

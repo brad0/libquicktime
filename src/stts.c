@@ -91,3 +91,71 @@ void quicktime_write_stts(quicktime_t *file, quicktime_stts_t *stts)
 
 	quicktime_atom_write_footer(file, &atom);
 }
+
+int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
+                                 int64_t * stts_index, int64_t * stts_count)
+  {
+  int64_t ret = 0;
+  int64_t time_count = 0;
+
+  *stts_index = 0;
+  
+  while(1)
+    {
+    if(time_count + stts->table[*stts_index].sample_duration *
+       stts->table[*stts_index].sample_count > *time)
+      {
+      *stts_count = (*time - time_count) / stts->table[*stts_index].sample_duration;
+
+      time_count += *stts_count * stts->table[*stts_index].sample_duration;
+      ret += *stts_count;
+      break;
+      }
+    else
+      {
+      time_count += stts->table[*stts_index].sample_duration *
+        stts->table[*stts_index].sample_count;
+      ret += stts->table[*stts_index].sample_count;
+      *stts_index++;
+      }
+    }
+  *time = time_count;
+  return ret;
+  }
+
+/* sample = -1 returns the total duration */
+
+int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
+                                 int64_t * stts_index, int64_t * stts_count)
+  {
+  int64_t ret = 0;
+  int64_t sample_count = 0;
+  *stts_index = 0;
+  
+  if(sample < 0)
+    {
+    for(*stts_index = 0; *stts_index < stts->total_entries; *stts_index++)
+      {
+      ret += stts->table[*stts_index].sample_duration *
+        stts->table[*stts_index].sample_count;
+      }
+    return ret;
+    }
+  while(1)
+    {
+    if(sample_count + stts->table[*stts_index].sample_count > sample)
+      {
+      *stts_count = (sample - sample_count);
+
+      ret += *stts_count * stts->table[*stts_index].sample_duration;
+      break;
+      }
+    else
+      {
+      sample_count += stts->table[*stts_index].sample_count;
+      ret += stts->table[*stts_index].sample_duration;
+      *stts_index++;
+      }
+    }
+  return ret;
+  }

@@ -225,7 +225,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
          (file->in_h < height) ||
          (file->out_w != width) ||
          (file->out_h != height) ||
-         (codec->lqt_colormodel != file->color_model))
+         (codec->lqt_colormodel != file->vtracks[track].color_model))
         {
         do_cmodel_transfer = 1;
         }
@@ -234,7 +234,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 
       
       
-      row_span = file->row_span ? file->row_span : width;
+      row_span = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
       
       /* Transfer colormodel */
 
@@ -280,7 +280,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                         file->out_w ? file->out_w : width,  // int out_w,
                         file->out_h ? file->out_h : height, // int out_h,
                         codec->lqt_colormodel, // int in_colormodel,
-                        file->color_model,      // int out_colormodel,
+                        file->vtracks[track].color_model,      // int out_colormodel,
                         0, // int bg_color,
                         codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
                         row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
@@ -346,7 +346,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                         file->out_w ? file->out_w : width,  // int out_w,
                         file->out_h ? file->out_h : height, // int out_h,
                         codec->lqt_colormodel, // int in_colormodel,
-                        file->color_model,      // int out_colormodel,
+                        file->vtracks[track].color_model,      // int out_colormodel,
                         0, // int bg_color,
                         out_pic.linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
                         row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
@@ -418,7 +418,7 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
 	}
         //        codec->lqt_colormodel = ffmepg_2_lqt(codec->com.ffcodec_enc);
         
-        if(file->color_model != BC_YUV420P)
+        if(file->vtracks[track].color_model != BC_YUV420P)
           {
           if(!codec->encode_buffer)
             {
@@ -446,10 +446,10 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                           0, 
                           width, 
                           height,
-                          file->color_model,
+                          file->vtracks[track].color_model,
                           BC_YUV420P, 
                           0,
-                          file->row_span ? file->row_span : width,
+                          file->vtracks[track].row_span ? file->vtracks[track].row_span : width,
                           width);
           }
         else
@@ -458,7 +458,7 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
           codec->frame->data[0] = row_pointers[0];
           codec->frame->data[1] = row_pointers[1];
           codec->frame->data[2] = row_pointers[2];
-          codec->frame->linesize[0] = file->row_span ? file->row_span : width;
+          codec->frame->linesize[0] = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
           codec->frame->linesize[1] = codec->frame->linesize[0]/2;
           codec->frame->linesize[2] = codec->frame->linesize[0]/2;
           }

@@ -579,6 +579,12 @@ typedef struct
 	long current_chunk;      /* current chunk in output file */
 
 	void *codec;
+/* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
+        int64_t timestamp;
+        int64_t stts_index;
+        int64_t stts_count;
+	int color_model, row_span;
+
 } quicktime_video_map_t;
 
 /* file descriptor passed to all routines */
@@ -642,7 +648,8 @@ typedef struct
 /* Parameters for frame currently being decoded */
 	int do_scaling;
 	int in_x, in_y, in_w, in_h, out_w, out_h;
-	int color_model, row_span;
+/*      Libquicktime change: color_model and row_span are now saved per track */
+/*	int color_model, row_span; */
 } quicktime_t;
 
 typedef struct

@@ -74,7 +74,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int result = 0;
 	int y1, u, v, y2, r, g, b, y3, y4;
 	int i;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->color_model);
+	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
 	initialize(vtrack);
 
 	y_size = codec->coded_h * codec->coded_w;
@@ -85,7 +85,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 
 
-	if(file->color_model == BC_YUV420P && 
+	if(file->vtracks[track].color_model == BC_YUV420P && 
 			file->in_x == 0 && 
 			file->in_y == 0 && 
 			file->in_w == width &&
@@ -117,7 +117,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			file->out_w, 
 			file->out_h,
 			BC_YUV420P, 
-			file->color_model,
+			file->vtracks[track].color_model,
 			0,
 			codec->coded_w,
 			file->out_w);
@@ -151,7 +151,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	bytes = quicktime_add3(y_size, u_size, v_size);
 
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
-	if(file->color_model == BC_YUV420P)
+	if(file->vtracks[track].color_model == BC_YUV420P)
 	{
 		result = !quicktime_write_data(file, row_pointers[0], y_size);
 		if(!result) result = !quicktime_write_data(file, row_pointers[1], u_size);
@@ -175,7 +175,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			0, 
 			width, 
 			height,
-			file->color_model,
+			file->vtracks[track].color_model,
 			BC_YUV420P, 
 			0,
 			width,

@@ -78,7 +78,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 	int pixel_size = frame_depth / 8;
 	int cmodel = source_cmodel(file, track);
-	int use_temp = (cmodel != file->color_model ||
+	int use_temp = (cmodel != file->vtracks[track].color_model ||
 		file->in_x != 0 ||
 		file->in_y != 0 ||
 		file->in_w != width ||
@@ -135,7 +135,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 			file->out_w, 
 			file->out_h,
 			cmodel, 
-			file->color_model,
+			file->vtracks[track].color_model,
 			0,
 			width,
 			file->out_w);
@@ -177,7 +177,7 @@ static int quicktime_encode_raw(quicktime_t *file,
 
 
 
-	if(file->color_model != dest_cmodel)
+	if(file->vtracks[track].color_model != dest_cmodel)
 	{
 		if(!codec->temp_frame)
 		{
@@ -212,7 +212,7 @@ static int quicktime_encode_raw(quicktime_t *file,
 			0,
 			width, 
 			height,
-			file->color_model, 
+                        file->vtracks[track].color_model, 
 			dest_cmodel,
 			0,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 			width,       /* For planar use the luma rowspan */
@@ -237,7 +237,7 @@ static int quicktime_encode_raw(quicktime_t *file,
 			cmodel_calculate_datasize(width,
 				height,
 				-1,
-				file->color_model));
+                                file->vtracks[track].color_model));
                 quicktime_write_chunk_footer(file,
                         trak,
                         vtrack->current_chunk,

@@ -117,12 +117,12 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int u, v;
 	register int y1, y2, y3, y4;
 	int r, g, b;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->color_model);
+	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
 	initialize(vtrack, codec);
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-	switch(file->color_model)
+	switch(file->vtracks[track].color_model)
 	{
 		case BC_RGB888:
 			buffer = codec->work_buffer;

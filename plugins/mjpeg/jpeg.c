@@ -56,8 +56,8 @@ static int decode(quicktime_t *file,
 //printf("decode 1\n");
 
 	mjpeg_set_cpus(codec->mjpeg, file->cpus);
-	if(file->row_span) 
-		mjpeg_set_rowspan(codec->mjpeg, file->row_span);
+	if(file->vtracks[track].row_span) 
+		mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].row_span);
 	else
 		mjpeg_set_rowspan(codec->mjpeg, 0);
 
@@ -112,7 +112,7 @@ static int decode(quicktime_t *file,
 				row_pointers[0], 
 				row_pointers[1], 
 				row_pointers[2],
-				file->color_model,
+				file->vtracks[track].color_model,
 				file->cpus);
 //printf("decode 7\n");
 		}
@@ -158,7 +158,7 @@ static int decode(quicktime_t *file,
 				file->out_w, 
 				file->out_h,
 				temp_cmodel, 
-				file->color_model,
+				file->vtracks[track].color_model,
 				0,
 				track_width,
 				file->out_w);
@@ -188,7 +188,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		row_pointers[0], 
 		row_pointers[1], 
 		row_pointers[2],
-		file->color_model,
+		file->vtracks[track].color_model,
 		file->cpus);
 	if(codec->jpeg_type == JPEG_MJPA) 
 		mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,

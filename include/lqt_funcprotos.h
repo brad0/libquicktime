@@ -415,6 +415,13 @@ void quicktime_read_stts(quicktime_t *file, quicktime_stts_t *stts);
 void quicktime_write_stts(quicktime_t *file, quicktime_stts_t *stts);
 
 
+int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
+                                 int64_t * stts_index, int64_t * stts_count);
+
+int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
+                                 int64_t * stts_index, int64_t * stts_count);
+
+
 /* tkhd.c */
 
 int quicktime_tkhd_init(quicktime_tkhd_t *tkhd);

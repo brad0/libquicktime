@@ -413,7 +413,7 @@ int quicktime_init(quicktime_t *file)
 //	quicktime_atom_write_header64(new_file, &file->mdat.atom, "mdat");
 	quicktime_moov_init(&(file->moov));
 	file->cpus = 1;
-	file->color_model = BC_RGB888;
+        //	file->color_model = BC_RGB888;
 	return 0;
 }
 
@@ -595,11 +595,40 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
 		file->vtracks[track].current_chunk = chunk;
 		offset = quicktime_sample_to_offset(file, trak, frame);
 		quicktime_set_position(file, offset);
-	}
+                file->vtracks[track].timestamp =
+                  quicktime_sample_to_time(&(trak->mdia.minf.stbl.stts),
+                                           frame,
+                                           &(file->vtracks[track].stts_index),
+                                           &(file->vtracks[track].stts_count));
+        }
 	else
 		fprintf(stderr, "quicktime_set_video_position: track >= file->total_vtracks\n");
 	return 0;
 }
+
+void lqt_seek_video(quicktime_t * file, int track, int64_t time)
+  {
+  int64_t pos;
+  int64_t offset, chunk_sample, chunk;
+  quicktime_trak_t *trak;
+
+  if(track >= file->total_vtracks)
+    return;
+
+  trak = file->vtracks[track].track;
+  file->vtracks[track].timestamp = time;
+  pos =
+    quicktime_time_to_sample(&(trak->mdia.minf.stbl.stts),
+                             &(file->vtracks[track].timestamp),
+                             &(file->vtracks[track].stts_index),
+                             &(file->vtracks[track].stts_count));
+
+  file->vtracks[track].current_position = pos;
+  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, pos);
+  file->vtracks[track].current_chunk = chunk;
+  offset = quicktime_sample_to_offset(file, trak, pos);
+  quicktime_set_position(file, offset);
+  }
 
 int quicktime_has_audio(quicktime_t *file)
 {
@@ -682,14 +711,28 @@ int quicktime_video_depth(quicktime_t *file, int track)
 }
 
 void quicktime_set_cmodel(quicktime_t *file, int colormodel)
-{
-	file->color_model = colormodel;
-}
+  {
+  int i;
+  for(i = 0; i < file->total_vtracks; i++)
+    file->vtracks[i].color_model = colormodel;
+  }
+
+void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
+  {
+  file->vtracks[track].color_model = colormodel;
+  }
 
 void quicktime_set_row_span(quicktime_t *file, int row_span)
 {
-	file->row_span = row_span;
+int i;
+  for(i = 0; i < file->total_vtracks; i++)
+    file->vtracks[i].row_span = row_span;
 }
+
+void lqt_set_row_span(quicktime_t *file, int track, int row_span)
+  {
+  file->vtracks[track].row_span = row_span;
+  }
 
 void quicktime_set_window(quicktime_t *file,
         int in_x,                    /* Location of input frame to take picture */
@@ -736,6 +779,71 @@ double quicktime_frame_rate(quicktime_t *file, int track)
 
 	return 0;
 }
+
+/*
+ *  Return the timestamp of the NEXT frame to be decoded.
+ *  Call this BEFORE one of the decoding functions.
+ */
+  
+int64_t lqt_frame_time(quicktime_t * file, int track)
+  {
+  return file->vtracks[track].timestamp;
+  }
+
+/*
+ *  Return the Duration of the entire track
+ */
+
+int64_t lqt_video_duration(quicktime_t * file, int track)
+  {
+  int64_t dummy1;
+  int64_t dummy2;
+  
+
+  return
+    quicktime_sample_to_time(&(file->vtracks[track].track->mdia.minf.stbl.stts), -1,
+                             &dummy1, &dummy2);
+  }
+
+
+/*
+ *  Get the timescale of the track. Divide the return values
+ *  of lqt_frame_duration and lqt_frame_time by the scale to
+ *  get the time in seconds.
+ */
+  
+int lqt_video_time_scale(quicktime_t * file, int track)
+  {
+  if(file->total_vtracks <= track)
+    return 0;
+  return file->vtracks[track].track->mdia.mdhd.time_scale;
+  }
+
+/*
+ *  Get the duration of the NEXT frame to be decoded.
+ *  If constant is not NULL it will be set to 1 if the
+ *  frame duration is constant throughout the whole track
+ */
+
+int lqt_frame_duration(quicktime_t * file, int track, int *constant)
+  {
+  if(file->total_vtracks <= track)
+    return 0;
+
+  if(constant)
+    {
+    if(file->vtracks[track].track->mdia.minf.stbl.stts.total_entries == 1)
+      *constant = 1;
+    else if((file->vtracks[track].track->mdia.minf.stbl.stts.total_entries == 2) && 
+            (file->vtracks[track].track->mdia.minf.stbl.stts.table[1].sample_count == 1))
+      *constant = 1;
+    else
+      *constant = 0;
+    }
+  return
+    file->vtracks[track].track->mdia.minf.stbl.stts.table[file->vtracks[track].stts_index].sample_duration;
+  }
+
 
 char* quicktime_video_compressor(quicktime_t *file, int track)
 {
@@ -1016,6 +1124,7 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 	vtrack->track = trak;
 	vtrack->current_position = 0;
 	vtrack->current_chunk = 1;
+        vtrack->color_model = BC_RGB888;
 	quicktime_init_vcodec(vtrack, encode, info);
 	return 0;
 }

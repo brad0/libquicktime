@@ -116,15 +116,15 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	{
 		int is_sequential =
 			check_sequentiality( row_pointers,
-								 720 * cmodel_calculate_pixelsize(file->color_model),
+								 720 * cmodel_calculate_pixelsize(file->vtracks[track].color_model),
 								 file->out_h );
 
 		codec->dv_decoder->quality = codec->decode_quality;
 
 		dv_parse_header( codec->dv_decoder, codec->data );
 		
-		if( (file->color_model == BC_YUV422
-			 || file->color_model == BC_RGB888) &&
+		if( (file->vtracks[track].color_model == BC_YUV422
+			 || file->vtracks[track].color_model == BC_RGB888) &&
 			file->in_x == 0 && 
 			file->in_y == 0 && 
 			file->in_w == width &&
@@ -133,14 +133,14 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			file->out_h == height &&
 			is_sequential )
 		{
-			if( file->color_model == BC_YUV422 )
+			if( file->vtracks[track].color_model == BC_YUV422 )
 			{
 				pitches[0] = 720 * 2;
 				dv_decode_full_frame( codec->dv_decoder, codec->data,
 									  e_dv_color_yuv, row_pointers,
 									  pitches );
 			}
-			else if( file->color_model == BC_RGB888)
+			else if( file->vtracks[track].color_model == BC_RGB888)
  			{
 				pitches[0] = 720 * 3;
 				dv_decode_full_frame( codec->dv_decoder, codec->data,
@@ -158,8 +158,8 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 					codec->temp_rows[i] = codec->temp_frame + 720 * 2 * i;
 			}
 
-			/*if( file->color_model == BC_YUV422 ||
-			  file->color_model == BC_YUV888 )
+			/*if( file->vtracks[track].color_model == BC_YUV422 ||
+			  file->vtracks[track].color_model == BC_YUV888 )
 			  {*/
 
 		    decode_colormodel = BC_YUV422;
@@ -169,9 +169,9 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 								  pitches );
 			
 			/*}
-			  else if( file->color_model == BC_RGB888 ||
-			  file->color_model == BC_BGR888 ||
-			  file->color_model == BC_RGBA8888 )
+			  else if( file->vtracks[track].color_model == BC_RGB888 ||
+			  file->vtracks[track].color_model == BC_BGR888 ||
+			  file->vtracks[track].color_model == BC_RGBA8888 )
 			  {
 			  decode_colormodel = BC_RGB888;
 			  pitches[0] = 720 * 3;
@@ -199,7 +199,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 				file->out_w, 
 				file->out_h,
 				decode_colormodel, 
-				file->color_model,
+				file->vtracks[track].color_model,
 				0,
 				width,
 				file->out_w);
@@ -254,18 +254,18 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	{
 		int is_sequential =
 			check_sequentiality( row_pointers,
-								 width_i * cmodel_calculate_pixelsize(file->color_model),
+								 width_i * cmodel_calculate_pixelsize(file->vtracks[track].color_model),
 								 height );
 	
-		if( ( file->color_model == BC_YUV422
-			  || file->color_model == BC_RGB888 ) &&
+		if( ( file->vtracks[track].color_model == BC_YUV422
+			  || file->vtracks[track].color_model == BC_RGB888 ) &&
 			width == width_i &&
 			height == height_i &&
 			is_sequential )
 		{
 			input_rows = row_pointers;
-			encode_colormodel = file->color_model;
-			switch( file->color_model )
+			encode_colormodel = file->vtracks[track].color_model;
+			switch( file->vtracks[track].color_model )
 			{
 				case BC_YUV422:
 					encode_dv_colormodel = e_dv_color_yuv;
@@ -306,7 +306,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 							0, 
 							MIN(width, width_i), 
 							MIN(height, height_i),
-							file->color_model, 
+							file->vtracks[track].color_model, 
 							BC_RGB888,
 							0,    /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 							width,  /* For planar use the luma rowspan */

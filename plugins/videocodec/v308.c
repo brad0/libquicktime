@@ -102,7 +102,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		file->out_w, 
 		file->out_h,
 		BC_VYU888, 
-		file->color_model,
+		file->vtracks[track].color_model,
 		0,
 		width,
 		file->out_w);
@@ -157,7 +157,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		0, 
 		width, 
 		height,
-		file->color_model,
+		file->vtracks[track].color_model,
 		BC_VYU888, 
 		0,
 		width,
