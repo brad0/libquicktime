@@ -718,26 +718,26 @@ int lqt_decode_audio_track(quicktime_t *file,
   return result;
   }
 
-
-
-/* Since all channels are written at the same time: */
-/* Encode using the compressor for the first audio track. */
-/* Which means all the audio channels must be on the same track. */
-
-int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, long samples)
-{
+int lqt_encode_audio_track(quicktime_t *file, 
+                           int16_t **input_i, 
+                           float **input_f, 
+                           long samples,
+                           int track)
+  {
 	int result = 1;
-	char *compressor = quicktime_audio_compressor(file, 0);
 
-	result = ((quicktime_codec_t*)file->atracks[0].codec)->encode_audio(file, 
-		input_i, 
-		input_f,
-		0, 
-		samples);
-	file->atracks[0].current_position += samples;
+	result = ((quicktime_codec_t*)file->atracks[track].codec)->encode_audio(file, input_i, 
+                                                                            input_f, track, samples);
+	file->atracks[track].current_position += samples;
 
 	return result;
-}
+  
+  }
+
+int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, long samples)
+  {
+  return lqt_encode_audio_track(file, input_i, input_f, samples, 0);
+  }
 
 int quicktime_reads_cmodel(quicktime_t *file, 
 	int colormodel, 

@@ -158,6 +158,17 @@ int lqt_decode_audio(quicktime_t *file,
 					 long samples);
 
 /*
+ * Same as quicktime_encode_audio but with an additional track argument
+ * for encoding files with more than one audio track
+ */
+  
+int lqt_encode_audio_track(quicktime_t *file, 
+                           int16_t **output_i, 
+                           float **output_f, 
+                           long samples,
+                           int track);
+  
+/*
  * This decodes all channels from one track
  * (Was there a reason to hide the difference between tracks and
  * channels from the user?)
