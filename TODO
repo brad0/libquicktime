@@ -9,3 +9,5 @@
 - Enable proper AVI decoding (at least for some types of AVIs).
 
 - Enable AVI encoding
+
+- Find replacement for opendivx
