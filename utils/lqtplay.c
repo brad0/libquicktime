@@ -941,8 +941,11 @@ static int qt_init_video(void)
 					  xv_port,FOURCC_YUV2);
 	    for (i = 0; i < qt_height; i++)
 		qt_rows[i] = qt_xvimage->data + qt_width * 2 * i;
-	    break;
-	case BC_YUV420P:
+
+            lqt_set_row_span(qt,0,qt_xvimage->pitches[0]);
+            
+            break;
+        case BC_YUV420P:
             if(xv_have_YV12)
               {
               fprintf(stderr,
@@ -963,7 +966,9 @@ static int qt_init_video(void)
 	      qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[1];
 	      qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[2];
 	      }
-              break;
+            lqt_set_row_span(qt,0,qt_xvimage->pitches[0]);
+            lqt_set_row_span_uv(qt,0,qt_xvimage->pitches[1]);
+            break;
 	default:
 	    fprintf(stderr,"ERROR: internal error at %s:%d\n",
 		    __FILE__,__LINE__);

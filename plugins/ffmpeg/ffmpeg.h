@@ -42,28 +42,6 @@ typedef struct
   int bitrate;
   } quicktime_ffmpeg_codec_common_t;
 
-typedef struct
-  {
-  quicktime_ffmpeg_codec_common_t com;
-
-  /* Interleaved samples as avcodec needs them */
-    
-  int16_t * sample_buffer;
-  int sample_buffer_alloc; 
-  int samples_in_buffer;
-  
-  /* Buffer for the entire chunk */
-
-  uint8_t * chunk_buffer;
-  int chunk_buffer_alloc;
-  int bytes_in_chunk_buffer;
-
-  /* Start and end positions of the sample buffer */
-    
-  int64_t sample_buffer_start;
-  int64_t sample_buffer_end;
-  
-  } quicktime_ffmpeg_audio_codec_t;
 
 typedef struct
   {
@@ -129,6 +107,10 @@ int lqt_ffmpeg_decode_audio(quicktime_t * file, int16_t ** output_i,
 int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *atrack);
 int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack);
 
+int lqt_ffmpeg_set_parameter_audio(quicktime_t *file, 
+                                   int track, 
+                                   char *key, 
+                                   void *value);
 
 int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat fmt, int * exact);
 enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int colormodel);

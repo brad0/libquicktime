@@ -460,8 +460,9 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       lqt_ffmpeg_get_lqt_colormodel(codec->com.ffcodec_dec->pix_fmt, &exact);
     if(!exact)
       codec->do_imgconvert = 1;
-    //    fprintf(stderr, "Detected stream colormodel: %s\n",
-    //            lqt_colormodel_to_string(codec->lqt_colormodel));
+    //    fprintf(stderr, "Detected stream colormodel: %s %s %d\n",
+    //            lqt_colormodel_to_string(codec->lqt_colormodel),
+    //            avcodec_get_pix_fmt_name(codec->com.ffcodec_dec->pix_fmt), exact);
     }
   
   /*
@@ -526,6 +527,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     switch(codec->lqt_colormodel)
       {
       case BC_YUV420P:  ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
+        //        fprintf(stderr, "Copy frame BC_YUV420P\n");
         row_span_uv = file->vtracks[track].row_span_uv ? file->vtracks[track].row_span_uv : width/2;
         for(i = 0; i < height; i++)
           {
@@ -620,7 +622,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     }
   else if(!codec->do_imgconvert)
     {
-    //    fprintf(stderr, "cmodel_transfer planar...");
+    //    fprintf(stderr, "cmodel_transfer...");
     /* Transfer colormodel */
     /* Must make a difference between planar and packed here */
         

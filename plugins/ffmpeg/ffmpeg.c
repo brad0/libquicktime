@@ -188,21 +188,6 @@ static int set_parameter_video(quicktime_t *file,
 #undef INTPARM
 }
 
-static int set_parameter_audio(quicktime_t *file, 
-                               int track, 
-                               char *key, 
-                               void *value)
-{
-	quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
-
-        if(!strcasecmp(key, "bit_rate_audio"))
-          {
-          codec->com.params.bit_rate = (*(int *)value) * 1000;
-          return 0;
-          }
-        //	fprintf(stderr, "Unknown key: %s\n", key);
-          return -1;
-}
 
 static int reads_colormodel(quicktime_t *file,
                             int colormodel, 
@@ -256,26 +241,3 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 }
 
-void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
-                                       AVCodec *decoder)
-{
-	quicktime_ffmpeg_audio_codec_t *codec;
-
-	avcodec_init();
-        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg 1\n");
-	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
-	if(!codec)
-          return;
-
-	codec->com.ffc_enc = encoder;
-	codec->com.ffc_dec = decoder;
-	
-	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)atrack->codec)->delete_acodec = lqt_ffmpeg_delete_audio;
-	if(encoder)
-          ((quicktime_codec_t*)atrack->codec)->encode_audio = lqt_ffmpeg_encode_audio;
-	if(decoder)
-          ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
-	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter_audio;
-
-}
