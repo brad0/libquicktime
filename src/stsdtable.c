@@ -171,7 +171,10 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quickt
 	quicktime_atom_t leaf_atom;
 
 	quicktime_atom_read_header(file, &leaf_atom);
-	
+
+        /* LQT: Initialize these */
+        table->extradata = (unsigned char*)0;
+        table->extradata_size = 0;
 	table->format[0] = leaf_atom.type[0];
 	table->format[1] = leaf_atom.type[1];
 	table->format[2] = leaf_atom.type[2];

@@ -5,6 +5,8 @@
 #include <lame/lame.h>
 #include <quicktime/quicktime.h>
 
+FILE * outfile = (FILE*)0;
+
 // Mp3 framesize detection (ported from gmerlin)
 
 static int mpeg_bitrates[5][16] = {
@@ -203,6 +205,9 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   /*       free(codec->output[i]); */
   /*     free(codec->output); */
   /*     } */
+
+  if(outfile)
+    fclose(outfile);
   
   if(codec->lame_global)
     {
@@ -223,6 +228,7 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   free(codec);
   return 0;
   }
+
 
 static int encode(quicktime_t *file, 
                   int16_t **input_i, 
@@ -246,18 +252,21 @@ static int encode(quicktime_t *file,
     codec->encode_initialized = 1;
     codec->lame_global = lame_init();
     lame_set_brate(codec->lame_global, codec->bitrate / 1000);
-    lame_set_quality(codec->lame_global, 0);
+    lame_set_VBR(codec->lame_global, vbr_off);
+    //    lame_set_quality(codec->lame_global, 0);
     lame_set_in_samplerate(codec->lame_global, 
                            trak->mdia.minf.stbl.stsd.table[0].sample_rate);
     lame_set_out_samplerate(codec->lame_global, 
                             trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+
+    lame_set_bWriteVbrTag(codec->lame_global, 0);
     
     /* Also support Mono streams */
     
     codec->stereo = (trak->mdia.minf.stbl.stsd.table[0].channels == 1) ? 0 : 1;
     lame_set_num_channels(codec->lame_global, (codec->stereo ? 2 : 1));
 
-    lame_set_scale(codec->lame_global, 1.0);
+    //    lame_set_scale(codec->lame_global, 1.0);
     
     if((result = lame_init_params(codec->lame_global)) < 0)
       printf(" lame_init_params returned %d\n", result);
@@ -302,6 +311,12 @@ static int encode(quicktime_t *file,
     //   fprintf(stderr, "Encoded %d frames, %d bytes\n", frames, result);
     
     quicktime_write_chunk_header(file, trak, &chunk_atom);
+    printf("Bytes encoded: %d Samples: %d\n", result, frames * codec->samples_per_frame);
+    if(!outfile)
+      outfile = fopen("out.mp3", "w");
+
+    fwrite(codec->encoder_output, 1, result, outfile);
+    
     result = !quicktime_write_data(file, codec->encoder_output, result);
     // Knows not to save the chunksizes for audio
     quicktime_write_chunk_footer(file, 

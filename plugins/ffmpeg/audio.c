@@ -79,7 +79,7 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
   /* Determine the chunk size */
 
   chunk_size = codec->chunk_sizes[codec->current_chunk-1];
-  fprintf(stderr, "Chunk size: %lld\n", chunk_size);
+  fprintf(stderr, "Chunk size: %lld, samples: %d\n", chunk_size, num_samples);
   if(codec->chunk_buffer_size < chunk_size + FF_INPUT_BUFFER_PADDING_SIZE)
     {
     codec->chunk_buffer_size = chunk_size + 100 + FF_INPUT_BUFFER_PADDING_SIZE;
@@ -88,7 +88,8 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
 
   /* Read one chunk */
 
-  offset = quicktime_chunk_to_offset(file, track_map->track, codec->current_chunk);
+  offset = quicktime_chunk_to_offset(file, track_map->track,
+                                     codec->current_chunk);
   quicktime_set_position(file, offset);
   
   result = !quicktime_read_data(file, codec->chunk_buffer, chunk_size);

@@ -105,11 +105,14 @@ static int set_parameter_video(quicktime_t *file,
 
 	if(!strcasecmp(key, "aspect_ratio_info")) {
 		if(!strcasecmp((char *)value, "Square")) {
-			codec->com.params.aspect_ratio = 1.0;
+			codec->com.params.sample_aspect_ratio.num = 1;
+			codec->com.params.sample_aspect_ratio.den = 1;
 		} else if(!strcasecmp((char *)value, "4:3")) {
-			codec->com.params.aspect_ratio = 4.0 / 3.0;
+                        codec->com.params.sample_aspect_ratio.num = 4;
+                        codec->com.params.sample_aspect_ratio.den = 3;
 		} else if(!strcasecmp((char *)value, "16:9")) {
-			codec->com.params.aspect_ratio = 16.0 / 9.0;
+                        codec->com.params.sample_aspect_ratio.num = 16;
+                        codec->com.params.sample_aspect_ratio.den = 9;
 		}
 	} else
 
