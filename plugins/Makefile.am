@@ -1,0 +1,23 @@
+# These are always here
+
+base_subdirs = dv audiocodec videocodec opendivx
+
+if HAVE_LIBJPEG
+jpeg_subdirs = mjpeg
+else
+jpeg_subdirs=
+endif
+
+if HAVE_LIBPNG
+png_subdirs=png
+else
+png_subdirs=
+endif
+
+if HAVE_VORBIS
+vorbis_subdirs=vorbis
+else
+vorbis_subdirs=
+endif
+
+SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(png_subdirs) $(vorbis_subdirs)
