@@ -58,7 +58,7 @@ Group(pl):	Aplikacje/Grafika
 Group(pt):	Aplicações/Gráficos
 Requires:	%{name} = %{version}
 
-%description firewire
+%description firewire-devel
 Header files for libquicktime firewire support
 
 %package devel
