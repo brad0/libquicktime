@@ -1,7 +1,6 @@
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <funcprotos.h>
 #include <graphics.h>
 
 typedef struct

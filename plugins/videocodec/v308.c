@@ -1,5 +1,5 @@
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include <quicktime/quicktime.h>
 #include <workarounds.h>
 #include "v308.h"
@@ -54,16 +54,6 @@ static int writes_colormodel(quicktime_t *file,
 		colormodel == BC_YUV161616 ||
 		colormodel == BC_YUVA16161616);
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

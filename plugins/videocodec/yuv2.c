@@ -1,5 +1,5 @@
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include "quicktime.h"
 #include "yuv2.h"
 

@@ -1,8 +1,5 @@
 CFLAGS = @CFLAGS@
 
-CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-#CFLAGS += -include $(CONFIG_HEADER)
-
 pkglib_LTLIBRARIES = lqt_videocodec.la
 
 lqt_videocodec_la_SOURCES = \
