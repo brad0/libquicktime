@@ -275,9 +275,11 @@ GLOBAL(void) jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long
 #ifdef HAVE_MT_JPEG
 static void create_init_mutex(pthread_mutex_t *m)
 	{
-#ifdef	__linux__
+#ifdef	PTHREAD_MUTEX_ERRORCHECK
 	pthread_mutexattr_t mu_attr;
 	pthread_mutexattr_t *p_attr = &mu_attr;
+
+	pthread_mutexattr_init(&mu_attr);
 	pthread_mutexattr_settype(&mu_attr, PTHREAD_MUTEX_ERRORCHECK);
 #else
 	pthread_mutexattr_t *p_attr = NULL;	/* Solaris/BSDOS/FreeBSD */
