@@ -14,6 +14,9 @@ extern "C" {
 void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value);
 void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value);
 
+int lqt_set_fiel(quicktime_t *, int, int, int);
+int lqt_get_fiel(quicktime_t *, int, int *, int *);
+
 int lqt_get_codec_api_version();
 
 /***********************************************

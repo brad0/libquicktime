@@ -158,6 +158,7 @@ dnl Checks for libraries.
 
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(z, inflateEnd)
+AC_CHECK_LIB(m, cos)
 
 AC_SEARCH_LIBS(pthread_create, [gthread pthread c_r])
 
