@@ -1,5 +1,5 @@
 #include <string.h>
-
+#include <limits.h>
 #include <dlfcn.h>
 
 #include <pthread.h>

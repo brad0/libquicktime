@@ -709,8 +709,11 @@ void lqt_registry_write()
   output = fopen(filename_buffer, "w");
   
   if(!output)
+    {
+    lqt_registry_unlock();
     return;
-  
+    }
+
   /*
    *  Write initial comment
    */
