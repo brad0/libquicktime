@@ -1,6 +1,8 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
+#include <string.h>
+
 int usage(void)
 {
 	printf("usage: dechunk [-f framerate] <input movie> <output prefix>\n");
