@@ -592,8 +592,11 @@ static void write_parameter_info(FILE * output,
     
   }
 
+/* 
+ *  Write codec info, return FALSE on error
+ */ 
 
-static void write_codec_info(const lqt_codec_info_t * info, FILE * output)
+static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
   {
   const char * tmp;
 
@@ -687,7 +690,9 @@ static void write_codec_info(const lqt_codec_info_t * info, FILE * output)
   fprintf(output, "%s%d\n", module_index_key, info->module_index);
   fprintf(output, "%s%u\n", module_file_time_key, info->file_time);
     
-  fprintf(output, "%s\n", end_codec_key);
+  if(fprintf(output, "%s\n", end_codec_key) < 0)
+    return 0;
+  return 1;
   }
 
 void lqt_registry_write()
@@ -760,14 +765,16 @@ void lqt_registry_write()
   
   for(i = 0; i < lqt_num_audio_codecs; i++)
     {
-    write_codec_info(codec_info, output);
+    if(!write_codec_info(codec_info, output))
+      goto fail;
     codec_info = codec_info->next;
     }
 
   codec_info = lqt_video_codecs;
   for(i = 0; i < lqt_num_video_codecs; i++)
     {
-    write_codec_info(codec_info, output);
+    if(!write_codec_info(codec_info, output))
+      goto fail;
     codec_info = codec_info->next;
     }
   fclose(output);
@@ -776,6 +783,12 @@ void lqt_registry_write()
 #ifndef NDEBUG
   fprintf(stderr, "done\n");
 #endif
-
-
+  return;
+fail:
+  fclose(output);
+  lqt_registry_unlock();
+#ifndef NDEBUG
+  fprintf(stderr, "%s could not be written, deleting imcomplete file", filename_buffer);
+#endif
+  remove(filename_buffer);
   }
