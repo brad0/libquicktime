@@ -7,7 +7,7 @@
 
 // Buffer sizes
 #define DV_NTSC_SIZE 120000
-#define DV_PAL_SIZE 140000
+#define DV_PAL_SIZE 144000
 
 typedef struct
 {
@@ -29,9 +29,12 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 
 	pthread_mutex_lock( &libdv_mutex );
 
-	// This is a memory leak. dv_decoder_t contains pointers so just
-	// free'ing leaves those pointers in limbo.
-	if(codec->dv_decoder) free( codec->dv_decoder );
+	if(codec->dv_decoder)
+	{
+		free( codec->dv_decoder->video);
+		free( codec->dv_decoder->audio);
+		free( codec->dv_decoder );
+	}
 	
 	if(codec->temp_frame) free(codec->temp_frame);
 	if(codec->temp_rows) free(codec->temp_rows);
@@ -82,7 +85,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	if( ! codec->dv_decoder )
 	{
-			dv_init();
 			codec->dv_decoder = dv_decoder_new();
 			codec->dv_decoder->prev_frame_decoded = 0;
 	}
@@ -222,9 +224,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		{
 			case BC_YUV422:
 				encode_dv_colormodel = e_dv_color_yuv;
+printf( "dv.c encode: e_dv_color_yuv\n" );
 				break;
 			case BC_RGB888:
 				encode_dv_colormodel = e_dv_color_rgb;
+printf( "dv.c encode: e_dv_color_rgb\n" );
 				break;
 			default:
 				return 0;
@@ -347,11 +351,13 @@ void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
 
 	/* Init private items */
 
+	dv_init();
+
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	
 	codec->dv_decoder = NULL;
 	codec->decode_quality = DV_QUALITY_BEST;
 	codec->anamorphic16x9 = 0;
 	codec->vlc_encode_passes = 3;
-	codec->data = calloc(1, 140000);
+	codec->data = calloc(1, 144000);
 }
