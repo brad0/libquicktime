@@ -218,6 +218,8 @@ copy_codec_info(const lqt_codec_info_t * info)
 
   if(info->module_filename)
     ret->module_filename = __lqt_strdup(info->module_filename);
+
+  ret->module_index = info->module_index;
   
   ret->type = info->type;
   ret->direction = info->direction;
@@ -1210,7 +1212,10 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
   const lqt_codec_info_t * info;
   int i;
   lqt_codec_info_t ** ret = (lqt_codec_info_t**)0;
-    
+
+  if(!name)
+    return ret;
+  
   lqt_registry_lock();
 
   info = lqt_get_audio_codec_info(0);
@@ -1245,6 +1250,9 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
   const lqt_codec_info_t * info;
   int i;
   lqt_codec_info_t ** ret = (lqt_codec_info_t**)0;
+
+  if(!name)
+    return ret;
   
   lqt_registry_lock();
 

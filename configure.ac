@@ -527,6 +527,7 @@ plugins/png/Makefile \
 plugins/opendivx/Makefile \
 plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
+plugins/ferguson/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])

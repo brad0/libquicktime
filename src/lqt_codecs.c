@@ -323,7 +323,10 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
     }
   
   /* Obtain the initializer for the actual codec */
-  
+
+  fprintf(stderr, "Creating codec %s, module %s, index %d\n",
+          codec_info->name, codec_info->module_filename,
+          codec_info->module_index);
   init_codec = get_codec(codec_info->module_index);
   
   init_codec(atrack);
@@ -376,15 +379,26 @@ int quicktime_delete_acodec(quicktime_audio_map_t *atrack)
 int quicktime_supported_video(quicktime_t *file, int track)
 {
 	char *compressor = quicktime_video_compressor(file, track);
-	if(!lqt_find_video_codec(compressor, file->wr)) return 0;
+        lqt_codec_info_t ** test_codec =
+          lqt_find_video_codec(compressor, file->wr);
+        if(!test_codec)
+          return 0;
+        
+        lqt_destroy_codec_info(test_codec);
 	return 1;
 }
 
 int quicktime_supported_audio(quicktime_t *file, int track)
 {
 	char *compressor = quicktime_audio_compressor(file, track);
-	if(!lqt_find_audio_codec(compressor, file->wr)) return 0;
-	return 1;
+        lqt_codec_info_t ** test_codec =
+          lqt_find_audio_codec(compressor, file->wr);
+        
+        if(!test_codec)
+          return 0;
+        
+        lqt_destroy_codec_info(test_codec);
+        return 1;
 }
 
 int quicktime_decode_video(quicktime_t *file,

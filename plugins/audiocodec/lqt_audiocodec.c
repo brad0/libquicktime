@@ -76,7 +76,6 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
       break;
     case 1: /* raw */
       return &codec_info_raw;
-
       break;
     case 2: /* Twos */
       return &codec_info_twos;

@@ -1294,8 +1294,11 @@ void lqt_set_default_video_parameters(quicktime_t * file)
     {
     codec = (quicktime_codec_t*)(file->vtracks[i].codec);
     codec_info = lqt_find_video_codec_by_name(codec->codec_name);
-    apply_default_parameters(file, i, codec, *codec_info, file->wr);
-    lqt_destroy_codec_info(codec_info);
+    if(codec_info)
+      {
+      apply_default_parameters(file, i, codec, *codec_info, file->wr);
+      lqt_destroy_codec_info(codec_info);
+      }
     }
   }
 
@@ -1308,7 +1311,11 @@ void lqt_set_default_audio_parameters(quicktime_t * file)
     {
     codec = (quicktime_codec_t*)(file->atracks[i].codec);
     codec_info = lqt_find_audio_codec_by_name(codec->codec_name);
-    apply_default_parameters(file, i, codec, *codec_info, file->wr);
-    lqt_destroy_codec_info(codec_info);
+    if(codec_info)
+      {
+      apply_default_parameters(file, i, codec, *codec_info, file->wr);
+      lqt_destroy_codec_info(codec_info);
+      }
     }
   }
+
