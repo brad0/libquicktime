@@ -471,7 +471,9 @@ AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 
 AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
 
-MODULE_LIBADD=../../src/libquicktime.la
+# -L is required so that linker can find libquicktime when DESTDIR is used.
+# libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
+MODULE_LIBADD=-L$prefix/lib ../../src/libquicktime.la
 AC_SUBST(MODULE_LIBADD)
 
 UTIL_LIBADD=../src/libquicktime.la

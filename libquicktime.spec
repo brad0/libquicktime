@@ -19,10 +19,6 @@ BuildRequires:	automake
 BuildRequires:	glib-devel
 BuildRequires:	libpng-devel >= 1.0.8
 BuildRequires:	libjpeg-devel
-BuildRequires:	libdv-devel >= 0.9
-BuildRequires:	libraw1394-devel
-BuildRequires:	libogg-devel
-BuildRequires:  libvorbis-devel
 BuildRoot:	/tmp/libquicktime
 
 %description
@@ -52,6 +48,7 @@ Requires:	libpng-devel >= 1.0.8
 Requires:	libjpeg-devel
 Requires:	libdv-devel
 Requires:	libraw1394-devel
+Requires:	libavc1394_0-devel
 Requires:	libogg-devel
 Requires:  	libvorbis-devel
 
@@ -75,6 +72,36 @@ Useful tools to operate on QuickTime files.
 
 %description -l pl progs
 Po¿yteczne narzêdzia od operowania na plikach w formacie QuickTime.
+
+%package vorbis
+Summary:	Libquicktime plugin supporting the Ogg Vorbis codec
+Group:		Applications/Graphics
+Requires:	%{name} = %{version}
+BuildRequires:	libogg-devel
+BuildRequires:  libvorbis-devel
+
+%description vorbis
+Libquicktime plugin supporting the Ogg Vorbis codec
+
+%package opendivx
+Summary:	Libquicktime plugin supporting the OpenDivX codec
+Group:		Applications/Graphics
+Requires:	%{name} = %{version}
+
+%description opendivx
+Libquicktime plugin supporting the OpenDivX codec
+
+# FIXME: Currently broken
+# %package dv
+# Summary:	Libquicktime plugin supporting the DV codec
+# Group:		Applications/Graphics
+# Requires:	%{name} = %{version}
+# BuildRequires:	libdv-devel >= 0.9
+# BuildRequires:	libraw1394-devel
+
+# FIXME: Currently broken
+# %description dv
+# Libquicktime plugin supporting the DV codec
 
 %package static
 Summary:	Static libquicktime libraries
@@ -124,11 +151,27 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc README.gz
 %attr(755,root,root) %{_libdir}/lib*.so.*.*
-%attr(755,root,root) %{_libdir}/libquicktime/*so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_audiocodec.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_mjpeg.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_png.so
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_videocodec.so
 
 %files progs
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
+
+%files vorbis
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_vorbis.so
+
+%files opendivx
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libquicktime/lqt_opendivx.so
+
+# FIXME: Currently broken
+# %files dv
+# %defattr(644,root,root,755)
+# %attr(755,root,root) %{_libdir}/libquicktime/lqt_dv.so
 
 %files devel
 %defattr(644,root,root,755)
@@ -142,3 +185,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %define date	%(echo `LC_ALL="C" date +"%a %b %d %Y"`)
 %changelog
+* Sat Feb 02 2002 W. Michael Petullo <libquicktime@flyn.org>
+- Split vorbis, opendivx, and DV plugins into separate packages.
+- First working release.
