@@ -9,10 +9,6 @@
 #include <lqt_funcprotos.h>
 #include <cmodel_permutation.h>
 
-#include <cmodel_default.h>
-#include <cmodel_yuv420p.h>
-#include <cmodel_yuv422.h>
-#include <util.h>
 
 
 

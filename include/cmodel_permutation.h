@@ -3961,3 +3961,4 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 void cmodel_yuv420p(PERMUTATION_ARGS);
 void cmodel_yuv422p(PERMUTATION_ARGS);
 void cmodel_yuv444p(PERMUTATION_ARGS);
+void cmodel_default(PERMUTATION_ARGS);
