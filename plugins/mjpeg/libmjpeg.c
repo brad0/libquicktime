@@ -659,10 +659,10 @@ void mjpeg_decompress_loop(mjpeg_compressor *engine)
 		*/
 		pthread_cond_wait(&engine->input_cond, &engine->input_lock);
 		}
+	pthread_exit(0);
 	}
 
 #endif
-
 
 
 static void compress_field(mjpeg_compressor *engine)
