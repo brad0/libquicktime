@@ -6,6 +6,10 @@
 #include <sys/stat.h>
 #include <string.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 static longest get_file_length(quicktime_t *file)
 {
 	struct stat status;

@@ -7,6 +7,10 @@
 #include <quicktime/lqt_codecapi.h>
 #include <string.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 static int quicktime_delete_vcodec_stub(quicktime_video_map_t *vtrack)
 {
 	printf("quicktime_delete_vcodec_stub called\n");
@@ -324,9 +328,11 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   
   /* Obtain the initializer for the actual codec */
 
+#ifndef NDEBUG
   fprintf(stderr, "Creating codec %s, module %s, index %d\n",
           codec_info->name, codec_info->module_filename,
           codec_info->module_index);
+#endif
   init_codec = get_codec(codec_info->module_index);
   
   init_codec(atrack);

@@ -3,6 +3,10 @@
 #include <string.h>
 #include <dlfcn.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 typedef struct
   {
   char * name;
@@ -175,7 +179,7 @@ int get_conversion_price(int in_colormodel, int out_colormodel)
   
   if(!input_is_rgb && !input_is_yuv)
     {
-#ifdef NDEBUG
+#ifndef NDEBUG
     fprintf(stderr,
             "Input colorspace is neither RGB nor YUV, can't predict conversion price\n");
 #endif
@@ -184,7 +188,7 @@ int get_conversion_price(int in_colormodel, int out_colormodel)
   
   if(!output_is_rgb && !input_is_yuv)
     {
-#ifdef NDEBUG
+#ifndef NDEBUG
     fprintf(stderr,
             "Output colorspace is neither RGB nor YUV, can't predict conversion price\n");
 #endif

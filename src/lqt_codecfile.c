@@ -10,6 +10,10 @@
 
 #include <lqt_codecinfo_private.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /*
  *  The keywords are defined globaly, so they are automatically
  *  the same in reading and writing functions
