@@ -603,7 +603,13 @@ AC_SUBST(PLUGIN_DIR)
 
 # -L is required so that linker can find libquicktime when DESTDIR is used.
 # libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
-MODULE_LIBADD="-L$prefix/lib ../../src/libquicktime.la"
+# MODULE_LIBADD="-L$prefix/lib ../../src/libquicktime.la"
+# The above is OK iff the added library is already installed. The
+# current
+# libtool version does not support linking libraries with uninstalled
+# libraries as occurs when Debian packages are created for the 1st time.
+# Linking against old libraries may not be desirable!
+MODULE_LIBADD= 
 AC_SUBST(MODULE_LIBADD)
 
 UTIL_LIBADD=../src/libquicktime.la
