@@ -516,9 +516,7 @@ void flush(quicktime_t *file, int track)
 
 void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack)
 {
-fprintf(stderr, "Creating ima4 codec\n");
-        quicktime_ima4_codec_t *codec;
-
+        quicktime_ima4_codec_t * codec;
 /* Init public items */
 	((quicktime_codec_t*)atrack->codec)->priv = calloc(1, sizeof(quicktime_ima4_codec_t));
 	((quicktime_codec_t*)atrack->codec)->delete_acodec = delete_codec;

@@ -87,7 +87,8 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_ato
 		if(quicktime_atom_is(&leaf_atom, "©inf"))
 		{
 			result += quicktime_read_udta_string(file, &(udta->info), &(udta->info_len));
-		}
+		        fprintf(stderr, "Read Info: %s\n", udta->info);
+                }
 		else
 		quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < udta_atom->end);

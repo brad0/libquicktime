@@ -12,6 +12,19 @@ static int encoding_colormodels_png[] =
     LQT_COLORMODEL_NONE
   };
 
+static lqt_parameter_info_static_t encode_parameters_png[] =
+  {
+     { 
+       "png_compression_level",
+       "Compression Level",
+       LQT_PARAMETER_INT,
+       { 9 },
+       0,
+       9,
+       (char**)0
+     },
+     { /* End of parameters */ }
+  };
 
 static lqt_codec_info_static_t codec_info_png =
   {
@@ -21,7 +34,7 @@ static lqt_codec_info_static_t codec_info_png =
   fourccs:     fourccs_png,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  encoding_parameters: encode_parameters_png,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
   encoding_colormodels: encoding_colormodels_png,
   decoding_colormodel: LQT_COLORMODEL_NONE

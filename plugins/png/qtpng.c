@@ -42,7 +42,7 @@ static void read_function(png_structp png_ptr, png_bytep data, png_uint_32 lengt
 {
 	quicktime_png_codec_t *codec = png_get_io_ptr(png_ptr);
 	
-	if(length + codec->buffer_position <= codec->buffer_size)
+	if((long)(length + codec->buffer_position) <= codec->buffer_size)
 	{
 		memcpy(data, codec->buffer + codec->buffer_position, length);
 		codec->buffer_position += length;
@@ -53,7 +53,7 @@ static void write_function(png_structp png_ptr, png_bytep data, png_uint_32 leng
 {
 	quicktime_png_codec_t *codec = png_get_io_ptr(png_ptr);
 
-	if(length + codec->buffer_size > codec->buffer_allocated)
+	if((long)(length + codec->buffer_size) > codec->buffer_allocated)
 	{
 		codec->buffer_allocated += length;
 		codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
@@ -219,6 +219,19 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 }
 
 
+static int set_parameter(quicktime_t *file, 
+                         int track, 
+                         char *key, 
+                         void *value)
+  {
+  quicktime_png_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  
+  if(!strcasecmp(key, "png_compression_level"))
+    codec->compression_level = *(int*)value;
+  return 0;
+  }
+
+
 void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
 {
 	quicktime_png_codec_t *codec;
@@ -228,6 +241,7 @@ void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
 	((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
 	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
+	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
 

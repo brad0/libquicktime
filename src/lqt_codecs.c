@@ -450,7 +450,8 @@ int lqt_decode_video(quicktime_t *file,
 	file->out_h = track_height;
 
 //printf("quicktime_decode_video 1\n");
-	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
+	result =
+          ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
 	file->vtracks[track].current_position++;
 //printf("quicktime_decode_video 2\n");
 	return result;
