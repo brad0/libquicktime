@@ -19,6 +19,9 @@ extern "C" {
 #define QUICKTIME_DIV3 "DIV3"
   
 #define QUICKTIME_DV "dvc "
+/* AVID DV codec can be processed with libdv as well */
+#define QUICKTIME_DV_AVID "AVdv"
+#define QUICKTIME_DV_AVID_A "dvcp"
 
 /* RGB uncompressed.  Allows alpha */
 #define QUICKTIME_RAW  "raw "

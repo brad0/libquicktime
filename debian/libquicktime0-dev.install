@@ -1,0 +1,6 @@
+debian/tmp/usr/include/quicktime/* usr/include/quicktime
+debian/tmp/usr/lib/*.la usr/lib
+debian/tmp/usr/lib/*.a usr/lib
+debian/tmp/usr/lib/libquicktime/*.la usr/lib/libquicktime
+debian/tmp/usr/lib/libquicktime/*.a usr/lib/libquicktime
+debian/tmp/usr/lib/*.so usr/lib

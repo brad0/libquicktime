@@ -1,0 +1,4 @@
+debian/tmp/usr/lib/lib*.so.* usr/lib
+debian/tmp/usr/lib/libquicktime/*.so usr/lib/libquicktime
+debian/tmp/usr/bin/* usr/bin
+debian/tmp/usr/share/aclocal/* usr/share/aclocal

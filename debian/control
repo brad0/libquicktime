@@ -1,0 +1,31 @@
+Source: libquicktime
+Priority: optional
+Maintainer: Arvind R. <arvind@acarlab.com>
+Build-Depends: debhelper (>> 3.0.0)
+Standards-Version: 3.5.2
+
+Package: libquicktime0-dev
+Section: devel
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version})
+Description: libquicktime headers and static library
+ The package contains the header files and static library
+ for libquicktime.
+
+Package: libquicktime0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: an API for writing / reading quicktime files
+ Video CODECs supported by this library are OpenDivX, MJPA,
+ JPEG Photo, PNG, RGB, YUV 4:2:2, and YUV 4:2:0 compression.
+ Supported audio CODECs are Ogg Vorbis, IMA4, ulaw
+ and any linear PCM format. MPEG and MP3 supported through
+ ffmpeg and lame packages.
+ .
+ Libquicktime is based on the quicktime4linux library.
+ Libquicktime adds features such as a GNU build tools-based
+ build process and dynamically loadable CODECs.
+ .
+ This package contains the shared and static libraries and
+ a collection of plugins and the lqtplay utility.
