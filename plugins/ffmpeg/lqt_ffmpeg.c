@@ -95,7 +95,7 @@ struct CODECIDMAP {
 	  -1, NULL, NULL,
 	  "mjpg",
 	  "MJPEG",
-	  {"MJPG", "mjpg", "JPEG", "jpeg", (char *)0} },
+	  {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
 
 /* Audio */
 	{ CODEC_ID_MP2,
