@@ -732,7 +732,9 @@ oss_setformat(int chan, int rate)
 
 static int oss_init(char *dev, int channels, int rate)
 {
-//    int trigger;
+#ifdef	SNDCTL_DSP_SETTRIGGER
+    int trigger;
+#endif
 
     oss_fd = open(dev,O_WRONLY | O_NONBLOCK);
     if (-1 == oss_fd) {
