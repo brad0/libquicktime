@@ -207,7 +207,7 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 	quicktime_set_position(file, atom->end);
 }
 
-int quicktime_atom_is(quicktime_atom_t *atom, char *type)
+int quicktime_atom_is(quicktime_atom_t *atom, unsigned char *type)
 {
 	if(atom->type[0] == type[0] &&
 		atom->type[1] == type[1] &&

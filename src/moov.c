@@ -204,6 +204,7 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		else
 		if(quicktime_atom_is(&leaf_atom, "udta"))
 		{
+                //                        fprintf(stderr, "READ UDTA\n");
 			quicktime_read_udta(file, &(moov->udta), &leaf_atom);
 			quicktime_atom_skip(file, &leaf_atom);
 		}

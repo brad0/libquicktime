@@ -416,6 +416,19 @@ typedef struct
 	int name_len;
 	char *info;
 	int info_len;
+/* Additional Metadata for libquicktime */
+        char *album;
+        int album_len;
+        char *author;
+        int author_len;
+        char *artist;
+        int artist_len;
+        char *genre;
+        int genre_len;
+        char *track;
+        int track_len;
+        char *comment;
+        int comment_len;
 } quicktime_udta_t;
 
 

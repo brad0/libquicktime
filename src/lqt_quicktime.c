@@ -273,6 +273,67 @@ char* quicktime_get_info(quicktime_t *file)
 	return file->moov.udta.info;
 }
 
+/* Extended metadata support */
+
+void lqt_set_album(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.album), &(file->moov.udta.album_len), string);
+}
+
+void lqt_set_artist(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.artist), &(file->moov.udta.artist_len), string);
+}
+
+void lqt_set_genre(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.genre), &(file->moov.udta.genre_len), string);
+}
+
+void lqt_set_track(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.track), &(file->moov.udta.track_len), string);
+}
+
+void lqt_set_comment(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.comment), &(file->moov.udta.comment_len), string);
+}
+
+void lqt_set_author(quicktime_t *file, char *string)
+{
+	quicktime_set_udta_string(&(file->moov.udta.author), &(file->moov.udta.author_len), string);
+}
+
+char * lqt_get_album(quicktime_t * file)
+{
+        return file->moov.udta.album;
+}
+
+char * lqt_get_artist(quicktime_t * file)
+{
+        return file->moov.udta.artist;
+}
+
+char * lqt_get_genre(quicktime_t * file)
+{
+        return file->moov.udta.genre;
+}
+
+char * lqt_get_track(quicktime_t * file)
+{
+        return file->moov.udta.track;
+}
+
+char * lqt_get_comment(quicktime_t *file)
+{
+        return file->moov.udta.comment;
+}
+
+char * lqt_get_author(quicktime_t *file)
+{
+        return file->moov.udta.author;
+}
 
 int quicktime_video_tracks(quicktime_t *file)
 {

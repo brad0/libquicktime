@@ -205,7 +205,22 @@ int lqt_get_wav_id(quicktime_t *file, int track);
 	
 int lqt_total_channels(quicktime_t *file);
 
+/* Extended metadata support */
 
+void lqt_set_album(quicktime_t *file, char *string);
+void lqt_set_artist(quicktime_t *file, char *string);
+void lqt_set_genre(quicktime_t *file, char *string);
+void lqt_set_track(quicktime_t *file, char *string);
+void lqt_set_comment(quicktime_t *file, char *string);
+void lqt_set_author(quicktime_t *file, char *string);
+
+char * lqt_get_album(quicktime_t * file);
+char * lqt_get_artist(quicktime_t * file);
+char * lqt_get_genre(quicktime_t * file);
+char * lqt_get_track(quicktime_t * file);
+char * lqt_get_comment(quicktime_t *file);
+char * lqt_get_author(quicktime_t *file);
+  
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

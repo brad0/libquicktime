@@ -4,7 +4,7 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom);
 int quicktime_atom_write_header64(quicktime_t *file, quicktime_atom_t *atom, char *text);
 int quicktime_atom_write_header(quicktime_t *file, quicktime_atom_t *atom, char *text);
 void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom);
-int quicktime_atom_is(quicktime_atom_t *atom, char *type);
+int quicktime_atom_is(quicktime_atom_t *atom, unsigned char *type);
 int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom);
 
 /* avi_hdrl.c */
