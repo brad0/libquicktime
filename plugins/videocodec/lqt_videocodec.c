@@ -12,7 +12,7 @@ void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
-static char * fourccs_raw[]  = { QUICKTIME_RAW,           (char*)0 };
+static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3",   (char*)0 };
 
 static char * fourccs_v308[] = { QUICKTIME_YUV444,        (char*)0 };
 
@@ -288,16 +288,13 @@ int get_stream_colormodel(quicktime_t * file, int track,
     depth = quicktime_video_depth(file, track);
     switch(depth)
       {
-      case 24:
-        return BC_RGB888;
-        break;
       case 32:
         return BC_ARGB8888;
         break;
       default:
-        return LQT_COLORMODEL_NONE; /* This should never happen... */
+        return BC_RGB888;
         break;
       }
     }
-  return LQT_COLORMODEL_NONE; /* And this neither */
+  return LQT_COLORMODEL_NONE;
   }

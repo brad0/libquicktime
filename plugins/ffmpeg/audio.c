@@ -26,6 +26,24 @@
 
 #include "ffmpeg.h"
 
+int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
+  {
+  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  
+  if(codec->com.init_enc)
+    avcodec_close(codec->com.ffcodec_enc);
+  if(codec->com.init_dec)
+    avcodec_close(codec->com.ffcodec_dec);
+  
+  if(codec->sample_buffer) free(codec->sample_buffer);
+  if(codec->chunk_buffer)  free(codec->chunk_buffer);
+  if(codec->chunk_sizes)   free(codec->chunk_sizes);
+  
+  free(codec);
+  return 0;
+  }
+
+
 static void deinterleave(int16_t *dst_i, float *dst_f, int16_t * src,
                          int channel, int num_channels, int length)
   {

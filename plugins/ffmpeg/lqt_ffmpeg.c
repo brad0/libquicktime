@@ -800,6 +800,7 @@ extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
   quicktime_video_map_t *vtrack;
   quicktime_trak_t *trak;
   AVCodecContext *avctx;
+  int dummy;
   struct CODECIDMAP * map;
     
   vtrack = &(file->vtracks[track]);
@@ -823,8 +824,8 @@ extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
   
   if(!avcodec_open(avctx, map->decoder) != 0)
     return LQT_COLORMODEL_NONE;
-
-  ret = lqt_ffmpeg_get_lqt_colormodel(avctx->pix_fmt);
+  
+  ret = lqt_ffmpeg_get_lqt_colormodel(avctx->pix_fmt, &dummy);
   
   avcodec_close(avctx);
 

@@ -25,45 +25,6 @@
 #include <quicktime/colormodels.h>
 #include "ffmpeg.h"
 
-static int delete_acodec(quicktime_audio_map_t *vtrack)
-  {
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-  
-  if(codec->com.init_enc)
-    avcodec_close(codec->com.ffcodec_enc);
-  if(codec->com.init_dec)
-    avcodec_close(codec->com.ffcodec_dec);
-  
-  if(codec->sample_buffer) free(codec->sample_buffer);
-  if(codec->chunk_buffer)  free(codec->chunk_buffer);
-  if(codec->chunk_sizes)   free(codec->chunk_sizes);
-  
-  free(codec);
-  return 0;
-  }
-
-static int delete_vcodec(quicktime_video_map_t *vtrack)
-{
-	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	
-	if(codec->com.init_enc)
-		avcodec_close(codec->com.ffcodec_enc);
-	if(codec->com.init_dec)
-		avcodec_close(codec->com.ffcodec_dec);
-
-	if(codec->frame_buffer) free(codec->frame_buffer);
-	if(codec->write_buffer) free(codec->write_buffer);
-	if(codec->read_buffer) free(codec->read_buffer);
-        if(codec->tmp_buffer) free(codec->tmp_buffer);
-        if(codec->row_pointers) free(codec->row_pointers);
-
-        if(codec->frame) free(codec->frame);
-        
-	free(codec);
-	
-	return 0;
-}
-
 
 static int set_parameter_video(quicktime_t *file, 
                                int track, 
@@ -337,7 +298,7 @@ static int set_parameter_audio(quicktime_t *file,
 }
 
 
-static int reads_colormodel(quicktime_t *file, 
+static int reads_colormodel(quicktime_t *file,
                             int colormodel, 
                             int track)
 {
@@ -368,7 +329,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	codec->com.ffc_dec = decoder;
 	
 	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_vcodec;
+	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_ffmpeg_delete_video;
 
         if(encoder)
           ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_ffmpeg_encode_video;
@@ -396,7 +357,7 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	codec->com.ffc_dec = decoder;
 	
 	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)atrack->codec)->delete_acodec = delete_acodec;
+	((quicktime_codec_t*)atrack->codec)->delete_acodec = lqt_ffmpeg_delete_audio;
 	if(encoder)
           ((quicktime_codec_t*)atrack->codec)->encode_audio = lqt_ffmpeg_encode_audio;
 	if(decoder)

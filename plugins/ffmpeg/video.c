@@ -29,29 +29,145 @@
 
 /* ffmpeg <-> libquicktime colormodels */
 
+/* Exact entries MUST come first */
+
 static struct
   {
   enum PixelFormat ffmpeg_id;
-  int         lqt_id;
+  int              lqt_id;
+  int              exact;
   }
 colormodels[] =
   {
-    { PIX_FMT_YUV420P,  BC_YUV420P   },  ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
-    { PIX_FMT_YUV422,   BC_YUV422    },
-    { PIX_FMT_RGB24,    BC_RGB888    },  ///< Packed pixel, 3 bytes per pixel, RGBRGB...
-    { PIX_FMT_BGR24,    BC_BGR888    },  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
-    { PIX_FMT_YUV422P,  BC_YUV422P   },  ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
-    { PIX_FMT_YUV444P,  BC_YUV444P   },  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
-    { PIX_FMT_RGBA32,   BC_RGBA8888  },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
-    //    { PIX_FMT_YUV410P,  BC_YUV410P   },  ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
-    { PIX_FMT_YUV411P,  BC_YUV411P   },  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
-    { PIX_FMT_RGB565,   BC_RGB565    },  ///< always stored in cpu endianness
-    //    { PIX_FMT_RGB555,   BC_RGB555    },  ///< always stored in cpu endianness, most significant bit to 1
-    { PIX_FMT_YUVJ420P, BC_YUV420P   }, ///< Planar YUV 4:2:0 full scale (jpeg)
-    { PIX_FMT_YUVJ422P, BC_YUV422P   }, ///< Planar YUV 4:2:2 full scale (jpeg)
-    { PIX_FMT_YUVJ444P, BC_YUV444P   }, ///< Planar YUV 4:4:4 full scale (jpeg)
+    { PIX_FMT_YUV420P,  BC_YUV420P,  1 },  ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
+    { PIX_FMT_YUV422,   BC_YUV422,   1 },
+    { PIX_FMT_RGB24,    BC_RGB888,   1 },  ///< Packed pixel, 3 bytes per pixel, RGBRGB...
+    { PIX_FMT_BGR24,    BC_BGR888,   1 },  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
+    { PIX_FMT_YUV422P,  BC_YUV422P,  1 },  ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+    { PIX_FMT_YUV444P,  BC_YUV444P,  1 },  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
+    { PIX_FMT_RGBA32,   BC_RGBA8888, 1 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    { PIX_FMT_YUV411P,  BC_YUV411P,  1 },  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
+    { PIX_FMT_RGB565,   BC_RGB565,   1 },  ///< always stored in cpu endianness
+    { PIX_FMT_RGB555,   BC_RGB888,   0 },  ///< always stored in cpu endianness, most significant bit to 1
+    { PIX_FMT_YUVJ420P, BC_YUV420P,  0 }, ///< Planar YUV 4:2:0 full scale (jpeg)
+    { PIX_FMT_YUVJ422P, BC_YUV422P,  0 }, ///< Planar YUV 4:2:2 full scale (jpeg)
+    { PIX_FMT_YUVJ444P, BC_YUV444P,  0 }, ///< Planar YUV 4:4:4 full scale (jpeg)
+    { PIX_FMT_GRAY8,    BC_RGB888,   0 },
+    { PIX_FMT_MONOWHITE, BC_RGB888,  0 },///< 0 is white
+    { PIX_FMT_MONOBLACK, BC_RGB888,  0 },///< 0 is black
+    { PIX_FMT_PAL8,      BC_RGB888,  0 },    ///< 8 bit with RGBA palette
+    { PIX_FMT_YUV410P,   BC_YUV420P, 0 },  ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
   };
 
+/*
+ *  We need this only for colormodels, which serve as a replacement for nonsupported
+ *  ffmpeg pixel formats
+ */
+
+static unsigned char ** alloc_rows(int width, int height, int colormodel)
+  {
+  unsigned char ** ret;
+  int i;
+  switch(colormodel)
+    {
+    case BC_RGB888:
+      ret    = malloc(height * sizeof(*ret));
+      ret[0] = malloc(width * height * 3);
+      for(i = 1; i < height; i++)
+        ret[i] = ret[0] + 3 * width;
+      break;
+    case BC_YUV420P:
+      ret    = malloc(3 * sizeof(*ret));
+      ret[0] = malloc((width * height * 3) / 2);
+      ret[1] = ret[0] + width * height;
+      ret[2] = ret[1] + (width * height)/4;
+      break;
+    case BC_YUV422P:
+      ret    = malloc(3 * sizeof(*ret));
+      ret[0] = malloc((width * height * 2));
+      ret[1] = ret[0] + width * height;
+      ret[2] = ret[1] + (width * height)/2;
+      break;
+    case BC_YUV444P:
+      ret    = malloc(3 * sizeof(*ret));
+      ret[0] = malloc((width * height * 3));
+      ret[1] = ret[0] + width * height;
+      ret[2] = ret[1] + width * height;
+      break;
+    }
+  return ret;
+  }
+
+static void delete_rows(unsigned char ** rows)
+  {
+  free(rows[0]);
+  free(rows);
+  }
+
+int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
+{
+	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	
+	if(codec->com.init_enc)
+		avcodec_close(codec->com.ffcodec_enc);
+	if(codec->com.init_dec)
+		avcodec_close(codec->com.ffcodec_dec);
+
+	if(codec->frame_buffer) free(codec->frame_buffer);
+	if(codec->write_buffer) free(codec->write_buffer);
+	if(codec->read_buffer) free(codec->read_buffer);
+        if(codec->tmp_buffer) delete_rows(codec->tmp_buffer);
+        if(codec->row_pointers) free(codec->row_pointers);
+
+        if(codec->frame) free(codec->frame);
+        
+	free(codec);
+	
+	return 0;
+}
+
+static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_colormodel, int row_span)
+  {
+  switch(lqt_colormodel)
+    {
+    case BC_YUV420P:
+    case BC_YUV422P:
+      ret->data[0] = rows[0];
+      ret->data[1] = rows[1];
+      ret->data[2] = rows[2];
+      ret->linesize[0] = row_span;
+      ret->linesize[1] = row_span/2;
+      ret->linesize[2] = row_span/2;
+      break;
+    case BC_YUV444P:
+      ret->data[0] = rows[0];
+      ret->data[1] = rows[1];
+      ret->data[2] = rows[2];
+      ret->linesize[0] = row_span;
+      ret->linesize[1] = row_span;
+      ret->linesize[2] = row_span;
+      break;
+    case BC_YUV411P:
+      ret->data[0] = rows[0];
+      ret->data[1] = rows[1];
+      ret->data[2] = rows[2];
+      ret->linesize[0] = row_span/4;
+      ret->linesize[1] = row_span/4;
+      ret->linesize[2] = row_span/4;
+      break;
+    case BC_YUV422:
+    case BC_RGB888:  ///< Packed pixel, 3 bytes per pixel, RGBRGB...
+    case BC_BGR888:  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
+    case BC_RGBA8888:  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    case BC_RGB565:  ///< always stored in cpu endianness
+      ret->data[0]     = rows[0];
+      ret->linesize[0] = (int)(rows[1] - rows[0]);
+      break;
+    default:
+      break;
+    }
+      
+  }
 
 enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   {
@@ -65,14 +181,17 @@ enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   return PIX_FMT_NB;
   }
 
-int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id)
+int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
   {
   int i;
 
   for(i = 0; i < sizeof(colormodels)/sizeof(colormodels[0]); i++)
     {
     if(colormodels[i].ffmpeg_id == id)
+      {
+      *exact = colormodels[i].exact;
       return colormodels[i].lqt_id;
+      }
     }
   return LQT_COLORMODEL_NONE;
   }
@@ -125,7 +244,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   AVPicture in_pic;
   AVPicture out_pic;
   quicktime_ctab_t * ctab;
-  
+  int exact;
   
   /* Initialize decoder */
   
@@ -204,8 +323,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                                  vtrack->current_position, track);
   if(buffer_size > 0)
     {
-    //    fprintf(stderr, "avcodec_decode_video: %p\n", codec->read_buffer);
-
     if(avcodec_decode_video(codec->com.ffcodec_dec,
                             codec->frame,
                             &got_pic,
@@ -237,16 +354,13 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
        *     2 conversions: The first converts to a colormodel we support,
        *     the second does a cmodel_transfer
        */
-
+      
       if(codec->lqt_colormodel == LQT_COLORMODEL_NONE)
         {
         codec->lqt_colormodel =
-          lqt_ffmpeg_get_lqt_colormodel(codec->com.ffcodec_dec->pix_fmt);
-        if(codec->lqt_colormodel == LQT_COLORMODEL_NONE)
-          {
-          codec->lqt_colormodel = BC_RGB888;
+          lqt_ffmpeg_get_lqt_colormodel(codec->com.ffcodec_dec->pix_fmt, &exact);
+        if(!exact)
           codec->do_imgconvert = 1;
-          }
         }
 
       if(file->in_x ||
@@ -261,12 +375,13 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         }
       else
         do_cmodel_transfer = 0;
-
-      
       
       row_span = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
-      
 
+      //      fprintf(stderr, "decode_video: in: %s out: %s\n",
+      //              lqt_colormodel_to_string(codec->lqt_colormodel),
+      //              lqt_colormodel_to_string(file->vtracks[track].color_model));
+              
       if(!codec->do_imgconvert && !do_cmodel_transfer)
         {
         //        fprintf(stderr, "Copy frame...");
@@ -375,25 +490,24 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
           cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
                           codec->frame->data,  // unsigned char **input_rows,
                           row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */
-                            row_pointers[1], // unsigned char *out_u_plane,
-                            row_pointers[2], // unsigned char *out_v_plane,
-                            codec->frame->data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
-                            codec->frame->data[1], // unsigned char *in_u_plane,
-                            codec->frame->data[2], // unsigned char *in_v_plane,
-                            file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
-                            file->in_y,     // int in_y,
-                            file->in_w ? file->in_w : width,     // int in_w,
-                            file->in_h ? file->in_h : height,    // int in_h,
-                            0, // file->out_x,       /* Dimensions to project on output frame */
-                            0, // file->out_y,
-                            file->out_w ? file->out_w : width,  // int out_w,
-                            file->out_h ? file->out_h : height, // int out_h,
-                            codec->lqt_colormodel, // int in_colormodel,
-                            file->vtracks[track].color_model,      // int out_colormodel,
-                            0, // int bg_color,
-                            codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
-                            row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
-            
+                          row_pointers[1], // unsigned char *out_u_plane,
+                          row_pointers[2], // unsigned char *out_v_plane,
+                          codec->frame->data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
+                          codec->frame->data[1], // unsigned char *in_u_plane,
+                          codec->frame->data[2], // unsigned char *in_v_plane,
+                          file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
+                          file->in_y,     // int in_y,
+                          file->in_w ? file->in_w : width,     // int in_w,
+                          file->in_h ? file->in_h : height,    // int in_h,
+                          0, // file->out_x,       /* Dimensions to project on output frame */
+                          0, // file->out_y,
+                          file->out_w ? file->out_w : width,  // int out_w,
+                          file->out_h ? file->out_h : height, // int out_h,
+                          codec->lqt_colormodel, // int in_colormodel,
+                          file->vtracks[track].color_model,      // int out_colormodel,
+                          0, // int bg_color,
+                          codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
+                          row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
           }
         else
           {
@@ -434,39 +548,24 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         in_pic.linesize[0]  = codec->frame->linesize[0];
         in_pic.linesize[1]  = codec->frame->linesize[1];
         in_pic.linesize[2]  = codec->frame->linesize[2];
-        
-        if(lqt_colormodel_is_planar(codec->lqt_colormodel))
-          {
-          out_pic.data[0]     = row_pointers[0];
-          out_pic.data[1]     = row_pointers[1];
-          out_pic.data[2]     = row_pointers[2];
-          out_pic.linesize[0] = row_span;
-          out_pic.linesize[1] = row_span/2;
-          out_pic.linesize[2] = row_span/2;
-          }
-        else
-          {
-          out_pic.data[0]     = row_pointers[0];
-          out_pic.data[1]     = NULL;
-          out_pic.data[2]     = NULL;
-          out_pic.linesize[0] = (int)(row_pointers[1] - row_pointers[0]);
-          out_pic.linesize[1] = 0;
-          out_pic.linesize[2] = 0;
-          }
-        
-        img_convert(&out_pic, PIX_FMT_RGB24,
+
+        fill_avpicture(&out_pic, row_pointers, codec->lqt_colormodel, row_span);
+        img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(codec->lqt_colormodel),
                     &in_pic,  codec->com.ffcodec_dec->pix_fmt,
                     width, height);
         }
       else
         {
         /* Worst case */
-
-        //        fprintf(stderr, "img_convert + cmodel_transfer...");
-
+        
+        //        fprintf(stderr, "img_convert + cmodel_transfer %d...", row_span);
+        
         if(!codec->tmp_buffer)
-          codec->tmp_buffer = malloc((width * height * 3)/2);
+          codec->tmp_buffer = alloc_rows(width, height, codec->lqt_colormodel);
 
+        memset(&in_pic, 0, sizeof(in_pic));
+        memset(&out_pic, 0, sizeof(out_pic));
+        
         in_pic.data[0]      = codec->frame->data[0];
         in_pic.data[1]      = codec->frame->data[1];
         in_pic.data[2]      = codec->frame->data[2];
@@ -474,25 +573,20 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         in_pic.linesize[1]  = codec->frame->linesize[1];
         in_pic.linesize[2]  = codec->frame->linesize[2];
 
-        out_pic.data[0]     = codec->tmp_buffer;
-        out_pic.data[1]     = &(codec->tmp_buffer[width * height]);
-        out_pic.data[2]     = &(codec->tmp_buffer[width * height + (width * height)/4]);
-        out_pic.linesize[0] = width;
-        out_pic.linesize[1] = width/2;
-        out_pic.linesize[2] = width/2;
-
-        img_convert(&out_pic, PIX_FMT_YUV420P,
-                   &in_pic,  codec->com.ffcodec_dec->pix_fmt,
-                   width, height);
+        fill_avpicture(&out_pic, codec->tmp_buffer, codec->lqt_colormodel, width);
+        
+        img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(codec->lqt_colormodel),
+                    &in_pic,  codec->com.ffcodec_dec->pix_fmt,
+                    width, height);
 
         cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
-                        out_pic.data,  // unsigned char **input_rows,
+                        codec->tmp_buffer,  // unsigned char **input_rows,
                         row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */
                         row_pointers[1], // unsigned char *out_u_plane,
                         row_pointers[2], // unsigned char *out_v_plane,
-                        out_pic.data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
-                        out_pic.data[1], // unsigned char *in_u_plane,
-                        out_pic.data[2], // unsigned char *in_v_plane,
+                        codec->tmp_buffer[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
+                        codec->tmp_buffer[1], // unsigned char *in_u_plane,
+                        codec->tmp_buffer[2], // unsigned char *in_v_plane,
                         file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
                         file->in_y,     // int in_y,
                         file->in_w ? file->in_w : width,     // int in_w,
@@ -504,7 +598,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                         codec->lqt_colormodel, // int in_colormodel,
                         file->vtracks[track].color_model,      // int out_colormodel,
                         0, // int bg_color,
-                        out_pic.linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
+                        width, // int in_rowspan,       /* For planar use the luma rowspan */
                         row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
         
         }

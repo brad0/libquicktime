@@ -87,7 +87,7 @@ typedef struct
   int lqt_colormodel;
   int do_imgconvert;
     
-  unsigned char * tmp_buffer;
+  unsigned char ** tmp_buffer;
   unsigned char ** row_pointers;
     
   /* Quality must be passed to the individual frame */
@@ -120,7 +120,11 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i,
                             float *output_f, long samples,
                             int track, int channel);
 
-int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat fmt);
+int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *atrack);
+int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack);
+
+
+int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat fmt, int * exact);
 enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int colormodel);
 
 
