@@ -1018,7 +1018,7 @@ int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_
         return result;
 }
 
-#if 1 /* This function is obsolete as it makes no sense for compressed codecs */
+#if 0 /* This function is obsolete as it makes no sense for compressed codecs */
 long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track)
 {
 	int64_t chunk_sample, chunk;
