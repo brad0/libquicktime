@@ -95,4 +95,5 @@ int main(int argc, char *argv[])
 	}
 
 	quicktime_close(file);
+        return 0;
 }

@@ -193,106 +193,15 @@ static int set_parameter_audio(quicktime_t *file,
         
 #define INTPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \
-          { \
           codec->com.params.x = (*(int *)value) * y; \
-          } \
+          return 0; \
 	}
-	
-	INTPARM(bit_rate, 1000) else 
-	INTPARM(bit_rate_tolerance, 1) else
-	INTPARM(gop_size, 1) else
-	INTPARM(global_quality, 1) else
-	INTPARM(qcompress, 0.01) else
-	INTPARM(qblur, 0.01) else
-	INTPARM(qmin, 1) else
-	INTPARM(qmax, 1) else
-	INTPARM(max_qdiff, 1) else
-	INTPARM(max_b_frames, 1) else
-	INTPARM(b_quant_factor, 1) else
-	INTPARM(b_quant_offset, 1) else
-	INTPARM(rc_strategy, 1) else
-	INTPARM(b_frame_strategy, 1) else
-	INTPARM(rtp_payload_size, 1) else
-	INTPARM(workaround_bugs, 1) else
-	INTPARM(luma_elim_threshold, 1) else
-	INTPARM(chroma_elim_threshold, 1) else
-	INTPARM(strict_std_compliance, 1) else
-	INTPARM(error_resilience, 1) else
-#if 0 /* Gone */
-        if(!strcasecmp(key, "flags_hq")) {
-		if(*(int *)value == 1)
-			codec->com.params.flags |= CODEC_FLAG_HQ;
-		else
-			codec->com.params.flags &= ~CODEC_FLAG_HQ;
-	} else
-#endif
-        if(!strcasecmp(key, "flags_4mv")) {
-		if(*(int *)value == 1)
-			codec->com.params.flags |= CODEC_FLAG_4MV;
-		else
-			codec->com.params.flags &= ~CODEC_FLAG_4MV;
-	} else
-	if(!strcasecmp(key, "flags_part")) {
-		if(*(int *)value == 1)
-			codec->com.params.flags |= CODEC_FLAG_PART;
-		else
-			codec->com.params.flags &= ~CODEC_FLAG_PART;
-	} else
-	if(!strcasecmp(key, "flags_gray")) {
-		if(*(int *)value == 1)
-			codec->com.params.flags |= CODEC_FLAG_GRAY;
-		else
-			codec->com.params.flags &= ~CODEC_FLAG_GRAY;
-	} else
-	if(!strcasecmp(key, "flags_fix")) {
-		if(*(int *)value == 1)
-			codec->com.params.flags |= CODEC_FLAG_QSCALE;
-		else
-			codec->com.params.flags &= ~CODEC_FLAG_QSCALE;
-	} else
-	if(!strcasecmp(key, "flags_pass")) {
-		codec->com.params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
-		if(*(int *)value == 1) {
-			codec->com.params.flags |= CODEC_FLAG_PASS1;
-		} else if(*(int *)value == 2) {
-			codec->com.params.flags |= CODEC_FLAG_PASS1;
-		}
-	} else
-	if(!strcasecmp(key, "me_method")) {
-		if(!strcasecmp((char *)value, "Zero")) {
-			codec->com.params.me_method = ME_ZERO;
-		} else if(!strcasecmp((char *)value, "Full")) {
-			codec->com.params.me_method = ME_FULL;
-		} else if(!strcasecmp((char *)value, "Log")) {
-			codec->com.params.me_method = ME_LOG;
-		} else if(!strcasecmp((char *)value, "Phods")) {
-			codec->com.params.me_method = ME_PHODS;
-		} else if(!strcasecmp((char *)value, "Epzs")) {
-			codec->com.params.me_method = ME_EPZS;
-		} else if(!strcasecmp((char *)value, "X1")) {
-			codec->com.params.me_method = ME_X1;
-		}
-	} else
-#if 0
-	if(!strcasecmp(key, "aspect_ratio_info")) {
-		if(!strcasecmp((char *)value, "Square")) {
-			codec->com.params.aspect_ratio_info = FF_ASPECT_SQUARE;
-		} else if(!strcasecmp((char *)value, "4:3 (625)")) {
-			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_625;
-		} else if(!strcasecmp((char *)value, "4:3 (525)")) {
-			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_525;
-		} else if(!strcasecmp((char *)value, "16:9 (625)")) {
-			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_625;
-		} else if(!strcasecmp((char *)value, "16:9 (525)")) {
-			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_525;
-		}
-	} else
-#endif
-        {
-		fprintf(stderr, "Unknown key: %s\n", key);
-		return -1;
-	}
+
+        INTPARM(bit_rate, 1000);
+	fprintf(stderr, "Unknown key: %s\n", key);
+          return -1;
 	return 0;
+#undef INTPARM
 }
 
 static int reads_colormodel(quicktime_t *file,

@@ -744,34 +744,39 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                 codec->com.ffcodec_enc->frame_rate_base = DEFAULT_FRAME_RATE_BASE;
 		codec->com.ffcodec_enc->width = width;
 		codec->com.ffcodec_enc->height = height;
+
 #define SP(x) codec->com.ffcodec_enc->x = codec->com.params.x
-		SP(bit_rate);
-#if 0
-		SP(bit_rate_tolerance);
-		SP(gop_size);
-                //		SP(global_quality);
-		SP(qcompress);
-		SP(qblur);
-		SP(qmin);
-		SP(qmax);
-		SP(max_qdiff);
-		SP(max_b_frames);
-		SP(b_quant_factor);
-		SP(b_quant_offset);
-		SP(rc_strategy);
-		SP(b_frame_strategy);
-		SP(rtp_payload_size);
-		SP(workaround_bugs);
-		SP(luma_elim_threshold);
-		SP(chroma_elim_threshold);
-		SP(strict_std_compliance);
-		SP(error_resilience);
-		SP(flags);
-		SP(me_method);
-#if 0
-		SP(aspect_ratio_info);
-#endif
-#endif
+
+                /* General options */
+
+                SP(strict_std_compliance);
+                SP(sample_aspect_ratio.num);
+                SP(sample_aspect_ratio.den);
+                SP(flags);
+		                
+                /* Bitrate options */
+                
+                SP(bit_rate);
+                SP(rc_min_rate);
+                SP(rc_max_rate);
+                SP(bit_rate_tolerance);
+                SP(qcompress);
+                SP(qblur);
+
+                /* VBR Options */
+                //                SP(qscale);
+                SP(qmin);
+                SP(qmax);
+                SP(mb_qmin);
+	        SP(mb_qmax);
+	        SP(max_qdiff);
+                  
+                /* Temporal compression */
+
+                SP(gop_size);
+                SP(me_method);
+                SP(mb_decision);
+                
 #undef SP
 		if(avcodec_open(codec->com.ffcodec_enc, codec->com.ffc_enc) != 0)
 			return -1;
