@@ -1,7 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-dnl AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
-dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(libquicktime, 0.9.2)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.3pre1)
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
@@ -170,21 +168,6 @@ AC_SUBST(X_EXTRA_LIBS)
 AC_SUBST(X_LIBS)
 AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
 
-dnl
-dnl Check for gtk
-dnl THis is neccesary for the utils/gtk subdirectory
-dnl
-
-have_gtk=false
-
-AM_PATH_GTK(1.2.8, have_gtk=true)
-
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
-
-AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
-
-
 AC_SUBST(LIBS)
 
 AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h stddef.h)
@@ -203,87 +186,133 @@ AC_CHECK_FUNCS(gettimeofday)
 AC_CHECK_FUNCS(fseeko)
 AM_CONDITIONAL(HAVE_FSEEKO, test x$have_fseeko = xtrue)
 
-dnl ENCORE_DIR=encore50
-dnl DECORE_DIR=decore50
-
-dnl AH_TEMPLATE([ENCORE_INCLUDE],
-dnl            [Which encore library to use.])
-dnl AH_TEMPLATE([DECORE_INCLUDE],
-dnl            [Which decore library to use.])
-
-dnl AC_DEFINE_UNQUOTED(ENCORE_INCLUDE, "$ENCORE_DIR/encore.h")
-dnl AC_DEFINE_UNQUOTED(DECORE_INCLUDE, "$DECORE_DIR/decore.h")
-
 AC_HEADER_STDC
 
-dnl AC_ARG_ENABLE(complete-dist,
-dnl [  --enable-complete-dist  Include the built copies of the library source if availiable. ])
+dnl
+dnl Check for optional libraries
+dnl 
 
-dnl COMPLETE_DIST=""; 
 
-dnl if test "x$enable_complete_dist" == "xyes"; then
-dnl 	test -d libraw1394 && COMPLETE_DIST="$COMPLETE_DIST libraw1394";
-dnl 	test -d libogg-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libogg-1.0rc2";
-dnl 	test -d libvorbis-1.0rc2 && COMPLETE_DIST="$COMPLETE_DIST libvorbis-1.0rc2";
-dnl fi
 
-dnl AC_SUBST(COMPLETE_DIST)
+dnl
+dnl Check for gtk
+dnl This is neccesary for the utils/gtk subdirectory
+dnl
+
+GTK_REQUIRED="1.2.8"
+
+have_gtk=false
+
+AM_PATH_GTK($GTK_REQUIRED, have_gtk=true)
+
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
+AC_SUBST(GTK_REQUIRED)
+
+AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
 
 dnl
 dnl Check for libdv
 dnl
 
-have_libdv=false
+have_libdv="false"
 
-OLD_CFLAGS=$CFLAGS
-OLD_LIBS=$LIBS
+LIBDV_REQUIRED="0.102"
 
-dnl
-dnl Since libdv depends on glib but libquicktime does not,
-dnl we check for it here (because we want to do AC_TRY_LINK).
-dnl
-
-have_glib=false
-AM_PATH_GLIB([1.2.8], have_glib=true)
-
-LIBS="$GLIB_LIBS -ldv"
-CFLAGS=$GLIB_CFLAGS
-
-if test x$have_glib = xtrue; then
-AC_MSG_CHECKING(for libdv with encoder)
-AC_TRY_LINK([#include <stdio.h>
-             #include <libdv/dv.h>],
-            [dv_decoder_t *decoder; dv_encoder_t *encoder;
-	     unsigned char *data, **frame;
-	     int *pitches;
-             decoder = dv_decoder_new( FALSE, TRUE, TRUE );
-             encoder = dv_encoder_new( FALSE, FALSE, FALSE );
-	     dv_decode_full_frame( decoder, data,
-				   e_dv_color_rgb, frame,
-				   pitches );
-	     dv_encode_full_frame( encoder, frame, e_dv_color_yuv, data );
-	     dv_decoder_free( decoder ); dv_encoder_free( encoder );],
-	    [have_libdv=true])
-
-
-case $have_libdv in
-  true) dnl AC_DEFINE(HAVE_LIBDV)
-        AC_MSG_RESULT(yes)
-	LIBDV_LIBS=-ldv;
-	LIBDV_CFLAGS=$CFLAGS;;
-  false) AC_MSG_RESULT(no); LIBDV_LIBS=""; LIBDV_CFLAGS="";;
-  * ) AC_MSG_RESULT("Somethings wrong: $have_libdv") ;;
-esac
-
-fi
-
-CFLAGS=$OLD_CFLAGS
-LIBS=$OLD_LIBS
-
+PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true", )
+AC_SUBST(LIBDV_REQUIRED)
 AC_SUBST(LIBDV_LIBS)
 AC_SUBST(LIBDV_CFLAGS)
 
 AM_CONDITIONAL(HAVE_LIBDV, test x$have_libdv = xtrue)
+
+
+dnl
+dnl Check for Vorbis
+dnl 
+
+VORBIS_REQUIRED="1.0"
+ 
+have_vorbis=false
+AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
+  
+XIPH_PATH_VORBIS(have_vorbis=true)
+AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
+  
+if test x$have_vorbis = xtrue; then
+AC_DEFINE(HAVE_VORBIS)
+fi
+ 
+AC_SUBST(VORBIS_REQUIRED)
+
+dnl
+dnl Check for lame
+dnl
+
+LAME_REQUIRED="3.93"
+have_lame="false"
+
+if test x$have_vorbis = xtrue; then
+    AC_CHECK_LIB(mp3lame, lame_decode_init,
+             [ have_lame="true" ], [], [ -lm -lvorbis])
+else
+    AC_CHECK_LIB(mp3lame, lame_decode_init,
+             [ have_lame="true" ], [], [ -lm ])
+fi
+
+AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")
+AC_SUBST(LAME_REQUIRED)
+
+dnl
+dnl Check for libjpeg
+dnl
+
+AH_TEMPLATE([HAVE_LIBJPEG], [Do we have libjpeg installed?])
+JPEG_REQUIRED="6b"
+have_libjpeg=false
+
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
+
+LIBS=-ljpeg-mmx
+CFLAGS=""
+
+AC_MSG_CHECKING(for jpeg-mmx)
+AC_TRY_LINK([#include <stdio.h>
+             #include <jpeglib.h>],
+            [struct jpeg_decompress_struct cinfo;
+             jpeg_create_decompress(&cinfo);],
+	    [have_libjpeg=true])
+
+if test x$have_libjpeg = xfalse; then
+  AC_MSG_RESULT(no);
+  LIBS=-ljpeg
+  CFLAGS=""
+  AC_MSG_CHECKING(for libjpeg)
+  AC_TRY_LINK([#include <stdio.h>
+               #include <jpeglib.h>],
+              [struct jpeg_decompress_struct cinfo;
+	       jpeg_create_decompress(&cinfo);],
+	      [have_libjpeg=true])
+fi
+
+case $have_libjpeg in
+  true) AC_DEFINE(HAVE_LIBJPEG)
+        AC_MSG_RESULT(yes)
+	JPEG_LIBS=$LIBS;
+	JPEG_CFLAGS=$CFLAGS;;
+  false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
+  * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
+esac
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+AC_SUBST(JPEG_LIBS)
+AC_SUBST(JPEG_CFLAGS)
+AC_SUBST(JPEG_REQUIRED)
+
+AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
 
 dnl
 dnl Check for quicktime1394 junk
@@ -380,87 +409,6 @@ AC_SUBST(FIREWIRE_CFLAGS)
 AC_SUBST(FIREWIRE_SUBDIRS)
 
 dnl
-dnl Check for Vorbis
-dnl 
-
-have_vorbis=false
-AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
-
-AM_PATH_VORBIS(have_vorbis=true)
-AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
-
-if test x$have_vorbis = xtrue; then
-AC_DEFINE(HAVE_VORBIS)
-fi
-
-dnl
-dnl Check for lame
-dnl
-
-have_lame="false"
-
-if test x$have_vorbis = xtrue; then
-    AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="true" ], [], [ -lm -lvorbis])
-else
-    AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="true" ], [], [ -lm ])
-fi
-
-AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")
-
-dnl
-dnl Check for libjpeg
-dnl
-
-AH_TEMPLATE([HAVE_LIBJPEG], [Do we have libjpeg installed?])
-
-have_libjpeg=false
-
-OLD_CFLAGS=$CFLAGS
-OLD_LIBS=$LIBS
-
-LIBS=-ljpeg-mmx
-CFLAGS=""
-
-AC_MSG_CHECKING(for jpeg-mmx)
-AC_TRY_LINK([#include <stdio.h>
-             #include <jpeglib.h>],
-            [struct jpeg_decompress_struct cinfo;
-             jpeg_create_decompress(&cinfo);],
-	    [have_libjpeg=true])
-
-if test x$have_libjpeg = xfalse; then
-  AC_MSG_RESULT(no);
-  LIBS=-ljpeg
-  CFLAGS=""
-  AC_MSG_CHECKING(for libjpeg)
-  AC_TRY_LINK([#include <stdio.h>
-               #include <jpeglib.h>],
-              [struct jpeg_decompress_struct cinfo;
-	       jpeg_create_decompress(&cinfo);],
-	      [have_libjpeg=true])
-fi
-
-case $have_libjpeg in
-  true) AC_DEFINE(HAVE_LIBJPEG)
-        AC_MSG_RESULT(yes)
-	JPEG_LIBS=$LIBS;
-	JPEG_CFLAGS=$CFLAGS;;
-  false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
-  * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
-esac
-
-CFLAGS=$OLD_CFLAGS
-LIBS=$OLD_LIBS
-
-AC_SUBST(JPEG_LIBS)
-AC_SUBST(JPEG_CFLAGS)
-
-AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
-
-
-dnl
 dnl Multithread support is now optional and
 dnl disabled by default
 dnl
@@ -516,6 +464,7 @@ dnl
 AH_TEMPLATE([HAVE_LIBPNG], [Enable png codec])
 
 have_libpng=false
+PNG_REQUIRED="1.0.8"
 
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
@@ -544,6 +493,7 @@ LIBS=$OLD_LIBS
 
 AC_SUBST(PNG_CFLAGS)
 AC_SUBST(PNG_LIBS)
+AC_SUBST(PNG_REQUIRED)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
@@ -706,3 +656,57 @@ plugins/xanim/libxanimcodecs/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])
+
+echo "Configuration: "
+$have_gtk
+
+echo -n "libdv:      "
+if test x$have_libdv = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "Vorbis:     "
+if test x$have_vorbis = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "Lame:       "
+if test x$have_lame = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+
+echo -n "Libjpeg:    "
+if test x$have_libjpeg = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "Libpng:     "
+if test x$have_libpng = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "Libavcodec: "
+if test x$have_libavcodec = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
+echo -n "gtk-1.x.y   "
+if test x$have_gtk = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
+
