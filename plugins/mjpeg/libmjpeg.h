@@ -79,6 +79,9 @@ typedef struct
 	unsigned char **mcu_rows[3];
 /* Height of the field */
 	int field_h; 
+/* Added by libquicktime for portable multithread support */
+        pthread_cond_t  input_cond, output_cond;
+        int input_ready, output_ready;
 } mjpeg_compressor;
 
 typedef struct

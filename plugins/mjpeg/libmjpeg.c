@@ -15,7 +15,11 @@
  * USA
  */
  
- #include <stdio.h>
+#ifdef	__linux__
+#define _GNU_SOURCE
+#endif
+
+#include <stdio.h>
 #include <stdlib.h>
 #include "colormodels.h"
 #include "libmjpeg.h"
@@ -204,18 +208,6 @@ GLOBAL(void) jpeg_buffer_dest(j_compress_ptr cinfo, mjpeg_compressor *engine)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 typedef struct {
 	struct jpeg_source_mgr pub;	/* public fields */
 
@@ -283,19 +275,18 @@ GLOBAL(void) jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long
 }
 
 
+static void create_init_mutex(pthread_mutex_t *m)
+	{
+#ifdef	__linux__
+	pthread_mutexattr_t mu_attr;
+	pthread_mutexattr_t *p_attr = &mu_attr;
+	pthread_mutexattr_settype(&mu_attr, PTHREAD_MUTEX_ERRORCHECK);
+#else
+	pthread_mutexattr_t *p_attr = NULL;	/* Solaris/BSDOS/FreeBSD */
+#endif
 
-
-
-
-
-
-
-
-
-
-
-
-
+	pthread_mutex_init(m, p_attr);
+	}
 
 static void reset_buffer(unsigned char **buffer, long *size, long *allocated)
 {
@@ -554,17 +545,6 @@ static void delete_jpeg_objects(mjpeg_compressor *engine)
 }
 
 
-
-static void unlock_compress_loop(mjpeg_compressor *engine)
-{
-	pthread_mutex_unlock(&(engine->input_lock));
-}
-
-static void lock_compress_loop(mjpeg_compressor *engine)
-{
-	pthread_mutex_lock(&(engine->output_lock));
-}
-
 // Make temp rows for compressor
 static void get_mcu_rows(mjpeg_t *mjpeg, 
 	mjpeg_compressor *engine,
@@ -654,18 +634,28 @@ finish:
 }
 
 void mjpeg_decompress_loop(mjpeg_compressor *engine)
-{
-	while(!engine->done)
 	{
-		pthread_mutex_lock(&engine->input_lock);
-		if(!engine->done)
-		{
-			decompress_field(engine);
-		}
-		pthread_mutex_unlock(&(engine->output_lock));
-	}
-}
 
+	pthread_mutex_lock(&engine->input_lock);
+	while	(engine->done == 0)
+		{
+		if	(engine->input_ready)
+			{
+			engine->input_ready = 0;
+			decompress_field(engine);
+			pthread_mutex_lock(&engine->output_lock);
+			engine->output_ready = 1;
+			pthread_cond_signal(&engine->output_cond);
+			pthread_mutex_unlock(&engine->output_lock);
+			}
+		/*
+		 * the master could set 'done' between now and the wait
+		 * below if it did not honor the locking protocol in the 
+		 * delete compressor routine.
+		*/
+		pthread_cond_wait(&engine->input_cond, &engine->input_lock);
+		}
+	}
 
 static void compress_field(mjpeg_compressor *engine)
 {
@@ -693,19 +683,30 @@ static void compress_field(mjpeg_compressor *engine)
 //printf("compress_field 2\n");
 }
 
-
 void mjpeg_compress_loop(mjpeg_compressor *engine)
-{
-	while(!engine->done)
 	{
-		pthread_mutex_lock(&engine->input_lock);
-		if(!engine->done)
+
+	pthread_mutex_lock(&engine->input_lock);
+	while	(engine->done == 0)
 		{
+		if	(engine->input_ready)
+			{
+			engine->input_ready = 0;
 			compress_field(engine);
+			pthread_mutex_lock(&engine->output_lock);
+			engine->output_ready = 1;
+			pthread_cond_signal(&engine->output_cond);
+			pthread_mutex_unlock(&engine->output_lock);
+			}
+		/*
+		 * the master could set 'done' between now and the wait
+		 * below if it did not honor the locking protocol in the 
+		 * delete compressor routine.
+		*/
+		pthread_cond_wait(&engine->input_cond, &engine->input_lock);
 		}
-		pthread_mutex_unlock(&engine->output_lock);
+	pthread_exit(0);
 	}
-}
 
 static void delete_temps(mjpeg_t *mjpeg)
 {
@@ -722,9 +723,6 @@ mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
 {
 	mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
 	pthread_attr_t  attr;
-	struct sched_param param;
-	pthread_mutexattr_t mutex_attr;
-	int i;
 
 	result->mjpeg = mjpeg;
 	result->instance = instance;
@@ -735,25 +733,34 @@ mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
 	result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
 	result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
 
-	pthread_mutexattr_init(&mutex_attr);
-	pthread_mutex_init(&(result->input_lock), &mutex_attr);
-	pthread_mutex_lock(&(result->input_lock));
-	pthread_mutex_init(&(result->output_lock), &mutex_attr);
-	pthread_mutex_lock(&(result->output_lock));
+	create_init_mutex(&(result->input_lock));
+	pthread_cond_init(&result->input_cond, NULL);
+
+	create_init_mutex(&(result->output_lock));
+	pthread_cond_init(&result->output_cond, NULL);
 
 	pthread_attr_init(&attr);
 	pthread_create(&(result->tid), &attr, (void*)mjpeg_decompress_loop, result);
-
 	return result;
 }
 
 void mjpeg_delete_decompressor(mjpeg_compressor *engine)
 {
-	engine->done = 1;
-	pthread_mutex_unlock(&(engine->input_lock));
-	pthread_join(engine->tid, 0);
-	pthread_mutex_destroy(&(engine->input_lock));
-	pthread_mutex_destroy(&(engine->output_lock));
+        /*
+         * Must honor the locking protocol to avoid a race condition with
+         * the child going into the cond_wait state for more input
+        */
+        pthread_mutex_lock(&engine->input_lock);
+        engine->done = 1;
+        pthread_cond_signal(&engine->input_cond);
+        pthread_mutex_unlock(&(engine->input_lock));
+        pthread_join(engine->tid, 0);
+
+        pthread_mutex_destroy(&(engine->input_lock));
+        pthread_mutex_destroy(&(engine->output_lock));
+        pthread_cond_destroy(&engine->input_cond);
+        pthread_cond_destroy(&engine->output_cond);
+
 	jpeg_destroy_decompress(&(engine->jpeg_decompress));
 	delete_rows(engine);
 	free(engine->mcu_rows[0]);
@@ -765,8 +772,6 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
 mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 {
 	pthread_attr_t  attr;
-	struct sched_param param;
-	pthread_mutexattr_t mutex_attr;
 	mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
 
 	result->field_h = mjpeg->coded_h / mjpeg->fields;
@@ -817,25 +822,34 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 	result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
 	result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
 
-	pthread_mutexattr_init(&mutex_attr);
-	pthread_mutex_init(&(result->input_lock), &mutex_attr);
-	pthread_mutex_lock(&(result->input_lock));
-	pthread_mutex_init(&(result->output_lock), &mutex_attr);
-	pthread_mutex_lock(&(result->output_lock));
+	create_init_mutex(&(result->input_lock));
+	pthread_cond_init(&result->input_cond, NULL);
+
+	create_init_mutex(&(result->output_lock));
+	pthread_cond_init(&result->output_cond, NULL);
 
 	pthread_attr_init(&attr);
 	pthread_create(&(result->tid), &attr, (void*)mjpeg_compress_loop, result);
 	return result;
 }
 
-
 void mjpeg_delete_compressor(mjpeg_compressor *engine)
 {
+	/*
+	 * Must honor the locking protocol to avoid a race condition with 
+	 * the child going into the cond_wait state for more input 
+	*/
+	pthread_mutex_lock(&engine->input_lock);
 	engine->done = 1;
-	pthread_mutex_unlock(&(engine->input_lock));
+	pthread_cond_signal(&engine->input_cond);
+	pthread_mutex_unlock(&engine->input_lock);
 	pthread_join(engine->tid, 0);
+
 	pthread_mutex_destroy(&(engine->input_lock));
 	pthread_mutex_destroy(&(engine->output_lock));
+	pthread_cond_destroy(&engine->input_cond);
+	pthread_cond_destroy(&engine->output_cond);
+
 	jpeg_destroy((j_common_ptr)&(engine->jpeg_compress));
 	if(engine->output_buffer) free(engine->output_buffer);
 	delete_rows(engine);
@@ -869,6 +883,7 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 	int cpus)
 {
 	int i, result = 0;
+	mjpeg_compressor *engine;
 	int corrected_fields = mjpeg->fields;
 	mjpeg->color_model = color_model;
 	mjpeg->cpus = cpus;
@@ -925,30 +940,32 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 
 /* Start the compressors on the image fields */
 	if(mjpeg->deinterlace) corrected_fields = 1;
-	for(i = 0; i < corrected_fields && !result; i++)
+	for(i = 0; i < corrected_fields; i++)
 	{
-		unlock_compress_loop(mjpeg->compressors[i]);
-
-		if(mjpeg->cpus < 2 && i < corrected_fields - 1)
-		{
-			lock_compress_loop(mjpeg->compressors[i]);
-		}
+		engine = mjpeg->compressors[i];
+		pthread_mutex_lock(&engine->input_lock);
+		engine->input_ready = 1;
+		pthread_cond_signal(&engine->input_cond);
+		pthread_mutex_unlock(&engine->input_lock);
 	}
 
 /* Wait for the compressors and store in master output */
-	for(i = 0; i < corrected_fields && !result; i++)
+	for(i = 0; i < corrected_fields; i++)
 	{
-		if(mjpeg->cpus > 1 || i == corrected_fields - 1)
-		{
-			lock_compress_loop(mjpeg->compressors[i]);
-		}
-
+		engine = mjpeg->compressors[i];
+		pthread_mutex_lock(&engine->output_lock);
+		while	(engine->output_ready == 0)
+			pthread_cond_wait(&engine->output_cond,
+					  &engine->output_lock);
+		engine->output_ready = 0;
 		append_buffer(&mjpeg->output_data, 
 			&mjpeg->output_size, 
 			&mjpeg->output_allocated,
 			mjpeg->compressors[i]->output_buffer, 
 			mjpeg->compressors[i]->output_size);
 		if(i == 0) mjpeg->output_field2 = mjpeg->output_size;
+		/* The cond wait would leave it locked - we're done so unlock */
+		pthread_mutex_unlock(&engine->output_lock);
 	}
 
 	if(corrected_fields < mjpeg->fields)
@@ -964,7 +981,6 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 }
 
 
-
 int mjpeg_decompress(mjpeg_t *mjpeg, 
 	unsigned char *buffer, 
 	long buffer_len,
@@ -976,6 +992,7 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 	int color_model,
 	int cpus)
 {
+	mjpeg_compressor *engine;
 	int i, result = 0;
 
 //printf("mjpeg_decompress 1 %ld %ld\n", buffer_len, input_field2);
@@ -1006,25 +1023,36 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 
 //printf("mjpeg_decompress 4\n");
 /* Start decompressors */
-	for(i = 0; i < mjpeg->fields && !result; i++)
+	for(i = 0; i < mjpeg->fields; i++)
 	{
-		unlock_compress_loop(mjpeg->decompressors[i]);
-
-// Don't want second thread to start until temp data is allocated by the first		
-		if(mjpeg->cpus < 2 && i < mjpeg->fields - 1 && !mjpeg->temp_data)
+		engine = mjpeg->decompressors[i];
+		pthread_mutex_lock(&engine->input_lock);
+		engine->input_ready = 1;
+		pthread_cond_signal(&engine->input_cond);
+		pthread_mutex_unlock(&engine->input_lock);
+// don't want second thread to start before temp data is allocated by the first
+// thread - wait if necessary for first thread to complete.
+		if	(i == 0 && !mjpeg->temp_data)
 		{
-			lock_compress_loop(mjpeg->decompressors[i]);
+			pthread_mutex_lock(&engine->output_lock);
+			while	(engine->output_ready == 0)
+				pthread_cond_wait(&engine->output_cond,
+						  &engine->output_lock);
+	/* The cond wait would leave it locked - we're done so unlock */
+			pthread_mutex_unlock(&engine->output_lock);
+
 		}
 	}
 
 //printf("mjpeg_decompress 5\n");
 /* Wait for decompressors */
-	for(i = 0; i < mjpeg->fields && !result; i++)
+	for(i = 0; i < mjpeg->fields; i++)
 	{
-		if(mjpeg->cpus > 1 || i == mjpeg->fields - 1)
-		{
-			lock_compress_loop(mjpeg->decompressors[i]);
-		}
+		engine = mjpeg->decompressors[i];
+		while	(engine->output_ready == 0)
+			pthread_cond_wait(&engine->output_cond,
+					  &engine->output_lock);
+		engine->output_ready = 0;
 	}
 
 //printf("mjpeg_decompress 6\n");
@@ -1078,7 +1106,6 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 	return 0;
 }
 
-
 void mjpeg_set_deinterlace(mjpeg_t *mjpeg, int value)
 {
 	mjpeg->deinterlace = value;
@@ -1109,13 +1136,11 @@ int mjpeg_get_fields(mjpeg_t *mjpeg)
 	return mjpeg->fields;
 }
 
-
 mjpeg_t* mjpeg_new(int w, 
 	int h, 
 	int fields)
 {
 	mjpeg_t *result = calloc(1, sizeof(mjpeg_t));
-	pthread_mutexattr_t mutex_attr;
 	int i;
 
 	result->output_w = w;
@@ -1126,9 +1151,7 @@ mjpeg_t* mjpeg_new(int w,
 	result->quality = 80;
 	result->use_float = 0;
 
-	pthread_mutexattr_init(&mutex_attr);
-	pthread_mutex_init(&(result->decompress_init), &mutex_attr);
-	
+	create_init_mutex(&(result->decompress_init));
 
 // Calculate coded dimensions
 // An interlaced frame with 4:2:0 sampling must be a multiple of 32
@@ -1140,14 +1163,9 @@ mjpeg_t* mjpeg_new(int w,
 	else
 		result->coded_h = (h % 32) ? h + (32 - (h % 32)) : h;
 
-	
-
 //printf("mjpeg_new %d %d %d %d\n", result->output_w, result->output_h, result->coded_w, result->coded_h);
 	return result;
 }
-
-
-
 
 void mjpeg_delete(mjpeg_t *mjpeg)
 {
@@ -1195,7 +1213,6 @@ static void insert_space(unsigned char **buffer,
 	}
 	*buffer_size += space_len;
 }
-
 
 static inline int nextbyte(unsigned char *data, long *offset, long length)
 {
@@ -1296,8 +1313,6 @@ static int next_marker(unsigned char *buffer, long *offset, long buffer_size)
 /* not a 00 or FF */
 		if (c != 0 && c != 0xff) done = 1; 
 	}
-
-
 
 	if(done == 1) 
 		return c;
@@ -1624,8 +1639,6 @@ long mjpeg_get_field2(unsigned char *buffer, long buffer_size)
 			if(total_fields == 2) break;
 		}
 	}
-	
-
 /*
  * 	while(total_fields < 2)
  * 	{
@@ -1660,9 +1673,3 @@ void mjpeg_video_size(unsigned char *data, long data_size, int *w, int *h)
 	  *h = (data[offset + 3] << 8) | (data[offset + 4]);
 	  *w = (data[offset + 5] << 8) | (data[offset + 6]);
 }
-
-
-
-
-
-
