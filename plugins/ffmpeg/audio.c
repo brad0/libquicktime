@@ -322,15 +322,22 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
     codec->com.init_enc = 1;
 
     /* One frame is: bitrate * frame_samples / (samplerate * 8) + 1024 */
-
+#if 0		// PATCH 1
     codec->chunk_buffer_size = (codec->com.ffcodec_enc->bit_rate * codec->com.ffcodec_enc->frame_size /
                                 (codec->com.ffcodec_enc->sample_rate * 8)) + 1024;
+#else
+    codec->chunk_buffer_size = ( codec->com.ffcodec_enc->frame_size
+									* sizeof( int16_t )
+									* codec->com.ffcodec_enc->channels
+								);
+#endif
     codec->chunk_buffer = malloc(codec->chunk_buffer_size);
     }
 
   /* Allocate sample buffer if necessary */
 
-  if(!codec->sample_buffer_size < codec->samples_in_buffer + samples)
+//         PATCH 2 
+  if(codec->sample_buffer_size < (codec->samples_in_buffer + samples))
     {
     codec->sample_buffer_size = codec->samples_in_buffer + samples + 16;
     codec->sample_buffer = realloc(codec->sample_buffer,
@@ -358,10 +365,11 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
     if(frame_bytes > 0)
       {
       quicktime_write_chunk_header(file, trak, &chunk_atom);
-      
+#if 0    // PATCH 3  
       if(codec->com.ffcodec_enc->frame_size == 1)
         samples_encoded = codec->samples_in_buffer;
       else
+#endif
         samples_encoded = codec->com.ffcodec_enc->frame_size;
 
       //      fprintf(stderr, "Done %d->%d\n", samples_encoded, frame_bytes);
