@@ -19,9 +19,10 @@
     
 */
 
+#include "config.h"
+#include "funcprotos.h"
 #include <string.h>
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include "ffmpeg.h"
 
 static int delete_acodec(quicktime_audio_map_t *vtrack)

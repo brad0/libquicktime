@@ -20,8 +20,9 @@
 */
 
 
+#include "config.h"
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include "ffmpeg.h"
 
 #include <string.h>
