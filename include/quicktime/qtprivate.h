@@ -56,10 +56,10 @@ typedef struct
 	long seed;
 	long flags;
 	long size;
-	short int *alpha;
-	short int *red;
-	short int *green;
-	short int *blue;
+	unsigned short int *alpha;
+	unsigned short int *red;
+	unsigned short int *green;
+	unsigned short int *blue;
 } quicktime_ctab_t;
 
 

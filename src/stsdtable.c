@@ -77,7 +77,14 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	quicktime_read_data(file, table->compressor_name, 31);
 	table->depth = quicktime_read_int16(file);
 	table->ctab_id = quicktime_read_int16(file);
-	
+
+        /*  If ctab_id is zero, the colortable follows immediately
+         *  after the ctab ID
+         */
+
+        if(!table->ctab_id)
+          quicktime_read_ctab(file, &(table->ctab));
+          
 	while(quicktime_position(file) < parent_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);

@@ -33,7 +33,9 @@ void quicktime_ctab_dump(quicktime_ctab_t *ctab)
 	printf("  colors ");
 	for(i = 0; i < ctab->size; i++)
 	{
-		printf("[%d %d %d %d]", ctab->red[i], ctab->green[i], ctab->blue[i], ctab->alpha[i]);
+		printf("[0x%02x 0x%02x 0x%02x 0x%02x]\n",
+                       (ctab->red[i])>>8, (ctab->green[i])>>8,
+                       (ctab->blue[i])>>8, (ctab->alpha[i])>>8);
 	}
 	printf("\n");
 }
@@ -57,6 +59,6 @@ int quicktime_read_ctab(quicktime_t *file, quicktime_ctab_t *ctab)
 		ctab->green[i] = quicktime_read_int16(file);
 		ctab->blue[i] = quicktime_read_int16(file);
 	}
-
+        quicktime_ctab_dump(ctab);
 	return 0;
 }
