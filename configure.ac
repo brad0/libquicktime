@@ -657,8 +657,6 @@ plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/rtjpeg/Makefile \
 plugins/ffmpeg/Makefile \
-plugins/xanim/Makefile \
-plugins/xanim/libxanimcodecs/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])

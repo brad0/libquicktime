@@ -476,7 +476,7 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
 #endif
   
 #ifndef NDEBUG
-  fprintf(stderr, "Reading codec file %s...", filename_buffer);
+  //  fprintf(stderr, "Reading codec file %s...", filename_buffer);
 #endif
 
   if(*filename_buffer == '\0')
@@ -489,7 +489,7 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
     lqt_registry_unlock();
 
 #ifndef NDEBUG
-    fprintf(stderr, "failed\n");
+    //    fprintf(stderr, "failed\n");
 #endif
     return (lqt_codec_info_t*)0;
     }
@@ -556,8 +556,8 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
     }
 
 #ifndef NDEBUG
-  fprintf(stderr, "done, found %d audio codecs, %d video codecs\n",
-          num_audio_codecs, num_video_codecs);
+  //  fprintf(stderr, "done, found %d audio codecs, %d video codecs\n",
+  //          num_audio_codecs, num_video_codecs);
 
 #endif
 
@@ -762,7 +762,7 @@ void lqt_registry_write()
     create_filename();
 
 #ifndef NDEBUG
-  fprintf(stderr, "Writing codec file %s...", filename_buffer);
+  //  fprintf(stderr, "Writing codec file %s...", filename_buffer);
 #endif
   
   output = fopen(filename_buffer, "w");
@@ -835,14 +835,14 @@ void lqt_registry_write()
   lqt_registry_unlock();
 
 #ifndef NDEBUG
-  fprintf(stderr, "done\n");
+  //  fprintf(stderr, "done\n");
 #endif
   return;
 fail:
   fclose(output);
   lqt_registry_unlock();
 #ifndef NDEBUG
-  fprintf(stderr, "%s could not be written, deleting imcomplete file", filename_buffer);
+  fprintf(stderr, "%s could not be written, deleting imcomplete file\n", filename_buffer);
 #endif
   remove(filename_buffer);
   }

@@ -403,22 +403,22 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
   lqt_codec_info_t * ret = (lqt_codec_info_t*)0;
 
 #ifndef NDEBUG  
-  fprintf(stderr, "Trying to load %s...", plugin_filename);
+  //  fprintf(stderr, "Trying to load %s...", plugin_filename);
 #endif
   
   module = dlopen(plugin_filename, RTLD_NOW);
   if(!module)
     {
 #ifndef NDEBUG  
-    fprintf(stderr, "\n");
+    //    fprintf(stderr, "\n");
 #endif
-    fprintf(stderr, "dlopen failed for %s: %s\n",
-            plugin_filename, dlerror());
+    //    fprintf(stderr, "dlopen failed for %s: %s\n",
+    //            plugin_filename, dlerror());
     return ret;
     }
 #ifndef NDEBUG  
-  else
-    fprintf(stderr, "success\n");
+  //  else
+  //    fprintf(stderr, "success\n");
 #endif
 
   /* Now, get the codec parameters */
@@ -518,7 +518,7 @@ static void register_codecs(lqt_codec_info_t * list,
     if(list->type == LQT_CODEC_AUDIO)
       {
 #ifndef NDEBUG
-      fprintf(stderr, "Registering audio codec %s\n", list->name);
+      //      fprintf(stderr, "Registering audio codec %s\n", list->name);
 #endif
       if(*audio_codecs_end)
         {
@@ -535,7 +535,7 @@ static void register_codecs(lqt_codec_info_t * list,
     if(list->type == LQT_CODEC_VIDEO)
       {
 #ifndef NDEBUG
-      fprintf(stderr, "Registering video codec %s\n", list->name);
+      //      fprintf(stderr, "Registering video codec %s\n", list->name);
 #endif
       if((*video_codecs_end))
         {
@@ -574,7 +574,7 @@ static int scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
   /* Set the end pointers so we can quickly add codecs after */
 
 #ifndef NDEBUG
-  fprintf(stderr, "Scanning %s for plugins\n", plugin_dir);
+  //  fprintf(stderr, "Scanning %s for plugins\n", plugin_dir);
 #endif
   
   audio_codecs_end = lqt_audio_codecs;
@@ -633,7 +633,7 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
       continue;
 
 #ifndef NDEBUG
-    fprintf(stderr, "Found %s...", directory_entry->d_name);
+    //    fprintf(stderr, "Found %s...", directory_entry->d_name);
 #endif
     
     codecs = find_codec_by_filename(database, filename, status.st_ctime);
@@ -641,8 +641,8 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
     if(codecs) /* Codec information found in database */
       {
 #ifndef NDEBUG
-      fprintf(stderr,
-              "Already in database, registering all codecs\n");
+      //      fprintf(stderr,
+      //              "Already in database, registering all codecs\n");
 #endif
       register_codecs(codecs,
                       &audio_codecs_end,
@@ -651,8 +651,8 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
     else /* Load the informations from the module */
       {
 #ifndef NDEBUG
-      fprintf(stderr,
-              "Getting codec info from module\n");
+      //      fprintf(stderr,
+      //              "Getting codec info from module\n");
 #endif
       codecs = load_codec_info_from_plugin(filename, status.st_ctime);
       register_codecs(codecs,
@@ -722,7 +722,7 @@ void lqt_registry_init()
   while(file_codecs)
     {
 #ifndef NDEBUG
-    fprintf(stderr, "Removing codec %s from registry\n", file_codecs->name);
+    //    fprintf(stderr, "Removing codec %s from registry\n", file_codecs->name);
 #endif
     tmp_file_codecs = file_codecs;
     file_codecs = file_codecs->next;
@@ -1616,8 +1616,8 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
                              &(info_from_module->encoding_parameters[i].val_default),
                              codec_info->encoding_parameters[i].type);
 #ifndef NDEBUG
-        fprintf(stderr, "Setting encoding parameter %s\n",
-                codec_info->encoding_parameters[i].name);
+        //        fprintf(stderr, "Setting encoding parameter %s\n",
+        //                codec_info->encoding_parameters[i].name);
 #endif
 
         }
@@ -1638,8 +1638,8 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
                              &(info_from_module->decoding_parameters[i].val_default),
                              codec_info->encoding_parameters[i].type);
 #ifndef NDEBUG
-        fprintf(stderr, "Setting decoding parameter %s\n",
-                codec_info->decoding_parameters[i].name);
+        //        fprintf(stderr, "Setting decoding parameter %s\n",
+        //                codec_info->decoding_parameters[i].name);
 #endif
 
         }
@@ -1684,7 +1684,7 @@ sort_codecs_internal(lqt_codec_info_t * original, char * names)
     end_pos = pos + strlen(pos);
 
 #ifndef NDEBUG
-  fprintf(stderr, "Sorting codecs, sort string: %s\n", pos);
+  //  fprintf(stderr, "Sorting codecs, sort string: %s\n", pos);
 #endif
   
   while(1)
@@ -1807,7 +1807,7 @@ static void __lqt_cleanup_codecinfo() __attribute__ ((destructor));
 static void __lqt_cleanup_codecinfo()
   {
 #ifndef NDEBUG
-  fprintf(stderr, "Deleting quicktime codecs\n");
+  //  fprintf(stderr, "Deleting quicktime codecs\n");
 #endif
   lqt_registry_destroy();
   }

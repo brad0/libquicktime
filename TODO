@@ -1,31 +1,11 @@
-Before public release:
-
-- Make the "scan for codecs" button functional in libquicktime_config
-
-- Check if we want to add patches for xmovie/cinelerra/bcast for lqt support
-  (or would this be politically incorrect?)
-
-Library:
-
-- Support reading compressed headers (look at openquicktime, simple
-  zlib decompression).
-
-- Research, how we can overload the reading and writing functions.
-  With this, we can write modules for files, http, rtsp, ftp, output to a
-  streaming server etc.
-
-Codecs:
-
-- Meditate about an mng codec (there exists an opensource one for windows)
-
-- Check, if we can support the binary only divx4linux codec without loosing
-  compatibility (or make a new fourcc for divx4linux?)
-  This would bring some more features and maybe more speed.
+- Enable proper RGBA support in ffmpeg plugin
+  (Currently, alpha is set to 0xff to make
+   some 32 bit RLE movies visible)
 
 - Try xvid (www.videocoding.de)
 
-- Check, if we want to have a libuicktime plugin which dlopens the 3ivx codec
+- Maybe try Ogg Theora?
 
-- Meditate about loading win32 DLLs to make even cooler things happen.
+- Enable proper AVI decoding (at least for some types of AVIs).
 
-- Enable the ffmpeg svq3 codec
+- Enable AVI encoding

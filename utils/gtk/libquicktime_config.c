@@ -1,3 +1,4 @@
+#include <config.h>
 #include <quicktime/lqt.h>
 
 #include <gtk/gtk.h>
@@ -54,6 +55,7 @@ static void main_window_button_callback(GtkWidget * w, gpointer data)
 static gboolean delete_callback(GtkWidget * w, gpointer data)
   {
   gtk_main_quit();
+  return TRUE;
   }
 
 MainWindow * create_main_window()
@@ -63,7 +65,10 @@ MainWindow * create_main_window()
   MainWindow * ret = calloc(1, sizeof(MainWindow));
     
   ret->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title(GTK_WINDOW(ret->window), "Libquicktime configurator "VERSION);
 
+  gtk_widget_set_usize(ret->window, 350, 200);
+  
   gtk_signal_connect(GTK_OBJECT(ret->window), "delete-event",
                      GTK_SIGNAL_FUNC(delete_callback), ret);
     

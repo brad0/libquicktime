@@ -154,7 +154,7 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
       {
       sample_count += stts->table[*stts_index].sample_count;
       ret += stts->table[*stts_index].sample_duration;
-      *stts_index++;
+      (*stts_index)++;
       }
     }
   return ret;
