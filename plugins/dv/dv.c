@@ -12,6 +12,7 @@
 typedef struct
 {
 	dv_decoder_t *dv_decoder;
+	dv_encoder_t *dv_encoder;
 	unsigned char *data;
 	unsigned char *temp_frame, **temp_rows;
 
@@ -19,29 +20,37 @@ typedef struct
 	int decode_quality;
 	int anamorphic16x9;
 	int vlc_encode_passes;
+	int clamp_luma, clamp_chroma;
+
+	int add_ntsc_setup;
+
+	int rem_ntsc_setup;
+
+	int parameters_changed;
 } quicktime_dv_codec_t;
 
-static pthread_mutex_t libdv_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t libdv_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_dv_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 
-	pthread_mutex_lock( &libdv_mutex );
-
 	if(codec->dv_decoder)
 	{
-		free( codec->dv_decoder->video);
-		free( codec->dv_decoder->audio);
-		free( codec->dv_decoder );
+		dv_decoder_free( codec->dv_decoder );
+		codec->dv_decoder = NULL;
+	}
+	
+	if(codec->dv_encoder)
+	{
+		dv_encoder_free( codec->dv_encoder );
+		codec->dv_encoder = NULL;
 	}
 	
 	if(codec->temp_frame) free(codec->temp_frame);
 	if(codec->temp_rows) free(codec->temp_rows);
 	free(codec->data);
 	free(codec);
-	
-	pthread_mutex_unlock( &libdv_mutex );
 	return 0;
 }
 
@@ -81,15 +90,27 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 	result = !quicktime_read_data(file, (char*)codec->data, bytes);
 
-	pthread_mutex_lock( &libdv_mutex );
-
+	if( codec->dv_decoder && codec->parameters_changed )
+	{
+		dv_decoder_free( codec->dv_decoder );
+		codec->dv_decoder = NULL;
+		codec->parameters_changed = 0;
+	}
+	
 	if( ! codec->dv_decoder )
 	{
-			codec->dv_decoder = dv_decoder_new();
-			codec->dv_decoder->prev_frame_decoded = 0;
-	}
+		pthread_mutex_lock( &libdv_init_mutex );
 
-	codec->dv_decoder->quality = codec->decode_quality;
+		//printf( "dv.c decode: Alloc'ing decoder\n" );
+			
+		codec->dv_decoder = dv_decoder_new( codec->add_ntsc_setup,
+											codec->clamp_luma,
+											codec->clamp_chroma );
+		codec->dv_decoder->prev_frame_decoded = 0;
+		
+		codec->parameters_changed = 0;
+		pthread_mutex_unlock( &libdv_init_mutex );
+	}
 
 	if(codec->dv_decoder)
 	{
@@ -97,6 +118,8 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			check_sequentiality( row_pointers,
 								 720 * cmodel_calculate_pixelsize(file->color_model),
 								 file->out_h );
+
+		codec->dv_decoder->quality = codec->decode_quality;
 
 		dv_parse_header( codec->dv_decoder, codec->data );
 		
@@ -184,8 +207,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		}
 	}
 
-	pthread_mutex_unlock( &libdv_mutex );
-
 	return result;
 }
 
@@ -207,88 +228,119 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int encode_colormodel = 0;
 	dv_color_space_t encode_dv_colormodel = 0;
 
-	int is_sequential =
-		check_sequentiality( row_pointers,
-							 width_i * cmodel_calculate_pixelsize(file->color_model),
-							 height );
-
-	// file->color_model == BC_YUV422 ||
-	if( file->color_model == BC_RGB888 &&
-		width == width_i &&
-		height == height_i &&
-		is_sequential )
+	if( codec->dv_encoder != NULL && codec->parameters_changed )
 	{
-		input_rows = row_pointers;
-		encode_colormodel = file->color_model;
-		switch( file->color_model )
-		{
-			/*case BC_YUV422:
-				encode_dv_colormodel = e_dv_color_yuv;
-printf( "dv.c encode: e_dv_color_yuv\n" );
-				break;*/
-			case BC_RGB888:
-				encode_dv_colormodel = e_dv_color_rgb;
-//printf( "dv.c encode: e_dv_color_rgb\n" );
-				break;
-			default:
-				return 0;
-				break;
-		}
+		dv_encoder_free( codec->dv_encoder );
+		codec->dv_encoder = NULL;
+		codec->parameters_changed = 0;
 	}
-	else
+	
+	if( ! codec->dv_encoder )
 	{
-		if(!codec->temp_frame)
+		pthread_mutex_lock( &libdv_init_mutex );
+
+		//printf( "dv.c encode: Alloc'ing encoder\n" );
+	
+		codec->dv_encoder = dv_encoder_new( codec->rem_ntsc_setup,
+											codec->clamp_luma,
+											codec->clamp_chroma );
+
+		codec->parameters_changed = 0;
+		pthread_mutex_unlock( &libdv_init_mutex );
+	}
+
+	if(codec->dv_encoder)
+	{
+		int is_sequential =
+			check_sequentiality( row_pointers,
+								 width_i * cmodel_calculate_pixelsize(file->color_model),
+								 height );
+	
+		if( ( file->color_model == BC_YUV422
+			  || file->color_model == BC_RGB888 ) &&
+			width == width_i &&
+			height == height_i &&
+			is_sequential )
 		{
-			codec->temp_frame = malloc(720 * 576 * 3);
-			codec->temp_rows = malloc(sizeof(unsigned char*) * 576);
-			for(i = 0; i < 576; i++)
-				codec->temp_rows[i] = codec->temp_frame + 720 * 3 * i;
+			input_rows = row_pointers;
+			encode_colormodel = file->color_model;
+			switch( file->color_model )
+			{
+				case BC_YUV422:
+					encode_dv_colormodel = e_dv_color_yuv;
+					//printf( "dv.c encode: e_dv_color_yuv\n" );
+					break;
+				case BC_RGB888:
+					encode_dv_colormodel = e_dv_color_rgb;
+					//printf( "dv.c encode: e_dv_color_rgb\n" );
+					break;
+				default:
+					return 0;
+					break;
+			}
 		}
+		else
+		{
+			if(!codec->temp_frame)
+			{
+				codec->temp_frame = malloc(720 * 576 * 3);
+				codec->temp_rows = malloc(sizeof(unsigned char*) * 576);
+				for(i = 0; i < 576; i++)
+					codec->temp_rows[i] = codec->temp_frame + 720 * 3 * i;
+			}
 		
-        cmodel_transfer(codec->temp_rows, /* Leave NULL if non existent */
-			row_pointers,
-			codec->temp_rows[0], /* Leave NULL if non existent */
-			codec->temp_rows[1],
-			codec->temp_rows[2],
-			row_pointers[0], /* Leave NULL if non existent */
-			row_pointers[1],
-			row_pointers[2],
-			0,        /* Dimensions to capture from input frame */
-			0, 
-			MIN(width, width_i), 
-			MIN(height, height_i),
-			0,       /* Dimensions to project on output frame */
-			0, 
-			MIN(width, width_i), 
-			MIN(height, height_i),
-			file->color_model, 
-			BC_RGB888,
-			0,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
-			width,       /* For planar use the luma rowspan */
-			width_i);
+			cmodel_transfer(codec->temp_rows, /* Leave NULL if non existent */
+							row_pointers,
+							codec->temp_rows[0], /* Leave NULL if non existent */
+							codec->temp_rows[1],
+							codec->temp_rows[2],
+							row_pointers[0], /* Leave NULL if non existent */
+							row_pointers[1],
+							row_pointers[2],
+							0,   /* Dimensions to capture from input frame */
+							0, 
+							MIN(width, width_i), 
+							MIN(height, height_i),
+							0,   /* Dimensions to project on output frame */
+							0, 
+							MIN(width, width_i), 
+							MIN(height, height_i),
+							file->color_model, 
+							BC_RGB888,
+							0,    /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
+							width,  /* For planar use the luma rowspan */
+							width_i);
 
 
-		input_rows = codec->temp_rows;
-		encode_colormodel = BC_RGB888;
-		encode_dv_colormodel = e_dv_color_rgb;
-	}
+			input_rows = codec->temp_rows;
+			encode_colormodel = BC_RGB888;
+			encode_dv_colormodel = e_dv_color_rgb;
+		}
+
+		// Setup the encoder
+		codec->dv_encoder->is16x9 = codec->anamorphic16x9;
+		codec->dv_encoder->vlc_encode_passes = codec->vlc_encode_passes;
+		codec->dv_encoder->static_qno = 0;
+		codec->dv_encoder->force_dct = DV_DCT_AUTO;
+		codec->dv_encoder->isPAL = isPAL;
+
 
 //printf("dv.c encode: 1 %d %d %d\n", width_i, height_i, encode_dv_colormodel);
-	dv_encode_full_frame( input_rows, codec->data, encode_dv_colormodel,
-						  isPAL, codec->anamorphic16x9,
-						  codec->vlc_encode_passes, 0, DV_DCT_AUTO );
+		dv_encode_full_frame( codec->dv_encoder,
+							  input_rows, encode_dv_colormodel, codec->data );
 //printf("dv.c encode: 2 %d %d\n", width_i, height_i);
 
-	result = !quicktime_write_data(file, codec->data, data_length);
-	quicktime_update_tables(file,
-						file->vtracks[track].track,
-						offset,
-						file->vtracks[track].current_chunk,
-						file->vtracks[track].current_position,
-						1,
-						data_length);
-	file->vtracks[track].current_chunk++;
-//printf("encode 3\n", width_i, height_i);
+		result = !quicktime_write_data(file, codec->data, data_length);
+		quicktime_update_tables(file,
+								file->vtracks[track].track,
+								offset,
+								file->vtracks[track].current_chunk,
+								file->vtracks[track].current_position,
+								1,
+								data_length);
+		file->vtracks[track].current_chunk++;
+//printf("encode 3\n");
+	}
 
 	return result;
 }
@@ -298,7 +350,6 @@ printf( "dv.c encode: e_dv_color_yuv\n" );
 // we include that.
 
 // This function is used as both reads_colormodel and writes_colormodel
-
 static int colormodel_dv(quicktime_t *file, 
 		int colormodel, 
 		int track)
@@ -327,6 +378,28 @@ static int set_parameter(quicktime_t *file,
 	{
 		codec->vlc_encode_passes = *(int*)value;
 	}
+	else if(!strcasecmp(key, "dv_clamp_luma"))
+	{
+		codec->clamp_luma = *(int*)value;
+	}
+	else if(!strcasecmp(key, "dv_clamp_chroma"))
+	{
+		codec->clamp_chroma = *(int*)value;
+	}
+	else if(!strcasecmp(key, "dv_add_ntsc_setup"))
+	{
+		codec->add_ntsc_setup = *(int*)value;
+	}
+	else if(!strcasecmp(key, "dv_rem_ntsc_setup"))
+	{
+		codec->rem_ntsc_setup = *(int*)value;
+	}
+	else
+	{
+		return 0;
+	}
+
+	codec->parameters_changed = 1;
 	return 0;
 }
 
@@ -349,13 +422,16 @@ void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
 
 	/* Init private items */
 
-	dv_init();
-
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	
 	codec->dv_decoder = NULL;
+	codec->dv_encoder = NULL;
 	codec->decode_quality = DV_QUALITY_BEST;
 	codec->anamorphic16x9 = 0;
 	codec->vlc_encode_passes = 3;
+	codec->clamp_luma = codec->clamp_chroma = 0;
+	codec->add_ntsc_setup = 0;
+	codec->parameters_changed = 0;
+	
 	codec->data = calloc(1, 144000);
 }

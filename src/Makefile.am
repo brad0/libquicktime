@@ -11,7 +11,7 @@ libquicktime_la_LDFLAGS = -export-dynamic
 CFLAGS = @CFLAGS@
 
 CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-CFLAGS += -include $(CONFIG_HEADER)
+#CFLAGS += -include $(CONFIG_HEADER)
 
 # build only the files, which can be compiled
 
@@ -62,4 +62,4 @@ lqt_color.c \
 lqt_codecinfo.c \
 lqt_loader.c
 
-INCLUDES = -I$(srcdir)/../include
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/

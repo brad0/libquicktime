@@ -21,6 +21,10 @@
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /* Public function (lqt.h) */
 
 int lqt_get_codec_api_version() { return LQT_CODEC_API_VERSION; }
@@ -550,7 +554,7 @@ static void scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
     while(video_codecs_end->next)
       video_codecs_end = video_codecs_end->next;
     
-  directory = opendir(PLUGIN_DIR);
+  directory = opendir(plugin_dir);
 
   if(!directory)
     {
@@ -668,7 +672,7 @@ void lqt_registry_init()
   file_codecs = lqt_registry_read(&audio_order, &video_order);
 
   /* Scan for the plugins, use cached values if possible */
-  
+
   scan_for_plugins(PLUGIN_DIR, &file_codecs);
 
   /*

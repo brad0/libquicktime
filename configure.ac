@@ -2,7 +2,7 @@ AC_INIT(src/lqt_quicktime.c)
 dnl AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
 dnl Every other copy of the package version number gets its value from here
 AM_INIT_AUTOMAKE(libquicktime, 0.9.0)
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h include/quicktime/lqt1394_config.h])
 
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
@@ -190,16 +190,16 @@ dnl Checks for library functions.
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(gettimeofday)
 
-ENCORE_DIR=encore50
-DECORE_DIR=decore50
+dnl ENCORE_DIR=encore50
+dnl DECORE_DIR=decore50
 
-AH_TEMPLATE([ENCORE_INCLUDE],
-            [Which encore library to use.])
-AH_TEMPLATE([DECORE_INCLUDE],
-            [Which decore library to use.])
+dnl AH_TEMPLATE([ENCORE_INCLUDE],
+dnl            [Which encore library to use.])
+dnl AH_TEMPLATE([DECORE_INCLUDE],
+dnl            [Which decore library to use.])
 
-AC_DEFINE_UNQUOTED(ENCORE_INCLUDE, "$ENCORE_DIR/encore.h")
-AC_DEFINE_UNQUOTED(DECORE_INCLUDE, "$DECORE_DIR/decore.h")
+dnl AC_DEFINE_UNQUOTED(ENCORE_INCLUDE, "$ENCORE_DIR/encore.h")
+dnl AC_DEFINE_UNQUOTED(DECORE_INCLUDE, "$DECORE_DIR/decore.h")
 
 AC_HEADER_STDC
 
@@ -240,15 +240,16 @@ if test x$have_glib = xtrue; then
 AC_MSG_CHECKING(for libdv with encoder)
 AC_TRY_LINK([#include <stdio.h>
              #include <libdv/dv.h>],
-            [dv_decoder_t *decoder;
+            [dv_decoder_t *decoder; dv_encoder_t *encoder;
 	     unsigned char *data, **frame;
 	     int *pitches;
-             decoder = dv_decoder_new();
+             decoder = dv_decoder_new( FALSE, TRUE, TRUE );
+             encoder = dv_encoder_new( FALSE, FALSE, FALSE );
 	     dv_decode_full_frame( decoder, data,
 				   e_dv_color_rgb, frame,
 				   pitches );
-	     dv_encode_full_frame( frame, data, e_dv_color_yuv,
-				   0, 0, 3, 0, DV_DCT_AUTO );],
+	     dv_encode_full_frame( encoder, frame, e_dv_color_yuv, data );
+	     dv_decoder_free( decoder ); dv_encoder_free( encoder );],
 	    [have_libdv=true])
 
 
@@ -370,6 +371,12 @@ dnl 	fi
 fi
 
 AM_CONDITIONAL(HAVE_FIREWIRE, test "x$enable_firewire" = xyes)
+
+HAVE_FIREWIRE=0
+if test "x$enable_firewire" = xyes; then
+	HAVE_FIREWIRE=1
+fi
+AC_SUBST(HAVE_FIREWIRE)
 
 AC_SUBST(FIREWIRE_LIBS)
 AC_SUBST(FIREWIRE_CFLAGS)
@@ -527,7 +534,7 @@ src/Makefile \
 quicktime1394/Makefile \
 include/Makefile \
 include/quicktime/Makefile \
-include/quicktime/version.h \
+include/quicktime/lqt_version.h \
 plugins/Makefile \
 plugins/dv/Makefile \
 plugins/mjpeg/Makefile \

@@ -1,30 +1,57 @@
-Quicktime for Linux
+libquicktime (a modified version of Heroine Virtual's Quicktime for Linux)
 
-Author: Heroine Virtual (Motion picture solutions for Linux)    broadcast@earthling.net
-Homepage: heroinewarrior.com/quicktime
-Requires: libpthread
+Original Author: Heroine Virtual (Motion picture solutions for Linux)
+                    <broadcast@earthling.net>
+Original Author's Home Page: heroinewarrior.com/quicktime
+
+Main Developers for libquicktime project:
+	Arthur Peters <amp@singingwizard.org>
+	Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
+	Gerd Knorr <kraxel@bytesex.org>
+	and others
+
+Homepage: http://libquicktime.sourceforge.net/
+Requires: 
+	libpthread
+	glibc >= 2.1
+
+This does not include libraries for the codecs. 
+If you want to have all availiable codec you will need:
+	libdv >= 0.9.5
+	libpng
+	the OggVorbis libraries
+	libjpeg
+
 ------------------------------------------------------------------------
 
-***** 
+libquicktime is a library for reading and writing quicktime files. It
+is based on the quicktime4linux library, with the following
+extensions:
 
-This is a Quicktime library for UNIX in a freely redistributable,
-statically linkable library.  
+    * Sourcetree upgraded with autoconf/automake/libtool and all the 
+other stuff, people like in "standard" linux libraries.
+    * All 3rd party libraries (jpeg, OggVorbis) were removed to reduce 
+download size, compilation time and code duplication on users harddisks. 
+Instead, the sytemwide installed libaries are autodetected by the 
+configure script.
+    * All codecs have been moved into dynamically loadable modules. 
+This makes it possible to distribute closed source codecs (or codecs 
+with an incompatible license) as separate packages.
+    * Unlike other quicktime libraries, we are source compatible with 
+quicktime4linux. Programs like cinelerra or xmovie can be compiled with 
+libquicktime (if the build system is modified, see our web page for more 
+info).
+    * The codecs themselves are also source compatible with 
+quicktime4linux, so porting codecs between quicktime4linux and 
+libquicktime requires only little brain load.
+    * Special API extensions allow access to the codec registry. 
+Applications can get important information about the codecs, their 
+settable parameters etc. at runtime.
 
-*****
+For build and installation instructions see INSTALL.
 
-Building:
-type "make" in the quicktime/quicktime directory.
-type "make util" to get some Small Utilities.
-
-Configuration:
-
-libdv must be hacked to compile on Compaq C.
-
-Replace ... with enumeration.
-Replace run:, len: with proper order.
-
-
-
+If you would like to get involved in development or have questions the 
+email list for you is libquicktime-devel@sourceforge.net.
 
 /*******************************************************
  * References:

@@ -1,4 +1,4 @@
-#include "version.h"
+#include <quicktime/lqt_version.h>
 
 /*
  *  Return the codec api version. This function will be defined in every

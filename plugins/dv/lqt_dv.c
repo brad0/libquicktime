@@ -23,6 +23,33 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
        val_max:            DV_QUALITY_BEST,
        stringlist_options: (char**)0
      },
+	 { 
+       name:               "dv_clamp_luma",
+       real_name:          "Clamp Luma Values",
+       type:               LQT_PARAMETER_INT,
+       val_default:        {0},
+       val_min:            0,
+       val_max:            1,
+       stringlist_options: (char**)0
+     },
+	 { 
+       name:               "dv_clamp_chroma",
+       real_name:          "Clamp Chroma Values",
+       type:               LQT_PARAMETER_INT,
+       val_default:        {0},
+       val_min:            0,
+       val_max:            1,
+       stringlist_options: (char**)0
+     },
+	 { 
+       name:               "dv_add_ntsc_setup",
+       real_name:          "Compensate for 7.5IRE NTSC setup",
+       type:               LQT_PARAMETER_INT,
+       val_default:        {0},
+       val_min:            0,
+       val_max:            1,
+       stringlist_options: (char**)0
+     },
      { /* End of parameters */ }
   };
 
@@ -46,6 +73,33 @@ static lqt_parameter_info_static_t encode_parameters_dv[] =
       val_max:            3,
       stringlist_options: (char**)0
     },
+	{ 
+      name:               "dv_clamp_luma",
+      real_name:          "Clamp Luma Values",
+      type:               LQT_PARAMETER_INT,
+      val_default:        {0},
+      val_min:            0,
+      val_max:            1,
+      stringlist_options: (char**)0
+	},
+	{ 
+      name:               "dv_clamp_chroma",
+      real_name:          "Clamp Chroma Values",
+      type:               LQT_PARAMETER_INT,
+      val_default:        {0},
+      val_min:            0,
+      val_max:            1,
+      stringlist_options: (char**)0
+	},
+	{ 
+      name:               "dv_rem_ntsc_setup",
+      real_name:          "Compensate for 7.5IRE NTSC setup",
+      type:               LQT_PARAMETER_INT,
+      val_default:        {0},
+      val_min:            0,
+      val_max:            1,
+      stringlist_options: (char**)0
+	},
     { /* End of parameters */ }
   };
 

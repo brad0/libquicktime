@@ -1,7 +1,7 @@
 CFLAGS = @CFLAGS@
 
 CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-CFLAGS += -include $(CONFIG_HEADER)
+#CFLAGS += -include $(CONFIG_HEADER)
 
 pkglib_LTLIBRARIES = lqt_videocodec.la
 
@@ -27,4 +27,4 @@ yuv2.h \
 yuv4.h \
 yv12.h
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/

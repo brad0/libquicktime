@@ -1187,31 +1187,29 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 			quicktime_close(new_file);
 			fprintf(stderr, "quicktime_open: error in header\n");
 			new_file = 0;
+			return new_file;
 		}
 //printf("quicktime_open 3\n");
 	}
 
 //printf("quicktime_open 4 %d %d\n", wr, exists);
-	if(wr)
-		if(!exists)
-		{
+	if(wr && !exists)
+	{
 /* start the data atom */
 /* also don't want to do this if making a streamable file */
-			quicktime_atom_write_header64(new_file, &new_file->mdat.atom, "mdat");
-		}
+		quicktime_atom_write_header64(new_file, &new_file->mdat.atom, "mdat");
+	}
 
 //printf("quicktime_open 5 %llx %llx\n", new_file->ftell_position, new_file->file_position);
 
-        if(rd)
-          {
-          /* Set default decoding parameters */
-          lqt_set_default_audio_parameters(new_file);
-          lqt_set_default_video_parameters(new_file);
-          
-          }
+	if(rd)
+	{
+		/* Set default decoding parameters */
+		lqt_set_default_audio_parameters(new_file);
+		lqt_set_default_video_parameters(new_file);
+	}
         
-
-        return new_file;
+	return new_file;
 }
 
 int quicktime_close(quicktime_t *file)

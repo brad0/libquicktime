@@ -68,7 +68,8 @@ static int encoding_colormodels_yv12[] =
     LQT_COLORMODEL_NONE,
   };
 
-#define DUMMY_PARAMETERS
+// if DUMMY_PARAMETERS is defined it will cause segfaults
+#undef DUMMY_PARAMETERS
 
 #ifdef DUMMY_PARAMETERS
 
