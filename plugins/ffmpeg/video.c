@@ -52,7 +52,8 @@ colormodels[] =
     { PIX_FMT_YUVJ444P, BC_YUV444P   }, ///< Planar YUV 4:4:4 full scale (jpeg)
   };
 
-static enum PixelFormat lqt_2_ffmpeg(int id)
+
+enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   {
   int i;
 
@@ -64,7 +65,7 @@ static enum PixelFormat lqt_2_ffmpeg(int id)
   return PIX_FMT_NB;
   }
 
-static int ffmpeg_2_lqt(enum PixelFormat id)
+int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id)
   {
   int i;
 
@@ -75,6 +76,8 @@ static int ffmpeg_2_lqt(enum PixelFormat id)
     }
   return LQT_COLORMODEL_NONE;
   }
+
+
 
 static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *codec,
                      int64_t frameno, int track)
@@ -96,7 +99,7 @@ static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *c
         codec->read_buffer[i+1] = 0;
         codec->read_buffer[i+2] = 0;
         codec->read_buffer[i+3] = 0;
-        
+        //        fprintf(stderr, "Read video frame %p\n", codec->read_buffer);
 	return i;
 }
 
@@ -104,7 +107,7 @@ static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *c
 int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                                    int track)
   {
-  int i;
+  int i, imax;
   int result = 0;
   int t;
   int buffer_size;
@@ -121,6 +124,8 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   int row_span;
   AVPicture in_pic;
   AVPicture out_pic;
+  quicktime_ctab_t * ctab;
+  
   
   /* Initialize decoder */
   
@@ -129,8 +134,30 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     codec->com.ffcodec_dec = avcodec_alloc_context();
     codec->com.ffcodec_dec->width = file->in_w;
     codec->com.ffcodec_dec->height = file->in_h;
+    codec->com.ffcodec_dec->bits_per_sample = quicktime_video_depth(file, track);
     codec->com.ffcodec_dec->extradata      = trak->mdia.minf.stbl.stsd.table[0].extradata;
     codec->com.ffcodec_dec->extradata_size = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
+
+    /* Add palette info */
+    
+    ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
+    if(ctab->size)
+      {
+      codec->com.ffcodec_dec->palctrl = &(codec->palette);
+      codec->palette.palette_changed = 1;
+      imax =
+        (ctab->size > AVPALETTE_COUNT)
+      ? AVPALETTE_COUNT : ctab->size;
+
+      for(i = 0; i < imax; i++)
+        {
+        codec->palette.palette[i] =
+          ((ctab->alpha[i] >> 8) << 24) |
+          ((ctab->red[i] >> 8) << 16) |
+          ((ctab->green[i] >> 8) << 8) |
+          ((ctab->blue[i] >> 8));
+        }
+      }
     
 #define SP(x) codec->com.ffcodec_dec->x = codec->com.params.x
     SP(workaround_bugs);
@@ -177,6 +204,8 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                                  vtrack->current_position, track);
   if(buffer_size > 0)
     {
+    //    fprintf(stderr, "avcodec_decode_video: %p\n", codec->read_buffer);
+
     if(avcodec_decode_video(codec->com.ffcodec_dec,
                             codec->frame,
                             &got_pic,
@@ -211,10 +240,11 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 
       if(codec->lqt_colormodel == LQT_COLORMODEL_NONE)
         {
-        codec->lqt_colormodel = ffmpeg_2_lqt(codec->com.ffcodec_dec->pix_fmt);
+        codec->lqt_colormodel =
+          lqt_ffmpeg_get_lqt_colormodel(codec->com.ffcodec_dec->pix_fmt);
         if(codec->lqt_colormodel == LQT_COLORMODEL_NONE)
           {
-          codec->lqt_colormodel = BC_YUV420P;
+          codec->lqt_colormodel = BC_RGB888;
           codec->do_imgconvert = 1;
           }
         }
@@ -236,77 +266,203 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       
       row_span = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
       
-      /* Transfer colormodel */
 
       if(!codec->do_imgconvert && !do_cmodel_transfer)
         {
-        /* Best case */
-
-        /* memcpy (it's ugly, I know. Improvements welcome) */
-        for(i = 0; i < height; i++)
-          {
-          memcpy(&(row_pointers[0][i*row_span]),
-                 &(codec->frame->data[0][i*codec->frame->linesize[0]]),
-                 width);
-          }
-
-        for(i = 0; i < height/2; i++)
-          {
-          memcpy(&(row_pointers[1][i*row_span/2]),
-                 &(codec->frame->data[1][i*codec->frame->linesize[1]]),
-                 width/2);
-          memcpy(&(row_pointers[2][i*row_span/2]),
-                 &(codec->frame->data[2][i*codec->frame->linesize[2]]),
-                 width/2);
-          }
+        //        fprintf(stderr, "Copy frame...");
         
+        /* Best case */
+        /* Copy frame */
+        /* memcpy (it's ugly, I know. Improvements welcome) */
+
+        switch(codec->lqt_colormodel)
+          {
+          case BC_YUV420P:  ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[0][i*row_span]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width);
+              }
+            for(i = 0; i < height/2; i++)
+              {
+              memcpy(&(row_pointers[1][i*row_span/2]),
+                     &(codec->frame->data[1][i*codec->frame->linesize[1]]),
+                     width/2);
+              memcpy(&(row_pointers[2][i*row_span/2]),
+                     &(codec->frame->data[2][i*codec->frame->linesize[2]]),
+                     width/2);
+              }
+            break;
+          case BC_YUV411P:  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[0][i*row_span]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width);
+              memcpy(&(row_pointers[1][i*row_span/4]),
+                     &(codec->frame->data[1][i*codec->frame->linesize[1]]),
+                     width/4);
+              memcpy(&(row_pointers[2][i*row_span/4]),
+                     &(codec->frame->data[2][i*codec->frame->linesize[2]]),
+                     width/4);
+              }
+            break;
+          case BC_YUV422P:  ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[0][i*row_span]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width);
+              memcpy(&(row_pointers[1][i*row_span/2]),
+                     &(codec->frame->data[1][i*codec->frame->linesize[1]]),
+                     width/2);
+              memcpy(&(row_pointers[2][i*row_span/2]),
+                     &(codec->frame->data[2][i*codec->frame->linesize[2]]),
+                     width/2);
+              }
+            break;
+          case BC_YUV444P:  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[0][i*row_span]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width);
+              memcpy(&(row_pointers[1][i*row_span]),
+                     &(codec->frame->data[1][i*codec->frame->linesize[1]]),
+                     width);
+              memcpy(&(row_pointers[2][i*row_span]),
+                     &(codec->frame->data[2][i*codec->frame->linesize[2]]),
+                     width);
+              }
+            break;
+          case BC_YUV422:
+          case BC_RGB565:  ///< always stored in cpu endianness
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[i]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width*2);
+              }
+            break;
+          case BC_RGB888:  ///< Packed pixel, 3 bytes per pixel, RGBRGB...
+          case BC_BGR888:  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[i]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width*3);
+              }
+            break;
+          case BC_RGBA8888:  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+            for(i = 0; i < height; i++)
+              {
+              memcpy(&(row_pointers[i]),
+                     &(codec->frame->data[0][i*codec->frame->linesize[0]]),
+                     width*4);
+              }
+            break;
+          }
         }
       else if(!codec->do_imgconvert)
         {
-        cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
-                        codec->frame->data,  // unsigned char **input_rows,
-                        row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */
-                        row_pointers[1], // unsigned char *out_u_plane,
-                        row_pointers[2], // unsigned char *out_v_plane,
-                        codec->frame->data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
-                        codec->frame->data[1], // unsigned char *in_u_plane,
-                        codec->frame->data[2], // unsigned char *in_v_plane,
-                        file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
-                        file->in_y,     // int in_y,
-                        file->in_w ? file->in_w : width,     // int in_w,
-                        file->in_h ? file->in_h : height,    // int in_h,
-                        0, // file->out_x,       /* Dimensions to project on output frame */
-                        0, // file->out_y,
-                        file->out_w ? file->out_w : width,  // int out_w,
-                        file->out_h ? file->out_h : height, // int out_h,
-                        codec->lqt_colormodel, // int in_colormodel,
-                        file->vtracks[track].color_model,      // int out_colormodel,
-                        0, // int bg_color,
-                        codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
-                        row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
+        //        fprintf(stderr, "cmodel_transfer...");
+        /* Transfer colormodel */
+        /* Must make a difference between planar and packed here */
+        
+        if(lqt_colormodel_is_planar(codec->lqt_colormodel))
+          {
+          cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
+                          codec->frame->data,  // unsigned char **input_rows,
+                          row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */
+                            row_pointers[1], // unsigned char *out_u_plane,
+                            row_pointers[2], // unsigned char *out_v_plane,
+                            codec->frame->data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
+                            codec->frame->data[1], // unsigned char *in_u_plane,
+                            codec->frame->data[2], // unsigned char *in_v_plane,
+                            file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
+                            file->in_y,     // int in_y,
+                            file->in_w ? file->in_w : width,     // int in_w,
+                            file->in_h ? file->in_h : height,    // int in_h,
+                            0, // file->out_x,       /* Dimensions to project on output frame */
+                            0, // file->out_y,
+                            file->out_w ? file->out_w : width,  // int out_w,
+                            file->out_h ? file->out_h : height, // int out_h,
+                            codec->lqt_colormodel, // int in_colormodel,
+                            file->vtracks[track].color_model,      // int out_colormodel,
+                            0, // int bg_color,
+                            codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
+                            row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
+            
+          }
+        else
+          {
+          if(!codec->row_pointers)
+            codec->row_pointers = malloc(height * sizeof(*(codec->row_pointers)));
+          for(i = 0; i < height; i++)
+            codec->row_pointers[i] = codec->frame->data[0] + codec->frame->linesize[0] * i;
+          
+          cmodel_transfer(row_pointers, // unsigned char **output_rows, /* Leave NULL if non existent */
+                          codec->row_pointers,  // unsigned char **input_rows,
+                          row_pointers[0], // unsigned char *out_y_plane, /* Leave NULL if non existent */
+                          row_pointers[1], // unsigned char *out_u_plane,
+                          row_pointers[2], // unsigned char *out_v_plane,
+                          codec->frame->data[0], // unsigned char *in_y_plane, /* Leave NULL if non existent */
+                          codec->frame->data[1], // unsigned char *in_u_plane,
+                          codec->frame->data[2], // unsigned char *in_v_plane,
+                          file->in_x,     // int in_x,        /* Dimensions to capture from input frame */
+                          file->in_y,     // int in_y,
+                          file->in_w ? file->in_w : width,     // int in_w,
+                          file->in_h ? file->in_h : height,    // int in_h,
+                          0, // file->out_x,       /* Dimensions to project on output frame */
+                          0, // file->out_y,
+                          file->out_w ? file->out_w : width,  // int out_w,
+                          file->out_h ? file->out_h : height, // int out_h,
+                          codec->lqt_colormodel, // int in_colormodel,
+                          file->vtracks[track].color_model,      // int out_colormodel,
+                          0, // int bg_color,
+                          codec->frame->linesize[0], // int in_rowspan,       /* For planar use the luma rowspan */
+                          row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
+          }
         }
       else if(!do_cmodel_transfer)
         {
+        //        fprintf(stderr, "img_convert...");
         in_pic.data[0]      = codec->frame->data[0];
         in_pic.data[1]      = codec->frame->data[1];
         in_pic.data[2]      = codec->frame->data[2];
         in_pic.linesize[0]  = codec->frame->linesize[0];
         in_pic.linesize[1]  = codec->frame->linesize[1];
         in_pic.linesize[2]  = codec->frame->linesize[2];
-        out_pic.data[0]     = row_pointers[0];
-        out_pic.data[1]     = row_pointers[1];
-        out_pic.data[2]     = row_pointers[2];
-        out_pic.linesize[0] = row_span;
-        out_pic.linesize[1] = row_span/2;
-        out_pic.linesize[2] = row_span/2;
-
-        img_convert(&out_pic, PIX_FMT_YUV420P,
-                   &in_pic,  codec->com.ffcodec_dec->pix_fmt,
-                   width, height);
+        
+        if(lqt_colormodel_is_planar(codec->lqt_colormodel))
+          {
+          out_pic.data[0]     = row_pointers[0];
+          out_pic.data[1]     = row_pointers[1];
+          out_pic.data[2]     = row_pointers[2];
+          out_pic.linesize[0] = row_span;
+          out_pic.linesize[1] = row_span/2;
+          out_pic.linesize[2] = row_span/2;
+          }
+        else
+          {
+          out_pic.data[0]     = row_pointers[0];
+          out_pic.data[1]     = NULL;
+          out_pic.data[2]     = NULL;
+          out_pic.linesize[0] = (int)(row_pointers[1] - row_pointers[0]);
+          out_pic.linesize[1] = 0;
+          out_pic.linesize[2] = 0;
+          }
+        
+        img_convert(&out_pic, PIX_FMT_RGB24,
+                    &in_pic,  codec->com.ffcodec_dec->pix_fmt,
+                    width, height);
         }
       else
         {
         /* Worst case */
+
+        //        fprintf(stderr, "img_convert + cmodel_transfer...");
 
         if(!codec->tmp_buffer)
           codec->tmp_buffer = malloc((width * height * 3)/2);
@@ -352,6 +508,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                         row_span);      // int out_rowspan);     /* For planar use the luma rowspan */
         
         }
+      //      fprintf(stderr, "Done\n"); 
       }
     }
   

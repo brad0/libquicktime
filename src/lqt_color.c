@@ -50,7 +50,7 @@ static lqt_colormodel_tab colormodel_table[] =
 
 /* Some functions to find out, how cheap a colorspace conversion can be */
 
-static int colormodel_is_yuv(int colormodel)
+int lqt_colormodel_is_yuv(int colormodel)
   {
   switch(colormodel)
     {
@@ -64,6 +64,7 @@ static int colormodel_is_yuv(int colormodel)
     case BC_UYVA8888:
     case BC_YUV420P:
     case BC_YUV422P:
+    case BC_YUV444P:
     case BC_YUV411P:
       return 1;
     default:
@@ -71,7 +72,7 @@ static int colormodel_is_yuv(int colormodel)
     }
   }
 
-static int colormodel_is_rgb(int colormodel)
+int lqt_colormodel_is_rgb(int colormodel)
   {
   switch(colormodel)
     {
@@ -92,7 +93,7 @@ static int colormodel_is_rgb(int colormodel)
     }
   }
 
-static int colormodel_has_alpha(int colormodel)
+int lqt_colormodel_has_alpha(int colormodel)
   {
   switch(colormodel)
     {
@@ -110,6 +111,22 @@ static int colormodel_has_alpha(int colormodel)
       return 0;
     }
   }
+
+int lqt_colormodel_is_planar(int colormodel)
+  {
+  switch(colormodel)
+    {
+    case BC_YUV420P:
+    case BC_YUV422P:
+    case BC_YUV444P:
+    case BC_YUV411P:
+      return 1;
+    default:
+      return 0;
+    }
+  
+  }
+
 
 /*
  *   Return the bits of a colormodel. This is used only internally
@@ -165,14 +182,14 @@ static int colormodel_get_bits(int colormodel)
 
 static int get_conversion_price(int in_colormodel, int out_colormodel)
   {
-  int input_is_rgb  = colormodel_is_rgb(in_colormodel);
-  int output_is_rgb = colormodel_is_rgb(out_colormodel);
+  int input_is_rgb  = lqt_colormodel_is_rgb(in_colormodel);
+  int output_is_rgb = lqt_colormodel_is_rgb(out_colormodel);
   
-  int input_is_yuv  = colormodel_is_yuv(in_colormodel);
-  int output_is_yuv = colormodel_is_yuv(out_colormodel);
+  int input_is_yuv  = lqt_colormodel_is_yuv(in_colormodel);
+  int output_is_yuv = lqt_colormodel_is_yuv(out_colormodel);
 
-  int input_has_alpha  = colormodel_has_alpha(in_colormodel);
-  int output_has_alpha = colormodel_has_alpha(out_colormodel);
+  int input_has_alpha  = lqt_colormodel_has_alpha(in_colormodel);
+  int output_has_alpha = lqt_colormodel_has_alpha(out_colormodel);
 
  
   /* Zero conversions are for free :-) */

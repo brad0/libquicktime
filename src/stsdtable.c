@@ -100,7 +100,9 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 
         if(!table->ctab_id)
           quicktime_read_ctab(file, &(table->ctab));
-          
+        else
+          quicktime_default_ctab(&(table->ctab), table->depth);
+        
 	while(quicktime_position(file) < parent_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);

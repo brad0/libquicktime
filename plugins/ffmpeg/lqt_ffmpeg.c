@@ -514,6 +514,76 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "mjpg",
 	  name: "MJPEG",
 	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
+	{
+          id: CODEC_ID_8BPS,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "8BPS",
+	  name: "Quicktime Planar RGB (8BPS)",
+	  fourccs: {"8BPS", (char *)0} },
+	{
+          id: CODEC_ID_INDEO3,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "8BPS",
+	  name: "Intel Indeo 3",
+	  fourccs: {"IV31", "IV32", (char *)0} },
+	{
+          id: CODEC_ID_RPZA,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "rpza",
+	  name: "Apple Video",
+	  fourccs: {"rpza", (char *)0} },
+	{
+          id: CODEC_ID_SMC,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "smc",
+	  name: "Apple Graphics",
+	  fourccs: {"smc ", (char *)0} },
+	{
+          id: CODEC_ID_CINEPAK,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "cinepak",
+	  name: "Cinepak",
+	  fourccs: {"cvid", (char *)0} },
+	{
+          id: CODEC_ID_CYUV,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "cyuv",
+	  name: "Creative YUV",
+	  fourccs: {"CYUV", (char *)0} },
+	{
+          id: CODEC_ID_QTRLE,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "rle",
+	  name: "RLE",
+	  fourccs: {"rle ", (char *)0} },
 };
 
 struct CODECIDMAP codecidmap_a[] = {
@@ -611,7 +681,7 @@ void ffmpeg_map_init(void)
     if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
       {
       codecidmap_a[i].index = ffmpeg_num_audio_codecs++ + ffmpeg_num_video_codecs;
-      fprintf(stderr, "Found codec %s %p %p\n", codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder);
+      // fprintf(stderr, "Found codec %s %p %p\n", codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder);
       }
     }
   }
@@ -639,7 +709,7 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 	encoding_parameters: NULL,
 	decoding_parameters: NULL,
 	encoding_colormodels: encoding_colormodels_ffmpeg,
-	decoding_colormodel:  BC_YUV420P
+	decoding_colormodel:  LQT_COLORMODEL_NONE,
 };
 
 /* These are called from the plugin loader */
@@ -691,25 +761,78 @@ static void set_codec_info(struct CODECIDMAP * map)
   }
   }
 
+static struct CODECIDMAP * find_codec(int index)
+  {
+  int i;
+  for(i = 0; i < NUMMAPS_V; i++)
+    {
+    if(codecidmap_v[i].index == index)
+      return &codecidmap_v[i];
+    }
+  for(i = 0; i < NUMMAPS_A; i++)
+    {
+    if(codecidmap_a[i].index == index)
+      return &codecidmap_a[i];
+    }
+  return (struct CODECIDMAP *)0;
+  }
+
 extern lqt_codec_info_static_t * get_codec_info(int index)
 {
-	int i;
-	
-	ffmpeg_map_init();
-	for(i = 0; i < NUMMAPS_V; i++) {
-		if(codecidmap_v[i].index == index) {
-                set_codec_info(&codecidmap_v[i]);
-                return &codec_info_ffmpeg;
-		}
-	}
-	for(i = 0; i < NUMMAPS_A; i++) {
-                if(codecidmap_a[i].index == index) {
-                set_codec_info(&codecidmap_a[i]);
-                return &codec_info_ffmpeg;
-		}
-	}
+	struct CODECIDMAP * map;
+        ffmpeg_map_init();
+	map = find_codec(index);
+
+        if(map)
+          {
+          set_codec_info(map);
+          return &codec_info_ffmpeg;
+          }
 	return NULL;
 }
+
+/* We obtain the stream colormodel during runtime */
+
+extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
+                                 int * exact)
+  {
+  int width, height, depth, ret;
+  quicktime_video_map_t *vtrack;
+  quicktime_trak_t *trak;
+  AVCodecContext *avctx;
+  struct CODECIDMAP * map;
+    
+  vtrack = &(file->vtracks[track]);
+  trak = vtrack->track;
+  
+  height = trak->tkhd.track_height;
+  width = trak->tkhd.track_width;
+  depth = quicktime_video_depth(file, track);
+
+  avctx = avcodec_alloc_context();
+
+  avctx->width = width;
+  avctx->height = height;
+  avctx->bits_per_sample = depth;
+  avctx->extradata      = trak->mdia.minf.stbl.stsd.table[0].extradata;
+  avctx->extradata_size = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
+
+  map = find_codec(codec_index);
+  if(!map)
+    return LQT_COLORMODEL_NONE;
+  
+  if(!avcodec_open(avctx, map->decoder) != 0)
+    return LQT_COLORMODEL_NONE;
+
+  ret = lqt_ffmpeg_get_lqt_colormodel(avctx->pix_fmt);
+  
+  avcodec_close(avctx);
+
+  fprintf(stderr, "LQT Colormodel: %s\n", lqt_colormodel_to_string(ret));
+  
+  return ret;
+  }
+
 
 /*
  *   Return the actual codec constructor
@@ -899,10 +1022,11 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
 	return (lqt_init_audio_codec_func_t)0;
 }
 
-
+#if 0
 
 int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
                           int * exact)
 {
 	return BC_YUV420P;
 }
+#endif

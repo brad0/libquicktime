@@ -598,6 +598,21 @@ typedef struct
 	int rd;
 	int wr;
 
+/* If the moov atom is compressed */
+        int compressed_moov;
+        unsigned char *moov_data;
+/*
+ * Temporary storage of compressed sizes.  If the file length is shorter than the
+ * uncompressed sizes, it won't work.
+ */
+        int64_t moov_end;
+        int64_t moov_size;
+        int64_t old_preload_size;
+        char *old_preload_buffer;
+        int64_t old_preload_start;
+        int64_t old_preload_end;
+        int64_t old_preload_ptr;
+
 /* ASF section */
         int use_asf;
 

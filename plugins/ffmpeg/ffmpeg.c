@@ -55,6 +55,7 @@ static int delete_vcodec(quicktime_video_map_t *vtrack)
 	if(codec->write_buffer) free(codec->write_buffer);
 	if(codec->read_buffer) free(codec->read_buffer);
         if(codec->tmp_buffer) free(codec->tmp_buffer);
+        if(codec->row_pointers) free(codec->row_pointers);
 
         if(codec->frame) free(codec->frame);
         

@@ -434,8 +434,11 @@ int quicktime_delete(quicktime_t *file)
 	}
 	file->total_atracks = 0;
 	file->total_vtracks = 0;
-//printf("quicktime_delete 1\n");
-	if(file->preload_size)
+
+        if(file->moov_data)
+          free(file->moov_data);
+        
+        if(file->preload_size)
 	{
 		free(file->preload_buffer);
 		file->preload_size = 0;

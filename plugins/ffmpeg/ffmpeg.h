@@ -88,10 +88,13 @@ typedef struct
   int do_imgconvert;
     
   unsigned char * tmp_buffer;
-  
+  unsigned char ** row_pointers;
+    
   /* Quality must be passed to the individual frame */
 
   int qscale;
+
+  AVPaletteControl palette;
   } quicktime_ffmpeg_video_codec_t;
 
 
@@ -116,5 +119,9 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i,
 int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i,
                             float *output_f, long samples,
                             int track, int channel);
+
+int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat fmt);
+enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int colormodel);
+
 
 #endif

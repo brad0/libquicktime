@@ -34,6 +34,13 @@ const char * lqt_colormodel_to_string(int colormodel);
 
 int lqt_string_to_colormodel(const char * str);
 
+/* Query information about the colormodel */
+  
+int lqt_colormodel_is_planar(int colormodel);
+int lqt_colormodel_has_alpha(int colormodel);
+int lqt_colormodel_is_rgb(int colormodel);
+int lqt_colormodel_is_yuv(int colormodel);
+  
 /* Query supported colormodels */
 
 int lqt_num_colormodels();

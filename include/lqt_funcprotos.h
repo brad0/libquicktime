@@ -116,6 +116,7 @@ int quicktime_ctab_init(quicktime_ctab_t *ctab);
 int quicktime_ctab_delete(quicktime_ctab_t *ctab);
 void quicktime_ctab_dump(quicktime_ctab_t *ctab);
 int quicktime_read_ctab(quicktime_t *file, quicktime_ctab_t *ctab);
+void quicktime_default_ctab(quicktime_ctab_t *ctab, int depth);
 
 /* dinf.c */
 
