@@ -1,6 +1,6 @@
+#include "funcprotos.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <funcprotos.h>
 #include <string.h>
 #include <lame/lame.h>
 #include <quicktime/quicktime.h>
