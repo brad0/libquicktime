@@ -15,8 +15,7 @@
  * USA
  */
 #include <quicktime/colormodels.h>
-#include <stdint.h>
-
+#include <inttypes.h>
 
 #define RGB_TO_YUV(y, u, v, r, g, b) \
 { \

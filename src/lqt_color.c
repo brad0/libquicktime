@@ -145,6 +145,9 @@ static int colormodel_get_bits(int colormodel)
     case BC_RGBA16161616:
     case BC_YUVA16161616:
       return 64;
+    default:
+      fprintf(stderr,"lqt: warning: unknown colormodel (%d)\n",colormodel);
+      return 0;
     }
   }
 

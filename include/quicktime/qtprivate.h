@@ -8,7 +8,7 @@
 
 //#include "codecs.h"
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 typedef int64_t longest;
 typedef uint64_t ulongest;

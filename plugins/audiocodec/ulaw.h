@@ -1,7 +1,6 @@
 #ifndef QUICKTIME_ULAW_H
 #define QUICKTIME_ULAW_H
 
-#include <stdint.h>
 #include <quicktime/quicktime.h>
 
 typedef struct

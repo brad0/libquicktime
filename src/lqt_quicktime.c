@@ -940,7 +940,7 @@ int quicktime_read_frame_init(quicktime_t *file, int track)
 	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
 	if(quicktime_ftell(file) != file->file_position) 
 	{
-		FSEEK(file->stream, file->file_position, SEEK_SET);
+		fseeko(file->stream, file->file_position, SEEK_SET);
 		file->ftell_position = file->file_position;
 	}
 	return 0;
@@ -1077,8 +1077,8 @@ int quicktime_dump(quicktime_t *file)
 {
 	printf("quicktime_dump\n");
 	printf("movie data\n");
-	printf(" size %ld\n", file->mdat.atom.size);
-	printf(" start %ld\n", file->mdat.atom.start);
+	printf(" size %lld\n", file->mdat.atom.size);
+	printf(" start %lld\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));
 	return 0;
 }

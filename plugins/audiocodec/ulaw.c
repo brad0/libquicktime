@@ -6,6 +6,9 @@
 #define uBIAS 0x84
 #define uCLIP 32635
 
+/* prototype */
+int ulaw_init_ulawtofloat(quicktime_t *file, int track);
+
 int ulaw_init_ulawtoint16(quicktime_t *file, int track)
 {
 	int i;

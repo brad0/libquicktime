@@ -139,7 +139,7 @@ static int encode_video_external(quicktime_t *file,
 
     	    if(bytes > 0)
 			{
-				printf("Writing %ld bytes\n", bytes);
+				printf("Writing %lld bytes\n", bytes);
 
 				error = !quicktime_write_data(file, output, bytes);
 
@@ -243,7 +243,7 @@ int quicktime_register_external_vcodec(const char *codec_name)
 	void *handle;
 	int (*quicktime_codec_register)(quicktime_extern_video_t*);
 	char path[1024];
-	char *error;
+	const char *error;
 
 	sprintf(path, "%s%s.so", CODEC_PREFIX, codec_name);
 	fprintf(stderr, "Trying to load external codec %s\n", path);
@@ -289,7 +289,7 @@ int quicktime_register_external_acodec(const char *codec_name)
 	void *handle;
 	int (*quicktime_codec_register)(quicktime_extern_audio_t*);
 	char path[1024];
-	char *error;
+	const char *error;
 
 	sprintf(path, "%s%s.so", CODEC_PREFIX, codec_name);
 	fprintf(stderr, "Trying to load external codec %s\n", path);

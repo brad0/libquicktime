@@ -5,10 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <stdint.h>
-
-#define FSEEK fseeko64
-
+#include <inttypes.h>
 
 #define WIDTH 720
 #define HEIGHT 480
@@ -233,7 +230,7 @@ int main(int argc, char *argv[])
 					search_buffer[i + 3] == 'F')
 				{
 					current_byte += i - 6;
-					FSEEK(in, current_byte, SEEK_SET);
+					fseeko(in, current_byte, SEEK_SET);
 					ftell_byte = current_byte;
 					found_jfif = 1;
 					audio_end = jpeg_start = current_byte;
@@ -247,7 +244,7 @@ int main(int argc, char *argv[])
 					search_buffer[i + 1] == 0xd9)
 				{
 					current_byte += i + 2;
-					FSEEK(in, current_byte, SEEK_SET);
+					fseeko(in, current_byte, SEEK_SET);
 					ftell_byte = current_byte;
 					found_eoi = 1;
 					audio_start = jpeg_end = current_byte;
@@ -291,7 +288,7 @@ fflush(stdout);
 		}
 		else
 		{
-			FSEEK(in, current_byte + SEARCH_FRAGMENT - 4, SEEK_SET);
+			fseeko(in, current_byte + SEARCH_FRAGMENT - 4, SEEK_SET);
 			ftell_byte = current_byte + SEARCH_FRAGMENT - 4;
 		}
 	}
@@ -300,7 +297,7 @@ printf("\n\n");
 	quicktime_close(out);
 
 // Transfer header
-	FSEEK(in, 0x8, SEEK_SET);
+	fseeko(in, 0x8, SEEK_SET);
 
 	data[0] = (ftell_byte & 0xff00000000000000LL) >> 56;
 	data[1] = (ftell_byte & 0xff000000000000LL) >> 48;
@@ -312,10 +309,10 @@ printf("\n\n");
 	data[7] = ftell_byte & 0xff;
 	fwrite(data, 8, 1, in);
 
-	FSEEK(in, ftell_byte, SEEK_SET);
+	fseeko(in, ftell_byte, SEEK_SET);
 	stat(temp_file, &ostat);
 	temp = fopen(temp_file, "rb");
-	FSEEK(temp, 0x10, SEEK_SET);
+	fseeko(temp, 0x10, SEEK_SET);
 	copy_buffer = calloc(1, ostat.st_size);
 	fread(copy_buffer, ostat.st_size, 1, temp);
 	fclose(temp);

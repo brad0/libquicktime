@@ -54,6 +54,9 @@ PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
 DEBUG_CFLAGS=" -g3"
 OPTIMIZE_CFLAGS=" -O3 -funroll-all-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2"
 
+# large file support
+COMMON_FLAGS="$COMMON_FLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
+
 # -Wno-unused-variable -Wno-unused-parameter
 # -std=gnu99 
 
@@ -146,7 +149,7 @@ dnl Checks for libraries.
 
 AC_CHECK_LIB(dl, dlopen)
 
-AC_SEARCH_LIBS(pthread_create, [gthread pthread])
+AC_SEARCH_LIBS(pthread_create, [gthread pthread c_r])
 
 dnl Check for X11
 AC_PATH_XTRA

@@ -4,7 +4,6 @@
 #include <workarounds.h>
 #include "v410.h"
 
-#include <stdint.h>
 #include <stdlib.h>
 
 static int delete_codec(quicktime_video_map_t *vtrack)

@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <strings.h>
 #include <errno.h>
-#include <endian.h>
 #include <fcntl.h>
 
 #include <sys/types.h>
@@ -487,6 +486,14 @@ static void gl_init(Widget widget, int iw, int ih)
 
 /* ------------------------------------------------------------------------ */
 /* oss code                                                                 */
+
+#ifndef AFMT_S16_NE
+# if BYTE_ORDER == BIG_ENDIAN
+#  define AFMT_S16_NE AFMT_S16_BE
+# else
+#  define AFMT_S16_NE AFMT_S16_LE
+# endif
+#endif
 
 static int oss_fd = -1;
 static int oss_sr,oss_hr;

@@ -43,8 +43,8 @@ qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
 lqtplay_SOURCES=lqtplay.c
 lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
-	-lXv -lGLU -lGL -lX11 @X_EXTRA_LIBS@
+	-lXv -lGLU -lGL -lX11 @X_EXTRA_LIBS@ -lm
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include @X_CFLAGS@
 
 #CFLAGS += -g3 -Werror

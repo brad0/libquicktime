@@ -17,7 +17,7 @@ int quicktime_fseek(quicktime_t *file, longest offset)
 {
 	file->ftell_position = offset;
 	if(offset > file->total_length || offset < 0) return 1;
-	if(FSEEK(file->stream, file->ftell_position, SEEK_SET))
+	if(fseeko(file->stream, file->ftell_position, SEEK_SET))
 	{
 //		perror("quicktime_read_data FSEEK");
 		return 1;
@@ -177,7 +177,7 @@ longest quicktime_byte_position(quicktime_t *file)
 
 void quicktime_read_pascal(quicktime_t *file, char *data)
 {
-	char len = quicktime_read_char(file);
+	unsigned char len = quicktime_read_char(file);
 	quicktime_read_data(file, data, len);
 	data[len] = 0;
 }
