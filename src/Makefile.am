@@ -60,6 +60,7 @@ workarounds.c \
 lqt_codecfile.c \
 lqt_color.c \
 lqt_codecinfo.c \
+lqt_divx.c \
 lqt_loader.c
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/

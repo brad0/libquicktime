@@ -20,7 +20,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="2"
+LQT_CODEC_API_VERSION="0"
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
