@@ -631,6 +631,7 @@ dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile \
 libquicktime.spec \
+doc/Makefile \
 src/Makefile \
 quicktime1394/Makefile \
 include/Makefile \
