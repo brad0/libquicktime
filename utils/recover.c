@@ -25,6 +25,30 @@
 
 #define SEARCH_FRAGMENT (longest)0x1000
 
+void usage()
+{
+	printf("Recover JPEG and PCM audio in a corrupted movie.\n"
+		   "Usage: recover [-w width] [-h height] [-f framerate]\n"
+		   "\t[-c audiochannels] [-r samplerate] [-b audiobits] [-t tempfile] <input>\n"
+		   "Compiled in defaults:\n"
+		   "   WIDTH %d\n"
+		   "   HEIGHT %d\n"
+		   "   FRAMERATE %.2f\n"
+		   "   CHANNELS %d\n"
+		   "   SAMPLERATE %d\n"
+		   "   BITS %d\n"
+		   "   TEMP_FILE %s\n",
+		   WIDTH, HEIGHT,
+		   FRAMERATE,
+		   CHANNELS,
+		   SAMPLERATE,
+		   BITS,
+		   TEMP_FILE
+		   );
+
+	exit( -1 );
+}
+
 int main(int argc, char *argv[])
 {
 	FILE *in;
@@ -41,28 +65,125 @@ int main(int argc, char *argv[])
 	unsigned char data[8];
 	struct stat ostat;
 
-	printf("Recover JPEG and PCM audio in a corrupted movie.\n"
-		"Usage: recover <input>\n"
-		"Compiled settings:\n"
-		"   WIDTH %d\n"
-		"   HEIGHT %d\n"
-		"   FRAMERATE %.2f\n"
-		"   CHANNELS %d\n"
-		"   SAMPLERATE %d\n"
-		"   BITS %d\n",
-		WIDTH,
-		HEIGHT,
-		FRAMERATE,
-		CHANNELS,
-		SAMPLERATE,
-		BITS);
+	long width = WIDTH, height = HEIGHT;
+	float frame_rate = FRAMERATE;
+	int channels = CHANNELS, sample_rate = SAMPLERATE, bits = BITS;
+	char *temp_file = TEMP_FILE;
+	char *input_file = NULL;
+	int have_input = 0;
+
 	if(argc < 2)	   
 	{				   
+		printf("Recover JPEG and PCM audio in a corrupted movie.\n"
+			   "Usage: recover [-w width] [-h height] [-f framerate]\n"
+			   "\t[-c audiochannels] [-r samplerate] [-b audiobits] <input> [<output>]\n"
+			   "Compiled in defaults:\n"
+			   "   WIDTH %ld\n"
+			   "   HEIGHT %ld\n"
+			   "   FRAMERATE %.2f\n"
+			   "   CHANNELS %d\n"
+			   "   SAMPLERATE %d\n"
+			   "   BITS %d\n"
+			   "   TEMP_FILE %s\n",
+			   width, height,
+			   frame_rate,
+			   channels,
+			   sample_rate,
+			   bits,
+			   temp_file);
 		exit(1);
 	}
+	
+	for(i = 1; i < argc; i++)
+	{
+		if(!strcmp(argv[i], "-f"))
+		{
+			if(i + 1 < argc)
+			{
+				frame_rate = atof(argv[++i]);
+			}
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-w"))
+		{
+			if(i + 1 < argc)
+				width = atol(argv[++i]);
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-h"))
+		{
+			if(i + 1 < argc)
+				height = atol(argv[++i]);
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-r"))
+		{
+			if(i + 1 < argc)
+				sample_rate = atol(argv[++i]);
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-c"))
+		{
+			if(i + 1 < argc)
+				channels = atol(argv[++i]);
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-b"))
+		{
+			if(i + 1 < argc)
+				bits = atol(argv[++i]);
+			else
+				usage();
+		}
+		else
+		if(!strcmp(argv[i], "-t"))
+		{
+			if(i + 1 < argc)
+				temp_file = argv[++i];
+			else
+				usage();
+		}
+		else if( ! have_input )
+		{
+			input_file = argv[i];
+			have_input = 1;
+		}
+		else
+		{
+			usage();
+		}
+	}
 
-	in = fopen(argv[1], "rb+");
-	out = quicktime_open(TEMP_FILE, 0, 1);
+	printf( "Using options:\n"
+			"   WIDTH %ld\n"
+			"   HEIGHT %ld\n"
+			"   FRAMERATE %.2f\n"
+			"   CHANNELS %d\n"
+			"   SAMPLERATE %d\n"
+			"   BITS %d\n"
+			"   INPUT %s\n"
+			"   TEMP_FILE %s\n",
+			width, height,
+			frame_rate,
+			channels,
+			sample_rate,
+			bits,
+			input_file,
+			temp_file);
+
+		
+	in = fopen(input_file, "rb+");
+	out = quicktime_open(temp_file, 0, 1);
 
 	if(!in)
 	{
@@ -76,16 +197,15 @@ int main(int argc, char *argv[])
 	}
 
 	quicktime_set_audio(out, 
-		CHANNELS, 
-		SAMPLERATE, 
-		BITS, 
-		QUICKTIME_TWOS);
+						channels,
+						sample_rate,
+						bits, 
+						QUICKTIME_TWOS);
 	quicktime_set_video(out, 
-		1, 
-		WIDTH, 
-		HEIGHT, 
-		FRAMERATE, 
-		QUICKTIME_JPEG);
+						1, 
+						width, height,
+						frame_rate,
+						QUICKTIME_JPEG);
 	audio_start = (longest)0x10;
 	found_jfif = 0;
 	found_eoi = 0;
@@ -139,7 +259,7 @@ int main(int argc, char *argv[])
 // Write audio chunk
 		if(found_jfif && !found_eoi && audio_end - audio_start > 0)
 		{
-			long samples = (audio_end - audio_start) / (CHANNELS * BITS / 8);
+			long samples = (audio_end - audio_start) / (channels * bits / 8);
 			quicktime_update_tables(out, 
 						out->atracks[0].track, 
 						audio_start, 
@@ -193,8 +313,8 @@ printf("\n\n");
 	fwrite(data, 8, 1, in);
 
 	FSEEK(in, ftell_byte, SEEK_SET);
-	stat(TEMP_FILE, &ostat);
-	temp = fopen(TEMP_FILE, "rb");
+	stat(temp_file, &ostat);
+	temp = fopen(temp_file, "rb");
 	FSEEK(temp, 0x10, SEEK_SET);
 	copy_buffer = calloc(1, ostat.st_size);
 	fread(copy_buffer, ostat.st_size, 1, temp);

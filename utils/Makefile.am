@@ -1,6 +1,6 @@
-noinst_PROGRAMS=test_codec testqt dump qtrecover
+noinst_PROGRAMS=test_codec testqt
 
-bin_PROGRAMS=qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv
+bin_PROGRAMS=qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=@UTIL_LIBADD@
@@ -14,8 +14,8 @@ qtinfo_LDADD=@UTIL_LIBADD@
 qtstreamize_SOURCES=qtstreamize.c
 qtstreamize_LDADD=@UTIL_LIBADD@
 
-dump_SOURCES=dump.c
-dump_LDADD=@UTIL_LIBADD@
+qtdump_SOURCES=dump.c
+qtdump_LDADD=@UTIL_LIBADD@
 
 qtdechunk_SOURCES=dechunk.c
 qtdechunk_LDADD=@UTIL_LIBADD@
