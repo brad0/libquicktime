@@ -1,13 +1,21 @@
-- Enable proper RGBA support in ffmpeg plugin
-  (Currently, alpha is set to 0xff to make
-   some 32 bit RLE movies visible)
-
 - Try xvid (www.videocoding.de)
 
-- Maybe try Ogg Theora?
+- Find replacement for opendivx encoder (i.e.
+  some MPEG-4 based encoder whose output can be read
+  by Quicktime4linux)
 
-- Enable proper AVI decoding (at least for some types of AVIs).
+- Support Vorbis encoding compatible with
+  qtcomponents.sf.net (Fourcc OggV, codec initialization data
+  in the stsd atom instead of the first audio chunk)
 
-- Enable AVI encoding
+- Support reading/writing of MPEG-4 esds atoms
 
-- Find replacement for opendivx
+- Support AAC audio en-/decoding via faad
+
+- Set compatibility flags for all encoders
+
+- Make MPEG-4 video encoding readable by Apple Quicktime
+  (requires at least esds atoms see above).
+
+- Maybe more steps towards proper mp4 encoding?
+
