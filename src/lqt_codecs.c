@@ -80,6 +80,39 @@ static void quicktime_flush_codec_stub(quicktime_t *file, int track)
 {
 }
 
+/* Convert Microsoft audio id to codec */
+void quicktime_id_to_codec(char *result, int id)
+{
+        switch(id)
+        {
+                case 0x55:
+                        memcpy(result, QUICKTIME_MP3, 4);
+                        break;
+                case 0x161:
+                        memcpy(result, QUICKTIME_WMA, 4);
+                        break;
+                default:
+                        printf("quicktime_id_to_codec: unknown audio id: %p\n", (void*)id);
+                        break;
+        }
+}
+
+int quicktime_codec_to_id(char *codec)
+{
+        if(quicktime_match_32(codec, QUICKTIME_MP3))
+                return 0x55;
+        else
+        if(quicktime_match_32(codec, QUICKTIME_WMA))
+                return 0x161;
+        else
+          {
+                printf("quicktime_codec_to_id: unknown codec %c%c%c%c\n", codec[0], codec[1], codec[2], codec[3]);
+                return -1;
+          }
+        
+}
+
+
 int quicktime_codec_defaults(quicktime_codec_t *codec)
 {
 	codec->delete_vcodec = quicktime_delete_vcodec_stub;

@@ -3,12 +3,16 @@
 #include <tkhd.h>
 #include <edts.h>
 #include <mdia.h>
+#include <string.h>
 
 int quicktime_trak_init(quicktime_trak_t *trak)
 {
 	quicktime_tkhd_init(&(trak->tkhd));
 	quicktime_edts_init(&(trak->edts));
 	quicktime_mdia_init(&(trak->mdia));
+	trak->allocated_chunksizes = 4096;
+	trak->chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
+	trak->total_chunksizes = 0;
 	return 0;
 }
 
@@ -54,6 +58,7 @@ int quicktime_trak_init_audio(quicktime_t *file,
 int quicktime_trak_delete(quicktime_trak_t *trak)
 {
 	quicktime_tkhd_delete(&(trak->tkhd));
+	free(trak->chunksizes);
 	return 0;
 }
 
@@ -68,9 +73,10 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
 	return 0;
 }
 
-
-quicktime_trak_t* quicktime_add_trak(quicktime_moov_t *moov)
+// Used when reading a file
+quicktime_trak_t* quicktime_add_trak(quicktime_t *file)
 {
+	quicktime_moov_t *moov = &(file->moov);
 	if(moov->total_tracks < MAXTRACKS)
 	{
 		moov->trak[moov->total_tracks] = malloc(sizeof(quicktime_trak_t));
@@ -99,6 +105,7 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 	do
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
+
 //printf("quicktime_read_trak %llx %llx\n", quicktime_position(file), quicktime_ftell(file));
 /* mandatory */
 		if(quicktime_atom_is(&leaf_atom, "tkhd"))
@@ -219,7 +226,7 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 		}
 		else 
 			sample = 0;
-		
+
 		return sample;
 	}
 	else
@@ -268,6 +275,24 @@ long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk)
 	}
 
 	return total;
+}
+
+// For AVI
+int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak)
+{
+	int i, chunk = trak->mdia.minf.stbl.stco.total_entries - 1;
+	long total_samples;
+
+	if(chunk >= 0)
+	{
+		total_samples = quicktime_sample_of_chunk(trak, chunk);
+		return total_samples / (chunk + 1);
+	}
+	else
+	{
+		total_samples = quicktime_track_samples(file, trak);
+		return total_samples;
+	}
 }
 
 int quicktime_chunk_of_sample(longest *chunk_sample, 
@@ -325,20 +350,27 @@ int quicktime_chunk_of_sample(longest *chunk_sample,
 	return 0;
 }
 
-longest quicktime_chunk_to_offset(quicktime_trak_t *trak, long chunk)
+longest quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk)
 {
 	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
+	longest result = 0;
 
 	if(trak->mdia.minf.stbl.stco.total_entries && 
 		chunk > trak->mdia.minf.stbl.stco.total_entries)
-		return table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
+		result = table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
 	else
 	if(trak->mdia.minf.stbl.stco.total_entries)
-		return table[chunk - 1].offset;
+		result = table[chunk - 1].offset;
 	else
-		return HEADER_LENGTH * 2;
+		result = HEADER_LENGTH * 2;
 
-	return 0;
+// Skip chunk header for AVI.  Skip it here instead of in read_chunk because some
+// codecs can't use read_chunk
+	if(file->use_avi)
+	{
+		result += 8 + file->mdat.atom.start;
+	}
+	return result;
 }
 
 long quicktime_offset_to_chunk(longest *chunk_offset, 
@@ -386,12 +418,12 @@ longest quicktime_sample_range_size(quicktime_trak_t *trak,
 	return total;
 }
 
-longest quicktime_sample_to_offset(quicktime_trak_t *trak, long sample)
+longest quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample)
 {
 	longest chunk, chunk_sample, chunk_offset1, chunk_offset2;
 
 	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
-	chunk_offset1 = quicktime_chunk_to_offset(trak, chunk);
+	chunk_offset1 = quicktime_chunk_to_offset(file, trak, chunk);
 	chunk_offset2 = chunk_offset1 + quicktime_sample_range_size(trak, chunk_sample, sample);
 //printf("quicktime_sample_to_offset chunk %d sample %d chunk_offset %d chunk_sample %d chunk_offset + samples %d\n",
 //	 chunk, sample, chunk_offset1, chunk_sample, chunk_offset2);
@@ -423,6 +455,81 @@ long quicktime_offset_to_sample(quicktime_trak_t *trak, longest offset)
 	return sample;
 }
 
+
+void quicktime_write_chunk_header(quicktime_t *file, 
+	quicktime_trak_t *trak, 
+	quicktime_atom_t *chunk)
+{
+	if(file->use_avi)
+	{
+		char tag[4];
+		tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
+		tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
+		if(trak->mdia.minf.is_audio)
+		{
+			tag[2] = 'w';
+			tag[3] = 'b';
+		}
+		else
+		if(trak->mdia.minf.is_video)
+		{
+			tag[2] = 'd';
+			tag[3] = 'c';
+		}
+
+		quicktime_atom_write_header(file, chunk, tag);
+	}
+	else
+	{
+		chunk->start = quicktime_position(file);
+	}
+}
+
+void quicktime_write_chunk_footer(quicktime_t *file, 
+	quicktime_trak_t *trak,
+	int current_chunk,
+	quicktime_atom_t *chunk, 
+	int samples)
+{
+	longest offset = chunk->start;
+	int sample_size = quicktime_position(file) - offset;
+
+	if(file->use_avi)
+	{
+		quicktime_atom_write_footer(file, chunk);
+		offset -= 8;
+	}
+
+	if(offset + sample_size > file->mdat.atom.size)
+		file->mdat.atom.size = offset + sample_size;
+
+	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), 
+		current_chunk, 
+		offset);
+
+	if(trak->mdia.minf.is_video)
+		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+		current_chunk - 1, 
+		sample_size);
+
+	if(trak->allocated_chunksizes <= trak->total_chunksizes)
+	{
+		int *new_chunksizes;
+		trak->allocated_chunksizes *= 2;
+		new_chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
+		memcpy(new_chunksizes, trak->chunksizes, trak->total_chunksizes * sizeof(int));
+		free(trak->chunksizes);
+		trak->chunksizes = new_chunksizes;
+	}
+
+	trak->chunksizes[trak->total_chunksizes++] = sample_size;
+
+	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
+		current_chunk, 
+		samples);
+}
+
+
 int quicktime_update_tables(quicktime_t *file, 
 							quicktime_trak_t *trak, 
 							longest offset, 
@@ -431,13 +538,28 @@ int quicktime_update_tables(quicktime_t *file,
 							longest samples, 
 							longest sample_size)
 {
+if(file->use_avi)
+printf(__FUNCTION__ ": replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n");
+
 	if(offset + sample_size > file->mdat.atom.size) 
 		file->mdat.atom.size = offset + sample_size;
 
 	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), chunk, offset);
 
-	if(sample_size) 
+	if(trak->mdia.minf.is_video)
 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), sample, sample_size);
+
+	if(trak->allocated_chunksizes <= trak->total_chunksizes)
+	{
+		int *new_chunksizes;
+		trak->allocated_chunksizes *= 2;
+		new_chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
+		memcpy(new_chunksizes, trak->chunksizes, trak->total_chunksizes * sizeof(int));
+		free(trak->chunksizes);
+		trak->chunksizes = new_chunksizes;
+	}
+
+	trak->chunksizes[trak->total_chunksizes++] = sample_size;
 
 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), chunk, samples);
 	return 0;

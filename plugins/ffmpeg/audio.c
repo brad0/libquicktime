@@ -311,8 +311,8 @@ static int fill_chunk_buffer(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
   int result = 0;
   longest offset1, offset2;
       
-  offset1 = quicktime_chunk_to_offset(track_map->track, current_chunk);
-  offset2 = quicktime_chunk_to_offset(track_map->track, current_chunk + 1);
+  offset1 = quicktime_chunk_to_offset(file, track_map->track, current_chunk);
+  offset2 = quicktime_chunk_to_offset(file, track_map->track, current_chunk + 1);
     
   codec->chunk_size = chunk_len(file, codec, offset1, offset2);
 

@@ -42,6 +42,11 @@ int quicktime_write_data(quicktime_t *file, char *data, int size);
 void quicktime_write_pascal(quicktime_t *file, char *data);
 int quicktime_read_data(quicktime_t *file, char *data, longest size);
 
+int quicktime_write_int32_le(quicktime_t *file, long value);
+long quicktime_read_int32_le(quicktime_t *file);
+int quicktime_read_int16_le(quicktime_t *file);
+int quicktime_write_int16_le(quicktime_t *file, int number);
+
 /* Most codecs don't specify the actual number of bits on disk in the stbl. */
 /* Convert the samples to the number of bytes for reading depending on the codec. */
 longest quicktime_samples_to_bytes(quicktime_trak_t *track, long samples);
@@ -91,14 +96,15 @@ longest quicktime_track_end(quicktime_trak_t *trak);
 /* the total number of samples in the track depending on the access mode */
 long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 
-
+int quicktime_avg_chunk_samples(quicktime_t *file,
+                                quicktime_trak_t *trak);
 /* queries for every atom */
 /* the starting sample in the given chunk */
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 
 
 /* the byte offset from mdat start of the chunk */
-longest quicktime_chunk_to_offset(quicktime_trak_t *trak, long chunk);
+longest quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
 
 
 /* the chunk of any offset from mdat start */
@@ -120,9 +126,10 @@ int quicktime_chunk_of_sample(longest *chunk_sample,
 
 
 /* converting between mdat offsets to samples */
-longest quicktime_sample_to_offset(quicktime_trak_t *trak, long sample);
+longest quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
+
 long quicktime_offset_to_sample(quicktime_trak_t *trak, longest offset);
-quicktime_trak_t* quicktime_add_trak(quicktime_moov_t *moov);
+
 
 
 /* update all the tables after writing a buffer */
@@ -137,7 +144,7 @@ int quicktime_update_tables(quicktime_t *file,
 void quicktime_update_stco(quicktime_stco_t *stco, long chunk, longest offset);
 void quicktime_update_stsz(quicktime_stsz_t *stsz, long sample, long sample_size);
 int quicktime_update_stsc(quicktime_stsc_t *stsc, long chunk, long samples);
-quicktime_trak_t* quicktime_add_trak(quicktime_moov_t *moov);
+
 int quicktime_trak_duration(quicktime_trak_t *trak, long *duration, long *timescale);
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak);
 /* number of samples in the chunk */
@@ -207,8 +214,39 @@ void quicktime_tkhd_init_video(quicktime_t *file,
 								quicktime_tkhd_t *tkhd, 
 								int frame_w, 
 								int frame_h);
-quicktime_trak_t* quicktime_add_trak(quicktime_moov_t *moov);
+quicktime_trak_t* quicktime_add_trak(quicktime_t *file);
 int quicktime_delete_trak(quicktime_moov_t *moov);
 int quicktime_get_timescale(float frame_rate);
 
+longest quicktime_add3(longest a, longest b, longest c);
+
+void quicktime_write_hdrl(quicktime_t *file);
+void quicktime_write_movi(quicktime_t *file);
+
+void quicktime_write_chunk_header(quicktime_t *file, 
+        quicktime_trak_t *trak, 
+        quicktime_atom_t *chunk);
+void quicktime_write_chunk_footer(quicktime_t *file, 
+        quicktime_trak_t *trak,
+        int current_chunk,
+        quicktime_atom_t *chunk, 
+        int samples);
+
+void quicktime_write_strh(quicktime_t *file, int track);
+void quicktime_read_strh(quicktime_t *file,
+                         quicktime_atom_t *parent_atom);
+
+int quicktime_match_24(char *input, char *output);
+
+void quicktime_id_to_codec(char *result, int id);
+int quicktime_codec_to_id(char *codec);
+
+void quicktime_read_hdrl(quicktime_t *file, quicktime_atom_t *parent_atom);
+void quicktime_read_movi(quicktime_t *file, quicktime_atom_t *parent_atom);
+void quicktime_read_idx1(quicktime_t *file, quicktime_atom_t *parent_atom);
+
+int quicktime_file_open(quicktime_t *file, char *path, int rd, int wr);
+void quicktime_finalize_hdrl(quicktime_t *file);
+void quicktime_write_idx1(quicktime_t *file);
+int quicktime_file_close(quicktime_t *file);
 #endif

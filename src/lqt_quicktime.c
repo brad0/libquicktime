@@ -10,6 +10,19 @@
 #include "config.h"
 #endif
 
+void quicktime_set_avi(quicktime_t *file, int value)
+{
+        file->use_avi = value;
+        quicktime_set_position(file, 0);
+        quicktime_atom_write_header(file, &file->riff_atom, "RIFF");
+
+// File length
+        quicktime_write_char32(file, "AVI ");
+        quicktime_write_hdrl(file);
+        quicktime_write_movi(file);
+
+}
+
 static longest get_file_length(quicktime_t *file)
 {
 	struct stat status;
@@ -579,7 +592,7 @@ int quicktime_set_audio_position(quicktime_t *file, longest sample, int track)
 		file->atracks[track].current_position = sample;
 		quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
 		file->atracks[track].current_chunk = chunk;
-		offset = quicktime_sample_to_offset(trak, sample);
+		offset = quicktime_sample_to_offset(file, trak, sample);
 		quicktime_set_position(file, offset);
 	}
 	else
@@ -599,7 +612,7 @@ int quicktime_set_video_position(quicktime_t *file, longest frame, int track)
 		file->vtracks[track].current_position = frame;
 		quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
 		file->vtracks[track].current_chunk = chunk;
-		offset = quicktime_sample_to_offset(trak, frame);
+		offset = quicktime_sample_to_offset(file, trak, frame);
 		quicktime_set_position(file, offset);
 	}
 	else
@@ -809,7 +822,7 @@ long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, i
 
 int quicktime_read_chunk(quicktime_t *file, char *output, int track, longest chunk, longest byte_start, longest byte_len)
 {
-	quicktime_set_position(file, quicktime_chunk_to_offset(file->atracks[track].track, chunk) + byte_start);
+	quicktime_set_position(file, quicktime_chunk_to_offset(file, file->atracks[track].track, chunk) + byte_start);
 	if(quicktime_read_data(file, output, byte_len)) return 0;
 	else
 	return 1;
@@ -993,6 +1006,36 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 	return 0;
 }
 
+static void init_maps(quicktime_t * file)
+  {
+  int i, track;
+  /* get tables for all the different tracks */
+  file->total_atracks = quicktime_audio_tracks(file);
+  file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
+  
+  for(i = 0, track = 0; i < file->total_atracks; i++)
+    {
+    while(!file->moov.trak[track]->mdia.minf.is_audio)
+      track++;
+    quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track],
+                             file->wr,
+                             (lqt_codec_info_t*)0);
+    }
+  
+  file->total_vtracks = quicktime_video_tracks(file);
+  file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
+  
+  for(track = 0, i = 0; i < file->total_vtracks; i++)
+    {
+    while(!file->moov.trak[track]->mdia.minf.is_video)
+      track++;
+    
+    quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track],
+                             file->wr,
+                             (lqt_codec_info_t*)0);
+    }
+  }
+
 int quicktime_read_info(quicktime_t *file)
 {
 	int result = 0, found_moov = 0;
@@ -1000,80 +1043,162 @@ int quicktime_read_info(quicktime_t *file)
 	longest start_position = quicktime_position(file);
 	quicktime_atom_t leaf_atom;
 	quicktime_trak_t *trak;
-	char avi_test[4];
+	char avi_test[12];
 
 // Check for Microsoft AVI
-	quicktime_read_char32(file, avi_test);
-	if(quicktime_match_32(avi_test, "RIFF"))
-	{
-		quicktime_read_char32(file, avi_test);
-		quicktime_read_char32(file, avi_test);
-		if(quicktime_match_32(avi_test, "AVI "))
-			file->use_avi = 1;
-	}
-
+	quicktime_read_data(file, avi_test, 12);
+	if(quicktime_match_32(avi_test, "RIFF") &&
+           quicktime_match_32(avi_test + 8, "AVI "))
+          {
+          file->use_avi = 1;
+          }
+        
 	quicktime_set_position(file, 0LL);
+        
+        if(file->use_avi)
+          {
+          // AVI translations:
+          // hdrl -> moov
+          // movi -> mdat
+          // idx1 -> moov
+          quicktime_set_position(file, 0xc);
+          do
+            {
+            result = quicktime_atom_read_header(file, &leaf_atom);
+            
+            if(!result)
+              {
+              //printf("quicktime_read_info 1 %c%c%c%c\n", leaf_atom.type[0], leaf_atom.type[1], leaf_atom.type[2], leaf_atom.type[3]);
+              if(quicktime_atom_is(&leaf_atom, "LIST"))
+                {
+                char data[4];
+                result = !quicktime_read_data(file, data, 4);
+                if(!result)
+                  {
+                  if(quicktime_match_32(data, "hdrl"))
+                    {
+                    //printf("quicktime_read_info 2\n");
+                    // No size here.
+                    quicktime_read_hdrl(file, &leaf_atom);
+                    init_maps(file);
+                    found_moov = 1;
+                    }
+                  else
+                    if(quicktime_match_32(data, "movi"))
+                      {
+                      //printf("quicktime_read_info 3\n");
+                      quicktime_read_movi(file, &leaf_atom);
+                      }
+                  }
+                quicktime_atom_skip(file, &leaf_atom);
+                }
+              else
+                if(quicktime_atom_is(&leaf_atom, "movi"))
+                  {
+                  //printf("quicktime_read_info 4\n");
+                  quicktime_read_movi(file, &leaf_atom);
+                  }
+                else
+                  if(quicktime_atom_is(&leaf_atom, "idx1"))
+                    {
+                    //printf("quicktime_read_info 5\n");
+                    // Preload idx1 here
+                    longest start_position = quicktime_position(file);
+                    long temp_size = leaf_atom.end - start_position;
+                    unsigned char *temp = malloc(temp_size);
+                    quicktime_set_preload(file, 
+                                          (temp_size < 0x100000) ? 0x100000 : temp_size);
+                    quicktime_read_data(file, temp, temp_size);
+                    quicktime_set_position(file, start_position);
+                    free(temp);
+                    quicktime_read_idx1(file, &leaf_atom);
+                    }
+                  else
+                    {
+                    quicktime_atom_skip(file, &leaf_atom);
+                    }
+              }
+            }while(!result && quicktime_position(file) < file->total_length);
+          // Synthesize extra atoms AVI doesn't supply
 
-	do
-	{
-		result = quicktime_atom_read_header(file, &leaf_atom);
+          for(i = 0; i < file->moov.total_tracks; i++)
+            {
+            quicktime_trak_t *trak = file->moov.trak[i];
+            if(trak->mdia.minf.is_audio)
+              {
+              quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
+              long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
+              long total = 0;
+              long chunk = trak->mdia.minf.stbl.stco.total_entries;
+              long sample = 0;
+              if(chunk > 0)
+                {
+                sample = 
+                  quicktime_sample_of_chunk(trak, chunk) +
+                  table[total_entries - 1].samples;
+                }
 
-		if(!result)
-		{
-			if(quicktime_atom_is(&leaf_atom, "mdat")) 
-			{
-				quicktime_read_mdat(file, &(file->mdat), &leaf_atom);
-			}
-			else
-			if(quicktime_atom_is(&leaf_atom, "moov")) 
-			{
-/* Set preload and preload the moov atom here */
-				longest start_position = quicktime_position(file);
-				long temp_size = leaf_atom.end - start_position;
-				unsigned char *temp = malloc(temp_size);
-				quicktime_set_preload(file, (temp_size < 0x100000) ? 0x100000 : temp_size);
-				quicktime_read_data(file, temp, temp_size);
-				quicktime_set_position(file, start_position);
-				free(temp);
+              trak->mdia.minf.stbl.stsz.sample_size = 1;
+              trak->mdia.minf.stbl.stsz.total_entries = sample;
+              trak->mdia.minf.stbl.stts.table[0].sample_count = sample;
+              }
+            else
+              if(trak->mdia.minf.is_video)
+                {
+                trak->mdia.minf.stbl.stsc.total_entries = 1;
+                trak->mdia.minf.stbl.stts.table[0].sample_count = 
+                  trak->mdia.minf.stbl.stco.total_entries;
+                }
+            }
+
+
+
+
+          }
+        else
+          {
+        
+          do
+            {
+            result = quicktime_atom_read_header(file, &leaf_atom);
+
+            if(!result)
+              {
+              if(quicktime_atom_is(&leaf_atom, "mdat")) 
+                {
+                quicktime_read_mdat(file, &(file->mdat), &leaf_atom);
+                }
+              else
+                if(quicktime_atom_is(&leaf_atom, "moov")) 
+                  {
+                  /* Set preload and preload the moov atom here */
+                  longest start_position = quicktime_position(file);
+                  long temp_size = leaf_atom.end - start_position;
+                  unsigned char *temp = malloc(temp_size);
+                  quicktime_set_preload(file, (temp_size < 0x100000) ? 0x100000 : temp_size);
+                  quicktime_read_data(file, temp, temp_size);
+                  quicktime_set_position(file, start_position);
+                  free(temp);
 				
-				quicktime_read_moov(file, &(file->moov), &leaf_atom);
-				found_moov = 1;
-			}
-			else
-				quicktime_atom_skip(file, &leaf_atom);
-		}
-//printf("quicktime_read_info ftell %llx length %llx\n", quicktime_position(file), file->total_length);
-	}while(!result && quicktime_position(file) < file->total_length);
+                  quicktime_read_moov(file, &(file->moov), &leaf_atom);
+                  found_moov = 1;
+                  }
+                else
+                  quicktime_atom_skip(file, &leaf_atom);
+              }
+            //printf("quicktime_read_info ftell %llx length %llx\n", quicktime_position(file), file->total_length);
+            }while(!result && quicktime_position(file) < file->total_length);
 
-/* go back to the original position */
-	quicktime_set_position(file, start_position);
+          /* go back to the original position */
+          quicktime_set_position(file, start_position);
 
-	if(found_moov)
-	{
-/* get tables for all the different tracks */
-		file->total_atracks = quicktime_audio_tracks(file);
-		file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
+          if(found_moov)
+            {
+            init_maps(file);
+            }
 
-		for(i = 0, track = 0; i < file->total_atracks; i++)
-		{
-			while(!file->moov.trak[track]->mdia.minf.is_audio)
-				track++;
-			quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track], file->wr, (lqt_codec_info_t*)0);
-		}
-
-		file->total_vtracks = quicktime_video_tracks(file);
-		file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
-
-		for(track = 0, i = 0; i < file->total_vtracks; i++)
-		{
-			while(!file->moov.trak[track]->mdia.minf.is_video)
-				track++;
-
-			quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track], file->wr, (lqt_codec_info_t*)0);
-		}
-	}
-
-	return !found_moov;
+          }
+        return !found_moov;
 }
 
 
@@ -1131,7 +1256,7 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 {
 	quicktime_t *new_file = calloc(1, sizeof(quicktime_t));
 	char flags[10];
-	int exists = 0;
+	int result = 0;
 	
 #ifdef PRINT_BANNER
 	static int have_warned = 0;
@@ -1149,86 +1274,93 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 	new_file->rd = rd;
 	new_file->mdat.atom.start = 0;
 
-//printf("quicktime_open 1\n");
-	if(rd && (new_file->stream = fopen(filename, "rb")))
-	{
-		exists = 1; 
-		fclose(new_file->stream); 
-	}
+        result = quicktime_file_open(new_file, filename, rd, wr);
 
-//printf("quicktime_open 1\n");
-
-	if(rd && !wr) sprintf(flags, "rb");
-	else
-	if(!rd && wr) sprintf(flags, "wb");
-	else
-	if(rd && wr)
-	{
-		if(exists) 
-			sprintf(flags, "rb+");
-		else
-			sprintf(flags, "wb+");
-	}
-
-//printf("quicktime_open 1\n");
-	if(!(new_file->stream = fopen(filename, flags)))
-	{
-		perror("quicktime_open");
-		free(new_file);
-		return 0;
-	}
-
-
-//printf("quicktime_open 1\n");
-	if(rd && exists)
-	{
-// Get length.
-		new_file->total_length = get_file_length(new_file);
-//printf("quicktime_open 2\n");
-
-		if(quicktime_read_info(new_file))
-		{
-			quicktime_close(new_file);
-			fprintf(stderr, "quicktime_open: error in header\n");
-			new_file = 0;
-			return new_file;
-		}
-//printf("quicktime_open 3\n");
-	}
-
-//printf("quicktime_open 4 %d %d\n", wr, exists);
-	if(wr && !exists)
-	{
-/* start the data atom */
-/* also don't want to do this if making a streamable file */
-		quicktime_atom_write_header64(new_file, &new_file->mdat.atom, "mdat");
-	}
-
-//printf("quicktime_open 5 %llx %llx\n", new_file->ftell_position, new_file->file_position);
-
+   //printf("quicktime_open 1\n");
+        if(!result)
+          {
+          if(rd)
+            {
+            if(quicktime_read_info(new_file))
+              {
+              quicktime_close(new_file);
+              fprintf(stderr, "quicktime_open: error in header\n");
+              new_file = 0;
+              }
+            //printf("quicktime_open 3\n");
+            }
+          
+          //printf("quicktime_open 4 %d %d\n", wr, exists);
+          /* start the data atom */
+          /* also don't want to do this if making a streamable file */
+          if(wr)
+            {
+            quicktime_atom_write_header64(new_file, 
+                                          &new_file->mdat.atom, 
+                                          "mdat");
+            }
+          }
+        else
+          {
+          quicktime_close(new_file);
+          new_file = 0;
+          }
+        
+        //printf("quicktime_open 5 %llx %llx\n", new_file->ftell_position, new_file->file_position);
+        
+        
 	if(rd)
-	{
+          {
 		/* Set default decoding parameters */
-		lqt_set_default_audio_parameters(new_file);
-		lqt_set_default_video_parameters(new_file);
-	}
+          lqt_set_default_audio_parameters(new_file);
+          lqt_set_default_video_parameters(new_file);
+          }
         
 	return new_file;
 }
 
 int quicktime_close(quicktime_t *file)
 {
-	int result;
+	int result = 0;
 	if(file->wr)
 	{
 		quicktime_codecs_flush(file);
 // Defeat errors during the fseek that occurs before every fwrite
 		file->total_length = get_file_length(file) + 0x7fffffff;
+
+                                if(file->use_avi)
+                {
+//printf(__FUNCTION__ " 1\n");
+// Pad movi to get an even number of bytes
+                        quicktime_atom_t junk_atom;
+                        int i;
+                        char temp[2] = { 0, 0 };
+                        quicktime_write_data(file, 
+                                temp, 
+                                (quicktime_position(file) - file->mdat.atom.start) % 2);
+                        quicktime_atom_write_footer(file, &file->mdat.atom);
+
+//printf(__FUNCTION__ " 1\n");
+                        quicktime_finalize_hdrl(file);
+//printf(__FUNCTION__ " 1\n");
+                        quicktime_write_idx1(file);
+//printf(__FUNCTION__ " 1\n");
+                        quicktime_atom_write_footer(file, &file->riff_atom);
+                        quicktime_atom_write_header(file, &junk_atom, "JUNK");
+                        for(i = 0; i < 0x406; i++)
+                                quicktime_write_int32_le(file, 0);
+                        quicktime_atom_write_footer(file, &junk_atom);
+
+//printf(__FUNCTION__ " 1\n");
+                }
+                else
+                {
 // Atoms are only written here
-		quicktime_write_moov(file, &(file->moov));
-		quicktime_atom_write_footer(file, &file->mdat.atom);
+                        quicktime_write_moov(file, &(file->moov));
+                        quicktime_atom_write_footer(file, &file->mdat.atom);
+                }
 	}
-	result = fclose(file->stream);
+	quicktime_file_close(file);
 
 	quicktime_delete(file);
 	free(file);

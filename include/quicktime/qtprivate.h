@@ -6,6 +6,17 @@
 #define HEADER_LENGTH 8
 #define MAXTRACKS 1024
 
+#define AVI_HASINDEX       0x00000010  // Index at end of file?
+#define AVI_MUSTUSEINDEX   0x00000020
+#define AVI_ISINTERLEAVED  0x00000100
+#define AVI_TRUSTCKTYPE    0x00000800  // Use CKType to find key frames?
+#define AVI_WASCAPTUREFILE 0x00010000
+#define AVI_COPYRIGHTED    0x00020000
+#define AVIF_WASCAPTUREFILE     0x00010000
+
+#define AVI_FRAME_RATE_BASE 10000
+
+
 //#include "codecs.h"
 #include <stdio.h>
 #include <inttypes.h>
@@ -356,6 +367,13 @@ typedef struct
 	quicktime_tkhd_t tkhd;
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
+// AVI needs header placeholders before anything else is written
+        longest length_offset;
+        longest samples_per_chunk_offset;
+// AVI needs chunk sizes
+        int *chunksizes;
+        int total_chunksizes;
+        int allocated_chunksizes;
 } quicktime_trak_t;
 
 
@@ -439,6 +457,7 @@ typedef struct
 	longest total_length;
 	quicktime_mdat_t mdat;
 	quicktime_moov_t moov;
+        quicktime_atom_t riff_atom;
 	int rd;
 	int wr;
 	int use_avi;
@@ -458,6 +477,10 @@ typedef struct
 	longest preload_start;     /* Start of preload_buffer in file */
 	longest preload_end;       /* End of preload buffer in file */
 	longest preload_ptr;       /* Offset of preload_start in preload_buffer */
+
+/* AVI offsets */
+        longest frames_offset;
+        longest bitrate_offset;
 
 /* mapping of audio channels to movie tracks */
 /* one audio map entry exists for each channel */

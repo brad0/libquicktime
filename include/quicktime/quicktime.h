@@ -79,6 +79,9 @@ extern "C" {
 
 #define QUICKTIME_VORBIS "OggS"
 
+#define QUICKTIME_MP3 ".mp3"
+#define QUICKTIME_WMA "WMA "
+  
 /* =========================== public interface ========================= // */
 
 /* return 1 if the file is a quicktime file */
@@ -283,6 +286,7 @@ void quicktime_set_preload(quicktime_t *file, longest preload);
 
 longest quicktime_byte_position(quicktime_t *file);
 
+void quicktime_set_avi(quicktime_t *file, int value);
 
 
 #ifdef __cplusplus

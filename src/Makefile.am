@@ -24,6 +24,10 @@ lqt_sources = lqt_codecs.c  lqt_plugin.c lqt_quicktime.c
 libquicktime_la_SOURCES= \
 $(lqt_sources) \
 atom.c \
+avi_hdrl.c \
+avi_idx1.c \
+avi_movi.c \
+avi_strh.c \
 cmodel_default.c \
 cmodel_yuv420p.c \
 cmodel_yuv422.c \
