@@ -147,21 +147,33 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 	return 0;
 }
 
+void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value)
+  {
+  quicktime_codec_t *codec = (quicktime_codec_t*)file->atracks[stream].codec;
+  if(codec->set_parameter) codec->set_parameter(file, stream, key, value);
+  }
+
+void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value)
+  {
+  quicktime_codec_t *codec = (quicktime_codec_t*)file->vtracks[stream].codec;
+  if(codec->set_parameter) codec->set_parameter(file, stream, key, value);
+  }
+
 void quicktime_set_parameter(quicktime_t *file, char *key, void *value)
 {
 	int i;
 	for(i = 0; i < file->total_vtracks; i++)
 	{
-		quicktime_codec_t *codec = (quicktime_codec_t*)file->vtracks[i].codec;
-		if(codec->set_parameter) codec->set_parameter(file, i, key, value);
+        lqt_set_video_parameter(file,i, key,value);
 	}
 
 	for(i = 0; i < file->total_atracks; i++)
 	{
-		quicktime_codec_t *codec = (quicktime_codec_t*)file->atracks[i].codec;
-		if(codec->set_parameter) codec->set_parameter(file, i, key, value);
+        lqt_set_audio_parameter(file,i, key,value);
 	}
 }
+
+
 
 void quicktime_set_jpeg(quicktime_t *file, int quality, int use_float)
 {

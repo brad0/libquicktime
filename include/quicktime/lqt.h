@@ -11,8 +11,8 @@ extern "C" {
 
 /* Call quicktime_set_parameter with our codec info */
 
-void lqt_set_parameter(quicktime_t *file, lqt_parameter_value_t * value,
-                       const lqt_parameter_info_t * info);
+void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value);
+void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value);
 
 int lqt_get_codec_api_version();
 
