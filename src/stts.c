@@ -26,7 +26,7 @@ void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int ti
 	table = &(stts->table[0]);
 
 	table->sample_count = 0;      /* need to set this when closing */
-	table->sample_duration = time_scale / frame_rate;
+	table->sample_duration = (int)(((float)time_scale / frame_rate) + 0.5);
 //printf("quicktime_stts_init_video %d %f\n", time_scale, frame_rate);
 }
 
