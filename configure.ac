@@ -1,7 +1,7 @@
 AC_INIT(src/lqt_quicktime.c)
 dnl AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
 dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(libquicktime, 0.9.0)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.0pre1)
 AM_CONFIG_HEADER([config.h include/quicktime/lqt1394_config.h])
 
 AC_CANONICAL_HOST
@@ -546,8 +546,6 @@ plugins/opendivx/Makefile \
 plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/ferguson/Makefile \
-plugins/xanim/Makefile \
-plugins/xanim/libxanimcodecs/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])

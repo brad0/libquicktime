@@ -65,11 +65,11 @@ AC_ARG_ENABLE(lqttest, [  --disable-lqttest       Do not try to compile and run 
     LQT_PLUGIN_DIR=`$LQT_CONFIG $lqtconf_args --plugin-dir`
 
     lqt_major_version=`$LQT_CONFIG $lqtconf_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\).*/\1/'`
     lqt_minor_version=`$LQT_CONFIG $lqtconf_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\).*/\2/'`
     lqt_micro_version=`$LQT_CONFIG $lqtconf_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\).*/\3/'`
     if test "x$enable_lqttest" = "xyes" ; then
       ac_save_CFLAGS="$CFLAGS"
       ac_save_LIBS="$LIBS"

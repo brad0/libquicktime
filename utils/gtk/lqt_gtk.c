@@ -965,7 +965,7 @@ lqtgtk_create_encoder_widget(lqt_codec_type type)
   
   gtk_option_menu_set_menu(GTK_OPTION_MENU(ret->optionmenu), ret->menu);
   gtk_widget_show(ret->optionmenu);
-  /*  gtk_widget_set_usize(ret->optionmenu, 100, ret->optionmenu->requisition.height); */
+  gtk_widget_set_usize(ret->optionmenu, 200, ret->optionmenu->requisition.height);
   
   return ret;
   }
@@ -1007,7 +1007,8 @@ void lqtgtk_encoder_widget_update(LqtGtkEncoderWidget * ew)
   {
   GtkWidget ** new_items;
   int i;
-
+  char * label_text;
+  
   if(ew->encoders)
     lqt_destroy_codec_info(ew->encoders);
     
@@ -1062,17 +1063,21 @@ void lqtgtk_encoder_widget_update(LqtGtkEncoderWidget * ew)
 
   for(i = 0; i < ew->num_encoders; i++)
     {
+    label_text = g_strdup_printf("%s (%s)",
+                          ew->encoders[i]->long_name,
+                          ew->encoders[i]->name);
     if(GTK_BIN(ew->menu_items[i])->child)
       {
       gtk_label_set_text(GTK_LABEL(GTK_BIN(ew->menu_items[i])->child),
-                         ew->encoders[i]->long_name);
+                         label_text);
       }
     else
       {
       gtk_label_set_text(GTK_LABEL(GTK_OPTION_MENU(ew->optionmenu)->button.child),
-                         ew->encoders[i]->long_name);
+                         label_text);
       
       }
+    g_free(label_text);
     gtk_widget_show(ew->menu_items[i]);
     }
 

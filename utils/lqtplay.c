@@ -51,6 +51,7 @@ static Dimension swidth,sheight;
 static int xv_port      = 0;
 static int xv_have_YUY2 = 0;
 static int xv_have_I420 = 0;
+static int xv_have_YV12 = 0;
 
 static int no_mitshm    = 0;
 static int pixmap_bytes = 0;
@@ -227,9 +228,13 @@ static void xv_init(void)
 	    fprintf(stderr," [BC_YUV422]");
 	    xv_have_YUY2 = 1;
 	}
+        if (FOURCC_YV12 == fo[i].id) {
+            fprintf(stderr," [BC_YUV420P]");
+            xv_have_YV12 = 1;
+        }
 	if (FOURCC_I420 == fo[i].id) {
 	    fprintf(stderr," [BC_YUV420P]");
-	    xv_have_I420 = 1;
+            xv_have_I420 = 1;
 	}
 	fprintf(stderr,"\n");
     }
@@ -673,13 +678,27 @@ static int qt_frame_blit(void)
 		qt_rows[i] = qt_xvimage->data + qt_width * 2 * i;
 	    break;
 	case BC_YUV420P:
-	    fprintf(stderr,"INFO: using BC_YUV420P + Xvideo extention\n");
-	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
-					  xv_port,FOURCC_I420);
-	    qt_rows[0] = qt_xvimage->data;
-	    qt_rows[1] = qt_xvimage->data + qt_width * qt_height;
-	    qt_rows[2] = qt_xvimage->data + qt_width * qt_height * 5 / 4;
-	    break;
+            if(xv_have_YV12)
+              {
+              fprintf(stderr,
+                      "INFO: using BC_YUV420P + Xvideo extention (YV12)\n");
+              qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
+              xv_port,FOURCC_YV12);
+              qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
+              qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[2];
+              qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[1];
+              }
+	    else if(xv_have_I420)
+              {
+              fprintf(stderr,
+                      "INFO: using BC_YUV420P + Xvideo extention (I420)\n");
+              qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
+	                                    xv_port,FOURCC_I420);
+	      qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
+	      qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[1];
+	      qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[2];
+	      }
+              break;
 	default:
 	    fprintf(stderr,"ERROR: internal error at %s:%d\n",
 		    __FILE__,__LINE__);
@@ -694,8 +713,9 @@ static int qt_frame_blit(void)
 	    quicktime_read_frame(qt,qt_frame,0);
 	qt_drop = 0;
     }
-    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
-			    qt_cmodel,qt_rows,0);
+    lqt_decode_video(qt, qt_rows, 0);
+//    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
+//			    qt_cmodel,qt_rows,0);
     switch (qt_cmodel) {
     case BC_RGB888:
 	if (use_gl) {
@@ -930,8 +950,11 @@ int main(int argc, char *argv[])
     /* use Xvideo? */
     if (xv_have_YUY2 && quicktime_reads_cmodel(qt,BC_YUV422,0))
 	qt_cmodel = BC_YUV422;
-    if (xv_have_I420 && quicktime_reads_cmodel(qt,BC_YUV420P,0))
+    if ((xv_have_I420 || xv_have_YV12) && quicktime_reads_cmodel(qt,BC_YUV420P,0))
 	qt_cmodel = BC_YUV420P;
+
+    /* Set decoding colormodel */
+    quicktime_set_cmodel(qt, qt_cmodel);
 
     /* use OpenGL? */
     XtRealizeWidget(app_shell);

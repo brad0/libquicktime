@@ -3,10 +3,10 @@
 
 do_autogen () {
     echo "Doing autogen in $PWD... "
-    aclocal
-    automake --foreign --add-missing
-    autoconf 
     autoheader
+    aclocal
+    autoconf
+    automake --foreign --add-missing
 }
 
 do_autogen
