@@ -70,6 +70,11 @@ void quicktime_write_ix(quicktime_t *file,
 	int track)
 {
 	int i;
+        quicktime_riff_t *riff;
+        quicktime_hdrl_t *hdrl;
+        quicktime_strl_t *strl;
+        quicktime_indx_t *indx;
+
 	quicktime_atom_write_header(file, &ix->atom, ix->tag);
 
 /* longs per entry */
@@ -99,10 +104,10 @@ void quicktime_write_ix(quicktime_t *file,
 
 
 /* Update super index */
-	quicktime_riff_t *riff = file->riff[0];
-	quicktime_hdrl_t *hdrl = &riff->hdrl;
-	quicktime_strl_t *strl = hdrl->strl[track];
-	quicktime_indx_t *indx = &strl->indx;
+	riff = file->riff[0];
+	hdrl = &riff->hdrl;
+	strl = hdrl->strl[track];
+	indx = &strl->indx;
 
 	quicktime_update_indx(file, indx, ix);
 }

@@ -224,6 +224,8 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->compression_id = 0;
 	table->packet_size = 0;
 	table->sample_rate = 0;
+        table->extradata = NULL;
+        table->extradata_size = 0;
 }
 
 void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
