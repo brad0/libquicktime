@@ -462,7 +462,7 @@ int quicktime_supported_audio(quicktime_t *file, int track)
         return 1;
 }
 
-static void update_frame_position(quicktime_video_map_t * track)
+void lqt_update_frame_position(quicktime_video_map_t * track)
   {
   track->timestamp +=
     track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_duration;
@@ -503,7 +503,7 @@ int quicktime_decode_video(quicktime_t *file,
 
         //printf("quicktime_decode_video 1\n");
 	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-        update_frame_position(&(file->vtracks[track]));
+        lqt_update_frame_position(&(file->vtracks[track]));
 //printf("quicktime_decode_video 2\n");
 	return result;
 }
@@ -536,7 +536,7 @@ int lqt_decode_video(quicktime_t *file,
 //printf("quicktime_decode_video 1\n");
 	result =
           ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-        update_frame_position(&(file->vtracks[track]));
+        lqt_update_frame_position(&(file->vtracks[track]));
 //printf("quicktime_decode_video 2\n");
 	return result;
 }
@@ -564,7 +564,7 @@ long quicktime_decode_scaled(quicktime_t *file,
 	file->out_h = out_h;
 
 	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-        update_frame_position(&(file->vtracks[track]));
+        lqt_update_frame_position(&(file->vtracks[track]));
 	return result;
 }
 
@@ -596,10 +596,11 @@ int lqt_encode_video(quicktime_t *file,
           quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                                 file->vtracks[track].current_position - 1,
                                 time - file->vtracks[track].timestamp);
-        
-        quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
-                              file->vtracks[track].current_position, 0);
-        
+        else
+          quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
+                                file->vtracks[track].current_position, 0);
+
+        file->vtracks[track].timestamp = time;
         file->vtracks[track].current_position++;
 	return result;
 }

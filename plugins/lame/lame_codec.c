@@ -357,14 +357,11 @@ static int encode(quicktime_t *file,
   {
 
   int result = 0;
-  int frames;
   int encoded_size;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_trak_t *trak = track_map->track;
   quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-  int new_size = codec->input_size + samples;
-  int i, j;
-  int frames_end = 0;
+  int i;
 
   if(!codec->encode_initialized)
     {
@@ -486,11 +483,7 @@ static int set_parameter(quicktime_t *file, int track,
 static void flush(quicktime_t *file, int track)
   {
   int result = 0;
-  int samples_left;
-  quicktime_atom_t chunk_atom;
-  int64_t offset = quicktime_position(file);
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_trak_t *trak = track_map->track;
   quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   
   if(codec->encode_initialized)

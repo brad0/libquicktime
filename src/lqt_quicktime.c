@@ -1100,9 +1100,9 @@ long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int tr
 
 	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
 	result = quicktime_read_data(file, video_buffer, bytes);
-	file->vtracks[track].current_position++;
+        lqt_update_frame_position(&file->vtracks[track]);
 
-	if(!result) return 0;
+        if(!result) return 0;
 	return bytes;
 }
 

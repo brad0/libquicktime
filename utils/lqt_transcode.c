@@ -101,9 +101,9 @@ static void print_usage()
   printf("Usage: lqt_transcode [-avi] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
   printf("       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n\n");
   printf("       lqt_transcode -lv\n");
-  printf("       List video encoders encoders\n\n");
+  printf("       List video encoders\n\n");
   printf("       lqt_transcode -la\n");
-  printf("       List audio encoders encoders\n");
+  printf("       List audio encoders\n");
   }
 
 static void list_info(lqt_codec_info_t ** info)

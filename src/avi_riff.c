@@ -291,7 +291,7 @@ static void insert_video_packet(quicktime_trak_t * trak,
 
   if(!size)
     {
-    stts->table[stsz->total_entries].sample_duration += stts->default_duration;
+    stts->table[stts->total_entries-1].sample_duration += stts->default_duration;
     return;
     }
   

@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
 {
 	quicktime_t *file;
 	FILE *output;
-	int result = 0;
 	int i, j;
 	int64_t length;
 	char string[1024], *prefix = 0, *input = 0;

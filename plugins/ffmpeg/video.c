@@ -335,7 +335,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   quicktime_ffmpeg_video_codec_t *codec =
     ((quicktime_codec_t*)vtrack->codec)->priv;
   int got_pic;
-  unsigned char *sp;
   int do_cmodel_transfer;
   int row_span, row_span_uv;
   quicktime_ctab_t * ctab;

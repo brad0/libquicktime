@@ -689,6 +689,7 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack);
 int quicktime_update_positions(quicktime_t *file);
 
 void quicktime_init_maps(quicktime_t * file);
+void lqt_update_frame_position(quicktime_video_map_t * track);
 
 /*
  *  Convenience function: Returns an array of chunk sizes

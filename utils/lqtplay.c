@@ -769,6 +769,9 @@ static int qt_audio_eof = 0; /* No more samples can be decoded */
 static int qt_hasvideo,qt_hasaudio;
 
 static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
+static int64_t qt_frame_time; /* Timestamp of the decoded frame */
+static int qt_timescale = 0;
+
 static unsigned char *qt_frame,**qt_rows;
 static XImage *qt_ximage;
 static XvImage *qt_xvimage;
@@ -877,6 +880,7 @@ static void qt_init(FILE *fp, char *filename)
 	qt_hasvideo = 1;
 	qt_width  = quicktime_video_width(qt,0);
 	qt_height = quicktime_video_height(qt,0);
+        qt_timescale = lqt_video_time_scale(qt,0);
     }
 
     if (!quicktime_has_audio(qt)) {
@@ -910,12 +914,10 @@ static void qt_cleanup()
     quicktime_close(qt);
   }
 
-static int qt_frame_blit(void)
+static int qt_init_video(void)
 {
-    int i;
-    
-    if (0 == quicktime_video_position(qt,0)) {
-	/* init */
+        int i;
+        /* init */
 	qt_frame = malloc(qt_width * qt_height * 4);
 	qt_rows = malloc(qt_height * sizeof(char*));
 	qt_gc = XCreateGC(dpy,XtWindow(simple),0,NULL);
@@ -966,18 +968,32 @@ static int qt_frame_blit(void)
 		    __FILE__,__LINE__);
 	    exit(1);
 	}
-    }
+        return 0;
+}
 
-    if (qt_drop) {
-	qt_droptotal += qt_drop;
+static int qt_frame_decode(void)
+  {
+  int i;
+  if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
+      return -1;
+
+  if (qt_drop) {
+        qt_droptotal += qt_drop;
 	fprintf(stderr,"dropped %d frame(s)\r",qt_droptotal);
 	for (i = 0; i < qt_drop; i++)
 	    quicktime_read_frame(qt,qt_frame,0);
 	qt_drop = 0;
     }
+    qt_frame_time = lqt_frame_time(qt, 0);
     lqt_decode_video(qt, qt_rows, 0);
 //    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
 //			    qt_cmodel,qt_rows,0);
+    return 0;
+  }
+
+static int qt_frame_blit(void)
+{
+
     switch (qt_cmodel) {
     case BC_RGB888:
 #ifdef USE_GL
@@ -1009,8 +1025,6 @@ static int qt_frame_blit(void)
 	exit(1);
     }
 
-    if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
-	return -1;
     return 0;
 }
 
@@ -1020,6 +1034,7 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     long msec;
 
     gettimeofday(&now,NULL);
+    /* Get the now - start (->negative value) */
     msec  = (start->tv_sec  - now.tv_sec)  * 1000;
     msec += (start->tv_usec - now.tv_usec) / 1000;
     if (qt_hasaudio && oss_sr && oss_hr) {
@@ -1027,8 +1042,10 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
 	msec = (long long)msec * oss_hr / oss_sr;
     }
     
-    msec += quicktime_video_position(qt,0) * 1000
-	/ quicktime_frame_rate(qt,0);
+    msec += (qt_frame_time * 1000) / qt_timescale;
+
+    //    fprintf(stderr, "Wait: %ld\n", msec);
+
     if (msec < 0) {
 	qt_drop = -msec * quicktime_frame_rate(qt,0) / 1000;
 	wait->tv_sec  = 0;
@@ -1079,9 +1096,9 @@ static int decode_audio()
     }
   else
     {
-    fprintf(stderr, "Decode audio...");
+    //    fprintf(stderr, "Decode audio...");
     lqt_decode_audio_track(qt, &qt_audio, (float**)0, AUDIO_BLOCK_SIZE, 0);
-    fprintf(stderr, "done\n");
+    //    fprintf(stderr, "done\n");
     samples_decoded = lqt_last_audio_position(qt, 0) - last_pos;
     }
   qt_audio_samples_in_buffer = samples_decoded;
@@ -1266,6 +1283,7 @@ static String res[] = {
 
 int main(int argc, char *argv[])
 {
+    int has_frame = 0, blit_frame = 0;
     struct timeval start,wait;
     //    int audio_frames;
     
@@ -1321,6 +1339,10 @@ int main(int argc, char *argv[])
     else
       audio_frames = oss_sr + 1024;
 #endif
+    /* Initialize video */
+    if(qt_hasvideo)
+      qt_init_video();
+    
     /* enter main loop */
     gettimeofday(&start,NULL);
     for (;;) {
@@ -1344,26 +1366,51 @@ int main(int argc, char *argv[])
 		}
 	    }
 	    if (qt_hasvideo) {
-		qt_frame_delay(&start,&wait);
-	    } else {
+                if(!has_frame) {
+                    if(0 != qt_frame_decode()) {
+                        qt_hasvideo = 0;
+                        wait.tv_sec  = 0;
+                        wait.tv_usec = 1000;
+                    } else {
+                    has_frame = 1;
+                    }
+                }
+                    
+            qt_frame_delay(&start,&wait);
+
+            /* "wait" is the time, we would have to wait.
+               If it's longer, than 2 ms, we'll continue feeding the
+               soundcard. This prevents audio underruns for frames with a
+               VERY long duration */
+             if(wait.tv_sec || (wait.tv_usec > 2000)) {
+                 wait.tv_sec  = 0;
+                 wait.tv_usec = 2000;
+                 blit_frame = 0;
+             } else
+                 blit_frame = 1;
+                
+	 } else {
 		wait.tv_sec  = 0;
 		wait.tv_usec = 1000;
 	    }
 	    rc = select(max+1,&rd,&wr,NULL,&wait);
 	    if (qt_hasaudio) {
 		if (use_alsa == 1) {
-		    if (0 != qt_alsa_audio_write()) break;
+		    if (0 != qt_alsa_audio_write()) qt_hasaudio = 0;
 		}
 		else if (FD_ISSET(oss_fd,&wr)) { 
-		    if (0 != qt_oss_audio_write()) break;
+		    if (0 != qt_oss_audio_write()) qt_hasaudio = 0;
 		}
 	    }
-	    if (qt_hasvideo && 0 == rc) {
-		if (0 != qt_frame_blit()) break;
+	    if (qt_hasvideo && 0 == rc && blit_frame) {
+		qt_frame_blit();
+                has_frame = 0;
 	    }
 	}
+    if(!qt_hasvideo && !qt_hasaudio)
+      break;
     }
-    qt_cleanup();    
+    qt_cleanup();
     return 0;
 }
 

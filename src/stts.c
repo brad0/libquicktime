@@ -180,11 +180,13 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
   return ret;
   }
 
-/* If one calls quicktime_update_stts(), the table is set up with ine entry per sample.
+/* If one calls quicktime_update_stts(), the table is set up with one entry per sample.
    Before writing, call quicktime_compress_stts() to kick out redundant entries */
 
 void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration)
   {
+  //  fprintf(stderr, "quicktime_update_stts: sample: %ld, duration: %ld\n",
+  //          sample, duration);
   if(sample >= stts->entries_allocated)
     {
     stts->entries_allocated *= 2;

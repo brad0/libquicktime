@@ -15,17 +15,11 @@ int main(int argc, char *argv[])
 {
 	quicktime_t *file;
 	FILE *input;
-	int result = 0;
 	int i, j;
-	int64_t length;
-	char string[1024], *prefix = 0, *output = 0;
+	char *output = 0;
 	char *data = 0;
-	int bytes = 0, old_bytes = 0;
+	int bytes = 0;
 	float output_rate = 0;
-	float input_rate;
-	int64_t input_frame;
-	int64_t new_length;
-	int rgb_to_ppm = 0;
 	char **input_frames = 0;
 	int total_input_frames = 0;
 	int width = 720, height = 480, bit_depth = 24;
