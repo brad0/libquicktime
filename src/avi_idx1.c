@@ -176,7 +176,6 @@ void quicktime_set_idx1_keyframe(quicktime_t *file,
 	quicktime_idx1_t *idx1 = &riff->idx1;
 	int i;
 	int counter = -1;
-
 // Search through entire index for right numbered tag.
 // Since all the tracks are combined in the same index, this is unavoidable.
 	for(i = 0; i < idx1->table_size; i++)
@@ -209,6 +208,7 @@ void quicktime_update_idx1table(quicktime_t *file,
 	quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
 	uint32_t flags = 0;
 	int i;
+#if 0
 	int keyframe_frame = idx1->table_size + 1;
 
 // Set flag for keyframe
@@ -225,7 +225,7 @@ void quicktime_update_idx1table(quicktime_t *file,
 			break;
 		}
 	}
-
+#endif
 
 // Allocation
 	if(idx1->table_size >= idx1->table_allocation)
@@ -246,7 +246,7 @@ void quicktime_update_idx1table(quicktime_t *file,
 // Appendage
 	idx1_table = &idx1->table[idx1->table_size];
 	memcpy(idx1_table->tag, tag, 4);
-	idx1_table->flags = flags;
+	idx1_table->flags = (trak->mdia.minf.is_audio) ? AVI_KEYFRAME : 0;
 	idx1_table->offset = offset - 8 - movi->atom.start;
 	idx1_table->size = size;
 	idx1->table_size++;

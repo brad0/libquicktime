@@ -850,9 +850,9 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                                      1);
 
 	file->vtracks[track].current_chunk++;
-        if(codec->frame->key_frame)
-	  quicktime_insert_keyframe(file, file->vtracks[track].current_position, track);
-	return result;
+        if(codec->com.ffcodec_enc->coded_frame->key_frame)
+          quicktime_insert_keyframe(file, file->vtracks[track].current_position, track);
+        return result;
 }
 
 /* We obtain the stream colormodel during runtime */

@@ -82,11 +82,11 @@ void quicktime_init_strl(quicktime_t *file,
 /* length: fill later */
         quicktime_write_int32_le(file, 0); 
 /* suggested buffer size */
-        quicktime_write_int32_le(file, 0); 
+        quicktime_write_int32_le(file, 1024 * 1024); /* Seems to work with ffmpeg */
 /* quality */
         quicktime_write_int32_le(file, -1); 
 /* sample size */
-        quicktime_write_int32_le(file, 0); 
+        quicktime_write_int32_le(file, (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3); 
         quicktime_write_int16_le(file, 0);
         quicktime_write_int16_le(file, 0);
         quicktime_write_int16_le(file, trak->tkhd.track_width);

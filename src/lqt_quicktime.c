@@ -1618,8 +1618,9 @@ int quicktime_close(quicktime_t *file)
                         quicktime_finalize_odml(file, &file->riff[0]->hdrl);
                                                                                                                   
 // Finalize super indexes
-                        quicktime_finalize_indx(file);
-                                                                                                                  
+                        if(file->total_riffs > 1)
+                          quicktime_finalize_indx(file);
+                        
 // Pad ending
                         quicktime_set_position(file, position);
                         quicktime_atom_write_header(file, &junk_atom, "JUNK");

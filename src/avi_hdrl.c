@@ -73,15 +73,15 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 	quicktime_write_int32_le(file, 0); /* bitrate in bytes */
     quicktime_write_int32_le(file, 0); /* padding */
     quicktime_write_int32_le(file, 
-		AVI_TRUSTCKTYPE | 
+                             //		AVI_TRUSTCKTYPE | 
 		AVI_HASINDEX | 
-		AVI_MUSTUSEINDEX | 
+                             //		AVI_MUSTUSEINDEX | 
 		AVI_ISINTERLEAVED); /* flags */
 	hdrl->frames_offset = quicktime_position(file);
     quicktime_write_int32_le(file, 0); /* nb frames, filled later */
     quicktime_write_int32_le(file, 0); /* initial frame */
     quicktime_write_int32_le(file, file->moov.total_tracks); /* nb streams */
-    quicktime_write_int32_le(file, 0); /* suggested buffer size */
+    quicktime_write_int32_le(file, 1024 * 1024); /* suggested buffer size */
 
 	if(file->total_vtracks)
     {
