@@ -24,6 +24,7 @@ BuildRequires:  gtk+-devel >=       @GTK_REQUIRED@
 BuildRequires:  lame-devel >=       @LAME_REQUIRED@
 BuildRequires:	libraw1394-devel >= @LIBRAW1394_REQUIRED@
 BuildRequires:	libavc1394-devel >= @LIBAVC1394_REQUIRED@
+BuildRequires:	ffmpeg-devel =      @AVCODEC_REQUIRED@
 
 BuildRoot:	/tmp/libquicktime
 
@@ -154,6 +155,8 @@ Lame plugin for Libquicktime
 Summary:	ffmpeg plugins for Libquicktime
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
+Requires:	ffmpeg = @AVCODEC_REQUIRED@
+
 
 %description ffmpeg
 ffmpeg plugins for Libquicktime

@@ -447,24 +447,15 @@ AH_TEMPLATE([HAVE_LIBAVCODEC],
 
 have_libavcodec=false
 
-OLD_LIBS=$LIBS
-LIBS="-lavcodec -lm"
+AVCODEC_REQUIRED="0.4.8acl"
 
-AC_MSG_CHECKING(for libavcodec)
-AC_TRY_LINK([#include <ffmpeg/avcodec.h>],
-            [avcodec_init();],
-	    [have_libavcodec=true])
-
-case $have_libavcodec in
-  true) AC_DEFINE(HAVE_LIBAVCODEC)
-        AC_MSG_RESULT(yes);;
-  false) AC_MSG_RESULT(no);;
-  * ) AC_MSG_RESULT("Somethings wrong: $have_libavcodec");;
-esac
-
-LIBS=$OLD_LIBS
+PKG_CHECK_MODULES(AVCODEC, avcodec = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
 
 AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
+
+AC_SUBST(AVCODEC_REQUIRED)
+AC_SUBST(AVCODEC_LIBS)
+AC_SUBST(AVCODEC_CFLAGS)
 
 dnl
 dnl Check for libpng
