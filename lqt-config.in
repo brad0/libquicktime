@@ -6,7 +6,7 @@ exec_prefix_set=no
 
 old_include_names=yes
 
-function usage
+usage()
 {
   cat <<EOF 1>&2
 Usage: lqt-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--use-lqt-includes] 
@@ -78,7 +78,7 @@ while test $# -gt 0; do
 
           includes=-I@includedir@
       fi
-      if test x$old_include_names == xyes; then
+      if test x$old_include_names = xyes; then
 	the_cflags="$includes -I@includedir@/quicktime $the_cflags"
       else
 	the_cflags="$includes $the_cflags"
@@ -96,10 +96,10 @@ while test $# -gt 0; do
   shift
 done
 
-if test x$echo_libs == xyes; then
+if test x$echo_libs = xyes; then
   echo $the_libs
 fi
 
-if test x$echo_cflags == xyes; then
+if test x$echo_cflags = xyes; then
   echo $the_cflags
 fi

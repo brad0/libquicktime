@@ -54,7 +54,16 @@ dnl Build CFLAGS
 COMMON_CFLAGS=" -finline-functions -Wall -Wno-unused -Winline"
 PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
 DEBUG_CFLAGS=" -g3"
-OPTIMIZE_CFLAGS=" -O3 -funroll-all-loops -fomit-frame-pointer -falign-loops=2 -falign-jumps=2 -falign-functions=2"
+
+dnl Optimizing flags
+
+OPTIMIZE_CFLAGS="-O3"
+
+AC_TRY_CFLAGS([-funroll-all-loops],   [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -funroll-all-loops"])
+AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-frame-pointer"])
+AC_TRY_CFLAGS([-falign-loops=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-loops=2"])
+AC_TRY_CFLAGS([-falign-jumps=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-jumps=2"])
+AC_TRY_CFLAGS([-falign-functions=2],  [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-functions=2"])
 
 # large file support
 COMMON_FLAGS="$COMMON_FLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"

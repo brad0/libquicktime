@@ -15,7 +15,7 @@ do_autogen () {
     echo -n "autoconf..."
     autoconf
     echo "done"
-    echo -n "automake"
+    echo -n "automake..."
     automake --foreign --add-missing
     echo "done"
 }
