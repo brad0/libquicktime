@@ -114,7 +114,7 @@ int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
   int64_t time_count = 0;
 
   *stts_index = 0;
-  
+
   while(1)
     {
     if(time_count + stts->table[*stts_index].sample_duration *
@@ -131,7 +131,7 @@ int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
       time_count += stts->table[*stts_index].sample_duration *
         stts->table[*stts_index].sample_count;
       ret += stts->table[*stts_index].sample_count;
-      *stts_index++;
+      (*stts_index)++;
       }
     }
   *time = time_count;
