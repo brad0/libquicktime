@@ -144,7 +144,7 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
 					output_i[i] = (int16_t)(codec->work_buffer[j]) << 8 |
 									(unsigned char)(codec->work_buffer[j + 1]);
 					j += step;
-					output_i[i] -= 0x8000;
+//					output_i[i] -= 0x8000;
 				}
 			}
 			else
@@ -153,7 +153,8 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
 				for(i = 0, j = 0; i < samples; i++)
 				{
 					output_f[i] = (float)((int16_t)(codec->work_buffer[j]) << 8 |
-									(unsigned char)(codec->work_buffer[j + 1])) - 0x8000;
+//									(unsigned char)(codec->work_buffer[j + 1])) - 0x8000;
+                                                                      (unsigned char)(codec->work_buffer[j + 1]));
 					output_f[i] /= 0x7fff;
 					j += step;
 				}
@@ -229,7 +230,7 @@ static int quicktime_encode_rawaudio(quicktime_t *file,
 					for(j = 0; j < samples; j++)
 					{
 						sample = input_i[i][j];
-						sample += 0x8000;
+//						sample += 0x8000;
 						codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
 						codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
 					}
@@ -275,7 +276,7 @@ static int quicktime_encode_rawaudio(quicktime_t *file,
 						else
 							sample = (int)(sample_f * 0x7fff + 0.5);
 						CLAMP(sample, -0x7fff, 0x7fff);
-						sample += 0x8000;
+//						sample += 0x8000;
 						codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
 						codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
 					}
