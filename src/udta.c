@@ -43,6 +43,28 @@ void quicktime_udta_dump(quicktime_udta_t *udta)
 	if(udta->info_len) printf("  info -> %s\n", udta->info);
 }
 
+int quicktime_read_udta_string(quicktime_t *file, char **string, int *size)
+{
+	int result;
+	if(*size) free(*string);
+	*size = quicktime_read_int16(file);  /* Size of string */
+	quicktime_read_int16(file);  /* Discard language code */
+	*string = malloc(*size + 1);
+	result = quicktime_read_data(file, *string, *size);
+	(*string)[*size] = 0;
+	return !result;
+}
+
+int quicktime_write_udta_string(quicktime_t *file, char *string, int size)
+{
+	int new_size = strlen(string);
+	int result;
+	quicktime_write_int16(file, new_size);    /* String size */
+	quicktime_write_int16(file, 0);    /* Language code */
+	result = quicktime_write_data(file, string, new_size);
+	return !result;
+}
+
 int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_atom_t *udta_atom)
 {
 	quicktime_atom_t leaf_atom;
@@ -100,30 +122,6 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
 	}
 
 	quicktime_atom_write_footer(file, &atom);
-}
-
-int quicktime_read_udta_string(quicktime_t *file, char **string, int *size)
-{
-	int result;
-
-	if(*size) free(*string);
-	*size = quicktime_read_int16(file);  /* Size of string */
-	quicktime_read_int16(file);  /* Discard language code */
-	*string = malloc(*size + 1);
-	result = quicktime_read_data(file, *string, *size);
-	(*string)[*size] = 0;
-	return !result;
-}
-
-int quicktime_write_udta_string(quicktime_t *file, char *string, int size)
-{
-	int new_size = strlen(string);
-	int result;
-
-	quicktime_write_int16(file, new_size);    /* String size */
-	quicktime_write_int16(file, 0);    /* Language code */
-	result = quicktime_write_data(file, string, new_size);
-	return !result;
 }
 
 int quicktime_set_udta_string(char **string, int *size, char *new_string)

@@ -14,7 +14,7 @@ int rawaudio_byte_order(void)
 
 int rawaudio_swap_bytes(char *buffer, long samples, int channels, int bits)
 {
-	long i;
+	long i = 0;
 	char byte1, byte2, byte3;
 	char *buffer1, *buffer2, *buffer3;
 

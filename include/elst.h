@@ -1,0 +1,22 @@
+/* This file was automatically generated.  Do not edit! */
+void quicktime_atom_write_footer(quicktime_t *file,quicktime_atom_t *atom);
+int quicktime_write_int24(quicktime_t *file,long number);
+int quicktime_write_char(quicktime_t *file,char x);
+int quicktime_atom_write_header(quicktime_t *file,quicktime_atom_t *atom,char *text);
+void quicktime_write_elst(quicktime_t *file,quicktime_elst_t *elst,long duration);
+long quicktime_read_int24(quicktime_t *file);
+int quicktime_read_char(quicktime_t *file);
+void quicktime_read_elst(quicktime_t *file,quicktime_elst_t *elst);
+void quicktime_elst_dump(quicktime_elst_t *elst);
+void quicktime_elst_delete(quicktime_elst_t *elst);
+void quicktime_elst_init_all(quicktime_elst_t *elst);
+void quicktime_elst_init(quicktime_elst_t *elst);
+void quicktime_elst_table_dump(quicktime_elst_table_t *table);
+int quicktime_write_fixed32(quicktime_t *file,float number);
+int quicktime_write_int32(quicktime_t *file,long value);
+void quicktime_write_elst_table(quicktime_t *file,quicktime_elst_table_t *table,long duration);
+float quicktime_read_fixed32(quicktime_t *file);
+long quicktime_read_int32(quicktime_t *file);
+void quicktime_read_elst_table(quicktime_t *file,quicktime_elst_table_t *table);
+void quicktime_elst_table_delete(quicktime_elst_table_t *table);
+void quicktime_elst_table_init(quicktime_elst_table_t *table);

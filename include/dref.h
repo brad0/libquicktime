@@ -1,0 +1,24 @@
+/* This file was automatically generated.  Do not edit! */
+void quicktime_atom_write_footer(quicktime_t *file,quicktime_atom_t *atom);
+int quicktime_atom_write_header(quicktime_t *file,quicktime_atom_t *atom,char *text);
+void quicktime_write_dref(quicktime_t *file,quicktime_dref_t *dref);
+void quicktime_read_dref(quicktime_t *file,quicktime_dref_t *dref);
+void quicktime_dref_dump(quicktime_dref_t *dref);
+void quicktime_dref_delete(quicktime_dref_t *dref);
+void quicktime_dref_init_all(quicktime_dref_t *dref);
+void quicktime_dref_init(quicktime_dref_t *dref);
+void quicktime_dref_table_dump(quicktime_dref_table_t *table);
+int quicktime_write_data(quicktime_t *file,char *data,int size);
+int quicktime_write_int24(quicktime_t *file,long number);
+int quicktime_write_char(quicktime_t *file,char x);
+int quicktime_write_char32(quicktime_t *file,char *string);
+int quicktime_write_int32(quicktime_t *file,long value);
+void quicktime_write_dref_table(quicktime_t *file,quicktime_dref_table_t *table);
+int quicktime_read_data(quicktime_t *file,char *data,longest size);
+long quicktime_read_int24(quicktime_t *file);
+int quicktime_read_char(quicktime_t *file);
+void quicktime_read_char32(quicktime_t *file,char *string);
+long quicktime_read_int32(quicktime_t *file);
+void quicktime_read_dref_table(quicktime_t *file,quicktime_dref_table_t *table);
+void quicktime_dref_table_delete(quicktime_dref_table_t *table);
+void quicktime_dref_table_init(quicktime_dref_table_t *table);

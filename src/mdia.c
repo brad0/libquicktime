@@ -1,6 +1,8 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-
+#include <mdhd.h>
+#include <hdlr.h>
+#include <mdia.h>
 
 void quicktime_mdia_init(quicktime_mdia_t *mdia)
 {

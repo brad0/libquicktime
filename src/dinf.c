@@ -1,5 +1,6 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <dinf.h>
 
 void quicktime_dinf_init(quicktime_dinf_t *dinf)
 {

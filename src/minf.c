@@ -1,7 +1,10 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-
-
+#include <vmhd.h>
+#include <smhd.h>
+#include <hdlr.h>
+#include <dinf.h>
+#include <stbl.h>
 
 void quicktime_minf_init(quicktime_minf_t *minf)
 {

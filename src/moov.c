@@ -1,9 +1,8 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-
-
-
-
+#include <udta.h>
+#include <ctab.h>
+#include <mvhd.h>
 
 int quicktime_moov_init(quicktime_moov_t *moov)
 {

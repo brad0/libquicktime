@@ -2,6 +2,9 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <quicktime/colormodels.h>
+
+extern cmodel_yuv_t *yuv_table;
 
 /* Graphics acceleration routines */
 

@@ -4,6 +4,7 @@
 #include <quicktime/quicktime.h>
 #include <workarounds.h>
 #include <string.h>
+#include <hdlr.h>
 
 /* Disk I/O */
 
