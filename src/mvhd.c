@@ -1,6 +1,5 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <matrix.h>
 
 int quicktime_mvhd_init(quicktime_mvhd_t *mvhd)
 {

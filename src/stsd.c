@@ -1,6 +1,5 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <stsdtable.h>
 
 void quicktime_stsd_init(quicktime_stsd_t *stsd)
 {

@@ -5,7 +5,6 @@ base_subdirs = audiocodec \
 videocodec \
 opendivx \
 ferguson \
-lame \
 rtjpeg \
 xanim \
 svq

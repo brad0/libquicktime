@@ -1,11 +1,5 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <stsd.h>
-#include <stss.h>
-#include <stsz.h>
-#include <stco.h>
-#include <stts.h>
-#include <stsc.h>
 
 void quicktime_stbl_init(quicktime_stbl_t *stbl)
 {

@@ -7,9 +7,9 @@
 
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <lqt_fseek.h>
 #include <workarounds.h>
 #include <string.h>
-#include <hdlr.h>
 
 
 /* Disk I/O */

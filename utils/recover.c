@@ -1,4 +1,5 @@
 #include <funcprotos.h>
+#include <lqt_fseek.h>
 #include <quicktime/quicktime.h>
 
 #include <stdio.h>

@@ -1,8 +1,5 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <tkhd.h>
-#include <edts.h>
-#include <mdia.h>
 #include <string.h>
 
 int quicktime_trak_init(quicktime_trak_t *trak)

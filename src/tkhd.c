@@ -1,6 +1,5 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <matrix.h>
 
 int quicktime_tkhd_init(quicktime_tkhd_t *tkhd)
 {

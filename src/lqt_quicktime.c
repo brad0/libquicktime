@@ -3,6 +3,7 @@
 #include <quicktime/lqt.h>
 #include <lqt_private.h>
 #include <funcprotos.h>
+#include <lqt_fseek.h>
 #include <sys/stat.h>
 #include <string.h>
 
@@ -957,7 +958,7 @@ int quicktime_read_frame_init(quicktime_t *file, int track)
 	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
 	if(quicktime_ftell(file) != file->file_position) 
 	{
-		fseeko(file->stream, file->file_position, SEEK_SET);
+		FSEEK(file->stream, file->file_position, SEEK_SET);
 		file->ftell_position = file->file_position;
 	}
 	return 0;

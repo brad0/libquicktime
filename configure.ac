@@ -386,7 +386,7 @@ AC_DEFINE(HAVE_VORBIS)
 fi
 
 dnl
-dnl Vheck for lame
+dnl Check for lame
 dnl
 
 have_lame="no"

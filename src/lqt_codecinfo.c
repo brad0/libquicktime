@@ -114,6 +114,8 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
         free(p->stringlist_options);
         }
       break;
+    default: /* Keep gcc quiet */
+      break;
     }
   }
 
@@ -530,10 +532,10 @@ static void register_codecs(lqt_codec_info_t * list,
     }
   }
 
-static void scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
+static int scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
   {
   char * pos;
-  
+  int ret;
   char * filename;
   DIR * directory;
   struct dirent * directory_entry;
@@ -571,9 +573,10 @@ static void scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
     fprintf(stderr, "Cannot open plugin directory %s\n\
 Did you forget \"make install\"? You need it because\n\
 libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
-    return;
+    return 0;
     }
 
+  ret = 0;
   while(1)
     {
     directory_entry = readdir(directory);
@@ -632,12 +635,13 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
       register_codecs(codecs,
                       &audio_codecs_end,
                       &video_codecs_end);
-      
+      ret = 1;
       }
     
     }
   free(filename);
   closedir(directory);
+  return ret;
   }
 
 void lqt_registry_destroy()
@@ -665,6 +669,7 @@ void lqt_registry_destroy()
 
 void lqt_registry_init()
   {
+  int do_write = 0;
   char * audio_order = (char*)0;
   char * video_order = (char*)0;
   
@@ -683,7 +688,8 @@ void lqt_registry_init()
 
   /* Scan for the plugins, use cached values if possible */
 
-  scan_for_plugins(PLUGIN_DIR, &file_codecs);
+  if(scan_for_plugins(PLUGIN_DIR, &file_codecs))
+    do_write = 1;
 
   /*
    *  If there were codecs in the database, which have
@@ -698,6 +704,7 @@ void lqt_registry_init()
     tmp_file_codecs = file_codecs;
     file_codecs = file_codecs->next;
     destroy_codec_info(tmp_file_codecs);
+    do_write = 1;
     }
   
   /*
@@ -721,8 +728,8 @@ void lqt_registry_init()
     }
   
   lqt_registry_unlock();
-  
-  lqt_registry_write();
+  if(do_write)
+    lqt_registry_write();
   }
 
 /*

@@ -1,6 +1,6 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <elst.h>
+
 
 void quicktime_edts_init(quicktime_edts_t *edts)
 {
