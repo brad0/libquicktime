@@ -1,3 +1,4 @@
+#include "funcprotos.h"
 #include "quicktime.h"
 #include "rawaudio.h"
 

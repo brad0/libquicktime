@@ -1,4 +1,4 @@
-#include <funcprotos.h>
+#include "funcprotos.h"
 #include "quicktime.h"
 #include "ulaw.h"
 #include <stdint.h>

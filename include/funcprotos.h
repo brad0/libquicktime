@@ -1,6 +1,7 @@
 #ifndef FUNCPROTOS_H
 #define FUNCPROTOS_H
 
+#include "config.h"
 #include <graphics.h>
 #include <quicktime/qtprivate.h>
 #include <quicktime/lqt_codecinfo.h>
