@@ -8,11 +8,14 @@ SUBDIRS = $(gtk_subdirs)
 
 if HAVE_X11
 xbin := lqtplay
+xman := lqtplay.1
 else
 xbin :=
+xman :=
 endif
 noinst_PROGRAMS := test_codec testqt
 bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
+man1_MANS := $(xman)
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=@UTIL_LIBADD@ -lm
