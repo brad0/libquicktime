@@ -676,7 +676,6 @@ plugins/videocodec/Makefile \
 plugins/vorbis/Makefile \
 plugins/png/Makefile \
 plugins/opendivx/Makefile \
-plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/rtjpeg/Makefile \
 plugins/ffmpeg/Makefile \
