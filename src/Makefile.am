@@ -17,7 +17,13 @@ CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 
 # Different files for dynamic plugins and others
 
-lqt_sources = lqt_codecs.c  lqt_plugin.c lqt_quicktime.c
+if HAVE_FSEEKO
+FSEEKO_SRC =
+else
+FSEEKO_SRC = lqt_fseeko.c
+endif
+
+lqt_sources = lqt_codecs.c  lqt_plugin.c lqt_quicktime.c $(FSEEKO_SRC)
 
 # lqt_sources = codecs.c  plugin.c quicktime.c
 
