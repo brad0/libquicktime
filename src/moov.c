@@ -28,7 +28,7 @@ int quicktime_moov_delete(quicktime_moov_t *moov)
 void quicktime_moov_dump(quicktime_moov_t *moov)
 {
 	int i;
-	printf("movie\n");
+	printf("movie (moov)\n");
 	quicktime_mvhd_dump(&(moov->mvhd));
 	quicktime_udta_dump(&(moov->udta));
 	for(i = 0; i < moov->total_tracks; i++)

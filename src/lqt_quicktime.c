@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <quicktime/colormodels.h>
 #include <quicktime/quicktime.h>
 #include <quicktime/lqt.h>
@@ -7,16 +11,15 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 static int64_t get_file_length(quicktime_t *file)
 {
-	struct stat status;
-	if(fstat(fileno(file->stream), &status))
-		perror("get_file_length fstat:");
-	return status.st_size;
+        int64_t current_pos, total_bytes;
+        current_pos = ftello(file->stream);
+        fseeko(file->stream, 0, SEEK_END);
+        total_bytes = ftello(file->stream);
+        fseeko(file->stream, current_pos, SEEK_CUR);
+        return total_bytes;
 }
 
 int quicktime_make_streamable(char *in_path, char *out_path)
@@ -26,6 +29,8 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 	int64_t mdat_start = 0, mdat_size = 0;
 	quicktime_atom_t leaf_atom;
 	int64_t moov_length = 0;
+	
+	memset(&new_file,0,sizeof(quicktime_t));
 	
 	quicktime_init(&file);
 
@@ -64,8 +69,8 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 
 			atoms++;
 		}
-	}while(!result && quicktime_position(&file) < file.total_length);
-
+	}while(!result && quicktime_position(&file) <
+               file.total_length);
 	fclose(file.stream);
 
 	if(!moov_exists)
@@ -97,9 +102,11 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 				return 1;
 			}
 
-			quicktime_shift_offsets(&(old_file->moov), moov_length);
+			quicktime_shift_offsets(&(old_file->moov), moov_length+8);
 
 /* open the output file */
+			
+			
 			if(!(new_file.stream = fopen(out_path, "wb")))
 			{
 				perror("quicktime_make_streamable");
@@ -110,7 +117,18 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 /* set up some flags */
 				new_file.wr = 1;
 				new_file.rd = 0;
+				new_file.cpus = 1;
+		      	new_file.presave_buffer = calloc(1, QUICKTIME_PRESAVE);
+
 				quicktime_write_moov(&new_file, &(old_file->moov));
+				
+				quicktime_set_position(&new_file, moov_length);
+
+        	    quicktime_atom_write_header64(&new_file, 
+                                         
+&(new_file.mdat.atom), 
+                                          "mdat");
+				
 				quicktime_set_position(old_file, mdat_start);
 
 				if(!(buffer = calloc(1, buf_size)))
@@ -120,19 +138,40 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 				}
 				else
 				{
-					while(quicktime_position(old_file) < mdat_start + mdat_size && !result)
+					while(quicktime_position(old_file) < mdat_start +
+mdat_size && !result)
 					{
-						if(quicktime_position(old_file) + buf_size > mdat_start + mdat_size)
-							buf_size = mdat_start + mdat_size - quicktime_position(old_file);
+						if(quicktime_position(old_file) + buf_size >
+mdat_start + mdat_size)
+							buf_size = mdat_start + mdat_size -
+quicktime_position(old_file);
 
-						if(!quicktime_read_data(old_file, buffer, buf_size)) result = 1;
+						if(!quicktime_read_data(old_file, buffer, buf_size))
+result = 1;
 						if(!result)
 						{
-							if(!quicktime_write_data(&new_file, buffer, buf_size)) result = 1;
+							if(!quicktime_write_data(&new_file, buffer,
+buf_size)) result = 1;
+ 
 						}
 					}
 					free(buffer);
 				}
+
+				quicktime_atom_write_footer(&new_file, 
+                                         
+&(new_file.mdat.atom));
+			
+				
+       			if(new_file.presave_size)
+        		{
+        			quicktime_fseek(&new_file,
+new_file.presave_position - new_file.presave_size);
+                	fwrite(new_file.presave_buffer, 1,
+new_file.presave_size, new_file.stream);
+                	new_file.presave_size = 0;
+        		}
+				free(new_file.presave_buffer);
 				fclose(new_file.stream);
 			}
 			quicktime_close(old_file);
@@ -146,6 +185,9 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 	
 	return 0;
 }
+
+
+
 
 void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value)
   {
