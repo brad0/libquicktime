@@ -31,7 +31,7 @@ Ok, now you have been warned, here is now to do it:
 2. Change to the hvirtual directory and apply it:
 
    cd <path_to>/hvirtual-110802
-   patch -p1 <path_to>/hvirtual-libquicktime.patch
+   patch -p1 < <path_to>/hvirtual-libquicktime.patch
 
 3. Type
 
