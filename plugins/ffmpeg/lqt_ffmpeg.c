@@ -28,7 +28,8 @@
 
 #define MAX_FOURCCS 30
 
-int ffmpeg_num_codecs = -1;
+int ffmpeg_num_audio_codecs = -1;
+int ffmpeg_num_video_codecs = -1;
 
 struct CODECIDMAP {
 	int id;
@@ -38,7 +39,9 @@ struct CODECIDMAP {
 	char *short_name;
 	char *name;
 	char *fourccs[MAX_FOURCCS];
-} codecidmap[] = {
+};
+
+struct CODECIDMAP codecidmap_v[] = {
 /* Tables from mplayers config... */
 /* Video */
 	{ CODEC_ID_MPEG1VIDEO,
@@ -96,9 +99,11 @@ struct CODECIDMAP {
 	  "mjpg",
 	  "MJPEG",
 	  {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
+};
 
-/* Audio */
-	{ CODEC_ID_MP2,
+struct CODECIDMAP codecidmap_a[] = {
+         /* Audio */
+        { CODEC_ID_MP2,
 	  -1, NULL, NULL,
 	  "mp2",
 	  "Mpeg Layer 2 Audio",
@@ -114,29 +119,50 @@ struct CODECIDMAP {
 	  "AC3 Audio",
 	  {".ac3", ".AC3", (char *)0} },
 };
-#define NUMMAPS ((int)(sizeof(codecidmap)/sizeof(struct CODECIDMAP)))
+
+
+#define NUMMAPS_A ((int)(sizeof(codecidmap_a)/sizeof(struct CODECIDMAP)))
+#define NUMMAPS_V ((int)(sizeof(codecidmap_v)/sizeof(struct CODECIDMAP)))
 
 void ffmpeg_map_init(void)
 {
 	AVCodec *codec;
-	int i;
-	if(ffmpeg_num_codecs >= 0)
+	int i, found;
+	if(ffmpeg_num_video_codecs >= 0)
 		return;
 	avcodec_register_all();
 	avcodec_init();
-	ffmpeg_num_codecs = 0;
+	ffmpeg_num_video_codecs = 0;
+	ffmpeg_num_audio_codecs = 0;
 	for(codec = first_avcodec; codec; codec = codec->next) {
-		for(i = 0; i < NUMMAPS; i++) {
-			if(codec->id == codecidmap[i].id) {
-				if(codecidmap[i].index < 0)
-					codecidmap[i].index = ffmpeg_num_codecs++;
+                found = 0;
+		for(i = 0; i < NUMMAPS_V; i++) {
+			if(codec->id == codecidmap_v[i].id) {
+				if(codecidmap_v[i].index < 0)
+					codecidmap_v[i].index = ffmpeg_num_audio_codecs + ffmpeg_num_video_codecs++;
 				if(codec->encode)
-					codecidmap[i].encoder = codec;
+					codecidmap_v[i].encoder = codec;
 				if(codec->decode)
-					codecidmap[i].decoder = codec;
+					codecidmap_v[i].decoder = codec;
+                                found = 1;
 				break;
 			}
 		}
+                if(!found) {
+         	  for(i = 0; i < NUMMAPS_A; i++) {
+			if(codec->id == codecidmap_a[i].id) {
+				if(codecidmap_a[i].index < 0)
+                                        codecidmap_a[i].index = ffmpeg_num_video_codecs + ffmpeg_num_audio_codecs++;
+				if(codec->encode)
+					codecidmap_a[i].encoder = codec;
+				if(codec->decode)
+					codecidmap_a[i].decoder = codec;
+                                found = 1;
+				break;
+			}
+                  }
+                }
+                
 	}
 }
 
@@ -195,7 +221,7 @@ static lqt_parameter_info_static_t encode_parameters_ffmpeg[] = {
 	},
 	{
 		"flags_gray",
-		"Gay scale only mode",
+		"Gray scale only mode",
 		LQT_PARAMETER_INT,
 		{ 0 },
 		0,
@@ -406,7 +432,7 @@ static lqt_parameter_info_static_t encode_parameters_ffmpeg[] = {
 static lqt_parameter_info_static_t decode_parameters_ffmpeg[] = {
 	{
 		"flags_gray",
-		"Gay scale only mode",
+		"Gray scale only mode",
 		LQT_PARAMETER_INT,
 		{ 0 },
 		0,
@@ -674,7 +700,7 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 	encoding_parameters: NULL,
 	decoding_parameters: NULL,
 	encoding_colormodels: encoding_colormodels_ffmpeg,
-	decoding_colormodel: BC_YUV420P
+	decoding_colormodel:  BC_YUV420P
 };
 
 /* These are called from the plugin loader */
@@ -682,63 +708,66 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 extern int get_num_codecs()
 {
 	ffmpeg_map_init();
-	return ffmpeg_num_codecs;
+	return ffmpeg_num_video_codecs + ffmpeg_num_audio_codecs;
 }
+
+static void set_codec_info(struct CODECIDMAP * map)
+  {
+  char * capabilities;
+
+  codec_info_ffmpeg.fourccs = map->fourccs;
+
+  if(map->encoder && map->decoder)
+    {
+    codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
+    capabilities = "Codec";
+    }
+  else if(map->encoder)
+    {
+    codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
+    capabilities = "Encoder";
+    }
+  else if(map->decoder)
+    {
+    codec_info_ffmpeg.direction = LQT_DIRECTION_DECODE;
+    capabilities = "Decoder";
+    }
+
+  snprintf(ffmpeg_name, 50, "ffmpeg_%s", map->short_name);
+  snprintf(ffmpeg_long_name, 50, "FFMPEG %s %s", map->name, capabilities);
+  snprintf(ffmpeg_description, 100, "FFMPEG %s %s", map->name, capabilities);
+
+  if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
+     (map->decoder && (map->decoder->type == CODEC_TYPE_VIDEO))){
+       codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
+       codec_info_ffmpeg.encoding_parameters =
+         (codec_info_ffmpeg.direction != LQT_DIRECTION_DECODE) ? encode_parameters_ffmpeg : NULL;
+       codec_info_ffmpeg.decoding_parameters =
+         (codec_info_ffmpeg.direction != LQT_DIRECTION_ENCODE) ? decode_parameters_ffmpeg : NULL;
+  } else {
+       codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
+       codec_info_ffmpeg.encoding_parameters =
+         (codec_info_ffmpeg.direction != LQT_DIRECTION_DECODE) ? encode_parameters_ffmpeg_audio : NULL;
+       codec_info_ffmpeg.decoding_parameters =
+         (codec_info_ffmpeg.direction != LQT_DIRECTION_ENCODE) ? decode_parameters_ffmpeg_audio : NULL;
+  }
+  }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
 {
 	int i;
 	
 	ffmpeg_map_init();
-	for(i = 0; i < NUMMAPS; i++) {
-		if(codecidmap[i].index == index) {
-			if(codecidmap[i].encoder && codecidmap[i].decoder) {
-				snprintf(ffmpeg_name, 50, "ffmpeg_%s", codecidmap[i].short_name);
-				snprintf(ffmpeg_long_name, 50, "FFMPEG %s Codec", codecidmap[i].name);
-				snprintf(ffmpeg_description, 100, "FFMPEG %s Codec", codecidmap[i].name);
-				codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
-				if(codecidmap[i].encoder->type == CODEC_TYPE_VIDEO) {
-					codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
-					codec_info_ffmpeg.encoding_parameters = encode_parameters_ffmpeg;
-					codec_info_ffmpeg.decoding_parameters = decode_parameters_ffmpeg;
-				} else {
-					codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
-					codec_info_ffmpeg.encoding_parameters = encode_parameters_ffmpeg_audio;
-					codec_info_ffmpeg.decoding_parameters = decode_parameters_ffmpeg_audio;
-				}
-			} else if(codecidmap[i].encoder) {
-				snprintf(ffmpeg_name, 50, "ffmpeg_%s_enc", codecidmap[i].short_name);
-				snprintf(ffmpeg_long_name, 50, "FFMPEG %s Encoder", codecidmap[i].name);
-				snprintf(ffmpeg_description, 100, "FFMPEG %s Encoder", codecidmap[i].name);
-				codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
-				if(codecidmap[i].encoder->type == CODEC_TYPE_VIDEO) {
-					codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
-					codec_info_ffmpeg.encoding_parameters = encode_parameters_ffmpeg;
-					codec_info_ffmpeg.decoding_parameters = NULL;
-				} else {
-					codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
-					codec_info_ffmpeg.encoding_parameters = encode_parameters_ffmpeg_audio;
-					codec_info_ffmpeg.decoding_parameters = NULL;
-				}
-			} else if(codecidmap[i].decoder) {
-				snprintf(ffmpeg_name, 50, "ffmpeg_%s_dec", codecidmap[i].short_name);
-				snprintf(ffmpeg_long_name, 50, "FFMPEG %s Decoder", codecidmap[i].name);
-				snprintf(ffmpeg_description, 100, "FFMPEG %s Decoder", codecidmap[i].name);
-				codec_info_ffmpeg.direction = LQT_DIRECTION_DECODE;
-				if(codecidmap[i].decoder->type == CODEC_TYPE_VIDEO) {
-					codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
-					codec_info_ffmpeg.encoding_parameters = NULL;
-					codec_info_ffmpeg.decoding_parameters = decode_parameters_ffmpeg;
-				} else {
-					codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
-					codec_info_ffmpeg.encoding_parameters = NULL;
-					codec_info_ffmpeg.decoding_parameters = decode_parameters_ffmpeg_audio;
-				}
-			} else {
-				return NULL;
-			}
-			codec_info_ffmpeg.fourccs = codecidmap[i].fourccs;
-			return &codec_info_ffmpeg;
+	for(i = 0; i < NUMMAPS_V; i++) {
+		if(codecidmap_v[i].index == index) {
+                set_codec_info(&codecidmap_v[i]);
+                return &codec_info_ffmpeg;
+		}
+	}
+	for(i = 0; i < NUMMAPS_A; i++) {
+                if(codecidmap_a[i].index == index) {
+                set_codec_info(&codecidmap_a[i]);
+                return &codec_info_ffmpeg;
 		}
 	}
 	return NULL;
@@ -754,14 +783,14 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 */
 
 #define IFUNC(x) \
-void quicktime_init_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
+void quicktime_init_video_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
 { \
 	int i; \
-	for(i = 0; i < ffmpeg_num_codecs; i++) { \
-		if(codecidmap[i].index == x) { \
-			quicktime_init_codec_ffmpeg(vtrack, \
-				codecidmap[i].encoder, \
-				codecidmap[i].decoder); \
+	for(i = 0; i < ffmpeg_num_video_codecs; i++) { \
+		if(codecidmap_v[i].index == x) { \
+			quicktime_init_video_codec_ffmpeg(vtrack, \
+				codecidmap_v[i].encoder, \
+				codecidmap_v[i].decoder); \
 		} \
 	} \
 }
@@ -795,53 +824,144 @@ IFUNC(26)
 IFUNC(27)
 IFUNC(28)
 IFUNC(29)
-#define MAXFUNC 29
+#define MAX_VIDEO_FUNC 29
 
+#define IFUNC(x) \
+void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
+{ \
+	int i; \
+	for(i = 0; i < ffmpeg_num_audio_codecs; i++) { \
+		if(codecidmap_a[i].index == x) { \
+			quicktime_init_audio_codec_ffmpeg(atrack, \
+				codecidmap_a[i].encoder, \
+				codecidmap_a[i].decoder); \
+		} \
+	} \
+}
+IFUNC(0)
+IFUNC(1)
+IFUNC(2)
+IFUNC(3)
+IFUNC(4)
+IFUNC(5)
+IFUNC(6)
+IFUNC(7)
+IFUNC(8)
+IFUNC(9)
+IFUNC(10)
+IFUNC(11)
+IFUNC(12)
+IFUNC(13)
+IFUNC(14)
+IFUNC(15)
+IFUNC(16)
+IFUNC(17)
+IFUNC(18)
+IFUNC(19)
+IFUNC(20)
+IFUNC(21)
+IFUNC(22)
+IFUNC(23)
+IFUNC(24)
+IFUNC(25)
+IFUNC(26)
+IFUNC(27)
+IFUNC(28)
+IFUNC(29)
+#define MAX_AUDIO_FUNC 29
+
+     
 #undef IFUNC
 
 extern lqt_init_video_codec_func_t get_video_codec(int index)
 {
 	ffmpeg_map_init();
-	if(index > MAXFUNC) {
+	if(index > MAX_VIDEO_FUNC) {
 		fprintf(stderr, "lqt_ffmpeg error: Insufficient dummy calls - please report!\n");
 		return NULL;
 	}
 	switch(index) {
-		case 0: return quicktime_init_codec_ffmpeg0;
-		case 1: return quicktime_init_codec_ffmpeg1;
-		case 2:	return quicktime_init_codec_ffmpeg2;
-		case 3:	return quicktime_init_codec_ffmpeg3;
-		case 4:	return quicktime_init_codec_ffmpeg4;
-		case 5:	return quicktime_init_codec_ffmpeg5;
-		case 6:	return quicktime_init_codec_ffmpeg6;
-		case 7:	return quicktime_init_codec_ffmpeg7;
-		case 8:	return quicktime_init_codec_ffmpeg8;
-		case 9:	return quicktime_init_codec_ffmpeg9;
-		case 10: return quicktime_init_codec_ffmpeg10;
-		case 11: return quicktime_init_codec_ffmpeg11;
-		case 12: return quicktime_init_codec_ffmpeg12;
-		case 13: return quicktime_init_codec_ffmpeg13;
-		case 14: return quicktime_init_codec_ffmpeg14;
-		case 15: return quicktime_init_codec_ffmpeg15;
-		case 16: return quicktime_init_codec_ffmpeg16;
-		case 17: return quicktime_init_codec_ffmpeg17;
-		case 18: return quicktime_init_codec_ffmpeg18;
-		case 19: return quicktime_init_codec_ffmpeg19;
-		case 20: return quicktime_init_codec_ffmpeg20;
-		case 21: return quicktime_init_codec_ffmpeg21;
-		case 22: return quicktime_init_codec_ffmpeg22;
-		case 23: return quicktime_init_codec_ffmpeg23;
-		case 24: return quicktime_init_codec_ffmpeg24;
-		case 25: return quicktime_init_codec_ffmpeg25;
-		case 26: return quicktime_init_codec_ffmpeg26;
-		case 27: return quicktime_init_codec_ffmpeg27;
-		case 28: return quicktime_init_codec_ffmpeg28;
-		case 29: return quicktime_init_codec_ffmpeg29;
+		case 0: return quicktime_init_video_codec_ffmpeg0;
+		case 1: return quicktime_init_video_codec_ffmpeg1;
+		case 2:	return quicktime_init_video_codec_ffmpeg2;
+		case 3:	return quicktime_init_video_codec_ffmpeg3;
+		case 4:	return quicktime_init_video_codec_ffmpeg4;
+		case 5:	return quicktime_init_video_codec_ffmpeg5;
+		case 6:	return quicktime_init_video_codec_ffmpeg6;
+		case 7:	return quicktime_init_video_codec_ffmpeg7;
+		case 8:	return quicktime_init_video_codec_ffmpeg8;
+		case 9:	return quicktime_init_video_codec_ffmpeg9;
+		case 10: return quicktime_init_video_codec_ffmpeg10;
+		case 11: return quicktime_init_video_codec_ffmpeg11;
+		case 12: return quicktime_init_video_codec_ffmpeg12;
+		case 13: return quicktime_init_video_codec_ffmpeg13;
+		case 14: return quicktime_init_video_codec_ffmpeg14;
+		case 15: return quicktime_init_video_codec_ffmpeg15;
+		case 16: return quicktime_init_video_codec_ffmpeg16;
+		case 17: return quicktime_init_video_codec_ffmpeg17;
+		case 18: return quicktime_init_video_codec_ffmpeg18;
+		case 19: return quicktime_init_video_codec_ffmpeg19;
+		case 20: return quicktime_init_video_codec_ffmpeg20;
+		case 21: return quicktime_init_video_codec_ffmpeg21;
+		case 22: return quicktime_init_video_codec_ffmpeg22;
+		case 23: return quicktime_init_video_codec_ffmpeg23;
+		case 24: return quicktime_init_video_codec_ffmpeg24;
+		case 25: return quicktime_init_video_codec_ffmpeg25;
+		case 26: return quicktime_init_video_codec_ffmpeg26;
+		case 27: return quicktime_init_video_codec_ffmpeg27;
+		case 28: return quicktime_init_video_codec_ffmpeg28;
+		case 29: return quicktime_init_video_codec_ffmpeg29;
 		default:
 			break;
 	}
 	return (lqt_init_video_codec_func_t)0;
 }
+
+extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+{
+	ffmpeg_map_init();
+	if(index > MAX_AUDIO_FUNC) {
+		fprintf(stderr, "lqt_ffmpeg error: Insufficient dummy calls - please report!\n");
+		return NULL;
+	}
+	switch(index) {
+		case 0: return quicktime_init_audio_codec_ffmpeg0;
+		case 1: return quicktime_init_audio_codec_ffmpeg1;
+		case 2:	return quicktime_init_audio_codec_ffmpeg2;
+		case 3:	return quicktime_init_audio_codec_ffmpeg3;
+		case 4:	return quicktime_init_audio_codec_ffmpeg4;
+		case 5:	return quicktime_init_audio_codec_ffmpeg5;
+		case 6:	return quicktime_init_audio_codec_ffmpeg6;
+		case 7:	return quicktime_init_audio_codec_ffmpeg7;
+		case 8:	return quicktime_init_audio_codec_ffmpeg8;
+		case 9:	return quicktime_init_audio_codec_ffmpeg9;
+		case 10: return quicktime_init_audio_codec_ffmpeg10;
+		case 11: return quicktime_init_audio_codec_ffmpeg11;
+		case 12: return quicktime_init_audio_codec_ffmpeg12;
+		case 13: return quicktime_init_audio_codec_ffmpeg13;
+		case 14: return quicktime_init_audio_codec_ffmpeg14;
+		case 15: return quicktime_init_audio_codec_ffmpeg15;
+		case 16: return quicktime_init_audio_codec_ffmpeg16;
+		case 17: return quicktime_init_audio_codec_ffmpeg17;
+		case 18: return quicktime_init_audio_codec_ffmpeg18;
+		case 19: return quicktime_init_audio_codec_ffmpeg19;
+		case 20: return quicktime_init_audio_codec_ffmpeg20;
+		case 21: return quicktime_init_audio_codec_ffmpeg21;
+		case 22: return quicktime_init_audio_codec_ffmpeg22;
+		case 23: return quicktime_init_audio_codec_ffmpeg23;
+		case 24: return quicktime_init_audio_codec_ffmpeg24;
+		case 25: return quicktime_init_audio_codec_ffmpeg25;
+		case 26: return quicktime_init_audio_codec_ffmpeg26;
+		case 27: return quicktime_init_audio_codec_ffmpeg27;
+		case 28: return quicktime_init_audio_codec_ffmpeg28;
+		case 29: return quicktime_init_audio_codec_ffmpeg29;
+		default:
+			break;
+	}
+	return (lqt_init_audio_codec_func_t)0;
+}
+
+
 
 int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
                           int * exact)

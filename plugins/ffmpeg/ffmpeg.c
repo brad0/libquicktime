@@ -567,7 +567,7 @@ static int encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, i
 	return result;
 }
 
-void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder)
+void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_codec_t *codec;
@@ -586,13 +586,33 @@ void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
 	if((encoder) && (encoder->type == CODEC_TYPE_VIDEO))
 		((quicktime_codec_t*)vtrack->codec)->encode_video = encode_video;
-	if((encoder) && (encoder->type == CODEC_TYPE_AUDIO))
-		((quicktime_codec_t*)vtrack->codec)->encode_audio = encode_audio;
 	if((decoder) && (decoder->type == CODEC_TYPE_VIDEO))
 		((quicktime_codec_t*)vtrack->codec)->decode_video = decode_video;
-	if((decoder) && (decoder->type == CODEC_TYPE_AUDIO))
-		((quicktime_codec_t*)vtrack->codec)->decode_audio = decode_audio;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
 	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
 	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
+}
+
+void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder, AVCodec *decoder)
+{
+	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
+	quicktime_ffmpeg_codec_t *codec;
+
+	avcodec_init();
+
+	codec = calloc(1, sizeof(quicktime_ffmpeg_codec_t));
+	if(!codec)
+		return;
+	memset(codec, 0, sizeof(quicktime_ffmpeg_codec_t));
+
+	codec->ffc_enc = encoder;
+	codec->ffc_dec = decoder;
+	
+	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
+	((quicktime_codec_t*)atrack->codec)->delete_vcodec = delete_codec;
+	if((encoder) && (encoder->type == CODEC_TYPE_AUDIO))
+		((quicktime_codec_t*)atrack->codec)->encode_audio = encode_audio;
+	if((decoder) && (decoder->type == CODEC_TYPE_AUDIO))
+		((quicktime_codec_t*)atrack->codec)->decode_audio = decode_audio;
+	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter;
 }

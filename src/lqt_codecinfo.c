@@ -45,6 +45,13 @@ static char * __lqt_strdup(const char * string)
   return ret;
   }
 
+static char * __lqt_fourccdup(const char * fourcc)
+  {
+  char * ret = malloc(5);
+  memcpy(ret, fourcc, 5);
+  return ret;
+  };
+
 /*
  *  Codec Registry
  */
@@ -115,13 +122,6 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
 void destroy_codec_info(lqt_codec_info_t * ptr)
   {
   int i;
-  
-  if(ptr->name)
-    free(ptr->name);          /* Name of the codec              */
-  if(ptr->long_name)          /* Long name of the codec         */
-    free(ptr->long_name);
-  if(ptr->description)        /* Long name of the codec         */
-    free(ptr->description);
 
   if(ptr->fourccs)
     {
@@ -129,6 +129,13 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
       free(ptr->fourccs[i]);
     free(ptr->fourccs);
     }
+  
+  if(ptr->name)
+    free(ptr->name);          /* Name of the codec              */
+  if(ptr->long_name)          /* Long name of the codec         */
+    free(ptr->long_name);
+  if(ptr->description)        /* Long name of the codec         */
+    free(ptr->description);
 
   if(ptr->encoding_parameters)
     {
@@ -238,7 +245,7 @@ copy_codec_info(const lqt_codec_info_t * info)
     {
     ret->fourccs = malloc(ret->num_fourccs * sizeof(char*));
     for(i = 0; i < ret->num_fourccs; i++)
-      ret->fourccs[i] = __lqt_strdup(info->fourccs[i]);
+      ret->fourccs[i] = __lqt_fourccdup(info->fourccs[i]);
     }
 
   ret->num_encoding_colormodels = info->num_encoding_colormodels;
@@ -480,6 +487,7 @@ static void register_codecs(lqt_codec_info_t * list,
                             lqt_codec_info_t ** audio_codecs_end,
                             lqt_codec_info_t ** video_codecs_end)
   {
+  lqt_codec_info_t * tmp_ptr;
   while(list)
     {
     if(list->type == LQT_CODEC_AUDIO)
@@ -516,7 +524,9 @@ static void register_codecs(lqt_codec_info_t * list,
         }
       lqt_num_video_codecs++;
       }
+    tmp_ptr = list;
     list = list->next;
+    tmp_ptr->next = (lqt_codec_info_t*)0;
     }
   }
 
@@ -634,16 +644,20 @@ void lqt_registry_destroy()
   {
   lqt_codec_info_t * tmp;
 
+  fprintf(stderr, "Deleting Audio Codecs\n");  
   while(lqt_audio_codecs)
     {
     tmp = lqt_audio_codecs->next;
+    fprintf(stderr, "Deleting codec %s\n", lqt_audio_codecs->long_name);
     destroy_codec_info(lqt_audio_codecs);
     lqt_audio_codecs = tmp;
     }
 
+  fprintf(stderr, "Deleting Video Codecs\n");  
   while(lqt_video_codecs)
     {
     tmp = lqt_video_codecs->next;
+    fprintf(stderr, "Deleting codec %s\n", lqt_video_codecs->long_name);
     destroy_codec_info(lqt_video_codecs);
     lqt_video_codecs = tmp;
     }
@@ -869,14 +883,15 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
   
   ret = calloc(1, sizeof(lqt_codec_info_t));
 
-  ret->name = __lqt_strdup(template->name);
-  ret->long_name = __lqt_strdup(template->long_name);
+  ret->name =        __lqt_strdup(template->name);
+  ret->long_name =   __lqt_strdup(template->long_name);
   ret->description = __lqt_strdup(template->description);
 
   ret->type      = template->type;
   ret->direction = template->direction;
   
   ret->num_fourccs = 0;
+  
   while(1)
     {
     if(template->fourccs[ret->num_fourccs])
@@ -887,7 +902,7 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
 
   ret->fourccs = malloc(ret->num_fourccs * sizeof(char*));
   for(i = 0; i < ret->num_fourccs; i++)
-    ret->fourccs[i] = __lqt_strdup(template->fourccs[i]);
+    ret->fourccs[i] = __lqt_fourccdup(template->fourccs[i]);
 
   ret->num_encoding_colormodels = 0;
 

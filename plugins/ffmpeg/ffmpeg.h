@@ -56,4 +56,5 @@ typedef struct
 
 #endif
 
-void quicktime_init_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);
+void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);
+void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);
