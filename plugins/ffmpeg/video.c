@@ -66,7 +66,7 @@ colormodels[] =
 
 static unsigned char ** alloc_rows(int width, int height, int colormodel)
   {
-  unsigned char ** ret;
+  unsigned char ** ret = (unsigned char**)0;
   int i;
   switch(colormodel)
     {
@@ -74,7 +74,7 @@ static unsigned char ** alloc_rows(int width, int height, int colormodel)
       ret    = malloc(height * sizeof(*ret));
       ret[0] = malloc(width * height * 3);
       for(i = 1; i < height; i++)
-        ret[i] = ret[0] + 3 * width;
+        ret[i] = ret[0] + 3 * i * width;
       break;
     case BC_YUV420P:
       ret    = malloc(3 * sizeof(*ret));
@@ -151,7 +151,7 @@ static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_color
       ret->data[0] = rows[0];
       ret->data[1] = rows[1];
       ret->data[2] = rows[2];
-      ret->linesize[0] = row_span/4;
+      ret->linesize[0] = row_span;
       ret->linesize[1] = row_span/4;
       ret->linesize[2] = row_span/4;
       break;
@@ -162,6 +162,7 @@ static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_color
     case BC_RGB565:  ///< always stored in cpu endianness
       ret->data[0]     = rows[0];
       ret->linesize[0] = (int)(rows[1] - rows[0]);
+      //      fprintf(stderr, "Linesize: %d\n", ret->linesize[0]);
       break;
     default:
       break;
@@ -350,9 +351,12 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
        *     image conversion routines to convert to row_pointers.
        *
        *  4. The decoder colormodel is not supported by libquicktime
-       *     AND scaling is reqested. Is this worst case, we need
-       *     2 conversions: The first converts to a colormodel we support,
-       *     the second does a cmodel_transfer
+       *     AND colorspace conversion is reqested. Is this worst case,
+       *     we need 2 conversions: The first converts to a colormodel
+       *     we support, the second does a cmodel_transfer
+       *
+       *  P.S. Volunteers are welcome to reduce this madness by supporting some more
+       *       colormodels for libquicktime. Look at quicktime4linux source
        */
       
       if(codec->lqt_colormodel == LQT_COLORMODEL_NONE)
@@ -377,11 +381,12 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         do_cmodel_transfer = 0;
       
       row_span = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
-
-      //      fprintf(stderr, "decode_video: in: %s out: %s\n",
-      //              lqt_colormodel_to_string(codec->lqt_colormodel),
-      //              lqt_colormodel_to_string(file->vtracks[track].color_model));
-              
+#if 0
+      fprintf(stderr, "decode_video: internal %s, in: %s out: %s\n",
+              avcodec_get_pix_fmt_name(codec->com.ffcodec_dec->pix_fmt),
+              lqt_colormodel_to_string(codec->lqt_colormodel),
+              lqt_colormodel_to_string(file->vtracks[track].color_model));
+#endif         
       if(!codec->do_imgconvert && !do_cmodel_transfer)
         {
         //        fprintf(stderr, "Copy frame...");
@@ -563,7 +568,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         if(!codec->tmp_buffer)
           codec->tmp_buffer = alloc_rows(width, height, codec->lqt_colormodel);
 
-        memset(&in_pic, 0, sizeof(in_pic));
+        memset(&in_pic,  0, sizeof(in_pic));
         memset(&out_pic, 0, sizeof(out_pic));
         
         in_pic.data[0]      = codec->frame->data[0];

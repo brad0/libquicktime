@@ -1022,12 +1022,3 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
 	}
 	return (lqt_init_audio_codec_func_t)0;
 }
-
-#if 0
-
-int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
-                          int * exact)
-{
-	return BC_YUV420P;
-}
-#endif
