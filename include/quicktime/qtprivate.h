@@ -3,6 +3,13 @@
 
 /* ================================= structures */
 
+
+/* Version used internally.  You need to query it with the C functions */
+/* These must match quicktime4linux !!! */
+#define QUICKTIME_MAJOR 1
+#define QUICKTIME_MINOR 6
+#define QUICKTIME_RELEASE 0
+
 #define HEADER_LENGTH 8
 #define MAXTRACKS 1024
 

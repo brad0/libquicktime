@@ -214,7 +214,7 @@ static int decode(quicktime_t *file,
 
 
 	if(samples > OUTPUT_ALLOCATION)
-		printf(__FUNCTION__ ": can't read more than %p samples at a time.\n", OUTPUT_ALLOCATION);
+		printf(__FUNCTION__ ": can't read more than %p samples at a time.\n", (void*)OUTPUT_ALLOCATION);
 
 
 

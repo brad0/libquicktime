@@ -84,6 +84,11 @@ extern "C" {
   
 /* =========================== public interface ========================= // */
 
+/* Get version information */
+int quicktime_major();
+int quicktime_minor();
+int quicktime_release();
+
 /* return 1 if the file is a quicktime file */
 int quicktime_check_sig(char *path);
 
@@ -241,7 +246,7 @@ int quicktime_divx_write_vol(unsigned char *data_start,
 	float frame_rate);
 int quicktime_divx_has_vol(unsigned char *data);
 
-
+int quicktime_div3_is_key(unsigned char *data, long size);
 
 /* Decode or encode the frame into a frame buffer. */
 /* All the frame buffers passed to these functions are unsigned char */

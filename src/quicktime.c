@@ -1118,3 +1118,4 @@ int quicktime_close(quicktime_t *file)
 	free(file);
 	return result;
 }
+

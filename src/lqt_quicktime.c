@@ -1453,3 +1453,28 @@ void lqt_set_default_audio_parameters(quicktime_t * file)
     }
   }
 
+int quicktime_major()
+{
+        return QUICKTIME_MAJOR;
+}
+
+int quicktime_minor()
+{
+        return QUICKTIME_MINOR;
+}
+
+int quicktime_release()
+{
+        return QUICKTIME_RELEASE;
+}
+
+int quicktime_div3_is_key(unsigned char *data, long size)
+  {
+  int result = 0;
+
+// First 2 bits are pict type.
+  result = (data[0] & 0xc0) == 0;
+
+
+  return result;
+  }
