@@ -35,15 +35,14 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	if(codec->compress_struct) RTjpeg_close(codec->compress_struct);
-	if(codec->encode_rows) free(codec->encode_rows);
 	if(codec->encode_frame) free(codec->encode_frame);
         if(codec->write_buffer) free(codec->write_buffer);
 
 	if(codec->decompress_struct) RTjpeg_close(codec->decompress_struct);
-	if(codec->decode_rows) free(codec->decode_rows);
         if(codec->decode_frame) free(codec->decode_frame);
 	if(codec->read_buffer) free(codec->read_buffer);
-	return 0;
+        free(codec);
+        return 0;
 }
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
