@@ -179,6 +179,22 @@ static int decode(quicktime_t *file,
             }
 
           codec->decode_block_align = track_map->channels * bits / 8;
+
+          /* Read first chunk */
+
+          codec->decode_buffer_size = lqt_read_audio_chunk(file,
+                                                           track, file->atracks[track].current_chunk,
+                                                           &(codec->decode_buffer),
+                                                           &(codec->decode_buffer_alloc));
+          if(codec->decode_buffer_size <= 0)
+            return 0;
+          /* Handle AVI byte order */
+          if(codec->le)
+            swap_bytes(codec->decode_buffer, 
+                       (codec->decode_buffer_size * track_map->channels) / codec->decode_block_align,
+                       quicktime_audio_bits(file, track));
+          
+          codec->decode_buffer_ptr = codec->decode_buffer;
           }
         
         if(file->atracks[track].current_position != file->atracks[track].last_position)
@@ -199,7 +215,7 @@ static int decode(quicktime_t *file,
                                                              &(codec->decode_buffer_alloc));
             if(codec->decode_buffer_size <= 0)
               return 0;
-
+            
             codec->decode_buffer_ptr = codec->decode_buffer;
 
             if(codec->le)
@@ -289,7 +305,7 @@ static int decode(quicktime_t *file,
                   for(j = 0; j < track_map->channels; j++)
                     {
                     codec->decode_sample_buffer_i[j][i] = ((int16_t)codec->decode_buffer_ptr[0]) << 8 |
-                      ((unsigned char)codec->decode_buffer_ptr[0]);
+                      ((unsigned char)codec->decode_buffer_ptr[1]);
                     codec->decode_buffer_ptr+= 2;
                     codec->decode_buffer_size-=2;
                     }

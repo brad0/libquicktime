@@ -1906,11 +1906,15 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
 
   trak = file->atracks[track].track;
 
-  if(chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+  if(chunk > file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
     {
     return 0;
     }
-  
+#if 0
+  fprintf(stderr, "lqt_read_audio_chunk %d %d\n",
+          chunk,
+          file->atracks[track].track->mdia.minf.stbl.stco.total_entries);
+#endif
   if(!trak->chunk_sizes)
     {
     trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);

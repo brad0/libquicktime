@@ -70,5 +70,6 @@ file_info(char *filename)
 	  printf("    %ssupported.\n",
 			 quicktime_supported_video(qtfile, i)?"":"NOT ");
 	}
+        quicktime_close(qtfile);
 }
 

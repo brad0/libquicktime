@@ -259,6 +259,16 @@ static int decode(quicktime_t *file,
 
           for(i = 1; i < file->atracks[track].channels; i++)
             codec->decode_sample_buffer[i] = codec->decode_sample_buffer[0] + i * SAMPLES_PER_BLOCK;
+
+          /* Read first chunk */
+          
+          codec->decode_buffer_size = lqt_read_audio_chunk(file,
+                                                           track, file->atracks[track].current_chunk,
+                                                           &(codec->decode_buffer),
+                                                           &(codec->decode_buffer_alloc));
+          if(codec->decode_buffer_size <= 0)
+            return 0;
+          codec->decode_buffer_ptr = codec->decode_buffer;
           }
         
         if(file->atracks[track].current_position != file->atracks[track].last_position)
