@@ -172,7 +172,7 @@ AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
 
 AC_SUBST(LIBS)
 
-AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h stddef.h)
+AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h soundcard.h stddef.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

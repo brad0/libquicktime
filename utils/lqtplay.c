@@ -21,8 +21,12 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/ioctl.h>
-#ifdef	HAVE_SOUNDCARD_H
+#ifdef	HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
+#else
+#ifdef HAVE_SOUNDCARD_H
+#include <soundcard.h>
+#endif
 #endif
 #ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
