@@ -301,7 +301,7 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
   quicktime_atom_t chunk_atom;
   int frame_bytes;
   int samples_done = 0;
-  
+  int samples_encoded;
   /* Initialize encoder */
     
   if(!codec->com.init_enc)
@@ -350,6 +350,7 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
   //          codec->samples_in_buffer, codec->com.ffcodec_enc->frame_size);
   while(codec->samples_in_buffer >= codec->com.ffcodec_enc->frame_size)
     {
+    //    fprintf(stderr, "avcodec_encode_audio %d...", samples_done);
     
     frame_bytes = avcodec_encode_audio(codec->com.ffcodec_enc, codec->chunk_buffer,
                                        codec->chunk_buffer_size,
@@ -358,14 +359,22 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
       {
       quicktime_write_chunk_header(file, trak, &chunk_atom);
       
-      samples_done              += codec->com.ffcodec_enc->frame_size;
-      codec->samples_in_buffer  -= codec->com.ffcodec_enc->frame_size;
+      if(codec->com.ffcodec_enc->frame_size == 1)
+        samples_encoded = codec->samples_in_buffer;
+      else
+        samples_encoded = codec->com.ffcodec_enc->frame_size;
+
+      //      fprintf(stderr, "Done %d->%d\n", samples_encoded, frame_bytes);
+
+      samples_done              += samples_encoded;
+      codec->samples_in_buffer  -= samples_encoded;
+      
       result = !quicktime_write_data(file, codec->chunk_buffer, frame_bytes);
       quicktime_write_chunk_footer(file,
                                    trak, 
                                    file->atracks[track].current_chunk,
                                    &chunk_atom, 
-                                   codec->com.ffcodec_enc->frame_size);
+                                   samples_encoded);
       file->atracks[track].current_chunk++;
       }
     }

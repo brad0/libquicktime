@@ -597,7 +597,9 @@ void ffmpeg_map_init(void)
     }
   for(i = 0; i < NUMMAPS_A; i++)
     {
-    codecidmap_a[i].encoder = avcodec_find_encoder(codecidmap_a[i].id);
+    /* UGLY HACK: Disable alaw encoding since it screws up libquicktime */
+    if(codecidmap_a[i].id != CODEC_ID_PCM_ALAW)
+      codecidmap_a[i].encoder = avcodec_find_encoder(codecidmap_a[i].id);
     codecidmap_a[i].decoder = avcodec_find_decoder(codecidmap_a[i].id);
 
     if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
