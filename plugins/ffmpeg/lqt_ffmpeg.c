@@ -40,7 +40,7 @@ int ffmpeg_num_video_codecs = -1;
 
 #define ENCODE_PARAM_AUDIO \
 	{\
-	  "bit_rate",\
+	  "bit_rate_audio",\
           "Bit rate (kbps)",\
 	  LQT_PARAMETER_INT,\
           { 128 },\
@@ -90,7 +90,7 @@ int ffmpeg_num_video_codecs = -1;
         LQT_PARAMETER_SECTION, \
         }, \
         {\
-	  "bit_rate",\
+	  "bit_rate_video",\
           "Bit rate (kbps)",\
 	  LQT_PARAMETER_INT,\
           { 800 },\

@@ -81,7 +81,7 @@ static int set_parameter_video(quicktime_t *file,
           Bitrate options
         *********************/
 
-        INTPARM(bit_rate, 1000)
+        INTPARM(bit_rate_video, 1000)
         INTPARM(rc_min_rate, 1000) 
         INTPARM(rc_max_rate, 1000)
 	INTPARM(bit_rate_tolerance, 1)
@@ -176,7 +176,7 @@ static int set_parameter_video(quicktime_t *file,
           //	}
           else
             {
-            fprintf(stderr, "Unknown key: %s\n", key);
+            //            fprintf(stderr, "Unknown key: %s\n", key);
 		return -1;
             }
 	return 0;
@@ -197,10 +197,9 @@ static int set_parameter_audio(quicktime_t *file,
           return 0; \
 	}
 
-        INTPARM(bit_rate, 1000);
-	fprintf(stderr, "Unknown key: %s\n", key);
+        INTPARM(bit_rate_audio, 1000);
+        //	fprintf(stderr, "Unknown key: %s\n", key);
           return -1;
-	return 0;
 #undef INTPARM
 }
 
