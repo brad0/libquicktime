@@ -1619,12 +1619,14 @@ int quicktime_close(quicktime_t *file)
                         if(file->total_riffs > 1)
                           quicktime_finalize_indx(file);
                         
+#if 0
 // Pad ending
                         quicktime_set_position(file, position);
                         quicktime_atom_write_header(file, &junk_atom, "JUNK");
                         for(i = 0; i < 0x406; i++)
                                 quicktime_write_int32_le(file, 0);
                         quicktime_atom_write_footer(file, &junk_atom);
+#endif
                 }
                 else
                 {

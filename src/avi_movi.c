@@ -41,20 +41,20 @@ void quicktime_read_movi(quicktime_t *file,
 
 void quicktime_finalize_movi(quicktime_t *file, quicktime_movi_t *movi)
 {
-	int i;
+//	int i;
 // Pad movi to get an even number of bytes
 	char temp[2] = { 0, 0 };
 	quicktime_write_data(file, 
 		temp, 
 		(quicktime_position(file) - movi->atom.start) % 2);
-
+#if 0 /* TODO: Proper implementation of partial (opendml) indices */
 	for(i = 0; i < file->moov.total_tracks; i++)
 	{
 		quicktime_ix_t *ix = movi->ix[i];
 // Write partial indexes and update super index
 		quicktime_write_ix(file, ix, i);
 	}
-
+#endif
 	quicktime_atom_write_footer(file, &movi->atom);
 }
 

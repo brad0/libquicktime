@@ -187,6 +187,11 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 	{
 		quicktime_set_position(file, atom->start - 4);
 		quicktime_write_int32_le(file, atom->end - atom->start);
+                quicktime_set_position(file, atom->end);
+                if((atom->end - atom->start) % 2)
+                  {
+                  quicktime_write_char(file, 0x00);
+                  }
 	}
 	else
 	{
@@ -201,9 +206,9 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 			quicktime_set_position(file, atom->start);
 			quicktime_write_int32(file, atom->end - atom->start);
 		}
+	quicktime_set_position(file, atom->end);
 	}
 
-	quicktime_set_position(file, atom->end);
 }
 
 int quicktime_atom_is(quicktime_atom_t *atom, unsigned char *type)
