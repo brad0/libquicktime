@@ -1,5 +1,7 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <time.h>
+#include <string.h>
 #include "qtvorbis.h"
 #include "vorbis/vorbisenc.h"
 

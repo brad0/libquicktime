@@ -14,6 +14,20 @@ int quicktime_atom_reset(quicktime_atom_t *atom)
 	return 0;
 }
 
+int quicktime_atom_read_type(char *data, char *type)
+{
+	type[0] = data[4];
+	type[1] = data[5];
+	type[2] = data[6];
+	type[3] = data[7];
+/*printf("%c%c%c%c ", type[0], type[1], type[2], type[3]); */
+/* need this for quicktime_check_sig */
+	if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
+	return 0;
+	else
+	return 1;
+}
+
 int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 {
 	char header[10];
@@ -163,21 +177,6 @@ longest quicktime_atom_read_size64(char *data)
 
 	if(result < HEADER_LENGTH) result = HEADER_LENGTH;
 	return (longest)result;
-}
-
-int quicktime_atom_read_type(char *data, char *type)
-{
-	type[0] = data[4];
-	type[1] = data[5];
-	type[2] = data[6];
-	type[3] = data[7];
-
-/*printf("%c%c%c%c ", type[0], type[1], type[2], type[3]); */
-/* need this for quicktime_check_sig */
-	if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
-	return 0;
-	else
-	return 1;
 }
 
 int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom)

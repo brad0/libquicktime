@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
 	FILE *temp;
 	quicktime_t *out;
 	longest current_byte, ftell_byte;
-	longest jpeg_start, jpeg_end;
-	longest audio_start, audio_end;
+	longest jpeg_start = 0, jpeg_end = 0;
+	longest audio_start, audio_end = 0;
 	unsigned char *search_buffer = calloc(1, SEARCH_FRAGMENT);
 	unsigned char *copy_buffer = 0;
 	int i, found_jfif, found_eoi;
@@ -322,6 +322,7 @@ printf("\n\n");
 	fwrite(copy_buffer, ostat.st_size, 1, in);
 
 	fclose(in);
+	exit (EXIT_SUCCESS);
 }
 
 

@@ -3,6 +3,47 @@
 
 #include <graphics.h>
 #include <quicktime/qtprivate.h>
+#include <lqt_funcprotos.h>
+#include <cmodel_permutation.h>
+
+/* Stuff from cmodel_*.c */
+void cmodel_yuv420p(PERMUTATION_ARGS);
+void cmodel_yuv422(PERMUTATION_ARGS);
+void cmodel_default(PERMUTATION_ARGS);
+
+/* Stuff from util.c */
+void quicktime_copy_char32(char *output, char *input);
+longest quicktime_ftell(quicktime_t *file);
+int quicktime_fseek(quicktime_t *file, longest offset);
+static int read_preload(quicktime_t *file, char *data, longest size);
+int quicktime_read_data(quicktime_t *file, char *data, longest size);
+int quicktime_write_data(quicktime_t *file, char *data, int size);
+longest quicktime_byte_position(quicktime_t *file);
+void quicktime_read_pascal(quicktime_t *file, char *data);
+void quicktime_write_pascal(quicktime_t *file, char *data);
+float quicktime_read_fixed32(quicktime_t *file);
+int quicktime_write_fixed32(quicktime_t *file, float number);
+int quicktime_write_int64(quicktime_t *file, longest value);
+int quicktime_write_int32(quicktime_t *file, long value);
+int quicktime_write_char32(quicktime_t *file, char *string);
+float quicktime_read_fixed16(quicktime_t *file);
+int quicktime_write_fixed16(quicktime_t *file, float number);
+unsigned long quicktime_read_uint32(quicktime_t *file);
+long quicktime_read_int32(quicktime_t *file);
+longest quicktime_read_int64(quicktime_t *file);
+long quicktime_read_int24(quicktime_t *file);
+int quicktime_write_int24(quicktime_t *file, long number);
+int quicktime_read_int16(quicktime_t *file);
+int quicktime_write_int16(quicktime_t *file, int number);
+int quicktime_read_char(quicktime_t *file);
+int quicktime_write_char(quicktime_t *file, char x);
+void quicktime_read_char32(quicktime_t *file, char *string);
+longest quicktime_position(quicktime_t *file);
+int quicktime_set_position(quicktime_t *file, longest position);
+void quicktime_copy_char32(char *output, char *input);
+void quicktime_print_chars(char *desc, char *input, int len);
+unsigned long quicktime_current_time(void);
+int quicktime_match_32(char *input, char *output);
 
 /* atom handling routines */
 int quicktime_atom_write_header(quicktime_t *file, quicktime_atom_t *atom, char *text);
@@ -207,7 +248,5 @@ void quicktime_tkhd_init_video(quicktime_t *file,
 quicktime_trak_t* quicktime_add_trak(quicktime_moov_t *moov);
 int quicktime_delete_trak(quicktime_moov_t *moov);
 int quicktime_get_timescale(float frame_rate);
-
-unsigned long quicktime_current_time(void);
 
 #endif

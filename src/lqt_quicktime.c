@@ -3,6 +3,7 @@
 #include <quicktime/quicktime.h>
 #include <glib.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #include <lqt_funcprotos.h>
 

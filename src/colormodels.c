@@ -16,6 +16,7 @@
  */
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 cmodel_yuv_t *yuv_table = 0;
@@ -116,6 +117,7 @@ int cmodel_components(int colormodel)
 		case BC_YUVA16161616: return 4; break;
 		case BC_YUV101010:    return 3; break;
 	}
+	return 1;
 }
 
 int cmodel_calculate_pixelsize(int colormodel)

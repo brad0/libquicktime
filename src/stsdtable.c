@@ -1,5 +1,6 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <string.h>
 
 
 void quicktime_mjqt_init(quicktime_mjqt_t *mjqt)

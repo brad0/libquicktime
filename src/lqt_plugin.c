@@ -3,6 +3,7 @@
 #include <dlfcn.h>
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <string.h>
 #include "config.h"
 
 static int total_vcodecs = 0;
@@ -12,6 +13,28 @@ static quicktime_extern_audio_t *acodecs = NULL;
 
 
 #define CODEC_PREFIX "quicktime_codec_"
+
+int quicktime_find_vcodec(char *fourcc)
+{
+  	int i;
+  	for(i = 0; i < total_vcodecs; i++)
+  	{
+    	if(quicktime_match_32(fourcc, vcodecs[i].fourcc))
+      		return i;
+  	}
+  	return -1;
+}
+
+int quicktime_find_acodec(char *fourcc)
+{
+	int i;
+	for(i = 0; i < total_acodecs; i++)
+	{
+    	if(quicktime_match_32(fourcc, acodecs[i].fourcc))
+    		return i;
+	}
+	return -1;
+}
 
 static int decode_audio_external(quicktime_t *file, 
 				int16_t *output_i, 
@@ -75,7 +98,7 @@ static int decode_video_external(quicktime_t *file,
 	else 
 	{
     	fprintf(stderr, 
-	    	"decode_video_external: Can't find the corresponding codec: ",
+	    	"decode_video_external: Can't find the corresponding codec: %s",
 	    	quicktime_video_compressor(file, track));
 	}
     return error;
@@ -115,7 +138,7 @@ static int encode_video_external(quicktime_t *file,
 
     	    if(bytes > 0)
 			{
-				printf("Writing %d bytes\n", bytes);
+				printf("Writing %ld bytes\n", bytes);
 
 				error = !quicktime_write_data(file, output, bytes);
 
@@ -139,7 +162,7 @@ static int encode_video_external(quicktime_t *file,
   	} 
 	else 
     	fprintf(stderr, 
-	    	"encode_video_external: Can't find the corresponding codec: ",
+	    	"encode_video_external: Can't find the corresponding codec: %s",
 	    	quicktime_video_compressor(file, track) );
   
     return error;    
@@ -155,32 +178,6 @@ int quicktime_vcodec_size()
 int quicktime_acodec_size()
 {
 	return total_acodecs;
-}
-
-
-int quicktime_find_vcodec(char *fourcc)
-{
-  	int i;
-
-  	for(i = 0; i < total_vcodecs; i++)
-  	{
-    	if(quicktime_match_32(fourcc, vcodecs[i].fourcc))
-      		return i;
-  	}
-  	return -1;
-}
-
-
-int quicktime_find_acodec(char *fourcc)
-{
-	int i;
-
-	for(i = 0; i < total_acodecs; i++)
-	{
-    	if(quicktime_match_32(fourcc, acodecs[i].fourcc))
-    		return i;
-	}
-	return -1;
 }
 
 

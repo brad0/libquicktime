@@ -125,4 +125,5 @@ int main(int argc, char *argv[])
 	}
 
 	quicktime_close(file);
+	exit (EXIT_SUCCESS);
 }

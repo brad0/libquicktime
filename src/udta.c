@@ -1,5 +1,6 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
+#include <string.h>
 
 #define DEFAULT_INFO "Made with Quicktime for Linux"
 

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>
+#include <string.h>
 #include "jpeg.h"
 #include <quicktime/quicktime.h>
 

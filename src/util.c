@@ -3,6 +3,7 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 #include <workarounds.h>
+#include <string.h>
 
 /* Disk I/O */
 

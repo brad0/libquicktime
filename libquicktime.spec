@@ -181,7 +181,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files static
 %defattr(644,root,root,755)
-# FIXME: These are not being built for some reason: %{_libdir}/lib*.a
+%{_libdir}/lib*.a
 
 %define date	%(echo `LC_ALL="C" date +"%a %b %d %Y"`)
 %changelog

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <quicktime/colormodels.h>
+#include <string.h>
 #include "libmjpeg.h"
 
 /* JPEG MARKERS */

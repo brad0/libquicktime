@@ -6,7 +6,7 @@
 
 
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	quicktime_t *file;
 	int result = 0;
@@ -26,4 +26,5 @@ main(int argc, char *argv[])
 	quicktime_dump(file);
 
 	quicktime_close(file);
+	exit (EXIT_SUCCESS);
 }
