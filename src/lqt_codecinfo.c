@@ -1081,8 +1081,8 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
     for(i = 0; i < lqt_num_audio_codecs; i++)
       {
       info = lqt_get_audio_codec_info(i);
-      if((encode && (info->type != LQT_DIRECTION_DECODE)) ||
-         (decode && (info->type != LQT_DIRECTION_ENCODE)))
+      if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
+         (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         num_codecs++;
       }
     }
@@ -1091,8 +1091,8 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
     for(i = 0; i < lqt_num_video_codecs; i++)
       {
       info = lqt_get_video_codec_info(i);
-      if((encode && (info->type != LQT_DIRECTION_DECODE)) ||
-         (decode && (info->type != LQT_DIRECTION_ENCODE)))
+      if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
+         (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         num_codecs++;
       }
     }
@@ -1104,8 +1104,8 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
     for(i = 0; i < lqt_num_audio_codecs; i++)
       {
       info = lqt_get_audio_codec_info(i);
-      if((encode && (info->type != LQT_DIRECTION_DECODE)) ||
-         (decode && (info->type != LQT_DIRECTION_ENCODE)))
+      if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
+         (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         {
         ret[num_added] = copy_codec_info(info);
         num_added++;
@@ -1117,8 +1117,8 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
     for(i = 0; i < lqt_num_video_codecs; i++)
       {
       info = lqt_get_video_codec_info(i);
-      if((encode && (info->type != LQT_DIRECTION_DECODE)) ||
-         (decode && (info->type != LQT_DIRECTION_ENCODE)))
+      if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
+         (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         {
         ret[num_added] = copy_codec_info(info);
         num_added++;
