@@ -223,12 +223,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_audiocodec.la
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_videocodec.so
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_videocodec.la
-%attr(755,root,root) %{_libdir}/libquicktime/lqt_ferguson.so
-%attr(644,root,root) %{_libdir}/libquicktime/lqt_ferguson.la
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_rtjpeg.so
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_rtjpeg.la
-%attr(755,root,root) %{_libdir}/libquicktime/lqt_svq.so
-%attr(644,root,root) %{_libdir}/libquicktime/lqt_svq.la
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_xanim.so
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_xanim.la
 

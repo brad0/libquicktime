@@ -4,10 +4,8 @@
 base_subdirs = audiocodec \
 videocodec \
 opendivx \
-ferguson \
 rtjpeg \
-xanim \
-svq
+xanim 
 
 if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
