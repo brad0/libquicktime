@@ -107,10 +107,10 @@ void quicktime_init_strl(quicktime_t *file,
 /* initial frame */
         quicktime_write_int32_le(file, 0);
 		strl->samples_per_chunk_offset = quicktime_position(file);
-/* samples per chunk */
+/* samples per chunk (dwScale) */
         quicktime_write_int32_le(file, 0);
 /* sample rate * samples per chunk  if uncompressed */
-/* sample rate if compressed */
+/* sample rate if compressed  (dwRate) */
         quicktime_write_int32_le(file, 0);
 /* start */
         quicktime_write_int32_le(file, 0);
@@ -224,19 +224,19 @@ void quicktime_read_strl(quicktime_t *file,
 	char data[4], codec[4];
 	int denominator;
 	int numerator;
-        int frame_duration;
-        int timescale;
-        int width;
-	int height;
-	int depth;
-	int frames;
-	int bytes_per_sample;
-	int sample_size;
+        int frame_duration = 0;
+        int timescale = 0;
+        int width = 0;
+	int height = 0;
+	int depth = 0;
+	int frames = 0;
+	int bytes_per_sample = 0;
+	int sample_size = 0;
 	int samples;
-	int samples_per_chunk;
-	int channels;
-	int sample_rate;
-	int compression_id;
+	int samples_per_chunk = 0;
+	int channels = 0;
+	int sample_rate = 0;
+	int compression_id = 0;
 	int bytes_per_second;
 	quicktime_trak_t *trak = 0;
 	quicktime_riff_t *first_riff = file->riff[0];
