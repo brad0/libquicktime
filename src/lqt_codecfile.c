@@ -77,7 +77,7 @@ static const char * option_key          = "Options: ";
 
 static const char * num_encoding_colormodels_key = "NumEncodingColormodels: ";
 static const char * encoding_colormodel_key =      "EncodingColormodel: ";
-
+static const char * decoding_colormodel_key =      "DecodingColormodel: ";
 
 #define READ_BUFFER_SIZE 2048
 
@@ -159,8 +159,8 @@ static void read_parameter_info(FILE * input,
          */
 
         info->val_default.val_int = 0;
-        info->val_min.val_int = 0;
-        info->val_max.val_int = 0;
+        info->val_min = 0;
+        info->val_max = 0;
         }
 
       /*
@@ -172,15 +172,11 @@ static void read_parameter_info(FILE * input,
         {
         info->type = LQT_PARAMETER_STRINGLIST;
         info->val_default.val_string = (char*)0;
-        info->val_min.val_string = (char*)0;
-        info->val_max.val_string = (char*)0;
         }
       else if(!strcmp(pos, type_string))
         {
         info->type = LQT_PARAMETER_STRING;
         info->val_default.val_string = (char*)0;
-        info->val_min.val_string = (char*)0;
-        info->val_max.val_string = (char*)0;
         }
       }
     else if(CHECK_KEYWORD(real_name_key))
@@ -198,12 +194,12 @@ static void read_parameter_info(FILE * input,
     else if(CHECK_KEYWORD(min_value_key))
       {
       pos = line + strlen(min_value_key);
-      read_parameter_value(pos, &(info->val_min), info->type);
+      info->val_min = atoi(pos);
       }
     else if(CHECK_KEYWORD(max_value_key))
       {
       pos = line + strlen(max_value_key);
-      read_parameter_value(pos, &(info->val_max), info->type);
+      info->val_max = atoi(pos);
       }
     else if(CHECK_KEYWORD(num_options_key))
       {
@@ -410,7 +406,11 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
         lqt_string_to_colormodel(pos);
       encoding_colormodels_read++;
       }
-    
+    else if(CHECK_KEYWORD(decoding_colormodel_key))
+      {
+      pos = line + strlen(decoding_colormodel_key);
+      codec->decoding_colormodel = lqt_string_to_colormodel(pos);
+      }
     }
   
   }
@@ -537,10 +537,10 @@ static void write_parameter_info(FILE * output,
     case LQT_PARAMETER_INT:
       fprintf(output, "%s%d\n", value_key, info->val_default.val_int);
 
-      if(info->val_min.val_int < info->val_max.val_int)
+      if(info->val_min < info->val_max)
         {
-        fprintf(output, "%s%d\n", min_value_key, info->val_min.val_int);
-        fprintf(output, "%s%d\n", max_value_key, info->val_max.val_int);
+        fprintf(output, "%s%d\n", min_value_key, info->val_min);
+        fprintf(output, "%s%d\n", max_value_key, info->val_max);
         }
 
       break;
@@ -631,14 +631,28 @@ static void write_codec_info(const lqt_codec_info_t * info, FILE * output)
     write_parameter_info(output, &(info->decoding_parameters[i]), 0);
     }
 
-  fprintf(output, "%s%d\n", num_encoding_colormodels_key,
-          info->num_encoding_colormodels);
-
-  for(i = 0; i < info->num_encoding_colormodels; i++)
+  if(info->type == LQT_CODEC_VIDEO)
     {
-    fprintf(output, "%s%s\n", encoding_colormodel_key,
-            lqt_colormodel_to_string(info->encoding_colormodels[i]));
+    if(info->direction != LQT_DIRECTION_DECODE)
+      {
+      fprintf(output, "%s%d\n", num_encoding_colormodels_key,
+              info->num_encoding_colormodels);
+      
+      for(i = 0; i < info->num_encoding_colormodels; i++)
+        {
+        fprintf(output, "%s%s\n", encoding_colormodel_key,
+                lqt_colormodel_to_string(info->encoding_colormodels[i]));
+        }
+      }
+    if(info->direction != LQT_DIRECTION_ENCODE)
+      {
+      fprintf(output, "%s%s\n", decoding_colormodel_key,
+              lqt_colormodel_to_string(info->decoding_colormodel));
+      
+      }
+    
     }
+  
   
   /* Module filename and index */
   fprintf(output, "%s%s\n", module_filename_key, info->module_filename);

@@ -311,9 +311,18 @@ have_libdv=false
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
 
-LIBS=-ldv
-CFLAGS=""
+dnl
+dnl Since libdv depends on glib but libquicktime does not,
+dnl we check for it here (because we want to do AC_TRY_LINK).
+dnl
 
+have_glib=false
+AM_PATH_GLIB([1.2.8], have_glib=true)
+
+LIBS="$GLIB_LIBS -ldv"
+CFLAGS=$GLIB_CFLAGS
+
+if test x$have_glib = xtrue; then
 AC_MSG_CHECKING(for libdv with encoder)
 AC_TRY_LINK([#include <stdio.h>
              #include <libdv/dv.h>],
@@ -332,11 +341,13 @@ AC_TRY_LINK([#include <stdio.h>
 case $have_libdv in
   true) dnl AC_DEFINE(HAVE_LIBDV)
         AC_MSG_RESULT(yes)
-	LIBDV_LIBS=$LIBS;
+	LIBDV_LIBS=-ldv;
 	LIBDV_CFLAGS=$CFLAGS;;
   false) AC_MSG_RESULT(no); LIBDV_LIBS=""; LIBDV_CFLAGS="";;
   * ) AC_MSG_RESULT("Somethings wrong: $have_libdv") ;;
 esac
+
+fi
 
 CFLAGS=$OLD_CFLAGS
 LIBS=$OLD_LIBS
@@ -356,7 +367,7 @@ AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
 AM_PATH_VORBIS(have_vorbis=true)
 AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
 
-if test x$have_vorbis = true; then
+if test x$have_vorbis = xtrue; then
 AC_DEFINE(HAVE_VORBIS)
 fi
 

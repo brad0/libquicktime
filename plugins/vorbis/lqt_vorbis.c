@@ -11,8 +11,8 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        real_name:          "Nominal Bitrate",
        type:               LQT_PARAMETER_INT,
        val_default:        { 128000 },
-       val_min:            {0},
-       val_max:            {0},
+       val_min:            0,
+       val_max:            0,
        stringlist_options: (char**)0
      },
      { 
@@ -20,8 +20,8 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        real_name: "Maximum Bitrate (-1: no limit)",
        type:      LQT_PARAMETER_INT,
        val_default:        { -1 },
-       val_min:            {0},
-       val_max:            {0},
+       val_min:            0,
+       val_max:            0,
        stringlist_options: (char**)0
      },
      { 
@@ -29,8 +29,8 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        real_name: "Minimum Bitrate (-1: no limit)",
        type:      LQT_PARAMETER_INT,
        val_default:        { -1 },
-       val_min:            {0},
-       val_max:            {0},
+       val_min:            0,
+       val_max:            0,
        stringlist_options: (char**)0
      },
      { /* End of paramaters */ }
@@ -53,12 +53,12 @@ static lqt_codec_info_static_t codec_info_vorbis =
 
 extern int get_num_codecs() { return 1; }
 
-extern lqt_codec_info_t * get_codec_info(int index)
+extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(!index)
-    return lqt_create_codec_info(&codec_info_vorbis);
+    return &codec_info_vorbis;
   
-  return (lqt_codec_info_t*)0;
+  return (lqt_codec_info_static_t*)0;
   }
      
 /*

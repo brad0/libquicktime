@@ -87,8 +87,8 @@ static lqt_parameter_info_static_t dummy_parameters[] =
        real_name:          "String Test",
        type:               LQT_PARAMETER_STRING,
        val_default:        { (int)"String Test" },
-       val_min:            {0},
-       val_max:            {0},
+       val_min:            0,
+       val_max:            0,
        stringlist_options: (char**)0
      },
      { 
@@ -96,8 +96,8 @@ static lqt_parameter_info_static_t dummy_parameters[] =
        real_name: "Stringlist test",
        type:      LQT_PARAMETER_STRINGLIST,
        val_default:        { (int)"Option1" },
-       val_min:            {0},
-       val_max:            {0},
+       val_min:            0,
+       val_max:            0,
        stringlist_options: dummy_stringlist_options
      },
      { /* End of array */ }
@@ -120,7 +120,8 @@ static lqt_codec_info_static_t codec_info_raw =
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
-  encoding_colormodels: encoding_colormodels_raw
+  encoding_colormodels: encoding_colormodels_raw,
+  decoding_colormodel:  LQT_COLORMODEL_NONE
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
@@ -133,8 +134,8 @@ static lqt_codec_info_static_t codec_info_v308 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v308
-
+  encoding_colormodels: encoding_colormodels_v308,
+  decoding_colormodel:  BC_VYU888
   };
 
 static lqt_codec_info_static_t codec_info_v408 =
@@ -147,7 +148,8 @@ static lqt_codec_info_static_t codec_info_v408 =
   direction:         LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v408
+  encoding_colormodels: encoding_colormodels_v408,
+  decoding_colormodel:  BC_UYVA8888
 
   };
 
@@ -161,8 +163,8 @@ static lqt_codec_info_static_t codec_info_v410 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v410
-
+  encoding_colormodels: encoding_colormodels_v410,
+  decoding_colormodel: BC_YUV101010
   };
 
 static lqt_codec_info_static_t codec_info_yuv2 =
@@ -175,7 +177,8 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_yuv2
+  encoding_colormodels: encoding_colormodels_yuv2,
+  decoding_colormodel: BC_YUV422
 
   };
 
@@ -189,7 +192,8 @@ static lqt_codec_info_static_t codec_info_yuv4 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_yuv4
+    encoding_colormodels: encoding_colormodels_yuv4,
+    decoding_colormodel: BC_RGB888
 
   };
 
@@ -203,42 +207,42 @@ static lqt_codec_info_static_t codec_info_yv12 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_yv12
-        
+    encoding_colormodels: encoding_colormodels_yv12,
+    decoding_colormodel: BC_YUV420P
+    
   };
 
 /* These are called from the plugin loader */
 
 extern int get_num_codecs() { return 7; }
 
-extern lqt_codec_info_t * get_codec_info(int index)
+extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
     case 0: /* raw */
-      return lqt_create_codec_info(&codec_info_raw);
+      return &codec_info_raw;
       break;
     case 1: /* v308 */
-      return lqt_create_codec_info(&codec_info_v308);
+      return &codec_info_v308;
       break;
-
     case 2: /* v408 */
-      return lqt_create_codec_info(&codec_info_v408);
+      return &codec_info_v408;
       break;
     case 3: /* v410 */
-      return lqt_create_codec_info(&codec_info_v410);
+      return &codec_info_v410;
       break;
     case 4: /* yuv2 */
-      return lqt_create_codec_info(&codec_info_yuv2);
+      return &codec_info_yuv2;
       break;
     case 5: /* yuv4 */
-      return lqt_create_codec_info(&codec_info_yuv4);
+      return &codec_info_yuv4;
       break;
     case 6: /* vy12 */
-      return lqt_create_codec_info(&codec_info_yv12);
+      return &codec_info_yv12;
       break;
     }
-  return (lqt_codec_info_t*)0;
+  return (lqt_codec_info_static_t*)0;
   }
 
 extern lqt_init_video_codec_func_t get_video_codec(int index)
@@ -268,4 +272,30 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
       break;
     }
   return (lqt_init_video_codec_func_t)0;
+  }
+
+int get_stream_colormodel(quicktime_t * file, int track,
+                          int codec_index, int * exact)
+  {
+  int depth;
+  if(exact)
+    *exact = 1;
+  
+  if(codec_index == 0)
+    {
+    depth = quicktime_video_depth(file, track);
+    switch(depth)
+      {
+      case 24:
+        return BC_RGB888;
+        break;
+      case 32:
+        return BC_ARGB8888;
+        break;
+      default:
+        return LQT_COLORMODEL_NONE; /* This should never happen... */
+        break;
+      }
+    }
+  return LQT_COLORMODEL_NONE; /* And this neither */
   }

@@ -79,6 +79,7 @@ void lqtgtk_codec_config_window_apply(LqtGtkCodecConfigWindow *w);
 typedef struct
   {
   GtkWidget * label_table;
+  GtkWidget * table;
 
   GtkWidget * widget;
  
@@ -97,8 +98,8 @@ typedef struct
   GtkWidget * fourccs_frame;
 
   GtkWidget * encoding_colormodels_label;
-  GtkWidget * encoding_colormodels_frame;
-
+  GtkWidget * decoding_colormodel_label;
+  GtkWidget * colormodels_frame;
   
   } LqtGtkCodecInfoWidget;
 

@@ -37,4 +37,13 @@ const char * lqt_get_colormodel_string(int index);
 
 int lqt_get_colormodel(int index);
 
+/*
+ *  Return decoder colormodel
+ *  This function can fail in some pathological cases,
+ *  it returns LQT_COLORMODEL_NONE then
+ */
+
+int lqt_get_decoder_colormodel(quicktime_t * file, int track,
+                               int * exact);
+
 #endif

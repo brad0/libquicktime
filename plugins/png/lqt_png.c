@@ -23,18 +23,19 @@ static lqt_codec_info_static_t codec_info_png =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_png
+  encoding_colormodels: encoding_colormodels_png,
+  decoding_colormodel: LQT_COLORMODEL_NONE
   };
 
 /* These are called from the plugin loader */
 
 extern int get_num_codecs() { return 1; }
 
-extern lqt_codec_info_t * get_codec_info(int index)
+extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(!index)
-    return lqt_create_codec_info(&codec_info_png);
-  return (lqt_codec_info_t*)0;
+    return &codec_info_png;
+  return (lqt_codec_info_static_t*)0;
   }
 
 /*
@@ -58,3 +59,32 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
   }
 
 
+/* 
+ *  Return internal colormodel of the stream
+ */
+
+int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
+                          int * exact)
+  {
+  int depth;
+  if(exact)
+    *exact = 1;
+
+  if(codec_index == 0)
+    {
+    depth = quicktime_video_depth(file, track);
+    switch(depth)
+      {
+      case 24:
+        return BC_RGB888;
+        break;
+      case 32:
+        return BC_RGBA8888;
+        break;
+      default:
+        return LQT_COLORMODEL_NONE; /* This should never happen... */
+        break;
+      }
+    }
+  return LQT_COLORMODEL_NONE; /* And this neither */
+  }

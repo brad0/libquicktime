@@ -67,26 +67,26 @@ static lqt_codec_info_static_t codec_info_ulaw =
 
 extern int get_num_codecs() { return 4; }
 
-extern lqt_codec_info_t * get_codec_info(int index)
+extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
     case 0: /* ima4 */
-      return lqt_create_codec_info(&codec_info_ima4);
+      return &codec_info_ima4;
       break;
     case 1: /* raw */
-      return lqt_create_codec_info(&codec_info_raw);
+      return &codec_info_raw;
 
       break;
     case 2: /* Twos */
-      return lqt_create_codec_info(&codec_info_twos);
+      return &codec_info_twos;
       break;
     case 3: /* Ulaw */
-      return lqt_create_codec_info(&codec_info_ulaw);
+      return &codec_info_ulaw;
       break;
     }
   
-  return (lqt_codec_info_t*)0;
+  return (lqt_codec_info_static_t*)0;
   }
      
 extern lqt_init_audio_codec_func_t get_audio_codec(int index)

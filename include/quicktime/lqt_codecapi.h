@@ -43,8 +43,8 @@ typedef struct
    *   These are only valid for numeric types and if val_min < val_max
    */
 
-  lqt_parameter_value_t val_min;
-  lqt_parameter_value_t val_max;
+  int val_min;
+  int val_max;
 
   /*
    *  Possible options (only valid for LQT_STRINGLIST)
@@ -77,7 +77,9 @@ typedef struct
   lqt_parameter_info_static_t * decoding_parameters;
 
   int * encoding_colormodels;
-   
+
+  int decoding_colormodel;
+  
   } lqt_codec_info_static_t;
 
 /*

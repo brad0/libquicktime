@@ -20,8 +20,8 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
        "Quality",
        LQT_PARAMETER_INT,
        {95 },
-       {1  },
-       {100},
+       1,
+       100,
        (char**)0
      },
      { 
@@ -29,8 +29,8 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
        "Use float",
        LQT_PARAMETER_INT,
        { 0 },
-       { 0 },
-       { 1 },
+       0,
+       1,
        (char**)0
      },
      { /* End of parameters */ }
@@ -59,7 +59,8 @@ static lqt_codec_info_static_t codec_info_jpeg =
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: encode_parameters_jpeg,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_jpeg
+    encoding_colormodels: encoding_colormodels_jpeg,
+    decoding_colormodel: BC_YUV420P
   };
 
 static lqt_codec_info_static_t codec_info_mjpa =
@@ -73,7 +74,8 @@ static lqt_codec_info_static_t codec_info_mjpa =
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: encode_parameters_jpeg,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_mjpa
+    encoding_colormodels: encoding_colormodels_mjpa,
+    decoding_colormodel: BC_YUV422P
   };
 
 
@@ -81,16 +83,16 @@ static lqt_codec_info_static_t codec_info_mjpa =
 
 extern int get_num_codecs() { return 2; }
 
-extern lqt_codec_info_t * get_codec_info(int index)
+extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
     case 0:
-      return lqt_create_codec_info(&codec_info_jpeg);
+      return &codec_info_jpeg;
     case 1:
-      return lqt_create_codec_info(&codec_info_mjpa);
+      return &codec_info_mjpa;
     }
-  return (lqt_codec_info_t*)0;
+  return (lqt_codec_info_static_t*)0;
   }
      
 

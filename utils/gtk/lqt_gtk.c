@@ -47,14 +47,14 @@ static void parameter_widget_apply(LqtGtkParameterWidget * w)
       parameter_set_string(w->parameter_info, ptr);
       break;
     case LQT_PARAMETER_INT:
-      if((w->parameter_info->val_min.val_int == 0) &&
-         (w->parameter_info->val_max.val_int == 1))
+      if((w->parameter_info->val_min == 0) &&
+         (w->parameter_info->val_max == 1))
         {
         w->parameter_info->val_default.val_int =
           gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w->widget));
         }
-      else if((w->parameter_info->val_min.val_int <
-               w->parameter_info->val_max.val_int))
+      else if((w->parameter_info->val_min <
+               w->parameter_info->val_max))
         {
         w->parameter_info->val_default.val_int =
           (int)(GTK_ADJUSTMENT(w->adjustment)->value);
@@ -82,19 +82,19 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
     case LQT_PARAMETER_INT:
 
       /* Boolean */
-      if((info->val_min.val_int == 0) && (info->val_max.val_int == 1))
+      if((info->val_min == 0) && (info->val_max == 1))
         {
         ret->widget = gtk_check_button_new_with_label(info->real_name);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ret->widget),
                                      info->val_default.val_int);
         }
       /* Integer with limits -> slider */
-      else if(info->val_min.val_int < info->val_max.val_int)
+      else if(info->val_min < info->val_max)
         {
         ret->label = gtk_label_new(info->real_name);
-        ret->adjustment = gtk_adjustment_new((gfloat) info->val_min.val_int,
-                                             (gfloat) info->val_min.val_int,
-                                             (gfloat) info->val_max.val_int,
+        ret->adjustment = gtk_adjustment_new((gfloat) info->val_min,
+                                             (gfloat) info->val_min,
+                                             (gfloat) info->val_max,
                                              0.0,
                                              0.0,
                                              0.0);
@@ -665,7 +665,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     
     *tmp1 = '\0';
     
-    for(i = 0; i < info->num_fourccs - 1; i++)
+    for(i = 0; i < info->num_encoding_colormodels - 1; i++)
       {
       sprintf(tmp2, "%s\n",
               lqt_colormodel_to_string(info->encoding_colormodels[i]));
@@ -683,10 +683,11 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     free(tmp1);
     free(tmp2);
 
-    ret->encoding_colormodels_frame = gtk_frame_new("Encoding Colormodels");
+    ret->colormodels_frame = gtk_frame_new("Colormodels");
     
-    gtk_container_add(GTK_CONTAINER(ret->encoding_colormodels_frame),
+    gtk_container_add(GTK_CONTAINER(ret->colormodels_frame),
                       ret->encoding_colormodels_label);
+    gtk_widget_show(ret->colormodels_frame);
     }
   
   /* Pack all widgets onto their containers */
@@ -694,7 +695,8 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   ret->fourccs_frame = gtk_frame_new("Fourccs");
   
   gtk_container_add(GTK_CONTAINER(ret->fourccs_frame), ret->fourccs_label);
-
+  gtk_widget_show(ret->fourccs_frame);
+  
   ret->label_table = gtk_table_new(5, 2, 0);
 
   gtk_table_attach_defaults(GTK_TABLE(ret->label_table),
@@ -718,7 +720,20 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
 
   gtk_widget_show(ret->label_table);
 
-  ret->widget = ret->label_table;
+  ret->table = gtk_table_new(3, 2, 0);
+
+  gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->label_table, 0, 2, 0, 1);
+
+  if(info->type == LQT_CODEC_VIDEO)
+    {
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame, 0, 1, 1, 2);
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame, 1, 2, 1, 2);
+    }
+  else
+    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame, 0, 2, 1, 2);
+    
+  gtk_widget_show(ret->table);
+  ret->widget = ret->table;
   return ret;
   }
 

@@ -49,101 +49,167 @@ it, you can even register new codecs without restarting the program (See
 below, how application programmers can implement this feature).
 <h3>
 <a NAME="app_hacker"></a>2. API extensions for application programmers</h3>
-Libquicktime has a codec registry (see above) defined in a private linked
+<b>2.1 Maintaining the registry</b>
+<p>Libquicktime has a codec registry (see above) defined in a private linked
 list. It allows applications to build configuration dialogs for codecs
 dynamically at runtime depending on the codecs, the user has installed.
 This is necessary for the separate distribution of libquicktime codecs.
-<p>The registry&nbsp; is initialized (using the method described above)
-by the first call of one of
-<p><tt>&nbsp; quicktime_supported_audio(),</tt>
-<p><tt>&nbsp; quicktime_supported_video(),</tt>
-<p><tt>&nbsp; quicktime_set_audio(),</tt>
-<p><tt>&nbsp; quicktime_set_video(),</tt>
-<p>when you write a file or
-<p><tt>&nbsp; quicktime_open()</tt>
-<p>when reading. If you want to access the codec database before calling
-one of these functions, call:
-<p><tt>&nbsp; lqt_init_codec_info();</tt>
-<p>to trigger the codec registration at a time of your choice. Your application
-can even rebuild the codec database at runtime. For this, call
-<p><tt>&nbsp; lqt_destroy_codec_info();</tt>
-<p>to destroy the registry and
-<p><tt>&nbsp; lqt_init_codec_info();</tt>
+<p>The registry&nbsp; is initialized automatically by the first access
+to codec informations, with the exception of the non thread save functions
+(see below). It can also
+<p>e thread save methods of getting informations about codecs, you'll never
+have to initialize the registry manually.
 <p>to rebuild it again. Calling only lqt_init_codec_info() after the registry
 is already initialized will do nothing. You always need to destroy the
 registry before bebuilding it. If your application is multithreaded, you
 should have a mutex in your application, which protects your codec database
 (Fixme: do this in libquicktime?).
-<p>Once the codec registry is initialized, get the number of available
-audio and video codecs by using:
-<p><tt>&nbsp; int lqt_get_num_audio_codecs();</tt>
-<p><tt>&nbsp; int lqt_get_num_video_codecs();</tt>
-<p>For each codec index (starting with zero), you can obtain an info structure
-with:
-<p><tt>&nbsp; const lqt_codec_info_t * lqt_get_audio_codec_info(int index);</tt>
-<p><tt>&nbsp; const lqt_codec_info_t * lqt_get_video_codec_info(int index);</tt>
-<p>These are the only functions, you should use to access the database.
-The returned structure is defined in lqt_codecinfo.h. The fields,
-<br>you might use in your program are:
-<p><tt>&nbsp; char * name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p><b>2.2 The codec info structure</b><b></b>
+<p>The structure for all codec data is defined as follows:
+<p><tt>struct lqt_codec_info_s</tt>
+<br><tt>&nbsp; {</tt>
+<br><tt>&nbsp; /* These are set by the plugins */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; char * name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+Name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 */</tt>
-<br><tt>&nbsp; char * long_name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Long name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp; char * long_name;&nbsp;&nbsp; /* Long name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 */</tt>
-<br><tt>&nbsp; char * description;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp; char * description; /* Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</tt><tt></tt>
+<p><tt>&nbsp; lqt_codec_type type;</tt>
+<br><tt>&nbsp; lqt_codec_direction direction;</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; int num_fourccs;&nbsp;&nbsp;&nbsp; /* Fourccs, this codec
+can handle */</tt>
+<br><tt>&nbsp; char ** fourccs;</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; int num_encoding_parameters;</tt>
+<br><tt>&nbsp; lqt_parameter_info_t * encoding_parameters;</tt><tt></tt>
+<p><tt>&nbsp; int num_decoding_parameters;</tt>
+<br><tt>&nbsp; lqt_parameter_info_t * decoding_parameters;</tt><tt></tt>
+<p><tt>&nbsp; /* Colormodels this codec can handle */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; int num_encoding_colormodels;</tt>
+<br><tt>&nbsp; int * encoding_colormodels;</tt><tt></tt>
+<p><tt>&nbsp; /*</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp; Colormodel for decoding.</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp; Must be set to LQT_COLORMODEL_NONE if the
+stream colormodel</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp; must be obtained at runtime by the codec</tt>
+<br><tt>&nbsp;&nbsp; */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; int decoding_colormodel;</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; /* The following members are set by libquicktime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 */</tt>
-<br><tt>&nbsp; lqt_codec_type type;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* LQT_CODEC_AUDIO or LQT_CODEC_VIDEO */</tt>
-<br><tt>&nbsp; lqt_codec_direction direction; /* LQT_DIRECTION_ENCODE,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-LQT_DIRECTION_DECODE or</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-LQT_DIRECTION_BOTH */</tt>
-<br><tt>&nbsp; int num_fourccs;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Number of fourccs, this codec can handle */</tt>
-<br><tt>&nbsp; char ** fourccs;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Array of fourccs.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; char * module_filename;&nbsp;&nbsp;&nbsp; /* Filename of
+the module&nbsp; */</tt>
+<br><tt>&nbsp; int module_index;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* Index inside the module */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; uint32_t file_time;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* File modification time&nbsp; */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; struct lqt_codec_info_s * next;&nbsp;&nbsp; /* For chaining
 */</tt>
-<p><tt>&nbsp; int num_encoding_parameters;&nbsp;&nbsp; /* Number of encoding
-parameters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<p><tt>&nbsp; /* encoding_parameters */</tt>
-<p><tt>&nbsp; lqt_codec_parameter_info_t * encoding_parameters;</tt>
-<p><tt>&nbsp; int num_decoding_parameters;&nbsp;&nbsp; /* Number of decoding
-parameters */</tt>
-<p><tt>&nbsp; /* decoding_parameters */</tt>
-<p><tt>&nbsp; lqt_codec_parameter_info_t * decoding_parameters;</tt>
-<p>The other structure members are for internal use by libquicktime. You
-have 2 arrays for the encoding and decoding parameters. The parameter info
-structure is also defined in lqt_codecinfo.h:
+<br><tt>&nbsp; };</tt><tt></tt>
+<p><tt>typedef struct lqt_codec_info_s lqt_codec_info_t;</tt><b></b>
+<p>Most of these members are self explaining. The only thicky thing are
+the colormodels. They indicate the the native colormodels of the codec,
+which can be read and written directly without colorspace conversion. A
+codec can have more than one native colormodel (e.g. the png codec supports
+RGB&nbsp;as well as RGBA), but in this case the best decoding colormodel
+depends on the other stream parameters (e.g. on the video depth for png).
+<br>If a codec supports more colormodels, it has all of them in the encoding_colormodels
+array. The application can then chose one these, if a file is written.
+In this case, the decoding_colormodel is set to LQT_COLORMODEL_NONE. This
+indicates, that libquicktime will try to get the stream colormodel from
+the codec if the file is open.
+<br>In most cases, however, there will be only one native colormodel, so
+there will be only one encoding colormodel, and the decoding colormodel
+will be known at compile time.
+<br>The next pointer should not be used by applications. To simplify the
+access to the data, all codec informations are passed as single pointers
+or arrays to the outer world.
+<p>You can get the encoding and decoding parameters in the parameter_info_t
+structure:
 <p><tt>typedef struct</tt>
 <br><tt>&nbsp; {</tt>
 <br><tt>&nbsp; char * name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* Parameter
-name (compatible with quicktime_set_parameter() )&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name (to be passed to quicktime_set_parameter() ) */</tt>
+<br><tt>&nbsp; char * real_name; /* Other name (for making dialogs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 */</tt>
-<br><tt>&nbsp; char * real_name; /* Parameter name for the world outside
-libquicktime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; lqt_parameter_type_t type; /* LQT_INT, LQT_STRING or LQT_STRINGLIST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 */</tt>
-<br><tt>&nbsp; lqt_parameter_type_t type; /* LQT_PARAMETER_INT or LQT_PARAMETER_STRING
-(maybe more?) */</tt>
-<br><tt>&nbsp; lqt_parameter_value_t val_default; /* default value (used
-when parameter is not set&nbsp;&nbsp; */</tt>
-<br><tt>&nbsp; lqt_parameter_value_t val_min;</tt>
-<br><tt>&nbsp; lqt_parameter_value_t val_max;</tt>
-<br><tt>&nbsp; } lqt_codec_parameter_info_t;</tt>
-<p>The minimum and maximum values are only valid for numeric types and
-if val_min &lt; val_max. If integer parameters have a minimum of 0 and
-a maximum of 1, they should be considered as boolean (applications will
-make a check button instead of a slider for this).
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; lqt_parameter_value_t val_default;</tt><tt></tt>
+<p><tt>&nbsp; /*</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp;&nbsp; Minimum and maximum values:</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp;&nbsp; These are only valid for numeric types
+and if val_min &lt; val_max</tt>
+<br><tt>&nbsp;&nbsp; */</tt><tt></tt>
+<p><tt>&nbsp; int val_min;</tt>
+<br><tt>&nbsp; int val_max;</tt><tt></tt>
+<p><tt>&nbsp; /*</tt>
+<br><tt>&nbsp;&nbsp; *&nbsp; Possible options (only valid for LQT_STRINGLIST)</tt>
+<br><tt>&nbsp;&nbsp; */</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; int num_stringlist_options;</tt>
+<br><tt>&nbsp; char ** stringlist_options;</tt>
+<br><tt>&nbsp;</tt>
+<br><tt>&nbsp; } lqt_parameter_info_t;</tt>
+<br><tt></tt>&nbsp;
+<p>The minimum and maximum values are only valid for integer parameters
+and if val_min &lt; val_max. If integer parameters have a minimum of 0
+and a maximum of 1, they should be considered as boolean (applications
+will make a check button instead of a slider for this). The stringlist
+is for enumerated types, the possible options are in stringlist_options.
 <p>lqt_parameter_value_t is a union, which can carry values of different
 datatypes:
 <p><tt>typedef union</tt>
 <br><tt>&nbsp; {</tt>
 <br><tt>&nbsp; int val_int;</tt>
 <br><tt>&nbsp; char * val_string;</tt>
-<br><tt>&nbsp; } lqt_parameter_value_t;</tt>
+<br><tt>&nbsp; } lqt_parameter_value_t;</tt><b></b>
+<p><b>2.3 Getting codec informations (the easy way):</b>
+<p>If you can make sure, that no quicktime files are openend or closed,
+while another thread rebuilds the registry, you can access the registry
+directly. Note, that these won't initialize the registry automatically.
+Get the number of audio-&nbsp; and videocodecs with:
+<p><tt>&nbsp; int lqt_get_num_audio_codecs();</tt>
+<p><tt>&nbsp; int lqt_get_num_video_codecs();</tt>
+<p>For each codec index (starting with zero), you can obtain an info structure
+with:
+<p><tt>&nbsp; const lqt_codec_info_t * lqt_get_audio_codec_info(int index);</tt>
+<p><tt>&nbsp; const lqt_codec_info_t * lqt_get_video_codec_info(int index);</tt>
+<p>These functions bypass the locking machanism of the registry and return
+pointers to the internal data.
+<p><b>2.4&nbsp; Getting codec informations (the harder way):</b>
+<p>There is another group of registry access functions, which lock the
+registry, copy the informations into the return value and unlock the registry.
+They are thread save, but you must free the retruned data expicitly. All
+these functions return a NULL&nbsp;terminated lqt_codec_info_t* array,
+even if they retrun always only one codec.
+<br>For getting any combination of audio/video en/decoders, use:
+<p><tt>lqt_codec_info_t ** lqt_query_registry(int audio, int video, int
+encode, int decode);</tt>
+<p>You can use it to show the commanline user a list of supported codecs
+or for building dialogs. To find a codec by it's individual name, use:
+<p><tt>lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name);</tt><tt></tt>
+<p><tt>lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name);</tt><tt></tt>
+<p>If you want to know something about the codecs of an open quicktime
+file, use:
+<p><tt>lqt_codec_info_t ** lqt_audio_codec_from_file(quicktime_t *, int
+track);</tt><tt></tt>
+<p><tt>lqt_codec_info_t ** lqt_video_codec_from_file(quicktime_t *, int
+track);</tt><tt></tt>
+<p>There is one function, which will free all the data returned from the
+above functions:
+<p><tt>void lqt_destroy_codec_info(lqt_codec_info_t ** info);</tt>
+<br><tt></tt>&nbsp;
 <p>Currently, there is no codec with support for decoding parameters, but
 this might change in future versions.
 <h3>
@@ -154,29 +220,38 @@ codecs (any combination of audio/video en- and decoders) can be in one
 shared module. How to define the codecs and how to write the interface
 functions for access by libquicktime is described here. For the codec interface
 specific parts of your module, you always need to include the file lqt_codecapi.h.
-<p>A quicktime codec is defined in qtprivate.h as:
-<pre>typedef struct
-&nbsp; {
-&nbsp; int (*delete_vcodec)(quicktime_video_map_t *vtrack);
-&nbsp; int (*delete_acodec)(quicktime_audio_map_t *atrack);
-&nbsp; int (*decode_video)(quicktime_t *file, unsigned char **row_pointers, int track);
-&nbsp; int (*encode_video)(quicktime_t *file, unsigned char **row_pointers, int track);
-&nbsp; int (*decode_audio)(quicktime_t *file, int16_t *output_i, float *output_f,&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; long samples, int track, int channel);
-&nbsp; int (*encode_audio)(quicktime_t *file, int16_t **input_i, float **input_f,&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int track, long samples);
-&nbsp; int (*reads_colormodel)(quicktime_t *file, int colormodel, int track);
-&nbsp; int (*writes_colormodel)(quicktime_t *file, int colormodel, int track);
-&nbsp; int (*set_parameter)(quicktime_t *file, int track, char *key, void *value);
-&nbsp; void (*flush)(quicktime_t *file, int track);
-
-&nbsp; void *priv;
-&nbsp; void *module; /* Needed by libquicktime for dynamic loading */
-&nbsp; } quicktime_codec_t;</pre>
-The module pointer is used by libquicktime to dlclose() us, if we are not
-longer needed. It should not be touched. The functions pointers are your
-actual en- and decoding functions (how they are written and what they do
-is described below).
+<p>A quicktime codec is defined in qtprivate.h as:<tt></tt>
+<p><tt>typedef struct<br>
+&nbsp; {<br>
+&nbsp; int (*delete_vcodec)(quicktime_video_map_t *vtrack);<br>
+&nbsp; int (*delete_acodec)(quicktime_audio_map_t *atrack);<br>
+&nbsp; int (*decode_video)(quicktime_t *file, unsigned char **row_pointers,
+int track);<br>
+&nbsp; int (*encode_video)(quicktime_t *file, unsigned char **row_pointers,
+int track);<br>
+&nbsp; int (*decode_audio)(quicktime_t *file, int16_t *output_i, float
+*output_f,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+long samples, int track, int channel);<br>
+&nbsp; int (*encode_audio)(quicktime_t *file, int16_t **input_i, float
+**input_f,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track, long samples);<br>
+&nbsp; int (*reads_colormodel)(quicktime_t *file, int colormodel, int track);<br>
+&nbsp; int (*writes_colormodel)(quicktime_t *file, int colormodel, int
+track);<br>
+&nbsp; int (*set_parameter)(quicktime_t *file, int track, char *key, void
+*value);<br>
+&nbsp; void (*flush)(quicktime_t *file, int track);<br>
+<br>
+&nbsp; void *priv;<br>
+&nbsp; void *module; /* Needed by libquicktime for dynamic loading */</tt>
+<br><tt>&nbsp; char *name;<br>
+&nbsp; } quicktime_codec_t;</tt>
+<p>The module pointer is used by libquicktime to dlclose() us, if we are
+not longer needed. It should not be touched. The functions pointers are
+your actual en- and decoding functions (how they are written and what they
+do is described below).
 <p><a NAME="new_delete"></a><b>3.2 Creating and deleting codecs</b>
 <p>The interface function, which creates one codec sets the members of
 the quicktime_codec_t structure to the functions defined in our module.
@@ -238,142 +313,79 @@ they are in one module). You need to define some static data structures.
 These are the fourccs of each codec, the encoding parameters, the decoding
 parameters and structures for the other informations. These are defined
 as follows:
-<p><tt>static char * fourccs_blup[]&nbsp; = { "BLUP", "BLU1" };</tt>
+<p><tt>static char * fourccs_blup[]&nbsp; = { "BLUP", "BLU1", (char*)0
+};</tt><tt></tt>
+<p><tt>static int encoding_colormodels_blup[] =</tt>
+<br><tt>&nbsp; {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; BC_YUV420P,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; LQT_COLORMODEL_NONE</tt>
+<br><tt>&nbsp; };</tt>
+<br><tt></tt>&nbsp;<tt></tt>
+<p><tt>static lqt_parameter_info_static_t encode_parameters_jpeg[] =</tt>
+<br><tt>&nbsp; {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "blup_quality",</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Quality",</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LQT_PARAMETER_INT,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {95 },</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 100,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (char**)0</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; },</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; {</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "blup_motion_search_radius",</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Motion search radius",</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LQT_PARAMETER_INT,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { 0 },</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (char**)0</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; },</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; { /* End of parameters */ }</tt>
+<br><tt>&nbsp; };</tt><tt></tt>
 <p><tt>static lqt_codec_info_static_t codec_info_blup =</tt>
 <br><tt>&nbsp; {</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; "Blup",</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; "Blup Video codec",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Long name of the codec */</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; "Video codec based on the bluplet transform
-algorithm",&nbsp;&nbsp; /* Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; LQT_CODEC_VIDEO,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; LQT_DIRECTION_BOTH</tt>
+<br><tt>&nbsp; name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"blup",</tt>
+<br><tt>&nbsp; long_name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"Blup",</tt>
+<br><tt>&nbsp; description:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"Video codec based on the bluplet transform algorithm",</tt>
+<br><tt>&nbsp; fourccs:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fourccs_blup,</tt>
+<br><tt>&nbsp; type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+LQT_CODEC_VIDEO,</tt>
+<br><tt>&nbsp; direction:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+LQT_DIRECTION_BOTH,</tt>
+<br><tt>&nbsp; encoding_parameters: (lqt_parameter_info_static_t*)0,</tt>
+<br><tt>&nbsp; decoding_parameters: (lqt_parameter_info_static_t*)0,</tt>
+<br><tt>&nbsp; encoding_colormodels: encoding_colormodels_blup,</tt>
+<br><tt>&nbsp; decoding_colormodel: BC_YUV420P</tt>
 <br><tt>&nbsp; };</tt>
-<p><tt>static lqt_codec_parameter_info_t encode_parameters_blup[] =</tt>
-<br><tt>&nbsp; {</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; {</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "blup_bitrate",&nbsp;&nbsp;&nbsp;
-/* Name for quicktime_set_parameter */</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Bitrate",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Name for dialog boxes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LQT_PARAMETER_INT, /* Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {1000000 },&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Default value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {0},&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Minimum value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {0}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Maximum value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; },</tt>
-<br><tt>&nbsp; };</tt>
-<p><tt>static lqt_codec_parameter_info_t decode_parameters_blup[] =</tt>
-<br><tt>&nbsp; {</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; {</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "blup_postprocess",&nbsp;&nbsp;&nbsp;&nbsp;
-/* Name for quicktime_set_parameter */</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Postpcocessing Level", /*
-Name for dialog boxes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; LQT_PARAMETER_INT,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; { 3 },&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Default value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {0},&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Minimum value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {5}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Maximum value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; },</tt>
-<br><tt>&nbsp; };</tt>
-<p>The lqt_codec_parameter_info_t structure (defined in lqt_codecinfo.h)
-is the same structure, which is exported into the library (see above).
-The lqt_codec_info_static_t structure (defined in lqt_codecapi.h) contains
-the members of lqt_codec_info_t, which can be initialized statically:
-<p><tt>typedef struct</tt>
-<br><tt>&nbsp; {</tt>
-<br><tt>&nbsp; char * name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp; char * long_name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Long name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp; char * description;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-/* Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-*/</tt>
-<br><tt>&nbsp; lqt_codec_type type;</tt>
-<br><tt>&nbsp; lqt_codec_direction direction;</tt>
-<br><tt>&nbsp; } lqt_codec_info_static_t;</tt>
+<br><tt></tt>&nbsp;
+<br><tt></tt>&nbsp;
+<p>The structures lqt_codec_parameter_info_static_t and lqt_codec_info_static
+have the same members as their nonstatic counterparts (see above), with
+the exception that all arrays must be NULL terminated (the num_* members
+are missing) and the members, which are set by libquicktime, aren't there.
 <p>Imagine you have similar structures defined for the blop codec also.
 You now need to program 2 functions, which pass this information to libquicktime.
 These look as follows:
 <p><tt>extern int get_num_codecs() { return 2; }</tt>
-<p><tt>extern lqt_codec_info_t * get_codec_info(int index)</tt>
+<p><tt>extern lqt_codec_info_static_t * get_codec_info(int index)</tt>
 <br><tt>&nbsp; {</tt>
 <br><tt>&nbsp; switch(index)</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; {</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; case 0:</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return lqt_create_codec_info(&amp;codec_info_blup,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-fourccs_blup,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sizeof(fourccs_blup)/sizeof(char*),</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-encode_parameters_blup,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sizeof(encode_parameters_blup)/sizeof(lqt_codec_parameter_info_t),</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-decode_parameters_blup,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sizeof(decode_parameters_blup)/sizeof(lqt_codec_parameter_info_t),</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-(const lqt_codec_parameter_info_t*)0,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-0);</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return &amp;codec_info_blup;</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; case 1:</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return lqt_create_codec_info(&amp;codec_info_blop,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-fourccs_blop,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sizeof(fourccs_blop)/sizeof(char*),</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-encode_parameters_blop,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-sizeof(encode_parameters_blop)/sizeof(lqt_codec_parameter_info_t),</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-(const lqt_codec_parameter_info_t*)0,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-0);</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; }</tt>
-<br><tt>&nbsp; return (lqt_codec_info_t*)0; /* Keep gcc happy */</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return &amp;codec_info_blop;</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; }</tt>
+<br><tt>&nbsp; return (lqt_codec_info_static_t*)0; /* Keep gcc happy */</tt>
 <br><tt>&nbsp; }</tt>
 <p>The function get_num_codecs() is self explaining. The function get_codec_info()
-returns an lqt_codec_info_t structure as defined in lqt_codecinfo.h. To
-create this structure from your statically defined data, use this (lqt_codecapi.h):
-<p><tt>lqt_codec_info_t *</tt>
-<br><tt>lqt_create_codec_info(const lqt_codec_info_static_t * template,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-char * fourccs[], int num_fourccs,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-const lqt_codec_parameter_info_t * encoding_parameters,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-int num_encoding_parameters,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-const lqt_codec_parameter_info_t * decoding_parameters,</tt>
-<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-int num_decoding_parameters);</tt>
-<p>This function lets you create a dynamically allocated codec info structure,
-which will then inserted info the registry by libquicktime. All data are
-copied, and the allocated memory fill be freed by libquicktime. In the
-above example the blop codec has no paremeters for decoding. In this case,
-you can pass NULL for the parameter descriptions.
+returns the lqt_codec_info_static_t structure, which will then be converted
+into a lqt_codec_info_t structure by libquicktime.
 <p><a NAME="passing"></a><b>3.4 Passing codecs to libquicktime</b>
 <p>When libqucktime wants to create a codec from the module, it calles
 one the following functions, which must be defined in the module:

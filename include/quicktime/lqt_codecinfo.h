@@ -49,8 +49,8 @@ typedef struct
    *   These are only valid for numeric types and if val_min < val_max
    */
 
-  lqt_parameter_value_t val_min;
-  lqt_parameter_value_t val_max;
+  int val_min;
+  int val_max;
 
   /*
    *  Possible options (only valid for LQT_STRINGLIST)
@@ -102,6 +102,14 @@ struct lqt_codec_info_s
   
   int num_encoding_colormodels;
   int * encoding_colormodels;
+
+  /*
+   *  Colormodel for decoding.
+   *  Must be set to LQT_COLORMODEL_NONE if the stream colormodel
+   *  must be obtained at runtime by the codec
+   */
+  
+  int decoding_colormodel;
   
   /* The following members are set by libquicktime      */
   
@@ -109,7 +117,7 @@ struct lqt_codec_info_s
   int module_index;          /* Index inside the module */
   
   uint32_t file_time;        /* File modification time  */
-
+  
   struct lqt_codec_info_s * next;   /* For chaining */
   };
 

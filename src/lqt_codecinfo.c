@@ -152,8 +152,8 @@ copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * inf
   switch(ret->type)
     {
     case LQT_PARAMETER_INT:
-      ret->val_min.val_int = info->val_min.val_int;
-      ret->val_max.val_int = info->val_max.val_int;
+      ret->val_min = info->val_min;
+      ret->val_max = info->val_max;
       ret->val_default.val_int = info->val_default.val_int;
       break;
     case LQT_PARAMETER_STRING:
@@ -197,11 +197,9 @@ copy_codec_info(const lqt_codec_info_t * info)
 
   if(info->module_filename)
     ret->module_filename = __lqt_strdup(info->module_filename);
-
   
   ret->type = info->type;
   ret->direction = info->direction;
-  
   
   ret->num_fourccs = info->num_fourccs;
   if(ret->num_fourccs)
@@ -219,6 +217,8 @@ copy_codec_info(const lqt_codec_info_t * info)
     for(i = 0; i < ret->num_encoding_colormodels; i++)
       ret->encoding_colormodels[i] = info->encoding_colormodels[i];
     }
+
+  ret->decoding_colormodel = info->decoding_colormodel;
   
   ret->num_encoding_parameters = info->num_encoding_parameters;
   
@@ -340,7 +340,7 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
     
   int (*get_num_codecs)();
   int (*get_codec_api_version)();
-  lqt_codec_info_t * (*get_codec_info)(int);
+  lqt_codec_info_static_t * (*get_codec_info)(int);
   
   lqt_codec_info_t * ret = (lqt_codec_info_t*)0;
 
@@ -397,7 +397,7 @@ Libquicktime interface version %d\n",
     return ret;
     }
   
-  get_codec_info = (lqt_codec_info_t*(*)(int))(dlsym(module, "get_codec_info"));
+  get_codec_info = (lqt_codec_info_static_t*(*)(int))(dlsym(module, "get_codec_info"));
   if(!get_codec_info)
     {
     fprintf(stderr, "Symbol %s not found in %s\n",
@@ -414,7 +414,7 @@ Libquicktime interface version %d\n",
     return ret;
     }
 
-  ret = get_codec_info(0);
+  ret = lqt_create_codec_info(get_codec_info(0));
 
   /* Complete the structure */
 
@@ -427,7 +427,7 @@ Libquicktime interface version %d\n",
   
   for(i = 1; i < num_codecs; i++)
     {
-    ret_end->next = get_codec_info(i);
+    ret_end->next = lqt_create_codec_info(get_codec_info(i));
     ret_end = ret_end->next;
     
     ret_end->module_index = i;
@@ -763,8 +763,8 @@ create_parameter_info(lqt_parameter_info_t * ret,
     {
     case LQT_PARAMETER_INT:
       ret->val_default.val_int = info->val_default.val_int;
-      ret->val_min.val_int = info->val_min.val_int;
-      ret->val_max.val_int = info->val_max.val_int;
+      ret->val_min = info->val_min;
+      ret->val_max = info->val_max;
       break;
     case LQT_PARAMETER_STRING:
       ret->val_default.val_string = __lqt_strdup(info->val_default.val_string);
@@ -856,6 +856,8 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
     for(i = 0; i < ret->num_encoding_colormodels; i++)
       ret->encoding_colormodels[i] = template->encoding_colormodels[i];
     }
+
+  ret->decoding_colormodel = template->decoding_colormodel;
     
   if(template->encoding_parameters)
     {
@@ -929,9 +931,9 @@ static void dump_codec_parameter(lqt_parameter_info_t * p)
       fprintf(stderr, "Integer, Default Value: %d ",
               p->val_default.val_int);
 
-      if(p->val_min.val_int < p->val_max.val_int)
+      if(p->val_min < p->val_max)
         fprintf(stderr, "(%d..%d)\n",
-                p->val_min.val_int, p->val_max.val_int);
+                p->val_min, p->val_max);
       else
         fprintf(stderr, "(unlimited)\n");
       break;
@@ -999,6 +1001,28 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
     }
   fprintf(stderr, "Module filename: %s\nIndex inside module: %d\n",
           info->module_filename, info->module_index);
+
+  /* Dump supported colormodels */
+  
+  if(info->type == LQT_CODEC_VIDEO)
+    {
+    if(info->num_encoding_colormodels)
+      {
+      fprintf(stderr, "Supported encoder colormodels: ");
+      for(i = 0; i < info->num_encoding_colormodels - 1; i++)
+        fprintf(stderr, "%s, ",
+                lqt_colormodel_to_string(info->encoding_colormodels[i]));
+      
+      fprintf(stderr, "%s\n",
+              lqt_colormodel_to_string(info->encoding_colormodels[info->num_encoding_colormodels - 1]));
+      }
+
+    fprintf(stderr, "Decoder Colormodel: ");
+    if(info->decoding_colormodel != LQT_COLORMODEL_NONE)
+      fprintf(stderr, "%s\n", lqt_colormodel_to_string(info->decoding_colormodel));
+    else
+      fprintf(stderr, "Depends on stream\n");
+    }
   }
 
 #define MATCH_FOURCC(a, b) \
