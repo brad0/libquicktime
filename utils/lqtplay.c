@@ -227,7 +227,7 @@ static void xv_init(void)
 	    fprintf(stderr," [BC_YUV422]");
 	    xv_have_YUY2 = 1;
 	}
-	if (FOURCC_YV12 == fo[i].id) {
+	if (FOURCC_I420 == fo[i].id) {
 	    fprintf(stderr," [BC_YUV420P]");
 	    xv_have_I420 = 1;
 	}

@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <inttypes.h>
 
 // Determine of the compressed frame is a keyframe for direct copy
 int quicktime_divx_is_key(unsigned char *data, long size)
