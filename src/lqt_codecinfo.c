@@ -815,7 +815,7 @@ create_parameter_info(lqt_parameter_info_t * ret,
 
       /* Now, copy them */
 
-      ret->stringlist_options = malloc(ret->num_stringlist_options);
+      ret->stringlist_options = malloc(ret->num_stringlist_options * sizeof(char *));
       for(i = 0; i < ret->num_stringlist_options; i++)
         {
           ret->stringlist_options[i] =
