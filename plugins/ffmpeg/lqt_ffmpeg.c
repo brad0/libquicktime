@@ -375,12 +375,17 @@ struct CODECIDMAP {
 	char *name;
 	char *fourccs[MAX_FOURCCS];
         int   wav_ids[MAX_WAV_IDS];
+/*
+ *  We explicitely allow, if encoding is allowed.
+ *  This prevents the spreading of broken files
+ */
+        int   do_encode; 
 };
 
 struct CODECIDMAP codecidmap_v[] = {
 /* Tables from mplayers config... */
 /* Video */
-	{
+        {
           id: CODEC_ID_MPEG1VIDEO,
 	  index: -1,
           encoder: NULL,
@@ -390,7 +395,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "mpg1",
 	  name: "Mpeg 1 Video",
 	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0} },
-	{
+        {
           id: CODEC_ID_MPEG4,
 	  index: -1,
           encoder: NULL,
@@ -399,9 +404,10 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_mpeg4,
 	  short_name: "mpg4",
 	  name: "Mpeg 4 Video (DivX)",
-	  fourccs: {"DIVX", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
-                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "mp4v",
-                    "MP4V", (char *)0} },
+	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
+                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
+                    "MP4V", (char *)0 },
+          do_encode: 1 },
 	{
           id: CODEC_ID_MSMPEG4V1,
 	  index: -1,
@@ -433,7 +439,8 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "MSMpeg 4v3",
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
-                    (char *)0}
+                    (char *)0},
+          do_encode: 1,
         },
 #if 0
 	{
@@ -456,7 +463,8 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "h263",
 	  name: "H263",
-	  fourccs: {"H263", "h263", (char *)0} },
+	  fourccs: {"H263", "h263", (char *)0},
+          do_encode: 1, },
 	{
           id: CODEC_ID_H263P,
 	  index: -1,
@@ -466,7 +474,8 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "h263p",
 	  name: "H263+",
-	  fourccs: {"U263", "u263", (char *)0} },
+	  fourccs: {"U263", "u263", (char *)0},
+          do_encode: 1, },
 	{
           id: CODEC_ID_H263I,
 	  index: -1,
@@ -518,7 +527,8 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "mjpg",
 	  name: "MJPEG",
-	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0} },
+	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0},
+          do_encode: 1, },
 	{
           id: CODEC_ID_8BPS,
 	  index: -1,
@@ -608,8 +618,8 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "dv",
 	  name: "DV",
-	  fourccs: {"dvcp", "dvc ", "dvpp", (char *)0} },
-
+	  fourccs: {"dvcp", "dvc ", "dvpp", (char *)0 },
+          do_encode: 1 },
 };
 
 struct CODECIDMAP codecidmap_a[] = {
@@ -625,6 +635,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "Mpeg Layer 2 Audio",
 	  fourccs: {".mp2", ".MP2", "ms\0\x50", "MS\0\x50", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
+          do_encode: 1,
         },
 	{
           id: CODEC_ID_MP3LAME,
@@ -637,6 +648,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "Mpeg Layer 3 Audio",
 	  fourccs: {".mp3", ".MP3", "ms\0\x55", "MS\0\x55", (char *)0},
           wav_ids: { 0x55, LQT_WAV_ID_NONE },
+          do_encode: 1,
         },
 	{
           id: CODEC_ID_AC3,
@@ -649,6 +661,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "AC3 Audio",
 	  fourccs: {".ac3", ".AC3", (char *)0},
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
+          do_encode: 1,
         },
 #if 0 /* Crashes */
 	{
@@ -691,7 +704,8 @@ void ffmpeg_map_init(void)
   
   for(i = 0; i < NUMMAPS_V; i++)
     {
-    codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
+    if(codecidmap_v[i].do_encode)
+      codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
     codecidmap_v[i].decoder = avcodec_find_decoder(codecidmap_v[i].id);
 
     if(codecidmap_v[i].encoder || codecidmap_v[i].decoder)
@@ -699,8 +713,7 @@ void ffmpeg_map_init(void)
     }
   for(i = 0; i < NUMMAPS_A; i++)
     {
-    /* UGLY HACK: Disable alaw encoding since it screws up libquicktime */
-    if(codecidmap_a[i].id != CODEC_ID_PCM_ALAW)
+    if(codecidmap_a[i].do_encode)
       codecidmap_a[i].encoder = avcodec_find_encoder(codecidmap_a[i].id);
     codecidmap_a[i].decoder = avcodec_find_decoder(codecidmap_a[i].id);
 

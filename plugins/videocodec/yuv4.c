@@ -89,11 +89,11 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv4_codec_t *co
 			codec->utob[i] = (long)( 1.7720 * 65536 * i);
 		}
 		codec->bytes_per_line = vtrack->track->tkhd.track_width * 3;
-		if((float)codec->bytes_per_line / 6 > (int)(codec->bytes_per_line / 6))
+		if(codec->bytes_per_line % 6)
 			codec->bytes_per_line += 3;
 
 		codec->rows = vtrack->track->tkhd.track_height / 2;
-		if((float)vtrack->track->tkhd.track_height / 2 > (int)(vtrack->track->tkhd.track_height / 2))
+		if((int)(vtrack->track->tkhd.track_height) % 2)
 			codec->rows++;
 
 		codec->work_buffer = malloc(codec->bytes_per_line * codec->rows);
@@ -236,7 +236,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
 	int64_t bytes = codec->rows * codec->bytes_per_line;
-	unsigned char *buffer = codec->work_buffer;
+	unsigned char *buffer;
 	unsigned char *output_row;    /* Pointer to output row */
 	unsigned char *row_pointer1, *row_pointer2;  /* Pointers to input rows */
 	register int x1, x2;
@@ -248,6 +248,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int denominator;
 	quicktime_atom_t chunk_atom;
 	initialize(vtrack, codec);
+        buffer = codec->work_buffer;
 
 
 
