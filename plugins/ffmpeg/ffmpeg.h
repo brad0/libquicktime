@@ -26,35 +26,48 @@
 #include <quicktime/quicktime.h>
 
 typedef struct
-{
-	AVCodecContext params;
-
-	/* Compression stuff */
-	AVCodecContext ffcodec_enc;
-	AVCodec * ffc_enc;
-	int init_enc;
-	unsigned char * encode_frame;
-	unsigned char * write_buffer;
-	int write_buffer_size;
-	
-	/* DeCompression stuff */
-	AVCodecContext ffcodec_dec;
-	AVCodec * ffc_dec;
-	int init_dec;
-	unsigned char * read_buffer;
-	int read_buffer_size;
-	longest last_frame;
-	
-	/* Audio compression */
-	short *ae_buf;
-	int ae_pos;
-
-	/* Audio decompression */
-	short *ad_buf;
-	int ad_pos;
-} quicktime_ffmpeg_codec_t;
+  {
+  AVCodecContext params;
+  
+  /* Compression stuff */
+  AVCodecContext ffcodec_enc;
+  AVCodec * ffc_enc;
+  int init_enc;
+  unsigned char * encode_frame;
+  unsigned char * write_buffer;
+  int write_buffer_size;
+  
+  /* DeCompression stuff */
+  AVCodecContext ffcodec_dec;
+  AVCodec * ffc_dec;
+  int init_dec;
+  unsigned char * read_buffer;
+  int read_buffer_size;
+  longest last_frame;
+  
+  /* Audio Sample buffer */
+  
+  short * sample_buffer;
+  int sample_buffer_pos;
+  int sample_buffer_size; /* Used for decoding only */
+  
+  } quicktime_ffmpeg_codec_t;
 
 #endif
 
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);
 void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *vtrack, AVCodec *encoder, AVCodec *decoder);
+
+int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
+                            int track);
+
+int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
+                            int track);
+
+int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, int track,
+                            long samples);
+
+int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, long samples,
+                            int track, int channel);
+
+

@@ -31,11 +31,339 @@
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
 
+#define ENCODE_PARAM_AUDIO \
+	{\
+	  "bit_rate",\
+          "Bit rate (kbps)",\
+	  LQT_PARAMETER_INT,\
+          { 128 },\
+          0,\
+          0,\
+          (char**)0\
+	}
+
+#define ENCODE_PARAM_VIDEO \
+	{\
+	  "bit_rate",\
+          "Bit rate (kbps)",\
+	  LQT_PARAMETER_INT,\
+          { 800 },\
+          0,\
+          0,\
+          (char**)0\
+	},\
+  	{\
+          "bit_rate_tolerance",\
+          "Bit rate tolernce",\
+          LQT_PARAMETER_INT,\
+          { 1024 * 8 },\
+          4,\
+          24000,\
+          (char**)0\
+	},\
+	{\
+          "flags_fix",\
+          "Fixed quality (VBR)",\
+          LQT_PARAMETER_INT,\
+          { 0 },\
+          0,\
+          1,\
+          (char**)0\
+        },\
+	{\
+          "quality",\
+          "VBR Quality",\
+          LQT_PARAMETER_INT,\
+          { 1 },\
+          1,\
+          31,\
+          (char**)0\
+	},\
+	{\
+          "flags_hq",\
+          "High quality (non realtime) mode",\
+          LQT_PARAMETER_INT,\
+          { 0 },\
+          0,\
+          1,\
+          (char**)0\
+        },\
+        {\
+          "flags_gray",\
+          "Gray scale only mode",\
+          LQT_PARAMETER_INT,\
+          { 0 },\
+          0,\
+          1,\
+          (char**)0\
+        }
+  
+#define ENCODE_PARAM_MOTION_EST \
+	{\
+		"me_method",\
+		"Motion estimation method",\
+		LQT_PARAMETER_STRINGLIST,\
+		{val_string: "Zero"},\
+		0,\
+		100,\
+		((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0})\
+	},\
+	{\
+		"flags_4mv",\
+		"4MV mode",\
+		LQT_PARAMETER_INT,\
+		{ 0 },\
+		0,\
+		1,\
+		(char**)0\
+	}
+  
+#define ENCODE_PARAM_MPEGVIDEO \
+  { \
+    "gop_size", \
+    "GOP size", \
+    LQT_PARAMETER_INT, \
+    { 250 }, \
+    0, \
+    300, \
+    (char**)0 \
+  }, \
+  { \
+    "aspect_ratio_info",\
+    "Aspect ratio",\
+    LQT_PARAMETER_STRINGLIST,\
+    {val_string: "Square"},\
+    0,\
+    100,\
+    ((char *[]){"Square", "4:3 (625)", "4:3 (525)",\
+                "16:9 (625)", "16:9 (525)", (char *)0})\
+  },\
+  { \
+    "luma_elim_threshold",\
+    "Luma elimination threshold",\
+    LQT_PARAMETER_INT,\
+    { 0 },\
+    0,\
+    99,\
+    (char**)0\
+  },\
+  { \
+    "chroma_elim_threshold",\
+    "Chroma elimination threshold",\
+    LQT_PARAMETER_INT,\
+    { 0 },\
+    0,\
+    99,\
+    (char**)0 \
+  }, \
+  { \
+    "flags_part", \
+    "Data partitioning mode", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    1, \
+    (char**)0 \
+    }, \
+    { \
+    "flags_pass", \
+    "Pass (0 = single pass)", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    2, \
+    (char**)0 \
+  }, \
+  { \
+    "max_b_frames", \
+    "Maximum B frames", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    FF_MAX_B_FRAMES, \
+    (char**)0 \
+  }, \
+  { \
+    "b_frame_strategy", \
+    "B Frame strategy", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    1, \
+    (char**)0 \
+  }, \
+  { \
+    "b_quant_factor", \
+    "Scale factor btw IPS and B frames", \
+    LQT_PARAMETER_INT, \
+    { 2 }, \
+    0, \
+    31, \
+    (char**)0 \
+  }, \
+  { \
+    "b_quant_offset", \
+    "Scale offset btw IPS and B frames", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    31, \
+    (char**)0 \
+  }, \
+  { \
+    "qcompress", \
+    "Qscale change between easy and hard scenes", \
+    LQT_PARAMETER_INT, \
+    { 50 }, \
+    0, \
+    100, \
+    (char**)0 \
+  }, \
+  { \
+    "qblur", \
+    "Qscale smoothing over time", \
+    LQT_PARAMETER_INT, \
+    { 50 }, \
+    0, \
+    100, \
+    (char**)0 \
+  }, \
+  { \
+    "qmin", \
+    "Minimum qscale", \
+    LQT_PARAMETER_INT, \
+    { 3 }, \
+    1, \
+    31, \
+    (char**)0 \
+  }, \
+  { \
+    "qmax", \
+    "Maximum qscale", \
+    LQT_PARAMETER_INT, \
+    { 15 }, \
+    1, \
+    31, \
+    (char**)0 \
+  }, \
+  { \
+    "max_qdiff", \
+    "Maximum qscale difference", \
+    LQT_PARAMETER_INT, \
+    { 3 }, \
+    1, \
+    31, \
+    (char**)0 \
+  }, \
+  { \
+    "rc_strategy", \
+    "RC strategy", \
+    LQT_PARAMETER_INT, \
+    { 2 }, \
+    0, \
+    2, \
+    (char**)0 \
+  }, \
+  { \
+    "rtp_payload_size", \
+    "Packet size (0 = variable)", \
+    LQT_PARAMETER_INT, \
+    { 0 }, \
+    0, \
+    1000000, \
+    (char**)0 \
+  }
+
+
+#define DECODE_PARAM_AUDIO
+
+#define DECODE_PARAM_VIDEO \
+        {\
+	  "workaround_bugs",\
+	  "Enable bug worarounds",\
+	  LQT_PARAMETER_INT,\
+	  { 1 },\
+	  0,\
+	  1,\
+	  (char**)0\
+	},\
+        {\
+          "flags_gray",\
+          "Gray scale only mode",\
+          LQT_PARAMETER_INT,\
+          { 0 },\
+          0,\
+          1,\
+          (char**)0\
+        }
+  
+static lqt_parameter_info_static_t encode_parameters_video[] = {
+  ENCODE_PARAM_VIDEO,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_mpegvideo[] = {
+  ENCODE_PARAM_VIDEO,
+  ENCODE_PARAM_MOTION_EST,
+  ENCODE_PARAM_MPEGVIDEO,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
+  ENCODE_PARAM_VIDEO,
+  ENCODE_PARAM_MOTION_EST,
+  ENCODE_PARAM_MPEGVIDEO,
+  // Encoding mpeg4
+	{
+		"strict_std_compliance",
+		"Comply strictly with standards",
+		LQT_PARAMETER_INT,
+		{ 0 },
+		0,
+		1,
+		(char**)0
+	},
+  { /* End of parameters */ }
+};
+
+
+static lqt_parameter_info_static_t encode_parameters_audio[] = {
+  ENCODE_PARAM_AUDIO,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t decode_parameters_video[] = {
+  DECODE_PARAM_VIDEO,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t decode_parameters_mpeg4[] = {
+  DECODE_PARAM_VIDEO,
+	{
+		"error_resilience",
+		"Error resilience",
+		LQT_PARAMETER_INT,
+		{ 1 },
+		0,
+		1,
+		(char**)0
+	},
+  { /* End of parameters */ }
+};
+
+
+static lqt_parameter_info_static_t decode_parameters_audio[] = {
+  //  DECODE_PARAM_AUDIO,
+  { /* End of parameters */ }
+};
+
 struct CODECIDMAP {
 	int id;
 	int index;
 	AVCodec *encoder;
 	AVCodec *decoder;
+        lqt_parameter_info_static_t * encode_parameters;
+        lqt_parameter_info_static_t * decode_parameters;
 	char *short_name;
 	char *name;
 	char *fourccs[MAX_FOURCCS];
@@ -44,79 +372,158 @@ struct CODECIDMAP {
 struct CODECIDMAP codecidmap_v[] = {
 /* Tables from mplayers config... */
 /* Video */
-	{ CODEC_ID_MPEG1VIDEO,
-	  -1, NULL, NULL,
-	  "mpg1",
-	  "Mpeg 1 Video",
-	  {"mpg1", "MPG1", "pim1", "PIM1", (char *)0} },
-	{ CODEC_ID_MPEG4,
-	  -1, NULL, NULL,
-	  "mpg4",
-	  "Mpeg 4 Video (DivX)",
-	  {"DIVX", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2", "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "mp4v", "MP4V", (char *)0} },
-	{ CODEC_ID_MSMPEG4V1,
-	  -1, NULL, NULL,
-	  "msmpeg4v1",
-	  "MSMpeg 4v1",
-	  {"DIV1", "div1", "MPG4", "mpg4", (char *)0} },
-	{ CODEC_ID_MSMPEG4V2,
-	  -1, NULL, NULL,
-	  "msmpeg4v2",
-	  "MSMpeg 4v2",
-	  {"DIV2", "div2", "MP42", "mp42", (char *)0} },
-	{ CODEC_ID_MSMPEG4V3,
-	  -1, NULL, NULL,
-	  "msmpeg4v3",
-	  "MSMpeg 4v3",
-	  {"MPG3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6", "div6", "DIV3", "div3", "DIV4", "div4", "AP41", "ap41", (char *)0} },
-	{ CODEC_ID_WMV1,
-	  -1, NULL, NULL,
-	  "wmv1",
-	  "WMV1",
-	  {"WMV1", "wmv1", (char *)0} },
-	{ CODEC_ID_H263,
-	  -1, NULL, NULL,
-	  "h263",
-	  "H263",
-	  {"H263", "h263", (char *)0} },
-	{ CODEC_ID_H263P,
-	  -1, NULL, NULL,
-	  "h263p",
-	  "H263+",
-	  {"U263", "u263", (char *)0} },
-	{ CODEC_ID_H263I,
-	  -1, NULL, NULL,
-	  "i263",
-	  "I263",
-	  {"I263", "i263", "viv1", "VIV1", (char *)0} },
-	{ CODEC_ID_RV10,
-	  -1, NULL, NULL,
-	  "rv10",
-	  "Real Video 10",
-	  {"RV10", "rv10", "RV13", "rv13", (char *)0} },
-	{ CODEC_ID_MJPEG,
-	  -1, NULL, NULL,
-	  "mjpg",
-	  "MJPEG",
-	  {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
+	{
+          id: CODEC_ID_MPEG1VIDEO,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "mpg1",
+	  name: "Mpeg 1 Video",
+	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0} },
+	{
+          id: CODEC_ID_MPEG4,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpeg4,
+          decode_parameters: decode_parameters_mpeg4,
+	  short_name: "mpg4",
+	  name: "Mpeg 4 Video (DivX)",
+	  fourccs: {"DIVX", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
+                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "mp4v",
+                    "MP4V", (char *)0} },
+	{
+          id: CODEC_ID_MSMPEG4V1,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpeg4,
+          decode_parameters: decode_parameters_mpeg4,
+	  short_name: "msmpeg4v1",
+	  name: "MSMpeg 4v1",
+	  fourccs: {"DIV1", "div1", "MPG4", "mpg4", (char *)0} },
+	{
+          id: CODEC_ID_MSMPEG4V2,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpeg4,
+          decode_parameters: decode_parameters_mpeg4,
+	  short_name: "msmpeg4v2",
+	  name: "MSMpeg 4v2",
+	  fourccs: {"DIV2", "div2", "MP42", "mp42", (char *)0} },
+	{
+          id: CODEC_ID_MSMPEG4V3,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpeg4,
+          decode_parameters: decode_parameters_mpeg4,
+	  short_name: "msmpeg4v3",
+	  name: "MSMpeg 4v3",
+	  fourccs: {"MPG3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
+                    "div6", "DIV3", "div3", "DIV4", "div4", "AP41", "ap41",
+                    (char *)0}
+        },
+#if 0
+	{
+          id: CODEC_ID_WMV1,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "wmv1",
+	  name: "WMV1",
+	  fourccs: {"WMV1", "wmv1", (char *)0} },
+#endif
+	{
+          id: CODEC_ID_H263,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "h263",
+	  name: "H263",
+	  fourccs: {"H263", "h263", (char *)0} },
+	{
+          id: CODEC_ID_H263P,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "h263p",
+	  name: "H263+",
+	  fourccs: {"U263", "u263", (char *)0} },
+	{
+          id: CODEC_ID_H263I,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "i263",
+	  name: "I263",
+	  fourccs: {"I263", "i263", "viv1", "VIV1", (char *)0} },
+#if 0
+	{
+          id: CODEC_ID_RV10,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "rv10",
+	  name: "Real Video 10",
+	  fourccs: {"RV10", "rv10", "RV13", "rv13", (char *)0} },
+#endif
+	{
+          id: CODEC_ID_MJPEG,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "mjpg",
+	  name: "MJPEG",
+	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
 };
 
 struct CODECIDMAP codecidmap_a[] = {
          /* Audio */
-        { CODEC_ID_MP2,
-	  -1, NULL, NULL,
-	  "mp2",
-	  "Mpeg Layer 2 Audio",
+        {
+          id: CODEC_ID_MP2,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_audio,
+          decode_parameters: decode_parameters_audio,
+	  short_name: "mp2",
+	  name: "Mpeg Layer 2 Audio",
 	  {".mp2", ".MP2", "ms\0\x50", "MS\0\x50", (char *)0} },
-	{ CODEC_ID_MP3LAME,
-	  -1, NULL, NULL,
-	  "mp3",
-	  "Mpeg Layer 3 Audio",
+	{
+          id: CODEC_ID_MP3LAME,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_audio,
+          decode_parameters: decode_parameters_audio,
+	  short_name: "mp3",
+	  name: "Mpeg Layer 3 Audio",
 	  {".mp3", ".MP3", "ms\0\x55", "MS\0\x55"} },
-	{ CODEC_ID_AC3,
-	  -1, NULL, NULL,
-	  "ac3",
-	  "AC3 Audio",
+	{
+          id: CODEC_ID_AC3,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_audio,
+          decode_parameters: decode_parameters_audio,
+	  short_name: "ac3",
+	  name: "AC3 Audio",
 	  {".ac3", ".AC3", (char *)0} },
 };
 
@@ -139,7 +546,9 @@ void ffmpeg_map_init(void)
 		for(i = 0; i < NUMMAPS_V; i++) {
 			if(codec->id == codecidmap_v[i].id) {
 				if(codecidmap_v[i].index < 0)
-					codecidmap_v[i].index = ffmpeg_num_audio_codecs + ffmpeg_num_video_codecs++;
+					codecidmap_v[i].index =
+                                          ffmpeg_num_audio_codecs +
+                                          ffmpeg_num_video_codecs++;
 				if(codec->encode)
 					codecidmap_v[i].encoder = codec;
 				if(codec->decode)
@@ -152,7 +561,9 @@ void ffmpeg_map_init(void)
          	  for(i = 0; i < NUMMAPS_A; i++) {
 			if(codec->id == codecidmap_a[i].id) {
 				if(codecidmap_a[i].index < 0)
-                                        codecidmap_a[i].index = ffmpeg_num_video_codecs + ffmpeg_num_audio_codecs++;
+                                        codecidmap_a[i].index =
+                                          ffmpeg_num_video_codecs +
+                                          ffmpeg_num_audio_codecs++;
 				if(codec->encode)
 					codecidmap_a[i].encoder = codec;
 				if(codec->decode)
@@ -170,518 +581,6 @@ void ffmpeg_map_init(void)
 static int encoding_colormodels_ffmpeg[] = {
 	BC_YUV420P, 
 	LQT_COLORMODEL_NONE
-};
-
-/* Common to all */
-static lqt_parameter_info_static_t encode_parameters_ffmpeg[] = {
-	{
-		"bit_rate",
-		"Bit rate (kbps)",
-		LQT_PARAMETER_INT,
-		{ 800 },
-		4,
-		24000,
-		(char**)0
-	},
-	{
-		"bit_rate_tolerance",
-		"Bit rate tolernce",
-		LQT_PARAMETER_INT,
-		{ 1024 * 8 },
-		4,
-		24000,
-		(char**)0
-	},
-	{
-		"flags_hq",
-		"High quality mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_4mv",
-		"4MV mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_part",
-		"Data partitioning mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_gray",
-		"Gray scale only mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_pass",
-		"Pass (0 = single pass)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		2,
-		(char**)0
-	},
-	{
-		"flags_fix",
-		"Fixed quality (VBR)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"me_method",
-		"Motion estimation method",
-		LQT_PARAMETER_STRINGLIST,
-		{val_string: "Zero"},
-		0,
-		100,
-		((char *[]){"Zero", "Full", "Log", "Phods", "Epzs", "X1", (char *)0})
-	},
-	{
-		"aspect_ratio_info",
-		"Aspect ratio",
-		LQT_PARAMETER_STRINGLIST,
-		{val_string: "Square"},
-		0,
-		100,
-		((char *[]){"Square", "4:3 (625)", "4:3 (525)", "16:9 (625)", "16:9 (525)", (char *)0})
-	},
-	{
-		"gop_size",
-		"GOP size",
-		LQT_PARAMETER_INT,
-		{ 250 },
-		0,
-		300,
-		(char**)0
-	},
-	{
-		"quality",
-		"Quality",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"qcompress",
-		"Qscale change between easy and hard scenes",
-		LQT_PARAMETER_INT,
-		{ 50 },
-		0,
-		100,
-		(char**)0
-	},
-	{
-		"qblur",
-		"Qscale smoothing over time",
-		LQT_PARAMETER_INT,
-		{ 50 },
-		0,
-		100,
-		(char**)0
-	},
-	{
-		"qmin",
-		"Minimum qscale",
-		LQT_PARAMETER_INT,
-		{ 3 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"qmax",
-		"Maximum qscale",
-		LQT_PARAMETER_INT,
-		{ 15 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"max_qdiff",
-		"Maximum qscale difference",
-		LQT_PARAMETER_INT,
-		{ 3 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"max_b_frames",
-		"Maximum B frames",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		FF_MAX_B_FRAMES,
-		(char**)0
-	},
-	{
-		"b_quant_factor",
-		"Scale factor btw IPS and B frames",
-		LQT_PARAMETER_INT,
-		{ 2 },
-		0,
-		31,
-		(char**)0
-	},
-	{
-		"b_quant_offset",
-		"Scale offset btw IPS and B frames",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		31,
-		(char**)0
-	},
-	{
-		"rc_strategy",
-		"RC strategy",
-		LQT_PARAMETER_INT,
-		{ 2 },
-		0,
-		2,
-		(char**)0
-	},
-	{
-		"b_frame_strategy",
-		"B Frame strategy",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"rtp_payload_size",
-		"Packet size (0 = variable)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1000000,
-		(char**)0
-	},
-	{
-		"workaround_bugs",
-		"Enable bug worarounds",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"luma_elim_threshold",
-		"Luma elimination threshold",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		99,
-		(char**)0
-	},
-	{
-		"chroma_elim_threshold",
-		"Chroma elimination threshold",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		99,
-		(char**)0
-	},
-	{
-		"strict_std_compliance",
-		"Comply strictly with standards",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"error_resilience",
-		"Error resilience",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{ /* End of parameters */ },
-};
-
-static lqt_parameter_info_static_t decode_parameters_ffmpeg[] = {
-	{
-		"flags_gray",
-		"Gray scale only mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"workaround_bugs",
-		"Enable bug worarounds",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"error_resilience",
-		"Error resilience",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{ /* End of parameters */ },
-};
-
-static lqt_parameter_info_static_t encode_parameters_ffmpeg_audio[] = {
-	{
-		"bit_rate",
-		"Bit rate (kbps)",
-		LQT_PARAMETER_INT,
-		{ 800 },
-		4,
-		24000,
-		(char**)0
-	},
-	{
-		"bit_rate_tolerance",
-		"Bit rate tolernce",
-		LQT_PARAMETER_INT,
-		{ 1024 * 8 },
-		4,
-		24000,
-		(char**)0
-	},
-	{
-		"flags_hq",
-		"High quality mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_part",
-		"Data partitioning mode",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"flags_pass",
-		"Pass (0 = single pass)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		2,
-		(char**)0
-	},
-	{
-		"flags_fix",
-		"Fixed quality (VBR)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"gop_size",
-		"GOP size",
-		LQT_PARAMETER_INT,
-		{ 250 },
-		0,
-		300,
-		(char**)0
-	},
-	{
-		"quality",
-		"Quality",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"qcompress",
-		"Qscale change between easy and hard scenes",
-		LQT_PARAMETER_INT,
-		{ 50 },
-		0,
-		100,
-		(char**)0
-	},
-	{
-		"qblur",
-		"Qscale smoothing over time",
-		LQT_PARAMETER_INT,
-		{ 50 },
-		0,
-		100,
-		(char**)0
-	},
-	{
-		"qmin",
-		"Minimum qscale",
-		LQT_PARAMETER_INT,
-		{ 3 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"qmax",
-		"Maximum qscale",
-		LQT_PARAMETER_INT,
-		{ 15 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"max_qdiff",
-		"Maximum qscale difference",
-		LQT_PARAMETER_INT,
-		{ 3 },
-		1,
-		31,
-		(char**)0
-	},
-	{
-		"max_b_frames",
-		"Maximum B frames",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		FF_MAX_B_FRAMES,
-		(char**)0
-	},
-	{
-		"b_quant_factor",
-		"Scale factor btw IPS and B frames",
-		LQT_PARAMETER_INT,
-		{ 2 },
-		0,
-		31,
-		(char**)0
-	},
-	{
-		"b_quant_offset",
-		"Scale offset btw IPS and B frames",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		31,
-		(char**)0
-	},
-	{
-		"rc_strategy",
-		"RC strategy",
-		LQT_PARAMETER_INT,
-		{ 2 },
-		0,
-		2,
-		(char**)0
-	},
-	{
-		"b_frame_strategy",
-		"B Frame strategy",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"rtp_payload_size",
-		"Packet size (0 = variable)",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1000000,
-		(char**)0
-	},
-	{
-		"workaround_bugs",
-		"Enable bug worarounds",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"strict_std_compliance",
-		"Comply strictly with standards",
-		LQT_PARAMETER_INT,
-		{ 0 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"error_resilience",
-		"Error resilience",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{ /* End of parameters */ },
-};
-
-static lqt_parameter_info_static_t decode_parameters_ffmpeg_audio[] = {
-	{
-		"workaround_bugs",
-		"Enable bug worarounds",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{
-		"error_resilience",
-		"Error resilience",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		1,
-		(char**)0
-	},
-	{ /* End of parameters */ },
 };
 
 /* Template */
@@ -713,23 +612,29 @@ extern int get_num_codecs()
 
 static void set_codec_info(struct CODECIDMAP * map)
   {
-  char * capabilities;
+  char * capabilities = (char*)0;
 
   codec_info_ffmpeg.fourccs = map->fourccs;
 
   if(map->encoder && map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
+    codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
+    codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
     capabilities = "Codec";
     }
   else if(map->encoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
+    codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
+    codec_info_ffmpeg.decoding_parameters = NULL;
     capabilities = "Encoder";
     }
   else if(map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_DECODE;
+    codec_info_ffmpeg.encoding_parameters = NULL;
+    codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
     capabilities = "Decoder";
     }
 
@@ -740,16 +645,8 @@ static void set_codec_info(struct CODECIDMAP * map)
   if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
      (map->decoder && (map->decoder->type == CODEC_TYPE_VIDEO))){
        codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
-       codec_info_ffmpeg.encoding_parameters =
-         (codec_info_ffmpeg.direction != LQT_DIRECTION_DECODE) ? encode_parameters_ffmpeg : NULL;
-       codec_info_ffmpeg.decoding_parameters =
-         (codec_info_ffmpeg.direction != LQT_DIRECTION_ENCODE) ? decode_parameters_ffmpeg : NULL;
   } else {
        codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
-       codec_info_ffmpeg.encoding_parameters =
-         (codec_info_ffmpeg.direction != LQT_DIRECTION_DECODE) ? encode_parameters_ffmpeg_audio : NULL;
-       codec_info_ffmpeg.decoding_parameters =
-         (codec_info_ffmpeg.direction != LQT_DIRECTION_ENCODE) ? decode_parameters_ffmpeg_audio : NULL;
   }
   }
 
