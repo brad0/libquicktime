@@ -881,6 +881,7 @@ static void qt_init(FILE *fp, char *filename)
 	qt_width  = quicktime_video_width(qt,0);
 	qt_height = quicktime_video_height(qt,0);
         qt_timescale = lqt_video_time_scale(qt,0);
+        fprintf(stderr, "Timescale: %d\n", qt_timescale);
     }
 
     if (!quicktime_has_audio(qt)) {
@@ -985,6 +986,7 @@ static int qt_frame_decode(void)
 	qt_drop = 0;
     }
     qt_frame_time = lqt_frame_time(qt, 0);
+    fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
     lqt_decode_video(qt, qt_rows, 0);
 //    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
 //			    qt_cmodel,qt_rows,0);
@@ -1044,7 +1046,7 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     
     msec += (qt_frame_time * 1000) / qt_timescale;
 
-    //    fprintf(stderr, "Wait: %ld\n", msec);
+    //    fprintf(stderr, "Time (msec) %ld\n", (qt_frame_time * 1000) / qt_timescale);
 
     if (msec < 0) {
 	qt_drop = -msec * quicktime_frame_rate(qt,0) / 1000;

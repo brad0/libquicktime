@@ -69,7 +69,7 @@ void quicktime_mdia_delete(quicktime_mdia_t *mdia)
 
 void quicktime_mdia_dump(quicktime_mdia_t *mdia)
 {
-	printf("  media\n");
+	printf("  media (mdia)\n");
 	quicktime_mdhd_dump(&(mdia->mdhd));
 	quicktime_hdlr_dump(&(mdia->hdlr));
 	quicktime_minf_dump(&(mdia->minf));
