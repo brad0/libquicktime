@@ -1,5 +1,5 @@
 INCLUDES = -I$(top_srcdir)/include
-CFLAGS = @CFLAGS@ @GTK_CFLAGS@
+AM_CFLAGS = @GTK_CFLAGS@
 
 bin_PROGRAMS = libquicktime_config
 

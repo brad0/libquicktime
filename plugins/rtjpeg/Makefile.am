@@ -1,4 +1,4 @@
-CFLAGS = @CFLAGS@ @RTJPEG_CFLAGS@
+AM_CFLAGS = @RTJPEG_CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_rtjpeg.la
 

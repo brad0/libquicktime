@@ -1,4 +1,3 @@
-CFLAGS = @CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_audiocodec.la
 

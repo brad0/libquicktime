@@ -7,10 +7,6 @@ lib_LTLIBRARIES= libquicktime.la
 
 libquicktime_la_LDFLAGS = -export-dynamic
 
-#CLAGS += @JPEG_CFLAGS@ -Ilibdv @VORBIS_CFLAGS@ @FIREWIRE_CFLAGS@
-CFLAGS = @CFLAGS@
-
-#CFLAGS += -include $(CONFIG_HEADER)
 
 # build only the files, which can be compiled
 

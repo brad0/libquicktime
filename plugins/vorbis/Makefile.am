@@ -1,4 +1,4 @@
-CFLAGS = @CFLAGS@ @VORBIS_CFLAGS@
+AM_CFLAGS = @VORBIS_CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_vorbis.la
 

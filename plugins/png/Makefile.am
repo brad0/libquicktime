@@ -1,4 +1,4 @@
-CFLAGS = @CFLAGS@ @PNG_CFLAGS@
+AM_CFLAGS = @PNG_CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_png.la
 

@@ -1,6 +1,5 @@
 libquicktimeincludedir = $(includedir)/quicktime
 
-CFLAGS = @CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_lame.la
 
