@@ -89,7 +89,8 @@ static void decode_sign_change(quicktime_yuv2_codec_t *codec, unsigned char **ro
 	}
 }
 
-static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *codec)
+static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *codec,
+                       int width, int height)
 {
 	int i;
 	if(!codec->initialized)
@@ -125,9 +126,9 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 			codec->utob[i] = (long)( 1.7720 * 65536 * i);
 		}
 
-		codec->coded_w = (int)((float)vtrack->track->tkhd.track_width / 4 + 0.5) * 4;
-		codec->coded_h = (int)((float)vtrack->track->tkhd.track_height / 4 + 0.5) * 4;
-
+		codec->coded_w = (int)((float)width / 4 + 0.5) * 4;
+                //		codec->coded_h = (int)((float)vtrack->track->tkhd.track_height / 4 + 0.5) * 4;
+                codec->coded_h = height;
 		codec->bytes_per_line = codec->coded_w * 2;
 		codec->work_buffer = malloc(codec->bytes_per_line *
 								codec->coded_h);
@@ -140,19 +141,18 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int64_t bytes, x, y;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int width = vtrack->track->tkhd.track_width;
-	int height = vtrack->track->tkhd.track_height;
+	int width = quicktime_video_width(file, track);
+	int height = quicktime_video_height(file, track);
 	unsigned char *buffer;
 	char *input_row;
 	unsigned char *output_row, *y_plane, *u_plane, *v_plane;
 	int result = 0;
 	int y1, u, v, y2, r, g, b;
 	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
-	initialize(vtrack, codec);
+	initialize(vtrack, codec, width, height);
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-
 	if(file->vtracks[track].color_model == BC_YUV422 &&
 		file->in_x == 0 && 
 		file->in_y == 0 && 
@@ -217,7 +217,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int bytes_per_row = width * 3;
 	quicktime_atom_t chunk_atom;
 
-	initialize(vtrack, codec);
+	initialize(vtrack, codec, width, height);
 
 	bytes = height * codec->bytes_per_line;
 	buffer = codec->work_buffer;
