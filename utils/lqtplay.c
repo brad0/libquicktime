@@ -1027,6 +1027,8 @@ static int qt_alsa_audio_write(int frames)
           }
         
     } else {
+        pos =  quicktime_audio_position(qt, 0);
+
 	/* mono */
         lqt_decode_audio_track(qt, &qt_audio, (float**)0, frames, 0);
     }
