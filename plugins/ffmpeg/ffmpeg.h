@@ -95,6 +95,12 @@ typedef struct
   int qscale;
 
   AVPaletteControl palette;
+
+  /* We decode the first frame during the init() function to
+     obtain the stream colormodel */
+
+  int have_frame;
+  
   } quicktime_ffmpeg_video_codec_t;
 
 

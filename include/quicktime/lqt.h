@@ -124,7 +124,7 @@ int64_t lqt_video_duration(quicktime_t * file, int track);
 
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel);
 void lqt_set_row_span(quicktime_t *file, int track, int row_span);
-
+void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv);
   
 /*
  * Same as quicktime_decode_audio, but it grabs all channels at

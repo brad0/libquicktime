@@ -518,7 +518,7 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "mjpg",
 	  name: "MJPEG",
-	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", (char *)0} },
+	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0} },
 	{
           id: CODEC_ID_8BPS,
 	  index: -1,
@@ -589,6 +589,27 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "rle",
 	  name: "RLE",
 	  fourccs: {"rle ", (char *)0} },
+        {
+          id: CODEC_ID_MSRLE,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "wrle",
+	  name: "Microsoft RLE",
+	  fourccs: {"WRLE", (char *)0} },
+        {
+          id: CODEC_ID_DVVIDEO,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_video,
+          decode_parameters: decode_parameters_video,
+	  short_name: "dv",
+	  name: "DV",
+	  fourccs: {"dvcp", "dvc ", "dvpp", (char *)0} },
+
 };
 
 struct CODECIDMAP codecidmap_a[] = {
@@ -800,51 +821,6 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 	return NULL;
 }
 
-/* We obtain the stream colormodel during runtime */
-
-extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
-                                 int * exact)
-  {
-  int width, height, depth, ret;
-  quicktime_video_map_t *vtrack;
-  quicktime_trak_t *trak;
-  AVCodecContext *avctx;
-  int dummy;
-  struct CODECIDMAP * map;
-    
-  vtrack = &(file->vtracks[track]);
-  trak = vtrack->track;
-  
-  height = trak->tkhd.track_height;
-  width = trak->tkhd.track_width;
-  depth = quicktime_video_depth(file, track);
-
-  avctx = avcodec_alloc_context();
-
-  avctx->width = width;
-  avctx->height = height;
-  avctx->bits_per_sample = depth;
-  avctx->extradata      = trak->mdia.minf.stbl.stsd.table[0].extradata;
-  avctx->extradata_size = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
-
-  map = find_codec(codec_index);
-  if(!map)
-    {
-    fprintf(stderr, "Found no codec for %d\n", codec_index);
-    return LQT_COLORMODEL_NONE;
-    }
-  if(avcodec_open(avctx, map->decoder) != 0)
-    {
-    fprintf(stderr, "Couldn't open codec No. %d\n", codec_index);
-    return LQT_COLORMODEL_NONE;
-    }
-  ret = lqt_ffmpeg_get_lqt_colormodel(avctx->pix_fmt, &dummy);
-  
-  avcodec_close(avctx);
-  return ret;
-  }
-
-
 /*
  *   Return the actual codec constructor
  */
@@ -860,7 +836,7 @@ void quicktime_init_video_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
 	int i; \
 	for(i = 0; i < ffmpeg_num_video_codecs; i++) { \
 		if(codecidmap_v[i].index == x) { \
-			quicktime_init_video_codec_ffmpeg(vtrack, \
+                      quicktime_init_video_codec_ffmpeg(vtrack,       \
 				codecidmap_v[i].encoder, \
 				codecidmap_v[i].decoder); \
 		} \

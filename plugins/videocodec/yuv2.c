@@ -95,8 +95,7 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 	if(!codec->initialized)
 	{
 /* Init private items */
-		for(i = 0; i < 256; i++)
-		{
+               for(i = 0; i < 256; i++) {
 /* compression */
 			codec->rtoy_tab[i] = (long)( 0.2990 * 65536 * i);
 			codec->rtou_tab[i] = (long)(-0.1687 * 65536 * i);
@@ -133,7 +132,7 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 		codec->work_buffer = malloc(codec->bytes_per_line *
 								codec->coded_h);
 		codec->initialized = 1;
-	}
+         }
 }
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)

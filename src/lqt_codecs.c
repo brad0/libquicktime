@@ -483,9 +483,13 @@ int quicktime_decode_video(quicktime_t *file,
                            unsigned char **row_pointers, int track)
 {
 	int result;
+        int track_height;
+	int track_width;
+
 	quicktime_trak_t *trak = file->vtracks[track].track;
-	int track_height = trak->tkhd.track_height;
-	int track_width = trak->tkhd.track_width;
+        
+	track_height = quicktime_video_height(file, track);
+	track_width =  quicktime_video_width(file, track);
 
 //printf("quicktime_decode_video 1\n");
 // Fake scaling parameters
@@ -513,10 +517,14 @@ int quicktime_decode_video(quicktime_t *file,
 int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track)
 {
-	int result;
+        int result;
+        int track_height;
+	int track_width;
+
 	quicktime_trak_t *trak = file->vtracks[track].track;
-	int track_height = trak->tkhd.track_height;
-	int track_width = trak->tkhd.track_width;
+        
+	track_height = quicktime_video_height(file, track);
+	track_width =  quicktime_video_width(file, track);
 
 //printf("quicktime_decode_video 1\n");
 // Fake scaling parameters

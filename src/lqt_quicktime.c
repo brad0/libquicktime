@@ -694,16 +694,23 @@ int quicktime_has_video(quicktime_t *file)
 
 int quicktime_video_width(quicktime_t *file, int track)
 {
-	if(file->total_vtracks)
-		return file->vtracks[track].track->tkhd.track_width;
-	return 0;
+//	if(file->total_vtracks)
+//          return file->vtracks[track].track->tkhd.track_width;
+//	return 0;
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+  return file->vtracks[track].track->mdia.minf.stbl.stsd.table->width;
+  
 }
 
 int quicktime_video_height(quicktime_t *file, int track)
 {
-	if(file->total_vtracks)
-		return file->vtracks[track].track->tkhd.track_height;
-	return 0;
+//	if(file->total_vtracks)
+//          return file->vtracks[track].track->tkhd.track_height;
+//	return 0;
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+  return file->vtracks[track].track->mdia.minf.stbl.stsd.table->height;
 }
 
 int quicktime_video_depth(quicktime_t *file, int track)
@@ -735,6 +742,11 @@ int i;
 void lqt_set_row_span(quicktime_t *file, int track, int row_span)
   {
   file->vtracks[track].row_span = row_span;
+  }
+
+void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv)
+  {
+  file->vtracks[track].row_span_uv = row_span_uv;
   }
 
 void quicktime_set_window(quicktime_t *file,

@@ -297,7 +297,6 @@ static int set_parameter_audio(quicktime_t *file,
 	return 0;
 }
 
-
 static int reads_colormodel(quicktime_t *file,
                             int colormodel, 
                             int track)
@@ -327,7 +326,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 
 	codec->com.ffc_enc = encoder;
 	codec->com.ffc_dec = decoder;
-	
+        codec->lqt_colormodel = LQT_COLORMODEL_NONE;
+        
 	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_ffmpeg_delete_video;
 

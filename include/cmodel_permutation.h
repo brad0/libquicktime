@@ -1241,7 +1241,6 @@ static inline void transfer_RGBA16161616_to_YUV444P(unsigned char *output_y,
 
 
 
-
 static inline void transfer_BGR8888_to_RGB888(unsigned char *(*output), unsigned char *input)
 {
 	(*output)[0] = input[2];
@@ -1258,12 +1257,298 @@ static inline void transfer_BGR8888_to_BGR8888(unsigned char *(*output), unsigne
 	(*output) += 4;
 }
 
+// ******************************** BGR888 -> *********************************
+
 static inline void transfer_BGR888_to_RGB888(unsigned char *(*output), unsigned char *input)
 {
 	(*output)[0] = input[2];
 	(*output)[1] = input[1];
 	(*output)[2] = input[0];
 	(*output) += 3;
+}
+
+static inline void transfer_BGR888_to_BGR888(unsigned char *(*output), unsigned char *input)
+{
+	(*output)[0] = input[0];
+	(*output)[1] = input[1];
+	(*output)[2] = input[2];
+	(*output) += 3;
+}
+
+static inline void transfer_BGR888_to_RGB8(unsigned char *(*output), unsigned char *input)
+{
+	*(*output) = (unsigned char)((input[2] & 0xc0) +
+			    			 ((input[1] & 0xe0) >> 2) +
+		 	    			 ((input[8] & 0xe0) >> 5));
+	(*output)++;
+}
+
+static inline void transfer_BGR888_to_BGR565(unsigned char *(*output), unsigned char *input)
+{
+	uint16_t r, g, b;
+	uint16_t r_s, g_s, b_s;
+	b = *input++;
+	g = *input++;
+	r = *input;
+	
+	r_s  = (r & 0x01) << 7;
+	r_s |= (r & 0x02) << 5;
+	r_s |= (r & 0x04) << 3;
+	r_s |= (r & 0x08) << 1;
+	r_s |= (r & 0x10) >> 1;
+	r_s |= (r & 0x20) >> 3;
+	r_s |= (r & 0x40) >> 5;
+	r_s |= (r & 0x80) >> 7;
+
+	g_s  = (g & 0x01) << 7;
+	g_s |= (g & 0x02) << 5;
+	g_s |= (g & 0x04) << 3;
+	g_s |= (g & 0x08) << 1;
+	g_s |= (g & 0x10) >> 1;
+	g_s |= (g & 0x20) >> 3;
+	g_s |= (g & 0x40) >> 5;
+	g_s |= (g & 0x80) >> 7;
+
+	b_s  = (b & 0x01) << 7;
+	b_s |= (b & 0x02) << 5;
+	b_s |= (b & 0x04) << 3;
+	b_s |= (b & 0x08) << 1;
+	b_s |= (b & 0x10) >> 1;
+	b_s |= (b & 0x20) >> 3;
+	b_s |= (b & 0x40) >> 5;
+	b_s |= (b & 0x80) >> 7;
+
+	*(uint16_t*)(*output) = ((b_s & 0xf8) << 8)
+			 + ((g_s & 0xfc) << 3)
+			 + ((r_s & 0xf8) >> 3);
+	(*output) += 2;
+}
+
+static inline void transfer_BGR888_to_RGB565(unsigned char *(*output), unsigned char *input)
+{
+	uint16_t r, g, b;
+	b = *input++;
+	g = *input++;
+	r = *input;
+	*(uint16_t*)(*output) = ((r & 0xf8) << 8)
+			 + ((g & 0xfc) << 3)
+			 + ((b & 0xf8) >> 3);
+	(*output) += 2;
+}
+
+static inline void transfer_BGR888_to_RGBA8888(unsigned char *(*output), unsigned char *input)
+{
+	(*output)[0] = input[2];
+	(*output)[1] = input[1];
+	(*output)[2] = input[0];
+	(*output)[3] = 0xff;
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_RGB161616(uint16_t *(*output), unsigned char *input)
+{
+	(*output)[0] = (input[2] << 8) | input[2];
+	(*output)[1] = (input[1] << 8) | input[1];
+	(*output)[2] = (input[0] << 8) | input[0];
+	(*output) += 3;
+}
+
+static inline void transfer_BGR888_to_RGBA16161616(uint16_t *(*output), unsigned char *input)
+{
+	(*output)[0] = (input[2] << 8) | input[2];
+	(*output)[1] = (input[1] << 8) | input[1];
+	(*output)[2] = (input[0] << 8) | input[0];
+	(*output)[3] = 0xffff;
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_ARGB8888(unsigned char *(*output), unsigned char *input)
+{
+	(*output)[0] = 0xff;
+	(*output)[1] = input[2];
+	(*output)[2] = input[1];
+	(*output)[3] = input[0];
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_ABGR8888(unsigned char *(*output), unsigned char *input)
+{
+	(*output)[0] = 0xff;
+	(*output)[1] = input[0];
+	(*output)[2] = input[1];
+	(*output)[3] = input[2];
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_BGR8888(unsigned char *(*output), unsigned char *input)
+{
+	(*output)[0] = input[0];
+	(*output)[1] = input[1];
+	(*output)[2] = input[2];
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_YUV888(unsigned char *(*output), unsigned char *input)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	(*output)[0] = y;
+	(*output)[1] = u;
+	(*output)[2] = v;
+	(*output) += 3;
+}
+
+// static inline void transfer_BGR888_to_VYU888(unsigned char *(*output), unsigned char *input)
+// {
+//         int y, u, v;
+
+//         RGB_TO_YUV(y, u, v, input[0], input[1], input[2]);
+
+//         (*output)[0] = v;
+//         (*output)[1] = y;
+//         (*output)[2] = u;
+//         (*output) += 3;
+// }
+
+
+static inline void transfer_BGR888_to_YUV101010(unsigned char *(*output), unsigned char *input)
+{
+	int r, g, b;
+	int y, u, v;
+
+	r = ((uint16_t)input[2]) << 8;
+	g = ((uint16_t)input[1]) << 8;
+	b = ((uint16_t)input[0]) << 8;
+	RGB_TO_YUV16(y, u, v, r, g, b);
+	WRITE_YUV101010(y, u, v);
+}
+
+static inline void transfer_BGR888_to_VYU888(unsigned char *(*output), unsigned char *input)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	(*output)[0] = v;
+	(*output)[1] = y;
+	(*output)[2] = u;
+	(*output) += 3;
+}
+
+static inline void transfer_BGR888_to_UYVA8888(unsigned char *(*output), unsigned char *input)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	(*output)[0] = u;
+	(*output)[1] = y;
+	(*output)[2] = v;
+	(*output)[3] = 0xff;
+	(*output) += 4;
+}
+
+
+
+static inline void transfer_BGR888_to_YUVA8888(unsigned char *(*output), unsigned char *input)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	(*output)[0] = y;
+	(*output)[1] = u;
+	(*output)[2] = v;
+	(*output)[3] = 255;
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_YUV161616(uint16_t *(*output), unsigned char *input)
+{
+	int y, u, v, opacity, r, g, b;
+	
+	r = ((int)input[2] << 8) | input[2];
+	g = ((int)input[1] << 8) | input[1];
+	b = ((int)input[0] << 8) | input[0];
+
+	RGB_TO_YUV16(y, u, v, r, g, b);
+
+	(*output)[0] = y;
+	(*output)[1] = u;
+	(*output)[2] = v;
+	(*output) += 3;
+}
+
+static inline void transfer_BGR888_to_YUVA16161616(uint16_t *(*output), unsigned char *input)
+{
+	int y, u, v, r, g, b;
+
+	r = (((int)input[2]) << 8) | input[2];
+	g = (((int)input[1]) << 8) | input[1];
+	b = (((int)input[0]) << 8) | input[0];
+	RGB_TO_YUV16(y, u, v, r, g, b);
+
+	(*output)[0] = y;
+	(*output)[1] = u;
+	(*output)[2] = v;
+	(*output)[3] = 0xffff;
+	(*output) += 4;
+}
+
+static inline void transfer_BGR888_to_YUV420P_YUV422P(unsigned char *output_y, 
+	unsigned char *output_u, 
+	unsigned char *output_v, 
+	unsigned char *input,
+	int output_column)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	output_y[output_column] = y;
+	output_u[output_column / 2] = u;
+	output_v[output_column / 2] = v;
+}
+
+static inline void transfer_BGR888_to_YUV444P(unsigned char *output_y, 
+	unsigned char *output_u, 
+	unsigned char *output_v, 
+	unsigned char *input,
+	int output_column)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	output_y[output_column] = y;
+	output_u[output_column] = u;
+	output_v[output_column] = v;
+}
+
+static inline void transfer_BGR888_to_YUV422(unsigned char *(*output), 
+	unsigned char *input,
+	int j)
+{
+	int y, u, v;
+
+	RGB_TO_YUV(y, u, v, input[2], input[1], input[0]);
+
+	if(!(j & 1))
+	{ 
+// Store U and V for even pixels only
+		 (*output)[1] = u;
+		 (*output)[3] = v;
+		 (*output)[0] = y;
+	}
+	else
+	{ 
+// Store Y and advance output for odd pixels only
+		 (*output)[2] = y;
+		 (*output) += 4;
+	}
+
 }
 
 

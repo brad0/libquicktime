@@ -583,7 +583,7 @@ typedef struct
         int64_t timestamp;
         int64_t stts_index;
         int64_t stts_count;
-	int color_model, row_span;
+        int color_model, row_span, row_span_uv;
 
 } quicktime_video_map_t;
 

@@ -44,6 +44,7 @@ static lqt_colormodel_tab colormodel_table[] =
     { "32 bpp UYVA",             BC_UYVA8888 },
     { "YUV 4:2:0 planar",        BC_YUV420P },
     { "YUV 4:2:2 planar",        BC_YUV422P },
+    { "YUV 4:4:4 planar",        BC_YUV444P },
     { "YUV 4:1:1 planar",        BC_YUV411P },
     { (char*)0, LQT_COLORMODEL_NONE }
   };
@@ -154,6 +155,7 @@ static int colormodel_get_bits(int colormodel)
     case BC_VYU888: 
     case BC_YUV420P:
     case BC_YUV422P:
+    case BC_YUV444P:
     case BC_YUV411P:
       return 24;
     case BC_YUV101010:
