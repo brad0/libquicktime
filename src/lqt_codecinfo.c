@@ -644,20 +644,16 @@ void lqt_registry_destroy()
   {
   lqt_codec_info_t * tmp;
 
-  fprintf(stderr, "Deleting Audio Codecs\n");  
   while(lqt_audio_codecs)
     {
     tmp = lqt_audio_codecs->next;
-    fprintf(stderr, "Deleting codec %s\n", lqt_audio_codecs->long_name);
     destroy_codec_info(lqt_audio_codecs);
     lqt_audio_codecs = tmp;
     }
 
-  fprintf(stderr, "Deleting Video Codecs\n");  
   while(lqt_video_codecs)
     {
     tmp = lqt_video_codecs->next;
-    fprintf(stderr, "Deleting codec %s\n", lqt_video_codecs->long_name);
     destroy_codec_info(lqt_video_codecs);
     lqt_video_codecs = tmp;
     }
