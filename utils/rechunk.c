@@ -5,7 +5,7 @@
 
 int usage(void)
 {
-	printf("usage: rechunk [-f framerate] [-w width] [-h height] [-c fourcc] <input frames> <output movie>\n");
+	printf("usage: rechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] <input frames> <output movie>\n");
 	printf("	Concatenate input frames into a Quicktime movie.\n");
 	exit(1);
 	return 0;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	int rgb_to_ppm = 0;
 	char **input_frames = 0;
 	int total_input_frames = 0;
-	int width = 720, height = 480;
+	int width = 720, height = 480, bit_depth = 24;
 	char compressor[5] = "yv12";
 
 	if(argc < 3)
@@ -73,6 +73,14 @@ int main(int argc, char *argv[])
 			else
 				usage();
 		}
+		else
+		if(!strcmp(argv[i], "-b"))
+		{
+			if(i + 1 < argc)
+				bit_depth = atoi(argv[++i]);
+			else
+				usage();
+		}
 		if(i == argc - 1)
 		{
 			output = argv[i];
@@ -85,7 +93,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if(input = fopen(output, "rb"))
+	input = fopen(output, "rb");
+	if(input != NULL)
 	{
 		printf("Output file already exists.\n");
 		exit(1);
@@ -98,6 +107,7 @@ int main(int argc, char *argv[])
 	}
 	
 	quicktime_set_video(file, 1, width, height, output_rate, compressor);
+	quicktime_set_depth(file, bit_depth, 0);
 	
 	for(i = 0; i < total_input_frames; i++)
 	{
@@ -120,4 +130,6 @@ int main(int argc, char *argv[])
 	}
 
 	quicktime_close(file);
+
+	return 0;
 }
