@@ -519,6 +519,72 @@ int quicktime_decode_audio(quicktime_t *file,
 	return result;
 }
 
+int lqt_total_channels(quicktime_t *file)
+{
+	int i = 0, total_channels = 0;
+	for( i=0; i < file->total_atracks; i++ )
+	{
+		total_channels += file->atracks[i].channels;
+	}
+
+	return total_channels;
+}
+
+/*
+ * Same as quicktime_decode_audio, but it grabs all channels at
+ * once. Or if you want only some channels you can leave the channels
+ * you don't want = NULL in the poutput array. The poutput arrays
+ * must contain at least lqt_total_channels(file) elements.
+ */
+
+int lqt_decode_audio(quicktime_t *file, 
+				int16_t **poutput_i, 
+				float **poutput_f, 
+				long samples)
+{
+	int quicktime_track, quicktime_channel;
+	int result = 1;
+	int total_channels = lqt_total_channels(file);
+	int i = 0;
+	int16_t *output_i;
+	float *output_f;
+
+	for( i=0; i < total_channels; i++ )
+	{
+		quicktime_channel_location( file, &quicktime_track, &quicktime_channel,
+									i );
+
+		if( poutput_i != NULL )
+		{
+			output_i = poutput_i[i];
+		}
+		else
+			output_i = NULL;
+		
+		if( poutput_f != NULL )
+		{
+			output_f = poutput_f[i];
+		}
+		else
+			output_f = NULL;
+
+		if( output_i != NULL || output_f != NULL )
+		{	
+			result = ((quicktime_codec_t*)file->atracks[quicktime_track].codec)->decode_audio(
+				file, 
+				output_i, 
+				output_f, 
+				samples, 
+				quicktime_track, 
+				quicktime_channel );
+		}
+	}
+
+	file->atracks[quicktime_track].current_position += samples;
+
+	return result;
+}
+
 /* Since all channels are written at the same time: */
 /* Encode using the compressor for the first audio track. */
 /* Which means all the audio channels must be on the same track. */

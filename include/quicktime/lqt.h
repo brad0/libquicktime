@@ -71,7 +71,26 @@ int lqt_set_audio(quicktime_t *file, int channels,
 
 int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track);
-  
+
+/*
+ * Same as quicktime_decode_audio, but it grabs all channels at
+ * once. Or if you want only some channels you can leave the channels
+ * you don't want = NULL in the poutput array. The poutput arrays
+ * must contain at least lqt_total_channels(file) elements.
+ */
+
+int lqt_decode_audio(quicktime_t *file, 
+					 int16_t **output_i, 
+					 float **output_f, 
+					 long samples);
+
+/*
+ * Returns the total number of audio channels across all tracks.
+ */
+	
+int lqt_total_channels(quicktime_t *file);
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
