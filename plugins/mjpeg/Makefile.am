@@ -1,7 +1,7 @@
 libquicktimeincludedir = $(includedir)/quicktime
 
 libquicktimeinclude_HEADERS = \
-libmjpeg.h
+libmjpeg.h jpeg.h
 
 CFLAGS = @CFLAGS@
 
@@ -20,9 +20,5 @@ lqt_mjpeg.c
 
 lqt_mjpeg_la_LDFLAGS = -avoid-version -module
 lqt_mjpeg_la_LIBADD = libquicktime_mjpeg.la @JPEG_LIBS@ @MODULE_LIBADD@
-
-
-noinst_HEADERS = \
-jpeg.h
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/

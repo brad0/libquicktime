@@ -16,6 +16,8 @@ extern "C" {
 
 #define QUICKTIME_DIVX "DIVX"
 
+#define QUICKTIME_DIV3 "DIV3"
+  
 #define QUICKTIME_DV "dvc "
 
 /* RGB uncompressed.  Allows alpha */

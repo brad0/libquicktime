@@ -30,10 +30,8 @@ extern "C" {
 
 
 #include <stdio.h>
-
 #include <jpeglib.h>
-	
-#include <setjmp.h>       /* Need setjmp.h included by png.h */
+#include <png.h>       /* Need setjmp.h included by png.h */
 #include "pthread.h"
 
 #define MAXFIELDS 2
@@ -125,6 +123,10 @@ typedef struct
 	long input_field2;
 	int deinterlace;
 	int rowspan;
+
+// Workarounds for thread unsafe libraries
+	pthread_mutex_t decompress_init;
+	int decompress_initialized;
 } mjpeg_t;
 
 

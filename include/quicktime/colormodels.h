@@ -47,6 +47,7 @@
 // Planar
 #define BC_YUV420P      7
 #define BC_YUV422P      17
+#define BC_YUV444P      27
 #define BC_YUV411P      18
 
 // Colormodels purely used by Quicktime are done in Quicktime.

@@ -179,7 +179,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	longest offset = quicktime_position(file);
 	int result = 0;
 	long field2_offset;
-
+        quicktime_atom_t chunk_atom;
 	mjpeg_set_cpus(codec->mjpeg, file->cpus);
 
 	mjpeg_compress(codec->mjpeg, 
@@ -196,17 +196,15 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			2,
 			&field2_offset);
 
+        quicktime_write_chunk_header(file, trak, &chunk_atom);
 	result = !quicktime_write_data(file, 
 				mjpeg_output_buffer(codec->mjpeg), 
 				mjpeg_output_size(codec->mjpeg));
-
-	quicktime_update_tables(file,
-						vtrack->track,
-						offset,
-						vtrack->current_chunk,
-						vtrack->current_position,
-						1,
-						mjpeg_output_size(codec->mjpeg));
+        quicktime_write_chunk_footer(file, 
+                                     trak,
+                                     vtrack->current_chunk,
+                                     &chunk_atom, 
+                                     1);
 
 	vtrack->current_chunk++;
 	return result;

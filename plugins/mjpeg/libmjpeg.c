@@ -15,10 +15,9 @@
  * USA
  */
  
-#include <stdio.h>
+ #include <stdio.h>
 #include <stdlib.h>
-#include <quicktime/colormodels.h>
-#include <string.h>
+#include "colormodels.h"
 #include "libmjpeg.h"
 
 /* JPEG MARKERS */
@@ -78,6 +77,7 @@
 
 #define QUICKTIME_MARKER_SIZE 0x2c
 #define QUICKTIME_JPEG_TAG 0x6d6a7067
+
 
 METHODDEF(void) mjpeg_error_exit (j_common_ptr cinfo)
 {
@@ -356,6 +356,19 @@ static void allocate_temps(mjpeg_t *mjpeg)
 	            }
     	        break;
 
+            case BC_YUV444P:
+	            mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h * 3);
+	            mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+	            mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+	            mjpeg->temp_rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+	            for(i = 0; i < mjpeg->coded_h; i++)
+	            {
+		            mjpeg->temp_rows[0][i] = mjpeg->temp_data + i * mjpeg->coded_w;
+		            mjpeg->temp_rows[1][i] = mjpeg->temp_data + mjpeg->coded_w * mjpeg->coded_h + i * mjpeg->coded_w;
+		            mjpeg->temp_rows[2][i] = mjpeg->temp_data + mjpeg->coded_w * mjpeg->coded_h + mjpeg->coded_w * mjpeg->coded_h + i * mjpeg->coded_w;
+	            }
+    	        break;
+
             case BC_YUV420P:
 	            mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h + mjpeg->coded_w * mjpeg->coded_h / 2);
 	            mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
@@ -390,83 +403,126 @@ static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i)
 static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
 {
 	int i;
-	if(mjpeg->jpeg_color_model == BC_YUV422P)
-	{
-		if(!compressor->rows[0])
+    switch(mjpeg->jpeg_color_model)
+    {
+		case BC_YUV444P:
 		{
-			compressor->rows[0] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-			compressor->rows[1] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-			compressor->rows[2] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-		}
+			if(!compressor->rows[0])
+			{
+				compressor->rows[0] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+				compressor->rows[1] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+				compressor->rows[2] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+			}
 
 // User colormodel matches jpeg colormodel
-		if(mjpeg->color_model == BC_YUV422P &&
-			mjpeg->output_w == mjpeg->coded_w &&
-			mjpeg->output_h == mjpeg->coded_h)
-		{
-			for(i = 0; i < compressor->field_h; i++)
+			if(mjpeg->color_model == BC_YUV444P &&
+				mjpeg->output_w == mjpeg->coded_w &&
+				mjpeg->output_h == mjpeg->coded_h)
 			{
-				int input_row = get_input_row(mjpeg, compressor, i);
-				compressor->rows[0][i] = mjpeg->y_argument + 
-					mjpeg->coded_w * input_row;
-				compressor->rows[1][i] = mjpeg->u_argument + 
-					(mjpeg->coded_w / 2) * input_row;
-				compressor->rows[2][i] = mjpeg->v_argument + 
-					(mjpeg->coded_w / 2) * input_row;
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->y_argument + 
+						mjpeg->coded_w * input_row;
+					compressor->rows[1][i] = mjpeg->u_argument + 
+						mjpeg->coded_w * input_row;
+					compressor->rows[2][i] = mjpeg->v_argument + 
+						mjpeg->coded_w * input_row;
+				}
 			}
-		}
-		else
-		{
-			for(i = 0; i < compressor->field_h; i++)
+			else
 			{
-				int input_row = get_input_row(mjpeg, compressor, i);
-				compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
-				compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
-				compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
+					compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
+					compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
+				}
 			}
-		}
-	}
-	else
-	if(mjpeg->jpeg_color_model == BC_YUV420P)
-	{
-		if(!compressor->rows[0])
-		{
-			compressor->rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-			compressor->rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
-			compressor->rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
+			break;
 		}
 
-// User colormodel matches jpeg colormodel
-		if(mjpeg->color_model == BC_YUV420P &&
-			mjpeg->output_w == mjpeg->coded_w &&
-			mjpeg->output_h == mjpeg->coded_h)
+		case BC_YUV422P:
 		{
-			for(i = 0; i < compressor->field_h; i++)
+			if(!compressor->rows[0])
 			{
-				int input_row = get_input_row(mjpeg, compressor, i);
-				compressor->rows[0][i] = mjpeg->y_argument + 
-					mjpeg->coded_w * input_row;
-                if(i < compressor->field_h / 2)
-                {
-				    compressor->rows[1][i] = mjpeg->u_argument + 
-					    (mjpeg->coded_w / 2) * input_row;
-				    compressor->rows[2][i] = mjpeg->v_argument + 
-					    (mjpeg->coded_w / 2) * input_row;
-                }
+				compressor->rows[0] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+				compressor->rows[1] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+				compressor->rows[2] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
 			}
+
+	// User colormodel matches jpeg colormodel
+			if(mjpeg->color_model == BC_YUV422P &&
+				mjpeg->output_w == mjpeg->coded_w &&
+				mjpeg->output_h == mjpeg->coded_h)
+			{
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->y_argument + 
+						mjpeg->coded_w * input_row;
+					compressor->rows[1][i] = mjpeg->u_argument + 
+						(mjpeg->coded_w / 2) * input_row;
+					compressor->rows[2][i] = mjpeg->v_argument + 
+						(mjpeg->coded_w / 2) * input_row;
+				}
+			}
+			else
+			{
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
+					compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
+					compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
+				}
+			}
+			break;
 		}
-		else
+
+		case BC_YUV420P:
 		{
-			for(i = 0; i < compressor->field_h; i++)
+			if(!compressor->rows[0])
 			{
-				int input_row = get_input_row(mjpeg, compressor, i);
-				compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
-                if(i < compressor->field_h / 2)
-                {
-				    compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
-				    compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
-                }
+				compressor->rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+				compressor->rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
+				compressor->rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
 			}
+
+	// User colormodel matches jpeg colormodel
+			if(mjpeg->color_model == BC_YUV420P &&
+				mjpeg->output_w == mjpeg->coded_w &&
+				mjpeg->output_h == mjpeg->coded_h)
+			{
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->y_argument + 
+						mjpeg->coded_w * input_row;
+                	if(i < compressor->field_h / 2)
+                	{
+				    	compressor->rows[1][i] = mjpeg->u_argument + 
+					    	(mjpeg->coded_w / 2) * input_row;
+				    	compressor->rows[2][i] = mjpeg->v_argument + 
+					    	(mjpeg->coded_w / 2) * input_row;
+                	}
+				}
+			}
+			else
+			{
+				for(i = 0; i < compressor->field_h; i++)
+				{
+					int input_row = get_input_row(mjpeg, compressor, i);
+					compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
+                	if(i < compressor->field_h / 2)
+                	{
+				    	compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
+				    	compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
+                	}
+				}
+			}
+			break;
 		}
 	}
 }
@@ -489,6 +545,7 @@ static void new_jpeg_objects(mjpeg_compressor *engine)
 /* Ideally the error handler would be set here but it must be called in a thread */
 	jpeg_create_decompress(&(engine->jpeg_decompress));
 	engine->jpeg_decompress.raw_data_out = TRUE;
+	engine->jpeg_decompress.dct_method = JDCT_IFAST;
 }
 
 static void delete_jpeg_objects(mjpeg_compressor *engine)
@@ -565,27 +622,33 @@ static void decompress_field(mjpeg_compressor *engine)
 	jpeg_start_decompress(&engine->jpeg_decompress);
 
 // Generate colormodel from jpeg sampling
-	if(engine->jpeg_decompress.comp_info[0].v_samp_factor == 2)
+	if(engine->jpeg_decompress.comp_info[0].v_samp_factor == 2 &&
+		engine->jpeg_decompress.comp_info[0].h_samp_factor == 2)
     	mjpeg->jpeg_color_model = BC_YUV420P;
     else
+	if(engine->jpeg_decompress.comp_info[0].v_samp_factor == 1 &&
+		engine->jpeg_decompress.comp_info[0].h_samp_factor == 2)
     	mjpeg->jpeg_color_model = BC_YUV422P;
+	else
+		mjpeg->jpeg_color_model = BC_YUV444P;
+
+// Must be here because the color model isn't known until now
+	pthread_mutex_lock(&(mjpeg->decompress_init));
 	allocate_temps(mjpeg);
+	pthread_mutex_unlock(&(mjpeg->decompress_init));
 	get_rows(mjpeg, engine);
 
-//printf("decompress_field 1\n");
+
 	while(engine->jpeg_decompress.output_scanline < engine->jpeg_decompress.output_height)
 	{
-//printf("decompress_field 2 %d\n", engine->jpeg_decompress.output_scanline);
 		get_mcu_rows(mjpeg, engine, engine->jpeg_decompress.output_scanline);
-//printf("decompress_field 3\n");
-
 		jpeg_read_raw_data(&engine->jpeg_decompress, 
 			engine->mcu_rows, 
 			engine->field_h);
-//printf("decompress_field 4\n");
 	}
 	jpeg_finish_decompress(&engine->jpeg_decompress);
-//printf("decompress_field 5\n");
+
+
 finish:
 	;
 }
@@ -609,6 +672,7 @@ static void compress_field(mjpeg_compressor *engine)
 	int i, j;
 	mjpeg_t *mjpeg = engine->mjpeg;
 
+//printf("compress_field 1\n");
 	get_rows(engine->mjpeg, engine);
 	reset_buffer(&engine->output_buffer, &engine->output_size, &engine->output_allocated);
 	jpeg_buffer_dest(&engine->jpeg_compress, engine);
@@ -626,6 +690,7 @@ static void compress_field(mjpeg_compressor *engine)
 			engine->field_h);
 	}
 	jpeg_finish_compress(&engine->jpeg_compress);
+//printf("compress_field 2\n");
 }
 
 
@@ -717,7 +782,12 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 	result->jpeg_compress.input_components = 3;
 	result->jpeg_compress.in_color_space = JCS_RGB;
 	jpeg_set_quality(&(result->jpeg_compress), mjpeg->quality, 0);
-	if(mjpeg->use_float) result->jpeg_compress.dct_method = JDCT_FLOAT;
+
+	if(mjpeg->use_float) 
+		result->jpeg_compress.dct_method = JDCT_FLOAT;
+	else
+		result->jpeg_compress.dct_method = JDCT_IFAST;
+//		result->jpeg_compress.dct_method = JDCT_ISLOW;
 
 /* Fix sampling */
 	switch(mjpeg->fields)
@@ -803,6 +873,7 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 	mjpeg->color_model = color_model;
 	mjpeg->cpus = cpus;
 
+//printf("mjpeg_compress 1 %d\n", color_model);
 /* Reset output buffer */
 	reset_buffer(&mjpeg->output_data, 
 		&mjpeg->output_size, 
@@ -879,7 +950,7 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 			mjpeg->compressors[i]->output_size);
 		if(i == 0) mjpeg->output_field2 = mjpeg->output_size;
 	}
-	
+
 	if(corrected_fields < mjpeg->fields)
 	{
 		append_buffer(&mjpeg->output_data, 
@@ -888,6 +959,7 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 			mjpeg->compressors[0]->output_buffer, 
 			mjpeg->compressors[0]->output_size);
 	}
+//printf("mjpeg_compress 2\n");
 	return 0;
 }
 
@@ -1043,6 +1115,7 @@ mjpeg_t* mjpeg_new(int w,
 	int fields)
 {
 	mjpeg_t *result = calloc(1, sizeof(mjpeg_t));
+	pthread_mutexattr_t mutex_attr;
 	int i;
 
 	result->output_w = w;
@@ -1052,6 +1125,11 @@ mjpeg_t* mjpeg_new(int w,
 	result->cpus = 1;
 	result->quality = 80;
 	result->use_float = 0;
+
+	pthread_mutexattr_init(&mutex_attr);
+	pthread_mutex_init(&(result->decompress_init), &mutex_attr);
+	
+
 // Calculate coded dimensions
 // An interlaced frame with 4:2:0 sampling must be a multiple of 32
 
@@ -1061,6 +1139,9 @@ mjpeg_t* mjpeg_new(int w,
 		result->coded_h = (h % 16) ? h + (16 - (h % 16)) : h;
 	else
 		result->coded_h = (h % 32) ? h + (32 - (h % 32)) : h;
+
+	
+
 //printf("mjpeg_new %d %d %d %d\n", result->output_w, result->output_h, result->coded_w, result->coded_h);
 	return result;
 }
@@ -1137,7 +1218,7 @@ static inline int next_int32(unsigned char *data, long *offset, long length)
 		(((unsigned int)data[*offset - 1])));
 }
 
-static inline int next_int16(unsigned char *data, long *offset, long length)
+static inline int read_int16(unsigned char *data, long *offset, long length)
 {
 	if(length - *offset < 2)	
 	{
@@ -1148,6 +1229,17 @@ static inline int next_int16(unsigned char *data, long *offset, long length)
 	*offset += 2;
 	return ((((unsigned int)data[*offset - 2]) << 8) | 
 		(((unsigned int)data[*offset - 1])));
+}
+
+static inline int next_int16(unsigned char *data, long *offset, long length)
+{
+	if(length - *offset < 2)	
+	{
+		return 0;
+	}
+
+	return ((((unsigned int)data[*offset]) << 8) | 
+		(((unsigned int)data[*offset + 1])));
 }
 
 static inline void write_int32(unsigned char *data, long *offset, long length, unsigned int value)
@@ -1170,6 +1262,20 @@ static int next_marker(unsigned char *buffer, long *offset, long buffer_size)
 {
 	int c, done = 0;  /* 1 - completion    2 - error */
 
+	while(*offset < buffer_size - 1)
+	{
+		if(buffer[*offset] == 0xff && buffer[*offset + 1] != 0xff)
+		{
+			(*offset) += 2;
+			return buffer[*offset - 1];
+		}
+		
+		(*offset)++;
+	}
+
+	return 0;
+
+#if 0
 	while(!done && *offset < buffer_size)
 	{
 		c = nextbyte(buffer, offset, buffer_size);
@@ -1188,13 +1294,18 @@ static int next_marker(unsigned char *buffer, long *offset, long buffer_size)
 		}while(*offset < buffer_size && !done && c == 0xFF);
 
 /* not a 00 or FF */
-		if (c != 0) done = 1; 
+		if (c != 0 && c != 0xff) done = 1; 
 	}
+
+
 
 	if(done == 1) 
 		return c;
 	else
 		return 0;
+
+#endif
+
 }
 
 /* Find the next marker after offset and return 0 on success */
@@ -1288,17 +1399,18 @@ static void table_offsets(unsigned char *buffer,
 							offset - 2;
 					}
 					len = 0;
+//printf("table_offsets 1 %x %d\n", header[0].next_offset, field);
 					break;
 
 				case M_DQT:
-//printf("header[field].quant_offset %x %x\n", header[field].quant_offset, offset - 2);
+//printf("table_offsets M_DQT %d %d\n", field, offset);
 					if(!header[field].quant_offset)
 					{
 						header[field].quant_offset = offset - 2;
 						if(field > 0)
 							header[field].quant_offset -= header[0].next_offset;
 					}
-					len = next_int16(buffer, &offset, buffer_size);
+					len = read_int16(buffer, &offset, buffer_size);
 					len -= 2;
 					break;
 
@@ -1309,7 +1421,7 @@ static void table_offsets(unsigned char *buffer,
 						if(field > 0)
 							header[field].huffman_offset -= header[0].next_offset;
 					}
-					len = next_int16(buffer, &offset, buffer_size);
+					len = read_int16(buffer, &offset, buffer_size);
 					len -= 2;
 					break;
 
@@ -1320,7 +1432,7 @@ static void table_offsets(unsigned char *buffer,
 						if(field > 0)
 							header[field].image_offset -= header[0].next_offset;
 					}
-					len = next_int16(buffer, &offset, buffer_size);
+					len = read_int16(buffer, &offset, buffer_size);
 					len -= 2;
 					break;
 
@@ -1328,14 +1440,14 @@ static void table_offsets(unsigned char *buffer,
 					header[field].scan_offset = offset - 2;
 					if(field > 0)
 						header[field].scan_offset -= header[0].next_offset;
-					len = next_int16(buffer, &offset, buffer_size);
+					len = read_int16(buffer, &offset, buffer_size);
 					len -= 2;
 					header[field].data_offset = offset + len;
 					if(field > 0)
 						header[field].data_offset -= header[0].next_offset;
 					break;
 
-				case 0:
+//				case 0:
 				case M_EOI:
 					if(field > 0) 
 					{
@@ -1344,12 +1456,23 @@ static void table_offsets(unsigned char *buffer,
 							offset - header[0].next_offset;
 						header[field].next_offset = 0;
 					}
+					else
+					{
+// Often misses second SOI but gets first EOI
+//						header[0].next_offset = 
+//							header[0].padded_field_size = 
+//							offset;
+					}
+//printf("table_offsets M_EOI %d %x\n", field, offset);
 					done = 1;
+					len = 0;
 					break;
 
 				default:
-					len = next_int16(buffer, &offset, buffer_size);
-					len -= 2;
+// Junk appears between fields
+					len = 0;
+//					len = read_int16(buffer, &offset, buffer_size);
+//					len -= 2;
 					break;
 			}
 
@@ -1390,6 +1513,10 @@ void mjpeg_insert_quicktime_markers(unsigned char **buffer,
 	if(fields < 2) return;
 // Get offsets for tables in both fields
 	table_offsets(*buffer, *buffer_size, header);
+//printf("mjpeg_insert_quicktime_markers %x %02x %02x\n", 
+//	header[0].next_offset, (*buffer)[*field2_offset], (*buffer)[*field2_offset + 1]);
+//if(*field2_offset == 0)
+//	fwrite(*buffer, *buffer_size, 1, stdout);
 
 	header[0].field_size += QUICKTIME_MARKER_SIZE;
 	header[0].padded_field_size += QUICKTIME_MARKER_SIZE;
@@ -1407,6 +1534,9 @@ void mjpeg_insert_quicktime_markers(unsigned char **buffer,
 	header[1].scan_offset += QUICKTIME_MARKER_SIZE;
 	header[1].data_offset += QUICKTIME_MARKER_SIZE;
 	*field2_offset = header[0].next_offset;
+
+
+
 // Insert APP1 marker
 	insert_space(buffer, 
 		buffer_size, 
@@ -1449,7 +1579,7 @@ static void read_quicktime_markers(unsigned char *buffer,
 		if(!result)
 		{
 // Marker size
-			next_int16(buffer, &offset, buffer_size);
+			read_int16(buffer, &offset, buffer_size);
 // Zero
 			next_int32(buffer, &offset, buffer_size);
 // MJPA
@@ -1485,25 +1615,38 @@ long mjpeg_get_field2(unsigned char *buffer, long buffer_size)
 	long field2_offset = 0;
 	int i;
 
-	while(total_fields < 2)
+	for(i = 0; i < buffer_size; i++)
 	{
-		int result = find_marker(buffer, 
-			&offset, 
-			buffer_size,
-			M_SOI);
-
-		if(!result) 
+		if(buffer[i] == 0xff && buffer[i + 1] == M_SOI)
 		{
 			total_fields++;
-			field2_offset = offset - 2;
-		}
-		else
-		{
-			field2_offset = 0;
-			break;
+			field2_offset = i;
+			if(total_fields == 2) break;
 		}
 	}
+	
 
+/*
+ * 	while(total_fields < 2)
+ * 	{
+ * 		int result = find_marker(buffer, 
+ * 			&offset, 
+ * 			buffer_size,
+ * 			M_SOI);
+ * 
+ * 		if(!result) 
+ * 		{
+ * 			total_fields++;
+ * 			field2_offset = offset - 2;
+ * 		}
+ * 		else
+ * 		{
+ * 			field2_offset = 0;
+ * 			break;
+ * 		}
+ * 	}
+ * 
+ */
 	return field2_offset;
 }
 
