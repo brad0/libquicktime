@@ -22,7 +22,7 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
-#include "rtjpeg.h"
+#include "rtjpeg_codec.h"
 
 static char * fourccs_rtjpeg[]  = { "RTJ0", (char*)0 };
 

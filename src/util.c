@@ -80,6 +80,10 @@ int quicktime_file_close(quicktime_t *file)
         return 0;
 }
 
+#ifndef	HAVE_STAT64
+#define stat64 stat
+#endif
+
 
 
 int64_t quicktime_ftell(quicktime_t *file)

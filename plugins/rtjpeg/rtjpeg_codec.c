@@ -29,7 +29,7 @@
 #include <string.h>
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>
-#include "rtjpeg.h"
+#include "rtjpeg_codec.h"
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
