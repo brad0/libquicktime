@@ -6,9 +6,11 @@ endif
 
 SUBDIRS = $(gtk_subdirs)
 
-noinst_PROGRAMS=test_codec testqt
-
-bin_PROGRAMS=qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
+noinst_PROGRAMS := test_codec testqt
+bin_PROGRAMS := qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
+#if HAVE_X11
+#bin_PROGRAMS += lqtplay
+#endif
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=@UTIL_LIBADD@ -lm
@@ -37,6 +39,9 @@ qtrecover_LDADD=@UTIL_LIBADD@
 qtyuv4toyuv_SOURCES=yuv4toyuv.c
 qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
+lqtplay_SOURCES=lqtplay.c
+lqtplay_LDADD=@UTIL_LIBADD@	\
+	-lXaw -lXt @X_PRE_LIBS@ -lXext -lX11 @X_EXTRA_LIBS@
 
 INCLUDES = -I$(top_srcdir)/include
 
