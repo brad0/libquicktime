@@ -1,6 +1,6 @@
 Summary:	A library for manipulating QuickTime files
 Name:		libquicktime
-Version:	0.9.1
+Version:	0.9.2
 Release:	1
 License:	GPL
 Group:		Libraries

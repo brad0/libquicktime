@@ -1,6 +1,14 @@
 # These are always here
 
-base_subdirs = audiocodec videocodec opendivx ferguson rtjpeg xanim svq
+# TODO: Add compile directory conditionally
+base_subdirs = audiocodec \
+videocodec \
+opendivx \
+ferguson \
+rtjpeg \
+xanim \
+svq \
+ffmpeg
 
 if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
