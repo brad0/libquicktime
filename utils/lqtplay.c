@@ -32,7 +32,7 @@
 #include <GL/glu.h>
 #include <GL/glx.h>
 
-#include <quicktime/quicktime.h>
+#include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
 /* ------------------------------------------------------------------------ */
@@ -944,7 +944,7 @@ int main(int argc, char *argv[])
 				     NULL);
     XtAddEventHandler(simple,StructureNotifyMask, True, resize_ev, NULL);
     x11_init();
-    if (args.xv)
+    if (args.xv && qt_hasvideo)
 	xv_init();
 
     /* use Xvideo? */
@@ -958,7 +958,7 @@ int main(int argc, char *argv[])
 
     /* use OpenGL? */
     XtRealizeWidget(app_shell);
-    if (BC_RGB888 == qt_cmodel && args.gl)
+    if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo)
 	gl_init(simple,qt_width,qt_height);
 
     /* enter main loop */

@@ -53,6 +53,11 @@ int main(int argc, char** argv)
 		int16_t **ppiAudioBuffer;
 		int16_t *piAudioBufferLinear;
 
+		if( fFrameRate <= 0 )
+			iSamplesPerFrame = 
+				ceilf( quicktime_sample_rate( pxQuicktimeInput, 0 ) );
+		
+
 		{
 			int cpus = 1;
 			if( getenv("CPUS") != NULL )
@@ -92,7 +97,7 @@ int main(int argc, char** argv)
 			snprintf( sName, 64, "%s-%02d.sw", pcAudioPrefix, i );
 			pxAudioOutputs[i] = fopen( sName, "wb" );
 		}
-		
+
 		/*
 		  ppFrameBuffer = calloc( iFrameHeight, sizeof( unsigned char * ) );
 		  for( i = 0; i < iFrameHeight; i++ )
@@ -101,27 +106,38 @@ int main(int argc, char** argv)
 		  }
 		*/
 
-		while( iFrameNum < quicktime_video_length( pxQuicktimeInput, 0 ) )
+		while( iFrameNum < quicktime_video_length( pxQuicktimeInput, 0 )
+			   || iFrameNum*iSamplesPerFrame < quicktime_audio_length( pxQuicktimeInput, 0 ) )
 		{
 			//long int iAudioPos = quicktime_audio_position( pxQuicktimeInput, 0 );
-			
-			quicktime_decode_video( pxQuicktimeInput, ppFrameBuffer, 0 );
-			quicktime_encode_video( pxQuicktimeOutput, ppFrameBuffer, 0 );
-
-			lqt_decode_audio( pxQuicktimeInput, ppiAudioBuffer,
-							  NULL, iSamplesPerFrame );
-			
-			for( i = 0; i < iNAudioOutputs; i++ )
+			if( iFrameNum < quicktime_video_length( pxQuicktimeInput, 0 ) )
 			{
+				quicktime_decode_video( pxQuicktimeInput, ppFrameBuffer, 0 );
+				quicktime_encode_video( pxQuicktimeOutput, ppFrameBuffer, 0 );
+				printf( "v " );
+			}
+
+			if( iFrameNum*iSamplesPerFrame < quicktime_audio_length( pxQuicktimeInput, 0 ) )
+			{
+				lqt_decode_audio( pxQuicktimeInput, ppiAudioBuffer,
+								  NULL, iSamplesPerFrame );
+				
+				for( i = 0; i < iNAudioOutputs; i++ )
+				{
 				/*
-				  quicktime_set_audio_position( pxQuicktimeInput, iAudioPos, 0 );
-				  quicktime_decode_audio( pxQuicktimeInput, ppiAudioBuffer[0],
-				  NULL, iSamplesPerFrame, i );
+				quicktime_set_audio_position( pxQuicktimeInput, iAudioPos, 0 );
+				quicktime_decode_audio( pxQuicktimeInput, ppiAudioBuffer[0],
+				NULL, iSamplesPerFrame, i );
 				*/
 				
-				fwrite( ppiAudioBuffer[i], iSamplesPerFrame, sizeof( int16_t ),
-						pxAudioOutputs[i] );
+					fwrite( ppiAudioBuffer[i], iSamplesPerFrame,
+							sizeof( int16_t ),
+							pxAudioOutputs[i] );
+				}
+				printf( "a %d(%d) < %d ", iFrameNum*iSamplesPerFrame, iSamplesPerFrame, quicktime_audio_length( pxQuicktimeInput, 0 ) );
 			}
+
+			printf( "At frame #%d\n", iFrameNum );
 
 			iFrameNum++;
 		}
