@@ -18,10 +18,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
     
 */
-
-#include "config.h"
-#include "funcprotos.h"
 #include <string.h>
+#include "config.h"
+
+#include "funcprotos.h"
+#include <quicktime/quicktime.h>
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
 
 #include "ffmpeg.h"
@@ -37,84 +42,94 @@ int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   
   if(codec->sample_buffer) free(codec->sample_buffer);
   if(codec->chunk_buffer)  free(codec->chunk_buffer);
-  if(codec->chunk_sizes)   free(codec->chunk_sizes);
   
   free(codec);
   return 0;
   }
 
-
-static void deinterleave(int16_t *dst_i, float *dst_f, int16_t * src,
-                         int channel, int num_channels, int length)
+static void deinterleave(int16_t ** dst_i, float ** dst_f, int16_t * src,
+                         int channels, int samples)
   {
-  int i;
+  int i, j;
   if(dst_f)
     {
-    for(i = 0; i < length; i++)
+    for(i = 0; i < channels; i++)
       {
-      dst_f[i] = (float)src[i * num_channels + channel]/16383.0;
+      if(dst_f[i])
+        {
+        for(j = 0; j < samples; j++)
+          {
+          dst_f[i][j] = (float)src[j*channels + i]/32767.0;
+          }
+        }
       }
     }
-  else if(dst_i)
+  if(dst_i)
     {
-    for(i = 0; i < length; i++)
+    for(i = 0; i < channels; i++)
       {
-      dst_i[i] = src[i * num_channels + channel];
+      if(dst_i[i])
+        {
+        for(j = 0; j < samples; j++)
+          {
+          dst_i[i][j] = src[j*channels + i];
+          }
+        }
       }
+
     }
   }
 
 /* Decode the current chunk into the sample buffer */
 
-static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *codec,
-                        quicktime_audio_map_t *track_map)
+static int decode_chunk(quicktime_t * file, int track)
   {
-  int result;
   int frame_bytes;
-  int64_t offset;
   int num_samples;
   int samples_decoded = 0;
   int bytes_decoded;
   int bytes_used;
   int64_t chunk_size;
-  offset = quicktime_chunk_to_offset(file, track_map->track, codec->current_chunk);
-  num_samples = quicktime_chunk_samples(track_map->track, codec->current_chunk);
-  
-  /* Reallocate sample buffer */
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+
+  //  fprintf(stderr, "Quicktime chunk samples...");
+  num_samples = quicktime_chunk_samples(track_map->track, track_map->current_chunk);
+
+  //  fprintf(stderr, "done %d\n", num_samples);
+
   if(!num_samples)
     return 0;
-  //  num_samples = 100000;
-  if(codec->sample_buffer_size < codec->samples_in_buffer + num_samples)
+
+  /*
+   *  For AVIs, chunk samples are not always 100% correct.
+   *  Furthermore, there can be a complete mp3 frame from the last chunk!
+   */
+
+  num_samples += 8192;
+
+  /* Reallocate sample buffer */
+  
+  if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
     {
-    codec->sample_buffer_size = codec->samples_in_buffer + num_samples;
-    //    fprintf(stderr, "codec->sample_buffer_size: %d\n", codec->sample_buffer_size);
-    codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_size *
+    
+    codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + num_samples;
+    //    fprintf(stderr, "codec->sample_buffer_alloc: %d\n", codec->sample_buffer_alloc);
+    codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_alloc *
                                    track_map->channels);
     }
+
+  /* Read chunk */
+
+  chunk_size = lqt_append_audio_chunk(file,
+                                      track, track_map->current_chunk,
+                                      &(codec->chunk_buffer),
+                                      &(codec->chunk_buffer_alloc),
+                                      codec->bytes_in_chunk_buffer);
+
+  track_map->current_chunk++;
   
-  /* Determine the chunk size */
-
-  chunk_size = codec->chunk_sizes[codec->current_chunk-1];
-  //  fprintf(stderr, "Chunk size: %lld, samples: %d\n", chunk_size, num_samples);
-  if(codec->chunk_buffer_size < codec->bytes_in_chunk_buffer + chunk_size +
-     FF_INPUT_BUFFER_PADDING_SIZE)
-    {
-    codec->chunk_buffer_size = codec->bytes_in_chunk_buffer +
-      chunk_size + 100 + FF_INPUT_BUFFER_PADDING_SIZE;
-    codec->chunk_buffer = realloc(codec->chunk_buffer, codec->chunk_buffer_size);
-    }
-
-  /* Read one chunk */
-
-  offset = quicktime_chunk_to_offset(file, track_map->track,
-                                     codec->current_chunk);
-  quicktime_set_position(file, offset);
-  
-  result = !quicktime_read_data(file, codec->chunk_buffer, chunk_size);
-
   codec->bytes_in_chunk_buffer += chunk_size;
-  
-  memset(&(codec->chunk_buffer[codec->bytes_in_chunk_buffer]), 0, FF_INPUT_BUFFER_PADDING_SIZE);
   
   /* Decode this */
 
@@ -126,27 +141,53 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
   bytes_used = 0;
   while(1)
     {
+#if 0
+    fprintf(stderr, "Avcodec decode audio %d\n",
+            codec->bytes_in_chunk_buffer +
+            FF_INPUT_BUFFER_PADDING_SIZE);
+#endif
+    /* BIG NOTE: We pass extra FF_INPUT_BUFFER_PADDING_SIZE for the buffer size
+       because we know, that lqt_read_audio_chunk allocates 16 extra bytes for us */
+#if 0
+    fprintf(stderr, "decode_chunk: Sample buffer: %lld %lld %d, chunk_buffer: %d\n",
+            codec->sample_buffer_start,
+            codec->sample_buffer_end,
+            (int)(codec->sample_buffer_end - codec->sample_buffer_start),
+            codec->bytes_in_chunk_buffer);
+#endif
     frame_bytes =
       avcodec_decode_audio(codec->com.ffcodec_dec,
-                           &(codec->sample_buffer[track_map->channels * codec->samples_in_buffer]),
+                           &(codec->sample_buffer[track_map->channels *
+                                                  (codec->sample_buffer_end - codec->sample_buffer_start)]),
                            &bytes_decoded,
-                           &(codec->chunk_buffer[bytes_used]), codec->bytes_in_chunk_buffer);
+                           &(codec->chunk_buffer[bytes_used]),
+                           codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
     if(frame_bytes < 0)
       {
       fprintf(stderr, "avcodec_decode_audio error\n");
       break;
       }
 #if 0
-    fprintf(stderr, "Samples decoded: %d, Bytes used: %d, chunk_size: %lld, chunk buffer: %d\n",
+    fprintf(stderr, "decode_chunk: Samples decoded: %d, Bytes used: %d, chunk_size: %lld, chunk buffer: %d\n",
             bytes_decoded / (track_map->channels * 2),
             frame_bytes, chunk_size, codec->bytes_in_chunk_buffer);
 #endif
-        
-    /* Incomplete frame, save the data for later use and exit here */
 
     bytes_used                   += frame_bytes;
     codec->bytes_in_chunk_buffer -= frame_bytes;
+    
+    /* Incomplete frame, save the data for later use and exit here */
 
+    if(bytes_decoded < 0)
+      {
+      fprintf(stderr, "decode_chunk: Incomplete frame\n");
+      
+      if(codec->bytes_in_chunk_buffer > 0)
+        memmove(codec->chunk_buffer + bytes_used,
+                codec->chunk_buffer, codec->bytes_in_chunk_buffer);
+      return 1;
+      }
+    
     /* This happens because ffmpeg adds FF_INPUT_BUFFER_PADDING_SIZE to the bytes returned */
     
     if(codec->bytes_in_chunk_buffer < 0)
@@ -155,43 +196,43 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
     if(bytes_decoded <= 0)
       {
       if(codec->bytes_in_chunk_buffer > 0)
-        //        memmove(codec->chunk_buffer, &(codec->chunk_buffer[bytes_used]), codec->bytes_in_chunk_buffer);
         codec->bytes_in_chunk_buffer = 0;
       break;
       }
     
     samples_decoded += (bytes_decoded / (track_map->channels * 2));
-    codec->samples_in_buffer += (bytes_decoded / (track_map->channels * 2));
+    codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
+
+    if(!codec->bytes_in_chunk_buffer)
+      break;
+
     }
 #if 0
   fprintf(stderr, "Last samples decoded: %d, Bytes used: %d, samples decoded %d, chunk_size: %lld\n",
           bytes_decoded / (track_map->channels * 2),
           bytes_used, samples_decoded, chunk_size);
 #endif
-  return result;
+  //  track_map->current_chunk++;
+  return samples_decoded;
   }
 
-
-/*
- Damned if I know how to handle sample-granular access.  There is no 
- guaranteed 1:1 mapping between compressed and uncompressed samples.
- 
- Linear access is easy, but the moment someone seeks, how can we possibly
- find  where to start again?
-*/
-
-int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, long samples,
-                            int track, int channel)
+int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
+                            float **output_f, long samples,
+                            int track)
   {
   int result = 0;
-  int samples_decoded;
-  int64_t chunk_sample, current_chunk; /* For seeking only */
+  int64_t chunk_sample; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   int channels = file->atracks[track].channels;
-  int64_t total_samples;
-  /* Initialize codec */
+  //  int64_t total_samples;
+
+  int samples_to_skip;
+  int samples_to_move;
+
+  //  fprintf(stderr, "ffmpeg decode audio %lld\n", track_map->current_position);
   
+  /* Initialize codec */
   if(!codec->com.init_dec)
     {
     codec->com.ffcodec_dec = avcodec_alloc_context();
@@ -205,75 +246,84 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i, float *output_
     
     //    codec->sample_buffer_offset = 0;
     codec->com.init_dec = 1;
-    /* Build table of contents */
-    codec->chunk_sizes = lqt_get_chunk_sizes(file, file->atracks[track].track);
-    codec->current_chunk = 1;
     }
 
   /* Check if we have to reposition the stream */
   
-  if(codec->current_position != file->atracks[track].current_position)
+  if(file->atracks[track].last_position != file->atracks[track].current_position)
     {
-    /* Sequential reading happened -> flush sample buffer */
-    
-    if(codec->current_position + codec->num_samples == file->atracks[track].current_position)
+
+    if((file->atracks[track].current_position < codec->sample_buffer_start) || 
+       (file->atracks[track].current_position + samples >= codec->sample_buffer_end))
       {
-      if(codec->samples_in_buffer - codec->num_samples > 0)
-        {
-        memmove(codec->sample_buffer, &(codec->sample_buffer[codec->num_samples * channels]),
-                (codec->samples_in_buffer - codec->num_samples) * channels * sizeof(int16_t));
-        }
-      codec->samples_in_buffer -= codec->num_samples;
-      }
-    else /* Seeking happened */
-      {
-      int samples_to_skip;
       quicktime_chunk_of_sample(&chunk_sample,
-                                &(codec->current_chunk),
+                                &(file->atracks[track].current_chunk),
                                 file->atracks[track].track,
                                 file->atracks[track].current_position);
-      samples_to_skip = file->atracks[track].current_position - chunk_sample;
 
-      /* Decode this chunk and skip samples */
-      codec->samples_in_buffer = 0;
-      decode_chunk(file, codec, track_map);
-      codec->current_chunk++;
-      if(samples_to_skip > 0)
-        {
-        if(codec->samples_in_buffer - samples_to_skip > 0)
-          memmove(codec->sample_buffer, &(codec->sample_buffer[samples_to_skip * channels]),
-                  (codec->samples_in_buffer - samples_to_skip) * channels * sizeof(int16_t));
-        codec->samples_in_buffer -= samples_to_skip;
-        }
+      fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
+              file->atracks[track].current_position,
+              file->atracks[track].current_chunk, chunk_sample);
+            
+      codec->sample_buffer_start = chunk_sample;
+      codec->sample_buffer_end   = chunk_sample;
+      decode_chunk(file, track);
       }
-    codec->current_position = file->atracks[track].current_position;
     }
+  
+  /* Flush unneeded samples */
+  
+  if(track_map->current_position > codec->sample_buffer_start)
+    {
+    samples_to_skip = track_map->current_position - codec->sample_buffer_start;
 
+    //    fprintf(stderr, "Flush\n");
+    
+    if(codec->sample_buffer_end > track_map->current_position)
+      {
+      samples_to_move = codec->sample_buffer_end - track_map->current_position;
+
+      //      fprintf(stderr, "Memmove...");
+      memmove(codec->sample_buffer,
+              &(codec->sample_buffer[samples_to_skip * channels]),
+              samples_to_move * channels * sizeof(int16_t));
+      //      fprintf(stderr, "done\n");
+      }
+    codec->sample_buffer_start = track_map->current_position;
+    }
+  
+#if 0
   /* Lets not hang if we are at the end of the file */
   total_samples = quicktime_audio_length(file, track);
   if(samples + codec->current_position > total_samples)
     {
     samples = total_samples - codec->current_position;
     }
-  
+#endif
+
   /* Read new chunks until we have enough samples */
-  
-  while(codec->samples_in_buffer < samples)
+  while(codec->sample_buffer_end - codec->sample_buffer_start < samples)
     {
-    if(codec->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+#if 0
+    fprintf(stderr, "Samples: %lld -> %lld %lld, %d\n",
+            codec->sample_buffer_start, codec->sample_buffer_end,
+            codec->sample_buffer_end - codec->sample_buffer_start, samples);
+#endif
+    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
       return 0;
     
-    result = decode_chunk(file, codec, track_map);
-    codec->current_chunk++;
+    result = decode_chunk(file, track);
     }
 
   /* Deinterleave into the buffer */
 
   deinterleave(output_i, output_f, codec->sample_buffer,
-               channel, channels, samples);
-  
-  codec->num_samples = samples;
-  return result;
+               channels, samples);
+
+  file->atracks[track].last_position = file->atracks[track].current_position + samples;
+
+  return samples;
+  // #endif
   }
 
 /*
@@ -340,25 +390,25 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
 
     /* One frame is: bitrate * frame_samples / (samplerate * 8) + 1024 */
 #if 0		// PATCH 1
-    codec->chunk_buffer_size = (codec->com.ffcodec_enc->bit_rate * codec->com.ffcodec_enc->frame_size /
+    codec->chunk_buffer_alloc = (codec->com.ffcodec_enc->bit_rate * codec->com.ffcodec_enc->frame_size /
                                 (codec->com.ffcodec_enc->sample_rate * 8)) + 1024;
 #else
-    codec->chunk_buffer_size = ( codec->com.ffcodec_enc->frame_size
+    codec->chunk_buffer_alloc = ( codec->com.ffcodec_enc->frame_size
 									* sizeof( int16_t )
 									* codec->com.ffcodec_enc->channels
 								);
 #endif
-    codec->chunk_buffer = malloc(codec->chunk_buffer_size);
+    codec->chunk_buffer = malloc(codec->chunk_buffer_alloc);
     }
 
   /* Allocate sample buffer if necessary */
 
 //         PATCH 2 
-  if(codec->sample_buffer_size < (codec->samples_in_buffer + samples))
+  if(codec->sample_buffer_alloc < (codec->samples_in_buffer + samples))
     {
-    codec->sample_buffer_size = codec->samples_in_buffer + samples + 16;
+    codec->sample_buffer_alloc = codec->samples_in_buffer + samples + 16;
     codec->sample_buffer = realloc(codec->sample_buffer,
-                                   codec->sample_buffer_size * channels * sizeof(int16_t));
+                                   codec->sample_buffer_alloc * channels * sizeof(int16_t));
     }
 
   /* Interleave */
@@ -377,7 +427,7 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
     //    fprintf(stderr, "avcodec_encode_audio %d...", samples_done);
     
     frame_bytes = avcodec_encode_audio(codec->com.ffcodec_enc, codec->chunk_buffer,
-                                       codec->chunk_buffer_size,
+                                       codec->chunk_buffer_alloc,
                                        &(codec->sample_buffer[samples_done*channels]));
     if(frame_bytes > 0)
       {

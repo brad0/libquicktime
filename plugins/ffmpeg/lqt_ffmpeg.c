@@ -352,12 +352,12 @@ static lqt_parameter_info_static_t decode_parameters_mpeg4[] = {
   DECODE_PARAM_VIDEO,
   { /* End of parameters */ }
 };
-
+#if 0
 static lqt_parameter_info_static_t decode_parameters_rle[] = {
   DECODE_PARAM_VIDEO,
   { /* End of parameters */ }
 };
-
+#endif
 
 static lqt_parameter_info_static_t decode_parameters_audio[] = {
   //  DECODE_PARAM_AUDIO,
@@ -694,8 +694,7 @@ struct CODECIDMAP codecidmap_a[] = {
 
 static void ffmpeg_map_init(void)
   {
-  AVCodec *codec;
-  int i, found;
+  int i;
   //  fprintf(stderr, "Init map...");
   if(ffmpeg_num_video_codecs >= 0)
     {

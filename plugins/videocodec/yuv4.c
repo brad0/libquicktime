@@ -235,7 +235,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int result = 0;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	int64_t bytes = codec->rows * codec->bytes_per_line;
+	int64_t bytes;
 	unsigned char *buffer;
 	unsigned char *output_row;    /* Pointer to output row */
 	unsigned char *row_pointer1, *row_pointer2;  /* Pointers to input rows */
@@ -252,7 +252,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 
 
-
+        bytes = codec->rows * codec->bytes_per_line;
 
 
 

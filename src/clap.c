@@ -1,5 +1,5 @@
 /*
- * $Id: clap.c,v 1.1 2004/10/13 20:32:05 sms00 Exp $
+ * $Id: clap.c,v 1.2 2004/11/29 00:41:22 gmerlin Exp $
  *
  * init, read, write handler for the "clap" (Clean Aperture) atom
 */
@@ -19,14 +19,14 @@ void quicktime_clap_dump(quicktime_clap_t *clap)
 {
 
 	printf("     clean aperture (clap)\n");
-	printf("       cleanApertureWidthN %ld\n", clap->cleanApertureWidthN);
-	printf("       cleanApertureWidthD %ld\n", clap->cleanApertureWidthD);
-	printf("       cleanApertureHeightN %ld\n", clap->cleanApertureHeightN);
-	printf("       cleanApertureHeightD %ld\n", clap->cleanApertureHeightD);
-	printf("       horizOffN %ld\n", clap->horizOffN);
-	printf("       horizOffD %ld\n", clap->horizOffD);
-	printf("       vertOffN %ld\n", clap->vertOffN);
-	printf("       vertOffD %ld\n", clap->vertOffD);
+	printf("       cleanApertureWidthN %d\n", clap->cleanApertureWidthN);
+	printf("       cleanApertureWidthD %d\n", clap->cleanApertureWidthD);
+	printf("       cleanApertureHeightN %d\n", clap->cleanApertureHeightN);
+	printf("       cleanApertureHeightD %d\n", clap->cleanApertureHeightD);
+	printf("       horizOffN %d\n", clap->horizOffN);
+	printf("       horizOffD %d\n", clap->horizOffD);
+	printf("       vertOffN %d\n", clap->vertOffN);
+	printf("       vertOffD %d\n", clap->vertOffD);
 }
 
 void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap)

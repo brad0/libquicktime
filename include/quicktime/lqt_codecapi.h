@@ -63,6 +63,8 @@ typedef struct
 
 typedef struct
   {
+  int compatibility_flags;
+
   char * name;               /* Name of the codec              */
   char * long_name;          /* Long name of the codec         */
   char * description;        /* Description                    */
@@ -95,7 +97,7 @@ typedef struct
  *  module.
  *
  *  The get_codec_info() function in your module will then call the
- *  function below to create a lqt_codec_info_t from the argument.
+codec->decode_buffer *  function below to create a lqt_codec_info_t from the argument.
  *  All data are copied, so the returned structure can be used after
  *  closing the module.
  *
@@ -104,4 +106,36 @@ typedef struct
 lqt_codec_info_t *
 lqt_create_codec_info(const lqt_codec_info_static_t * template);
 
+/* Some audio stuff */
 
+int16_t ** lqt_audio_buffer_create_int16(int num_channels, int num_samples);
+float   ** lqt_audio_buffer_create_float(int num_channels, int num_samples);
+
+/* An extremely useful function for audio decoders */
+
+/*
+ *  It copies the smaller one of src_size and dst_size
+ *  from src_pos in the source to dst_pos in the destination
+ *  either src_i or src_f can be NULL. Same for dst_i and 
+ *  dst_f. But here, you can also set individual channels to NULL.
+ */
+   
+int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
+                   int16_t ** src_i, float ** src_f,
+                   int dst_pos, int src_pos,
+                   int dst_size, int src_size, int num_channels);
+
+/*
+ *  Read one audio chunk
+ *  buffer will be realloced if too small and buffer_alloc will be the
+ *  new allocated size. Return value is the number of valid bytes,
+ *  which might be smaller than buffer_alloc.
+ */
+
+int lqt_read_audio_chunk(quicktime_t * file, int track,
+                         long chunk,
+                         uint8_t ** buffer, int * buffer_alloc);
+int lqt_append_audio_chunk(quicktime_t * file, int track,
+                           long chunk,
+                           uint8_t ** buffer, int * buffer_alloc,
+                           int initial_bytes);

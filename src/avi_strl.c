@@ -238,7 +238,6 @@ void quicktime_read_strl(quicktime_t *file,
 	int compression_id = 0;
         //	int bytes_per_second;
 	quicktime_trak_t *trak = 0;
-	quicktime_riff_t *first_riff = file->riff[0];
 
 
 	codec[0] = codec[1] = codec[2] = codec[3] = 0;
@@ -304,6 +303,7 @@ void quicktime_read_strl(quicktime_t *file,
 			if(quicktime_match_32(data, "auds"))
 			{
 				trak = quicktime_add_trak(file);
+                                trak->strl = strl;
 				channels = 2;
 				sample_rate = 0;
 				compression_id = 0;
@@ -325,7 +325,7 @@ void quicktime_read_strl(quicktime_t *file,
 				quicktime_set_position(file, quicktime_position(file) + 4);
 /* length of track */
 				samples = quicktime_read_int32_le(file);           // dwLength
-                                fprintf(stderr, "*** Time: %f\n", (float)samples/(float)strl->dwRate);
+                                // fprintf(stderr, "*** Time: %f\n", (float)samples/(float)strl->dwRate);
 /* suggested buffer size, quality */
                                 // Skip dwSuggestedBufferSize dwQuality
 				quicktime_set_position(file, quicktime_position(file) + 8);
@@ -362,10 +362,11 @@ void quicktime_read_strl(quicktime_t *file,
 				channels = quicktime_read_int16_le(file); //                   nChannels
 				sample_rate = quicktime_read_int32_le(file); //                nSamplesPerSec
                                 strl->nAvgBytesPerSec = quicktime_read_int32_le(file); //      nAvgBytesPerSec
-                                strl->nBlockAlign = quicktime_read_int32_le(file); //          nBlockAlign
+                                strl->nBlockAlign = quicktime_read_int16_le(file); //          nBlockAlign
                                 // quicktime_set_position(file, quicktime_position(file) + 6);
 				strl->wBitsPerSample = quicktime_read_int16_le(file); //                wBitsPerSample
-//printf("quicktime_read_strl 40 %d %d %d\n", channels, sample_rate, strl->wBitsPerSample);
+                                fprintf(stderr, "quicktime_read_strl 40 %d %d %d\n",
+                                        channels, sample_rate, strl->wBitsPerSample);
 			}
 		}
 		else
@@ -414,7 +415,7 @@ void quicktime_read_strl(quicktime_t *file,
 					trak, 
 					channels, 
 					sample_rate, 
-					strl->wBitsPerSample, 
+                                        strl->wBitsPerSample, 
 					codec);
 
 

@@ -240,6 +240,8 @@ copy_codec_info(const lqt_codec_info_t * info)
   int i;
   lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
 
+  ret->compatibility_flags = info->compatibility_flags;
+    
   if(info->name)
     ret->name = __lqt_strdup(info->name);
   if(info->long_name)
@@ -913,6 +915,8 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
     }
   
   ret = calloc(1, sizeof(lqt_codec_info_t));
+
+  ret->compatibility_flags = template->compatibility_flags;
 
   ret->name =        __lqt_strdup(template->name);
   ret->long_name =   __lqt_strdup(template->long_name);

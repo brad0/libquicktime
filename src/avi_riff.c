@@ -1,5 +1,6 @@
 #include <quicktime/quicktime.h>
 #include <funcprotos.h>
+#include <string.h>
 
 
 void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
@@ -7,7 +8,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
 	quicktime_riff_t *riff = quicktime_new_riff(file);
 	quicktime_atom_t leaf_atom;
 	int result = 0;
-	int i;
 	char data[5];
 
 	riff->atom = *parent_atom;
@@ -131,7 +131,6 @@ quicktime_riff_t* quicktime_new_riff(quicktime_t *file)
 
 void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff)
 {
-	int i = 0;
 	quicktime_delete_hdrl(file, &riff->hdrl);
 	quicktime_delete_movi(file, &riff->movi);
 	quicktime_delete_idx1(&riff->idx1);
@@ -176,10 +175,221 @@ void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff)
 }
 
 
+/*
+ *  Get the number of audio samples corresponding to a number of bytes
+ *  in an audio stream.
+ *
+ *  Update all arguments for which pointers are passed
+ */
+
+static int bytes_to_samples(quicktime_strl_t * strl, int bytes, int samplerate)
+  {
+  int64_t total_samples;
+  int ret;
+
+  strl->total_bytes += bytes;
+  if(strl->nBlockAlign)
+    {
+    strl->total_blocks = (strl->total_bytes + strl->nBlockAlign - 1) / strl->nBlockAlign;
+    }
+  else
+    strl->total_blocks++;
+  
+  if((strl->dwSampleSize == 0) && (strl->dwScale > 1))
+    {
+    /* variable bitrate */
+    total_samples = (samplerate * strl->total_blocks *
+                     strl->dwScale) / strl->dwRate;
+    }
+  else
+    {
+    /* constant bitrate */
+    if(strl->nBlockAlign)
+      {
+      total_samples =
+        (strl->total_bytes * strl->dwScale * samplerate) /
+        (strl->nBlockAlign * strl->dwRate);
+      }
+    else
+      {
+      total_samples =
+        (samplerate * strl->total_bytes *
+         strl->dwScale) / (strl->dwSampleSize * strl->dwRate);
+      }
+    }
+
+  /* Update stuff */
+
+  ret = total_samples - strl->total_samples;
+  strl->total_samples = total_samples;
+
+  return ret;
+  }
 
 
-void quicktime_import_avi(quicktime_t *file)
-{
+/* Insert audio chunk from idx1 into quicktime indices */
+
+#define NUM_ALLOC 1024
+
+static void insert_audio_packet(quicktime_trak_t * trak,
+                                int64_t offset,
+                                int size)
+  {
+  int num_samples;
+  quicktime_stco_t *stco;
+  quicktime_stsc_t *stsc;
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  
+  /* Update stco */
+
+  stco = &trak->mdia.minf.stbl.stco;
+  quicktime_update_stco(stco, stco->total_entries + 1, offset);
+
+  /* Update stsc */
+  
+  num_samples = bytes_to_samples(trak->strl, size, trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+  
+  stsc = &trak->mdia.minf.stbl.stsc;
+
+  /* stsc will be initialized with 1 entry and zero samples */
+
+  if(stsc->table[0].samples == 0)
+    quicktime_update_stsc(stsc, 1, num_samples);
+  else
+    quicktime_update_stsc(stsc, stsc->total_entries+1, num_samples);
+
+  /* Update total samples */
+
+  stts->table[0].sample_count += num_samples;
+
+  if(trak->chunk_sizes_alloc < stco->total_entries)
+    {
+    trak->chunk_sizes = realloc(trak->chunk_sizes,
+                                sizeof(*trak->chunk_sizes) *
+                                (trak->chunk_sizes_alloc + NUM_ALLOC));
+    memset(trak->chunk_sizes + trak->chunk_sizes_alloc, 0,
+           sizeof(*trak->chunk_sizes) * NUM_ALLOC);
+    trak->chunk_sizes_alloc += NUM_ALLOC;
+    }
+  trak->chunk_sizes[stco->total_entries - 1] = size;
+  }
+
+#undef NUM_ALLOC
+     
+/* Insert video chunk from idx1 into quicktime indices */
+
+static void insert_video_packet(quicktime_trak_t * trak,
+                                int64_t offset,
+                                int size, int keyframe)
+  {
+  quicktime_stss_t *stss;
+  quicktime_stco_t *stco = &trak->mdia.minf.stbl.stco;
+  quicktime_stsz_t *stsz = &trak->mdia.minf.stbl.stsz;
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+
+  /* If size is zero, the last frame will be repeated */
+
+  if(!size)
+    {
+    stts->table[stsz->total_entries].sample_duration += stts->default_duration;
+    return;
+    }
+  
+  /* Update stco */
+  
+  quicktime_update_stco(stco, stco->total_entries + 1, offset);
+
+  /* Update stss */
+
+  if(keyframe)
+    {
+    stss = &trak->mdia.minf.stbl.stss;
+    if(stss->entries_allocated <= stss->total_entries)
+      {
+      stss->entries_allocated *= 2;
+      stss->table = realloc(stss->table, 
+                            sizeof(quicktime_stss_table_t) * stss->entries_allocated);
+      }
+    stss->table[stss->total_entries++].sample = stsz->total_entries+1;
+    }
+
+  /* Update sample duration */
+
+  quicktime_update_stts(stts, stsz->total_entries, 0);
+  
+  /* Update sample size */
+
+  quicktime_update_stsz(stsz, stsz->total_entries, size);
+  }
+
+/* Build index tables from an idx1 index */
+
+static void idx1_build_index(quicktime_t *file)
+  {
+  int i;
+  quicktime_idx1table_t *idx1table;
+  quicktime_trak_t * trak;
+  quicktime_riff_t *first_riff = file->riff[0];
+  quicktime_idx1_t *idx1 = &first_riff->idx1;
+  int track_number;
+    
+  for(i = 0; i < idx1->table_size; i++)
+    {
+    idx1table = idx1->table + i;
+    track_number = (idx1table->tag[0] - '0') * 10 +
+      (idx1table->tag[1] - '0');
+    if((track_number < 0) || (track_number >= file->moov.total_tracks))
+      continue;
+    trak = file->moov.trak[track_number];
+
+    if(trak->mdia.minf.is_audio)
+      insert_audio_packet(trak,
+                          idx1table->offset + first_riff->movi.atom.start,
+                          idx1table->size);
+
+    else if(trak->mdia.minf.is_video)
+      insert_video_packet(trak,
+                          idx1table->offset + first_riff->movi.atom.start,
+                          idx1table->size,
+                          !!(idx1table->flags & AVI_KEYFRAME));
+    }
+  }
+
+/* Build index tables from an indx index */
+#if 0
+static void indx_build_index(quicktime_t *file)
+  {
+  
+  }
+#endif
+/*
+ *  Ok, this differs from the qt4l approach:
+ *  If indx tables are present for all streams,
+ *  we'll use them and forget the idx1. Otherwise,
+ *  we build the index from the idx1
+ */
+
+int quicktime_import_avi(quicktime_t *file)
+  {
+#if 1
+  int i;
+
+  quicktime_riff_t *first_riff = file->riff[0];
+  quicktime_idx1_t *idx1 = &first_riff->idx1;
+  if(!idx1->table_size)
+    return 1;
+  idx1_build_index(file);
+
+  /* Compress stts */
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    if(file->moov.trak[i]->mdia.minf.is_video)
+       quicktime_compress_stts(&(file->moov.trak[i]->mdia.minf.stbl.stts));
+    }
+  
+  return 0;
+  
+#else /* Original version follows */
 	int i, j, k;
 	quicktime_riff_t *first_riff = file->riff[0];
 	quicktime_idx1_t *idx1 = &first_riff->idx1;
@@ -316,7 +526,7 @@ void quicktime_import_avi(quicktime_t *file)
 						{
 							if(stsd->table[0].sample_size > 0)
 							{
-								quicktime_update_stsc(stsc, 
+                                                                  quicktime_update_stsc(stsc, 
 									stsc->total_entries + 1, 
 									ixtable->size * 
 									8 / 
@@ -373,6 +583,7 @@ void quicktime_import_avi(quicktime_t *file)
 	}
 
 //printf("quicktime_import_avi 30\n");
+#endif
 
 }
 

@@ -130,7 +130,7 @@ static lqt_codec_info_static_t codec_info_v308 =
   {
   name:        "v308",
   long_name:   "8 bit Planar YUV 4:4:4",
-  description: "8 bit Planar YUV 4:4:4",
+  description: "8 bit Planar YUV 4:4:4 (v308)",
   fourccs:     fourccs_v308,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -144,7 +144,7 @@ static lqt_codec_info_static_t codec_info_v408 =
   {
   name:              "v408",
   long_name:         "8 bit Planar YUVA 4:4:4:4",
-  description:       "8 bit Planar YUVA 4:4:4:4",
+  description:       "8 bit Planar YUVA 4:4:4:4 (v408)",
   fourccs:           fourccs_v408,
   type:              LQT_CODEC_VIDEO,
   direction:         LQT_DIRECTION_BOTH,
@@ -159,7 +159,7 @@ static lqt_codec_info_static_t codec_info_v410 =
   {
   name:        "v410",
   long_name:   "10 bit Planar YUV 4:4:4",
-  description: "10 bit Planar YUV 4:4:4:4",
+  description: "10 bit Planar YUV 4:4:4 (v410)",
   fourccs:     fourccs_v410,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -173,7 +173,7 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   {
   name:        "yuv2",
   long_name:   "8 bit Packed YUV 4:2:2",     /* Long name of the codec */
-  description: "8 bit Packed YUV 4:2:2",      /* Description            */
+  description: "8 bit Packed YUV 4:2:2 (yuv2)",      /* Description            */
   fourccs:     fourccs_yuv2,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -188,7 +188,7 @@ static lqt_codec_info_static_t codec_info_yuv4 =
   {
     name:        "yuv4",
     long_name:   "YUV 4:2:0", 
-    description: "YUV 4:2:0 NOT COMPATIBLE WITH STANDARD QUICKTIME",
+    description: "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME",
     fourccs:     fourccs_yuv4,
     type:        LQT_CODEC_VIDEO,
     direction:   LQT_DIRECTION_BOTH,
@@ -203,7 +203,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
   {
     name:        "yv12",
     long_name:   "8 bit Planar YUV 4:2:0",
-    description: "8 bit Planar YUV 4:2:0",
+    description: "8 bit Planar YUV 4:2:0 (yv12)",
     fourccs:     fourccs_yv12,
     type:        LQT_CODEC_VIDEO,
     direction:   LQT_DIRECTION_BOTH,

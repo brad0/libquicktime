@@ -3,8 +3,8 @@ pkglib_LTLIBRARIES = lqt_audiocodec.la
 
 lqt_audiocodec_la_SOURCES = \
 ima4.c \
-rawaudio.c \
 twos.c \
+rawaudio.c \
 ulaw.c \
 lqt_audiocodec.c
 

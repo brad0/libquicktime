@@ -15,7 +15,7 @@ void quicktime_stsc_init_table(quicktime_t *file, quicktime_stsc_t *stsc)
 {
 	if(!stsc->entries_allocated)
 	{
-		stsc->total_entries = 0;
+		stsc->total_entries = 1;
 		stsc->entries_allocated = 2048;
 		stsc->table = (quicktime_stsc_table_t*)calloc(1, sizeof(quicktime_stsc_table_t) * stsc->entries_allocated);
 	}

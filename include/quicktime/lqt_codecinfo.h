@@ -12,7 +12,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/* 
+ * Compatibility flags for encoders
+ */
+  
+#define LQT_CODEC_COMPATIBILITY_QUICKTIME (1<<0) /* Codec can be used for Quicktime files       */
+#define LQT_CODEC_COMPATIBILITY_AVI       (1<<1) /* Codec can be used for AVI files             */
+#define LQT_CODEC_COMPATIBILITY_HVIRTUAL  (1<<2) /* Codec can be played back by Heroine Virtual */
 
+/*
+ *  Note, that additional codecs (e.g. Divx) might be required for the following 
+ *  2 Programs
+ */
+  
+#define LQT_CODEC_COMPATIBILITY_APPLE     (1<<3) /* Codec can be played back by Apple Quicktime */
+#define LQT_CODEC_COMPATIBILITY_WMP       (1<<4) /* Codec can be played by Windows Media Player */
+  
+  
+  
 /*
  *  Parameter types:
  *  Right now, only int is present, but the structure itself
@@ -88,6 +105,8 @@ typedef enum
 
 struct lqt_codec_info_s
   {
+  int compatibility_flags; /* Compatibility flags (See defines above) */
+
   /* These are set by the plugins */
   
   char * name;               /* Name of the codec              */

@@ -40,14 +40,13 @@ static int quicktime_encode_video_stub(quicktime_t *file,
 }
 
 static int quicktime_decode_audio_stub(quicktime_t *file, 
-					int16_t *output_i, 
-					float *output_f, 
-					long samples, 
-					int track, 
-					int channel)
+                                       int16_t ** output_i, 
+                                       float ** output_f, 
+                                       long samples,
+                                       int track)
 {
 	printf("quicktime_decode_audio_stub called\n");
-	return 1;
+	return 0;
 }
 
 static int quicktime_encode_audio_stub(quicktime_t *file, 
@@ -486,7 +485,6 @@ int quicktime_decode_video(quicktime_t *file,
         int track_height;
 	int track_width;
 
-	quicktime_trak_t *trak = file->vtracks[track].track;
         
 	track_height = quicktime_video_height(file, track);
 	track_width =  quicktime_video_width(file, track);
@@ -521,7 +519,6 @@ int lqt_decode_video(quicktime_t *file,
         int track_height;
 	int track_width;
 
-	quicktime_trak_t *trak = file->vtracks[track].track;
         
 	track_height = quicktime_video_height(file, track);
 	track_width =  quicktime_video_width(file, track);
@@ -580,29 +577,77 @@ int quicktime_encode_video(quicktime_t *file,
 //printf("quicktime_encode_video 1 %p\n", ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video);
 	result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, row_pointers, track);
 //printf("quicktime_encode_video 2\n");
-	file->vtracks[track].current_position++;
+        quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
+                              file->vtracks[track].current_position, 0);
+        file->vtracks[track].current_position++;
+	return result;
+}
+
+int lqt_encode_video(quicktime_t *file, 
+                     unsigned char **row_pointers, 
+                     int track, int64_t time)
+{
+	int result;
+//printf("quicktime_encode_video 1 %p\n", ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video);
+	result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, row_pointers, track);
+//printf("quicktime_encode_video 2\n");
+
+        if(file->vtracks[track].current_position)
+          quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
+                                file->vtracks[track].current_position - 1,
+                                time - file->vtracks[track].timestamp);
+        
+        quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
+                              file->vtracks[track].current_position, 0);
+        
+        file->vtracks[track].current_position++;
 	return result;
 }
 
 
+
 int quicktime_decode_audio(quicktime_t *file, 
-				int16_t *output_i, 
-				float *output_f, 
-				long samples, 
-				int channel)
+                           int16_t *output_i, 
+                           float *output_f, 
+                           long samples, 
+                           int channel)
 {
-	int quicktime_track, quicktime_channel;
+        float   ** channels_f;
+        int16_t ** channels_i;
+
+        int quicktime_track, quicktime_channel;
 	int result = 1;
 
-	quicktime_channel_location(file, &quicktime_track, &quicktime_channel, channel);
+        quicktime_channel_location(file, &quicktime_track,
+                                   &quicktime_channel, channel);
+
+        if(output_i)
+          {
+          channels_i = calloc(quicktime_track_channels(file, quicktime_track), sizeof(*channels_i));
+          channels_i[quicktime_channel] = output_i;
+          }
+        else
+          channels_i = (int16_t**)0;
+        
+        if(output_f)
+          {
+          channels_f = calloc(quicktime_track_channels(file, quicktime_track), sizeof(*channels_f));
+          channels_f[quicktime_channel] = output_f;
+          }
+        else
+          channels_f = (float**)0;
+        
 	result = ((quicktime_codec_t*)file->atracks[quicktime_track].codec)->decode_audio(file, 
-				output_i, 
-				output_f, 
-				samples, 
-				quicktime_track, 
-				quicktime_channel);
+                                                                                          channels_i, 
+                                                                                          channels_f, 
+                                                                                          samples,
+                                                                                          quicktime_track);
 	file->atracks[quicktime_track].current_position += samples;
 
+        if(channels_i)
+          free(channels_i);
+        else if(channels_f)
+          free(channels_f);
 	return result;
 }
 
@@ -629,45 +674,42 @@ int lqt_decode_audio(quicktime_t *file,
 				float **poutput_f, 
 				long samples)
 {
-	int quicktime_track, quicktime_channel;
+	int quicktime_track;
 	int result = 1;
-	int total_channels = lqt_total_channels(file);
 	int i = 0;
-	int16_t *output_i;
-	float *output_f;
+	int16_t **output_i;
+	float   **output_f;
 
-	for( i=0; i < total_channels; i++ )
-	{
-		quicktime_channel_location( file, &quicktime_track, &quicktime_channel,
-									i );
+	int total_tracks = quicktime_audio_tracks(file);
+        int track_channels;
 
-		if( poutput_i != NULL )
-		{
-			output_i = poutput_i[i];
-		}
-		else
-			output_i = NULL;
-		
-		if( poutput_f != NULL )
-		{
-			output_f = poutput_f[i];
-		}
-		else
-			output_f = NULL;
+        if(poutput_i)
+          output_i = poutput_i;
+        else
+          poutput_i = (int16_t**)0;
 
-		if( output_i != NULL || output_f != NULL )
-		{	
-			result = ((quicktime_codec_t*)file->atracks[quicktime_track].codec)->decode_audio(
-				file, 
-				output_i, 
-				output_f, 
-				samples, 
-				quicktime_track, 
-				quicktime_channel );
-		}
-	}
+        if(poutput_f)
+          output_f = poutput_f;
+        else
+          poutput_f = (float**)0;
+        
+	for( i=0; i < total_tracks; i++ )
+          {
+          track_channels = quicktime_track_channels(file, i);
 
-	file->atracks[quicktime_track].current_position += samples;
+          result = ((quicktime_codec_t*)file->atracks[i].codec)->decode_audio(
+                                                                              file, 
+                                                                              output_i, 
+                                                                              output_f, 
+                                                                              samples, 
+                                                                              quicktime_track);
+          if(output_f)
+            output_f += track_channels;
+          if(output_i)
+            output_i += track_channels;
+          }
+
+        file->atracks[quicktime_track].current_position += samples;
 
 	return result;
 }
@@ -679,39 +721,14 @@ int lqt_decode_audio_track(quicktime_t *file,
                            int track)
   {
   int result = 1;
-  int16_t *output_i;
-  float *output_f;
-  int i;
-  int total_channels = quicktime_track_channels(file, track);
+  //  fprintf(stderr, "lqt_decode_audio_track\n");
   
-  for( i=0; i < total_channels; i++ )
-    {
-    
-    if( poutput_i != NULL )
-      {
-      output_i = poutput_i[i];
-      }
-    else
-      output_i = NULL;
-    
-    if( poutput_f != NULL )
-      {
-      output_f = poutput_f[i];
-      }
-    else
-      output_f = NULL;
-    
-    if( output_i != NULL || output_f != NULL )
-      {	
-      result = ((quicktime_codec_t*)file->atracks[track].codec)->decode_audio(
-                                                                              file, 
-                                                                              output_i, 
-                                                                              output_f, 
-                                                                              samples, 
-                                                                              track, 
-                                                                              i );
-      }
-    }
+  result = !(((quicktime_codec_t*)file->atracks[track].codec)->decode_audio(
+                                                                           file, 
+                                                                           poutput_i, 
+                                                                           poutput_f, 
+                                                                           samples, 
+                                                                           track));
   
   file->atracks[track].current_position += samples;
   
@@ -807,3 +824,63 @@ int quicktime_codecs_flush(quicktime_t *file)
 	}
 	return result;
 }
+
+/* Copy audio */
+
+int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
+                   int16_t ** src_i, float ** src_f,
+                   int dst_pos, int src_pos,
+                   int dst_size, int src_size, int num_channels)
+  {
+  
+  int i, j, i_tmp;
+  int samples_to_copy;
+  samples_to_copy = src_size < dst_size ? src_size : dst_size;
+
+  //  fprintf(stderr, "lqt copy audio %d, src_pos: %d, dst_pos: %d, src_size: %d, dst_size: %d, samples_to_copy: %d\n",
+  //          num_channels, src_pos, dst_pos, src_size, dst_size, samples_to_copy);
+  
+  if(src_i)
+    {
+    for(i = 0; i < num_channels; i++)
+      {
+      if(dst_i && dst_i[i]) /* int -> int */
+        {
+        memcpy(dst_i[i] + dst_pos, src_i[i] + src_pos, samples_to_copy * sizeof(int16_t));
+        }
+      if(dst_f && dst_f[i]) /* int -> float */
+        {
+        for(j = 0; j < samples_to_copy; j++)
+          {
+          dst_f[i][dst_pos + j] = (float)src_i[i][src_pos + j] / 32767.0;
+          }
+        }
+      }
+    }
+  else if(src_f)
+    {
+    for(i = 0; i < num_channels; i++)
+      {
+      if(dst_i && dst_i[i]) /* float -> int */
+        {
+        for(j = 0; j < samples_to_copy; j++)
+          {
+          i_tmp = (int)(src_f[i][src_pos + j] * 32767.0);
+          
+          if(i_tmp > 32767)
+            i_tmp = 32767;
+
+          if(i_tmp < -32768)
+            i_tmp = -32768;
+          
+          dst_i[i][dst_pos + j] = i_tmp;
+          }
+        }
+      if(dst_f && dst_f[i]) /* float -> float */
+        {
+        memcpy(dst_f[i] + dst_pos, src_f[i] + src_pos, samples_to_copy * sizeof(float));
+        }
+      }
+    }
+  return samples_to_copy;
+  }

@@ -1,3 +1,4 @@
+#include <string.h>
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
@@ -14,8 +15,9 @@ void quicktime_stts_init_table(quicktime_stts_t *stts)
 {
 	if(!stts->total_entries)
 	{
-		stts->total_entries = 1;
-		stts->table = (quicktime_stts_table_t*)malloc(sizeof(quicktime_stts_table_t) * stts->total_entries);
+        stts->total_entries = 1;
+        stts->entries_allocated = 1;
+        stts->table = (quicktime_stts_table_t*)malloc(sizeof(quicktime_stts_table_t) * stts->total_entries);
 	}
 }
 
@@ -39,6 +41,7 @@ void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int fr
 
 	table->sample_count = 0;      /* need to set this when closing */
 	table->sample_duration = frame_duration;
+        stts->default_duration = frame_duration;
 //printf("quicktime_stts_init_video %d %f\n", time_scale, frame_rate);
 }
 
@@ -175,4 +178,60 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
       }
     }
   return ret;
+  }
+
+/* If one calls quicktime_update_stts(), the table is set up with ine entry per sample.
+   Before writing, call quicktime_compress_stts() to kick out redundant entries */
+
+void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration)
+  {
+  if(sample >= stts->entries_allocated)
+    {
+    stts->entries_allocated *= 2;
+    stts->table = realloc(stts->table, stts->entries_allocated * sizeof(*(stts->table)));
+    }
+  stts->table[sample].sample_count = 1;
+  if(duration)
+    stts->table[sample].sample_duration = duration;
+  else
+    stts->table[sample].sample_duration = stts->default_duration;
+  
+  if(sample >= stts->total_entries)
+    stts->total_entries = sample + 1;
+  }
+
+void quicktime_compress_stts(quicktime_stts_t *stts)
+  {
+  long sample = 0;
+  long i;
+  
+  while(sample < stts->total_entries)
+    {
+    i = 1;
+
+    while(sample + i < stts->total_entries)
+      {
+      if(stts->table[sample + i].sample_duration ==  stts->table[sample].sample_duration)
+        {
+        stts->table[sample].sample_count++;
+        }
+      else
+        {
+        break;
+        }
+      i++;
+      }
+
+    if(stts->table[sample].sample_count > 1)
+      {
+      /* Compress */
+      if(stts->total_entries - sample - i)
+        memmove(&stts->table[sample + 1], &stts->table[sample + i],
+                sizeof(stts->table[sample + i]) * (stts->total_entries - sample - i));
+
+      stts->total_entries -= stts->table[sample].sample_count-1;
+      }
+    sample++;
+    }
+  
   }

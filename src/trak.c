@@ -73,7 +73,10 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
 	quicktime_mdia_delete(&(trak->mdia));
 	quicktime_edts_delete(&(trak->edts));
 	quicktime_tkhd_delete(&(trak->tkhd));
-	return 0;
+
+        if(trak->chunk_sizes)
+          free(trak->chunk_sizes);
+        return 0;
 }
 
 
@@ -93,7 +96,7 @@ quicktime_trak_t* quicktime_add_trak(quicktime_t *file)
 	quicktime_moov_t *moov = &(file->moov);
 	if(moov->total_tracks < MAXTRACKS)
 	{
-		moov->trak[moov->total_tracks] = malloc(sizeof(quicktime_trak_t));
+        moov->trak[moov->total_tracks] = calloc(1, sizeof(quicktime_trak_t));
 		quicktime_trak_init(moov->trak[moov->total_tracks]);
 		moov->total_tracks++;
 	}
@@ -189,7 +192,6 @@ int64_t quicktime_track_end(quicktime_trak_t *trak)
 	int64_t size = 0;
 	int64_t chunk, chunk_offset, chunk_samples, sample;
 	quicktime_stsz_t *stsz = &(trak->mdia.minf.stbl.stsz);
-	quicktime_stsz_table_t *table = stsz->table;
 	quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
 	quicktime_stco_t *stco;
 
@@ -251,10 +253,10 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 		int i;
 		long total = 0;
                 /* Get this from the AVI header */
-                if(trak->strl)
-                  {
-                  //                  total = 
-                  }
+                //                if(trak->strl)
+                //                  {
+                //                  total = 
+                //                  }
                 /* LQT: Make this correct for VBR files */
                 if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
                   {
@@ -311,7 +313,7 @@ long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk)
 // For AVI
 int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak)
 {
-	int i, chunk = trak->mdia.minf.stbl.stco.total_entries - 1;
+	int chunk = trak->mdia.minf.stbl.stco.total_entries - 1;
 	long total_samples;
 
 	if(chunk >= 0)
@@ -374,7 +376,8 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 	return 0;
 }
 
-int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk)
+int64_t quicktime_chunk_to_offset(quicktime_t *file,
+                                  quicktime_trak_t *trak, long chunk)
 {
 	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
 	int64_t result = 0;
@@ -433,8 +436,8 @@ int64_t quicktime_sample_range_size(quicktime_trak_t *trak,
 	long chunk_sample, 
 	long sample)
 {
-	quicktime_stsz_table_t *table = trak->mdia.minf.stbl.stsz.table;
-	int64_t i, total;
+
+int64_t i, total;
         /* LQT: For VBR audio, quicktime_sample_rage_size makes no sense */
         if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
           return 0;
@@ -625,9 +628,16 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
 {
 	long samples = quicktime_track_samples(file, trak);
 
-	trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
+        if(trak->mdia.minf.is_video)
+          {
+          quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+          if(trak->mdia.minf.stbl.stts.total_entries == 1)
+            trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
+          }
+        else
+          trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
 
-	if(!trak->mdia.minf.stbl.stsz.total_entries)
+        if(!trak->mdia.minf.stbl.stsz.total_entries)
 	{
 		trak->mdia.minf.stbl.stsz.sample_size = 1;
 		trak->mdia.minf.stbl.stsz.total_entries = samples;

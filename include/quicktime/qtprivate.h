@@ -246,6 +246,8 @@ typedef struct
 	int version;
 	long flags;
 	long total_entries;
+        long entries_allocated;
+        int  default_duration;
 	quicktime_stts_table_t *table;
 } quicktime_stts_t;
 
@@ -514,6 +516,10 @@ typedef struct
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
         quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
+        int chunk_sizes_alloc;
+        int64_t * chunk_sizes; /* This contains the chunk sizes for audio
+                                  tracks. They can not so easily be obtained
+                                  during decoding */
 } quicktime_trak_t;
 
 
@@ -672,6 +678,14 @@ struct quicktime_strl_s
         uint32_t nAvgBytesPerSec;
 
         uint16_t wBitsPerSample;
+
+        /* The next ones will be used for generating index tables
+           with the lowest possible error */
+
+        int64_t total_bytes;
+        int64_t total_samples;
+        int64_t total_blocks;
+
 /* Start of indx header for later writing */
         int64_t indx_offset;
 /* Size of JUNK without 8 byte header which is to be replaced by indx */
@@ -734,11 +748,13 @@ typedef struct
 {
 	quicktime_trak_t *track; /* real quicktime track corresponding to this table */
 	int channels;            /* number of audio channels in the track */
-	long current_position;   /* current sample in output file */
-	long current_chunk;      /* current chunk in output file */
+	int64_t current_position;   /* current sample in output file */
+	int64_t current_chunk;      /* current chunk in output file */
 
+        /* Last position if set by the codec. If last position and current position
+           differ, the codec knows, that a seek happened since the last decode call */
+        long last_position;
 	void *codec;
-
 
 } quicktime_audio_map_t;
 
@@ -750,6 +766,7 @@ typedef struct
 
 	void *codec;
 /* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
+/* For Encoding: Timestamp of the LAST encoded frame */
         int64_t timestamp;
         int64_t stts_index;
         int64_t stts_count;
@@ -871,17 +888,17 @@ typedef struct
 	int (*encode_video)(quicktime_t *file, 
 				unsigned char **row_pointers, 
 				int track);
-	int (*decode_audio)(quicktime_t *file, 
-				int16_t *output_i, 
-				float *output_f, 
-				long samples, 
-				int track,
-				int channel);
+        /* API Change: Return value is the number of samples */
+        int (*decode_audio)(quicktime_t *file, 
+                            int16_t ** output_i, 
+                            float ** output_f,
+                            long samples, 
+                            int track);
 	int (*encode_audio)(quicktime_t *file, 
 				int16_t **input_i, 
 				float **input_f, 
 				int track, 
-				long samples);
+                            long samples);
 	int (*reads_colormodel)(quicktime_t *file, 
 		int colormodel, 
 		int track);

@@ -112,6 +112,18 @@ int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track);
 
 /*
+ *  Encode a video frame with a specified timestamp
+ *  Timestamp unit is timescale tics. Timestamp should start with zero.
+ *  WARNING: AVI files don't support arbitrary timestamps. For AVI files
+ *  time is ignored, instead it's frame_number * frame_duration,
+ */
+  
+int lqt_encode_video(quicktime_t *file, 
+                     unsigned char **row_pointers, 
+                     int track, int64_t time);
+
+  
+/*
  *  Get the duration of the NEXT frame to be decoded.
  *  If constant is not NULL it will be set to 1 if the
  *  frame duration is constant throughout the whole track

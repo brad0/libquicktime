@@ -90,7 +90,7 @@ void quicktime_init_odml(quicktime_t *file, quicktime_hdrl_t *hdrl);
 /* avi_riff.c */
 void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom);
 void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff);
-void quicktime_import_avi(quicktime_t *file);
+int quicktime_import_avi(quicktime_t *file);
 void quicktime_init_riff(quicktime_t *file);
 void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff);
 quicktime_riff_t* quicktime_new_riff(quicktime_t *file);
@@ -107,8 +107,6 @@ void quicktime_init_strl(quicktime_t *file,
                          quicktime_video_map_t *vtrack,
                          quicktime_trak_t *trak,
                          quicktime_strl_t *strl);
-
-
 
 /* ctab.c */
 
@@ -505,6 +503,10 @@ void quicktime_stts_delete(quicktime_stts_t *stts);
 void quicktime_stts_dump(quicktime_stts_t *stts);
 void quicktime_read_stts(quicktime_t *file, quicktime_stts_t *stts);
 void quicktime_write_stts(quicktime_t *file, quicktime_stts_t *stts);
+void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration);
+/* The following function kicks out redundant entries */
+void quicktime_compress_stts(quicktime_stts_t *stts);
+
 void quicktime_stts_init_panorama(quicktime_t *file, quicktime_stts_t *stts, int frame_duration);
 
 
@@ -698,6 +700,7 @@ void quicktime_init_maps(quicktime_t * file);
  */
 
 int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak);
+
 
 /* lqt_codecs.c */
 

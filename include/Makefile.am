@@ -19,10 +19,8 @@ lqt_funcprotos.h \
 lqt_loader.h \
 lqt_plugin.h \
 lqt_private.h \
-lqt_quicktime.h \
 mmx.h \
 plugin.h \
-quicktime.h \
 rtjpeg.h \
 rtjpeg_core.h \
 util.h \

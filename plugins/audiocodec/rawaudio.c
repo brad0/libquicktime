@@ -1,11 +1,31 @@
 #include "funcprotos.h"
-#include "quicktime.h"
+#include <quicktime/quicktime.h>
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+
 #include "rawaudio.h"
+
+#define SAMPLES_PER_BLOCK 1024
+
 
 typedef struct
 {
 	char *work_buffer;
 	long buffer_size;
+
+/* Decode specific stuff */
+        int decode_buffer_size;
+        int decode_buffer_alloc;
+        uint8_t * decode_buffer;
+        uint8_t * decode_buffer_ptr;
+
+        int16_t ** decode_sample_buffer_i;
+        float ** decode_sample_buffer_f;
+        int decode_sample_buffer_size;
+        int decode_sample_buffer_pos;
+        int decode_initialized;
+        int decode_block_align;
+
 } quicktime_rawaudio_codec_t;
 
 /* =================================== private for rawaudio */
@@ -35,24 +55,216 @@ static int quicktime_delete_codec_rawaudio(quicktime_audio_map_t *atrack)
 	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
 
 	if(codec->work_buffer) free(codec->work_buffer);
-	codec->work_buffer = 0;
+
+        if(codec->decode_sample_buffer_i)
+          {
+          free(codec->decode_sample_buffer_i[0]);
+          free(codec->decode_sample_buffer_i);
+          }
+        if(codec->decode_sample_buffer_f)
+          {
+          free(codec->decode_sample_buffer_f[0]);
+          free(codec->decode_sample_buffer_f);
+          }
+        
+        codec->work_buffer = 0;
 	codec->buffer_size = 0;
 	free(codec);
 	return 0;
 }
 
 static int quicktime_decode_rawaudio(quicktime_t *file, 
-					int16_t *output_i, 
-					float *output_f, 
+					int16_t ** output_i, 
+					float ** output_f, 
 					long samples, 
-					int track, 
-					int channel)
+					int track)
 {
-	int result = 0;
-	long i, j;
-	quicktime_audio_map_t *track_map = &(file->atracks[track]);
+
+        int j;
+        quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
+
+	int64_t chunk, chunk_sample;
+	int64_t i;
+
+        int samples_decoded, samples_copied;
+
+        int64_t samples_to_skip = 0;
+        int bits;
+        
+        bits = quicktime_audio_bits(file, track);
+        
+        if(!codec->decode_initialized)
+          {
+          codec->decode_initialized = 1;
+
+          if(bits <= 16)
+            {
+            codec->decode_sample_buffer_i    = malloc(sizeof(*(codec->decode_sample_buffer_i)) * file->atracks[track].channels);
+            codec->decode_sample_buffer_i[0] = malloc(sizeof(*(codec->decode_sample_buffer_i[0])) * file->atracks[track].channels *
+                                                      SAMPLES_PER_BLOCK);
+            for(i = 1; i < file->atracks[track].channels; i++)
+              codec->decode_sample_buffer_i[i] = codec->decode_sample_buffer_i[0] + i * SAMPLES_PER_BLOCK;
+            
+            }
+          else
+            {
+            codec->decode_sample_buffer_f    = malloc(sizeof(*(codec->decode_sample_buffer_f)) * file->atracks[track].channels);
+            codec->decode_sample_buffer_f[0] = malloc(sizeof(*(codec->decode_sample_buffer_f[0])) * file->atracks[track].channels *
+                                                      SAMPLES_PER_BLOCK);
+
+            for(i = 1; i < file->atracks[track].channels; i++)
+              codec->decode_sample_buffer_f[i] = codec->decode_sample_buffer_f[0] + i * SAMPLES_PER_BLOCK;
+            }
+
+          codec->decode_block_align = track_map->channels * bits / 8;
+          }
+        
+        if(file->atracks[track].current_position != file->atracks[track].last_position)
+          {
+          //          fprintf(stderr, "SEEKED\n");
+          
+          /* Seeking happened */
+          quicktime_chunk_of_sample(&chunk_sample, &chunk,
+                                    file->atracks[track].track,
+                                    file->atracks[track].current_position);
+
+          /* Read the chunk */
+
+          if(file->atracks[track].current_chunk != chunk)
+            {
+            file->atracks[track].current_chunk = chunk;
+            codec->decode_buffer_size = lqt_read_audio_chunk(file,
+                                                             track, file->atracks[track].current_chunk,
+                                                             &(codec->decode_buffer),
+                                                             &(codec->decode_buffer_alloc));
+            codec->decode_buffer_ptr = codec->decode_buffer;
+            }
+          else
+            {
+            codec->decode_buffer_size += (int)(codec->decode_buffer_ptr - codec->decode_buffer);
+            codec->decode_buffer_ptr = codec->decode_buffer;
+            }
+
+          /* Skip frames */
+
+          samples_to_skip = file->atracks[track].current_position - chunk_sample;
+          if(samples_to_skip < 0)
+            {
+            fprintf(stderr, "rawaudio: Cannot skip backwards\n");
+            samples_to_skip = 0;
+            }
+                    
+          codec->decode_buffer_ptr = codec->decode_buffer + samples_to_skip * codec->decode_block_align;
+          codec->decode_buffer_size -= samples_to_skip * codec->decode_block_align;
+          codec->decode_sample_buffer_size = 0;
+          codec->decode_sample_buffer_pos = 0;
+          }
+
+        /* Decode until we are done */
+
+        samples_decoded = 0;
+
+        while(samples_decoded < samples)
+          {
+          /* Decode new frame if necessary */
+          if(!codec->decode_sample_buffer_size)
+            {
+            /* Get new chunk if necessary */
+            
+            if(!codec->decode_buffer_size)
+              {
+              //              fprintf(stderr, "Reading chunk\n");
+              file->atracks[track].current_chunk++;
+              codec->decode_buffer_size = lqt_read_audio_chunk(file,
+                                                               track, file->atracks[track].current_chunk,
+                                                               &(codec->decode_buffer),
+                                                               &(codec->decode_buffer_alloc));
+              
+              codec->decode_buffer_ptr = codec->decode_buffer;
+              }
+
+            if(!codec->decode_buffer_size)
+              break;
+            
+            codec->decode_sample_buffer_size = codec->decode_buffer_size / codec->decode_block_align;
+            if(codec->decode_sample_buffer_size > SAMPLES_PER_BLOCK)
+              {
+              codec->decode_sample_buffer_size = SAMPLES_PER_BLOCK;
+              }
+
+            codec->decode_sample_buffer_pos = 0;
+            
+            /* Decode the stuff */
+            
+            switch(bits)
+              {
+              case 8:
+                for(i = 0; i < codec->decode_sample_buffer_size; i++)
+                  {
+                  for(j = 0; j < track_map->channels; j++)
+                    {
+                    codec->decode_sample_buffer_i[j][i] = (((int16_t)(*codec->decode_buffer_ptr)) << 8) ^ 0x8000;
+                    codec->decode_buffer_ptr++;
+                    codec->decode_buffer_size--;
+                    }
+                  }
+                break;
+              case 16:
+                for(i = 0; i < codec->decode_sample_buffer_size; i++)
+                  {
+                  for(j = 0; j < track_map->channels; j++)
+                    {
+                    codec->decode_sample_buffer_i[j][i] = ((int16_t)codec->decode_buffer_ptr[0]) << 8 |
+                      ((unsigned char)codec->decode_buffer_ptr[0]);
+                    codec->decode_buffer_ptr+= 2;
+                    codec->decode_buffer_size-=2;
+                    }
+                  }
+                break;
+              case 24:
+                for(i = 0; i < codec->decode_sample_buffer_size; i++)
+                  {
+                  for(j = 0; j < track_map->channels; j++)
+                    {
+                    codec->decode_sample_buffer_i[j][i] = (float)((((int)codec->decode_buffer_ptr[0]) << 16) | 
+                                                           (((unsigned char)codec->decode_buffer_ptr[1]) << 8) |
+                                                           ((unsigned char)codec->decode_buffer_ptr[2])) / 0x7fffff;
+                    codec->decode_buffer_ptr+= 3;
+                    codec->decode_buffer_size-=3;
+                    }
+                  }
+                break;
+              default:
+                break;
+              }
+            }
+          
+          /* Copy samples */
+          //          fprintf(stderr, "Decode: %d\n", codec->decode_sample_buffer_size);
+                    
+          samples_copied = lqt_copy_audio(output_i,     // int16_t ** dst_i
+                                          output_f,     // float ** dst_f
+                                          codec->decode_sample_buffer_i,    // int16_t ** src_i
+                                          codec->decode_sample_buffer_f,    // float ** src_f
+                                          samples_decoded,                  // int dst_pos
+                                          codec->decode_sample_buffer_pos,  // int src_pos
+                                          samples - samples_decoded,        // int dst_size
+                                          codec->decode_sample_buffer_size, // int src_size
+                                          file->atracks[track].channels);   // int num_channels
+          
+          samples_decoded += samples_copied;
+          codec->decode_sample_buffer_size -= samples_copied;
+          codec->decode_sample_buffer_pos += samples_copied;
+
+          }
+        
+        file->atracks[track].last_position = file->atracks[track].current_position + samples_decoded;
+        return samples_decoded;
+
+#if 0 /* Old (hopefully obsolete) version */
+
+        int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
 
 	get_work_buffer(file, track, samples * step);
 	result = !quicktime_read_audio(file, codec->work_buffer, samples, track);
@@ -139,6 +351,7 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
 /*printf("quicktime_decode_rawaudio 2\n"); */
 
 	return result;
+#endif
 }
 
 #define CLAMP(x, y, z) ((x) = ((x) <  (y) ? (y) : ((x) > (z) ? (z) : (x))))
@@ -150,7 +363,7 @@ static int quicktime_encode_rawaudio(quicktime_t *file,
 							long samples)
 {
 	int result = 0;
-	long i, j, offset;
+	long i, j;
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 	int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;

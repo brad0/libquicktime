@@ -37,73 +37,6 @@ int quicktime_find_acodec(char *fourcc)
 	return -1;
 }
 
-static int decode_audio_external(quicktime_t *file, 
-				int16_t *output_i, 
-				float *output_f, 
-				long samples, 
-				int track,
-				int channel)
-{
-    return -1;
-}
-
-static int encode_audio_external(quicktime_t *file, 
-				int16_t **input_i, 
-				float **input_f, 
-				int track, 
-				long samples)
-{
-    return -1;
-}
-
-static int decode_video_external(quicktime_t *file, 
-				unsigned char **row_pointers, 
-				int track)
-{
-	unsigned char *input;
-	unsigned char *output = row_pointers[0]; 
-	int	index = 0;
-	int error = -1;
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	unsigned int bytes;
-	char *compressor;
-
-	compressor = quicktime_video_compressor(file, track);
-	index = quicktime_find_vcodec(compressor);
-
-	if(index >= 0)
-	{
-    	quicktime_set_video_position(file, vtrack->current_position, track);
-    	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-
-    	if(bytes <= 0) 
-		{
-    		fprintf(stderr, "decode_video_external: frame size equal %d\n", bytes);
-    		return -1;
-    	}
-
-    	input = (unsigned char*)malloc(bytes);
-    	if(input) 
-		{
-    	    if(quicktime_read_data(file, input, bytes)) 
-				error = vcodecs[index].decode(file, track, bytes, input, output); 
-    	  	else 
-				fprintf(stderr, "decode_video_external: can't read data from file\n");
-
-    	} 
-		else 
-			fprintf(stderr, "decode_video_external: Can't allocate decoding buffer");
-
-    	free(input);
-	}
-	else 
-	{
-    	fprintf(stderr, 
-	    	"decode_video_external: Can't find the corresponding codec: %s",
-	    	quicktime_video_compressor(file, track));
-	}
-    return error;
-}
 
 
 
@@ -156,13 +89,6 @@ int quicktime_register_acodec(char *fourcc,
 	return index;
 }
 
-static int select_codec(const struct dirent *ptr)
-{
-	if(strncmp(ptr->d_name, CODEC_PREFIX, 15) == 0)
-    	return 1;
-	else 
-    	return 0;
-}
 
 #if 0 /* Not needed in libquicktime */
 int quicktime_init_vcodec_core(int index, quicktime_video_map_t *vtrack)

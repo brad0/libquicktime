@@ -52,7 +52,7 @@ AC_SUBST(ASFLAGS)
 
 dnl Build CFLAGS
 
-COMMON_CFLAGS=" -finline-functions -Wall -Wno-unused -Winline"
+COMMON_CFLAGS=" -finline-functions -Wall -Winline"
 PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
 DEBUG_CFLAGS=" -g3"
 
@@ -469,7 +469,7 @@ have_libavcodec=false
 AVCODEC_BUILD="4712"
 
 dnl PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
-LQT_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
+ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
 
 AVCODEC_REQUIRED=$AVCODEC_VERSION
 

@@ -1,5 +1,5 @@
 /*
- * $Id: colr.c,v 1.1 2004/10/13 20:32:05 sms00 Exp $
+ * $Id: colr.c,v 1.2 2004/11/29 00:41:22 gmerlin Exp $
  *
  * init, read, write handler for the "colr" (Clean Aperture) atom
 */
@@ -19,10 +19,10 @@ void quicktime_colr_dump(quicktime_colr_t *colr)
 {
 
 	printf("     color description (colr)\n");
-	printf("       colorParamType %ld\n", colr->colorParamType);
-	printf("       primaries %ld\n", colr->primaries);
-	printf("       transferFunction %ld\n", colr->transferFunction);
-	printf("       matrix %ld\n", colr->matrix);
+	printf("       colorParamType %d\n", colr->colorParamType);
+	printf("       primaries %d\n", colr->primaries);
+	printf("       transferFunction %d\n", colr->transferFunction);
+	printf("       matrix %d\n", colr->matrix);
 }
 
 void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr)

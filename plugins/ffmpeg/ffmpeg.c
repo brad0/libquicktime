@@ -222,7 +222,6 @@ static int writes_colormodel(quicktime_t *file,
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
                                        AVCodec *decoder)
 {
-	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_video_codec_t *codec;
 
 	avcodec_init();
@@ -251,11 +250,10 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
                                        AVCodec *decoder)
 {
-	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_audio_codec_t *codec;
 
 	avcodec_init();
-        //        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg\n");
+        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg 1\n");
 	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
 	if(!codec)
           return;

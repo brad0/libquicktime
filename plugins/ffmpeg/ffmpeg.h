@@ -45,25 +45,23 @@ typedef struct
 typedef struct
   {
   quicktime_ffmpeg_codec_common_t com;
-  int64_t current_chunk;
 
   /* Interleaved samples as avcodec needs them */
     
   int16_t * sample_buffer;
-  int sample_buffer_size; 
+  int sample_buffer_alloc; 
   int samples_in_buffer;
-
+  
   /* Buffer for the entire chunk */
 
-  char * chunk_buffer;
-  int chunk_buffer_size;
+  uint8_t * chunk_buffer;
+  int chunk_buffer_alloc;
   int bytes_in_chunk_buffer;
+
+  /* Start and end positions of the sample buffer */
     
-  /* Decoder specific stuff */
-  
-  int64_t * chunk_sizes;
-  int64_t current_position; /* Start of sample buffer */
-  int num_samples;          /* Number of samples decoded the last time */
+  int64_t sample_buffer_start;
+  int64_t sample_buffer_end;
   
   } quicktime_ffmpeg_audio_codec_t;
 
@@ -122,9 +120,9 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i,
                             float **input_f, int track,
                             long samples);
 
-int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i,
-                            float *output_f, long samples,
-                            int track, int channel);
+int lqt_ffmpeg_decode_audio(quicktime_t * file, int16_t ** output_i,
+                            float ** output_f, long samples,
+                            int track);
 
 int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *atrack);
 int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack);

@@ -5,6 +5,8 @@
  *
  */
 
+// #define USE_GL
+
 #include "config.h"
 
 #include <stdio.h>
@@ -35,9 +37,12 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
+#ifdef USE_GL
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
+#endif
 
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
@@ -64,7 +69,10 @@ static int xv_have_YV12 = 0;
 static int no_mitshm    = 0;
 static int pixmap_bytes = 0;
 static int x11_byteswap = 0;
+
+#ifdef USE_GL
 static int use_gl       = 0;
+#endif
 
 static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
@@ -403,7 +411,7 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 
 /* ------------------------------------------------------------------------ */
 /* OpenGL code                                                              */
-
+#ifdef USE_GL
 static int tw,th;
 static GLint tex;
 static int gl_attrib[] = { GLX_RGBA,
@@ -501,6 +509,7 @@ static void gl_init(Widget widget, int iw, int ih)
     use_gl = 1;
 }
 
+#endif // USE_GL
 
 static int oss_sr,oss_hr;
 
@@ -547,7 +556,7 @@ static int alsa_init(char *dev, int channels, int rate)
 {
 #ifdef HAVE_ALSA
     int dir;
-    int exact_param;   /* parameter returned by          */
+    //    int exact_param;   /* parameter returned by          */
                        /* snd_pcm_hw_params_set_*_near   */ 
     int tmprate;
     int err = 0;
@@ -595,12 +604,14 @@ static int alsa_init(char *dev, int channels, int rate)
 
     if (tmprate != rate) fprintf(stderr,"WARNING: Using %i Hz instead of requested rate %i Hz\n ", tmprate, rate);
     oss_sr = tmprate;
+    dir = 0;
     if ((err = snd_pcm_hw_params_set_buffer_time_near(pcm_handle, hwparams, &buffer_time, &dir)) < 0) {
 	printf("Unable to set buffer time %i for playback: %s\n", buffer_time, snd_strerror(err));
 	return 1;
     }
 
     /* period time */
+    dir = 0;
     if ((err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hwparams, &period_time, &dir)) < 0) {
 	fprintf(stderr, "Error setting periods.(%s)\n", snd_strerror(err));
 	return 1;
@@ -612,7 +623,7 @@ static int alsa_init(char *dev, int channels, int rate)
                 return 1;
     }
     
-
+    dir = 0;
     err = snd_pcm_hw_params_get_period_size(hwparams, &periodsize, &dir);
     if (err < 0) {
                 fprintf(stderr, "Unable to get period size for playback: %s\n", snd_strerror(err));
@@ -685,7 +696,7 @@ oss_setformat(int chan, int rate)
 
 static int oss_init(char *dev, int channels, int rate)
 {
-    int trigger;
+//    int trigger;
 
     oss_fd = open(dev,O_WRONLY | O_NONBLOCK);
     if (-1 == oss_fd) {
@@ -713,8 +724,8 @@ static XImage *qt_ximage;
 static XvImage *qt_xvimage;
 static GC qt_gc;
 
-static int16_t *qt_audio,*qt1,*qt2;
-//static int16_t **qt_audion;
+static int16_t *qt_audio; //,*qt1,*qt2;
+static int16_t **qt_audion;
 
 static int qt_size,qt_offset,qt_stereo;
 static int qt_cmodel = BC_RGB888;
@@ -841,8 +852,13 @@ static int qt_frame_blit(void)
 	qt_gc = XCreateGC(dpy,XtWindow(simple),0,NULL);
 	switch (qt_cmodel) {
 	case BC_RGB888:
-	    fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
+#ifdef USE_GL
+          fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
 		    use_gl ? "OpenGL" : "plain X11");
+#else
+          fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
+		    "plain X11");
+#endif
 	    qt_ximage = x11_create_ximage(dpy,qt_width,qt_height);
 	    for (i = 0; i < qt_height; i++)
 		qt_rows[i] = qt_frame + qt_width * 3 * i;
@@ -895,9 +911,13 @@ static int qt_frame_blit(void)
 //			    qt_cmodel,qt_rows,0);
     switch (qt_cmodel) {
     case BC_RGB888:
-	if (use_gl) {
+#ifdef USE_GL
+      if (use_gl) {
 	    gl_blit(simple,qt_frame,qt_width,qt_height,swidth,sheight);
-	} else {
+	} else
+#endif // USE_GL
+
+        {
 	    switch (pixmap_bytes) {
 	    case 2:
 		rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
@@ -950,46 +970,65 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     }
 }
 
-static int runcount;
+//static int runcount;
 static int qt_alsa_audio_write(int frames)
 {
 #ifdef HAVE_ALSA
     long pos;
-    int i;
+    int i, j;
     signed short *ptr;
     int frames_processed = frames;    
     int ret = 0;
-    
+    int channels = quicktime_track_channels(qt,0);
     if (0 == quicktime_audio_position(qt,0)) {
 	/* Init */
-	//qt_audion  = malloc(sizeof(char) * 2);
-	//qt_audion[0]  = malloc(periodsize/2 * sizeof(short));
+        qt_audion  = malloc(channels * sizeof(*qt_audion));
+
+        for(i = 0; i < channels; i++)
+          {
+          qt_audion[i] = malloc(frames * sizeof(*(qt_audion[i])));
+          }
+        
+        //qt_audion[0]  = malloc(periodsize/2 * sizeof(short));
 	//qt_audion[1]  = malloc(periodsize/2 * sizeof(short));
 	qt_audio  = malloc(frames*4);
+#if 0
 	if (quicktime_track_channels(qt,0) > 1) {
 	    qt1 = malloc(frames*4/2);
 	    qt2 = malloc(frames*4/2);
 	}
-
+#endif
     }
     
-    if (qt_stereo) {
-      	/* stereo: two channels => interlaved samples */
+    if (channels > 1) {
+        /* stereo: two channels => interlaved samples */
       	pos = quicktime_audio_position(qt,0);
 	//quicktime_decode_audio(qt,qt_audion[0],NULL,frames,0);
   	//quicktime_set_audio_position(qt,pos,0);
   	//quicktime_decode_audio(qt,qt_audion[1],NULL,frames,1);
 
-	    quicktime_decode_audio(qt,qt1,NULL,frames,0);
-	    quicktime_set_audio_position(qt,pos,0);
-	    quicktime_decode_audio(qt,qt2,NULL,frames,1);
-	    for (i = 0; i < frames; i++) {
-		qt_audio[2*i+0] = qt1[i];
-		qt_audio[2*i+1] = qt2[i];
-	    }
+#if 0
+        quicktime_decode_audio(qt,qt_audion[0],NULL,frames,0);
+        for(i = 1; i < channels; i++)
+          {
+          quicktime_set_audio_position(qt,pos,0);
+          quicktime_decode_audio(qt,qt_audion[i],NULL,frames,i);
+          }
+#else
+        lqt_decode_audio_track(qt, qt_audion, (float**)0, frames, 0);
+#endif
+        /* Interleave */
+        for (i = 0; i < frames; i++)
+          {
+          for(j = 0; j < channels; j++)
+            {
+            qt_audio[channels*i+j] = qt_audion[j][i];
+            }
+          }
+        
     } else {
 	/* mono */
-	quicktime_decode_audio(qt,qt_audio,NULL,frames,0);
+        lqt_decode_audio_track(qt, &qt_audio, (float**)0, frames, 0);
     }
 
     ptr = qt_audio;
@@ -1023,33 +1062,48 @@ static int qt_alsa_audio_write(int frames)
 static int qt_oss_audio_write(void)
 {
     long pos;
-    int rc,i;
+    int rc,i,j;
+    int channels;
+    
+    channels = quicktime_track_channels(qt,0);
 
     if (0 == quicktime_audio_position(qt,0)) {
 	/* init */
 	qt_size   = 64 * 1024;
 	qt_offset = 0;
-	qt_audio  = malloc(qt_size);
-	if (quicktime_track_channels(qt,0) > 1) {
-	    qt1 = malloc(qt_size/2);
-	    qt2 = malloc(qt_size/2);
-	}
-    }
-
+	qt_audio  = malloc(qt_size/2 * channels * sizeof(*qt_audio));
+        qt_audion = malloc(channels * sizeof(*qt_audion));
+        for(i = 0; i < channels; i++)
+          {
+          qt_audion[i] = malloc(qt_size/2 * sizeof(*(qt_audion[i])));
+          }
+      }
+    
     if (0 == qt_offset) {
 	if (qt_stereo) {
 	    /* stereo: two channels => interlaved samples */
 	    pos = quicktime_audio_position(qt,0);
-	    quicktime_decode_audio(qt,qt1,NULL,qt_size/4,0);
-	    quicktime_set_audio_position(qt,pos,0);
-	    quicktime_decode_audio(qt,qt2,NULL,qt_size/4,1);
-	    for (i = 0; i < qt_size/4; i++) {
-		qt_audio[2*i+0] = qt1[i];
-		qt_audio[2*i+1] = qt2[i];
-	    }
+#if 0
+	    quicktime_decode_audio(qt,qt_audion[i],NULL,qt_size/4,0);
+            for(i = 0; i < num_channels; i++)
+              {
+              quicktime_set_audio_position(qt,pos,0);
+              quicktime_decode_audio(qt,qt_audion[i],NULL,qt_size/4,1);
+              }
+#else
+            lqt_decode_audio_track(qt, qt_audion, (float**)0, qt_size/4, 0);
+#endif
+        /* Interleave */
+        for (i = 0; i < qt_size/4; i++)
+          {
+          for(j = 0; j < channels; j++)
+            {
+            qt_audio[channels*i+j] = qt_audion[j][i];
+            }
+          }
 	} else {
-	    /* mono */
-	    quicktime_decode_audio(qt,qt_audio,NULL,qt_size/2,0);
+        /* mono */
+        lqt_decode_audio_track(qt, &qt_audio, (float**)0, qt_size/4, 0);
 	}
     }
     rc = write(oss_fd,qt_audio+qt_offset/2,qt_size-qt_offset);
@@ -1152,8 +1206,10 @@ static void resize_ev(Widget widget, XtPointer client_data,
     case ConfigureNotify:
 	XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
 	fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
+#ifdef USE_GL
 	if (use_gl)
 	    gl_resize(widget,swidth,sheight);
+#endif
 	break;
     }
 }
@@ -1219,9 +1275,10 @@ int main(int argc, char *argv[])
 
     /* use OpenGL? */
     XtRealizeWidget(app_shell);
+#ifdef USE_GL
     if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo)
 	gl_init(simple,qt_width,qt_height);
-    
+#endif    
     /* frames per chunk for alsa */
     audio_frames = ((oss_sr / quicktime_frame_rate(qt,0)) / 2 + 0.5);
 

@@ -1,9 +1,13 @@
+#include "funcprotos.h"
+#include <quicktime/quicktime.h>
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+
+#include "qtvorbis.h"
+#include <vorbis/vorbisenc.h>
+
 #include <string.h>
 #include <time.h>
-#include "funcprotos.h"
-#include "quicktime.h"
-#include "qtvorbis.h"
-#include "vorbis/vorbisenc.h"
 
 // Attempts to read more samples than this will crash
 #define OUTPUT_ALLOCATION 0x100000
@@ -48,6 +52,23 @@ typedef struct
 	unsigned int dec_current_serialno;
 	int decode_initialized;
 	float **output;
+        int stream_initialized;
+
+/* Decoding stuff */
+        float ** sample_buffer;
+        int sample_buffer_alloc; 
+  
+  /* Buffer for the entire chunk */
+
+        uint8_t * chunk_buffer;
+        int chunk_buffer_alloc;
+        int bytes_in_chunk_buffer;
+
+  /* Start and end positions of the sample buffer */
+    
+        int64_t sample_buffer_start;
+        int64_t sample_buffer_end;
+
 
 // Number of last sample relative to file
 	int64_t output_position;
@@ -104,113 +125,314 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 	return 0;
 }
 
+static int next_chunk(quicktime_t * file, int track)
+  {
+  int chunk_size;
+  uint8_t * buffer;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  chunk_size = lqt_read_audio_chunk(file,
+                                    track, track_map->current_chunk,
+                                    &(codec->chunk_buffer),
+                                    &(codec->chunk_buffer_alloc));
 
+  track_map->current_chunk++;
+  
+  if(!chunk_size)
+    return 0;
+
+  buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
+  memcpy(buffer, codec->chunk_buffer, chunk_size);
+  ogg_sync_wrote(&codec->dec_oy, chunk_size);
+  
+  return 1;
+  }
+
+static int next_page(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  int result = 0;
+  while(result < 1)
+    {
+    result = ogg_sync_pageout(&codec->dec_oy, &codec->dec_og);
+
+    if(result == 0)
+      {
+      if(!next_chunk(file, track))
+        {
+        return 0;
+        }
+      }
+    else
+      {
+      if(!codec->stream_initialized)
+        {
+        ogg_stream_init(&codec->dec_os, ogg_page_serialno(&codec->dec_og));
+        codec->stream_initialized = 1;
+        }
+      ogg_stream_pagein(&codec->dec_os, &codec->dec_og);
+      }
+    }
+  return 1;
+  }
+
+
+static int next_packet(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+
+  int result = 0;
+  while(result < 1)
+    {
+    result = ogg_stream_packetout(&codec->dec_os, &codec->dec_op);
+    
+    //    fprintf(stderr, "Getting new packet %d\n", result);
+    
+    if(result == 0)
+      {
+      if(!next_page(file, track))
+        return 0;
+      }
+    }
+  return 1;
+  }
+
+float ** alloc_sample_buffer(float ** old, int channels, int samples,
+                             int * sample_buffer_alloc)
+  {
+  int i;
+  if(!old)
+    {
+    old = calloc(channels, sizeof(*(old)));
+    }
+  //  fprintf(stderr, "alloc_sample_buffer: samples: %d alloc: %d",
+  //          samples, *sample_buffer_alloc);
+  if(*sample_buffer_alloc < samples)
+    {
+    *sample_buffer_alloc = samples + 256;
+
+    for(i = 0; i < channels; i++)
+      {
+      old[i] = realloc(old[i], (*sample_buffer_alloc) * sizeof(float));
+      }
+    }
+
+  //  fprintf(stderr, " new_alloc: %d", *sample_buffer_alloc);
+
+  return old;
+  }
+
+static int decode_frame(quicktime_t * file, int track)
+  {
+  int i;
+  float ** channels;
+  int samples_decoded = 0;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+
+  while(1)
+    {
+    samples_decoded = vorbis_synthesis_pcmout(&codec->dec_vd, &(channels));
+
+    if(samples_decoded > 0)
+      break;
+
+    /* Decode new data */
+
+    if(!next_packet(file, track))
+      {
+      return 0;
+      }
+
+    if(vorbis_synthesis(&codec->dec_vb, &codec->dec_op) == 0)
+      {
+      vorbis_synthesis_blockin(&codec->dec_vd,
+                               &codec->dec_vb);
+      }
+    }
+
+  codec->sample_buffer = alloc_sample_buffer(codec->sample_buffer,
+                                             file->atracks[track].channels,
+                                             codec->sample_buffer_end -
+                                             codec->sample_buffer_start + samples_decoded,
+                                             &(codec->sample_buffer_alloc));
 #if 0
-
-// Buffer fragment should be bigger then largest page header so
-// all lacing bytes can be decoded.
-#define BUFFER_FRAGMENT 4096
-
-// Calculate chunk length from OggS headers.  This is the worst case
-// but it's better not to assume libogg is going to do anything for us.
-
-#define SEGMENT_OFFSET 0x1a
-#define LACE_OFFSET 0x1b
-static int chunk_len(quicktime_t *file, int64_t offset, int64_t next_chunk)
-{
-	int result = 0;
-	unsigned char buffer[BUFFER_FRAGMENT];
-	int accum = 0;
-	int segment_count = 0;
-	int segment_size = 0;
-	int lace_size = 0;
-	int page_size = 0;
-	int i, j;
-
-	while(offset < next_chunk)
-	{
-		quicktime_set_position(file, offset);
-		result = !quicktime_read_data(file, buffer, BUFFER_FRAGMENT);
-
-		if(result)
-		{
-			return accum;
-		}
-
-		if(memcmp(buffer, "OggS", 4))
-		{
-			return accum;
-		}
-		else
-		{
-		}
-
-// Decode size of OggS page
-		segment_count = buffer[SEGMENT_OFFSET];
-
-// Decode one segment at a time
-		i = LACE_OFFSET;
-		page_size = 0;
-		while(segment_count > 0)
-		{
-			page_size += buffer[i++];
-			segment_count--;
-		}
-		accum += i + page_size;
-		offset += i + page_size;
-	}
-
-
-	return accum;
-}
-
-
-// Calculates the chunk size based on ogg pages.
-#define READ_CHUNK(chunk) \
-{ \
-	int64_t offset1 = quicktime_chunk_to_offset(file, trak, (chunk)); \
-	int64_t offset2 = quicktime_chunk_to_offset(file, trak, (chunk) + 1); \
-	int size = 0; \
-	if(offset2 == offset1) \
-		result = 1; \
-	else \
-	{ \
-		size = chunk_len(file, offset1, \
-			offset2 > offset1 ? offset2 : offset1 + 0xfffff); \
- \
-		buffer = ogg_sync_buffer(&codec->dec_oy, size); \
-		quicktime_set_position(file, offset1); \
-		result = !quicktime_read_data(file, buffer, size); \
-		ogg_sync_wrote(&codec->dec_oy, size); \
-	} \
-/* printf("READ_CHUNK size=%d\n", size); */ \
-/* printf("%llx %x: ", quicktime_chunk_to_offset(file, trak, (chunk)), size); */ \
-/* for(i = 0; i < 16; i++) */ \
-/* 	printf("%02x ", buffer[i]); */ \
-/* printf("result=%d\n", result); */ \
-}
-
-#else
-
-#define READ_CHUNK(chunk) \
-{ \
-	int64_t offset  = quicktime_chunk_to_offset(file, trak, (chunk)); \
-	int size = codec->chunk_sizes[chunk-1]; \
- 	buffer = ogg_sync_buffer(&codec->dec_oy, size); \
-	quicktime_set_position(file, offset); \
-	result = !quicktime_read_data(file, buffer, size); \
-	ogg_sync_wrote(&codec->dec_oy, size); \
-}
+  fprintf(stderr, "Copy: %d %d %f\n",
+          (int)(codec->sample_buffer_end - codec->sample_buffer_start),
+          samples_decoded, channels[0][0]);
 #endif
+  for(i = 0; i < track_map->channels; i++)
+    {
+    memcpy(codec->sample_buffer[i] + (int)(codec->sample_buffer_end - codec->sample_buffer_start),
+           channels[i], samples_decoded * sizeof(float));
+    }
+  vorbis_synthesis_read(&codec->dec_vd, samples_decoded);
+
+  codec->sample_buffer_end += samples_decoded;
+  return 1;
+  }
 
 static int decode(quicktime_t *file, 
-					int16_t *output_i, 
-					float *output_f, 
+					int16_t **output_i, 
+					float **output_f, 
 					long samples, 
-					int track, 
-					int channel)
-{
-	int result = 0;
+					int track) 
+  {
+  int i;
+  int result = 0;
+  int64_t chunk_sample; /* For seeking only */
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  //  int64_t total_samples;
+
+  int samples_to_skip;
+  int samples_to_move;
+  int samples_copied;
+  //  fprintf(stderr, "ffmpeg decode audio %lld\n", track_map->current_position);
+  
+  /* Initialize codec */
+  if(!codec->decode_initialized)
+    {
+    codec->decode_initialized = 1;
+
+    ogg_sync_init(&codec->dec_oy); /* Now we can read pages */
+
+    vorbis_info_init(&codec->dec_vi);
+    vorbis_comment_init(&codec->dec_vc);
+    
+    if(!next_page(file, track))
+      return 0;
+                                                                                                    
+    if(!next_packet(file, track))
+      return 0;
+
+    if(vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc,
+                                 &codec->dec_op) < 0)
+      {
+      fprintf(stderr, "decode: vorbis_synthesis_headerin: not a vorbis header\n");
+      return 0;
+      }
+
+    if(!next_packet(file, track))
+      return 0;
+    vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc, &codec->dec_op);
+    if(!next_packet(file, track))
+      return 0;
+    vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc, &codec->dec_op);
+    
+    vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
+    vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
+    
+    }
+
+  /* Check if we have to reposition the stream */
+  
+  if(file->atracks[track].last_position != file->atracks[track].current_position)
+    {
+    if((file->atracks[track].current_position < codec->sample_buffer_start) || 
+       (file->atracks[track].current_position + samples >= codec->sample_buffer_end))
+      {
+      /* Get the next chunk */
+
+      quicktime_chunk_of_sample(&chunk_sample,
+                                &(file->atracks[track].current_chunk),
+                                file->atracks[track].track,
+                                file->atracks[track].current_position);
+
+      fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
+              file->atracks[track].current_position,
+              file->atracks[track].current_chunk, chunk_sample);
+
+      /* Reset everything */
+      
+      vorbis_dsp_clear(&codec->dec_vd);
+      vorbis_block_clear(&codec->dec_vb);
+      
+      ogg_stream_clear(&codec->dec_os);
+      ogg_sync_reset(&codec->dec_oy);
+      codec->stream_initialized = 0;
+      if(!next_page(file, track))
+        return 0;
+
+      /* Initialize again */
+      
+      ogg_sync_init(&codec->dec_oy);
+      ogg_stream_init(&codec->dec_os, ogg_page_serialno(&codec->dec_og));
+      vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
+      vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
+
+      /* Reset sample buffer */
+            
+      codec->sample_buffer_start = chunk_sample;
+      codec->sample_buffer_end   = chunk_sample;
+
+      /* Decode next frame */
+      
+      decode_frame(file, track);
+      }
+    }
+  
+  
+  /* Flush unneeded samples */
+  
+  if(track_map->current_position > codec->sample_buffer_start)
+    {
+    samples_to_skip = track_map->current_position - codec->sample_buffer_start;
+
+    //    fprintf(stderr, "Flush\n");
+    
+    if(codec->sample_buffer_end > track_map->current_position)
+      {
+      samples_to_move = codec->sample_buffer_end - track_map->current_position;
+
+      //      fprintf(stderr, "Memmove...");
+      for(i = 0; i < track_map->channels; i++)
+        {
+        memmove(codec->sample_buffer[i],
+                &(codec->sample_buffer[i][samples_to_skip]),
+                samples_to_move * sizeof(float));
+        }
+
+      //      fprintf(stderr, "done\n");
+      }
+    codec->sample_buffer_start = track_map->current_position;
+    }
+  
+
+  /* Read new chunks until we have enough samples */
+  while(codec->sample_buffer_end - codec->sample_buffer_start < samples)
+    {
+#if 0
+    fprintf(stderr, "Samples: %lld -> %lld %lld, %d\n",
+            codec->sample_buffer_start, codec->sample_buffer_end,
+            codec->sample_buffer_end - codec->sample_buffer_start, samples);
+#endif
+    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+      return 0;
+    
+    result = decode_frame(file, track);
+    }
+
+  
+  
+  samples_copied = lqt_copy_audio(output_i,                                     // int16_t ** dst_i
+                                  output_f,                                     // float ** dst_f
+                                  (int16_t**)0,                // int16_t ** src_i
+                                  codec->sample_buffer,                 // float ** src_f
+                                  0,                                            // int dst_pos
+                                  0,                                            // int src_pos
+                                  samples,                                      // int dst_size
+                                  samples,                                      // int src_size
+                                  file->atracks[track].channels);               // int num_channels
+  
+  file->atracks[track].last_position = file->atracks[track].current_position + samples_copied;
+
+  return samples_copied;
+  
+#if 0 /* Old (Hopefully obsolete) version */
+        int result = 0;
 	int bytes;
 	int i, j;
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -584,6 +806,7 @@ static int decode(quicktime_t *file,
 //printf("decode 16\n");
 
 	return 0;
+#endif
 }
 
 
@@ -673,7 +896,6 @@ static int encode(quicktime_t *file,
 							long samples)
 {
 	int result = 0;
-	int64_t offset = quicktime_position(file);
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_trak_t *trak = track_map->track;
 	quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
@@ -726,7 +948,7 @@ static int encode(quicktime_t *file,
   		vorbis_comment_init(&codec->enc_vc);
   		vorbis_analysis_init(&codec->enc_vd, &codec->enc_vi);
   		vorbis_block_init(&codec->enc_vd, &codec->enc_vb);
-    	srand(time(NULL));
+                //    	srand(time(NULL));
 		ogg_stream_init(&codec->enc_os, rand());
 
 
@@ -768,7 +990,10 @@ static int encode(quicktime_t *file,
 
     vorbis_analysis_wrote(&codec->enc_vd, samples);
 
-	FLUSH_OGG2
+    fprintf(stderr, "Encoded %d samples\n",
+            codec->enc_vd.granulepos - codec->encoded_samples);
+    result = 0;
+    FLUSH_OGG2
 
 	codec->next_chunk_size += samples;
 
@@ -776,6 +1001,8 @@ static int encode(quicktime_t *file,
 	if(chunk_started)
 	{
 		int new_encoded_samples = codec->enc_vd.granulepos;
+                fprintf(stderr, "WRITING CHUNK\n");
+                
 		quicktime_write_chunk_footer(file, 
 						trak,
 						track_map->current_chunk,
@@ -820,10 +1047,8 @@ static void flush(quicktime_t *file, int track)
 {
 	int result = 0;
 	int size = 0;
-	int64_t offset = quicktime_position(file);
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	long output_position = codec->enc_vd.granulepos;
 	int chunk_started = 0;
 	quicktime_atom_t chunk_atom;
 	quicktime_trak_t *trak = track_map->track;

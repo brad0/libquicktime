@@ -432,8 +432,6 @@ int quicktime_set_video(quicktime_t *file,
                         double frame_rate,
                         char *compressor)
   {
-	int i;
-	quicktime_trak_t *trak;
         lqt_codec_info_t ** info;
         int timescale, frame_duration;
         timescale = quicktime_get_timescale(frame_rate);
@@ -673,16 +671,19 @@ int quicktime_update_positions(quicktime_t *file)
 
 int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
 {
-	int64_t offset, chunk_sample, chunk;
-	quicktime_trak_t *trak;
 	if(track < file->total_atracks)
 	{
+#if 0 /* Old version (hopefully obsolete) */
 		trak = file->atracks[track].track;
                 file->atracks->current_position = sample;
                 quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
 		file->atracks[track].current_chunk = chunk;
 		offset = quicktime_sample_to_offset(file, trak, sample);
 		quicktime_set_position(file, offset);
+#else
+                file->atracks->current_position = sample;
+                /* Codec will do the rest */
+#endif
 	}
 	else
 		fprintf(stderr, "quicktime_set_audio_position: track >= file->total_atracks\n");
@@ -997,7 +998,6 @@ int quicktime_write_audio(quicktime_t *file,
 
 int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_t bytes, int track)
 {
-        int64_t offset = quicktime_position(file);
         int result = 0;
         quicktime_atom_t chunk_atom;
         quicktime_video_map_t *vtrack = &file->vtracks[track];
@@ -1019,12 +1019,12 @@ int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_
 long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track)
 {
 	int64_t chunk_sample, chunk;
-	int result = 0, track_num;
+	int result = 0;
 	quicktime_trak_t *trak = file->atracks[track].track;
 	int64_t fragment_len, chunk_end;
 	int64_t start_position = file->atracks[track].current_position;
 	int64_t position = file->atracks[track].current_position;
-	int64_t start = position, end = position + samples;
+	int64_t end = position + samples;
 	int64_t bytes, total_bytes = 0;
 	int64_t buffer_offset;
 
@@ -1055,6 +1055,7 @@ long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, i
 	if(result) return 0;
 	return total_bytes;
 }
+
 
 int quicktime_read_chunk(quicktime_t *file, char *output, int track, int64_t chunk, int64_t byte_start, int64_t byte_len)
 {
@@ -1092,7 +1093,6 @@ long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int tr
 	int64_t bytes;
 	int result = 0;
 
-	quicktime_trak_t *trak = file->vtracks[track].track;
 	bytes = quicktime_frame_size(file, file->vtracks[track].current_position, track);
 
 	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
@@ -1218,7 +1218,6 @@ int quicktime_has_keyframes(quicktime_t *file, int track)
 
 int quicktime_read_frame_init(quicktime_t *file, int track)
 {
-	quicktime_trak_t *trak = file->vtracks[track].track;
 	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
 	if(quicktime_ftell(file) != file->file_position) 
 	{
@@ -1250,7 +1249,6 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 {
-	int i;
 	quicktime_delete_vcodec(vtrack);
 	return 0;
 }
@@ -1267,9 +1265,8 @@ int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *tr
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 {
-	int i;
 	quicktime_delete_acodec(atrack);
-	return 0;
+        return 0;
 }
 
 void quicktime_init_maps(quicktime_t * file)
@@ -1312,10 +1309,8 @@ void quicktime_init_maps(quicktime_t * file)
 int quicktime_read_info(quicktime_t *file)
 {
         int result = 0, got_header = 0;
-        int i, channel, trak_channel, track;
         int64_t start_position = quicktime_position(file);
         quicktime_atom_t leaf_atom;
-        quicktime_trak_t *trak;
         char avi_avi[4];
         int got_avi = 0;
         int got_asf = 0;
@@ -1375,8 +1370,9 @@ int quicktime_read_info(quicktime_t *file)
                                                                                                                   
 //printf("quicktime_read_info 10\n");
 /* Construct indexes. */
-                quicktime_import_avi(file);
-//printf("quicktime_read_info 20\n");
+                if(quicktime_import_avi(file))
+                  return 1;
+                //printf("quicktime_read_info 20\n");
         }
 /* Quicktime section */
         else
@@ -1525,7 +1521,6 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 {
         int i;
 	quicktime_t *new_file = calloc(1, sizeof(quicktime_t));
-	char flags[10];
 	int result = 0;
         if(rd && wr)
           {
@@ -1898,3 +1893,77 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
   free(chunk_indices);
   return ret;
   }
+
+int lqt_read_audio_chunk(quicktime_t * file, int track,
+                         long chunk,
+                         uint8_t ** buffer, int * buffer_alloc)
+  {
+  int64_t offset;
+  quicktime_trak_t * trak;
+  int result;
+
+  trak = file->atracks[track].track;
+
+  if(!trak->chunk_sizes)
+    {
+    trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);
+    }
+
+  /* Reallocate buffer */
+
+  if(*buffer_alloc < trak->chunk_sizes[chunk-1] + 16)
+    {
+    *buffer_alloc = trak->chunk_sizes[chunk-1] + 32;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+  
+  /* Get offset */
+  
+  offset = quicktime_chunk_to_offset(file, trak, chunk);
+
+  quicktime_set_position(file, offset);
+
+  result = quicktime_read_data(file, *buffer, trak->chunk_sizes[chunk-1]);
+
+  memset((*buffer) + trak->chunk_sizes[chunk-1], 0, 16);
+  
+  return result ? trak->chunk_sizes[chunk-1] : 0;
+  }
+
+int lqt_append_audio_chunk(quicktime_t * file, int track,
+                           long chunk,
+                           uint8_t ** buffer, int * buffer_alloc,
+                           int initial_bytes)
+  {
+  int64_t offset;
+  quicktime_trak_t * trak;
+  int result;
+
+  trak = file->atracks[track].track;
+
+  if(!trak->chunk_sizes)
+    {
+    trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);
+    }
+
+  /* Reallocate buffer */
+
+  if(*buffer_alloc < trak->chunk_sizes[chunk-1] + 16 + initial_bytes)
+    {
+    *buffer_alloc = trak->chunk_sizes[chunk-1] + 32 + initial_bytes;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+  
+  /* Get offset */
+  
+  offset = quicktime_chunk_to_offset(file, trak, chunk);
+
+  quicktime_set_position(file, offset);
+
+  result = quicktime_read_data(file, (*buffer) + initial_bytes, trak->chunk_sizes[chunk-1]);
+
+  memset((*buffer) + initial_bytes + trak->chunk_sizes[chunk-1], 0, 16);
+  
+  return result ? trak->chunk_sizes[chunk-1] : 0;
+  }
+
