@@ -13,17 +13,13 @@
 #include <workarounds.h>
 #include <string.h>
 
-#ifndef	HAVE_STAT64
-#define stat64 stat
-#endif
-
 /* Disk I/O */
 
 int64_t quicktime_get_file_length(char *path)
 {
-      struct stat64 status;
-      if(stat64(path, &status))
-              perror("quicktime_get_file_length stat64:");
+      struct stat status;
+      if(stat(path, &status))
+              perror("quicktime_get_file_length stat:");
       return status.st_size;
 }
 
@@ -80,12 +76,6 @@ int quicktime_file_close(quicktime_t *file)
         file->stream = 0;
         return 0;
 }
-
-#ifndef	HAVE_STAT64
-#define stat64 stat
-#endif
-
-
 
 int64_t quicktime_ftell(quicktime_t *file)
 {
