@@ -81,7 +81,12 @@ static int set_parameter_video(quicktime_t *file,
           Bitrate options
         *********************/
 
-        INTPARM(bit_rate_video, 1000)
+        if(!strcasecmp(key, "bit_rate_video")) 
+          { 
+          codec->com.params.bit_rate = (*(int *)value) * 1000;
+          return 0;
+          }
+
         INTPARM(rc_min_rate, 1000) 
         INTPARM(rc_max_rate, 1000)
 	INTPARM(bit_rate_tolerance, 1)
@@ -190,17 +195,13 @@ static int set_parameter_audio(quicktime_t *file,
 {
 	quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
 
-        
-#define INTPARM(x, y) \
-	if(!strcasecmp(key, #x)) { \
-          codec->com.params.x = (*(int *)value) * y; \
-          return 0; \
-	}
-
-        INTPARM(bit_rate_audio, 1000);
+        if(!strcasecmp(key, "bit_rate_audio"))
+          {
+          codec->com.params.bit_rate = (*(int *)value) * 1000;
+          return 0;
+          }
         //	fprintf(stderr, "Unknown key: %s\n", key);
           return -1;
-#undef INTPARM
 }
 
 static int reads_colormodel(quicktime_t *file,

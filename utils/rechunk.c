@@ -5,7 +5,7 @@
 
 int usage(void)
 {
-	printf("usage: rechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] <input frames> <output movie>\n");
+	printf("usage: qtrechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] <input frames> <output movie>\n");
 	printf("	Concatenate input frames into a Quicktime movie.\n");
 	exit(1);
 	return 0;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 			else
 				usage();
 		}
-		if(i == argc - 1)
+		else if(i == argc - 1)
 		{
 			output = argv[i];
 		}
