@@ -48,9 +48,46 @@ typedef struct
   /* Audio Sample buffer */
   
   short * sample_buffer;
-  int sample_buffer_pos;
-  int sample_buffer_size; /* Used for decoding only */
+
+  /* Encoding only */
   
+  int sample_buffer_pos;
+
+  /* Decoding only */
+  
+  int sample_buffer_size; 
+  int samples_in_buffer;
+  
+  /* Index of the first sample in buffer relative to start of stream */
+  
+  longest sample_buffer_offset;
+
+  /* Buffer for the entire chunk */
+
+  char * chunk_buffer;
+  int chunk_buffer_size;
+
+  char * chunk_buffer_ptr;
+  int chunk_size;
+    
+  /* Buffer for a single frame */
+  
+  char * frame_buffer;
+  int frame_buffer_size;
+  int next_frame_bytes;
+
+  /* Decoded frame */
+
+  uint16_t * decoded_frame;
+  int decoded_frame_pos;
+
+  int samples_per_frame;
+  
+  /* Remember some stuff */
+
+  longest last_sample_start;
+  longest last_sample_num;
+    
   } quicktime_ffmpeg_codec_t;
 
 #endif

@@ -296,7 +296,8 @@ static int writes_colormodel(quicktime_t *file,
 }
 
 
-void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder, AVCodec *decoder)
+void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
+                                       AVCodec *decoder)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_codec_t *codec;
@@ -323,7 +324,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 }
 
-void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder, AVCodec *decoder)
+void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
+                                       AVCodec *decoder)
 {
 	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_ffmpeg_codec_t *codec;
@@ -344,4 +346,34 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	if(decoder)
           ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
 	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter_audio;
+
+        /* Set the number of samples per frame (ffmpeg lies here for decoders) */
+        
+        if(encoder)
+          {
+          switch(encoder->id)
+            {
+            case CODEC_ID_MP2:
+            case CODEC_ID_MP3LAME:
+              codec->samples_per_frame = 1152;
+              break; 
+            case CODEC_ID_AC3:
+              codec->samples_per_frame = 6*256;
+              break; 
+            }
+          }
+        else if(decoder)
+          {
+          switch(decoder->id)
+            {
+            case CODEC_ID_MP2:
+            case CODEC_ID_MP3LAME:
+              codec->samples_per_frame = 1152;
+              break;
+            case CODEC_ID_AC3:
+              codec->samples_per_frame = 6*256;
+              break;
+            }
+          
+          }
 }
