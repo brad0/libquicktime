@@ -1,9 +1,16 @@
-Before "real" (stable or whatever) Release:
+Before public release:
 
-- Check, if we want another codec fuction get_best_colormodel() and
-  export this to a public lqt_get_best_colormodel(). This would
-  be possible for most codecs and enable optimized video handling in
-  applications.
+- Add advanced lqt_decode_audio functions, which decode all channels at once
+
+- Add functions for getting the best decoding colormodel
+
+- Make the "scan for codecs" button functional in libquicktime_config
+
+- Add support for reordering codecs, so we can have multiple codecs for one fourcc
+  (Must be done in libquicktime as well as in libquicktime_config)
+
+- Check if we want to add patches for xmovie/cinelerra/bcast for lqt support
+  (or would this be politically incorrect?)
 
 Library:
 
@@ -12,25 +19,16 @@ Library:
 - Research, how we can overload the reading and writing functions. With this, we can write
   modules for files, http, rtsp, ftp, output to a streaming server etc.
 
-- Write a small C program, which is installed in the $PATH and updates the plugin registry.
-  This can also be called by install scripts and makefiles.
-  Maybe some console output, which new codecs were found.
-  The same will however, always be done by all libquicktime applications.
-
 Codecs:
 
 - Try the rtjpeg codec in the libquicktime source (it's documented nowhere and was not
   activated in quicktime4linux).
-
-- Implement encoding parameters for the png codec.
 
 - Meditate about an mng codec (there exists an opensource one for windows)
 
 - Check, if we can support the binary only divx4linux codec without loosing
   compatibility (or make a new fourcc for divx4linux?)
   This would bring some more features and maybe more speed.
-
-- Make postprocessing a parameter for the current divx decoder
 
 - Find valid min and max values for all codec parameters (especially divx)
 
