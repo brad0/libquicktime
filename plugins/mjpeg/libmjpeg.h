@@ -35,7 +35,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <jpeglib.h>
-#include <png.h>       /* Need setjmp.h included by png.h */
+#include <setjmp.h>
 
 #ifdef HAVE_MT_JPEG
 #include "pthread.h"   /* Make sure we only include pthread when necessary */
