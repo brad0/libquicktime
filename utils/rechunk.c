@@ -1,5 +1,5 @@
-#include "funcprotos.h"
-#include "quicktime.h"
+#include <funcprotos.h>
+#include <quicktime/quicktime.h>
 
 #include <string.h>
 
