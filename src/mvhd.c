@@ -72,9 +72,9 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 	mvhd->next_track_id = quicktime_read_int32(file);
 }
 
-void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, double frame_rate)
+void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, int timescale)
 {
-	mvhd->time_scale = quicktime_get_timescale(frame_rate);
+	mvhd->time_scale = timescale;
 }
 
 void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)

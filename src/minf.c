@@ -15,15 +15,15 @@ void quicktime_minf_init_video(quicktime_t *file,
 								quicktime_minf_t *minf, 
 								int frame_w,
 								int frame_h, 
-								int time_scale, 
-								double frame_rate,
+                                                                int frame_duration,
+                                                                int time_scale, 
 								char *compressor)
 {
 	minf->is_video = 1;
 //printf("quicktime_minf_init_video 1\n");
-	quicktime_vmhd_init_video(file, &(minf->vmhd), frame_w, frame_h, frame_rate);
+	quicktime_vmhd_init_video(file, &(minf->vmhd), frame_w, frame_h, frame_duration, time_scale);
 //printf("quicktime_minf_init_video 1 %d %f\n", time_scale, frame_rate);
-	quicktime_stbl_init_video(file, &(minf->stbl), frame_w, frame_h, time_scale, frame_rate, compressor);
+	quicktime_stbl_init_video(file, &(minf->stbl), frame_w, frame_h, frame_duration, time_scale, compressor);
 //printf("quicktime_minf_init_video 2\n");
 	quicktime_hdlr_init_data(&(minf->hdlr));
 //printf("quicktime_minf_init_video 1\n");

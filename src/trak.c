@@ -16,7 +16,8 @@ int quicktime_trak_init_video(quicktime_t *file,
 							quicktime_trak_t *trak, 
 							int frame_w, 
 							int frame_h, 
-							double frame_rate,
+                                                        int frame_duration,
+                                                        int timescale,
 							char *compressor)
 {
 
@@ -28,7 +29,8 @@ int quicktime_trak_init_video(quicktime_t *file,
 		&(trak->mdia), 
 		frame_w, 
 		frame_h, 
-		frame_rate, 
+                frame_duration,
+                timescale,
 		compressor);
 	quicktime_edts_init_table(&(trak->edts));
 

@@ -205,7 +205,7 @@ void quicktime_mdhd_init_video(quicktime_t *file,
                                quicktime_mdhd_t *mdhd, 
                                int frame_w,
                                int frame_h, 
-                               double frame_rate);
+                               int timescale);
 
 /* mdia.c */
 
@@ -226,7 +226,8 @@ void quicktime_mdia_init_video(quicktime_t *file,
                                quicktime_mdia_t *mdia,
                                int frame_w,
                                int frame_h, 
-                               double frame_rate,
+                               int frame_duration,
+                               int timescale,
                                char *compressor);
 
 /* minf.c */
@@ -242,8 +243,8 @@ void quicktime_minf_init_video(quicktime_t *file,
                                quicktime_minf_t *minf, 
                                int frame_w,
                                int frame_h, 
+                               int frame_duration,
                                int time_scale, 
-                               double frame_rate,
                                char *compressor);
 
 void quicktime_minf_init_audio(quicktime_t *file, 
@@ -269,7 +270,7 @@ int quicktime_mvhd_init(quicktime_mvhd_t *mvhd);
 int quicktime_mvhd_delete(quicktime_mvhd_t *mvhd);
 void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd);
 void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_atom_t *parent_atom);
-void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, double frame_rate);
+void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, int time_scale);
 void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd);
 
 /* smhd.c */
@@ -295,8 +296,8 @@ void quicktime_stbl_init_video(quicktime_t *file,
                                quicktime_stbl_t *stbl, 
                                int frame_w,
                                int frame_h, 
-                               int time_scale, 
-                               double frame_rate,
+                               int frame_duration,
+                               int time_scale,
                                char *compressor);
 
 void quicktime_stbl_init_audio(quicktime_t *file, 
@@ -342,7 +343,6 @@ void quicktime_stsd_init_video(quicktime_t *file,
                                quicktime_stsd_t *stsd, 
                                int frame_w,
                                int frame_h, 
-                               double frame_rate,
                                char *compression);
 
 void quicktime_stsd_init_audio(quicktime_t *file, 
@@ -408,7 +408,7 @@ void quicktime_update_stsz(quicktime_stsz_t *stsz,
 
 void quicktime_stts_init(quicktime_stts_t *stts);
 void quicktime_stts_init_table(quicktime_stts_t *stts);
-void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int time_scale, double frame_rate);
+void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int frame_duration);
 void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts, int sample_rate);
 void quicktime_stts_delete(quicktime_stts_t *stts);
 void quicktime_stts_dump(quicktime_stts_t *stts);
@@ -440,7 +440,8 @@ int quicktime_trak_init_video(quicktime_t *file,
                               quicktime_trak_t *trak, 
                               int frame_w, 
                               int frame_h, 
-                              double frame_rate,
+                              int frame_duration,
+                              int time_scale,
                               char *compressor);
 
 int quicktime_trak_init_audio(quicktime_t *file, 
@@ -513,7 +514,8 @@ void quicktime_vmhd_init_video(quicktime_t *file,
                                quicktime_vmhd_t *vmhd, 
                                int frame_w,
                                int frame_h, 
-                               double frame_rate);
+                               int frame_duration,
+                               int timescale);
 
 void quicktime_vmhd_delete(quicktime_vmhd_t *vmhd);
 void quicktime_vmhd_dump(quicktime_vmhd_t *vmhd);

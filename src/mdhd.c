@@ -17,9 +17,9 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 								quicktime_mdhd_t *mdhd, 
 								int frame_w,
 								int frame_h, 
-								double frame_rate)
+								int timescale)
 {
-	mdhd->time_scale = quicktime_get_timescale(frame_rate);
+	mdhd->time_scale = timescale;
 //printf("quicktime_mdhd_init_video %d %f\n", mdhd->time_scale, frame_rate);
 	mdhd->duration = 0;      /* set this when closing */
 }

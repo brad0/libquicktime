@@ -22,8 +22,7 @@ void quicktime_stsd_init_video(quicktime_t *file,
 								quicktime_stsd_t *stsd, 
 								int frame_w,
 								int frame_h, 
-								double frame_rate,
-								char *compression)
+                                                                char * compression)
 {
 	quicktime_stsd_table_t *table;
 	quicktime_stsd_init_table(stsd);

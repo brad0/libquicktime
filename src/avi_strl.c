@@ -224,8 +224,9 @@ void quicktime_read_strl(quicktime_t *file,
 	char data[4], codec[4];
 	int denominator;
 	int numerator;
-	double frame_rate;
-	int width;
+        int frame_duration;
+        int timescale;
+        int width;
 	int height;
 	int depth;
 	int frames;
@@ -282,10 +283,17 @@ void quicktime_read_strl(quicktime_t *file,
 				denominator = quicktime_read_int32_le(file);
 				numerator = quicktime_read_int32_le(file);
 				if(denominator != 0)
-					frame_rate = (double)numerator / denominator;
+                                {
+                                        timescale = numerator;
+                                        frame_duration = denominator;
+                                        //  frame_rate = (double)numerator / denominator;
+                                }
 				else
-					frame_rate = numerator;
-
+                                {
+                                // frame_rate = numerator;
+                                        timescale = numerator;
+                                        frame_duration = 1;
+                                }
 /* Blank */
 				quicktime_set_position(file, quicktime_position(file) + 4);
 				frames = quicktime_read_int32_le(file);
@@ -380,11 +388,12 @@ void quicktime_read_strl(quicktime_t *file,
 			trak, 
 			width, 
 			height, 
-			frame_rate,
+			frame_duration,
+                        timescale,
 			codec);
 		quicktime_mhvd_init_video(file, 
 			&file->moov.mvhd, 
-			frame_rate);
+                        timescale);
 		trak->mdia.mdhd.duration = frames;
 //			trak->mdia.mdhd.time_scale = 1;
 		memcpy(trak->mdia.minf.stbl.stsd.table[0].format, codec, 4);

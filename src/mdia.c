@@ -12,13 +12,14 @@ void quicktime_mdia_init_video(quicktime_t *file,
 								quicktime_mdia_t *mdia,
 								int frame_w,
 								int frame_h, 
-								double frame_rate,
+								int frame_duration,
+                                                                int timescale,
 								char *compressor)
 {
 //printf("quicktime_mdia_init_video 1\n");
-	quicktime_mdhd_init_video(file, &(mdia->mdhd), frame_w, frame_h, frame_rate);
+	quicktime_mdhd_init_video(file, &(mdia->mdhd), frame_w, frame_h, timescale);
 //printf("quicktime_mdia_init_video 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
-	quicktime_minf_init_video(file, &(mdia->minf), frame_w, frame_h, mdia->mdhd.time_scale, frame_rate, compressor);
+	quicktime_minf_init_video(file, &(mdia->minf), frame_w, frame_h, frame_duration, timescale, compressor);
 //printf("quicktime_mdia_init_video 1\n");
 	quicktime_hdlr_init_video(&(mdia->hdlr));
 //printf("quicktime_mdia_init_video 2\n");

@@ -15,5 +15,5 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
  *  Works for reading and writing
  */
 
-void lqt_set_default_video_parameters(quicktime_t * file);
-void lqt_set_default_audio_parameters(quicktime_t * file);
+void lqt_set_default_video_parameters(quicktime_t * file, int track);
+void lqt_set_default_audio_parameters(quicktime_t * file, int track);

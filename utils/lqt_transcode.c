@@ -86,7 +86,9 @@ typedef struct
   int colormodel;
   int width;
   int height;
-  double framerate;
+
+  int frame_duration;
+  int timescale;
   int samplerate;
   int num_channels;
   int audio_bits;
@@ -156,9 +158,9 @@ static void list_audio_codecs()
 
 static unsigned char ** alloc_video_buffer(int width, int height, int colormodel)
   {
-  int bytes_per_line;
+  int bytes_per_line = 0;
   int i;
-  int y_size, uv_size;
+  int y_size, uv_size = 0;
   unsigned char ** video_buffer;
   /* Allocate frame buffer */
 
@@ -260,7 +262,9 @@ static int transcode_init(transcode_handle * h,
     {
     h->width     = quicktime_video_width(h->in_file, 0);
     h->height    = quicktime_video_height(h->in_file, 0);
-    h->framerate = quicktime_frame_rate(h->in_file, 0);
+    
+    h->timescale = lqt_video_time_scale(h->in_file, 0);
+    h->frame_duration = lqt_frame_duration(h->in_file, 0, NULL);
     
     /* Codec info for encoding */
     
@@ -275,7 +279,7 @@ static int transcode_init(transcode_handle * h,
     
     lqt_set_video(h->out_file, 1,
                   h->width, h->height,
-                  h->framerate,
+                  h->frame_duration, h->timescale,
                   codec_info[0]);
     
     /* Get colormodel */
@@ -330,7 +334,7 @@ static int transcode_init(transcode_handle * h,
 #if 1
     if(h->do_video)
       {
-      h->samples_per_frame = (int)(((double)h->samplerate / h->framerate)+0.5);
+      h->samples_per_frame = (int)(((double)h->frame_duration / (double)h->timescale)+0.5);
       /* Avoid too odd numbers */
       h->samples_per_frame = 16 * ((h->samples_per_frame + 15) / 16);
       }
@@ -373,7 +377,7 @@ static int transcode_iteration(transcode_handle * h)
   if(h->do_audio && h->do_video)
     {
     audio_time = (float)(h->audio_samples_written)/(float)(h->samplerate);
-    video_time = (float)(h->video_frames_written)/h->framerate;
+    video_time = (float)(h->video_frames_written * h->frame_duration)/h->timescale;
 
     //    fprintf(stderr, "Transcode time: %f %f\n", audio_time, video_time);
     

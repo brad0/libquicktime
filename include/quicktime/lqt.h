@@ -67,6 +67,11 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track,
  */
 
 int lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);
+
+
+/**************************************
+ * Set streams for encoding
+ **************************************/
   
 /*
  *   Versions of quicktime_set_audio and quicktime_set_video,
@@ -75,13 +80,27 @@ int lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);
 
 int lqt_set_video(quicktime_t *file, int tracks, 
                   int frame_w, int frame_h,
-                  double frame_rate,
+                  int frame_duration, int timescale,
                   lqt_codec_info_t * info);
 
 int lqt_set_audio(quicktime_t *file, int channels,
                   long sample_rate,  int bits,
                   lqt_codec_info_t * codec_info);
 
+
+/*
+ *  Add streams. These allow different formats in the streams
+ */
+
+int lqt_add_audio_track(quicktime_t *file,
+                        int channels, long sample_rate, int bits, lqt_codec_info_t * info);
+
+int lqt_add_video_track(quicktime_t *file,
+                        int frame_w, int frame_h,
+                        int frame_duration, int timescale,
+                        lqt_codec_info_t * info);
+  
+  
 /*
  *  Same as quicktime_decode_video but doesn't force BC_RGB888
  */

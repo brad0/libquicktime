@@ -17,14 +17,14 @@ void quicktime_stbl_init_video(quicktime_t *file,
 								quicktime_stbl_t *stbl, 
 								int frame_w,
 								int frame_h, 
+                                                                int frame_duration,
 								int time_scale, 
-								double frame_rate,
 								char *compressor)
 {
 //printf("quicktime_stbl_init_video 1\n");
-	quicktime_stsd_init_video(file, &(stbl->stsd), frame_w, frame_h, frame_rate, compressor);
+	quicktime_stsd_init_video(file, &(stbl->stsd), frame_w, frame_h, compressor);
 //printf("quicktime_stbl_init_video 1 %d %f\n", time_scale, frame_rate);
-	quicktime_stts_init_video(file, &(stbl->stts), time_scale, frame_rate);
+	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
 //printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsc_init_video(file, &(stbl->stsc));
 //printf("quicktime_stbl_init_video 1\n");
