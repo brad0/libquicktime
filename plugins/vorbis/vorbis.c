@@ -291,12 +291,11 @@ static int decode(quicktime_t *file,
 					int track) 
   {
   int i;
-  int result = 0;
   int64_t chunk_sample; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   //  int64_t total_samples;
-
+  int samples_decoded;
   int samples_to_skip;
   int samples_to_move;
   int samples_copied;
@@ -461,29 +460,21 @@ static int decode(quicktime_t *file,
   /* Read new chunks until we have enough samples */
   while(codec->sample_buffer_end < codec->sample_buffer_start + samples)
     {
-    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
-      {
-#if 0
-      fprintf(stderr, "Detected EOF %lld %ld\n",
-              track_map->current_chunk,
-              file->atracks[track].track->mdia.minf.stbl.stco.total_entries);
-#endif
-      return 0;
-      }
-    result = decode_frame(file, track);
+    if(!decode_frame(file, track))
+      break;
     //    fprintf(stderr, "Decoded frame\n");
     }
-
-
+  samples_decoded = (codec->sample_buffer_end - codec->sample_buffer_start) < samples ?
+    (codec->sample_buffer_end - codec->sample_buffer_start) : samples;
   
-  samples_copied = lqt_copy_audio(output_i,             // int16_t ** dst_i
-                                  output_f,             // float ** dst_f
-                                  (int16_t**)0,         // int16_t ** src_i
-                                  codec->sample_buffer, // float ** src_f
-                                  0,                    // int dst_pos
-                                  0,                    // int src_pos
-                                  samples,              // int dst_size
-                                  samples,              // int src_size
+  samples_copied = lqt_copy_audio(output_i,                // int16_t ** dst_i
+                                  output_f,                // float ** dst_f
+                                  (int16_t**)0,            // int16_t ** src_i
+                                  codec->sample_buffer,    // float ** src_f
+                                  0,                       // int dst_pos
+                                  0,                       // int src_pos
+                                  samples,                 // int dst_size
+                                  samples_decoded,         // int src_size
                                   file->atracks[track].channels); // int num_channels
   
   file->atracks[track].last_position = file->atracks[track].current_position + samples_copied;

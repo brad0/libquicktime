@@ -681,7 +681,8 @@ int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
 		offset = quicktime_sample_to_offset(file, trak, sample);
 		quicktime_set_position(file, offset);
 #else
-                file->atracks->current_position = sample;
+                file->atracks[track].current_position = sample;
+                file->atracks[track].eof = 0;
                 /* Codec will do the rest */
 #endif
 	}
@@ -1909,7 +1910,7 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
 
   trak = file->atracks[track].track;
 
-  if(chunk > file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+  if(chunk > trak->mdia.minf.stbl.stco.total_entries)
     {
     /* Read beyond EOF */
     file->atracks[track].eof = 1;
@@ -1956,6 +1957,13 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   int result;
 
   trak = file->atracks[track].track;
+
+  if(chunk > trak->mdia.minf.stbl.stco.total_entries)
+    {
+    /* Read beyond EOF */
+    file->atracks[track].eof = 1;
+    return 0;
+    }
 
   if(!trak->chunk_sizes)
     {

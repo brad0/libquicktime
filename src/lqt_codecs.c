@@ -622,6 +622,9 @@ int quicktime_decode_audio(quicktime_t *file,
         quicktime_channel_location(file, &quicktime_track,
                                    &quicktime_channel, channel);
 
+        if(file->atracks[quicktime_track].eof)
+          return 1;
+        
         if(output_i)
           {
           channels_i = calloc(quicktime_track_channels(file, quicktime_track), sizeof(*channels_i));
@@ -697,6 +700,9 @@ int lqt_decode_audio(quicktime_t *file,
           {
           track_channels = quicktime_track_channels(file, i);
 
+          if(file->atracks[i].eof)
+            return 1;
+                    
           result = ((quicktime_codec_t*)file->atracks[i].codec)->decode_audio(
                                                                               file, 
                                                                               output_i, 
@@ -723,6 +729,10 @@ int lqt_decode_audio_track(quicktime_t *file,
   {
   int result = 1;
   //  fprintf(stderr, "lqt_decode_audio_track\n");
+
+  if(file->atracks[track].eof)
+    return 1;
+          
   
   result = !(((quicktime_codec_t*)file->atracks[track].codec)->decode_audio(
                                                                            file, 

@@ -55,6 +55,12 @@
 
 static quicktime_t *qt = NULL;
 
+#define COUNT_SAMPLES
+
+#ifdef COUNT_SAMPLES
+int64_t total_samples_decoded = 0;
+#endif
+
 
 /* ------------------------------------------------------------------------ */
 /* X11 code                                                                 */
@@ -1114,6 +1120,7 @@ static int decode_audio()
     //    fprintf(stderr, "done\n");
     samples_decoded = lqt_last_audio_position(qt, 0) - last_pos;
     }
+  total_samples_decoded += samples_decoded;
   qt_audio_samples_in_buffer = samples_decoded;
   qt_audio_ptr = qt_audio;
   if(samples_decoded < AUDIO_BLOCK_SIZE)
@@ -1424,6 +1431,7 @@ int main(int argc, char *argv[])
       break;
     }
     qt_cleanup();
+    fprintf(stderr, "Decoded %lld samples\n", total_samples_decoded);    
     return 0;
 }
 
