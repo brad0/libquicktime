@@ -17,6 +17,7 @@ graphics.h \
 hdlr.h \
 lqt_codecinfo_private.h \
 lqt_funcprotos.h \
+lqt_private.h \
 matrix.h \
 mdhd.h \
 mdia.h \
