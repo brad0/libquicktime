@@ -156,6 +156,8 @@ lqtgtk_codec_info_window_run(LqtGtkCodecInfoWindow *);
 
 typedef struct
   {
+  GtkTreeModel * model;
+  
   GtkWidget * list;        /* List of all codecs */
   GtkWidget * scrolledwindow;
   GtkWidget * up_button;
@@ -185,6 +187,8 @@ void lqtgtk_destroy_codec_browser(LqtGtkCodecBrowser * );
 
 void lqtgtk_codec_browser_update(LqtGtkCodecBrowser * b);
 
+#if 0 /* Not used */
+  
 /*
  *  Stuff for selecting encoders. This makes an option menu with the
  *  codecs as well as functional "info" and "options" buttons 
@@ -226,6 +230,8 @@ const char * lqtgtk_encoder_widget_get_encoder(LqtGtkEncoderWidget * ew);
 
 void lqtgtk_encoder_widget_set_encoder(LqtGtkEncoderWidget * ew,
                                        const char * name);
+
+#endif
   
 #ifdef __cplusplus
 }

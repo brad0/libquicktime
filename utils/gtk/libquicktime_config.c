@@ -67,14 +67,18 @@ MainWindow * create_main_window()
   ret->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW(ret->window), "Libquicktime configurator "VERSION);
 
-  gtk_widget_set_usize(ret->window, 350, 200);
+  //  gtk_widget_set_size_request(ret->window, 350, 200);
   
-  gtk_signal_connect(GTK_OBJECT(ret->window), "delete-event",
-                     GTK_SIGNAL_FUNC(delete_callback), ret);
+  g_signal_connect(G_OBJECT(ret->window), "delete-event",
+                   G_CALLBACK(delete_callback), ret);
     
-  ret->close_button = gtk_button_new_with_label("Close");
-  ret->save_button = gtk_button_new_with_label("Save");
+  //  ret->close_button = gtk_button_new_with_label("Close");
+  //  ret->save_button = gtk_button_new_with_label("Save");
 
+  ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+  ret->save_button = gtk_button_new_from_stock(GTK_STOCK_SAVE);
+  
+  
   ret->notebook = gtk_notebook_new();
 
   tab_label = gtk_label_new("Audio Codecs");
@@ -98,15 +102,15 @@ MainWindow * create_main_window()
   ret->buttonbox = gtk_hbutton_box_new();
    
 
-  ret->close_button = gtk_button_new_with_label("Close");
-  ret->save_button = gtk_button_new_with_label("Save");
+  ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
+  ret->save_button = gtk_button_new_from_stock(GTK_STOCK_SAVE);
 
-  gtk_signal_connect(GTK_OBJECT(ret->close_button), "clicked",
-                     GTK_SIGNAL_FUNC(main_window_button_callback),
-                     (gpointer)ret);
-  gtk_signal_connect(GTK_OBJECT(ret->save_button), "clicked",
-                     GTK_SIGNAL_FUNC(main_window_button_callback),
-                     (gpointer)ret);
+  g_signal_connect(G_OBJECT(ret->close_button), "clicked",
+                   G_CALLBACK(main_window_button_callback),
+                   (gpointer)ret);
+  g_signal_connect(G_OBJECT(ret->save_button), "clicked",
+                   G_CALLBACK(main_window_button_callback),
+                   (gpointer)ret);
 
   GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
   GTK_WIDGET_SET_FLAGS (ret->save_button, GTK_CAN_DEFAULT);

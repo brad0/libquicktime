@@ -217,18 +217,13 @@ dnl
 dnl Check for gtk
 dnl This is neccesary for the utils/gtk subdirectory
 dnl
-
-GTK_REQUIRED="1.2.8"
-
-have_gtk=false
-
-AM_PATH_GTK($GTK_REQUIRED, have_gtk=true)
-
-AC_SUBST(GTK_CFLAGS)
-AC_SUBST(GTK_LIBS)
+GTK_REQUIRED="2.4.0"
+AM_PATH_GTK_2_0($GTK_REQUIRED, have_gtk=true, have_gtk=false)
+AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
 AC_SUBST(GTK_REQUIRED)
 
-AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
+dnl Always be in sync with the newest gtk
+GTK_CFLAGS="$GTK_CFLAGS -DGTK_DISABLE_DEPRECATED"
 
 dnl
 dnl Check for libdv
