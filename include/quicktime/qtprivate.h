@@ -100,6 +100,31 @@ typedef struct
 	int motion_jpeg_huffman_table;
 } quicktime_mjht_t;
 
+typedef struct
+{
+	int32_t hSpacing;
+	int32_t vSpacing;
+} quicktime_pasp_t;
+
+typedef struct
+{
+	int32_t colorParamType;
+	int16_t primaries;
+	int16_t transferFunction;
+	int16_t matrix;
+} quicktime_colr_t;
+
+typedef struct
+{
+	int32_t cleanApertureWidthN;
+	int32_t cleanApertureWidthD;
+	int32_t cleanApertureHeightN;
+	int32_t cleanApertureHeightD;
+	int32_t horizOffN;
+	int32_t horizOffD;
+	int32_t vertOffN;
+	int32_t vertOffD;
+} quicktime_clap_t;
 
 typedef struct
 {
@@ -130,6 +155,9 @@ typedef struct
 	int field_dominance;   /* 0 - unknown     1 - top first     2 - bottom first */
 	quicktime_mjqt_t mjqt;
 	quicktime_mjht_t mjht;
+	quicktime_pasp_t pasp;
+	quicktime_colr_t colr;
+	quicktime_clap_t clap;
 
 /* audio description */
 	int channels;
