@@ -2,7 +2,7 @@
  * simple quicktime movie player, needs libquicktime (or quicktime4linux).
  *
  *  (c) 2002 Gerd Knorr <kraxel@bytesex.org>
-*
+ *
  */
 
 #include <stdio.h>
@@ -26,18 +26,28 @@
 #include <X11/Shell.h>
 #include <X11/Xaw/Simple.h>
 #include <X11/extensions/XShm.h>
+#include <X11/extensions/Xv.h>
+#include <X11/extensions/Xvlib.h>
 
 #include <quicktime/quicktime.h>
+#include <quicktime/colormodels.h>
 
 /* ------------------------------------------------------------------------ */
 /* X11 code                                                                 */
 
 static XtAppContext app_context;
-static Widget       app_shell,simple;
+static Widget       app_shell;
 static Display      *dpy;
 static Visual       *visual;
 static XVisualInfo  vinfo,*vinfo_list;
 static XPixmapFormatValues *pf;
+
+static Widget simple;
+static Dimension swidth,sheight;
+
+static int xv_port = 0;
+static int xv_have_YUY2 = 0;
+static int xv_have_I420 = 0;
 
 static int no_mitshm = 0;
 static int pixmap_bytes = 0;
@@ -150,7 +160,7 @@ static void x11_init(void)
     vinfo_list = XGetVisualInfo(dpy, VisualIDMask, &vinfo, &n);
     vinfo = vinfo_list[0];
     if (vinfo.class != TrueColor || vinfo.depth < 15) {
-	fprintf(stderr,"can't handle visual\n");
+	fprintf(stderr,"can't handle visuals != TrueColor, sorry\n");
 	exit(1);
     }
 
@@ -169,6 +179,56 @@ static void x11_init(void)
     /* init lookup tables */
     x11_lut(vinfo.red_mask, vinfo.green_mask, vinfo.blue_mask,
 	    pixmap_bytes,x11_byteswap);
+}
+
+static void xv_init(void)
+{
+    int ver, rel, req, ev, err, i;
+    int adaptors, formats;
+    XvAdaptorInfo        *ai;
+    XvImageFormatValues  *fo;
+    
+    if (Success != XvQueryExtension(dpy,&ver,&rel,&req,&ev,&err))
+	return;
+
+    /* find + lock port */
+    if (Success != XvQueryAdaptors(dpy,DefaultRootWindow(dpy),&adaptors,&ai))
+	return;
+    for (i = 0; i < adaptors; i++) {
+	if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask)) {
+	    if (Success != XvGrabPort(dpy,ai[i].base_id,CurrentTime)) {
+		fprintf(stderr,"INFO: Xvideo port %ld: is busy, skipping\n",
+			ai[i].base_id);
+		continue;
+	    }
+	    xv_port = ai[i].base_id;
+	    break;
+	}
+    }
+    if (0 == xv_port)
+	return;
+
+    /* check image formats */
+    fo = XvListImageFormats(dpy, xv_port, &formats);
+    for(i = 0; i < formats; i++) {
+	fprintf(stderr, "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s",
+		xv_port,
+		fo[i].id,
+		(fo[i].id)       & 0xff,
+		(fo[i].id >>  8) & 0xff,
+		(fo[i].id >> 16) & 0xff,
+		(fo[i].id >> 24) & 0xff,
+		(fo[i].format == XvPacked) ? "packed" : "planar");
+	if (FOURCC_YUV2 == fo[i].id) {
+	    fprintf(stderr," [BC_YUV422]");
+	    xv_have_YUY2 = 1;
+	}
+	if (FOURCC_YV12 == fo[i].id) {
+	    fprintf(stderr," [BC_YUV420P]");
+	    xv_have_I420 = 1;
+	}
+	fprintf(stderr,"\n");
+    }
 }
 
 static int
@@ -224,7 +284,7 @@ shm_error:
 	XDestroyImage(ximage);
 	ximage = NULL;
     }
-    if ((void *)-1 != shminfo->shmaddr  && NULL != shminfo->shmaddr)
+    if ((void *)-1 != shminfo->shmaddr  &&  NULL != shminfo->shmaddr)
 	shmdt(shminfo->shmaddr);
     free(shminfo);
     XSetErrorHandler(old_handler);
@@ -243,10 +303,88 @@ shm_error:
     return ximage;
 }
 
+static XvImage*
+xv_create_ximage(Display *dpy, int width, int height, int port, int format)
+{
+    XvImage         *xvimage = NULL;
+    unsigned char   *ximage_data;
+    XShmSegmentInfo *shminfo = NULL;
+    void            *old_handler;
+    
+    if (no_mitshm)
+	goto no_mitshm;
+    
+    old_handler = XSetErrorHandler(catch_no_mitshm);
+    shminfo = malloc(sizeof(XShmSegmentInfo));
+    memset(shminfo, 0, sizeof(XShmSegmentInfo));
+    xvimage = XvShmCreateImage(dpy, port, format, 0,
+			       width, height, shminfo);
+    if (NULL == xvimage)
+	goto shm_error;
+    shminfo->shmid = shmget(IPC_PRIVATE, xvimage->data_size,
+			    IPC_CREAT | 0777);
+    if (-1 == shminfo->shmid) {
+	perror("shmget");
+	goto shm_error;
+    }
+    shminfo->shmaddr = (char *) shmat(shminfo->shmid, 0, 0);
+    if ((void *)-1 == shminfo->shmaddr) {
+	perror("shmat");
+	goto shm_error;
+    }
+    xvimage->data = shminfo->shmaddr;
+    shminfo->readOnly = False;
+    
+    XShmAttach(dpy, shminfo);
+    XSync(dpy, False);
+    if (no_mitshm)
+	goto shm_error;
+    shmctl(shminfo->shmid, IPC_RMID, 0);
+    XSetErrorHandler(old_handler);
+
+shm_error:
+    if (xvimage) {
+	XFree(xvimage);
+	xvimage = NULL;
+    }
+    if ((void *)-1 != shminfo->shmaddr  &&  NULL != shminfo->shmaddr)
+	shmdt(shminfo->shmaddr);
+    free(shminfo);
+    XSetErrorHandler(old_handler);
+    no_mitshm = 1;
+
+ no_mitshm:
+    if (NULL == (ximage_data = malloc(width * height * 2))) {
+	fprintf(stderr,"out of memory\n");
+	exit(1);
+    }
+    xvimage = XvCreateImage(dpy, port, format, ximage_data,
+			    width, height);
+    return xvimage;
+}
+
+static void x11_blit(Window win, GC gc, XImage *xi, int width, int height)
+{
+    if (no_mitshm)
+	XPutImage(dpy,win,gc,xi, 0,0,0,0, width,height);
+    else
+	XShmPutImage(dpy,win,gc,xi, 0,0,0,0, width,height, True);
+}
+
+static void xv_blit(Window win, GC gc, XvImage *xi,
+		    int iw, int ih, int ww, int wh)
+{
+    if (no_mitshm)
+	XvPutImage(dpy,xv_port,win,gc,xi, 0,0,iw,ih, 0,0,ww,wh);
+    else
+	XvShmPutImage(dpy,xv_port,win,gc,xi, 0,0,iw,ih, 0,0,ww,wh, True);
+}
+
 /* ------------------------------------------------------------------------ */
 /* oss code                                                                 */
 
 static int oss_fd = -1;
+static int oss_sr,oss_hr;
 
 static int
 oss_setformat(int chan, int rate)
@@ -267,6 +405,8 @@ oss_setformat(int chan, int rate)
     }
     ioctl(oss_fd, SNDCTL_DSP_SPEED, &hw_rate);
     if (rate != hw_rate) {
+	oss_sr = rate;
+	oss_hr = hw_rate;
 	fprintf(stderr,"WARNING: sample rate mismatch (need %d, got %d)\n",
 		rate,hw_rate);
     }
@@ -279,7 +419,7 @@ static int oss_init(char *dev, int channels, int rate)
 
     oss_fd = open(dev,O_WRONLY | O_NONBLOCK);
     if (-1 == oss_fd) {
-	fprintf(stderr,"open %s: %s\n",dev,strerror(errno));
+	fprintf(stderr,"WARNING: open %s: %s\n",dev,strerror(errno));
 	return -1;
     }
     oss_setformat(channels,rate);
@@ -297,10 +437,12 @@ static int qt_hasvideo,qt_hasaudio;
 static int qt_width = 320, qt_height = 32, qt_drop, qt_droptotal;
 static unsigned char *qt_frame,**qt_rows;
 static XImage *qt_ximage;
+static XvImage *qt_xvimage;
 static GC qt_gc;
 
 static int16_t *qt_audio,*qt1,*qt2;
 static int qt_size,qt_offset,qt_stereo;
+static int qt_cmodel = BC_RGB888;
 
 static void qt_init(FILE *fp, char *filename)
 {
@@ -310,12 +452,12 @@ static void qt_init(FILE *fp, char *filename)
     /* open file */
     qt = quicktime_open(filename,1,0);
     if (NULL == qt) {
-	fprintf(fp,"can't open file: %s\n",filename);
+	fprintf(fp,"ERROR: can't open file: %s\n",filename);
 	exit(1);
     }
 
     /* print misc info */
-    fprintf(fp,"going to play %s\n",filename);
+    fprintf(fp,"INFO: playing %s\n",filename);
     str = quicktime_get_copyright(qt);
     if (str)
 	fprintf(fp,"  copyright: %s\n",str);
@@ -400,12 +542,36 @@ static int qt_frame_blit(void)
     
     if (0 == quicktime_video_position(qt,0)) {
 	/* init */
-	qt_frame  = malloc(qt_width * qt_height * 4);
-	qt_rows   = malloc(qt_height * sizeof(char*));
-	for (i = 0; i < qt_height; i++)
-	    qt_rows[i] = qt_frame + qt_width * 3 * i;
-	qt_ximage = x11_create_ximage(dpy,qt_width,qt_height);
+	qt_frame = malloc(qt_width * qt_height * 4);
+	qt_rows = malloc(qt_height * sizeof(char*));
 	qt_gc = XCreateGC(dpy,XtWindow(simple),0,NULL);
+	switch (qt_cmodel) {
+	case BC_RGB888:
+	    fprintf(stderr,"INFO: using BC_RGB888 + plain X11\n");
+	    qt_ximage = x11_create_ximage(dpy,qt_width,qt_height);
+	    for (i = 0; i < qt_height; i++)
+		qt_rows[i] = qt_frame + qt_width * 3 * i;
+	    break;
+	case BC_YUV422:
+	    fprintf(stderr,"INFO: using BC_YUV422 + Xvideo extention\n");
+	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
+					  xv_port,FOURCC_YUV2);
+	    for (i = 0; i < qt_height; i++)
+		qt_rows[i] = qt_xvimage->data + qt_width * 2 * i;
+	    break;
+	case BC_YUV420P:
+	    fprintf(stderr,"INFO: using BC_YUV420P + Xvideo extention\n");
+	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
+					  xv_port,FOURCC_I420);
+	    qt_rows[0] = qt_xvimage->data;
+	    qt_rows[1] = qt_xvimage->data + qt_width * qt_height;
+	    qt_rows[2] = qt_xvimage->data + qt_width * qt_height * 5 / 4;
+	    break;
+	default:
+	    fprintf(stderr,"ERROR: internal error at %s:%d\n",
+		    __FILE__,__LINE__);
+	    exit(1);
+	}
     }
 
     if (qt_drop) {
@@ -415,21 +581,30 @@ static int qt_frame_blit(void)
 	    quicktime_read_frame(qt,qt_frame,0);
 	qt_drop = 0;
     }
-    quicktime_decode_video(qt,qt_rows,0);
-    switch (pixmap_bytes) {
-    case 2:
-	rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
+    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
+			    qt_cmodel,qt_rows,0);
+    switch (qt_cmodel) {
+    case BC_RGB888:
+	switch (pixmap_bytes) {
+	case 2:
+	    rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
+	    break;
+	case 4:
+	    rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
+	    break;
+	}
+	x11_blit(XtWindow(simple),qt_gc,qt_ximage,qt_width,qt_height);
 	break;
-    case 4:
-	rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
+    case BC_YUV422:
+    case BC_YUV420P:
+	xv_blit(XtWindow(simple),qt_gc,qt_xvimage,
+		qt_width,qt_height,swidth,sheight);
 	break;
+    default:
+	fprintf(stderr,"ERROR: internal error at %s:%d\n",
+		__FILE__,__LINE__);
+	exit(1);
     }
-    if (no_mitshm)
-	XPutImage(dpy,XtWindow(simple),qt_gc,qt_ximage,
-		  0,0,0,0, qt_width,qt_height);
-    else
-	XShmPutImage(dpy,XtWindow(simple),qt_gc,qt_ximage,
-		     0,0,0,0, qt_width,qt_height, True);
 
     if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
 	return -1;
@@ -444,6 +619,10 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     gettimeofday(&now,NULL);
     msec  = (start->tv_sec  - now.tv_sec)  * 1000;
     msec += (start->tv_usec - now.tv_usec) / 1000;
+    if (qt_hasaudio && oss_sr && oss_hr) {
+	/* cheap trick to make a/v sync ... */
+	msec = (long long)msec * oss_hr / oss_sr;
+    }
     msec += quicktime_video_position(qt,0) * 1000
 	/ quicktime_frame_rate(qt,0);
     if (msec < 0) {
@@ -494,11 +673,13 @@ static int qt_audio_write(void)
 	perror("write dsp");
 	close(oss_fd);
 	oss_fd = -1;
+	qt_hasaudio = 0;
 	break;
     case 0:
 	fprintf(stderr,"write dsp: Huh? no data written?\n");
 	close(oss_fd);
 	oss_fd = -1;
+	qt_hasaudio = 0;
 	break;
     default:
 	qt_offset += rc;
@@ -507,7 +688,7 @@ static int qt_audio_write(void)
     }
 
     if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) &&
-0 == qt_offset)
+	0 == qt_offset)
 	return -1;
     return 0;
 }
@@ -524,9 +705,13 @@ static void usage(FILE *fp, char *prog)
     fprintf(fp,
 	    "\n"
 	    "Very simple quicktime movie player for X11.  Just playes\n"
-	    "the movie and nothing else.  No fancy gui, no controls,\n"
-	    "no command line switches.  Nothing.  Nada.  All you can\n"
-	    "do is quit with 'Q' and 'ESC' keys ...\n"
+	    "the movie and nothing else.  No fancy gui, no controls.\n"
+	    "No command line switches beside the usual toolkit stuff\n"
+	    "like -geometry.  Some info will be printed on stderr.\n"
+	    "\n"
+	    "You can quit with 'Q' and 'ESC' keys.  You can resize the\n"
+	    "window.  When using Xvideo the later will even scale the\n"
+	    "video to fit the window.\n"
 	    "\n"
 	    "usage: %s <file>\n"
 	    "\n",
@@ -534,9 +719,21 @@ static void usage(FILE *fp, char *prog)
 }
 
 static void quit_ac(Widget widget, XEvent *event,
-	     String *params, Cardinal *num_params)
+		    String *params, Cardinal *num_params)
 {
     exit(0);
+}
+
+static void resize_ev(Widget widget, XtPointer client_data,
+		      XEvent *event, Boolean *d)
+{
+    switch(event->type) {
+    case MapNotify:
+    case ConfigureNotify:
+	XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
+	fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
+	break;
+    }
 }
 
 static XtActionsRec action_table[] = {
@@ -559,12 +756,15 @@ int main(int argc, char *argv[])
 				  NULL, 0,
 				  &argc, argv,
 				  res, NULL);
+
+    /* open file */
     if (argc < 2) {
 	usage(stderr,argv[0]);
 	exit(1);
     }
     qt_init(stdout,argv[1]);
 
+    /* init x11 stuff */
     dpy = XtDisplay(app_shell);
     XtAppAddActions(app_context,action_table,
 		    sizeof(action_table)/sizeof(XtActionsRec));
@@ -573,11 +773,18 @@ int main(int argc, char *argv[])
 				     XtNwidth,  qt_width,
 				     XtNheight, qt_height,
 				     NULL);
-
+    XtAddEventHandler(simple,StructureNotifyMask, True, resize_ev, NULL);
     x11_init();
+    xv_init();
+
+    /* use Xvideo? */
+    if (xv_have_YUY2 && quicktime_reads_cmodel(qt,BC_YUV422,0))
+	qt_cmodel = BC_YUV422;
+    if (xv_have_I420 && quicktime_reads_cmodel(qt,BC_YUV420P,0))
+	qt_cmodel = BC_YUV420P;
+
+    /* enter main loop */
     XtRealizeWidget(app_shell);
-    
-    /* main loop */
     gettimeofday(&start,NULL);
     for (;;) {
 	int rc,max;
@@ -614,5 +821,3 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
-
-
