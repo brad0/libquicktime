@@ -10,7 +10,6 @@ libquicktime_la_LDFLAGS = -export-dynamic
 #CLAGS += @JPEG_CFLAGS@ -Ilibdv @VORBIS_CFLAGS@ @FIREWIRE_CFLAGS@
 CFLAGS = @CFLAGS@
 
-CFLAGS += -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 #CFLAGS += -include $(CONFIG_HEADER)
 
 # build only the files, which can be compiled

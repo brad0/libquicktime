@@ -1,3 +1,5 @@
+#include <string.h>
+#include <time.h>
 #include "funcprotos.h"
 #include "quicktime.h"
 #include "qtvorbis.h"

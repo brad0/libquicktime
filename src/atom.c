@@ -107,7 +107,7 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
  * 	atom->type[0], atom->type[1], atom->type[2], atom->type[3],
  * 	atom->start, atom->size, atom->end,
  * 	file->file_position,
- * 	(int64_t)FTELL(file->stream));
+ * 	(int64_t)ftello(file->stream));
  */
 
 /* Skip placeholder atom */

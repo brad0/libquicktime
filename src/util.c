@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -11,7 +13,6 @@
 #include <workarounds.h>
 #include <string.h>
 
-#include "config.h"
 #ifndef	HAVE_STAT64
 #define stat64 stat
 #endif
@@ -95,9 +96,9 @@ int quicktime_fseek(quicktime_t *file, int64_t offset)
 {
 	file->ftell_position = offset;
 	if(offset > file->total_length || offset < 0) return 1;
-	if(FSEEK(file->stream, file->ftell_position, SEEK_SET))
+	if(fseeko(file->stream, file->ftell_position, SEEK_SET))
 	{
-//		perror("quicktime_fseek FSEEK");
+//		perror("quicktime_fseek fseeko");
 		return 1;
 	}
 	return 0;

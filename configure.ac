@@ -39,6 +39,9 @@ AC_LANG_C
 
 AC_C_BIGENDIAN
 
+# large file support
+AC_SYS_LARGEFILE
+
 AC_CACHE_SAVE
 
 dnl This is necessary for libtool assembler support
@@ -64,9 +67,6 @@ AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-
 AC_TRY_CFLAGS([-falign-loops=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-loops=2"])
 AC_TRY_CFLAGS([-falign-jumps=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-jumps=2"])
 AC_TRY_CFLAGS([-falign-functions=2],  [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-functions=2"])
-
-# large file support
-COMMON_FLAGS="$COMMON_FLAGS -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
 
 # -Wno-unused-variable -Wno-unused-parameter
 # -std=gnu99 

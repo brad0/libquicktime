@@ -5,6 +5,8 @@
  *
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,7 +19,9 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/ioctl.h>
+#ifdef	HAVE_SOUNDCARD_H
 #include <sys/soundcard.h>
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
@@ -508,6 +512,7 @@ static int oss_sr,oss_hr;
 static int
 oss_setformat(int chan, int rate)
 {
+#ifdef	SNDCTL_DSP_SETFMT
     int hw_afmt = AFMT_S16_NE;
     int hw_chan = chan;
     int hw_rate = rate;
@@ -530,6 +535,9 @@ oss_setformat(int chan, int rate)
 		rate,hw_rate);
     }
     return 0;
+#else
+    return 1;
+#endif
 }
 
 static int oss_init(char *dev, int channels, int rate)
@@ -542,9 +550,13 @@ static int oss_init(char *dev, int channels, int rate)
 	return -1;
     }
     oss_setformat(channels,rate);
+#ifdef	SNDCTL_DSP_SETTRIGGER
     trigger = PCM_ENABLE_OUTPUT;
     ioctl(oss_fd,SNDCTL_DSP_SETTRIGGER,&trigger);
     return 0;
+#else
+    return 1;
+#endif
 }
 
 /* ------------------------------------------------------------------------ */

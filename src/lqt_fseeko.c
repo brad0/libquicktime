@@ -8,7 +8,7 @@
  *
  *
  * IDENTIFICATION
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_fseeko.c,v 1.1 2003/01/21 10:14:21 gmerlin Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_fseeko.c,v 1.2 2004/01/21 04:32:30 sms00 Exp $
  *
  *-------------------------------------------------------------------------
  */
@@ -74,12 +74,6 @@ failure:
 }
 
 off_t
-lqt_fseeko64(FILE *stream, off_t offset, int whence)
-{
-	return(lqt_fseeko(stream, offset, whence));
-}
-
-off_t
 lqt_ftello(FILE *stream)
 {
 	off_t floc;
@@ -87,11 +81,5 @@ lqt_ftello(FILE *stream)
 	if (fgetpos(stream, &floc) != 0)
 		return -1;
 	return floc;
-}
-
-off_t
-lqt_ftello64(FILE *stream)
-{
-	return(lqt_ftello(stream));
 }
 #endif
