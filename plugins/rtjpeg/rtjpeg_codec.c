@@ -26,6 +26,7 @@
 
 #define BLOCK_SIZE 16
 
+#include "config.h"
 #include <string.h>
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>

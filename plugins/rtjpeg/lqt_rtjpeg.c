@@ -19,6 +19,8 @@
     
 */
 
+
+#include "config.h"
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
