@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.4pre2)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.4pre3)
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
