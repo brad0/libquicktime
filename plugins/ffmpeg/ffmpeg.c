@@ -255,7 +255,7 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	quicktime_ffmpeg_audio_codec_t *codec;
 
 	avcodec_init();
-
+        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg\n");
 	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
 	if(!codec)
           return;
