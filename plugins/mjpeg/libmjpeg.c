@@ -791,7 +791,9 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
 
 mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 {
-	pthread_attr_t  attr;
+#ifdef HAVE_MT_JPEG	
+        pthread_attr_t  attr;
+#endif
 	mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
 
 	result->field_h = mjpeg->coded_h / mjpeg->fields;
