@@ -1,5 +1,5 @@
+#include "funcprotos.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include "qtpng.h"
 
 static int delete_codec(quicktime_video_map_t *vtrack)
