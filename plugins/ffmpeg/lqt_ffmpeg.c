@@ -690,7 +690,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 	int i;
 	
 	ffmpeg_map_init();
-	for(i = 0; i < ffmpeg_num_codecs; i++) {
+	for(i = 0; i < NUMMAPS; i++) {
 		if(codecidmap[i].index == index) {
 			if(codecidmap[i].encoder && codecidmap[i].decoder) {
 				snprintf(ffmpeg_name, 50, "ffmpeg_%s", codecidmap[i].short_name);
