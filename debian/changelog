@@ -1,3 +1,10 @@
+libquicktime (0.9.3-2) unstable; urgency=low
+
+  * Created plugin packages
+  * Synced with ffmpeg_cvs of Aug 12 and ffmpeg_acl_cvs
+
+ -- Arvind R. <arvind@acarlab.com>  Sat, 20 Aug 2004 13:40:30 +0530
+
 libquicktime (0.9.3-1) unstable; urgency=low
 
   * Release

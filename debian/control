@@ -17,15 +17,71 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: an API for writing / reading quicktime files
- Video CODECs supported by this library are OpenDivX, MJPA,
- JPEG Photo, PNG, RGB, YUV 4:2:2, and YUV 4:2:0 compression.
- Supported audio CODECs are Ogg Vorbis, IMA4, ulaw
- and any linear PCM format. MPEG and MP3 supported through
- ffmpeg and lame packages.
+ Libquicktime is a library for reading and writing QuickTime files
+ on UNIX systems. Video CODECs supported by this library are OpenDivX, MJPA,
+ JPEG Photo, PNG, RGB, YUV 4:2:2, and YUV 4:2:0 compression.  Supported
+ audio CODECs are Ogg Vorbis, IMA4, ulaw, and any linear PCM format.
  .
- Libquicktime is based on the quicktime4linux library.
- Libquicktime adds features such as a GNU build tools-based
- build process and dynamically loadable CODECs.
+ Libquicktime is based on the quicktime4linux library.  Libquicktime add
+ features such as a GNU build tools-based build process and dynamically
+ loadable CODECs.
  .
- This package contains the shared and static libraries and
- a collection of plugins and the lqtplay utility.
+ This package contains the shared runtime libraries
+
+Package: libquicktime-plugin-vorbis
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin for Vorbis
+ Libquicktime plugin modules supporting the Ogg-Vorbis codec
+
+Package: libquicktime-plugin-lame
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin for Lame
+ Libquicktime plugin modules supporting the Lame decoder for MP3 audio
+
+Package: libquicktime-plugin-opendivx
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin for the OpenDivX codec
+ Libquicktime plugin modules supporting the OpenDivX codec
+
+Package: libquicktime-plugin-jpeg
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin based on libjpeg
+ Libquicktime plugin modules with JPEG support 
+
+Package: libquicktime-plugin-png
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin based on libpng
+ Libquicktime plugin modules with PNG support 
+
+Package: libquicktime-plugin-ffmpeg
+Section: libs
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: libquicktime plugin for the ffmpeg codecs
+ Libquicktime plugin modules with ffmpeg support 
+
+Package: libquicktime-plugin-configurator
+Section: graphics
+Architecture: any
+Depends: libquicktime0 (= ${Source-Version}), ${shlibs:Depends}
+Description: plugin  configurator for libquicktime
+ Configurator for libquicktime plugins with gtk interface 
+
+Package: libquicktime0-progs
+Section: graphics
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: libquicktime utilities
+ The lqtplay utility plays quicktime file. The lqt_transcode
+ utility converts formats. qtinfo provides summary info of
+ files.

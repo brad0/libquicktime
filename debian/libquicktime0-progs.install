@@ -1,0 +1,3 @@
+debian/tmp/usr/bin/qt*				usr/bin
+debian/tmp/usr/bin/lqt_transcode	usr/bin
+debian/tmp/usr/bin/lqtplay			usr/bin
