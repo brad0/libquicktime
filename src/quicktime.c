@@ -4,7 +4,7 @@
 #include <glib.h>
 #include <sys/stat.h>
 
-static longest get_file_length(quicktime_t *file)
+static int64_t get_file_length(quicktime_t *file)
 {
 	struct stat status;
 	if(fstat(fileno(file->stream), &status))
@@ -16,9 +16,9 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 {
 	quicktime_t file, *old_file, new_file;
 	int moov_exists = 0, mdat_exists = 0, result, atoms = 1;
-	longest mdat_start, mdat_size;
+	int64_t mdat_start, mdat_size;
 	quicktime_atom_t leaf_atom;
-	longest moov_length;
+	int64_t moov_length;
 	
 	quicktime_init(&file);
 
@@ -80,7 +80,7 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 		if(moov_exists > 1)
 		{
 			char *buffer;
-			longest buf_size = 1000000;
+			int64_t buf_size = 1000000;
 
 			result = 0;
 
@@ -360,7 +360,7 @@ int quicktime_set_cpus(quicktime_t *file, int cpus)
 	return 0;
 }
 
-void quicktime_set_preload(quicktime_t *file, longest preload)
+void quicktime_set_preload(quicktime_t *file, int64_t preload)
 {
 	if(preload)
 		if(!file->preload_size)
@@ -435,8 +435,8 @@ int quicktime_update_positions(quicktime_t *file)
 /* seek_end and seek_start but not for routines that reposition one track, like */
 /* set_audio_position. */
 
-	longest mdat_offset = quicktime_position(file) - file->mdat.atom.start;
-	longest sample, chunk, chunk_offset;
+	int64_t mdat_offset = quicktime_position(file) - file->mdat.atom.start;
+	int64_t sample, chunk, chunk_offset;
 	int i;
 
 	if(file->total_atracks)
@@ -463,9 +463,9 @@ int quicktime_update_positions(quicktime_t *file)
 	return 0;
 }
 
-int quicktime_set_audio_position(quicktime_t *file, longest sample, int track)
+int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
 {
-	longest offset, chunk_sample, chunk;
+	int64_t offset, chunk_sample, chunk;
 	quicktime_trak_t *trak;
 
 	if(track < file->total_atracks)
@@ -483,9 +483,9 @@ int quicktime_set_audio_position(quicktime_t *file, longest sample, int track)
 	return 0;
 }
 
-int quicktime_set_video_position(quicktime_t *file, longest frame, int track)
+int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
 {
-	longest offset, chunk_sample, chunk;
+	int64_t offset, chunk_sample, chunk;
 	quicktime_trak_t *trak;
 
 	if(track < file->total_vtracks)
@@ -621,9 +621,9 @@ int quicktime_write_audio(quicktime_t *file,
 	long samples, 
 	int track)
 {
-	longest offset;
+	int64_t offset;
 	int result;
-	longest bytes;
+	int64_t bytes;
 
 /* write chunk for 1 track */
 	bytes = samples * quicktime_audio_bits(file, track) / 8 * file->atracks[track].channels;
@@ -642,9 +642,9 @@ int quicktime_write_audio(quicktime_t *file,
 	return result;
 }
 
-int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, longest bytes, int track)
+int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_t bytes, int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	int result = 0;
 
 	result = !quicktime_write_data(file, video_buffer, bytes);
@@ -664,15 +664,15 @@ int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, longes
 
 long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track)
 {
-	longest chunk_sample, chunk;
+	int64_t chunk_sample, chunk;
 	int result = 0, track_num;
 	quicktime_trak_t *trak = file->atracks[track].track;
-	longest fragment_len, chunk_end;
-	longest start_position = file->atracks[track].current_position;
-	longest position = file->atracks[track].current_position;
-	longest start = position, end = position + samples;
-	longest bytes, total_bytes = 0;
-	longest buffer_offset;
+	int64_t fragment_len, chunk_end;
+	int64_t start_position = file->atracks[track].current_position;
+	int64_t position = file->atracks[track].current_position;
+	int64_t start = position, end = position + samples;
+	int64_t bytes, total_bytes = 0;
+	int64_t buffer_offset;
 
 	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, position);
 	buffer_offset = 0;
@@ -702,7 +702,7 @@ long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, i
 	return total_bytes;
 }
 
-int quicktime_read_chunk(quicktime_t *file, char *output, int track, longest chunk, longest byte_start, longest byte_len)
+int quicktime_read_chunk(quicktime_t *file, char *output, int track, int64_t chunk, int64_t byte_start, int64_t byte_len)
 {
 	quicktime_set_position(file, quicktime_chunk_to_offset(file->atracks[track].track, chunk) + byte_start);
 	if(quicktime_read_data(file, output, byte_len)) return 0;
@@ -735,7 +735,7 @@ long quicktime_frame_size(quicktime_t *file, long frame, int track)
 
 long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track)
 {
-	longest bytes;
+	int64_t bytes;
 	int result = 0;
 
 	quicktime_trak_t *trak = file->vtracks[track].track;
@@ -889,7 +889,7 @@ int quicktime_read_info(quicktime_t *file)
 {
 	int result = 0, found_moov = 0;
 	int i, channel, trak_channel, track;
-	longest start_position = quicktime_position(file);
+	int64_t start_position = quicktime_position(file);
 	quicktime_atom_t leaf_atom;
 	quicktime_trak_t *trak;
 	char avi_test[4];
@@ -920,7 +920,7 @@ int quicktime_read_info(quicktime_t *file)
 			if(quicktime_atom_is(&leaf_atom, "moov")) 
 			{
 /* Set preload and preload the moov atom here */
-				longest start_position = quicktime_position(file);
+				int64_t start_position = quicktime_position(file);
 				long temp_size = leaf_atom.end - start_position;
 				unsigned char *temp = malloc(temp_size);
 				quicktime_set_preload(file, (temp_size < 0x100000) ? 0x100000 : temp_size);

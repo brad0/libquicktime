@@ -88,7 +88,7 @@ void quicktime_write_stco(quicktime_t *file, quicktime_stco_t *stco)
 	quicktime_atom_write_footer(file, &atom);
 }
 
-void quicktime_update_stco(quicktime_stco_t *stco, long chunk, longest offset)
+void quicktime_update_stco(quicktime_stco_t *stco, long chunk, int64_t offset)
 {
 	long i;
 

@@ -28,14 +28,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-typedef int64_t longest;
-typedef uint64_t ulongest;
-
 typedef struct
 {
-	longest start;      /* byte start in file */
-	longest end;        /* byte endpoint in file */
-	longest size;       /* byte size for writing */
+	int64_t start;      /* byte start in file */
+	int64_t end;        /* byte endpoint in file */
+	int64_t size;       /* byte size for writing */
 	int use_64;         /* Use 64 bit header */
 	unsigned char type[4];
 } quicktime_atom_t;
@@ -115,7 +112,7 @@ typedef struct
 	int height;
 	float dpi_horizontal;
 	float dpi_vertical;
-	longest data_size;
+	int64_t data_size;
 	int frames_per_sample;
 	char compressor_name[32];
 	int depth;
@@ -199,14 +196,14 @@ typedef struct
 /* sample size */
 typedef struct
 {
-	longest size;
+	int64_t size;
 } quicktime_stsz_table_t;
 
 typedef struct
 {
 	int version;
 	long flags;
-	longest sample_size;
+	int64_t sample_size;
 	long total_entries;
 
 	long entries_allocated;    /* used by the library for allocating a table */
@@ -217,7 +214,7 @@ typedef struct
 /* chunk offset */
 typedef struct
 {
-	longest offset;
+	int64_t offset;
 } quicktime_stco_table_t;
 
 typedef struct
@@ -248,7 +245,7 @@ typedef struct
 
 typedef struct
 {
-	longest size;
+	int64_t size;
 	char type[4];
 	int version;
 	long flags;
@@ -372,8 +369,8 @@ typedef struct
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
 // AVI needs header placeholders before anything else is written
-        longest length_offset;
-        longest samples_per_chunk_offset;
+        int64_t length_offset;
+        int64_t samples_per_chunk_offset;
 // AVI needs chunk sizes
         int *chunksizes;
         int total_chunksizes;
@@ -458,7 +455,7 @@ typedef struct
 typedef struct
 {
 	FILE *stream;
-	longest total_length;
+	int64_t total_length;
 	quicktime_mdat_t mdat;
 	quicktime_moov_t moov;
         quicktime_atom_t riff_atom;
@@ -467,24 +464,24 @@ typedef struct
 	int use_avi;
 /* for begining and ending frame writes where the user wants to write the  */
 /* file descriptor directly */
-	longest offset;
+	int64_t offset;
 /* I/O */
 /* Current position of virtual file descriptor */
-	longest file_position;      
+	int64_t file_position;      
 // Work around a bug in glibc where ftello returns only 32 bits by maintaining
 // our own position
-	longest ftell_position;
+	int64_t ftell_position;
 
 /* Read ahead buffer */
-	longest preload_size;      /* Enables preload when nonzero. */
+	int64_t preload_size;      /* Enables preload when nonzero. */
 	char *preload_buffer;
-	longest preload_start;     /* Start of preload_buffer in file */
-	longest preload_end;       /* End of preload buffer in file */
-	longest preload_ptr;       /* Offset of preload_start in preload_buffer */
+	int64_t preload_start;     /* Start of preload_buffer in file */
+	int64_t preload_end;       /* End of preload buffer in file */
+	int64_t preload_ptr;       /* Offset of preload_start in preload_buffer */
 
 /* AVI offsets */
-        longest frames_offset;
-        longest bitrate_offset;
+        int64_t frames_offset;
+        int64_t bitrate_offset;
 
 /* mapping of audio channels to movie tracks */
 /* one audio map entry exists for each channel */

@@ -153,14 +153,14 @@ static int quicktime_encode_raw(quicktime_t *file,
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	int result = 0;
 	register int i, j;
 	int height = trak->tkhd.track_height;
 	int width = trak->tkhd.track_width;
 	int depth = quicktime_video_depth(file, track);
-	longest bytes = height * width * depth / 8;
-	longest bytes_per_row = width * depth / 8;
+	int64_t bytes = height * width * depth / 8;
+	int64_t bytes_per_row = width * depth / 8;
 	unsigned char temp;
 	int dest_cmodel;
 

@@ -25,7 +25,7 @@
 #include "ffmpeg.h"
 
 static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
-                     longest frameno, int track)
+                     int64_t frameno, int track)
 {
 	int i;
 	
@@ -142,7 +142,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                         int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	int result = 0;
 	int i = 0;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);

@@ -95,7 +95,7 @@ void quicktime_read_idx1(quicktime_t *file, quicktime_atom_t *parent_atom)
 			{
 // Flags
 				int flags = quicktime_read_int32_le(file);
-				longest offset = quicktime_read_int32_le(file);
+				int64_t offset = quicktime_read_int32_le(file);
 
 // Offset from start of movi
 //printf("quicktime_read_idx1 3 %d\n", file->moov.trak[i]->mdia.minf.stbl.stco.total_entries);

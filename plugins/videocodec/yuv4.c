@@ -33,7 +33,7 @@ static int quicktime_reads_colormodel_yuv4(quicktime_t *file,
 
 static int quicktime_decode_yuv4(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest bytes, in_y, out_y;
+	int64_t bytes, in_y, out_y;
 	register int x1, x2;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv4_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
@@ -157,13 +157,13 @@ static int quicktime_decode_yuv4(quicktime_t *file, unsigned char **row_pointers
 
 static int quicktime_encode_yuv4(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv4_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int result = 0;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	longest bytes = codec->rows * codec->bytes_per_line;
+	int64_t bytes = codec->rows * codec->bytes_per_line;
 	unsigned char *buffer = codec->work_buffer;
 	unsigned char *output_row;    /* Pointer to output row */
 	unsigned char *row_pointer1, *row_pointer2;  /* Pointers to input rows */

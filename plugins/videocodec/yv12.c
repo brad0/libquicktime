@@ -36,14 +36,14 @@ static int writes_colormodel(quicktime_t *file,
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest bytes, x, y;
+	int64_t bytes, x, y;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
 	unsigned char *buffer;
 	unsigned char *output_row0, *output_row1, *y_plane0, *y_plane1, *u_plane, *v_plane;
-	longest y_size, u_size, v_size;
+	int64_t y_size, u_size, v_size;
 	int result = 0;
 	int y1, u, v, y2, r, g, b, y3, y4;
 	int bytes_per_row = width * cmodel_calculate_pixelsize(file->color_model);
@@ -102,19 +102,19 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int result = 0;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
 	unsigned char *y_plane0, *y_plane1, *u_plane, *v_plane;
-	longest y_size, u_size, v_size;
+	int64_t y_size, u_size, v_size;
 	unsigned char *input_row0, *input_row1;
 	int x, y;
 	int y1, u, y2, v, y3, y4, subscript;
 	int r, g, b;
-	longest bytes = (longest)0;
+	int64_t bytes = (int64_t)0;
 
 	y_size = codec->coded_h * codec->coded_w;
 	u_size = codec->coded_h * codec->coded_w / 4;

@@ -96,7 +96,7 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 // Disk full.  Rewind and try again
 	if(result)
 	{
-		quicktime_set_position(file, file->mdat.atom.end - (longest)0x100000);
+		quicktime_set_position(file, file->mdat.atom.end - (int64_t)0x100000);
 		file->mdat.atom.end = quicktime_position(file);
 		quicktime_atom_write_header(file, &atom, "moov");
 	}
@@ -135,7 +135,7 @@ void quicktime_update_durations(quicktime_moov_t *moov)
 	
 }
 
-int quicktime_shift_offsets(quicktime_moov_t *moov, longest offset)
+int quicktime_shift_offsets(quicktime_moov_t *moov, int64_t offset)
 {
 	int i;
 	for(i = 0; i < moov->total_tracks; i++)

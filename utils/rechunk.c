@@ -17,14 +17,14 @@ int main(int argc, char *argv[])
 	FILE *input;
 	int result = 0;
 	int i, j;
-	longest length;
+	int64_t length;
 	char string[1024], *prefix = 0, *output = 0;
 	char *data = 0;
 	int bytes = 0, old_bytes = 0;
 	float output_rate = 0;
 	float input_rate;
-	longest input_frame;
-	longest new_length;
+	int64_t input_frame;
+	int64_t new_length;
 	int rgb_to_ppm = 0;
 	char **input_frames = 0;
 	int total_input_frames = 0;

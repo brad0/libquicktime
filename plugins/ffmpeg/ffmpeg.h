@@ -43,7 +43,7 @@ typedef struct
   int init_dec;
   unsigned char * read_buffer;
   int read_buffer_size;
-  longest last_frame;
+  int64_t last_frame;
   
   /* Audio Sample buffer */
   
@@ -60,7 +60,7 @@ typedef struct
   
   /* Index of the first sample in buffer relative to start of stream */
   
-  longest sample_buffer_offset;
+  int64_t sample_buffer_offset;
 
   /* Buffer for the entire chunk */
 
@@ -85,8 +85,8 @@ typedef struct
   
   /* Remember some stuff */
 
-  longest last_sample_start;
-  longest last_sample_num;
+  int64_t last_sample_start;
+  int64_t last_sample_num;
     
   } quicktime_ffmpeg_codec_t;
 

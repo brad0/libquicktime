@@ -89,8 +89,8 @@ void quicktime_write_hdrl(quicktime_t *file)
 void quicktime_finalize_hdrl(quicktime_t *file)
 {
 	int i;
-	longest position = quicktime_position(file);
-	longest total_frames = 0;
+	int64_t position = quicktime_position(file);
+	int64_t total_frames = 0;
 	double frame_rate = 0;
 
 	for(i = 0; i < file->moov.total_tracks; i++)

@@ -21,7 +21,7 @@
 
 
 
-#define SEARCH_FRAGMENT (longest)0x1000
+#define SEARCH_FRAGMENT (int64_t)0x1000
 
 void usage()
 {
@@ -52,13 +52,13 @@ int main(int argc, char *argv[])
 	FILE *in;
 	FILE *temp;
 	quicktime_t *out;
-	longest current_byte, ftell_byte;
-	longest jpeg_start = 0, jpeg_end = 0;
-	longest audio_start, audio_end = 0;
+	int64_t current_byte, ftell_byte;
+	int64_t jpeg_start = 0, jpeg_end = 0;
+	int64_t audio_start, audio_end = 0;
 	unsigned char *search_buffer = calloc(1, SEARCH_FRAGMENT);
 	unsigned char *copy_buffer = 0;
 	int i, found_jfif, found_eoi;
-	longest file_size;
+	int64_t file_size;
 	struct stat status;
 	unsigned char data[8];
 	struct stat ostat;
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 						width, height,
 						frame_rate,
 						QUICKTIME_JPEG);
-	audio_start = (longest)0x10;
+	audio_start = (int64_t)0x10;
 	found_jfif = 0;
 	found_eoi = 0;
 	ftell_byte = 0;

@@ -117,8 +117,8 @@ static int encode_video_external(quicktime_t *file,
 	int index = 0;
 	int error = -1;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	longest bytes;
-	longest offset = quicktime_position(file);
+	int64_t bytes;
+	int64_t offset = quicktime_position(file);
 	char *compressor;
 	short width, height, depth;
 

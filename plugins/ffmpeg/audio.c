@@ -259,7 +259,7 @@ static int get_frame_bytes_ac3(uint8_t * buf)
   }
 
 static int chunk_len(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
-                     longest offset, longest next_chunk)
+                     int64_t offset, int64_t next_chunk)
   {
   int result = 0;
   unsigned char header[7];
@@ -306,10 +306,10 @@ static int chunk_len(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
 #define END_BYTES 4
 
 static int fill_chunk_buffer(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
-                             quicktime_audio_map_t *track_map, longest current_chunk)
+                             quicktime_audio_map_t *track_map, int64_t current_chunk)
   {
   int result = 0;
-  longest offset1, offset2;
+  int64_t offset1, offset2;
       
   offset1 = quicktime_chunk_to_offset(file, track_map->track, current_chunk);
   offset2 = quicktime_chunk_to_offset(file, track_map->track, current_chunk + 1);
@@ -336,11 +336,11 @@ static int fill_chunk_buffer(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
 /* Decode one frame into the sample buffer */
 
 static int decode_frame(quicktime_t *file, quicktime_ffmpeg_codec_t *codec,
-                         quicktime_audio_map_t *track_map, longest sample)
+                         quicktime_audio_map_t *track_map, int64_t sample)
   {
   int frame_bytes, result = 0;
   int frame_size;
-  longest chunk_sample, current_chunk;
+  int64_t chunk_sample, current_chunk;
   
   if(!codec->chunk_buffer ||
      (codec->chunk_buffer_ptr >= codec->chunk_buffer + codec->chunk_size - 4))
@@ -452,7 +452,7 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i, float *output_
                             int track, int channel)
   {
   int result = 0;
-  longest chunk_sample, current_chunk; /* For seeking only */
+  int64_t chunk_sample, current_chunk; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   int channels = file->atracks[track].channels;
@@ -579,7 +579,7 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
   quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t *trak = track_map->track;
   int channels = file->atracks[track].channels;
-  longest offset;
+  int64_t offset;
   int size = 0;
 
   int interleave_length;

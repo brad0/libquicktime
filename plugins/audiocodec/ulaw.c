@@ -147,7 +147,7 @@ int ulaw_get_read_buffer(quicktime_t *file, int track, long samples)
 	
 	if(!codec->read_buffer) 
 	{
-		longest bytes = samples * file->atracks[track].channels;
+		int64_t bytes = samples * file->atracks[track].channels;
 		codec->read_size = samples;
 		if(!(codec->read_buffer = malloc(bytes))) return 1;
 	}
@@ -257,8 +257,8 @@ static int quicktime_encode_ulaw(quicktime_t *file,
 {
 	int result = 0;
 	int channel, step;
-	longest offset;
-	longest i;
+	int64_t offset;
+	int64_t i;
 	quicktime_ulaw_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
 
 	result = ulaw_init_int16toulaw(file, track);

@@ -16,6 +16,6 @@
 
 /* Most codecs don't specify the actual number of bits on disk in the stbl. */
 /* Convert the samples to the number of bytes for reading depending on the codec. */
-longest quicktime_samples_to_bytes(quicktime_trak_t *track, long samples);
+int64_t quicktime_samples_to_bytes(quicktime_trak_t *track, long samples);
 
 #endif

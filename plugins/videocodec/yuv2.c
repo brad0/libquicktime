@@ -71,7 +71,7 @@ static void decode_sign_change(quicktime_yuv2_codec_t *codec, unsigned char **ro
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest bytes, x, y;
+	int64_t bytes, x, y;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = vtrack->track->tkhd.track_width;
@@ -136,13 +136,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int result = 1;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	longest bytes = height * codec->bytes_per_line;
+	int64_t bytes = height * codec->bytes_per_line;
 	unsigned char *buffer = codec->work_buffer;
 	int x, y;
 	int y1, u, y2, v;

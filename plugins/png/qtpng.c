@@ -70,7 +70,7 @@ static void flush_function(png_structp png_ptr)
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
-	longest i;
+	int64_t i;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	png_structp png_ptr;
@@ -164,7 +164,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	longest offset = quicktime_position(file);
+	int64_t offset = quicktime_position(file);
 	int result = 0;
 	int i;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);

@@ -182,7 +182,7 @@ void quicktime_moov_dump(quicktime_moov_t *moov);
 int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_atom_t *parent_atom);
 void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov);
 void quicktime_update_durations(quicktime_moov_t *moov);
-int quicktime_shift_offsets(quicktime_moov_t *moov, longest offset);
+int quicktime_shift_offsets(quicktime_moov_t *moov, int64_t offset);
 
 /* mvhd.c */
 
@@ -236,7 +236,7 @@ void quicktime_stco_dump(quicktime_stco_t *stco);
 void quicktime_read_stco(quicktime_t *file, quicktime_stco_t *stco);
 void quicktime_read_stco64(quicktime_t *file, quicktime_stco_t *stco);
 void quicktime_write_stco(quicktime_t *file, quicktime_stco_t *stco);
-void quicktime_update_stco(quicktime_stco_t *stco, long chunk, longest offset);
+void quicktime_update_stco(quicktime_stco_t *stco, long chunk, int64_t offset);
 
 /* stsc.c */
 
@@ -370,28 +370,28 @@ quicktime_trak_t* quicktime_add_trak(quicktime_t *file);
 int quicktime_delete_trak(quicktime_moov_t *moov);
 int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_atom_t *trak_atom);
 int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak, long moov_time_scale);
-longest quicktime_track_end(quicktime_trak_t *trak);
+int64_t quicktime_track_end(quicktime_trak_t *trak);
 long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 /* For AVI */
 int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak);
-int quicktime_chunk_of_sample(longest *chunk_sample, 
-                              longest *chunk, 
+int quicktime_chunk_of_sample(int64_t *chunk_sample, 
+                              int64_t *chunk, 
                               quicktime_trak_t *trak, 
                               long sample);
 
-longest quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
+int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
 
-long quicktime_offset_to_chunk(longest *chunk_offset, 
+long quicktime_offset_to_chunk(int64_t *chunk_offset, 
                                quicktime_trak_t *trak, 
-                               longest offset);
+                               int64_t offset);
 
-longest quicktime_sample_range_size(quicktime_trak_t *trak, 
+int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
                                     long chunk_sample, 
                                     long sample);
-longest quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
+int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
 
-long quicktime_offset_to_sample(quicktime_trak_t *trak, longest offset);
+long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset);
 void quicktime_write_chunk_header(quicktime_t *file, 
                                   quicktime_trak_t *trak, 
                                   quicktime_atom_t *chunk);
@@ -403,11 +403,11 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 
 int quicktime_update_tables(quicktime_t *file, 
                             quicktime_trak_t *trak, 
-                            longest offset, 
-                            longest chunk, 
-                            longest sample, 
-                            longest samples, 
-                            longest sample_size);
+                            int64_t offset, 
+                            int64_t chunk, 
+                            int64_t sample, 
+                            int64_t samples, 
+                            int64_t sample_size);
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
                             long *duration, 
@@ -415,7 +415,7 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
-int quicktime_trak_shift_offsets(quicktime_trak_t *trak, longest offset);
+int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
 
 /* udta.c */
 
@@ -446,19 +446,19 @@ void quicktime_write_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 
 /* Disk I/O */
 
-longest quicktime_get_file_length(quicktime_t *file);
+int64_t quicktime_get_file_length(quicktime_t *file);
 int quicktime_file_open(quicktime_t *file, char *path, int rd, int wr);
 int quicktime_file_close(quicktime_t *file);
-longest quicktime_ftell(quicktime_t *file);
-int quicktime_fseek(quicktime_t *file, longest offset);
-int quicktime_read_data(quicktime_t *file, char *data, longest size);
+int64_t quicktime_ftell(quicktime_t *file);
+int quicktime_fseek(quicktime_t *file, int64_t offset);
+int quicktime_read_data(quicktime_t *file, char *data, int64_t size);
 int quicktime_write_data(quicktime_t *file, char *data, int size);
-longest quicktime_byte_position(quicktime_t *file);
+int64_t quicktime_byte_position(quicktime_t *file);
 void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);
 float quicktime_read_fixed32(quicktime_t *file);
 int quicktime_write_fixed32(quicktime_t *file, float number);
-int quicktime_write_int64(quicktime_t *file, longest value);
+int quicktime_write_int64(quicktime_t *file, int64_t value);
 int quicktime_write_int32(quicktime_t *file, long value);
 int quicktime_write_int32_le(quicktime_t *file, long value);
 int quicktime_write_char32(quicktime_t *file, char *string);
@@ -467,7 +467,7 @@ int quicktime_write_fixed16(quicktime_t *file, float number);
 unsigned long quicktime_read_uint32(quicktime_t *file);
 long quicktime_read_int32(quicktime_t *file);
 long quicktime_read_int32_le(quicktime_t *file);
-longest quicktime_read_int64(quicktime_t *file);
+int64_t quicktime_read_int64(quicktime_t *file);
 long quicktime_read_int24(quicktime_t *file);
 int quicktime_write_int24(quicktime_t *file, long number);
 int quicktime_read_int16(quicktime_t *file);
@@ -477,8 +477,8 @@ int quicktime_write_int16_le(quicktime_t *file, int number);
 int quicktime_read_char(quicktime_t *file);
 int quicktime_write_char(quicktime_t *file, char x);
 void quicktime_read_char32(quicktime_t *file, char *string);
-longest quicktime_position(quicktime_t *file);
-int quicktime_set_position(quicktime_t *file, longest position);
+int64_t quicktime_position(quicktime_t *file);
+int quicktime_set_position(quicktime_t *file, int64_t position);
 void quicktime_copy_char32(char *output, char *input);
 void quicktime_print_chars(char *desc, char *input, int len);
 unsigned long quicktime_current_time(void);
@@ -514,4 +514,4 @@ int quicktime_codec_to_id(char *codec);
 
 /* workarounds.c */
 
-longest quicktime_add3(longest a, longest b, longest c);
+int64_t quicktime_add3(int64_t a, int64_t b, int64_t c);

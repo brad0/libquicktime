@@ -14,7 +14,7 @@
 
 /* Disk I/O */
 
-longest quicktime_get_file_length(quicktime_t *file)
+int64_t quicktime_get_file_length(quicktime_t *file)
 {
 	struct stat status;
 	if(fstat(fileno(file->stream), &status))
@@ -67,12 +67,12 @@ int quicktime_file_close(quicktime_t *file)
 
 
 
-longest quicktime_ftell(quicktime_t *file)
+int64_t quicktime_ftell(quicktime_t *file)
 {
 	return file->ftell_position;
 }
 
-int quicktime_fseek(quicktime_t *file, longest offset)
+int quicktime_fseek(quicktime_t *file, int64_t offset)
 {
 	file->ftell_position = offset;
 	if(offset > file->total_length || offset < 0) return 1;
@@ -85,12 +85,12 @@ int quicktime_fseek(quicktime_t *file, longest offset)
 }
 
 /* Read entire buffer from the preload buffer */
-static int read_preload(quicktime_t *file, char *data, longest size)
+static int read_preload(quicktime_t *file, char *data, int64_t size)
 {
-	longest selection_start = 0;
-	longest selection_end = 0;
-	longest fragment_start = 0;
-	longest fragment_len = 0;
+	int64_t selection_start = 0;
+	int64_t selection_end = 0;
+	int64_t fragment_start = 0;
+	int64_t fragment_len = 0;
 
 	selection_start = file->file_position;
 	selection_end = quicktime_add(file->file_position, size);
@@ -112,14 +112,14 @@ static int read_preload(quicktime_t *file, char *data, longest size)
 		fragment_start += fragment_len;
 		data += fragment_len;
 
-		if(fragment_start >= file->preload_size) fragment_start = (longest)0;
+		if(fragment_start >= file->preload_size) fragment_start = (int64_t)0;
 		selection_start += fragment_len;
 	}
 //printf("read_preload 2\n");
 	return 0;
 }
 
-int quicktime_read_data(quicktime_t *file, char *data, longest size)
+int quicktime_read_data(quicktime_t *file, char *data, int64_t size)
 {
 	int result = 1;
 //printf("quicktime_read_data %d\n", file->preload_size);
@@ -133,9 +133,9 @@ int quicktime_read_data(quicktime_t *file, char *data, longest size)
 	else
 	{
 /* Region requested for loading */
-		longest selection_start = file->file_position;
-		longest selection_end = file->file_position + size;
-		longest fragment_start, fragment_len;
+		int64_t selection_start = file->file_position;
+		int64_t selection_end = file->file_position + size;
+		int64_t fragment_start, fragment_len;
 
 		if(selection_end - selection_start > file->preload_size)
 		{
@@ -233,7 +233,7 @@ int quicktime_write_data(quicktime_t *file, char *data, int size)
 	return result;
 }
 
-longest quicktime_byte_position(quicktime_t *file)
+int64_t quicktime_byte_position(quicktime_t *file)
 {
 	return quicktime_position(file);
 }
@@ -288,18 +288,18 @@ int quicktime_write_fixed32(quicktime_t *file, float number)
 	return quicktime_write_data(file, data, 4);
 }
 
-int quicktime_write_int64(quicktime_t *file, longest value)
+int quicktime_write_int64(quicktime_t *file, int64_t value)
 {
 	unsigned char data[8];
 
-	data[0] = (((ulongest)value) & 0xff00000000000000LL) >> 56;
-	data[1] = (((ulongest)value) & 0xff000000000000LL) >> 48;
-	data[2] = (((ulongest)value) & 0xff0000000000LL) >> 40;
-	data[3] = (((ulongest)value) & 0xff00000000LL) >> 32;
-	data[4] = (((ulongest)value) & 0xff000000LL) >> 24;
-	data[5] = (((ulongest)value) & 0xff0000LL) >> 16;
-	data[6] = (((ulongest)value) & 0xff00LL) >> 8;
-	data[7] =  ((ulongest)value) & 0xff;
+	data[0] = (((uint64_t)value) & 0xff00000000000000LL) >> 56;
+	data[1] = (((uint64_t)value) & 0xff000000000000LL) >> 48;
+	data[2] = (((uint64_t)value) & 0xff0000000000LL) >> 40;
+	data[3] = (((uint64_t)value) & 0xff00000000LL) >> 32;
+	data[4] = (((uint64_t)value) & 0xff000000LL) >> 24;
+	data[5] = (((uint64_t)value) & 0xff0000LL) >> 16;
+	data[6] = (((uint64_t)value) & 0xff00LL) >> 8;
+	data[7] =  ((uint64_t)value) & 0xff;
 
 	return quicktime_write_data(file, data, 8);
 }
@@ -407,9 +407,9 @@ long quicktime_read_int32_le(quicktime_t *file)
 	return (long)result;
 }
 
-longest quicktime_read_int64(quicktime_t *file)
+int64_t quicktime_read_int64(quicktime_t *file)
 {
-	ulongest result, a, b, c, d, e, f, g, h;
+	uint64_t result, a, b, c, d, e, f, g, h;
 	char data[8];
 
 	quicktime_read_data(file, data, 8);
@@ -430,7 +430,7 @@ longest quicktime_read_int64(quicktime_t *file)
 		(f << 16) | 
 		(g << 8) | 
 		h;
-	return (longest)result;
+	return (int64_t)result;
 }
 
 
@@ -522,12 +522,12 @@ void quicktime_read_char32(quicktime_t *file, char *string)
 	quicktime_read_data(file, string, 4);
 }
 
-longest quicktime_position(quicktime_t *file) 
+int64_t quicktime_position(quicktime_t *file) 
 { 
 	return file->file_position; 
 }
 
-int quicktime_set_position(quicktime_t *file, longest position) 
+int quicktime_set_position(quicktime_t *file, int64_t position) 
 {
 //printf("quicktime_set_position %lld\n", position);
 	file->file_position = position;

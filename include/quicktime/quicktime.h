@@ -193,19 +193,19 @@ int quicktime_seek_end(quicktime_t *file);
 int quicktime_seek_start(quicktime_t *file);
 
 /* set position of file descriptor relative to a track */
-int quicktime_set_audio_position(quicktime_t *file, longest sample, int track);
-int quicktime_set_video_position(quicktime_t *file, longest frame, int track);
+int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track);
+int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track);
 
 /* ========================== Access to raw data follows. */
 /* write data for one quicktime track */
 /* the user must handle conversion to the channels in this track */
 int quicktime_write_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
-int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, longest bytes, int track);
+int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_t bytes, int track);
 
 /* Read an entire chunk. */
 /* read the number of bytes starting at the byte_start in the specified chunk */
 /* You must provide enough space to store the chunk. */
-int quicktime_read_chunk(quicktime_t *file, char *output, int track, longest chunk, longest byte_start, longest byte_len);
+int quicktime_read_chunk(quicktime_t *file, char *output, int track, int64_t chunk, int64_t byte_start, int64_t byte_len);
 
 /* read raw data */
 long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
@@ -289,9 +289,9 @@ int quicktime_set_cpus(quicktime_t *file, int cpus);
 /* preload is the number of bytes to read ahead. */
 /* This is no longer functional to the end user but is used to accelerate */
 /* reading the header internally. */
-void quicktime_set_preload(quicktime_t *file, longest preload);
+void quicktime_set_preload(quicktime_t *file, int64_t preload);
 
-longest quicktime_byte_position(quicktime_t *file);
+int64_t quicktime_byte_position(quicktime_t *file);
 
 void quicktime_set_avi(quicktime_t *file, int value);
 

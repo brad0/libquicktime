@@ -281,8 +281,8 @@ static int decode(quicktime_t *file,
 					int channel)
 {
 	int result = 0;
-	longest chunk, chunk_sample, chunk_bytes, chunk_samples;
-	longest i, chunk_start, chunk_end;
+	int64_t chunk, chunk_sample, chunk_bytes, chunk_samples;
+	int64_t i, chunk_start, chunk_end;
 	quicktime_trak_t *trak = file->atracks[track].track;
 	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
 
@@ -345,11 +345,11 @@ static int encode(quicktime_t *file,
 						long samples)
 {
 	int result = 0;
-	longest i, j, step;
-	longest chunk_bytes;
-	longest overflow_start;
-	longest offset;
-	longest chunk_samples; /* Samples in the current chunk to be written */
+	int64_t i, j, step;
+	int64_t chunk_bytes;
+	int64_t overflow_start;
+	int64_t offset;
+	int64_t chunk_samples; /* Samples in the current chunk to be written */
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 	int16_t *input_ptr;
@@ -359,7 +359,7 @@ static int encode(quicktime_t *file,
 	if(codec->work_buffer && codec->work_size < (samples + codec->work_overflow + 1) * track_map->channels)
 	{
 /* Create new buffer */
-		longest new_size = (samples + codec->work_overflow + 1) * track_map->channels;
+		int64_t new_size = (samples + codec->work_overflow + 1) * track_map->channels;
 		int16_t *new_buffer = malloc(sizeof(int16_t) * new_size);
 
 /* Copy overflow */
@@ -458,7 +458,7 @@ static int encode(quicktime_t *file,
 	}
 
 /* Write to disk */
-	chunk_samples = (longest)((samples + codec->work_overflow) / SAMPLES_PER_BLOCK) * SAMPLES_PER_BLOCK;
+	chunk_samples = (int64_t)((samples + codec->work_overflow) / SAMPLES_PER_BLOCK) * SAMPLES_PER_BLOCK;
 
 /*printf("quicktime_encode_ima4 1 %ld\n", chunk_samples); */
 /* The block division may result in 0 samples getting encoded. */

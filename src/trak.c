@@ -165,11 +165,11 @@ int quicktime_write_trak(quicktime_t *file,
 	return 0;
 }
 
-longest quicktime_track_end(quicktime_trak_t *trak)
+int64_t quicktime_track_end(quicktime_trak_t *trak)
 {
 /* get the byte endpoint of the track in the file */
-	longest size = 0;
-	longest chunk, chunk_offset, chunk_samples, sample;
+	int64_t size = 0;
+	int64_t chunk, chunk_offset, chunk_samples, sample;
 	quicktime_stsz_t *stsz = &(trak->mdia.minf.stbl.stsz);
 	quicktime_stsz_table_t *table = stsz->table;
 	quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
@@ -292,8 +292,8 @@ int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak)
 	}
 }
 
-int quicktime_chunk_of_sample(longest *chunk_sample, 
-	longest *chunk, 
+int quicktime_chunk_of_sample(int64_t *chunk_sample, 
+	int64_t *chunk, 
 	quicktime_trak_t *trak, 
 	long sample)
 {
@@ -347,10 +347,10 @@ int quicktime_chunk_of_sample(longest *chunk_sample,
 	return 0;
 }
 
-longest quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk)
+int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk)
 {
 	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
-	longest result = 0;
+	int64_t result = 0;
 
 	if(trak->mdia.minf.stbl.stco.total_entries && 
 		chunk > trak->mdia.minf.stbl.stco.total_entries)
@@ -370,9 +370,9 @@ longest quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, lon
 	return result;
 }
 
-long quicktime_offset_to_chunk(longest *chunk_offset, 
+long quicktime_offset_to_chunk(int64_t *chunk_offset, 
 	quicktime_trak_t *trak, 
-	longest offset)
+	int64_t offset)
 {
 	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
 	int i;
@@ -389,12 +389,12 @@ long quicktime_offset_to_chunk(longest *chunk_offset,
 	return 1;
 }
 
-longest quicktime_sample_range_size(quicktime_trak_t *trak, 
+int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
 	long chunk_sample, 
 	long sample)
 {
 	quicktime_stsz_table_t *table = trak->mdia.minf.stbl.stsz.table;
-	longest i, total;
+	int64_t i, total;
 
 	if(trak->mdia.minf.stbl.stsz.sample_size)
 	{
@@ -415,9 +415,9 @@ longest quicktime_sample_range_size(quicktime_trak_t *trak,
 	return total;
 }
 
-longest quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample)
+int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample)
 {
-	longest chunk, chunk_sample, chunk_offset1, chunk_offset2;
+	int64_t chunk, chunk_sample, chunk_offset1, chunk_offset2;
 
 	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
 	chunk_offset1 = quicktime_chunk_to_offset(file, trak, chunk);
@@ -427,14 +427,14 @@ longest quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, lo
 	return chunk_offset2;
 }
 
-long quicktime_offset_to_sample(quicktime_trak_t *trak, longest offset)
+long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset)
 {
-	longest chunk_offset;
-	longest chunk = quicktime_offset_to_chunk(&chunk_offset, trak, offset);
-	longest chunk_sample = quicktime_sample_of_chunk(trak, chunk);
-	longest sample, sample_offset;
+	int64_t chunk_offset;
+	int64_t chunk = quicktime_offset_to_chunk(&chunk_offset, trak, offset);
+	int64_t chunk_sample = quicktime_sample_of_chunk(trak, chunk);
+	int64_t sample, sample_offset;
 	quicktime_stsz_table_t *table = trak->mdia.minf.stbl.stsz.table;
-	longest total_samples = trak->mdia.minf.stbl.stsz.total_entries;
+	int64_t total_samples = trak->mdia.minf.stbl.stsz.total_entries;
 
 	if(trak->mdia.minf.stbl.stsz.sample_size)
 	{
@@ -488,7 +488,7 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 	quicktime_atom_t *chunk, 
 	int samples)
 {
-	longest offset = chunk->start;
+	int64_t offset = chunk->start;
 	int sample_size = quicktime_position(file) - offset;
 
 	if(file->use_avi)
@@ -529,11 +529,11 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 
 int quicktime_update_tables(quicktime_t *file, 
 							quicktime_trak_t *trak, 
-							longest offset, 
-							longest chunk, 
-							longest sample, 
-							longest samples, 
-							longest sample_size)
+							int64_t offset, 
+							int64_t chunk, 
+							int64_t sample, 
+							int64_t samples, 
+							int64_t sample_size)
 {
 if(file->use_avi)
 printf("%s: replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n\n", __FUNCTION__ );
@@ -610,7 +610,7 @@ long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
 	return result;
 }
 
-int quicktime_trak_shift_offsets(quicktime_trak_t *trak, longest offset)
+int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset)
 {
 	quicktime_stco_t *stco = &(trak->mdia.minf.stbl.stco);
 	int i;
