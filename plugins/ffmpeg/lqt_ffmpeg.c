@@ -531,7 +531,7 @@ struct CODECIDMAP codecidmap_v[] = {
           decoder: NULL,
           encode_parameters: encode_parameters_video,
           decode_parameters: decode_parameters_video,
-	  short_name: "8BPS",
+	  short_name: "indeo",
 	  name: "Intel Indeo 3",
 	  fourccs: {"IV31", "IV32", (char *)0} },
 	{

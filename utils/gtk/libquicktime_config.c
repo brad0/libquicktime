@@ -24,7 +24,7 @@ typedef struct
 
   GtkWidget * close_button;
   GtkWidget * save_button;
-  GtkWidget * rescan_button;
+  //  GtkWidget * rescan_button;
 
   GtkWidget * notebook;
 
@@ -49,10 +49,11 @@ static void main_window_button_callback(GtkWidget * w, gpointer data)
     {
     lqt_registry_write();
     }
-  else if(w == mw->rescan_button)
-    {
-    
-    }
+  }
+
+static gboolean delete_callback(GtkWidget * w, gpointer data)
+  {
+  gtk_main_quit();
   }
 
 MainWindow * create_main_window()
@@ -63,9 +64,11 @@ MainWindow * create_main_window()
     
   ret->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+  gtk_signal_connect(GTK_OBJECT(ret->window), "delete-event",
+                     GTK_SIGNAL_FUNC(delete_callback), ret);
+    
   ret->close_button = gtk_button_new_with_label("Close");
   ret->save_button = gtk_button_new_with_label("Save");
-  ret->rescan_button = gtk_button_new_with_label("Scan for codecs");
 
   ret->notebook = gtk_notebook_new();
 
@@ -92,7 +95,6 @@ MainWindow * create_main_window()
 
   ret->close_button = gtk_button_new_with_label("Close");
   ret->save_button = gtk_button_new_with_label("Save");
-  ret->rescan_button = gtk_button_new_with_label("Scan for codecs");
 
   gtk_signal_connect(GTK_OBJECT(ret->close_button), "clicked",
                      GTK_SIGNAL_FUNC(main_window_button_callback),
@@ -100,28 +102,23 @@ MainWindow * create_main_window()
   gtk_signal_connect(GTK_OBJECT(ret->save_button), "clicked",
                      GTK_SIGNAL_FUNC(main_window_button_callback),
                      (gpointer)ret);
-  gtk_signal_connect(GTK_OBJECT(ret->rescan_button), "clicked",
-                     GTK_SIGNAL_FUNC(main_window_button_callback),
-                     (gpointer)ret);
 
   GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
   GTK_WIDGET_SET_FLAGS (ret->save_button, GTK_CAN_DEFAULT);
-  GTK_WIDGET_SET_FLAGS (ret->rescan_button, GTK_CAN_DEFAULT);
   
   gtk_widget_show(ret->close_button);
   gtk_widget_show(ret->save_button);
-  gtk_widget_show(ret->rescan_button);
 
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->close_button);
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->save_button);
-  gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->rescan_button);
 
   gtk_widget_show(ret->buttonbox);
 
   ret->mainbox = gtk_vbox_new(0, 5);
 
   gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->notebook);
-  gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->buttonbox);
+  gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->buttonbox,
+                     FALSE, FALSE, 0);
 
   gtk_widget_show(ret->mainbox);
   gtk_container_add(GTK_CONTAINER(ret->window), ret->mainbox);
