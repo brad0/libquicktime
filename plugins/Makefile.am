@@ -5,6 +5,7 @@ base_subdirs = audiocodec \
 videocodec \
 opendivx \
 ferguson \
+lame \
 rtjpeg \
 xanim \
 svq
@@ -13,6 +14,12 @@ if HAVE_LIBJPEG
 jpeg_subdirs = mjpeg
 else
 jpeg_subdirs=
+endif
+
+if HAVE_LAME
+lame_subdirs = lame
+else
+lame_subdirs=
 endif
 
 if HAVE_LIBDV
@@ -40,4 +47,6 @@ libavcodec=
 endif
 
 SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
-	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs)
+	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs) \
+        $(lame_subdirs)
+

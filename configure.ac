@@ -383,6 +383,17 @@ AC_DEFINE(HAVE_VORBIS)
 fi
 
 dnl
+dnl Vheck for lame
+dnl
+
+have_lame="no"
+
+AC_CHECK_LIB(mp3lame, lame_decode_init,
+             [ have_lame="yes" ], [], [ -lm ])
+
+AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")
+
+dnl
 dnl Check for libjpeg
 dnl
 
@@ -640,6 +651,7 @@ include/quicktime/Makefile \
 include/quicktime/lqt_version.h \
 plugins/Makefile \
 plugins/dv/Makefile \
+plugins/lame/Makefile \
 plugins/mjpeg/Makefile \
 plugins/audiocodec/Makefile \
 plugins/videocodec/Makefile \
