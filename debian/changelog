@@ -1,3 +1,9 @@
+libquicktime (0.9.3-1) unstable; urgency=low
+
+  * Release
+
+ -- Arvind R. <arvind@acarlab.com>  Tue, 20 Jul 2004 02:54:44 +0530
+
 libquicktime (0.9.2-4) unstable; urgency=low
 
   * Rebuild with ffmpeg_acl, lqt-cvs20040630

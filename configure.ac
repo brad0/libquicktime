@@ -184,8 +184,8 @@ dnl Checks for library functions.
 
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(gettimeofday)
-AC_CHECK_FUNCS(fseeko)
-AM_CONDITIONAL(HAVE_FSEEKO, test x$have_fseeko = xtrue)
+AC_CHECK_FUNCS(fseeko, [have_fseeko="true"])
+AM_CONDITIONAL(HAVE_FSEEKO, test x"$have_fseeko" = "xtrue")
 
 AC_HEADER_STDC
 

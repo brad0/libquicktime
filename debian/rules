@@ -55,7 +55,6 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	# -$(MAKE) distclean
-	./cvs_clean.sh
 	-test -r /usr/share/misc/config.sub && \
 	  cp -f /usr/share/misc/config.sub config.sub
 	-test -r /usr/share/misc/config.guess && \
@@ -85,7 +84,6 @@ binary-arch: build install
 #	dh_movefiles
 
 #	dh_installdebconf	
-	mv doc/qt4l_* doc/qt4l
 	dh_installdocs
 #	dh_installexamples
 #	dh_installmenu

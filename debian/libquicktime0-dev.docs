@@ -2,5 +2,4 @@ NEWS
 README
 TODO
 ChangeLog
-doc/codecs.html
-doc/qt4l
+doc/*.html

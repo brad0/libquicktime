@@ -10,4 +10,6 @@ off_t lqt_ftello(FILE *);
 
 #define fseeko(a,b,c) lqt_fseeko(a,b,c)
 #define ftello(a) lqt_ftello(a)
+#else
+#include <stdio.h>
 #endif
