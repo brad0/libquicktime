@@ -441,21 +441,31 @@ int64_t i, total;
         /* LQT: For VBR audio, quicktime_sample_rage_size makes no sense */
         if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
           return 0;
-	if(trak->mdia.minf.stbl.stsz.sample_size)
-	{
+	if(trak->mdia.minf.is_audio)
+          {
 /* assume audio */
 		return quicktime_samples_to_bytes(trak, sample - chunk_sample);
 /* 		return (sample - chunk_sample) * trak->mdia.minf.stbl.stsz.sample_size  */
 /* 			* trak->mdia.minf.stbl.stsd.table[0].channels  */
 /* 			* trak->mdia.minf.stbl.stsd.table[0].sample_size / 8; */
-	}
+          }
 	else
-	{
+          {
+          /* All frames have the same size */
+          if(trak->mdia.minf.stbl.stsz.sample_size)
+            {
+            total = (sample - chunk_sample) *
+              trak->mdia.minf.stbl.stsz.sample_size;
+            }
 /* probably video */
-		for(i = chunk_sample, total = 0; i < sample; i++)
-		{
-			total += trak->mdia.minf.stbl.stsz.table[i].size;
-		}
+          else
+            {
+            for(i = chunk_sample, total = 0; i < sample; i++)
+              {
+              total += trak->mdia.minf.stbl.stsz.table[i].size;
+              }
+            }
+          
 	}
 	return total;
 }

@@ -307,7 +307,8 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
   mpeg_header h;
   quicktime_atom_t chunk_atom;
   int result;
-  
+  /* We write each mp3 frame into an own chunk. This increases the chance,
+     that M$ software will be able to play our files */
   while(codec->encoder_output_size > 4)
     {
     if(!decode_header(&h, codec->encoder_output))
@@ -459,10 +460,6 @@ static int encode(quicktime_t *file,
   if(result > 0)
     {
     codec->encoder_output_size += result;
-
-    /* We write each mp3 frame into an own chunk. This increases the chance,
-       that M$ software will be able to play our files */
-
     result = write_data(file, track_map, codec);
     }
   

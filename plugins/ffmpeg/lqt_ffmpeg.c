@@ -662,7 +662,7 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
           do_encode: 1,
         },
-#if 0 /* Crashes */
+#if 0 /* Sounds ugly */
 	{
           id: CODEC_ID_ADPCM_MS,
 	  index: -1,
@@ -672,6 +672,19 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "McRowsoft ADPCM",
 	  fourccs: {"ms\0\x02", "MS\0\x02", (char*)0},
           wav_ids: { 0x02, LQT_WAV_ID_NONE },
+        },
+#endif
+#if 0 /* Sounds ugly */
+        {
+          id: CODEC_ID_ADPCM_IMA_WAV,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          short_name: "ima adpcm (wav)",
+	  name: "ADPCM ima WAV",
+	  fourccs: {"ms\0\x11", "MS\0\x11", (char*)0},
+          wav_ids: { 0x11, LQT_WAV_ID_NONE },
+          
         },
 #endif
 	{
