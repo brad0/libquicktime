@@ -27,7 +27,7 @@ static lqt_colormodel_tab colormodel_table[] =
     { "24 bpp YUV", BC_YUV888  },
     { "32 bpp YUVA", BC_YUVA8888  },   
     { "48 bpp YUV", BC_YUV161616  }, 
-    { "48 bpp", BC_YUVA16161616  },
+    { "64 bpp YUVA", BC_YUVA16161616  },
     { "YUV 4:2:2 packed (YUY2)", BC_YUV422  },
     { "8 bpp Alpha", BC_A8  },
     { "16 bpp Alpha", BC_A16 },
