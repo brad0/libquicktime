@@ -549,6 +549,18 @@ void quicktime_vmhd_dump(quicktime_vmhd_t *vmhd);
 void quicktime_read_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 void quicktime_write_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 
+
+/* navg */
+
+int quicktime_navg_init(quicktime_navg_t *navg);
+int quicktime_navg_delete(quicktime_navg_t *navg);
+void quicktime_navg_dump(quicktime_navg_t *navg);
+int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_atom_t *navg_atom);
+void quicktime_write_navg(quicktime_t *file, quicktime_navg_t *navg);
+
+
+
+
 /* util.c */
 
 /* Disk I/O */

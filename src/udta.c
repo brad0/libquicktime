@@ -22,6 +22,8 @@ int quicktime_udta_init(quicktime_udta_t *udta)
 	udta->info = malloc(strlen(DEFAULT_INFO) + 1);
 	udta->info_len = strlen(DEFAULT_INFO);
 	sprintf(udta->info, DEFAULT_INFO);
+	udta->is_qtvr = 0;
+	quicktime_navg_init(&(udta->navg));
 	return 0;
 }
 
@@ -79,6 +81,11 @@ void quicktime_udta_dump(quicktime_udta_t *udta)
 	if(udta->track_len)     printf("  track:     %s\n", udta->track);
 	if(udta->genre_len)     printf("  genre:     %s\n", udta->genre);
 	if(udta->comment_len)   printf("  comment:   %s\n", udta->comment);
+	if(udta->is_qtvr)       printf("  ctyp:      %c%c%c%c\n", udta->ctyp[0],
+	    							  udta->ctyp[1],
+							    	  udta->ctyp[2],
+							          udta->ctyp[3]);
+	if(udta->is_qtvr) quicktime_navg_dump(&(udta->navg));
 }
 
 int quicktime_read_udta_string(quicktime_t *file, char **string, int *size)
@@ -156,6 +163,22 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_ato
 		{
 			result += quicktime_read_udta_string(file, &(udta->author), &(udta->author_len));
                 }
+                else
+
+                if(quicktime_atom_is(&leaf_atom, "NAVG"))
+		{
+			result += quicktime_read_navg(file, &(udta->navg), &leaf_atom);
+                }
+		else
+                if(quicktime_atom_is(&leaf_atom, "ctyp"))
+		{
+			udta->ctyp[0] = quicktime_read_char(file);
+			udta->ctyp[1] = quicktime_read_char(file);
+			udta->ctyp[2] = quicktime_read_char(file);
+			udta->ctyp[3] = quicktime_read_char(file);
+			if (strcmp(udta->ctyp, "stna") ||
+			    strcmp(udta->ctyp, "STpn")) udta->is_qtvr = 1;
+                }
 		else
 		quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < udta_atom->end);
@@ -167,6 +190,7 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
 {
 	quicktime_atom_t atom, subatom;
 	quicktime_atom_write_header(file, &atom, "udta");
+
 
 	if(udta->copyright_len)
 	{
@@ -229,7 +253,17 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
 		quicktime_write_udta_string(file, udta->author, udta->author_len);
 		quicktime_atom_write_footer(file, &subatom);
 	}
-        
+        if(udta->is_qtvr)
+	{
+		quicktime_write_navg(file, &(udta->navg));
+		
+	    	quicktime_atom_write_header(file, &subatom, "ctyp");
+		quicktime_write_char(file, udta->ctyp[0]);
+		quicktime_write_char(file, udta->ctyp[1]);
+		quicktime_write_char(file, udta->ctyp[2]);
+		quicktime_write_char(file, udta->ctyp[3]);
+		quicktime_atom_write_footer(file, &subatom);
+	}	
 	quicktime_atom_write_footer(file, &atom);
 }
 

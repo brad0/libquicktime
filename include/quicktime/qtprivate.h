@@ -28,6 +28,8 @@
 #define AVI_FRAME_RATE_BASE 10000
 #define MAX_RIFFS  0x100
 
+#define QTVR_OBJ 1
+#define QTVR_PAN 2
 
 //#include "codecs.h"
 #include <stdio.h>
@@ -407,6 +409,34 @@ typedef struct
 } quicktime_edts_t;
 
 
+/* qtvr navg (v1.0) */
+typedef struct {
+    int    version;        // Always 1
+    int    columns;    // Number of columns in movie
+    int    rows;        // Number rows in movie
+    int    reserved;        // Zero
+    int    loop_frames;        // Number of frames shot at each position
+    int    loop_dur;        // The duration of each frame
+    int    movietype;        // kStandardObject, kObjectInScene, or
+                    // kOldNavigableMovieScene
+    int    loop_timescale;        // Number of ticks before next frame of
+                    // loop is displayed
+    float    fieldofview;        // 180.0 for kStandardObject or
+                    // kObjectInScene, actual  degrees for
+                    // kOldNavigableMovieScene.
+    float    startHPan;        // Start horizontal pan angle in
+                    //  degrees
+    float    endHPan;        // End horizontal pan angle in  degrees
+    float    endVPan;        // End vertical pan angle in  degrees
+    float    startVPan;        // Start vertical pan angle in  degrees
+    float    initialHPan;        // Initial horizontal pan angle in
+                    //  degrees (poster view)
+    float    initialVPan;        // Initial vertical pan angle in  degrees
+                    // (poster view)
+    long    reserved2;        // Zero
+} quicktime_navg_t;
+
+
 typedef struct
 {
 	quicktime_tkhd_t tkhd;
@@ -436,6 +466,7 @@ typedef struct
 	long next_track_id;
 } quicktime_mvhd_t;
 
+
 typedef struct
 {
 	char *copyright;
@@ -457,6 +488,10 @@ typedef struct
         int track_len;
         char *comment;
         int comment_len;
+	int is_qtvr;
+	/* player controls */
+	char ctyp[4];
+	quicktime_navg_t navg;
 } quicktime_udta_t;
 
 

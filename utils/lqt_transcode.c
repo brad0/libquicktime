@@ -98,7 +98,7 @@ typedef struct
 
 static void print_usage()
   {
-  printf("Usage: lqt_transcode [-avi] [-floataudio] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
+  printf("Usage: lqt_transcode [-avi] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
   printf("       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n\n");
   printf("       lqt_transcode -lv\n");
   printf("       List video encoders encoders\n\n");
@@ -234,7 +234,10 @@ static int transcode_init(transcode_handle * h,
                           char * video_codec,
                           char * audio_codec,
                           int floataudio,
-                          int use_avi)
+                          int use_avi,
+                          char * qtvr,
+                          int qtvr_rows,
+                          int qtvr_columns)
   {
   lqt_codec_info_t ** codec_info;
   int * colormodels;
@@ -362,6 +365,18 @@ static int transcode_init(transcode_handle * h,
     h->num_audio_samples = quicktime_audio_length(h->in_file, 0);
     }
 
+    if(!strcmp(qtvr,"obj")) {
+	lqt_qtvr_set_type(h->out_file, QTVR_OBJ);
+    }
+
+    if(qtvr_columns) {
+	lqt_qtvr_set_columns(h->out_file, (short)qtvr_columns);
+    }
+
+    if(qtvr_rows) {
+	lqt_qtvr_set_rows(h->out_file, (short)qtvr_rows);
+    }
+
   if(use_avi)
     quicktime_set_avi(h->out_file, 1);
   return 1;
@@ -440,6 +455,9 @@ int main(int argc, char ** argv)
   char * out_file = (char*)0;
   char * video_codec = (char*)0;
   char * audio_codec = (char*)0;
+  char * qtvr = (char*)0;
+  unsigned short qtvr_rows = 0;
+  unsigned short qtvr_columns = 0;
   int i, j;
   int use_avi = 0, floataudio = 0;
   transcode_handle handle;
@@ -481,13 +499,25 @@ int main(int argc, char ** argv)
           use_avi = 1;
         else if(!strcmp(argv[i], "-floataudio"))
           floataudio = 1;
+        else if(!strcmp(argv[i], "-qtvr")) {
+          qtvr = argv[i+1];
+	  i++;
+	  }
+	else if(!strcmp(argv[i], "-qtvr_rows")) {
+          qtvr_rows = atoi(argv[i+1]);
+	  i++;
+	  }
+	else if(!strcmp(argv[i], "-qtvr_columns")) {
+          qtvr_columns = atoi(argv[i+1]);
+	  i++;
+	  }
         }
       in_file = argv[argc-2];
       out_file = argv[argc-1];
     }
   
   if(!transcode_init(&handle, in_file, out_file, video_codec, audio_codec,
-                     floataudio, use_avi))
+                     floataudio, use_avi, qtvr, qtvr_rows, qtvr_columns))
     {
     return 0;
     }

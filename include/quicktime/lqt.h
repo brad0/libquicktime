@@ -221,6 +221,22 @@ char * lqt_get_track(quicktime_t * file);
 char * lqt_get_comment(quicktime_t *file);
 char * lqt_get_author(quicktime_t *file);
   
+/* QTVR stuff */
+
+/* read */
+int lqt_is_qtvr(quicktime_t  *file);
+int lqt_qtvr_get_loop_frames(quicktime_t  *file);
+int lqt_qtvr_get_rows(quicktime_t  *file);
+int lqt_qtvr_get_columns(quicktime_t  *file);
+
+/* write */
+/* type: QTVR_OBJ == object movie */
+/*       QTVR_PAN == panorama movie */ /* <- doesn't work yet */
+int lqt_qtvr_set_type(quicktime_t  *file, int type);
+
+int lqt_qtvr_set_rows(quicktime_t  *file, short rows);
+int lqt_qtvr_set_columns(quicktime_t  *file, short columns);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
