@@ -13,7 +13,7 @@ else
 xbin :=
 xman :=
 endif
-noinst_PROGRAMS := test_codec testqt
+noinst_PROGRAMS := test_codec testqt dump_codecs
 # bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover lqt_transcode
 bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode
 man1_MANS := $(xman)
@@ -38,6 +38,9 @@ qtdump_LDADD=@UTIL_LIBADD@
 
 qtdechunk_SOURCES=dechunk.c
 qtdechunk_LDADD=@UTIL_LIBADD@
+
+dump_codecs_SOURCES=dump_codecs.c
+dump_codecs_LDADD=@UTIL_LIBADD@
 
 qtrechunk_SOURCES=rechunk.c
 qtrechunk_LDADD=@UTIL_LIBADD@
