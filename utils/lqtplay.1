@@ -6,9 +6,9 @@ lqtplay - simple quicktime movie player for X11.
 .SH DESCRIPTION
 .B lqtplay
 just plays the given quicktime movie in a window on your X11 display.
-Sound is played using a OSS dsp device (if available).  Some info about
-the movie and some other stuff is printed on stderr.  No fancy GUI.  The
-only interactive element is that you can resize the window, and lqtplay
+Sound is played using a OSS dsp device or Alsa (if available).  Some info 
+about the movie and some other stuff is printed on stderr.  No fancy GUI. 
+The only interactive element is that you can resize the window, and lqtplay
 will adapt the video size if support for hardware-scaled video is
 available.
 .P
@@ -26,6 +26,10 @@ color space conversion + video scaling in hardware).
 Don't use OpenGL (via GLX entention) for video scaling.  By default
 lqtplay tries to use 3D textures to scale RGB frames in hardware if
 DRI is available.
+.TP
+.B -noalsa
+Don't use Alsa for audio output.  By default lqtplay uses Alsa 
+if it was available at compile time.
 .P
 The usual toolkit options (like -geometry) are accepted too.
 .SH AUTHOR

@@ -22,6 +22,9 @@
 #ifdef	HAVE_SOUNDCARD_H
 #include <sys/soundcard.h>
 #endif
+#ifdef HAVE_ALSA
+#include <alsa/asoundlib.h>
+#endif
 
 #include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
@@ -495,6 +498,125 @@ static void gl_init(Widget widget, int iw, int ih)
     use_gl = 1;
 }
 
+
+
+
+
+/* ------------------------------------------------------------------------ */
+/* alsa code                                                                 */
+
+#ifdef HAVE_ALSA
+
+/* Enable alsa */
+static int use_alsa = 1;
+
+#ifndef SND_PCM_FORMAT_S16_NE
+# if BYTE_ORDER == BIG_ENDIAN
+#  define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
+# else
+#  define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_LE
+# endif
+#endif
+
+static int periods = 16; /* number of periods == fragments */
+static snd_pcm_uframes_t periodsize = 4096; /* Periodsize (bytes) */
+
+/* Handle for the PCM device */ 
+static snd_pcm_t *pcm_handle;
+
+/* This structure contains information about    */
+/* the hardware and can be used to specify the  */
+/* configuration to be used for the PCM stream. */
+static snd_pcm_hw_params_t *hwparams;
+
+#else
+
+/* Disable Alsa */
+static int use_alsa = 0;
+
+#endif /* HAVE_ALSA */
+
+static int alsa_init(char *dev, int channels, int rate)
+{
+#ifdef HAVE_ALSA
+    int dir;
+    int exact_param;   /* parameter returned by          */
+                       /* snd_pcm_hw_params_set_*_near   */ 
+    int tmprate;
+
+    tmprate = rate;
+    
+    if (snd_pcm_open(&pcm_handle, dev, SND_PCM_STREAM_PLAYBACK, 1) < 0) {
+	fprintf(stderr, "Error opening PCM device %s\n", dev);
+	return 1;
+    }
+    
+    /* Allocate the snd_pcm_hw_params_t structure on the stack. */
+    snd_pcm_hw_params_alloca(&hwparams);
+
+    /* Init hwparams with full configuration space */
+    if (snd_pcm_hw_params_any(pcm_handle, hwparams) < 0) {
+	fprintf(stderr, "Can not configure this PCM device.\n");
+	return 1;
+    }
+    
+    if (snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
+	fprintf(stderr, "Error setting access.\n");
+	return 1;
+    }
+
+    /* put checks here */
+    /* Only needed when sampling format not supported by hardware .. unlikely */
+
+    /* Set sample format */
+    if (snd_pcm_hw_params_set_format(pcm_handle, hwparams, SND_PCM_FORMAT_S16_NE) < 0) {
+	fprintf(stderr, "Error setting format.\n");
+	return 1;
+    }
+
+    /* Set sample rate. If the exact rate is not supported */
+    /* by the hardware, use nearest possible rate.         */ 
+    exact_param = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, &dir);
+    if (dir != 0) {
+	fprintf(stderr, "Samplerate %d Hz is not supported. Using %d Hz instead.\n", rate, exact_param);
+    }
+
+    /* Set number of channels */
+    if (snd_pcm_hw_params_set_channels(pcm_handle, hwparams, channels) < 0) {
+	fprintf(stderr, "Error setting format.\n");
+	return 1;
+    }
+
+    /* Set number of periods. Periods used to be called fragments. */ 
+    if (snd_pcm_hw_params_set_period_size_near(pcm_handle, hwparams, &periodsize, &dir) < 0) {
+	fprintf(stderr, "Error setting periods.\n");
+	return 1;
+    }
+
+    /* Set number of periods. Periods used to be called fragments. */ 
+    if (snd_pcm_hw_params_set_periods_near(pcm_handle, hwparams, &periods, &dir) < 0) {
+	fprintf(stderr, "Error setting periods.\n");
+	return 1;
+    }
+
+    /* Apply HW parameter settings to */
+    /* PCM device and prepare device  */
+    if (snd_pcm_hw_params(pcm_handle, hwparams) < 0) {
+	fprintf(stderr, "Error setting HW params.\n");
+	return 1;
+    }
+    
+    if (snd_pcm_prepare(pcm_handle) < 0) {
+	fprintf(stderr, "Error in pcm_prepare.\n");
+	return 1;
+    }
+#endif
+
+return 0;
+}
+
+
+
 /* ------------------------------------------------------------------------ */
 /* oss code                                                                 */
 
@@ -572,6 +694,7 @@ static XvImage *qt_xvimage;
 static GC qt_gc;
 
 static int16_t *qt_audio,*qt1,*qt2;
+
 static int qt_size,qt_offset,qt_stereo;
 static int qt_cmodel = BC_RGB888;
 
@@ -579,6 +702,13 @@ static void qt_init(FILE *fp, char *filename)
 {
     char *str;
     int i;
+
+    /* audio device */
+    char *adev_name;
+    
+    /* default */
+    adev_name = strdup("default");
+//    if (getenv("LQTPLAY_ALSA_DEV")) adev_name = getenv("LQTPLAY_ALSA_DEV");
 
     /* open file */
     qt = quicktime_open(filename,1,0);
@@ -656,11 +786,17 @@ static void qt_init(FILE *fp, char *filename)
 	qt_hasaudio = 1;
 	if (quicktime_track_channels(qt,0) > 1)
 	    qt_stereo = 1;
-	if (-1 == oss_init("/dev/dsp", qt_stereo ? 2 : 1,
-			   quicktime_sample_rate(qt,0)))
-	    qt_hasaudio = 0;
-    }
-
+  if (use_alsa == 1) {
+    if (-1 == alsa_init(adev_name, qt_stereo ? 2 : 1, 
+         quicktime_sample_rate(qt,0))) {
+           qt_hasaudio = 0;}
+  }
+  else {
+  	if (-1 == oss_init("/dev/dsp", qt_stereo ? 2 : 1,
+ 		     quicktime_sample_rate(qt,0))) 
+           qt_hasaudio = 0;
+  }
+  }
     if (0 == qt_hasvideo && 0 == qt_hasaudio) {
 	fprintf(stderr,"ERROR: no playable stream found\n");
 	exit(1);
@@ -792,7 +928,60 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     }
 }
 
-static int qt_audio_write(void)
+
+static int qt_alsa_audio_write(void)
+{
+#ifdef HAVE_ALSA
+    long pos;
+    int i;
+    
+    int frames = 1;
+    int pcmreturn;
+    frames = periodsize >> 2;
+
+    if (0 == quicktime_audio_position(qt,0)) {
+	/* Init */
+	qt_audio  = malloc(periodsize);
+	if (quicktime_track_channels(qt,0) > 1) {
+	    qt1 = malloc(periodsize/2);
+	    qt2 = malloc(periodsize/2);
+	}
+    }
+    if (qt_stereo) {
+      	/* stereo: two channels => interlaved samples */
+      	pos = quicktime_audio_position(qt,0);
+	quicktime_decode_audio(qt,qt1,NULL,periodsize>>2,0);
+  	quicktime_set_audio_position(qt,pos,0);
+  	quicktime_decode_audio(qt,qt2,NULL,periodsize>>2,1);
+	for (i = 0; i < periodsize/2; i++) {
+	    qt_audio[2*i+0] = qt1[i];
+	    qt_audio[2*i+1] = qt2[i];
+	}
+    } else {
+	/* mono */
+	quicktime_decode_audio(qt,qt_audio,NULL,periodsize/4,0);
+    }
+
+    while ((pcmreturn = snd_pcm_writei(pcm_handle, (void *)qt_audio, frames)) < 0) {
+	if (pcmreturn == -EAGAIN) snd_pcm_wait(pcm_handle, 1000);
+	else {
+	    snd_pcm_prepare(pcm_handle);
+	    fprintf(stderr, "<<<<<<<<<<<<<<< Buffer Underrun >>>>>>>>>>>>>>>\n");
+	}
+    }
+
+    if (pcmreturn == -EAGAIN) snd_pcm_wait(pcm_handle, 1000);
+    
+    if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) && 0 == qt_offset) {
+	snd_pcm_drain(pcm_handle);	
+	return -1;
+    }
+#endif
+
+  return 0;
+}
+
+static int qt_oss_audio_write(void)
 {
     long pos;
     int rc,i;
@@ -846,7 +1035,7 @@ static int qt_audio_write(void)
 
     if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) &&
 	0 == qt_offset)
-	return -1;
+       return -1;
     return 0;
 }
 
@@ -856,6 +1045,7 @@ static int qt_audio_write(void)
 struct ARGS {
     int  xv;
     int  gl;
+    int  alsa;
 } args;
 
 XtResource args_desc[] = {
@@ -871,6 +1061,11 @@ XtResource args_desc[] = {
 	XtCValue, XtRInt, sizeof(int),
 	XtOffset(struct ARGS*,gl),
 	XtRString, "1"
+    },{
+	"alsa",
+	XtCValue, XtRInt, sizeof(int),
+	XtOffset(struct ARGS*,alsa),
+	XtRString, "1"
     }
 };
 const int args_count = XtNumber(args_desc);
@@ -878,6 +1073,7 @@ const int args_count = XtNumber(args_desc);
 XrmOptionDescRec opt_desc[] = {
     { "-noxv",  "xv", XrmoptionNoArg,  "0" },
     { "-nogl",  "gl", XrmoptionNoArg,  "0" },
+    { "-noalsa",  "alsa", XrmoptionNoArg,  "0" },
 };
 const int opt_count = (sizeof(opt_desc)/sizeof(XrmOptionDescRec));
 
@@ -898,6 +1094,7 @@ static void usage(FILE *fp, char *prog)
 	    "options:\n"
 	    "  -noxv   don't use the Xvideo extention\n"
 	    "  -nogl   don't use OpenGL\n"
+	    "  -noalsa don't use Alsa\n"
 	    "\n",
 	    prog);
 }
@@ -946,6 +1143,9 @@ int main(int argc, char *argv[])
 			      args_desc,args_count,
 			      NULL,0);
 
+    /* don't use alsa*/			      
+    if (!args.alsa) use_alsa=0;
+			      
     /* open file */
     if (argc < 2) {
 	usage(stderr,argv[0]);
@@ -963,6 +1163,7 @@ int main(int argc, char *argv[])
 				     XtNheight, qt_height,
 				     NULL);
     XtAddEventHandler(simple,StructureNotifyMask, True, resize_ev, NULL);
+
     x11_init();
     if (args.xv && qt_hasvideo)
 	xv_init();
@@ -997,9 +1198,11 @@ int main(int argc, char *argv[])
 	    FD_SET(ConnectionNumber(dpy),&rd);
 	    max = ConnectionNumber(dpy);
 	    if (qt_hasaudio) {
-		FD_SET(oss_fd,&wr);
-		if (oss_fd > max)
-		    max = oss_fd;
+		if (use_alsa == 0) {
+		    FD_SET(oss_fd,&wr);
+		    if (oss_fd > max)
+			max = oss_fd;
+		}
 	    }
 	    if (qt_hasvideo) {
 		qt_frame_delay(&start,&wait);
@@ -1008,14 +1211,20 @@ int main(int argc, char *argv[])
 		wait.tv_usec = 0;
 	    }
 	    rc = select(max+1,&rd,&wr,NULL,&wait);
-	    if (qt_hasaudio && FD_ISSET(oss_fd,&wr))
-		if (0 != qt_audio_write())
-		    break;
-	    if (qt_hasvideo && 0 == rc)
-		if (0 != qt_frame_blit())
-		    break;
+	    if (qt_hasaudio) {
+		if (use_alsa == 1) {
+		    if (0 != qt_alsa_audio_write()) break;
+		}
+		else if (FD_ISSET(oss_fd,&wr)) { 
+		    if (0 != qt_oss_audio_write()) break;
+		}
+	    }
+	    if (qt_hasvideo && 0 == rc) {
+		if (0 != qt_frame_blit()) break;
+	    }
 	}
     }
     qt_cleanup();    
     return 0;
 }
+

@@ -194,7 +194,24 @@ dnl
 dnl Check for optional libraries
 dnl 
 
+dnl
+dnl Check for Alsa
+dnl
 
+have_libalsa="false"
+
+AH_TEMPLATE([HAVE_ALSA], [Do we have Alsa?])
+
+ALSA_REQUIRED="0.9"
+PKG_CHECK_MODULES(ALSA, alsa >= $ALSA_REQUIRED, have_alsa="true", have_alsa="false")
+AM_CONDITIONAL(HAVE_ALSA, test x$have_alsa = xtrue)
+
+if test x$have_alsa = xtrue; then
+AC_DEFINE(HAVE_ALSA,1)
+fi
+
+ALSA_CFLAGS="$ALSA_CFLAGS"
+AC_SUBST(ALSA_CFLAGS)
 
 dnl
 dnl Check for gtk
@@ -747,4 +764,11 @@ echo "Yes"
 else
 echo "Missing"
 fi
+
+echo -n "Alsa        "
+if test x$have_alsa = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi  
 
