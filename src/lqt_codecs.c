@@ -472,8 +472,10 @@ static void update_frame_position(quicktime_video_map_t * track)
 
   if(track->stts_count >=
      track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_count)
+    {
     track->stts_index++;
-  
+    track->stts_count = 0;
+    }
   track->current_position++;
   }
 

@@ -727,7 +727,7 @@ extern int get_num_codecs()
 
 static void set_codec_info(struct CODECIDMAP * map)
   {
-  char * capabilities = (char*)0;
+  // char * capabilities = (char*)0;
 
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
@@ -737,27 +737,31 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
-    capabilities = "Codec";
+    //    capabilities = "Codec";
     }
   else if(map->encoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = NULL;
-    capabilities = "Encoder";
+    //    capabilities = "Encoder";
     }
   else if(map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_DECODE;
     codec_info_ffmpeg.encoding_parameters = NULL;
     codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
-    capabilities = "Decoder";
+    //    capabilities = "Decoder";
     }
 
   snprintf(ffmpeg_name, 50, "ffmpeg_%s", map->short_name);
-  snprintf(ffmpeg_long_name, 50, "FFMPEG %s %s", map->name, capabilities);
-  snprintf(ffmpeg_description, 100, "FFMPEG %s %s", map->name, capabilities);
+  //  snprintf(ffmpeg_long_name, 50, "FFMPEG %s %s", map->name, capabilities);
+  //  snprintf(ffmpeg_description, 100, "FFMPEG %s %s", map->name, capabilities);
 
+  snprintf(ffmpeg_long_name, 50, "FFMPEG %s", map->name);
+  snprintf(ffmpeg_description, 100, "FFMPEG %s", map->name);
+
+  
   if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
      (map->decoder && (map->decoder->type == CODEC_TYPE_VIDEO))){
        codec_info_ffmpeg.type = LQT_CODEC_VIDEO;

@@ -129,18 +129,23 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
                                  int64_t * stts_index, int64_t * stts_count)
   {
   int64_t ret = 0;
-  int64_t sample_count = 0;
-  *stts_index = 0;
-  
+  int64_t sample_count;
+
   if(sample < 0)
     {
-    for(*stts_index = 0; *stts_index < stts->total_entries; *stts_index++)
+    for(*stts_index = 0; *stts_index < stts->total_entries; (*stts_index)++)
       {
       ret += stts->table[*stts_index].sample_duration *
         stts->table[*stts_index].sample_count;
       }
     return ret;
     }
+
+  *stts_index = 0;
+  //  *stts_count = 0;
+
+  sample_count = 0;
+  
   while(1)
     {
     if(sample_count + stts->table[*stts_index].sample_count > sample)
@@ -153,7 +158,7 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
     else
       {
       sample_count += stts->table[*stts_index].sample_count;
-      ret += stts->table[*stts_index].sample_duration;
+      ret += stts->table[*stts_index].sample_count * stts->table[*stts_index].sample_duration;
       (*stts_index)++;
       }
     }
