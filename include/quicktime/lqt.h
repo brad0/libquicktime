@@ -118,7 +118,7 @@ int lqt_decode_video(quicktime_t *file,
  */
 
 int lqt_frame_duration(quicktime_t * file, int track, int *constant);
-
+  
 /*
  *  Return the timestamp of the NEXT frame to be decoded.
  *  Call this BEFORE one of the decoding functions.

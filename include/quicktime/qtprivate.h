@@ -40,6 +40,10 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+/* Forward declarations */
+
+typedef struct quicktime_strl_s quicktime_strl_t;
+
 typedef struct
 {
 /* for AVI it's the end of the 8 byte header in the file */
@@ -509,6 +513,7 @@ typedef struct
 	quicktime_tkhd_t tkhd;
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
+        quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
 } quicktime_trak_t;
 
 
@@ -638,15 +643,35 @@ typedef struct
         quicktime_indxtable_t *table;
 } quicktime_indx_t;
 
-typedef struct
+struct quicktime_strl_s
 {
         quicktime_atom_t atom;
 /* Super index for reading */
         quicktime_indx_t indx;
-/* AVI needs header placeholders before anything else is written */
-        int64_t length_offset;
-        int64_t samples_per_chunk_offset;
-        int64_t sample_size_offset;
+/* LIBQUICKTIME: These are the important values to make proper audio
+   headers. They are set by the ENCODER in the encode-functions before
+   writing the first audio chunk (i.e. after a call to quicktime_set_avi) */
+
+        /* strh stuff */
+
+        int64_t  dwScaleOffset;
+        uint32_t dwScale;
+
+        uint32_t dwRate;
+
+        int64_t  dwLengthOffset;
+
+        int64_t dwSampleSizeOffset;
+        uint32_t dwSampleSize;
+
+        /* WAVEFORMATEX stuff */
+
+        uint16_t nBlockAlign;
+
+        int64_t nAvgBytesPerSecOffset;
+        uint32_t nAvgBytesPerSec;
+
+        uint16_t wBitsPerSample;
 /* Start of indx header for later writing */
         int64_t indx_offset;
 /* Size of JUNK without 8 byte header which is to be replaced by indx */
@@ -658,7 +683,7 @@ typedef struct
         int is_video;
 /* Notify reader the super indexes are valid */
         int have_indx;
-} quicktime_strl_t;
+};
 
 typedef struct
 {
@@ -713,6 +738,8 @@ typedef struct
 	long current_chunk;      /* current chunk in output file */
 
 	void *codec;
+
+
 } quicktime_audio_map_t;
 
 typedef struct

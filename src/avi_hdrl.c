@@ -160,7 +160,7 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 		if(trak->mdia.minf.is_video)
 		{
 			int length;
-			quicktime_set_position(file, strl->length_offset);
+			quicktime_set_position(file, strl->dwLengthOffset);
 			total_frames = length = quicktime_track_samples(file, trak);
 			quicktime_write_int32_le(file, length);
 			frame_rate = (double)trak->mdia.mdhd.time_scale /
@@ -170,21 +170,23 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 		if(trak->mdia.minf.is_audio)
 		{
 			int length, samples_per_chunk;
-			quicktime_set_position(file, strl->length_offset);
+			quicktime_set_position(file, strl->dwLengthOffset);
 			length = quicktime_track_samples(file, trak);
 			quicktime_write_int32_le(file, length);
-			quicktime_set_position(file, strl->samples_per_chunk_offset);
+			quicktime_set_position(file, strl->dwScaleOffset);
 
-			samples_per_chunk = quicktime_avg_chunk_samples(file, trak);
-			quicktime_write_int32_le(file, 
-				samples_per_chunk);
-			quicktime_write_int32_le(file, 
-				samples_per_chunk *
-				trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+			quicktime_write_int32_le(file, strl->dwScale);
+			quicktime_write_int32_le(file, strl->dwRate);
 
-			quicktime_set_position(file, strl->sample_size_offset);
-			quicktime_write_int32_le(file, 
-				trak->mdia.minf.stbl.stsd.table[0].sample_size);
+			quicktime_set_position(file, strl->dwSampleSizeOffset);
+			quicktime_write_int32_le(file, strl->dwSampleSize);
+
+                        quicktime_set_position(file, strl->nAvgBytesPerSecOffset);
+                        quicktime_write_int32_le(file, strl->nAvgBytesPerSec);
+			quicktime_write_int16_le(file, strl->nBlockAlign);
+                        quicktime_write_int16_le(file, strl->wBitsPerSample);
+                        
+                        
 		}
 	}
 

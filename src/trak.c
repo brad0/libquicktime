@@ -250,6 +250,11 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 		quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
 		int i;
 		long total = 0;
+                /* Get this from the AVI header */
+                if(trak->strl)
+                  {
+                  //                  total = 
+                  }
                 /* LQT: Make this correct for VBR files */
                 if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
                   {

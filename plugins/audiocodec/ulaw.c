@@ -13,7 +13,8 @@ typedef struct
 	unsigned char *int16toulaw_ptr;
 	unsigned char *read_buffer;
 	long read_size;
-} quicktime_ulaw_codec_t;
+        int encode_initialized;
+  } quicktime_ulaw_codec_t;
 
 /* ==================================== private for ulaw */
 
@@ -276,6 +277,24 @@ static int quicktime_encode_ulaw(quicktime_t *file,
 	quicktime_audio_map_t *track_map = &file->atracks[track];
 	quicktime_trak_t *trak = track_map->track;
 
+        if(!codec->encode_initialized)
+          {
+          if(trak->strl)
+            {
+            /* strh stuff */
+            trak->strl->dwRate = trak->mdia.minf.stbl.stsd.table[0].sample_rate * track_map->channels;
+            trak->strl->dwScale = track_map->channels;
+            trak->strl->dwSampleSize = 1;
+            
+            /* WAVEFORMATEX stuff */
+            
+            trak->strl->nBlockAlign = trak->strl->dwScale;
+            trak->strl->nAvgBytesPerSec =  trak->strl->dwRate;
+            trak->strl->wBitsPerSample = 8;
+            }
+          codec->encode_initialized = 1;
+          }
+        
 	result = ulaw_init_int16toulaw(file, track);
 	result += ulaw_get_read_buffer(file, track, samples);
 

@@ -10,7 +10,8 @@ typedef struct
 	char *work_buffer;
 	long buffer_size;
         int le; /* For 8 bits means unsigned operation, for more bits, little endian */
-} quicktime_twos_codec_t;
+        int encode_initialized;
+  } quicktime_twos_codec_t;
 
 static int byte_order(void)
 {                /* 1 if little endian */
@@ -26,18 +27,12 @@ static int get_work_buffer(quicktime_t *file, int track, long bytes)
 {
 	quicktime_twos_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
 
-	if(codec->work_buffer && codec->buffer_size != bytes)
-	{
-		free(codec->work_buffer);
-		codec->work_buffer = 0;
-	}
-	
-	if(!codec->work_buffer) 
-	{
-		codec->buffer_size = bytes;
-		if(!(codec->work_buffer = malloc(bytes))) return 1;
-	}
-	return 0;
+        if(codec->buffer_size < bytes)
+          {
+          codec->buffer_size = bytes + 128;
+          codec->work_buffer = realloc(codec->work_buffer, codec->buffer_size);
+          }
+        return 0;
 }
 
 /* =================================== public for twos */
@@ -216,19 +211,40 @@ static int encode(quicktime_t *file,
 {
 	int result = 0;
 	long i, j, offset;
+        quicktime_trak_t *trak;
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_twos_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 	int step = track_map->channels * quicktime_audio_bits(file, track) / 8;
 	int sample;
 	float sample_f;
+        int bits = quicktime_audio_bits(file, track);
+        
+        if(!codec->encode_initialized)
+          {
+          trak = track_map->track;
+          if(trak->strl)
+            {
+            /* strh stuff */
+            trak->strl->dwRate = (trak->mdia.minf.stbl.stsd.table[0].sample_rate * track_map->channels * bits) / 8;
+            trak->strl->dwScale = (track_map->channels * bits) / 8;
+            trak->strl->dwSampleSize = bits/8;
+            
+            /* WAVEFORMATEX stuff */
+            
+            trak->strl->nBlockAlign = trak->strl->dwScale;
+            trak->strl->nAvgBytesPerSec =  trak->strl->dwRate;
+            trak->strl->wBitsPerSample = bits;
+            }
+          codec->encode_initialized = 1;
+          }
 
-	get_work_buffer(file, track, samples * step);
+        get_work_buffer(file, track, samples * step);
 
 	if(input_i)
 	{
 		for(i = 0; i < track_map->channels; i++)
 		{
-			switch(quicktime_audio_bits(file, track))
+			switch(bits)
 			{
 				case 8:
 					for(j = 0; j < samples; j++)

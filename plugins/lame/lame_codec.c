@@ -390,6 +390,22 @@ static int encode(quicktime_t *file,
       printf(" lame_init_params returned %d\n", result);
     //    codec->encoded_header = mpeg3_new_layer();
     codec->samples_per_frame = lame_get_framesize(codec->lame_global);
+
+    /* Initialize AVI header */
+
+    if(trak->strl)
+      {
+      /* strh stuff */
+      trak->strl->dwRate = codec->bitrate / 8;
+      trak->strl->dwScale = 1;
+      trak->strl->dwSampleSize = 1;
+      
+      /* WAVEFORMATEX stuff */
+      
+      trak->strl->nBlockAlign = 1;
+      trak->strl->nAvgBytesPerSec =  codec->bitrate / 8;
+      trak->strl->wBitsPerSample = 0;
+      }
     }
 
   /* Reallocate output if necessary */
