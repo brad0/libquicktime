@@ -16,7 +16,14 @@ static lqt_parameter_info_static_t encode_parameters_lame[] =
        val_default:        { 256000 },
        val_min:            0,
        val_max:            0,
-       stringlist_options: (char**)0
+     },
+     {
+       name:               "mp3_quality",
+       real_name:          "Quality (0 = best)",
+       type:               LQT_PARAMETER_INT,
+       val_default:        { 0 },
+       val_min:            0,
+       val_max:            9,
      },
      { /* End of paramaters */ }
   };
