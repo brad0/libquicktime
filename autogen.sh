@@ -3,15 +3,25 @@
 
 do_autogen () {
     echo "Doing autogen in $PWD... "
-    libtoolize --copy --force
-    autoheader
+    echo -n "aclocal..."
     aclocal
+    echo "done"
+    echo -n "libtoolize..."
+    libtoolize --automake --copy --force
+    echo "done"
+    echo -n "autoheader..."
+    autoheader
+    echo "done"
+    echo -n "autoconf..."
     autoconf
+    echo "done"
+    echo -n "automake"
     automake --foreign --add-missing
+    echo "done"
 }
 
 #Run this twice - rerun with auto generated files...
-# do_autogen
+do_autogen
 do_autogen
 
 echo "all done. You are now ready to run ./configure"
