@@ -414,8 +414,7 @@ dnl
 dnl Check for libjpeg
 dnl
 
-AH_TEMPLATE([HAVE_LIBJPEG],
-            [Do we have libjpeg installed?])
+AH_TEMPLATE([HAVE_LIBJPEG], [Do we have libjpeg installed?])
 
 have_libjpeg=false
 
@@ -460,6 +459,28 @@ AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
 
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
+
+
+dnl
+dnl Multithread support is now optional and
+dnl disabled by default
+dnl
+
+have_mt_jpeg=false
+
+AH_TEMPLATE([HAVE_MT_JPEG], [Multithreaded jpeg supported?])
+
+AC_ARG_ENABLE(mt-jpeg,
+    [  --enable-mt-jpeg        Enable multithreaded jpeg codec ],
+     [case "${enableval}" in
+       yes) have_mt_jpeg=true ;;
+       no) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-mt-jpeg) ;;
+     esac],[])
+
+if test x$have_mt_jpeg = xtrue; then
+AC_DEFINE(HAVE_MT_JPEG)
+fi
 
 dnl
 dnl Check for libavcodec (ffmpeg)

@@ -431,6 +431,7 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
     {
     fprintf(stderr, "module %s has to API version and is thus terribly old\n",
             plugin_filename);
+    dlclose(module);
     return ret;
     }
 
@@ -444,6 +445,7 @@ Libquicktime interface version %d\n",
             plugin_filename,
             codec_api_version_module,
             codec_api_version_us);
+    dlclose(module);
     return ret;
     }
   get_num_codecs = (int (*)())(dlsym(module, "get_num_codecs"));
@@ -452,6 +454,7 @@ Libquicktime interface version %d\n",
     {
     fprintf(stderr, "Symbol %s not found in %s\n",
             "get_num_codecs", plugin_filename);
+    dlclose(module);
     return ret;
     }
   
@@ -460,6 +463,7 @@ Libquicktime interface version %d\n",
     {
     fprintf(stderr, "Symbol %s not found in %s\n",
             "get_codec_info", plugin_filename);
+    dlclose(module);
     return ret;
     }
 
@@ -469,6 +473,7 @@ Libquicktime interface version %d\n",
   if(!num_codecs)
     {
     fprintf(stderr, "No codecs found\n");
+    dlclose(module);
     return ret;
     }
 
@@ -495,6 +500,7 @@ Libquicktime interface version %d\n",
     ret_end->file_time = time;
     }
   ret_end->next = (lqt_codec_info_t*)0;
+  dlclose(module);
   return ret;
   }
 

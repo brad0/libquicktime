@@ -275,6 +275,7 @@ GLOBAL(void) jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long
 }
 
 
+#ifdef HAVE_MT_JPEG
 static void create_init_mutex(pthread_mutex_t *m)
 	{
 #ifdef	__linux__
@@ -287,6 +288,7 @@ static void create_init_mutex(pthread_mutex_t *m)
 
 	pthread_mutex_init(m, p_attr);
 	}
+#endif
 
 static void reset_buffer(unsigned char **buffer, long *size, long *allocated)
 {
@@ -613,9 +615,13 @@ static void decompress_field(mjpeg_compressor *engine)
 		mjpeg->jpeg_color_model = BC_YUV444P;
 
 // Must be here because the color model isn't known until now
+#ifdef HAVE_MT_JPEG
 	pthread_mutex_lock(&(mjpeg->decompress_init));
+#endif
 	allocate_temps(mjpeg);
+#ifdef HAVE_MT_JPEG
 	pthread_mutex_unlock(&(mjpeg->decompress_init));
+#endif
 	get_rows(mjpeg, engine);
 
 
@@ -633,6 +639,7 @@ finish:
 	;
 }
 
+#ifdef HAVE_MT_JPEG
 void mjpeg_decompress_loop(mjpeg_compressor *engine)
 	{
 
@@ -656,6 +663,10 @@ void mjpeg_decompress_loop(mjpeg_compressor *engine)
 		pthread_cond_wait(&engine->input_cond, &engine->input_lock);
 		}
 	}
+
+#endif
+
+
 
 static void compress_field(mjpeg_compressor *engine)
 {
@@ -683,6 +694,8 @@ static void compress_field(mjpeg_compressor *engine)
 //printf("compress_field 2\n");
 }
 
+
+#ifdef HAVE_MT_JPEG
 void mjpeg_compress_loop(mjpeg_compressor *engine)
 	{
 
@@ -707,6 +720,7 @@ void mjpeg_compress_loop(mjpeg_compressor *engine)
 		}
 	pthread_exit(0);
 	}
+#endif
 
 static void delete_temps(mjpeg_t *mjpeg)
 {
@@ -733,6 +747,7 @@ mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
 	result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
 	result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
 
+#ifdef HAVE_MT_JPEG
 	create_init_mutex(&(result->input_lock));
 	pthread_cond_init(&result->input_cond, NULL);
 
@@ -741,6 +756,7 @@ mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
 
 	pthread_attr_init(&attr);
 	pthread_create(&(result->tid), &attr, (void*)mjpeg_decompress_loop, result);
+#endif 
 	return result;
 }
 
@@ -750,6 +766,7 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
          * Must honor the locking protocol to avoid a race condition with
          * the child going into the cond_wait state for more input
         */
+#ifdef HAVE_MT_JPEG
         pthread_mutex_lock(&engine->input_lock);
         engine->done = 1;
         pthread_cond_signal(&engine->input_cond);
@@ -760,6 +777,7 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
         pthread_mutex_destroy(&(engine->output_lock));
         pthread_cond_destroy(&engine->input_cond);
         pthread_cond_destroy(&engine->output_cond);
+#endif
 
 	jpeg_destroy_decompress(&(engine->jpeg_decompress));
 	delete_rows(engine);
@@ -822,6 +840,7 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 	result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
 	result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
 
+#ifdef HAVE_MT_JPEG
 	create_init_mutex(&(result->input_lock));
 	pthread_cond_init(&result->input_cond, NULL);
 
@@ -830,6 +849,7 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
 
 	pthread_attr_init(&attr);
 	pthread_create(&(result->tid), &attr, (void*)mjpeg_compress_loop, result);
+#endif
 	return result;
 }
 
@@ -839,6 +859,7 @@ void mjpeg_delete_compressor(mjpeg_compressor *engine)
 	 * Must honor the locking protocol to avoid a race condition with 
 	 * the child going into the cond_wait state for more input 
 	*/
+#ifdef HAVE_MT_JPEG
 	pthread_mutex_lock(&engine->input_lock);
 	engine->done = 1;
 	pthread_cond_signal(&engine->input_cond);
@@ -849,6 +870,7 @@ void mjpeg_delete_compressor(mjpeg_compressor *engine)
 	pthread_mutex_destroy(&(engine->output_lock));
 	pthread_cond_destroy(&engine->input_cond);
 	pthread_cond_destroy(&engine->output_cond);
+#endif
 
 	jpeg_destroy((j_common_ptr)&(engine->jpeg_compress));
 	if(engine->output_buffer) free(engine->output_buffer);
@@ -940,6 +962,8 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 
 /* Start the compressors on the image fields */
 	if(mjpeg->deinterlace) corrected_fields = 1;
+
+#ifdef HAVE_MT_JPEG
 	for(i = 0; i < corrected_fields; i++)
 	{
 		engine = mjpeg->compressors[i];
@@ -967,6 +991,22 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 		/* The cond wait would leave it locked - we're done so unlock */
 		pthread_mutex_unlock(&engine->output_lock);
 	}
+
+#else
+	/* run decompressors in current thread */
+	for(i = 0; i < corrected_fields; i++)
+	{
+		engine = mjpeg->compressors[i];
+		compress_field(engine);
+		append_buffer(&mjpeg->output_data, 
+			&mjpeg->output_size, 
+			&mjpeg->output_allocated,
+			mjpeg->compressors[i]->output_buffer, 
+			mjpeg->compressors[i]->output_size);
+		if(i == 0) mjpeg->output_field2 = mjpeg->output_size;
+	}	
+
+#endif
 
 	if(corrected_fields < mjpeg->fields)
 	{
@@ -1023,6 +1063,10 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 
 //printf("mjpeg_decompress 4\n");
 /* Start decompressors */
+
+#ifdef HAVE_MT_JPEG
+
+
 	for(i = 0; i < mjpeg->fields; i++)
 	{
 		engine = mjpeg->decompressors[i];
@@ -1035,9 +1079,11 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 		if	(i == 0 && !mjpeg->temp_data)
 		{
 			pthread_mutex_lock(&engine->output_lock);
-			while	(engine->output_ready == 0)
+			while	(engine->output_ready == 0){
+			    printf("decompress: WAIT\n");
 				pthread_cond_wait(&engine->output_cond,
 						  &engine->output_lock);
+			}
 	/* The cond wait would leave it locked - we're done so unlock */
 			pthread_mutex_unlock(&engine->output_lock);
 
@@ -1054,6 +1100,18 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 					  &engine->output_lock);
 		engine->output_ready = 0;
 	}
+
+#else
+	/* run decompressors in current thread */
+	for(i = 0; i < mjpeg->fields; i++)
+	{
+		engine = mjpeg->decompressors[i];
+		decompress_field(engine);
+
+	}
+
+#endif
+
 
 //printf("mjpeg_decompress 6\n");
 /* Convert colormodel */
@@ -1151,7 +1209,9 @@ mjpeg_t* mjpeg_new(int w,
 	result->quality = 80;
 	result->use_float = 0;
 
+#ifdef HAVE_MT_JPEG
 	create_init_mutex(&(result->decompress_init));
+#endif
 
 // Calculate coded dimensions
 // An interlaced frame with 4:2:0 sampling must be a multiple of 32

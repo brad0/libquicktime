@@ -23,6 +23,10 @@
 
 
 
+/* use a thread to run compressors / decompressors */
+// #define USE_THREAD 0
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,7 +36,10 @@ extern "C" {
 #include <stdio.h>
 #include <jpeglib.h>
 #include <png.h>       /* Need setjmp.h included by png.h */
-#include "pthread.h"
+
+#ifdef HAVE_MT_JPEG
+#include "pthread.h"   /* Make sure we only include pthread when necessary */
+#endif
 
 #define MAXFIELDS 2
 #define QUICKTIME_MJPA_MARKSIZE 40
@@ -68,9 +75,6 @@ typedef struct
 	struct jpeg_decompress_struct jpeg_decompress;
 	struct jpeg_compress_struct jpeg_compress;
 	struct mjpeg_error_mgr jpeg_error;
-	pthread_t tid;   /* ID of thread */
-	pthread_mutex_t input_lock, output_lock;
-	int done;     /* Flag to end */
 	int error;
 // Pointer to uncompressed YUV rows
 // [3 planes][downsampled rows][downsampled pixels]
@@ -79,9 +83,17 @@ typedef struct
 	unsigned char **mcu_rows[3];
 /* Height of the field */
 	int field_h; 
+
+/* Conditional compilation of pthread support */
+#ifdef HAVE_MT_JPEG
+	pthread_t tid;   /* ID of thread */
+	pthread_mutex_t input_lock, output_lock;
+	int done;     /* Flag to end */
+
 /* Added by libquicktime for portable multithread support */
         pthread_cond_t  input_cond, output_cond;
         int input_ready, output_ready;
+#endif
 } mjpeg_compressor;
 
 typedef struct
@@ -128,8 +140,10 @@ typedef struct
 	int rowspan;
 
 // Workarounds for thread unsafe libraries
+#ifdef HAVE_MT_JPEG
 	pthread_mutex_t decompress_init;
 	int decompress_initialized;
+#endif
 } mjpeg_t;
 
 
