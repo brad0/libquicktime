@@ -3,6 +3,7 @@
 #include <funcprotos.h>
 #include <quicktime/lqt.h>
 #include <lqt_codecinfo_private.h>
+#define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
 
 static int quicktime_delete_vcodec_stub(quicktime_video_map_t *vtrack)

@@ -17,10 +17,8 @@
 typedef enum
   {
     LQT_PARAMETER_INT,
-    LQT_PARAMETER_STRING
-
-    /* More types to be added */
-
+    LQT_PARAMETER_STRING,
+    LQT_PARAMETER_STRINGLIST /* String with options */
   } lqt_parameter_type_t;
 
 /*
@@ -53,8 +51,15 @@ typedef struct
 
   lqt_parameter_value_t val_min;
   lqt_parameter_value_t val_max;
-              
-  } lqt_codec_parameter_info_t;
+
+  /*
+   *  Possible options (only valid for LQT_STRINGLIST)
+   */
+  
+  int num_stringlist_options;
+  char ** stringlist_options;
+  
+  } lqt_parameter_info_t;
 
 /*
  *   This is the structre, returned by the plugin
@@ -88,10 +93,10 @@ struct lqt_codec_info_s
   char ** fourccs;
 
   int num_encoding_parameters;
-  lqt_codec_parameter_info_t * encoding_parameters;
+  lqt_parameter_info_t * encoding_parameters;
 
   int num_decoding_parameters;
-  lqt_codec_parameter_info_t * decoding_parameters;
+  lqt_parameter_info_t * decoding_parameters;
   
   /* The following members are set by libquicktime      */
   
@@ -104,7 +109,6 @@ struct lqt_codec_info_s
   };
 
 typedef struct lqt_codec_info_s lqt_codec_info_t;
-
 
 /* Global Entry points */
 

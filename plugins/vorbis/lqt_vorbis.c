@@ -2,49 +2,48 @@
 #include <quicktime/lqt_codecapi.h>
 #include "qtvorbis.h"
 
-static char * fourccs_vorbis[]  = { QUICKTIME_VORBIS };
+static char * fourccs_vorbis[]  = { QUICKTIME_VORBIS, (char*)0 };
 
-
-static lqt_codec_info_static_t codec_info_vorbis =
-  {
-    "vorbis",
-    "Ogg Vorbis audio codec",     /* Long name of the codec */
-    "Patent free audio codec (see http://www.vorbis.com)",      /* Description            */
-    
-    LQT_CODEC_AUDIO,
-    LQT_DIRECTION_BOTH
-    
-  };
-
-static lqt_codec_parameter_info_t encode_parameters_vorbis[] =
+static lqt_parameter_info_static_t encode_parameters_vorbis[] =
   {
      { 
-       "vorbis_bitrate",  /* Name for quicktime_set_parameter */
-       "Nominal Bitrate", /* Name for dialog boxes            */
-       LQT_PARAMETER_INT, /* Type                             */
-       { 128000 },        /* Default value                    */
-       {0},               /* Minimum value                    */
-       {0}                /* Maximum value                    */
+       name:               "vorbis_bitrate",
+       real_name:          "Nominal Bitrate",
+       type:               LQT_PARAMETER_INT,
+       val_default:        { 128000 },
+       val_min:            {0},
+       val_max:            {0},
+       stringlist_options: (char**)0
      },
      { 
-       "vorbis_max_bitrate",            /* Name for quicktime_set_parameter */
-       "Maximum Bitrate (-1: no limit)",/* Name for dialog boxes            */
-       LQT_PARAMETER_INT,               /* Type                             */
-       { -1 },                          /* Default value                    */
-       {0},                             /* Minimum value                    */
-       {0}                              /* Maximum value                    */
+       name:      "vorbis_max_bitrate",
+       real_name: "Maximum Bitrate (-1: no limit)",
+       type:      LQT_PARAMETER_INT,
+       val_default:        { -1 },
+       val_min:            {0},
+       val_max:            {0},
+       stringlist_options: (char**)0
      },
      { 
-       "vorbis_min_bitrate",            /* Name for quicktime_set_parameter */
-       "Minimum Bitrate (-1: no limit)",/* Name for dialog boxes            */
-       LQT_PARAMETER_INT,               /* Type                             */
-       { -1 },                          /* Default value                    */
-       {0},                             /* Minimum value                    */
-       {0}                              /* Maximum value                    */
+       name:      "vorbis_min_bitrate",
+       real_name: "Minimum Bitrate (-1: no limit)",
+       type:      LQT_PARAMETER_INT,
+       val_default:        { -1 },
+       val_min:            {0},
+       val_max:            {0},
+       stringlist_options: (char**)0
      }
   };
 
-
+static lqt_codec_info_static_t codec_info_vorbis =
+  {
+    name:        "vorbis",
+    long_name:   "Ogg Vorbis audio codec",
+    description: "Patent free audio codec (see http://www.vorbis.com)",
+    fourccs:    fourccs_vorbis,
+    type:       LQT_CODEC_AUDIO,
+    direction:  LQT_DIRECTION_BOTH
+  };
 
 
 /* These are called from the plugin loader */
@@ -55,11 +54,10 @@ extern lqt_codec_info_t * get_codec_info(int index)
   {
   if(!index)
     return lqt_create_codec_info(&codec_info_vorbis,
-                                 fourccs_vorbis,
-                                 sizeof(fourccs_vorbis)/sizeof(char*),
                                  encode_parameters_vorbis,
-                                 sizeof(encode_parameters_vorbis)/sizeof(lqt_codec_parameter_info_t),
-                                 (const lqt_codec_parameter_info_t*)0,
+                                 sizeof(encode_parameters_vorbis)/
+                                 sizeof(lqt_parameter_info_static_t),
+                                 (const lqt_parameter_info_static_t*)0,
                                  0);
   
   return (lqt_codec_info_t*)0;

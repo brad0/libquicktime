@@ -59,6 +59,7 @@ static const char * module_file_time_key = "FileTime: ";
 
 static const char * type_int            = "Integer";
 static const char * type_string         = "String";
+static const char * type_stringlist     = "Stringlist";
 
 static const char * num_encoding_parameters_key  = "NumEncodingParameters: ";
 static const char * num_decoding_parameters_key  = "NumDecodingParameters: ";
@@ -68,6 +69,9 @@ static const char * min_value_key       = "ValueMin: ";
 static const char * max_value_key       = "ValueMax: ";
 
 static const char * real_name_key       = "RealName: ";
+
+static const char * num_options_key     = "NumOptions: ";
+static const char * option_key          = "Options: ";
 
 
 /* Returns a NULL terminated list of all codecs */
@@ -99,11 +103,12 @@ static void read_parameter_value(char * pos,
   }
 
 static void read_parameter_info(FILE * input,
-                                lqt_codec_parameter_info_t * info,
+                                lqt_parameter_info_t * info,
                                 char * line)
   {
   char * pos;
-
+  int options_read = 0;
+  
   /* First, get the name */
 
   pos = line + strlen(begin_parameter_e_key);
@@ -144,10 +149,17 @@ static void read_parameter_info(FILE * input,
         info->val_min.val_string = (char*)0;
         info->val_max.val_string = (char*)0;
         }
+      else if(!strcmp(pos, type_stringlist))
+        {
+        info->type = LQT_PARAMETER_STRING;
+        info->val_default.val_string = (char*)0;
+        info->val_min.val_string = (char*)0;
+        info->val_max.val_string = (char*)0;
+        }
       }
     else if(CHECK_KEYWORD(real_name_key))
       {
-      pos = line + strlen(type_key);
+      pos = line + strlen(real_name_key);
       info->real_name = __lqt_strdup(pos);
       }
 
@@ -166,6 +178,18 @@ static void read_parameter_info(FILE * input,
       {
       pos = line + strlen(max_value_key);
       read_parameter_value(pos, &(info->val_max), info->type);
+      }
+    else if(CHECK_KEYWORD(num_options_key))
+      {
+      pos = line + strlen(num_options_key);
+      info->num_stringlist_options = atoi(pos);
+      info->stringlist_options = calloc(info->num_stringlist_options,
+                                        sizeof(char*));
+      }
+    else if(CHECK_KEYWORD(option_key))
+      {
+      pos = line + strlen(option_key);
+      info->stringlist_options[options_read] = __lqt_strdup(pos);
       }
     else if(CHECK_KEYWORD(end_parameter_key))
       break;
@@ -299,10 +323,10 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       if(codec->num_encoding_parameters)
         codec->encoding_parameters =
           malloc(codec->num_encoding_parameters *
-                 sizeof(lqt_codec_parameter_info_t));
+                 sizeof(lqt_parameter_info_t));
       else
         codec->encoding_parameters =
-          (lqt_codec_parameter_info_t*)0;
+          (lqt_parameter_info_t*)0;
       }
     else if(CHECK_KEYWORD(num_decoding_parameters_key))
       {
@@ -311,10 +335,10 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       if(codec->num_decoding_parameters)
         codec->decoding_parameters =
           malloc(codec->num_decoding_parameters *
-                 sizeof(lqt_codec_parameter_info_t));
+                 sizeof(lqt_parameter_info_t));
       else
         codec->decoding_parameters =
-          (lqt_codec_parameter_info_t*)0;
+          (lqt_parameter_info_t*)0;
         
       }
     
@@ -424,10 +448,11 @@ lqt_codec_info_t * lqt_read_codec_file(const char * filename)
   }
 
 static void write_parameter_info(FILE * output,
-                                 const lqt_codec_parameter_info_t * info,
+                                 const lqt_parameter_info_t * info,
                                  int encode)
   {
   const char * tmp = (const char*)0;
+  int i;
   
   fprintf(output, "%s%s\n",
           (encode ? begin_parameter_e_key : begin_parameter_d_key),
@@ -440,6 +465,9 @@ static void write_parameter_info(FILE * output,
       break;
     case LQT_PARAMETER_STRING:
       tmp = type_string;
+      break;
+    case LQT_PARAMETER_STRINGLIST:
+      tmp = type_stringlist;
       break;
     }
 
@@ -463,6 +491,17 @@ static void write_parameter_info(FILE * output,
       break;
     case LQT_PARAMETER_STRING:
       fprintf(output, "%s%s\n", value_key, info->val_default.val_string);
+      break;
+    case LQT_PARAMETER_STRINGLIST:
+      fprintf(output, "%s%s\n", value_key, info->val_default.val_string);
+
+      /* 
+       *  Print options
+       */
+      fprintf(output, "%s%d\n", num_options_key, info->num_stringlist_options);
+      
+      for(i = 0; i < info->num_stringlist_options; i++)
+        fprintf(output, "%s%s\n", option_key, info->stringlist_options[i]);
       break;
     }
 

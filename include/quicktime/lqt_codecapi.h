@@ -1,7 +1,22 @@
+#include "version.h"
+
+/*
+ *  Return the codec api version. This function will be defined in every
+ *  sourcefile, which includes it. This means, that each module must
+ *  have exactly one sourcefile which includes it.
+ *  This file will be the lqt_* interface file of the module.
+ */
+
+#ifndef LQT_LIBQUICKTIME
+extern int get_codec_api_version() { return LQT_CODEC_API_VERSION; }
+#endif
+
 /*
  *  Functions and datatypes for exclusive
  *  use by codec modules
  */
+
+
 
 /*
  *   This defines the actual codec creation function,
@@ -10,6 +25,34 @@
 
 typedef void (* lqt_init_video_codec_func_t)(quicktime_video_map_t *);
 typedef void (* lqt_init_audio_codec_func_t)(quicktime_audio_map_t *);
+
+typedef struct
+  {
+  /* Parameter name (to be passed to quicktime_set_parameter() ) */
+  
+  char * name;
+  char * real_name; /* Other name (for making dialogs) */
+  
+  lqt_parameter_type_t type;
+    
+  lqt_parameter_value_t val_default;
+
+  /*
+   *   Minimum and maximum values:
+   *   These are only valid for numeric types and if val_min < val_max
+   */
+
+  lqt_parameter_value_t val_min;
+  lqt_parameter_value_t val_max;
+
+  /*
+   *  Possible options (only valid for LQT_STRINGLIST)
+   *  NULL terminated
+   */
+  
+  char ** stringlist_options;
+  
+  } lqt_parameter_info_static_t;
 
 /*
  *   This holds the parts of the codec_info structure,
@@ -22,8 +65,13 @@ typedef struct
   char * long_name;          /* Long name of the codec         */
   char * description;        /* Description                    */
 
+  /* Fourccs, NULL terminated */
+  
+  char ** fourccs;
+  
   lqt_codec_type type;
   lqt_codec_direction direction;
+
   } lqt_codec_info_static_t;
 
 
@@ -45,10 +93,11 @@ typedef struct
 
 lqt_codec_info_t *
 lqt_create_codec_info(const lqt_codec_info_static_t * template,
-                      char * fourccs[], int num_fourccs,
-                      const lqt_codec_parameter_info_t * encoding_parameters,
+                      const lqt_parameter_info_static_t *
+                      encoding_parameters,
                       int num_encoding_parameters,
-                      const lqt_codec_parameter_info_t * decoding_parameters,
+                      const lqt_parameter_info_static_t *
+                      decoding_parameters,
                       int num_decoding_parameters);
 
 

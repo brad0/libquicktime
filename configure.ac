@@ -9,6 +9,19 @@ AM_MAINTAINER_MODE
 AC_LIBTOOL_PICMODE
 
 dnl
+dnl Libquicktime codec API version
+dnl 
+
+LQT_CODEC_API_VERSION="0"
+
+AH_TEMPLATE([LQT_CODEC_API_VERSION],
+            [Libquicktime codec API version])
+
+AC_DEFINE(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
+AC_SUBST(LQT_CODEC_API_VERSION)
+
+
+dnl
 dnl set GMERLIN to "true" for gmerlin compilation
 dnl
 
@@ -487,6 +500,7 @@ AC_OUTPUT([Makefile \
 src/Makefile \
 include/Makefile \
 include/quicktime/Makefile \
+include/quicktime/version.h \
 plugins/Makefile \
 plugins/dv/Makefile \
 plugins/mjpeg/Makefile \

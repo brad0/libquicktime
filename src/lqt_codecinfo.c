@@ -3,16 +3,28 @@
 
 #include <dlfcn.h>
 
+#include <pthread.h>
+
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
-
 #include <quicktime/lqt.h>
 
 #include <lqt_codecinfo_private.h>
+
+/*
+ *  Define LQT_LIBQUICKTIME to prevent compiling the
+ *  get_codec_api_version() function
+ */
+
+#define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
+
+/* Public function (lqt.h) */
+
+int lqt_get_codec_api_version() { return LQT_CODEC_API_VERSION; }
 
 /*
  *  Quick and dirty strdup function for the case it's not there
@@ -26,7 +38,7 @@ static char * __lqt_strdup(const char * string)
   }
 
 /*
- *  Codec Database
+ *  Codec Registry
  */
 
 int lqt_num_audio_codecs = 0;
@@ -35,16 +47,48 @@ int lqt_num_video_codecs = 0;
 lqt_codec_info_t * lqt_audio_codecs = (lqt_codec_info_t*)0;
 lqt_codec_info_t * lqt_video_codecs = (lqt_codec_info_t*)0;
 
-void destroy_parameter_info(lqt_codec_parameter_info_t * p)
+static int mutex_initialized = 0;
+pthread_mutex_t codecs_mutex;
+
+/*
+ *  Lock and unlock the codec registry
+ */
+
+void lqt_codecs_lock()
   {
+  if(!mutex_initialized)
+    pthread_mutex_init(&codecs_mutex, (pthread_mutexattr_t *)0);
+
+  pthread_mutex_lock(&codecs_mutex);
+  }
+
+void lqt_codecs_unlock()
+  {
+  pthread_mutex_unlock(&codecs_mutex);
+  }
+
+void destroy_parameter_info(lqt_parameter_info_t * p)
+  {
+  int i;
   if(p->name)
     free(p->name);
   if(p->real_name)
     free(p->real_name);
-  if(p->type == LQT_PARAMETER_STRING)
+
+  switch(p->type)
     {
-    if(p->val_default.val_string)
-      free(p->val_default.val_string);
+    case LQT_PARAMETER_STRING:
+      if(p->val_default.val_string)
+        free(p->val_default.val_string);
+    case LQT_PARAMETER_STRINGLIST:
+      if(p->val_default.val_string)
+        free(p->val_default.val_string);
+      if(p->stringlist_options)
+        {
+        for(i = 0; i < p->num_stringlist_options; i++)
+          free(p->stringlist_options[i]);
+        free(p->stringlist_options);
+        }
     }
   }
 
@@ -171,8 +215,12 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
   int i;
 
   int num_codecs;
-  
+
+  int codec_api_version_module;
+  int codec_api_version_us = lqt_get_codec_api_version();
+    
   int (*get_num_codecs)();
+  int (*get_codec_api_version)();
   lqt_codec_info_t * (*get_codec_info)(int);
   
   lqt_codec_info_t * ret = (lqt_codec_info_t*)0;
@@ -198,6 +246,29 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
 
   /* Now, get the codec parameters */
 
+  /* Check the api version */
+
+  get_codec_api_version = (int (*)())(dlsym(module, "get_codec_api_version"));
+
+  if(!get_codec_api_version)
+    {
+    fprintf(stderr, "module %s has to API version and is thus terribly old\n",
+            plugin_filename);
+    return ret;
+    }
+
+  codec_api_version_module = get_codec_api_version();
+
+  if(codec_api_version_module != codec_api_version_us)
+    {
+    fprintf(stderr, "Codec interface version mismatch of module %s\n\
+Module interface version       %d\n\
+Libquicktime interface version %d\n", 
+            plugin_filename,
+            codec_api_version_module,
+            codec_api_version_us);
+    return ret;
+    }
   get_num_codecs = (int (*)())(dlsym(module, "get_num_codecs"));
 
   if(!get_num_codecs)
@@ -528,41 +599,81 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index)
   }
 
 static void 
-copy_parameter_info(lqt_codec_parameter_info_t * ret,
-                    const lqt_codec_parameter_info_t * i)
+copy_parameter_info(lqt_parameter_info_t * ret,
+                    const lqt_parameter_info_static_t * info)
   {
-  ret->name = __lqt_strdup(i->name); /* Parameter name  */
-  ret->real_name = __lqt_strdup(i->real_name); /* Parameter name  */
+  int i;
+  ret->name = __lqt_strdup(info->name);           /* Parameter name  */
+  ret->real_name = __lqt_strdup(info->real_name); /* Parameter name  */
 
-  ret->type = i->type;
+  ret->type = info->type;
 
   switch(ret->type)
     {
     case LQT_PARAMETER_INT:
-      ret->val_default.val_int = i->val_default.val_int;
-      ret->val_min.val_int = i->val_min.val_int;
-      ret->val_max.val_int = i->val_max.val_int;
+      ret->val_default.val_int = info->val_default.val_int;
+      ret->val_min.val_int = info->val_min.val_int;
+      ret->val_max.val_int = info->val_max.val_int;
       break;
     case LQT_PARAMETER_STRING:
-      ret->val_default.val_string = __lqt_strdup(i->val_default.val_string);
+      ret->val_default.val_string = __lqt_strdup(info->val_default.val_string);
+      break;
+    case LQT_PARAMETER_STRINGLIST:
+      ret->val_default.val_string = __lqt_strdup(info->val_default.val_string);
+      if(!info->stringlist_options)
+        {
+        fprintf(stderr, "Stringlist parameter %s has NULL options\n",
+                info->name);
+        return;
+        }
+
+      /* Count the options */
+
+      ret->num_stringlist_options = 0;
+      
+      while(1)
+        {
+        if(info->stringlist_options[ret->num_stringlist_options])
+          ret->num_stringlist_options++;
+        else
+          break;
+        }
+
+      /* Now, copy them */
+
+      ret->stringlist_options = malloc(ret->num_stringlist_options);
+      for(i = 0; i < ret->num_stringlist_options; i++)
+        {
+          ret->stringlist_options[i] =
+          __lqt_strdup(info->stringlist_options[i]);
+        }
       break;
     default:
       break;
     }
+  
   }
 
 
 lqt_codec_info_t *
 lqt_create_codec_info(const lqt_codec_info_static_t * template,
-                      char * fourccs[],
-                      int num_fourccs,
-                      const lqt_codec_parameter_info_t * encoding_parameters,
+                      const lqt_parameter_info_static_t *
+                      encoding_parameters,
                       int num_encoding_parameters,
-                      const lqt_codec_parameter_info_t * decoding_parameters,
+                      const lqt_parameter_info_static_t *
+                      decoding_parameters,
                       int num_decoding_parameters)
   {
   int i;
-  lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
+  lqt_codec_info_t * ret;
+
+  if(!template->fourccs)
+    {
+    fprintf(stderr, "Codec %s has no fourccs defined\n", template->name);
+    return (lqt_codec_info_t*)0;
+    }
+  
+  ret = calloc(1, sizeof(lqt_codec_info_t));
 
   ret->name = __lqt_strdup(template->name);
   ret->long_name = __lqt_strdup(template->long_name);
@@ -571,21 +682,25 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template,
   ret->type      = template->type;
   ret->direction = template->direction;
 
-  ret->num_fourccs = num_fourccs;
-  if(num_fourccs)
+  
+  ret->num_fourccs = 0;
+  while(1)
     {
-    ret->fourccs = malloc(num_fourccs * sizeof(char*));
-    for(i = 0; i < num_fourccs; i++)
-      ret->fourccs[i] = __lqt_strdup(fourccs[i]);
+    if(template->fourccs[ret->num_fourccs])
+      ret->num_fourccs++;
+    else
+      break;
     }
-  else /* This should never happen */
-    ret->fourccs = (char**)0;
+
+  ret->fourccs = malloc(ret->num_fourccs * sizeof(char*));
+  for(i = 0; i < ret->num_fourccs; i++)
+    ret->fourccs[i] = __lqt_strdup(template->fourccs[i]);
   
   ret->num_encoding_parameters = num_encoding_parameters;
   if(num_encoding_parameters)
     {
     ret->encoding_parameters =
-      malloc(num_encoding_parameters * sizeof(lqt_codec_parameter_info_t));
+      calloc(num_encoding_parameters, sizeof(lqt_parameter_info_t));
     for(i = 0; i < num_encoding_parameters; i++)
       {
       /* Copy parameter info */
@@ -595,14 +710,14 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template,
     }
   else
     {
-    ret->encoding_parameters = (lqt_codec_parameter_info_t*)0;
+    ret->encoding_parameters = (lqt_parameter_info_t*)0;
     }
 
   ret->num_decoding_parameters = num_decoding_parameters;
   if(num_decoding_parameters)
     {
-    ret->decoding_parameters = malloc(num_decoding_parameters *
-                                      sizeof(lqt_codec_parameter_info_t));
+    ret->decoding_parameters = calloc(num_decoding_parameters,
+                                      sizeof(lqt_parameter_info_t));
     for(i = 0; i < num_decoding_parameters; i++)
       {
       /* Copy parameter info */
@@ -612,16 +727,14 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template,
     }
   else
     {
-    ret->decoding_parameters = (lqt_codec_parameter_info_t*)0;
+    ret->decoding_parameters = (lqt_parameter_info_t*)0;
     }
-
-  
   return ret;
-    
   }
 
-static void dump_codec_parameter(lqt_codec_parameter_info_t * p)
+static void dump_codec_parameter(lqt_parameter_info_t * p)
   {
+  int i;
   fprintf(stderr, "Parameter: %s (%s) ", p->name,
           p->real_name);
   fprintf(stderr, "Type: ");
@@ -641,9 +754,17 @@ static void dump_codec_parameter(lqt_codec_parameter_info_t * p)
       fprintf(stderr, "String, Default Value : %s\n",
               (p->val_default.val_string ? p->val_default.val_string : "NULL"));
       break;
+    case LQT_PARAMETER_STRINGLIST:
+      fprintf(stderr, "Stringlist, Default Value : %s\n",
+              (p->val_default.val_string ? p->val_default.val_string :
+               "NULL"));
+      fprintf(stderr, "Options: ");
+      for(i = 0; i < p->num_stringlist_options; i++)
+        fprintf(stderr, "%s ", p->stringlist_options[i]);
+      fprintf(stderr, "\n");
+      break;
     }
   }
-
 
 void lqt_dump_codec_info(const lqt_codec_info_t * info)
   {
@@ -694,8 +815,6 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
   fprintf(stderr, "Module filename: %s\nIndex inside module: %d\n",
           info->module_filename, info->module_index);
   }
-
-
 
 #define MATCH_FOURCC(a, b) \
 ( ( a[0]==b[0] ) && \

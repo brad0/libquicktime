@@ -59,3 +59,5 @@ str[4] = fourcc & 0x00;
 lqt_codec_info_t * lqt_find_audio_codec(char * fourcc, int encode);
 lqt_codec_info_t * lqt_find_video_codec(char * fourcc, int encode);
 
+void lqt_codecs_lock();
+void lqt_codecs_unlock();
