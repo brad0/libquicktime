@@ -736,7 +736,9 @@ static void delete_temps(mjpeg_t *mjpeg)
 mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
 {
 	mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
+#ifdef HAVE_MT_JPEG
 	pthread_attr_t  attr;
+#endif
 
 	result->mjpeg = mjpeg;
 	result->instance = instance;
