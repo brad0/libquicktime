@@ -237,6 +237,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_includedir}/quicktime
 %attr(755,root,root) %{_bindir}/lqt-config
 %attr(755,root,root) %{_datadir}/aclocal/lqt.m4
+%attr(644,root,root) %{_libdir}/pkgconfig/libquicktime.pc
 
 %files plugincfg
 %attr(755,root,root) %{_bindir}/libquicktime_config
