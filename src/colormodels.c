@@ -17,7 +17,7 @@
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <funcprotos.h>
 
 cmodel_yuv_t *yuv_table = 0;
 

@@ -6,6 +6,14 @@
 #include <lqt_funcprotos.h>
 #include <cmodel_permutation.h>
 
+/* Stuff from elst.c */
+void quicktime_elst_init(quicktime_elst_t *elst);
+void quicktime_elst_delete(quicktime_elst_t *elst);
+void quicktime_elst_init_all(quicktime_elst_t *elst);
+void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst);
+void quicktime_elst_dump(quicktime_elst_t *elst);
+void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst, long duration);
+
 /* Stuff from cmodel_*.c */
 void cmodel_yuv420p(PERMUTATION_ARGS);
 void cmodel_yuv422(PERMUTATION_ARGS);

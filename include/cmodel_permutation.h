@@ -1837,8 +1837,8 @@ static inline void transfer_YUVA16161616_to_BGR888(unsigned char *(*output), uin
 
 static inline void transfer_YUVA16161616_to_RGB888(unsigned char *(*output), uint16_t *input)
 {
-	unsigned int y, u, v, a;
-	unsigned int r, g, b;
+	int y, u, v, a;
+	int r, g, b;
 	
 	a = input[3];
 	y = ((int)input[0]) << 8;
@@ -1859,8 +1859,8 @@ static inline void transfer_YUVA16161616_to_RGB888(unsigned char *(*output), uin
 
 static inline void transfer_YUVA16161616_to_RGBA8888(unsigned char *(*output), uint16_t *input)
 {
-	unsigned int y, u, v, a;
-	unsigned int r, g, b;
+	int y, u, v, a;
+	int r, g, b;
 	
 	a = input[3];
 	y = ((int)input[0]) << 8;
