@@ -986,7 +986,7 @@ static int qt_frame_decode(void)
 	qt_drop = 0;
     }
     qt_frame_time = lqt_frame_time(qt, 0);
-    fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
+//    fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
     lqt_decode_video(qt, qt_rows, 0);
 //    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
 //			    qt_cmodel,qt_rows,0);
