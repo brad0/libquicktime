@@ -224,12 +224,21 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 {
 	quicktime_ffmpeg_video_codec_t *codec;
 
+	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+        
 	avcodec_init();
 
 	codec = calloc(1, sizeof(quicktime_ffmpeg_video_codec_t));
 	if(!codec)
 	  return;
 
+	if(quicktime_match_32(compressor, "dvc "))
+	  codec->encode_colormodel = BC_YUV411P;
+        //        else if(quicktime_match_32(compressor, "dvcp"))
+        //          codec->encode_colormodel = BC_YUV411P;
+        else
+          codec->encode_colormodel = BC_YUV420P;
+        
 	codec->com.ffc_enc = encoder;
 	codec->com.ffc_dec = decoder;
         codec->lqt_colormodel = LQT_COLORMODEL_NONE;

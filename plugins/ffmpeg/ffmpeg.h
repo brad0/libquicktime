@@ -98,6 +98,8 @@ typedef struct
      obtain the stream colormodel */
 
   int have_frame;
+
+  int encode_colormodel;
   
   } quicktime_ffmpeg_video_codec_t;
 

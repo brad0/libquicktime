@@ -436,7 +436,11 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       
       if(buffer_size <= 0)
         return 0;
-      
+#if 0
+      fprintf(stderr, "Frame size: %d\n", buffer_size);
+
+      fprintf(stderr, "Decode video...");
+#endif 
       if(avcodec_decode_video(codec->com.ffcodec_dec,
                               codec->frame,
                               &got_pic,
@@ -446,6 +450,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         fprintf(stderr, "Skipping corrupted frame\n");
         continue;
         }
+      //      fprintf(stderr, "done\n");
       }
     }
   
@@ -455,6 +460,8 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       lqt_ffmpeg_get_lqt_colormodel(codec->com.ffcodec_dec->pix_fmt, &exact);
     if(!exact)
       codec->do_imgconvert = 1;
+    //    fprintf(stderr, "Detected stream colormodel: %s\n",
+    //            lqt_colormodel_to_string(codec->lqt_colormodel));
     }
   
   /*
@@ -783,10 +790,11 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
 		codec->write_buffer = malloc(codec->write_buffer_size);
 		if(!codec->write_buffer)
                   return -1;
+
 	}
         //        codec->lqt_colormodel = ffmepg_2_lqt(codec->com.ffcodec_enc);
         
-        if(file->vtracks[track].color_model != BC_YUV420P)
+        if(vtrack->color_model != codec->encode_colormodel)
           {
           if(!codec->encode_buffer)
             {
@@ -795,9 +803,23 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
           codec->frame->data[0] = codec->encode_buffer;
           codec->frame->data[1] = codec->frame->data[0] + width * height;
           codec->frame->data[2] = codec->frame->data[1] + (width * height) / 4;
+
           codec->frame->linesize[0] = width;
-          codec->frame->linesize[1] = width / 2;
-          codec->frame->linesize[2] = width / 2;
+          if(codec->encode_colormodel == BC_YUV420P)
+            {
+            codec->frame->linesize[1] = width / 2;
+            codec->frame->linesize[2] = width / 2;
+            }
+          else if(codec->encode_colormodel == BC_YUV411P)
+            {
+            codec->frame->linesize[1] = width / 4;
+            codec->frame->linesize[2] = width / 4;
+            }
+          else
+            {
+            fprintf(stderr, "Unsupported encoding colormodel, please report\n");
+            }
+                    
           cmodel_transfer(codec->frame->data, 
                           row_pointers,
                           codec->frame->data[0],
@@ -814,10 +836,10 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                           0, 
                           width, 
                           height,
-                          file->vtracks[track].color_model,
-                          BC_YUV420P, 
+                          vtrack->color_model,
+                          codec->encode_colormodel,
                           0,
-                          file->vtracks[track].row_span ? file->vtracks[track].row_span : width,
+                          vtrack->row_span ? vtrack->row_span : width,
                           width);
           }
         else
@@ -826,9 +848,29 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
           codec->frame->data[0] = row_pointers[0];
           codec->frame->data[1] = row_pointers[1];
           codec->frame->data[2] = row_pointers[2];
-          codec->frame->linesize[0] = file->vtracks[track].row_span ? file->vtracks[track].row_span : width;
-          codec->frame->linesize[1] = codec->frame->linesize[0]/2;
-          codec->frame->linesize[2] = codec->frame->linesize[0]/2;
+          codec->frame->linesize[0] = vtrack->row_span ? vtrack->row_span : width;
+          if(!vtrack->row_span_uv)
+            {
+            if(codec->encode_colormodel == BC_YUV420P)
+              {
+              codec->frame->linesize[1] = width / 2;
+              codec->frame->linesize[2] = width / 2;
+              }
+            else if(codec->encode_colormodel == BC_YUV411P)
+              {
+              codec->frame->linesize[1] = width / 4;
+              codec->frame->linesize[2] = width / 4;
+              }
+            else
+              {
+              fprintf(stderr, "Unsupported encoding colormodel, please report\n");
+              }
+            }
+          else
+            {
+            codec->frame->linesize[1] = vtrack->row_span_uv;
+            codec->frame->linesize[2] = vtrack->row_span_uv;
+            }
           }
         codec->frame->quality = codec->qscale;
 	bytes_encoded = avcodec_encode_video(codec->com.ffcodec_enc,
@@ -843,13 +885,13 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                                        bytes_encoded);
         quicktime_write_chunk_footer(file, 
                                      trak, 
-                                     file->vtracks[track].current_chunk,
+                                     vtrack->current_chunk,
                                      &chunk_atom, 
                                      1);
 
-	file->vtracks[track].current_chunk++;
+	vtrack->current_chunk++;
         if(codec->com.ffcodec_enc->coded_frame->key_frame)
-          quicktime_insert_keyframe(file, file->vtracks[track].current_position, track);
+          quicktime_insert_keyframe(file, vtrack->current_position, track);
         return result;
 }
 

@@ -212,7 +212,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int64_t offset = quicktime_position(file);
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_dv_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
@@ -229,6 +228,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	dv_color_space_t encode_dv_colormodel = 0;
         quicktime_atom_t chunk_atom;
 
+        //  fprintf(stderr, "Encoding %s\n", (isPAL ? "PAL" : "NTSC"));
+        
 	if( codec->dv_encoder != NULL && codec->parameters_changed )
 	{
 		dv_encoder_free( codec->dv_encoder );
@@ -403,7 +404,6 @@ static int set_parameter(quicktime_t *file,
 void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
 {
 	quicktime_dv_codec_t *codec;
-	int i;
 
 /* Init public items */
 	((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_dv_codec_t));

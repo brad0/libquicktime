@@ -5,17 +5,20 @@
 #include <libdv/dv.h>
 
 
-static char * fourccs_dv[]  = { QUICKTIME_DV, QUICKTIME_DV_AVID, QUICKTIME_DV_AVID_A, (char*)0 };
+// static char * fourccs_dv[]  = { QUICKTIME_DV, QUICKTIME_DV_AVID, QUICKTIME_DV_AVID_A, (char*)0 };
 
-// static char * fourccs_dv[]  = { (char*)0 };
+/* Now, we need the fourccs for encoding only */
 
+static char * fourccs_dv_ntsc[] = { "dvc ", (char*)0 };
+static char * fourccs_dv_pal[]  = { "dvcp", (char*)0 };
 
 static int encoding_colormodels_dv[] =
   {
     BC_YUV422,
     LQT_COLORMODEL_NONE
   };
-  
+
+#if 0  
 static lqt_parameter_info_static_t decode_parameters_dv[] =
   {
      { 
@@ -56,6 +59,7 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
      },
      { /* End of parameters */ }
   };
+#endif
 
 static lqt_parameter_info_static_t encode_parameters_dv[] =
   {
@@ -107,29 +111,47 @@ static lqt_parameter_info_static_t encode_parameters_dv[] =
     { /* End of parameters */ }
   };
 
-static lqt_codec_info_static_t codec_info_dv =
+static lqt_codec_info_static_t codec_info_dv_pal =
   {
-    name:        "dv",
-    long_name:   "Quasar DV Codec",
+    name:        "dv_pal",
+    long_name:   "Quasar DV Codec (PAL-Mode)",
     description: "Codec for digital video camaras. Based on\
  libdv (http://libdv.sourceforge.net/).",
-    fourccs:     fourccs_dv,
+    fourccs:     fourccs_dv_pal,
     type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH,
+    direction:   LQT_DIRECTION_ENCODE,
     encoding_parameters: encode_parameters_dv,
-    decoding_parameters: decode_parameters_dv,
+    //    decoding_parameters: decode_parameters_dv,
     encoding_colormodels: encoding_colormodels_dv,
     decoding_colormodel:  BC_YUV422
   };
 
+static lqt_codec_info_static_t codec_info_dv_ntsc =
+  {
+    name:        "dv",
+    long_name:   "Quasar DV Codec (NTSC-Mode)",
+    description: "Codec for digital video camaras. Based on\
+ libdv (http://libdv.sourceforge.net/).",
+    fourccs:     fourccs_dv_ntsc,
+    type:        LQT_CODEC_VIDEO,
+    direction:   LQT_DIRECTION_ENCODE,
+    encoding_parameters: encode_parameters_dv,
+    //    decoding_parameters: decode_parameters_dv,
+    encoding_colormodels: encoding_colormodels_dv,
+    decoding_colormodel:  BC_YUV422
+  };
+
+
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 1; }
+extern int get_num_codecs() { return 2; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(index == 0)
-    return &codec_info_dv;
+    return &codec_info_dv_ntsc;
+  else if(index == 1)
+    return &codec_info_dv_pal;
   
   return (lqt_codec_info_static_t*)0;
   }
@@ -141,7 +163,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 
 extern lqt_init_video_codec_func_t get_video_codec(int index)
   {
-  if(index == 0)
+  if(index < 2)
     return quicktime_init_codec_dv;
   return (lqt_init_video_codec_func_t)0;
   }

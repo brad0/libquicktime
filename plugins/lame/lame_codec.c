@@ -307,43 +307,56 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
   mpeg_header h;
   quicktime_atom_t chunk_atom;
   int result;
+  int chunk_bytes = 0, chunk_samples = 0;
+
+  uint8_t * chunk_ptr;
+  
   /* We write each mp3 frame into an own chunk. This increases the chance,
      that M$ software will be able to play our files */
+  chunk_ptr = codec->encoder_output;
   while(codec->encoder_output_size > 4)
     {
-    if(!decode_header(&h, codec->encoder_output))
+    if(!decode_header(&h, chunk_ptr))
       {
       fprintf(stderr, "Ouch: lame created non mp3 data\n");
       break;
       }
-
     if(codec->encoder_output_size >= h.frame_bytes)
       {
-      quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
-      result = !quicktime_write_data(file, codec->encoder_output, h.frame_bytes);
-      quicktime_write_chunk_footer(file, 
-                                   track_map->track, 
-                                   track_map->current_chunk,
-                                   &chunk_atom, 
-                                   h.samples_per_frame);
-      track_map->current_chunk++;
-#if 0        
-      fprintf(stderr, "Encoded %d samples, %d bytes %d remaining\n",
-              h.samples_per_frame, h.frame_bytes, codec->encoder_output_size - h.frame_bytes);
-#endif   
-      /* Adjust mp3 buffer */
-
-      if(codec->encoder_output_size > h.frame_bytes)
-        {
-        memmove(codec->encoder_output, codec->encoder_output + h.frame_bytes,
-                codec->encoder_output_size - h.frame_bytes);
-        }
       codec->encoder_output_size -= h.frame_bytes;
+      chunk_ptr += h.frame_bytes;
+      chunk_bytes += h.frame_bytes;
+      chunk_samples += h.samples_per_frame;
       }
     else
       break;
     }
 
+  if(chunk_ptr > codec->encoder_output)
+    {
+    quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
+    result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
+    quicktime_write_chunk_footer(file, 
+                                 track_map->track, 
+                                 track_map->current_chunk,
+                                 &chunk_atom,
+                                 chunk_samples);
+    track_map->current_chunk++;
+
+    /* Adjust mp3 buffer */
+
+    if(codec->encoder_output_size)
+      memmove(codec->encoder_output, chunk_ptr, codec->encoder_output_size);
+    
+#if 1
+    fprintf(stderr, "Encoded %d samples, %d bytes %d remaining\n",
+            chunk_samples, chunk_bytes, codec->encoder_output_size);
+#endif   
+
+
+    }
+  
+  
   return result;
   }
 
