@@ -42,6 +42,7 @@
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
+
 /* ------------------------------------------------------------------------ */
 /* X11 code                                                                 */
 
@@ -68,6 +69,8 @@ static int use_gl       = 0;
 static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
 static unsigned long   lut_blue[256];
+
+static quicktime_t *qt = NULL;
 
 #define SWAP2(x) (((x>>8) & 0x00ff) |\
                   ((x<<8) & 0xff00))
@@ -499,6 +502,7 @@ static void gl_init(Widget widget, int iw, int ih)
 }
 
 
+static int oss_sr,oss_hr;
 
 
 
@@ -518,8 +522,10 @@ static int use_alsa = 1;
 # endif
 #endif
 
-static int periods = 16; /* number of periods == fragments */
-static snd_pcm_uframes_t periodsize = 4096; /* Periodsize (bytes) */
+//static int periods = 32; /* number of periods == fragments */
+static snd_pcm_uframes_t periodsize = 1024; /* Periodsize (bytes) */
+static unsigned int buffer_time = 500000; 
+static unsigned int period_time = 125000;              /* period time in us */
 
 /* Handle for the PCM device */ 
 static snd_pcm_t *pcm_handle;
@@ -528,6 +534,7 @@ static snd_pcm_t *pcm_handle;
 /* the hardware and can be used to specify the  */
 /* configuration to be used for the PCM stream. */
 static snd_pcm_hw_params_t *hwparams;
+snd_pcm_sframes_t buffer_size;
 
 #else
 
@@ -543,10 +550,10 @@ static int alsa_init(char *dev, int channels, int rate)
     int exact_param;   /* parameter returned by          */
                        /* snd_pcm_hw_params_set_*_near   */ 
     int tmprate;
-
+    int err = 0;
     tmprate = rate;
-    
-    if (snd_pcm_open(&pcm_handle, dev, SND_PCM_STREAM_PLAYBACK, 1) < 0) {
+    oss_hr = rate;
+    if (snd_pcm_open(&pcm_handle, dev, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) {
 	fprintf(stderr, "Error opening PCM device %s\n", dev);
 	return 1;
     }
@@ -554,14 +561,13 @@ static int alsa_init(char *dev, int channels, int rate)
     /* Allocate the snd_pcm_hw_params_t structure on the stack. */
     snd_pcm_hw_params_alloca(&hwparams);
 
-    /* Init hwparams with full configuration space */
-    if (snd_pcm_hw_params_any(pcm_handle, hwparams) < 0) {
-	fprintf(stderr, "Can not configure this PCM device.\n");
+    if ((err = snd_pcm_hw_params_any(pcm_handle, hwparams)) < 0) {
+	fprintf(stderr, "Can not configure this PCM device. (%s)\n", snd_strerror(err));
 	return 1;
     }
     
-    if (snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
-	fprintf(stderr, "Error setting access.\n");
+    if ((err = snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
+	fprintf(stderr, "Error setting access. (%s)\n", snd_strerror(err));
 	return 1;
     }
 
@@ -569,47 +575,62 @@ static int alsa_init(char *dev, int channels, int rate)
     /* Only needed when sampling format not supported by hardware .. unlikely */
 
     /* Set sample format */
-    if (snd_pcm_hw_params_set_format(pcm_handle, hwparams, SND_PCM_FORMAT_S16_NE) < 0) {
-	fprintf(stderr, "Error setting format.\n");
+    if ((err = snd_pcm_hw_params_set_format(pcm_handle, hwparams,  SND_PCM_FORMAT_S16_NE)) < 0) {
+	fprintf(stderr, "Error setting format.(%s)\n", snd_strerror(err));
 	return 1;
     }
-
+    
+    /* Set number of channels */ // weird 1 channel mode doesn't work
+    if ((err = snd_pcm_hw_params_set_channels(pcm_handle, hwparams, channels)) < 0) {
+	fprintf(stderr, "Error setting channels. %i (%s)\n", channels, snd_strerror(err));
+	return 1;
+    }
+    
     /* Set sample rate. If the exact rate is not supported */
     /* by the hardware, use nearest possible rate.         */ 
-    exact_param = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, &dir);
-    if (dir != 0) {
-	fprintf(stderr, "Samplerate %d Hz is not supported. Using %d Hz instead.\n", rate, exact_param);
-    }
-
-    /* Set number of channels */
-    if (snd_pcm_hw_params_set_channels(pcm_handle, hwparams, channels) < 0) {
-	fprintf(stderr, "Error setting format.\n");
+    if ((err = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, 0)) < 0 ) {
+	fprintf(stderr, "Error setting sample rate (%s)\n", snd_strerror(err));
 	return 1;
     }
 
-    /* Set number of periods. Periods used to be called fragments. */ 
-    if (snd_pcm_hw_params_set_period_size_near(pcm_handle, hwparams, &periodsize, &dir) < 0) {
-	fprintf(stderr, "Error setting periods.\n");
+    if (tmprate != rate) fprintf(stderr,"WARNING: Using %i Hz instead of requested rate %i Hz\n ", tmprate, rate);
+    oss_sr = tmprate;
+    if ((err = snd_pcm_hw_params_set_buffer_time_near(pcm_handle, hwparams, &buffer_time, &dir)) < 0) {
+	printf("Unable to set buffer time %i for playback: %s\n", buffer_time, snd_strerror(err));
 	return 1;
     }
 
-    /* Set number of periods. Periods used to be called fragments. */ 
-    if (snd_pcm_hw_params_set_periods_near(pcm_handle, hwparams, &periods, &dir) < 0) {
-	fprintf(stderr, "Error setting periods.\n");
+    /* period time */
+    if ((err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hwparams, &period_time, &dir)) < 0) {
+	fprintf(stderr, "Error setting periods.(%s)\n", snd_strerror(err));
 	return 1;
+    }
+
+    
+    if ((err = snd_pcm_hw_params_get_buffer_size(hwparams, &buffer_size))< 0) {
+                fprintf(stderr, "Unable to get buffer size for playback: %s\n", snd_strerror(err));
+                return 1;
+    }
+    
+
+    err = snd_pcm_hw_params_get_period_size(hwparams, &periodsize, &dir);
+    if (err < 0) {
+                fprintf(stderr, "Unable to get period size for playback: %s\n", snd_strerror(err));
+                return 1;
     }
 
     /* Apply HW parameter settings to */
     /* PCM device and prepare device  */
-    if (snd_pcm_hw_params(pcm_handle, hwparams) < 0) {
-	fprintf(stderr, "Error setting HW params.\n");
+    if ((err = snd_pcm_hw_params(pcm_handle, hwparams)) < 0) {
+	fprintf(stderr, "Error setting HW params.(%s)\n", snd_strerror(err));
 	return 1;
     }
     
-    if (snd_pcm_prepare(pcm_handle) < 0) {
-	fprintf(stderr, "Error in pcm_prepare.\n");
+    if ((err = snd_pcm_prepare(pcm_handle)) < 0) {
+	fprintf(stderr, "Error in pcm_prepare.(%s)\n", snd_strerror(err));
 	return 1;
     }
+    
 #endif
 
 return 0;
@@ -684,7 +705,6 @@ static int oss_init(char *dev, int channels, int rate)
 /* ------------------------------------------------------------------------ */
 /* quicktime code                                                           */
 
-static quicktime_t *qt = NULL;
 static int qt_hasvideo,qt_hasaudio;
 
 static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
@@ -694,6 +714,7 @@ static XvImage *qt_xvimage;
 static GC qt_gc;
 
 static int16_t *qt_audio,*qt1,*qt2;
+//static int16_t **qt_audion;
 
 static int qt_size,qt_offset,qt_stereo;
 static int qt_cmodel = BC_RGB888;
@@ -707,7 +728,7 @@ static void qt_init(FILE *fp, char *filename)
     char *adev_name;
     
     /* default */
-    adev_name = strdup("default");
+    adev_name = strdup("plughw");
 //    if (getenv("LQTPLAY_ALSA_DEV")) adev_name = getenv("LQTPLAY_ALSA_DEV");
 
     /* open file */
@@ -793,7 +814,7 @@ static void qt_init(FILE *fp, char *filename)
   }
   else {
   	if (-1 == oss_init("/dev/dsp", qt_stereo ? 2 : 1,
- 		     quicktime_sample_rate(qt,0))) 
+ 		     quicktime_sample_rate(qt,0)))
            qt_hasaudio = 0;
   }
   }
@@ -916,6 +937,7 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
 	/* cheap trick to make a/v sync ... */
 	msec = (long long)msec * oss_hr / oss_sr;
     }
+    
     msec += quicktime_video_position(qt,0) * 1000
 	/ quicktime_frame_rate(qt,0);
     if (msec < 0) {
@@ -928,52 +950,69 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     }
 }
 
-
-static int qt_alsa_audio_write(void)
+static int runcount;
+static int qt_alsa_audio_write(int frames)
 {
 #ifdef HAVE_ALSA
     long pos;
     int i;
+    signed short *ptr;
+    int frames_processed = frames;    
+    int ret = 0;
     
-    int frames = 1;
-    int pcmreturn;
-    frames = periodsize >> 2;
-
     if (0 == quicktime_audio_position(qt,0)) {
 	/* Init */
-	qt_audio  = malloc(periodsize);
+	//qt_audion  = malloc(sizeof(char) * 2);
+	//qt_audion[0]  = malloc(periodsize/2 * sizeof(short));
+	//qt_audion[1]  = malloc(periodsize/2 * sizeof(short));
+	qt_audio  = malloc(frames*4);
 	if (quicktime_track_channels(qt,0) > 1) {
-	    qt1 = malloc(periodsize/2);
-	    qt2 = malloc(periodsize/2);
+	    qt1 = malloc(frames*4/2);
+	    qt2 = malloc(frames*4/2);
 	}
+
     }
+    
     if (qt_stereo) {
       	/* stereo: two channels => interlaved samples */
       	pos = quicktime_audio_position(qt,0);
-	quicktime_decode_audio(qt,qt1,NULL,periodsize>>2,0);
-  	quicktime_set_audio_position(qt,pos,0);
-  	quicktime_decode_audio(qt,qt2,NULL,periodsize>>2,1);
-	for (i = 0; i < periodsize/2; i++) {
-	    qt_audio[2*i+0] = qt1[i];
-	    qt_audio[2*i+1] = qt2[i];
-	}
+	//quicktime_decode_audio(qt,qt_audion[0],NULL,frames,0);
+  	//quicktime_set_audio_position(qt,pos,0);
+  	//quicktime_decode_audio(qt,qt_audion[1],NULL,frames,1);
+
+	    quicktime_decode_audio(qt,qt1,NULL,frames,0);
+	    quicktime_set_audio_position(qt,pos,0);
+	    quicktime_decode_audio(qt,qt2,NULL,frames,1);
+	    for (i = 0; i < frames; i++) {
+		qt_audio[2*i+0] = qt1[i];
+		qt_audio[2*i+1] = qt2[i];
+	    }
     } else {
 	/* mono */
-	quicktime_decode_audio(qt,qt_audio,NULL,periodsize/4,0);
+	quicktime_decode_audio(qt,qt_audio,NULL,frames,0);
     }
 
-    while ((pcmreturn = snd_pcm_writei(pcm_handle, (void *)qt_audio, frames)) < 0) {
-	if (pcmreturn == -EAGAIN) snd_pcm_wait(pcm_handle, 1000);
-	else {
+    ptr = qt_audio;
+
+
+    while (frames_processed > 0) {
+	ret = snd_pcm_writei(pcm_handle, (void *)(ptr), frames);
+	if (ret == -EAGAIN) { 
+	    snd_pcm_wait(pcm_handle, 1000);
+	}
+	else if (ret == -EPIPE) {
 	    snd_pcm_prepare(pcm_handle);
-	    fprintf(stderr, "<<<<<<<<<<<<<<< Buffer Underrun >>>>>>>>>>>>>>>\n");
+	}
+	else if (ret < 0) {
+	    fprintf(stderr, "Warning: %s\n", snd_strerror(ret));
+	}
+	
+	if (ret > 0 ) {
+	    frames_processed -=ret;
 	}
     }
-
-    if (pcmreturn == -EAGAIN) snd_pcm_wait(pcm_handle, 1000);
-    
     if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) && 0 == qt_offset) {
-	snd_pcm_drain(pcm_handle);	
+	snd_pcm_drain(pcm_handle);
 	return -1;
     }
 #endif
@@ -1134,6 +1173,7 @@ static String res[] = {
 int main(int argc, char *argv[])
 {
     struct timeval start,wait;
+    int audio_frames;
     
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
 				  opt_desc, opt_count,
@@ -1181,6 +1221,9 @@ int main(int argc, char *argv[])
     XtRealizeWidget(app_shell);
     if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo)
 	gl_init(simple,qt_width,qt_height);
+    
+    /* frames per chunk for alsa */
+    audio_frames = ((oss_sr / quicktime_frame_rate(qt,0)) / 2 + 0.5);
 
     /* enter main loop */
     gettimeofday(&start,NULL);
@@ -1213,7 +1256,7 @@ int main(int argc, char *argv[])
 	    rc = select(max+1,&rd,&wr,NULL,&wait);
 	    if (qt_hasaudio) {
 		if (use_alsa == 1) {
-		    if (0 != qt_alsa_audio_write()) break;
+		    if (0 != qt_alsa_audio_write(audio_frames)) break;
 		}
 		else if (FD_ISSET(oss_fd,&wr)) { 
 		    if (0 != qt_oss_audio_write()) break;
