@@ -99,8 +99,10 @@ static int decode_chunk(quicktime_t * file, int track)
   //  fprintf(stderr, "done %d\n", num_samples);
 
   if(!num_samples)
+    {
+    fprintf(stderr, "audio_ffmpeg: EOF\n");
     return 0;
-
+    }
   /*
    *  For AVIs, chunk samples are not always 100% correct.
    *  Furthermore, there can be a complete mp3 frame from the last chunk!
@@ -180,11 +182,11 @@ static int decode_chunk(quicktime_t * file, int track)
 
     if(bytes_decoded < 0)
       {
-      fprintf(stderr, "decode_chunk: Incomplete frame\n");
+      //      fprintf(stderr, "decode_chunk: Incomplete frame\n");
       
       if(codec->bytes_in_chunk_buffer > 0)
-        memmove(codec->chunk_buffer + bytes_used,
-                codec->chunk_buffer, codec->bytes_in_chunk_buffer);
+        memmove(codec->chunk_buffer,
+                codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
       return 1;
       }
     
@@ -241,7 +243,7 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
     if(avcodec_open(codec->com.ffcodec_dec, codec->com.ffc_dec) != 0)
       {
       fprintf(stderr, "Avcodec open failed\n");
-      return -1;
+      return 0;
       }
     
     //    codec->sample_buffer_offset = 0;
@@ -250,20 +252,21 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
 
   /* Check if we have to reposition the stream */
   
-  if(file->atracks[track].last_position != file->atracks[track].current_position)
+  if(track_map->last_position != track_map->current_position)
     {
 
-    if((file->atracks[track].current_position < codec->sample_buffer_start) || 
-       (file->atracks[track].current_position + samples >= codec->sample_buffer_end))
+    if((track_map->current_position < codec->sample_buffer_start) || 
+       (track_map->current_position + samples >= codec->sample_buffer_end))
       {
       quicktime_chunk_of_sample(&chunk_sample,
-                                &(file->atracks[track].current_chunk),
-                                file->atracks[track].track,
-                                file->atracks[track].current_position);
+                                &(track_map->current_chunk),
+                                track_map->track,
+                                track_map->current_position);
 
-      fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
-              file->atracks[track].current_position,
-              file->atracks[track].current_chunk, chunk_sample);
+      fprintf(stderr, "Seek: pos: %ld, last_pos: %lld, chunk: %lld, chunk_sample: %lld\n",
+              track_map->last_position,
+              track_map->current_position,
+              track_map->current_chunk, chunk_sample);
             
       codec->sample_buffer_start = chunk_sample;
       codec->sample_buffer_end   = chunk_sample;
@@ -309,18 +312,18 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
             codec->sample_buffer_start, codec->sample_buffer_end,
             codec->sample_buffer_end - codec->sample_buffer_start, samples);
 #endif
-    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
       return 0;
     
     result = decode_chunk(file, track);
     }
 
   /* Deinterleave into the buffer */
-
+  
   deinterleave(output_i, output_f, codec->sample_buffer,
                channels, samples);
 
-  file->atracks[track].last_position = file->atracks[track].current_position + samples;
+  track_map->last_position = track_map->current_position + samples;
 
   return samples;
   // #endif

@@ -834,7 +834,10 @@ void quicktime_set_cmodel(quicktime_t *file, int colormodel)
 
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
   {
-  file->vtracks[track].color_model = colormodel;
+  if((track < file->total_vtracks) && (track >= 0))
+    file->vtracks[track].color_model = colormodel;
+  else
+    fprintf(stderr, "lqt_set_cmodel: No track No. %d\n", track);
   }
 
 void quicktime_set_row_span(quicktime_t *file, int row_span)
@@ -1972,3 +1975,8 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   return result ? trak->chunk_sizes[chunk-1] : 0;
   }
 
+
+int64_t lqt_last_audio_position(quicktime_t * file, int track)
+  {
+  return file->atracks[track].last_position;
+  }

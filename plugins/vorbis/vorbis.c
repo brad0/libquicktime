@@ -117,7 +117,10 @@ static int delete_codec(quicktime_audio_map_t *atrack)
       free(codec->sample_buffer[i]);
     free(codec->sample_buffer);
     }
-
+  if(codec->chunk_buffer)
+    free(codec->chunk_buffer);
+  if(codec->enc_header)
+    free(codec->enc_header);
         
   free(codec);
   return 0;

@@ -213,7 +213,7 @@ static void get_scale_tables(int **column_table,
 	int out_x2, 
 	int out_y2)
 {
-	int y_out, i;
+	int i;
 	float w_in = in_x2 - in_x1;
 	float h_in = in_y2 - in_y1;
 	int w_out = out_x2 - out_x1;

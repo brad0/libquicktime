@@ -642,13 +642,13 @@ int quicktime_decode_audio(quicktime_t *file,
                                                                                           channels_f, 
                                                                                           samples,
                                                                                           quicktime_track);
-	file->atracks[quicktime_track].current_position += samples;
+	file->atracks[quicktime_track].current_position += result;
 
         if(channels_i)
           free(channels_i);
         else if(channels_f)
           free(channels_f);
-	return result;
+	return ((result < 0) ? 1 : 0);
 }
 
 int lqt_total_channels(quicktime_t *file)

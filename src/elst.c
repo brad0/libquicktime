@@ -83,7 +83,6 @@ void quicktime_elst_dump(quicktime_elst_t *elst)
 void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst)
 {
 	int i;
-	quicktime_atom_t leaf_atom;
 
 	elst->version = quicktime_read_char(file);
 	elst->flags = quicktime_read_int24(file);

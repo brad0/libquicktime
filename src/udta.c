@@ -2,7 +2,7 @@
 #include <quicktime/quicktime.h>
 #include <string.h>
 
-#define DEFAULT_INFO "Made with Libquicktime"
+// #define DEFAULT_INFO "Made with Libquicktime"
 
 /* Atom IDs */
 
@@ -19,9 +19,12 @@ static unsigned char genre_id[]     = { 0xa9, 'g', 'e', 'n' };
 int quicktime_udta_init(quicktime_udta_t *udta)
 {
         memset(udta, 0, sizeof(*udta));
-	udta->info = malloc(strlen(DEFAULT_INFO) + 1);
-	udta->info_len = strlen(DEFAULT_INFO);
-	sprintf(udta->info, DEFAULT_INFO);
+
+        // No, no, it's bad to tell lies here (especially when decoding)
+        //	udta->info = malloc(strlen(DEFAULT_INFO) + 1);
+        //	udta->info_len = strlen(DEFAULT_INFO);
+        //	sprintf(udta->info, DEFAULT_INFO);
+
 	udta->is_qtvr = 0;
 	quicktime_navg_init(&(udta->navg));
 	return 0;

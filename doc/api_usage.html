@@ -1,0 +1,723 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [de] (X11; U; Linux 2.4.14 i686) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#ffffff" link="#0000ee" vlink="#551a8b"
+ alink="#ff0000">
+<center>
+<h1>Libquicktime API usage<br>
+</h1>
+</center>
+<center><br>
+<div style="text-align: left;"><a href="#1._API_Conventions">1. API
+conventions</a><br>
+<a href="#2._OpeningClosing">2. Opening/Closing</a><br>
+<a href="#3._Reading_quicktime_files">3. Reading</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.1_Getting_audio_stream_information">3.1
+Getting audio information</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.2_Decoding_audio">3.2 Decoding audio</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.3_Audio_seeking">3.3 Audio seeking</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.4_Getting_video_information">3.4
+Getting video information</a><span style="font-weight: bold;"><br>
+&nbsp;&nbsp;&nbsp; </span><a href="#3.5_Decoding_video">3.5 Decoding
+video</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.6_Video_seeking">3.6 Video seeking</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#3.7_Global_information">3.7 Global
+information</a><br>
+<a href="#4._Writing_Quicktime_files">4. Writing</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.1_Setting_metadata">4.1 Setting metadata</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.2_Setting_up_tracks">4.2 Setting up
+tracks</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.3_Setting_codec_parameters">4.3 Setting
+codec parameters</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.4_Making_an_AVI">4.4 Making an AVI</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.5_Encoding_audio">4.5 Encoding audio</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.6_Encoding_video">4.6 Encoding video</a><br>
+&nbsp;&nbsp;&nbsp; <a href="#4.7_Making_streamable_Quicktime">4.7
+Making streamable quicktime</a><br>
+<a href="#5._Colormodels">5. Colormodels</a><br>
+<a href="#6._Codec_registry_interface">6. Codec registry interface</a><br>
+</div>
+</center>
+<h3><a name="1._API_Conventions"></a>&nbsp;1. API Conventions<br>
+</h3>
+The libquicktime API is kept quite similar to the quicktime4linux API.
+All libquicktime specific extensions are prefixed with lqt_ or LQT_.
+Libquicktime makes however, a bit more use of enums. In this file, some
+not recommended functions are not documented. Brave people might
+consult the files <span style="font-family: monospace;">&lt;quicktime/quicktime.h&gt;</span>
+and <span style="font-family: monospace;">&lt;quicktime/lqt.h&gt;</span>
+for the whole truth.<br>
+<h3><a name="2._OpeningClosing"></a>2. Opening/Closing</h3>
+To open a Quicktime or sufficiently compatible AVI file, use:<br>
+<br>
+<code></code><span style="font-family: monospace;">quicktime_t*
+quicktime_open(char *filename, int rd, int wr);</span><br>
+<br>
+This returns an opaque pointer type quicktime_t* or NULL if the file
+could not be opened. The returned handle is the first argument for most
+libquicktime functions. The arguments <span
+ style="font-family: monospace;">rd</span> and <span
+ style="font-family: monospace;">wr</span> specify if the file
+will be opened for reading or writing. Only one of both can be TRUE.
+After you are done with it, close the handle with<br>
+<br>
+<span style="font-family: monospace;">int quicktime_close(quicktime_t
+*file);</span><br>
+<h3><a name="3._Reading_quicktime_files"></a>3. Reading quicktime files</h3>
+<h4><a name="3.1_Getting_audio_stream_information"></a>3.1 Getting
+audio information</h4>
+First, get the number of audio streams with:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_audio_tracks(quicktime_t *file);</span><br>
+<br>
+Then, for each track, call:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_track_channels(quicktime_t *file, int track);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">long
+quicktime_sample_rate(quicktime_t *file, int track);<br>
+long quicktime_audio_length(quicktime_t *file, int track);<br
+ style="font-family: monospace;">
+</span><span style="font-family: monospace;">int
+quicktime_audio_bits(quicktime_t *file, int track);</span><br>
+<br>
+to get channel count, the samplerate, length (in samples) and bits per
+sample. The last
+value is for information purposes only. While the audio format is
+always available from the quicktime container, it can happen, that the
+codec isn't supported by libquicktime. To make sure, that an audio
+track can be decoded, check if the return value of<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_supported_audio(quicktime_t *file, int track)</span>;<br>
+<br>
+is nonzero. Then, before you decode the first samples, you can set some
+codec parameters. This works exactly the same way as for encoding (see <a
+ href="#4.3_Setting_codec_parameters">Setting codec parameters</a>).<br>
+<h4><a name="3.2_Decoding_audio"></a>3.2 Decoding audio</h4>
+There are 3 functions for decoding audio. The most recommended one is:<br>
+<br>
+<span style="font-family: monospace;">int
+lqt_decode_audio_track(quicktime_t *file, int16_t **output_i, float
+**output_f, long samples, int track);</span><br>
+<br>
+<span style="font-family: monospace;">output_i</span> and <span
+ style="font-family: monospace;">output_f</span> are pointers to arrays
+where the samples for the channels will be copied. Either of both
+arrays can be NULL.
+Single channel arrays can also be NULL if some channels are not of
+interest.<br>
+The quicktime4linux API (unlike ours) hides the concept of an audio
+track from the user. To resemble this behaviour, there is a function:<br>
+<br>
+<span style="font-family: monospace;">int lqt_decode_audio(quicktime_t
+*file, int16_t **output_i, float **output_f, long samples);</span><br>
+<br>
+It decodes all channels of all tracks at once. Finally, there is the
+quicktime4linux approach (for compatibility reasons):<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_decode_audio(quicktime_t *file, int16_t *output_i, float
+*output_f, long samples, int channel);</span><br>
+<br>
+It's not recommended, because if you need more than one channel, you
+must seek backwards between the decode calls.<br>
+After decoding, you can use<br>
+<br>
+<span style="font-family: monospace;">int64_t
+lqt_last_audio_position(quicktime_t * file, int track);</span><br>
+<br>
+It returns the REAL sample position of the stream. You can use this to
+check, if you decoded fewer samples than you wanted. In this case, EOF
+is reached.<br>
+<h4><a name="3.3_Audio_seeking"></a>3.3 Audio seeking</h4>
+To set an audio stream to a specified position, use:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_set_audio_position(quicktime_t *file, int64_t sample, int
+track);</span><br>
+<br>
+Subsequent decode calls will then start from the specified sample
+position. Seeking is sample-accurate except for AVI files with
+compressed audio due to file format weaknesses.<br>
+<h4><a name="3.4_Getting_video_information"></a>3.4 Getting video
+information</h4>
+First, get the number of video tracks with:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_video_tracks(quicktime_t *file);<span
+ style="font-weight: bold;"><br>
+<br>
+</span></span>For each track, get the video format with:<span
+ style="font-weight: bold;"><br>
+<br>
+</span><span style="font-family: monospace;">int
+quicktime_video_width(quicktime_t *file, int track);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">int
+quicktime_video_height(quicktime_t *file, int track);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">int
+lqt_video_time_scale(quicktime_t * file, int track);</span><span
+ style="font-weight: bold;"><br>
+</span><span style="font-family: monospace;">double
+quicktime_frame_rate(quicktime_t *file, int track);<br>
+long quicktime_video_length(quicktime_t *file, int track);<br>
+int64_t lqt_video_duration(quicktime_t * file, int track);<br>
+int quicktime_video_depth(quicktime_t *file, int track);<br>
+<br>
+</span>The last function is for information only. You can either use
+the framerate (and <span style="font-family: monospace;">quicktime_video_length</span>)
+for your synchronization or the timescale (and <span
+ style="font-family: monospace;">lqt_video_duration</span>). The
+timescale method has the advantage, that you make no rounding
+errors and can synchronize tracks with nonconstant framerates. While
+the video format is always available from the quicktime
+container, it can happen, that the codec isn't supported by
+libquicktime. To make sure, that a video track can be decoded, check
+if the return value of<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_supported_video(quicktime_t *file, int track)</span>;<br>
+<br>
+is nonzero. Then, before you decode the first frame, you can set some
+codec
+parameters. This works exactly the same way as for encoding (see <a
+ href="file:///home/pix/Src/Libquicktime/libquicktime/doc/api_usage.html#4.3_Setting_codec_parameters">Setting
+codec parameters</a>).
+<h4><a name="3.5_Decoding_video"></a>3.5 Decoding video</h4>
+After you figured out the proper colormodel (see <a
+ href="#5._Colormodels">colormodels</a>) and before decoding the first
+frame, call:<br>
+<br>
+<span style="font-family: monospace;">lqt_set_cmodel(<span
+ style="font-family: monospace;">quicktime_t *file, int track, int
+colormodel);</span><br>
+</span><br>
+Furthermore, you might have planar video frames (e.g. XVideo images)
+which have padded scanlines. To tell this to the library, use:<br>
+<br>
+<span style="font-family: monospace;">void lqt_set_row_span(quicktime_t
+*file, int track, int row_span);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">void
+lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv);</span><br>
+<br>
+The first one sets the byte offsets between the scane lines for the
+luminance plane, the second one is for the chrominance planes. Then,
+you
+can get the timestamp and duration of the NEXT frame to be decoded with:<br>
+<br>
+<span style="font-family: monospace;">int64_t
+lqt_frame_time(quicktime_t * file, int track);</span><br>
+<br>
+The unit are timescale tics. Finally, decode the frame with:<br>
+<br>
+<span style="font-family: monospace;">int lqt_decode_video(quicktime_t
+*file, unsigned char **row_pointers, int track);</span><br>
+<br>
+<span style="font-family: monospace;">row_pointers</span> points to the
+scanline beginnings for packed formats and
+to the planes for planar formats. Alternatively, you can use:<br>
+<br>
+<span style="font-family: monospace;">long
+quicktime_decode_scaled(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int in_x,&nbsp; /* Location of input frame to take picture */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int in_y,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int in_w,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int in_h,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int out_w, /* Dimensions of output frame */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int out_h,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int color_model,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+unsigned char **row_pointers,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track);</span><br>
+<br>
+It lets you take a rectangular area from the file and writes it into
+the buffer at a specified location. If input size and output size are
+different, the image will be scaled. Finally, there is a legacy
+version, which will only work for BC_RGB888:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_decode_video(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+unsigned char **row_pointers,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track);</span><br>
+<h4><a name="3.6_Video_seeking"></a>3.6 Video seeking</h4>
+There are different approaches depending on your timing method.<br>
+<br>
+<span style="font-family: monospace;">lqt_seek_video(quicktime_t *
+file, int track, </span><span style="font-family: monospace;">int64_t
+time);</span><br style="font-family: monospace;">
+<br>
+seeks to the specified time given in timescale tics. Since the
+timestamp of the next frame might be slightly different from<br>
+the time you seeked to, use <span style="font-family: monospace;">lqt_frame_time
+</span>to get the timestamp of the next frame. If you trust the
+framerate and just count frames, you can use:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_set_video_position(quicktime_t *file, int64_t frame, int
+track);</span><br>
+<h4><a name="3.7_Global_information"></a>3.7 Global information</h4>
+These are for information only. They play no role in the decoding
+process. To find out, if the file is an AVI, use<br>
+<br>
+<span style="font-family: monospace;">int lqt_is_avi(quicktime_t *file);<br>
+<br>
+</span>Then, you can get the metadata as strings:<br>
+<br>
+<span style="font-family: monospace;">char*
+quicktime_get_copyright(quicktime_t *file);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">char*
+quicktime_get_name(quicktime_t *file);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">char*
+quicktime_get_info(quicktime_t *file);</span><br>
+<span style="font-family: monospace;">char * lqt_get_album(quicktime_t
+* file);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">char * lqt_get_artist(quicktime_t
+* file);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">char * lqt_get_genre(quicktime_t
+* file);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">char * lqt_get_track(quicktime_t
+* file);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">char *
+lqt_get_comment(quicktime_t *file);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">char * lqt_get_author(quicktime_t
+*file);</span><br>
+<br>
+Treat the return values as if they were const. No, libquicktime isn't
+really const friendly ;-(<br>
+<h3><a name="4._Writing_Quicktime_files"></a>4. Writing Quicktime files</h3>
+<h4><a name="4.1_Setting_metadata"></a>4.1 Setting metadata</h4>
+First, you might want to insert some information strings into your
+file. Do this with:<br>
+<br>
+<span style="font-family: monospace;">void
+quicktime_set_copyright(quicktime_t *file, char *string);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">void
+quicktime_set_name(quicktime_t *file, char *string);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">void
+quicktime_set_info(quicktime_t *file, char *string);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_album(quicktime_t
+*file, char *string);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_artist(quicktime_t
+*file, char *string);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_genre(quicktime_t
+*file, char *string);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_track(quicktime_t
+*file, char *string);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_comment(quicktime_t
+*file, char *string);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void lqt_set_author(quicktime_t
+*file, char *string);</span><span style="font-weight: bold;"><br>
+</span>
+<h4><a name="4.2_Setting_up_tracks"></a>4.2 Setting up tracks</h4>
+To add an audio track, call:<br>
+<br>
+<span style="font-family: monospace;">int
+lqt_add_audio_track(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int channels, long
+sample_rate, int bits, lqt_codec_info_t * info);</span><br>
+<br>
+The bits argument is only relevant for the twos and sowt codecs. It
+should be set to 16 by default. To add a video track, use:<br>
+<br>
+<span style="font-family: monospace;">int
+lqt_add_video_track(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int frame_w, int frame_h,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int frame_duration, int timescale,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+lqt_codec_info_t * info);</span><br>
+<br>
+The <span style="font-family: monospace;">frame_duration</span> should
+is only important, if you use
+<span style="font-family: monospace;">quicktime_encode_video</span>
+(see below).<br>
+<br>
+<h4><a name="4.3_Setting_codec_parameters"></a>4.3 Setting codec
+parameters</h4>
+To set a parameter of audio and video codecs, call<br>
+<br>
+<span style="font-family: monospace;">void
+lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void
+*value);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">void
+lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void
+*value);</span><br>
+<br>
+value must be of type <span style="font-family: monospace;">char*</span>
+for string parameters and <span style="font-family: monospace;">int*</span>
+for integer parameters. See <a href="#6._Codec_registry_interface">Codec
+registry interface</a> for methods to find out the encoding parameters.<br>
+<h4><a name="4.4_Making_an_AVI"></a>4.4 Making an AVI</h4>
+After you configured all codecs, you can tell the library to make an
+AVI instead of a Quicktime file. It's done with:<br>
+<br>
+<span style="font-family: monospace;">void
+quicktime_set_avi(quicktime_t *file, 1);</span><br
+ style="font-family: monospace;">
+<br>
+Please note, that not all codecs are supported with AVI files. Some are
+only supported in AVIs. See <a href="#6._Codec_registry_interface">Codec
+registry interface</a> for more informtation about this.<br>
+<h4><a name="4.5_Encoding_audio"></a>4.5 Encoding audio</h4>
+To encode a buffer full of samples, use<br>
+<br>
+<span style="font-family: monospace;">int
+lqt_encode_audio_track(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int16_t **channels_i,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+float **channels_f,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+long samples,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track);</span><br style="font-family: monospace;">
+<br>
+Either channels_i or channels_f must be NULL.<br>
+<h4><a name="4.6_Encoding_video"></a>4.6 Encoding video</h4>
+Before you encode the first frame, you must decide which colormodel you
+use (see <a href="#5._Colormodels">Colormodels</a>). You tell the
+library about the colormodel with:<br>
+<br>
+<span style="font-family: monospace;">void lqt_set_cmodel(quicktime_t
+*file, int track, int colormodel);</span><br>
+<br>
+Then, if you will use a planar format, and your memory had padded
+scanlines, tell the byte offsets between the scanlines of the luminance
+and chrominance planes:<br>
+<br>
+<span style="font-family: monospace;">void lqt_set_row_span(quicktime_t
+*file, int track, int row_span);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">void
+lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv);</span><br
+ style="font-family: monospace;">
+<br>
+Finally, if you source has individual tinestamps for all frames, call<br>
+<br>
+<span style="font-family: monospace;">int lqt_encode_video(quicktime_t
+*file,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+unsigned char **row_pointers,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track, int64_t time);</span><br style="font-family: monospace;">
+<br>
+The timestamp is given in timescale tics. <span
+ style="font-family: monospace;">row_pointers</span> contains the
+scanlines for packet formats and the planes <br>
+for planar formats. If you have a constant frame duration and passed it
+to <span style="font-family: monospace;">lqt_add_video_track</span>,
+you might also use:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_encode_video(quicktime_t *file,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+unsigned char **row_pointers,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int track);<br>
+</span>
+<h4><a name="4.7_Making_streamable_Quicktime"></a>4.7 Making streamable
+Quicktime</h4>
+By default, libquicktime will put the header (the moov atom) at the end
+of the file. This means, that it won't be playable from a non-seekable
+source (i.e. a http connection). To reorder the file to have the header
+at the start, call:<br>
+<br>
+<span style="font-family: monospace;">int
+quicktime_make_streamable(char *in_path, char *out_path);<br>
+<br>
+</span>This function must be called after you closed the file with <span
+ style="font-family: monospace;">quicktime_close</span>. Note that you
+need twice the disk space for this function.<span
+ style="font-family: monospace;"><br>
+</span>
+<h3><a name="5._Colormodels"></a>5. Colormodels</h3>
+The supported colormodels are defined in colormodels.h. Libquicktime
+adds another value <span style="font-family: monospace;">LQT_COLORMODEL_NONE</span>,
+which specifies an uninitialized or unknown colormodel. Informations
+about the supported colormodels can be obtained with:<br>
+<br>
+<span style="font-family: monospace;">const char *
+lqt_colormodel_to_string(int colormodel);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">int
+lqt_string_to_colormodel(const char * str);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">int lqt_colormodel_is_planar(int
+colormodel);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">int lqt_colormodel_has_alpha(int
+colormodel);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">int lqt_colormodel_is_rgb(int
+colormodel);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">int lqt_colormodel_is_yuv(int
+colormodel);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"><br>
+int lqt_num_colormodels();</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">const char *
+lqt_get_colormodel_string(int index);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">int lqt_get_colormodel(int index);</span><br
+ style="font-family: monospace;">
+<br>
+The best idea is to decide, which colormodels you want to support in
+your application. <span style="font-family: monospace;">BC_RGB888</span>
+and <span style="font-family: monospace;">BC_YUV420P</span> should
+always be supported. Please note, that libquicktimes internal
+colorspace converter is not the fastest out there. The more colorspaces
+you can handle yourself, the fewer time consuming internal conversions
+will be used. A nice library, which converts many
+libquicktime colormodels, is <a
+ href="http://gmerlin.soutceforge.net/gavl.html">gavl</a>. Then call
+for each video track:<br>
+<br>
+<span style="font-family: monospace;">int
+lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);</span><br>
+<br>
+<span style="font-family: monospace;">supported</span> is an array of
+the colorspaces, you can handle terminated with <span
+ style="font-family: monospace;">LQT_COLORMODEL_NONE</span>. The
+function works for both en- and decoding and tries to minimize
+conversion overhead and information loss.<br>
+<h3><a name="6._Codec_registry_interface"></a>6. Codec registry
+interface</h3>
+This allows you to access the codecs, which are installed on the system
+along with information about them. To query the registry about the
+installed codecs, use:<br>
+<br>
+<span style="font-family: monospace;">lqt_codec_info_t **
+lqt_query_registry(int audio, int video,</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+int encode, int decode);</span><br style="font-family: monospace;">
+<br>
+The return value is a NULL terminated array of <span
+ style="font-family: monospace;">lqt_codec_info_t</span> pointers. The
+codec info is defined in lqt_codecinfo.h:<br>
+<br>
+<span style="font-family: monospace;">typedef struct lqt_codec_info_s
+lqt_codec_info_t;<br>
+<br style="font-family: monospace;">
+</span><span style="font-family: monospace;">struct lqt_codec_info_s</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; {</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int compatibility_flags;
+/* Compatibility flags (See defines above) */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; </span><span
+ style="font-family: monospace;">char *
+name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* Name of the
+codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char *
+long_name;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+Long name of the codec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char *
+description;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;</span><span
+ style="font-family: monospace;"> lqt_codec_type type;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; lqt_codec_direction
+direction;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int
+num_fourccs;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* Fourccs, this codec can handle */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char ** fourccs;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int num_wav_ids;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int * wav_ids;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int num_encoding_parameters;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; lqt_parameter_info_t *
+encoding_parameters;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int num_decoding_parameters;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; lqt_parameter_info_t *
+decoding_parameters;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; /* Colormodels this codec can
+handle */</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int num_encoding_colormodels;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int * encoding_colormodels;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;"></span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int decoding_colormodel;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; /* The following members are
+set by libquicktime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; char *
+module_filename;&nbsp;&nbsp;&nbsp; /* Filename of the module&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int
+module_index;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+Index inside the module */</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; uint32_t
+file_time;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* File
+modification time&nbsp; */</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; struct lqt_codec_info_s *
+next;&nbsp;&nbsp; /* For chaining */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; };</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+Most interesting are the name, long name and description. The <span
+ style="font-family: monospace;">encoding_parameters</span> and <span
+ style="font-family: monospace;">decoding_parameters</span> arrays
+contain informations about the parameters you can pass to
+lqt_set_[audio|video]_parameter. The parameter infos are defined like
+this:<br>
+<br>
+<span style="font-family: monospace;">typedef enum</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; {</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+LQT_PARAMETER_INT,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+LQT_PARAMETER_STRING,</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+LQT_PARAMETER_STRINGLIST, /* String with options */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; /* This dummy
+type is used to separate sections (real_name will be on tab-label) */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+LQT_PARAMETER_SECTION</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; } lqt_parameter_type_t;</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">typedef union</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; {</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int val_int;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char * val_string;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; } lqt_parameter_value_t;</span><br
+ style="font-family: monospace;">
+<br style="font-family: monospace;">
+<span style="font-family: monospace;">typedef struct</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; {</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; /* Parameter name (to be
+passed to quicktime_set_parameter() ) */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char * name;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char * real_name; /* Other
+name (for making dialogs) */</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; lqt_parameter_type_t type;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; lqt_parameter_value_t
+val_default;</span><br style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; *&nbsp;&nbsp;
+Minimum and maximum values:</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; *&nbsp;&nbsp; These
+are only valid for numeric types and if val_min &lt; val_max</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int val_min;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; int val_max;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; /*</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; *&nbsp; Possible
+options (only valid for LQT_STRINGLIST)</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp; */</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; int num_stringlist_options;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp; char ** stringlist_options;</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;"></span><span
+ style="font-family: monospace;">&nbsp; } lqt_parameter_info_t;</span><br
+ style="font-family: monospace;">
+<br>
+You can also get the codec infos, when you read a file:<br>
+<br>
+<span style="font-family: monospace;">lqt_codec_info_t **
+lqt_audio_codec_from_file(quicktime_t *, int track);</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">lqt_codec_info_t **
+lqt_video_codec_from_file(quicktime_t *, int track);</span><br>
+<br>
+Codec infos are returned as a local copy, so you must free them. This
+is done with:<br>
+<br>
+<span style="font-family: monospace;">void
+lqt_destroy_codec_info(lqt_codec_info_t ** info);</span><br>
+<br>
+</body>
+</html>

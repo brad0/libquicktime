@@ -24,7 +24,6 @@ void quicktime_gmhd_dump(quicktime_gmhd_t *gmhd)
 void quicktime_read_gmhd(quicktime_t *file, quicktime_gmhd_t *gmhd, quicktime_atom_t *parent_atom)
 {
        quicktime_atom_t leaf_atom;
-       int result = 0;
 
        do
        {

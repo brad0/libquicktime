@@ -169,7 +169,7 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 		else
 		if(trak->mdia.minf.is_audio)
 		{
-			int length, samples_per_chunk;
+			int length;
 			quicktime_set_position(file, strl->dwLengthOffset);
 			length = quicktime_track_samples(file, trak);
 			quicktime_write_int32_le(file, length);

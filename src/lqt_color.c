@@ -437,6 +437,8 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
 int lqt_get_best_colormodel(quicktime_t * file, int track,
                             int * supported)
   {
+  if((track >= file->total_vtracks) || (track < 0))
+    return LQT_COLORMODEL_NONE;
   if(file->wr)
     return lqt_get_best_colormodel_encode(file, track, supported);
   else

@@ -171,6 +171,7 @@ static void scanline_raw_32(uint8_t * src,
     }
   }
 
+#if 0
 static void scanline_raw_2_gray(uint8_t * src,
                                 uint8_t * dst,
                                 int num_pixels,
@@ -252,7 +253,7 @@ static void scanline_raw_8_gray(uint8_t * src,
     }
   }
 
-
+#endif
 /* */
 
 static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
@@ -332,7 +333,6 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 	unsigned char *ptr;
         quicktime_ctab_t * ctab;
 	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
-	int pixel_size = frame_depth / 8;
 	int cmodel = source_cmodel(file, track);
 	int use_temp = (cmodel != file->vtracks[track].color_model ||
 		file->in_x != 0 ||
@@ -401,15 +401,18 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
               break;
             case 34: /* 2 bit gray */
               codec->bytes_per_line = width / 4;
-              codec->scanline_func = scanline_raw_2_gray;
+              //              codec->scanline_func = scanline_raw_2_gray;
+              codec->scanline_func = scanline_raw_2;
               break;
             case 36: /* 4 bit gray */
               codec->bytes_per_line = width / 2;
-              codec->scanline_func = scanline_raw_4_gray;
+              //              codec->scanline_func = scanline_raw_4_gray;
+              codec->scanline_func = scanline_raw_4;
               break;
             case 40: /* 8 bit gray */
               codec->bytes_per_line = width;
-              codec->scanline_func = scanline_raw_8_gray;
+              //              codec->scanline_func = scanline_raw_8_gray;
+              codec->scanline_func = scanline_raw_8;
               break;
             }
           if(codec->bytes_per_line & 1)
@@ -492,15 +495,11 @@ static int quicktime_encode_raw(quicktime_t *file,
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
-	int64_t offset = quicktime_position(file);
 	int result = 0;
-	register int i, j;
+	register int i;
 	int height = trak->tkhd.track_height;
 	int width = trak->tkhd.track_width;
 	int depth = quicktime_video_depth(file, track);
-	int64_t bytes = height * width * depth / 8;
-	int64_t bytes_per_row = width * depth / 8;
-	unsigned char temp;
 	int dest_cmodel;
         quicktime_atom_t chunk_atom;
         
@@ -615,6 +614,7 @@ void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
         codec_base->decode_audio = 0;
         codec_base->encode_audio = 0;
         codec_base->reads_colormodel = reads_colormodel;
+        codec_base->writes_colormodel = writes_colormodel;
         codec_base->fourcc = QUICKTIME_RAW;
         codec_base->title = "RGB uncompressed";
         codec_base->desc = "RGB uncompressed";

@@ -17,7 +17,6 @@ int quicktime_moov_init(quicktime_moov_t *moov)
 
 int quicktime_moov_delete(quicktime_moov_t *moov)
 {
-	int i;
 	while(moov->total_tracks) quicktime_delete_trak(moov);
 	quicktime_mvhd_delete(&(moov->mvhd));
 	quicktime_udta_delete(&(moov->udta));

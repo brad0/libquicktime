@@ -24,7 +24,6 @@ void quicktime_init_movi(quicktime_t *file, quicktime_riff_t *riff)
 	{
 		quicktime_strl_t *strl = first_riff->hdrl.strl[i];
 		quicktime_trak_t *trak = file->moov.trak[i];
-		quicktime_ix_t *ix = 
 			movi->ix[i] = 
 			quicktime_new_ix(file, trak, strl);
 	}

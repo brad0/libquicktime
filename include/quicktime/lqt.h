@@ -173,6 +173,13 @@ int lqt_decode_audio(quicktime_t *file,
 					 long samples);
 
 /*
+ * Returns the position of the last decoded sample. If it is smaller than you expected, EOF is reached.
+ */
+  
+  
+int64_t lqt_last_audio_position(quicktime_t * file, int track);
+  
+/*
  * Same as quicktime_encode_audio but with an additional track argument
  * for encoding files with more than one audio track
  */

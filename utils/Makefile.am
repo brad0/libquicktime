@@ -52,11 +52,11 @@ qtyuv4toyuv_SOURCES=yuv4toyuv.c
 qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
 lqtplay_SOURCES=lqtplay.c
-#lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
-#	-lXv -lGLU -lGL -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@
-
 lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
-	-lXv -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@
+	-lXv -lGLU -lGL -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@
+
+#lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
+#	-lXv -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@
 
 lqtvrplay_SOURCES=lqtvrplay.c
 lqtvrplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \

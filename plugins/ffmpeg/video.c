@@ -284,7 +284,6 @@ static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
   {
   AVPicture in_pic;
   AVPicture out_pic;
-  int i, j;
 
   /*
    *  Could someone please tell me, how people can make such a brain dead
@@ -328,7 +327,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   {
   int i, imax;
   int result = 0;
-  int t;
   int buffer_size;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_trak_t *trak = vtrack->track;
@@ -337,7 +335,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   quicktime_ffmpeg_video_codec_t *codec =
     ((quicktime_codec_t*)vtrack->codec)->priv;
   int got_pic;
-  unsigned char *dp, *sp;
+  unsigned char *sp;
   int do_cmodel_transfer;
   int row_span, row_span_uv;
   quicktime_ctab_t * ctab;
@@ -616,7 +614,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     }
   else if(!codec->do_imgconvert)
     {
-    //    fprintf(stderr, "cmodel_transfer...");
+    //    fprintf(stderr, "cmodel_transfer planar...");
     /* Transfer colormodel */
     /* Must make a difference between planar and packed here */
         
@@ -726,7 +724,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                         int track)
 {
-	int64_t offset = quicktime_position(file);
 	int result = 0;
 	int bytes_encoded;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);

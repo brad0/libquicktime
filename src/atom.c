@@ -92,7 +92,6 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 	}
 	else
 	{
-		int64_t size2;
 
 		reset(atom);
 

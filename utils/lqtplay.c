@@ -1,11 +1,11 @@
 /*
- * simple quicktime movie player, needs libquicktime (or quicktime4linux).
+ * simple quicktime movie player, needs libquicktime
  *
  *  (c) 2002 Gerd Knorr <kraxel@bytesex.org>
  *
  */
 
-// #define USE_GL
+#define USE_GL
 
 #include "config.h"
 
@@ -47,6 +47,10 @@
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
+/* File handle */
+
+static quicktime_t *qt = NULL;
+
 
 /* ------------------------------------------------------------------------ */
 /* X11 code                                                                 */
@@ -78,7 +82,19 @@ static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
 static unsigned long   lut_blue[256];
 
-static quicktime_t *qt = NULL;
+/* Video stuff */
+
+static int qt_cmodel = BC_RGB888;
+
+static int qt_cmodels[] =
+  {
+    BC_RGB888, /* Always supported */
+    /* Placeholders for various YUV formats, set by xv_init */
+    LQT_COLORMODEL_NONE,
+    LQT_COLORMODEL_NONE,
+    LQT_COLORMODEL_NONE,
+  };
+
 
 #define SWAP2(x) (((x>>8) & 0x00ff) |\
                   ((x<<8) & 0xff00))
@@ -206,6 +222,7 @@ static void x11_init(void)
 
 static void xv_init(void)
 {
+    int cmodel_index;
     int ver, rel, req, ev, err, i;
     int adaptors, formats;
     XvAdaptorInfo        *ai;
@@ -256,6 +273,14 @@ static void xv_init(void)
 	}
 	fprintf(stderr,"\n");
     }
+
+    /* Fill the cmodel array */
+    cmodel_index = 1;
+    if(xv_have_YUY2)
+      qt_cmodels[cmodel_index++] = BC_YUV422;
+    if(xv_have_YV12 || xv_have_I420)
+      qt_cmodels[cmodel_index++] = BC_YUV420P;
+    
 }
 
 static int
@@ -412,12 +437,13 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 /* ------------------------------------------------------------------------ */
 /* OpenGL code                                                              */
 #ifdef USE_GL
-static int tw,th;
-static GLint tex;
+static int gl_texture_width,gl_texture_height;
+static GLint gl_texture;
 static int gl_attrib[] = { GLX_RGBA,
-			   GLX_RED_SIZE, 1,
-			   GLX_GREEN_SIZE, 1,
-			   GLX_BLUE_SIZE, 1,
+                           GLX_RED_SIZE, 8,
+                           GLX_GREEN_SIZE, 8,
+                           GLX_BLUE_SIZE, 8,
+                           GLX_DEPTH_SIZE, 8,
 			   GLX_DOUBLEBUFFER,
 			   None };
 
@@ -438,21 +464,22 @@ static void gl_blit(Widget widget, char *rgbbuf,
     char *dummy;
     float x,y;
 
-    if (0 == tex) {
-	glGenTextures(1,&tex);
-	glBindTexture(GL_TEXTURE_2D,tex);
+    if (0 == gl_texture) {
+	glGenTextures(1,&gl_texture);
+	glBindTexture(GL_TEXTURE_2D,gl_texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	dummy = malloc(tw*th*3);
-	memset(dummy,128,tw*th*3);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,tw,th,0,
+	dummy = malloc(gl_texture_width*gl_texture_height*3);
+	memset(dummy,128,gl_texture_width*gl_texture_height*3);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,gl_texture_width,
+                     gl_texture_height,0,
 		     GL_RGB,GL_UNSIGNED_BYTE,dummy);
 	free(dummy);
     }
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0,iw,ih,
 		    GL_RGB,GL_UNSIGNED_BYTE,rgbbuf);
-    x = (float)iw/tw;
-    y = (float)ih/th;
+    x = (float)iw/gl_texture_width;
+    y = (float)ih/gl_texture_height;
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
@@ -483,25 +510,30 @@ static void gl_init(Widget widget, int iw, int ih)
     glXMakeCurrent(XtDisplay(widget),XtWindow(widget),ctx);
     fprintf(stderr, "INFO: gl: DRI=%s\n",
 	    glXIsDirect(dpy, ctx) ? "Yes" : "No");
-    if (!glXIsDirect(dpy, ctx))
-	return;
-    
+    if (!glXIsDirect(dpy, ctx)) {
+        fprintf(stderr, "WARNING: gl: Direct rendering missing\n");
+        return;
+    }
+#if 0
     /* check against max size */
     glGetIntegerv(GL_MAX_TEXTURE_SIZE,&i);
     fprintf(stderr,"INFO: gl: texture max size: %d\n",i);
-    if (iw > i)
-	return;
-    if (ih > i)
-	return;
-    
+    if ((iw > i) || (ih > i))
+        {
+        fprintf(stderr, "WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n",
+                i, i, iw, ih);
+        return;
+        }
+#endif
     /* textures have power-of-two x,y dimensions */
     for (i = 0; iw >= (1 << i); i++)
 	;
-    tw = (1 << i);
+    gl_texture_width = (1 << i);
     for (i = 0; ih >= (1 << i); i++)
 	;
-    th = (1 << i);
-    fprintf(stderr,"INFO: gl: frame=%dx%d, texture=%dx%d\n",iw,ih,tw,th);
+    gl_texture_height = (1 << i);
+    fprintf(stderr,"INFO: gl: frame=%dx%d, texture=%dx%d\n",iw,ih,
+            gl_texture_width,gl_texture_height);
 
     glClearColor (0.0, 0.0, 0.0, 0.0);
     glShadeModel(GL_FLAT);
@@ -524,7 +556,7 @@ static int oss_sr,oss_hr;
 static int use_alsa = 1;
 
 #ifndef SND_PCM_FORMAT_S16_NE
-# if BYTE_ORDER == BIG_ENDIAN
+# ifdef WORDS_BIGENDIAN
 #  define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_BE
 # else
 #  define SND_PCM_FORMAT_S16_NE SND_PCM_FORMAT_S16_LE
@@ -716,6 +748,24 @@ static int oss_init(char *dev, int channels, int rate)
 /* ------------------------------------------------------------------------ */
 /* quicktime code                                                           */
 
+/* Audio stuff */
+
+/* Interleaved audio buffer */
+static int16_t *qt_audio = (int16_t*)0;    //,*qt1,*qt2;
+static int16_t *qt_audio_ptr; /* Pointer to the sample buffer for the next write() call */
+
+static int qt_audio_samples_in_buffer;
+
+/* Non interleaved audio buffer */
+static int16_t **qt_audion = (int16_t**)0;
+
+/* One decode call will decode this many samples */
+
+#define AUDIO_BLOCK_SIZE (10*1024)
+
+static int qt_channels,qt_sample_rate;
+static int qt_audio_eof = 0; /* No more samples can be decoded */
+
 static int qt_hasvideo,qt_hasaudio;
 
 static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
@@ -724,11 +774,6 @@ static XImage *qt_ximage;
 static XvImage *qt_xvimage;
 static GC qt_gc;
 
-static int16_t *qt_audio; //,*qt1,*qt2;
-static int16_t **qt_audion;
-
-static int qt_size,qt_offset,qt_stereo;
-static int qt_cmodel = BC_RGB888;
 
 static void qt_init(FILE *fp, char *filename)
 {
@@ -756,10 +801,34 @@ static void qt_init(FILE *fp, char *filename)
 	fprintf(fp,"  copyright: %s\n",str);
     str = quicktime_get_name(qt);
     if (str)
-	fprintf(fp,"  name: %s\n",str);
+	fprintf(fp,"  name:      %s\n",str);
     str = quicktime_get_info(qt);
     if (str)
-	fprintf(fp,"  info: %s\n",str);
+	fprintf(fp,"  info:      %s\n",str);
+
+    str = lqt_get_author(qt);
+    if (str)
+	fprintf(fp,"  author:    %s\n",str);
+
+    str = lqt_get_artist(qt);
+    if (str)
+	fprintf(fp,"  artist:    %s\n",str);
+
+    str = lqt_get_album(qt);
+    if (str)
+        fprintf(fp,"  album:     %s\n",str);
+
+    str = lqt_get_genre(qt);
+    if (str)
+	fprintf(fp,"  genre:     %s\n",str);
+
+    str = lqt_get_track(qt);
+    if (str)
+	fprintf(fp,"  track:     %s\n",str);
+
+    str = lqt_get_comment(qt);
+    if (str)
+	fprintf(fp,"  comment:   %s\n",str);
     
     /* print video info */
     if (quicktime_has_video(qt)) {
@@ -816,16 +885,16 @@ static void qt_init(FILE *fp, char *filename)
 	fprintf(stderr,"WARNING: unsupported audio codec\n");
     } else {
 	qt_hasaudio = 1;
-	if (quicktime_track_channels(qt,0) > 1)
-	    qt_stereo = 1;
+	qt_channels = quicktime_track_channels(qt,0);
+        qt_sample_rate = quicktime_sample_rate(qt,0);
   if (use_alsa == 1) {
-    if (-1 == alsa_init(adev_name, qt_stereo ? 2 : 1, 
-         quicktime_sample_rate(qt,0))) {
+    if (-1 == alsa_init(adev_name, qt_channels, 
+         qt_sample_rate)) {
            qt_hasaudio = 0;}
   }
   else {
-  	if (-1 == oss_init("/dev/dsp", qt_stereo ? 2 : 1,
- 		     quicktime_sample_rate(qt,0)))
+  	if (-1 == oss_init("/dev/dsp", qt_channels,
+                           qt_sample_rate))
            qt_hasaudio = 0;
   }
   }
@@ -970,91 +1039,98 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     }
 }
 
+
+/* Decode at most AUDIO_BLOCK_SIZE samples and interleave them into the
+   qt_audio array. Return the real number of decoded samples */
+
+static int decode_audio()
+  {
+  int i, j;
+  int samples_decoded;
+  long last_pos = lqt_last_audio_position(qt, 0);
+  if(!qt_audio)
+    {
+    /* Initialize */
+
+    if(qt_channels > 1)
+      {
+      qt_audion  = malloc(qt_channels * sizeof(*qt_audion));
+      for(i = 0; i < qt_channels; i++)
+        {
+        qt_audion[i] = calloc(AUDIO_BLOCK_SIZE, sizeof(*(qt_audion[i])));
+        }
+      }
+    qt_audio  = calloc(AUDIO_BLOCK_SIZE*qt_channels, sizeof(*qt_audio));
+    }
+  
+  if(qt_channels > 1)
+    {
+    lqt_decode_audio_track(qt, qt_audion, (float**)0, AUDIO_BLOCK_SIZE, 0);
+    samples_decoded = lqt_last_audio_position(qt, 0) - last_pos;
+    
+    /* Interleave */
+    for (i = 0; i < samples_decoded; i++)
+      {
+      for(j = 0; j < qt_channels; j++)
+        {
+        qt_audio[qt_channels*i+j] = qt_audion[j][i];
+        }
+      }
+    }
+  else
+    {
+    fprintf(stderr, "Decode audio...");
+    lqt_decode_audio_track(qt, &qt_audio, (float**)0, AUDIO_BLOCK_SIZE, 0);
+    fprintf(stderr, "done\n");
+    samples_decoded = lqt_last_audio_position(qt, 0) - last_pos;
+    }
+  qt_audio_samples_in_buffer = samples_decoded;
+  qt_audio_ptr = qt_audio;
+  if(samples_decoded < AUDIO_BLOCK_SIZE)
+    {
+    fprintf(stderr, "Audio track finished\n");
+    qt_audio_eof = 1;
+    }
+  return samples_decoded;
+  }
+
 //static int runcount;
-static int qt_alsa_audio_write(int frames)
+static int qt_alsa_audio_write()
 {
 #ifdef HAVE_ALSA
-    long pos;
-    int i, j;
-    signed short *ptr;
-    int frames_processed = frames;    
+    int done = 0;
     int ret = 0;
-    int channels = quicktime_track_channels(qt,0);
-    if (0 == quicktime_audio_position(qt,0)) {
-	/* Init */
-        qt_audion  = malloc(channels * sizeof(*qt_audion));
-
-        for(i = 0; i < channels; i++)
-          {
-          qt_audion[i] = malloc(frames * sizeof(*(qt_audion[i])));
-          }
-        
-        //qt_audion[0]  = malloc(periodsize/2 * sizeof(short));
-	//qt_audion[1]  = malloc(periodsize/2 * sizeof(short));
-	qt_audio  = malloc(frames*4);
-#if 0
-	if (quicktime_track_channels(qt,0) > 1) {
-	    qt1 = malloc(frames*4/2);
-	    qt2 = malloc(frames*4/2);
-	}
-#endif
+    //    fprintf(stderr, "Write alsa %d\n", qt_audio_samples_in_buffer);
+    while(!done) {
+        /* Decode new audio samples */
+        if(!qt_audio_samples_in_buffer)
+          decode_audio(AUDIO_BLOCK_SIZE);
+        //        fprintf(stderr, "snd_pcm_writei..");
+        ret = snd_pcm_writei(pcm_handle, (void *)(qt_audio_ptr), qt_audio_samples_in_buffer);
+        //        fprintf(stderr, "done %d\n", ret);
+        if (ret == -EAGAIN) { 
+            ret = 0;
+            done = 1;
+    //           snd_pcm_wait(pcm_handle, 1000);
+        }
+        else if (ret == -EPIPE) {
+            snd_pcm_prepare(pcm_handle);
+            fprintf(stderr, "Warning: buffer underrun\n");
+        }
+        else if (ret < 0) {
+            fprintf(stderr, "Warning: %s\n", snd_strerror(ret));
+        }
+        else if (ret >= 0)
+          done = 1;
+    }
+    if (ret > 0 ) {
+    qt_audio_samples_in_buffer -=ret;
+    qt_audio_ptr += ret * qt_channels;
     }
     
-    if (channels > 1) {
-        /* stereo: two channels => interlaved samples */
-      	pos = quicktime_audio_position(qt,0);
-	//quicktime_decode_audio(qt,qt_audion[0],NULL,frames,0);
-  	//quicktime_set_audio_position(qt,pos,0);
-  	//quicktime_decode_audio(qt,qt_audion[1],NULL,frames,1);
-
-#if 0
-        quicktime_decode_audio(qt,qt_audion[0],NULL,frames,0);
-        for(i = 1; i < channels; i++)
-          {
-          quicktime_set_audio_position(qt,pos,0);
-          quicktime_decode_audio(qt,qt_audion[i],NULL,frames,i);
-          }
-#else
-        lqt_decode_audio_track(qt, qt_audion, (float**)0, frames, 0);
-#endif
-        /* Interleave */
-        for (i = 0; i < frames; i++)
-          {
-          for(j = 0; j < channels; j++)
-            {
-            qt_audio[channels*i+j] = qt_audion[j][i];
-            }
-          }
-        
-    } else {
-        pos =  quicktime_audio_position(qt, 0);
-
-	/* mono */
-        lqt_decode_audio_track(qt, &qt_audio, (float**)0, frames, 0);
-    }
-
-    ptr = qt_audio;
-
-
-    while (frames_processed > 0) {
-	ret = snd_pcm_writei(pcm_handle, (void *)(ptr), frames);
-	if (ret == -EAGAIN) { 
-	    snd_pcm_wait(pcm_handle, 1000);
-	}
-	else if (ret == -EPIPE) {
-	    snd_pcm_prepare(pcm_handle);
-	}
-	else if (ret < 0) {
-	    fprintf(stderr, "Warning: %s\n", snd_strerror(ret));
-	}
-	
-	if (ret > 0 ) {
-	    frames_processed -=ret;
-	}
-    }
-    if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) && 0 == qt_offset) {
-	snd_pcm_drain(pcm_handle);
-	return -1;
+    if (qt_audio_eof && 0 == qt_audio_samples_in_buffer) {
+        snd_pcm_drain(pcm_handle);
+        return -1;
     }
 #endif
 
@@ -1063,52 +1139,12 @@ static int qt_alsa_audio_write(int frames)
 
 static int qt_oss_audio_write(void)
 {
-    long pos;
-    int rc,i,j;
-    int channels;
-    
-    channels = quicktime_track_channels(qt,0);
+    int rc;
 
-    if (0 == quicktime_audio_position(qt,0)) {
-	/* init */
-	qt_size   = 64 * 1024;
-	qt_offset = 0;
-	qt_audio  = malloc(qt_size/2 * channels * sizeof(*qt_audio));
-        qt_audion = malloc(channels * sizeof(*qt_audion));
-        for(i = 0; i < channels; i++)
-          {
-          qt_audion[i] = malloc(qt_size/2 * sizeof(*(qt_audion[i])));
-          }
-      }
+    if(!qt_audio_samples_in_buffer)
+      decode_audio(AUDIO_BLOCK_SIZE);
     
-    if (0 == qt_offset) {
-	if (qt_stereo) {
-	    /* stereo: two channels => interlaved samples */
-	    pos = quicktime_audio_position(qt,0);
-#if 0
-	    quicktime_decode_audio(qt,qt_audion[i],NULL,qt_size/4,0);
-            for(i = 0; i < num_channels; i++)
-              {
-              quicktime_set_audio_position(qt,pos,0);
-              quicktime_decode_audio(qt,qt_audion[i],NULL,qt_size/4,1);
-              }
-#else
-            lqt_decode_audio_track(qt, qt_audion, (float**)0, qt_size/4, 0);
-#endif
-        /* Interleave */
-        for (i = 0; i < qt_size/4; i++)
-          {
-          for(j = 0; j < channels; j++)
-            {
-            qt_audio[channels*i+j] = qt_audion[j][i];
-            }
-          }
-	} else {
-        /* mono */
-        lqt_decode_audio_track(qt, &qt_audio, (float**)0, qt_size/4, 0);
-	}
-    }
-    rc = write(oss_fd,qt_audio+qt_offset/2,qt_size-qt_offset);
+    rc = write(oss_fd,qt_audio_ptr,qt_audio_samples_in_buffer * qt_channels * sizeof(*qt_audio));
     switch (rc) {
     case -1:
 	perror("write dsp");
@@ -1123,14 +1159,14 @@ static int qt_oss_audio_write(void)
 	qt_hasaudio = 0;
 	break;
     default:
-	qt_offset += rc;
-	if (qt_offset == qt_size)
-	    qt_offset = 0;
+        qt_audio_samples_in_buffer -= rc * qt_channels * sizeof(*qt_audio);
+        qt_audio_ptr += rc / sizeof(*qt_audio);
+        break;
     }
 
-    if (quicktime_audio_position(qt,0) >= quicktime_audio_length(qt,0) &&
-	0 == qt_offset)
+    if (qt_audio_eof && 0 == qt_audio_samples_in_buffer) {
        return -1;
+    }
     return 0;
 }
 
@@ -1231,7 +1267,7 @@ static String res[] = {
 int main(int argc, char *argv[])
 {
     struct timeval start,wait;
-    int audio_frames;
+    //    int audio_frames;
     
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
 				  opt_desc, opt_count,
@@ -1265,16 +1301,13 @@ int main(int argc, char *argv[])
     x11_init();
     if (args.xv && qt_hasvideo)
 	xv_init();
-
-    /* use Xvideo? */
-    if (xv_have_YUY2 && quicktime_reads_cmodel(qt,BC_YUV422,0))
-	qt_cmodel = BC_YUV422;
-    if ((xv_have_I420 || xv_have_YV12) && quicktime_reads_cmodel(qt,BC_YUV420P,0))
-	qt_cmodel = BC_YUV420P;
-
-    /* Set decoding colormodel */
-    quicktime_set_cmodel(qt, qt_cmodel);
-
+    if(qt_hasvideo) {
+        /* Decide about the colormodel */
+        qt_cmodel = lqt_get_best_colormodel(qt, 0, qt_cmodels);
+        fprintf(stderr, "Using colormodel %s\n", lqt_colormodel_to_string(qt_cmodel));
+        /* Set decoding colormodel */
+        lqt_set_cmodel(qt, 0, qt_cmodel);
+    }
     /* use OpenGL? */
     XtRealizeWidget(app_shell);
 #ifdef USE_GL
@@ -1282,8 +1315,12 @@ int main(int argc, char *argv[])
 	gl_init(simple,qt_width,qt_height);
 #endif    
     /* frames per chunk for alsa */
-    audio_frames = ((oss_sr / quicktime_frame_rate(qt,0)) / 2 + 0.5);
-
+#if 0
+    if(qt_hasvideo)
+      audio_frames = ((oss_sr / quicktime_frame_rate(qt,0)) / 2 + 0.5);
+    else
+      audio_frames = oss_sr + 1024;
+#endif
     /* enter main loop */
     gettimeofday(&start,NULL);
     for (;;) {
@@ -1309,13 +1346,13 @@ int main(int argc, char *argv[])
 	    if (qt_hasvideo) {
 		qt_frame_delay(&start,&wait);
 	    } else {
-		wait.tv_sec  = 1;
-		wait.tv_usec = 0;
+		wait.tv_sec  = 0;
+		wait.tv_usec = 1000;
 	    }
 	    rc = select(max+1,&rd,&wr,NULL,&wait);
 	    if (qt_hasaudio) {
 		if (use_alsa == 1) {
-		    if (0 != qt_alsa_audio_write(audio_frames)) break;
+		    if (0 != qt_alsa_audio_write()) break;
 		}
 		else if (FD_ISSET(oss_fd,&wr)) { 
 		    if (0 != qt_oss_audio_write()) break;

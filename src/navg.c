@@ -52,7 +52,6 @@ void quicktime_navg_dump(quicktime_navg_t *navg)
 
 int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_atom_t *navg_atom)
 {
-	quicktime_atom_t leaf_atom;
 	navg->version =  quicktime_read_int16(file);
 	navg->columns = quicktime_read_int16(file);
 	navg->rows = quicktime_read_int16(file);
@@ -74,7 +73,7 @@ int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_ato
 
 void quicktime_write_navg(quicktime_t *file, quicktime_navg_t *navg)
 {
-	quicktime_atom_t atom, subatom;
+	quicktime_atom_t atom;
 	quicktime_atom_write_header(file, &atom, "NAVG");
 	quicktime_write_int16(file, navg->version);
 	quicktime_write_int16(file, navg->columns);

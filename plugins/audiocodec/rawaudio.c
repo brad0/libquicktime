@@ -55,6 +55,7 @@ static int quicktime_delete_codec_rawaudio(quicktime_audio_map_t *atrack)
 	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
 
 	if(codec->work_buffer) free(codec->work_buffer);
+	if(codec->decode_buffer) free(codec->decode_buffer);
 
         if(codec->decode_sample_buffer_i)
           {
@@ -184,9 +185,8 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
               codec->decode_buffer_ptr = codec->decode_buffer;
               }
 
-            if(!codec->decode_buffer_size)
-              break;
-            
+            if(codec->decode_buffer_size <= 0)
+              return 0;
             codec->decode_sample_buffer_size = codec->decode_buffer_size / codec->decode_block_align;
             if(codec->decode_sample_buffer_size > SAMPLES_PER_BLOCK)
               {
