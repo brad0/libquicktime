@@ -14,7 +14,10 @@ include \
 plugins \
 utils
 
-EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4
+EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4 libquicktime.pc.in
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA=libquicktime.pc
 
 bin_SCRIPTS = lqt-config
 

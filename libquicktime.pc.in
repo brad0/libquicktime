@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/@PACKAGE@
+plugindir=@libdir@/@PLUGIN_DIR@
+
+Name: libquicktime
+Description: library for reading and writing Quicktime files
+Version: @VERSION@
+Libs: -L${libdir} @LQT_LIBS@
+Cflags: -I${includedir} @LQT_CFLAGS@

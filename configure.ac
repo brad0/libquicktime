@@ -660,6 +660,7 @@ dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile \
 libquicktime.spec \
+libquicktime.pc \
 doc/Makefile \
 debian/Makefile \
 src/Makefile \
