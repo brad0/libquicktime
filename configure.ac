@@ -2,7 +2,8 @@ AC_INIT(src/lqt_quicktime.c)
 dnl AC_INIT([Libquicktime], 0.9.0, [Libquicktime Devel List <libquicktime-devel@sourceforge.net>], [libquicktime])
 dnl Every other copy of the package version number gets its value from here
 AM_INIT_AUTOMAKE(libquicktime, 0.9.0)
-AM_CONFIG_HEADER([config.h include/quicktime/lqt1394_config.h])
+AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
@@ -485,6 +486,93 @@ AC_SUBST(PNG_LIBS)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
+#CPU Optimisation added by Justin Schoeman (justin@suntiger.ee.up.ac.za)
+
+AC_MSG_WARN(Doing a few not well tested checks for CPU optimisations.)
+AC_MSG_WARN(Please report any problems to justin@suntiger.ee.up.ac.za)
+
+RTJPEG_CFLAGS=$CFLAGS
+
+#Check for MMX-capable compiler
+AC_ARG_ENABLE(mmx, [  --enable-mmx            compile for MMX CPU [default=yes]])
+if test x${enable_mmx-yes} = xyes ; then
+  AC_MSG_CHECKING(for MMX-capable compiler)
+  AC_TRY_RUN([
+    #include "plugins/rtjpeg/mmx.h"
+    main()
+    { movq_r2r(mm0, mm1); return 0; }
+  ],
+  [
+    # program could be run
+    HAVE_MMX="yes"
+    AC_MSG_RESULT(yes)
+  ],
+    # program could not be run
+    HAVE_MMX="no"
+    AC_MSG_RESULT(no)
+  ,
+    # cross compiling (untested)
+  [
+    case "x${host_cpu}" in 
+         xi586 | xi686 | xk6 | xk7 | xathlon)
+            HAVE_MMX="yes"
+            AC_MSG_RESULT(yes) ;;
+        *)
+            HAVE_MMX="no"
+            AC_MSG_RESULT(not supported on ${host_cpu}) ;;
+    esac
+  ])
+fi
+
+# Set X86_MMX compile flag
+
+if test "x$HAVE_MMX" = "xyes" ; then
+  AC_MSG_WARN(Building with MMX optimisations - do not)
+  AC_MSG_WARN(execute the binary on a non-MMX machine.)
+  RTJPEG_CFLAGS="-DMMX $RTJPEG_CFLAGS"
+fi
+
+# Set CPU specific compiler options
+
+if test "x$RPM_OPT_FLAGS" = "x" ; then
+    # detect Athlon CPU
+    # the idea is to use -mcpu=athlon to get the important optimization
+    # but keep -march=${host_cpu} from the command line. -march=i686
+    # should not have a negative impact on athlons, but -march=i586 or
+    # worse has.
+    AC_MSG_CHECKING(for Athlon CPU)
+    if grep Athlon /proc/cpuinfo > /dev/null ; then
+         AC_MSG_RESULT(yes)
+         AC_TRY_CFLAGS([-march=athlon], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=athlon"],
+           AC_TRY_CFLAGS([-march=i686], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=i686"]))
+    else
+         AC_MSG_RESULT(no)
+         AC_MSG_CHECKING(for K6 CPU)
+         if grep -i k6 /proc/cpuinfo > /dev/null ; then
+              AC_MSG_RESULT(yes)
+              AC_TRY_CFLAGS([-march=k6], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=k6"],
+                AC_TRY_CFLAGS([-march=i686], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=i686"]))
+         else
+              AC_MSG_RESULT(no)
+              AC_TRY_CFLAGS([-march=pentium], 
+                            [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=pentium"])
+         fi
+    fi
+    
+    # basic optimization
+    AC_TRY_CFLAGS([-malign-double -fschedule-insns2],
+                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -malign-double -fschedule-insns2"])
+    AC_TRY_CFLAGS([-O6],
+                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O6"],
+		  AC_TRY_CFLAGS([-O3],[RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O3"]))
+else
+    # use optimization as required for RPM host CPU
+    RTJPEG_CFLAGS="$RTJPEG_CFLAGS $RPM_OPT_FLAGS"
+    RTJPEG_CFLAGS="$RTJPEG_CFLAGS"
+fi
+
+AC_SUBST(RTJPEG_CFLAGS)
+
 dnl jpeg/Makefile
 
 if test "x$prefix" = xNONE; then
@@ -547,6 +635,7 @@ plugins/opendivx/Makefile \
 plugins/opendivx/decore50/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/ferguson/Makefile \
+plugins/rtjpeg/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])
