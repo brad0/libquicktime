@@ -26,6 +26,7 @@ static lqt_codec_info_static_t codec_info_vorbis =
     long_name:           "Lame mp3 encoder",
     description:         "Lame mp3 encoder (see http://www.mp3dev.org)",
     fourccs:             fourccs_mp3,
+    wav_ids:             (int[]){ 0x55, LQT_WAV_ID_NONE },
     type:                LQT_CODEC_AUDIO,
     direction:           LQT_DIRECTION_ENCODE,
     encoding_parameters: encode_parameters_lame,

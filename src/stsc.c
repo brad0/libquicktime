@@ -16,7 +16,7 @@ void quicktime_stsc_init_table(quicktime_t *file, quicktime_stsc_t *stsc)
 	if(!stsc->entries_allocated)
 	{
 		stsc->total_entries = 0;
-		stsc->entries_allocated = 2000;
+		stsc->entries_allocated = 2048;
 		stsc->table = (quicktime_stsc_table_t*)calloc(1, sizeof(quicktime_stsc_table_t) * stsc->entries_allocated);
 	}
 }
@@ -50,7 +50,7 @@ void quicktime_stsc_delete(quicktime_stsc_t *stsc)
 void quicktime_stsc_dump(quicktime_stsc_t *stsc)
 {
 	int i;
-	printf("     sample to chunk\n");
+	printf("     sample to chunk (stsc)\n");
 	printf("      version %d\n", stsc->version);
 	printf("      flags %ld\n", stsc->flags);
 	printf("      total_entries %ld\n", stsc->total_entries);

@@ -22,7 +22,7 @@ void quicktime_stsd_init_video(quicktime_t *file,
 								quicktime_stsd_t *stsd, 
 								int frame_w,
 								int frame_h, 
-								float frame_rate,
+								double frame_rate,
 								char *compression)
 {
 	quicktime_stsd_table_t *table;
@@ -78,7 +78,7 @@ void quicktime_stsd_delete(quicktime_stsd_t *stsd)
 void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd)
 {
 	int i;
-	printf("     sample description\n");
+	printf("     sample description (stsd)\n");
 	printf("      version %d\n", stsd->version);
 	printf("      flags %ld\n", stsd->flags);
 	printf("      total_entries %ld\n", stsd->total_entries);

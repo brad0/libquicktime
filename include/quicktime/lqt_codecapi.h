@@ -11,6 +11,7 @@
 extern int get_codec_api_version() { return LQT_CODEC_API_VERSION; }
 #endif
 
+#define LQT_WAV_ID_NONE -1
 
 /*
  *  Functions and datatypes for exclusive
@@ -69,7 +70,11 @@ typedef struct
   /* Fourccs, NULL terminated */
   
   char ** fourccs;
-  
+
+  /* WAV IDs, terminated with LQT_WAV_ID_NONE */
+
+  int * wav_ids;
+    
   lqt_codec_type type;
   lqt_codec_direction direction;
 

@@ -22,7 +22,7 @@ void quicktime_stco_init_common(quicktime_t *file, quicktime_stco_t *stco)
 {
 	if(!stco->entries_allocated)
 	{
-		stco->entries_allocated = 2000;
+		stco->entries_allocated = 2048;
 		stco->total_entries = 0;
 		stco->table = (quicktime_stco_table_t*)malloc(sizeof(quicktime_stco_table_t) * stco->entries_allocated);
 /*printf("quicktime_stco_init_common %x\n", stco->table); */
@@ -32,7 +32,7 @@ void quicktime_stco_init_common(quicktime_t *file, quicktime_stco_t *stco)
 void quicktime_stco_dump(quicktime_stco_t *stco)
 {
 	int i;
-	printf("     chunk offset\n");
+	printf("     chunk offset (stco)\n");
 	printf("      version %d\n", stco->version);
 	printf("      flags %ld\n", stco->flags);
 	printf("      total_entries %ld\n", stco->total_entries);
@@ -88,9 +88,13 @@ void quicktime_write_stco(quicktime_t *file, quicktime_stco_t *stco)
 	quicktime_atom_write_footer(file, &atom);
 }
 
+// Chunk starts at 1
 void quicktime_update_stco(quicktime_stco_t *stco, long chunk, int64_t offset)
 {
 	long i;
+        if(chunk <= 0)
+                printf("quicktime_update_stco chunk must start at 1. chunk=%ld\n",
+                        chunk);
 
 	if(chunk > stco->entries_allocated)
 	{

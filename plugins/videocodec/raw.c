@@ -28,7 +28,6 @@ static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
 static int source_cmodel(quicktime_t *file, int track)
 {
 	int depth = quicktime_video_depth(file, track);
-/*         fprintf(stderr, "%s: source_cmodel: depth: %d\n", __FILE__, depth); */
 	if(depth == 24) 
 		return BC_RGB888;
 	else
@@ -163,7 +162,8 @@ static int quicktime_encode_raw(quicktime_t *file,
 	int64_t bytes_per_row = width * depth / 8;
 	unsigned char temp;
 	int dest_cmodel;
-
+        quicktime_atom_t chunk_atom;
+        
 //printf("quicktime_encode_raw %llx %llx\n", file->file_position, file->ftell_position);
 	if(depth == 32)
 	{
@@ -218,35 +218,35 @@ static int quicktime_encode_raw(quicktime_t *file,
 			0,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 			width,       /* For planar use the luma rowspan */
 			width);     /* For planar use the luma rowspan */
-
+                quicktime_write_chunk_header(file, trak, &chunk_atom);
 		result = !quicktime_write_data(file, codec->temp_frame, 
 			cmodel_calculate_datasize(width,
 				height,
 				-1,
 				dest_cmodel));
+                quicktime_write_chunk_footer(file,
+                        trak,
+                        vtrack->current_chunk,
+                        &chunk_atom,
+                        1);
+
 	}
 	else
 	{
-		result = !quicktime_write_data(file, row_pointers[0], 
+                quicktime_write_chunk_header(file, trak, &chunk_atom);
+                result = !quicktime_write_data(file, row_pointers[0], 
 			cmodel_calculate_datasize(width,
 				height,
 				-1,
 				file->color_model));
+                quicktime_write_chunk_footer(file,
+                        trak,
+                        vtrack->current_chunk,
+                        &chunk_atom,
+                        1);
 	}
 
-
-
-
-
-	quicktime_update_tables(file,
-						file->vtracks[track].track,
-						offset,
-						file->vtracks[track].current_chunk,
-						file->vtracks[track].current_position,
-						1,
-						bytes);
-
-	file->vtracks[track].current_chunk++;
+        vtrack->current_chunk++;
 	return result;
 }
 
@@ -264,17 +264,16 @@ int quicktime_raw_rows_consecutive(unsigned char **row_pointers, int w, int h, i
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
 {
-	quicktime_raw_codec_t *priv;
-
-	((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_raw_codec_t));
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = quicktime_delete_codec_raw;
-	((quicktime_codec_t*)vtrack->codec)->decode_video = quicktime_decode_raw;
-	((quicktime_codec_t*)vtrack->codec)->encode_video = quicktime_encode_raw;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-        /*	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = quicktime_reads_colormodel_raw; */
-
-	priv = ((quicktime_codec_t*)vtrack->codec)->priv;
+        quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+ 
+        codec_base->priv = calloc(1, sizeof(quicktime_raw_codec_t));
+        codec_base->delete_vcodec = quicktime_delete_codec_raw;
+        codec_base->decode_video = quicktime_decode_raw;
+        codec_base->encode_video = quicktime_encode_raw;
+        codec_base->decode_audio = 0;
+        codec_base->encode_audio = 0;
+        codec_base->reads_colormodel = reads_colormodel;
+        codec_base->fourcc = QUICKTIME_RAW;
+        codec_base->title = "RGB uncompressed";
+        codec_base->desc = "RGB uncompressed";
 }

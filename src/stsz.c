@@ -17,9 +17,9 @@ void quicktime_stsz_init_video(quicktime_t *file, quicktime_stsz_t *stsz)
 	stsz->sample_size = 0;
 	if(!stsz->entries_allocated)
 	{
-		stsz->entries_allocated = 2000;
+		stsz->entries_allocated = 2048;
 		stsz->total_entries = 0;
-		stsz->table = (quicktime_stsz_table_t*)malloc(sizeof(quicktime_stsz_table_t) * stsz->entries_allocated);
+		stsz->table = (quicktime_stsz_table_t*)calloc(sizeof(quicktime_stsz_table_t), stsz->entries_allocated);
 	}
 }
 
@@ -48,7 +48,7 @@ void quicktime_stsz_delete(quicktime_stsz_t *stsz)
 void quicktime_stsz_dump(quicktime_stsz_t *stsz)
 {
 	int i;
-	printf("     sample size\n");
+	printf("     sample size (stsz)\n");
 	printf("      version %d\n", stsz->version);
 	printf("      flags %ld\n", stsz->flags);
 	printf("      sample_size %lld\n", stsz->sample_size);
@@ -74,7 +74,7 @@ void quicktime_read_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 //printf("quicktime_read_stsz 1 %d\n", stsz->sample_size);
 	if(!stsz->sample_size)
 	{
-		stsz->table = (quicktime_stsz_table_t*)malloc(sizeof(quicktime_stsz_table_t) * stsz->entries_allocated);
+		stsz->table = (quicktime_stsz_table_t*)calloc(sizeof(quicktime_stsz_table_t), stsz->entries_allocated);
 		for(i = 0; i < stsz->total_entries; i++)
 		{
 			stsz->table[i].size = quicktime_read_int32(file);

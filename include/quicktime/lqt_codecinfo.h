@@ -97,6 +97,10 @@ struct lqt_codec_info_s
   
   int num_fourccs;           /* Fourccs, this codec can handle */
   char ** fourccs;
+
+  int num_wav_ids;
+  int * wav_ids;
+  
   
   int num_encoding_parameters;
   lqt_parameter_info_t * encoding_parameters;

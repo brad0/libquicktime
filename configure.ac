@@ -21,7 +21,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="0"
+LQT_CODEC_API_VERSION="1"
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
@@ -398,14 +398,14 @@ dnl
 dnl Check for lame
 dnl
 
-have_lame="no"
+have_lame="false"
 
 if test x$have_vorbis = xtrue; then
     AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="yes" ], [], [ -lm -lvorbis])
+             [ have_lame="true" ], [], [ -lm -lvorbis])
 else
     AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="yes" ], [], [ -lm ])
+             [ have_lame="true" ], [], [ -lm ])
 fi
 
 AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")

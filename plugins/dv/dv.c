@@ -227,6 +227,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int result = 0;
 	int encode_colormodel = 0;
 	dv_color_space_t encode_dv_colormodel = 0;
+        quicktime_atom_t chunk_atom;
 
 	if( codec->dv_encoder != NULL && codec->parameters_changed )
 	{
@@ -330,15 +331,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 							  input_rows, encode_dv_colormodel, codec->data );
 //printf("dv.c encode: 2 %d %d\n", width_i, height_i);
 
-		result = !quicktime_write_data(file, codec->data, data_length);
-		quicktime_update_tables(file,
-								file->vtracks[track].track,
-								offset,
-								file->vtracks[track].current_chunk,
-								file->vtracks[track].current_position,
-								1,
-								data_length);
-		file->vtracks[track].current_chunk++;
+                
+                quicktime_write_chunk_header(file, trak, &chunk_atom);
+                result = !quicktime_write_data(file, codec->data, data_length);
+                quicktime_write_chunk_footer(file, trak, vtrack->current_chunk, &chunk_atom, 1);
+                file->vtracks[track].current_chunk++;
 //printf("encode 3\n");
 	}
 

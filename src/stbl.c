@@ -18,7 +18,7 @@ void quicktime_stbl_init_video(quicktime_t *file,
 								int frame_w,
 								int frame_h, 
 								int time_scale, 
-								float frame_rate,
+								double frame_rate,
 								char *compressor)
 {
 //printf("quicktime_stbl_init_video 1\n");

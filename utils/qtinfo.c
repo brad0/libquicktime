@@ -38,12 +38,20 @@ file_info(char *filename)
 	printf("  %d audio tracks.\n", n);
 	for(i = 0; i < n; i++) {
 
-	  printf("    %d channels, %d bits, sample rate %ld, length %ld samples, compressor %s.\n",
+        printf("    %d channels, %d bits, sample rate %ld, length %ld samples, ",
 		 quicktime_track_channels(qtfile, i),
 		 quicktime_audio_bits(qtfile, i),
 		 quicktime_sample_rate(qtfile, i),
-		 quicktime_audio_length(qtfile, i),
-		 quicktime_audio_compressor(qtfile, i));
+		 quicktime_audio_length(qtfile, i));
+        if(lqt_is_avi(qtfile))
+          {
+          printf("wav_id 0x%02x.\n", lqt_get_wav_id(qtfile, i));
+          }
+        else
+          {
+          printf("compressor %s.\n", quicktime_audio_compressor(qtfile, i));
+
+          }
 	  printf("    %ssupported.\n",
 		 quicktime_supported_audio(qtfile, i)?"":"NOT ");
 	}

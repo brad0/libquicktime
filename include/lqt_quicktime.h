@@ -129,8 +129,7 @@ int quicktime_set_video(quicktime_t *file,int tracks,int frame_w,int frame_h,flo
 int quicktime_init_audio_map(quicktime_audio_map_t *atrack,quicktime_trak_t *trak,int encode);
 int quicktime_init_audio_map(quicktime_audio_map_t *atrack,quicktime_trak_t *trak);
 int quicktime_trak_init_audio(quicktime_t *file,quicktime_trak_t *trak,int channels,int sample_rate,int bits,char *compressor);
-quicktime_trak_t *quicktime_add_track(quicktime_moov_t *moov);
-quicktime_trak_t *quicktime_add_track(quicktime_moov_t *moov);
+quicktime_trak_t *quicktime_add_track(quicktime_t *);
 int quicktime_match_32(char *input,char *output);
 int quicktime_set_audio(quicktime_t *file,int channels,long sample_rate,int bits,char *compressor);
 int quicktime_set_audio(quicktime_t *file,int channels,long sample_rate,int bits,char *compressor);

@@ -19,6 +19,13 @@
     
 */
 
+/*
+ *  Support for video, which is no multiple of 16 by
+ *  Burkhard Plaum
+ */
+
+#define BLOCK_SIZE 16
+
 #include <string.h>
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>
@@ -40,35 +47,38 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
-	int t;
+	int t, i, file_rowspan;
 	int buffer_size;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int use_temp = (BC_YUV420P != file->color_model ||
-		file->in_x != 0 ||
-		file->in_y != 0 ||
-		file->in_w != width ||
-		file->in_h != height ||
-		file->out_w != width ||
-		file->out_h != height);
-	
+	int use_temp;
 	if(!codec->decompress_struct) {
 		codec->decompress_struct = RTjpeg_init();
 		if(!codec->decompress_struct)
 			return -1;
+                codec->qt_height = trak->tkhd.track_height;
+                codec->qt_width  = trak->tkhd.track_width;
+                codec->jpeg_height = BLOCK_SIZE * ((codec->qt_height + BLOCK_SIZE - 1) / (BLOCK_SIZE));
+                codec->jpeg_width  = BLOCK_SIZE * ((codec->qt_width  + BLOCK_SIZE - 1) / (BLOCK_SIZE));
 		t = RTJ_YUV420;
 		RTjpeg_set_format(codec->decompress_struct, &t);
-		codec->decode_frame = malloc(width * height * 3 / 2);
+		codec->decode_frame = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2);
 		if(!codec->decode_frame)
 			return -1;
 		codec->decode_rows[0] = codec->decode_frame;
-		codec->decode_rows[1] = codec->decode_rows[0] + width * height;
-		codec->decode_rows[2] = codec->decode_rows[1] + (width * height) / 4;
+		codec->decode_rows[1] = codec->decode_rows[0] + codec->jpeg_width * codec->jpeg_height;
+		codec->decode_rows[2] = codec->decode_rows[1] + (codec->jpeg_width * codec->jpeg_height) / 4;
 	}
 
+        use_temp = (BC_YUV420P != file->color_model ||
+		file->in_x != 0 ||
+		file->in_y != 0 ||
+		file->in_w != codec->qt_width ||
+		file->in_h != codec->qt_height ||
+		file->out_w != codec->qt_width ||
+		file->out_h != codec->qt_height);
+        
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	buffer_size = quicktime_frame_size(file, vtrack->current_position, track);
 	if(buffer_size > codec->read_buffer_size)
@@ -84,6 +94,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		if(!result)
 			RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->decode_rows);
 	}
+        file_rowspan = file->row_span ? file->row_span : file->out_w;
 	if(use_temp) {
 		cmodel_transfer(row_pointers, 
 			codec->decode_rows,
@@ -104,12 +115,20 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 			BC_YUV420P, 
 			file->color_model,
 			0,
-			width,
-			file->out_w);
+                        codec->jpeg_width,
+			file_rowspan);
 	} else {
-		memcpy(row_pointers[0], codec->decode_rows[0], width * height);
-		memcpy(row_pointers[1], codec->decode_rows[1], (width * height) / 4);
-		memcpy(row_pointers[2], codec->decode_rows[2], (width * height) / 4);
+                for(i = 0; i < codec->qt_height; i++) {
+                        memcpy(&row_pointers[0][i*file_rowspan], &codec->decode_rows[0][i*codec->jpeg_width],
+                               codec->jpeg_width);
+                }
+                for(i = 0; i < codec->qt_height/2; i++) {
+                        memcpy(&row_pointers[1][i*file_rowspan/2], &codec->decode_rows[1][i*codec->jpeg_width/2],
+                               codec->jpeg_width/2);
+                        memcpy(&row_pointers[2][i*file_rowspan/2], &codec->decode_rows[2][i*codec->jpeg_width/2],
+                               codec->jpeg_width/2);
+                }
+                
 	}
 	return result;
 }
@@ -119,17 +138,22 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int64_t offset = quicktime_position(file);
 	int result = 0;
 	int i;
+        int file_rowspan;
+        quicktime_atom_t chunk_atom;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
 
 	if(!codec->compress_struct) {
 		codec->compress_struct = RTjpeg_init();
 		if(!codec->compress_struct)
 			return -1;
-		RTjpeg_set_size(codec->compress_struct, &width, &height);
+                codec->qt_height = trak->tkhd.track_height;
+                codec->qt_width  = trak->tkhd.track_width;
+                codec->jpeg_height = BLOCK_SIZE * ((codec->qt_height + BLOCK_SIZE - 1) / (BLOCK_SIZE));
+                codec->jpeg_width  = BLOCK_SIZE * ((codec->qt_width  + BLOCK_SIZE - 1) / (BLOCK_SIZE));
+
+		RTjpeg_set_size(codec->compress_struct, &(codec->jpeg_width), &(codec->jpeg_height));
 		i = codec->Q;
 		i *= 255;
 		i /= 100;
@@ -138,19 +162,19 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		RTjpeg_set_format(codec->compress_struct, &i);
 		RTjpeg_set_intra(codec->compress_struct, &codec->K, &codec->LQ, &codec->CQ);
 		if(file->color_model != BC_YUV420P) {
-			codec->encode_frame = malloc(width * height * 3 / 2);
+			codec->encode_frame = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2);
 			if(!codec->encode_frame)
 				return -1;
 			codec->encode_rows[0] = codec->encode_frame;
-			codec->encode_rows[1] = codec->encode_rows[0] + width * height;
-			codec->encode_rows[2] = codec->encode_rows[1] + (width * height) / 4;
+			codec->encode_rows[1] = codec->encode_rows[0] + codec->jpeg_width * codec->jpeg_height;
+			codec->encode_rows[2] = codec->encode_rows[1] + (codec->jpeg_width * codec->jpeg_height) / 4;
 		}
-		codec->write_buffer = malloc(width * height * 3 / 2 + 100);
+		codec->write_buffer = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2 + 100);
 		if(!codec->write_buffer)
 			return -1;
 	}
-	
-	if(file->color_model != BC_YUV420P) {
+        file_rowspan = file->row_span ? file->row_span : codec->qt_width;
+        if(file->color_model != BC_YUV420P) {
 		cmodel_transfer(codec->encode_rows, 
 			row_pointers,
 			codec->encode_rows[0],
@@ -161,34 +185,42 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 			row_pointers[2],
 			0, 
 			0, 
-			width, 
-			height,
+			codec->qt_width, 
+			codec->qt_height,
 			0, 
 			0, 
-			width, 
-			height,
+			codec->qt_width, 
+			codec->qt_height,
 			file->color_model,
 			BC_YUV420P, 
 			0,
-			width,
-			width);
-		i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, codec->encode_rows);
+			file_rowspan,
+                        codec->jpeg_width);
 	} else {
-		i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, row_pointers);
+                for(i = 0; i < codec->qt_height; i++) {
+                        memcpy(&codec->encode_rows[0][i*codec->jpeg_width], &row_pointers[0][i*file_rowspan], 
+                               codec->jpeg_width);
+                }
+                for(i = 0; i < codec->qt_height/2; i++) {
+                memcpy(&codec->encode_rows[1][i*codec->jpeg_width/2], &row_pointers[1][i*file_rowspan/2],
+                               codec->jpeg_width/2);
+                memcpy(&codec->encode_rows[2][i*codec->jpeg_width/2], &row_pointers[2][i*file_rowspan/2],
+                               codec->jpeg_width/2);
+                }
+        
 	}
+	i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, codec->encode_rows);
 
-	result = !quicktime_write_data(file, 
+        quicktime_write_chunk_header(file, trak, &chunk_atom);
+        result = !quicktime_write_data(file, 
 				codec->write_buffer, 
 				i);
-
-	quicktime_update_tables(file,
-						file->vtracks[track].track,
-						offset,
-						file->vtracks[track].current_chunk,
-						file->vtracks[track].current_position,
-						1,
-						i);
-
+        quicktime_write_chunk_footer(file,
+                trak,
+                vtrack->current_chunk,
+                &chunk_atom,
+                1);
+        
 	file->vtracks[track].current_chunk++;
 	return result;
 }

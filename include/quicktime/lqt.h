@@ -68,7 +68,7 @@ int lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);
 
 int lqt_set_video(quicktime_t *file, int tracks, 
                   int frame_w, int frame_h,
-                  float frame_rate,
+                  double frame_rate,
                   lqt_codec_info_t * info);
 
 int lqt_set_audio(quicktime_t *file, int channels,
@@ -94,6 +94,13 @@ int lqt_decode_audio(quicktime_t *file,
 					 float **output_f, 
 					 long samples);
 
+/*
+ *  AVI Specific stuff
+ */
+
+int lqt_is_avi(quicktime_t *file);
+int lqt_get_wav_id(quicktime_t *file, int track);
+  
 /*
  * Returns the total number of audio channels across all tracks.
  */

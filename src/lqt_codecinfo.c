@@ -131,6 +131,9 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
       free(ptr->fourccs[i]);
     free(ptr->fourccs);
     }
+
+  if(ptr->wav_ids)
+    free(ptr->wav_ids);
   
   if(ptr->name)
     free(ptr->name);          /* Name of the codec              */
@@ -180,7 +183,8 @@ static void copy_parameter_value(lqt_parameter_value_t * dst,
   }
 
 static void
-copy_parameter_info(lqt_parameter_info_t * ret, const lqt_parameter_info_t * info)
+copy_parameter_info(lqt_parameter_info_t * ret,
+                    const lqt_parameter_info_t * info)
   {
   int i;
   
@@ -250,6 +254,15 @@ copy_codec_info(const lqt_codec_info_t * info)
       ret->fourccs[i] = __lqt_fourccdup(info->fourccs[i]);
     }
 
+  ret->num_wav_ids = info->num_wav_ids;
+  if(ret->num_wav_ids)
+    {
+    ret->wav_ids = malloc(ret->num_wav_ids * sizeof(int));
+    for(i = 0; i < ret->num_wav_ids; i++)
+      ret->wav_ids[i] = info->wav_ids[i];
+    
+    }
+  
   ret->num_encoding_colormodels = info->num_encoding_colormodels;
   if(ret->num_encoding_colormodels)
     {
@@ -892,6 +905,8 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
 
   ret->type      = template->type;
   ret->direction = template->direction;
+
+  /* Copy fourccs */
   
   ret->num_fourccs = 0;
   
@@ -907,6 +922,27 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
   for(i = 0; i < ret->num_fourccs; i++)
     ret->fourccs[i] = __lqt_fourccdup(template->fourccs[i]);
 
+  /* Copy wav_ids */
+
+  ret->num_wav_ids = 0;
+
+  if(template->wav_ids)
+    {
+    while(1)
+      {
+      if(template->wav_ids[ret->num_wav_ids] != LQT_WAV_ID_NONE)
+        ret->num_wav_ids++;
+      else
+        break;
+      }
+    ret->wav_ids = malloc(ret->num_wav_ids * sizeof(int));
+    for(i = 0; i < ret->num_wav_ids; i++)
+      ret->wav_ids[i] = template->wav_ids[i];
+    }
+
+  
+  /* Copy encoding colormodels */
+    
   ret->num_encoding_colormodels = 0;
 
   if(template->encoding_colormodels)
@@ -1142,6 +1178,46 @@ lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
   lqt_registry_unlock();
   return ret;
   }
+
+lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
+  {
+  int j;
+  lqt_codec_info_t * tmp_ptr = (lqt_codec_info_t*)0;
+  lqt_codec_info_t * ptr;
+
+  lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
+  
+  lqt_registry_lock();
+  
+  ptr = lqt_audio_codecs;
+  
+  while(ptr)
+    {
+    for(j = 0; j < ptr->num_wav_ids; j++)
+      {
+      if(ptr->wav_ids[j] == wav_id)
+        {
+        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (ptr->direction != LQT_DIRECTION_ENCODE))
+          {
+          tmp_ptr = ptr;
+          break;
+          }
+        }
+      }
+    if(tmp_ptr)
+      break;
+    ptr = ptr->next;
+    }
+  if(tmp_ptr)
+    {
+    ret = calloc(2, sizeof(lqt_codec_info_t*));
+    *ret = copy_codec_info(tmp_ptr);
+    }
+  lqt_registry_unlock();
+  return ret;
+  }
+
 
 lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
   {

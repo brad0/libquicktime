@@ -16,7 +16,7 @@ void quicktime_vmhd_init_video(quicktime_t *file,
 								quicktime_vmhd_t *vmhd, 
 								int frame_w,
 								int frame_h, 
-								float frame_rate)
+								double frame_rate)
 {
 }
 

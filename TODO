@@ -1,28 +1,20 @@
 Before public release:
 
-- Add advanced lqt_decode_audio functions, which decode all channels at once
-
-- Add functions for getting the best decoding colormodel
-
 - Make the "scan for codecs" button functional in libquicktime_config
-
-- Add support for reordering codecs, so we can have multiple codecs for one fourcc
-  (Must be done in libquicktime as well as in libquicktime_config)
 
 - Check if we want to add patches for xmovie/cinelerra/bcast for lqt support
   (or would this be politically incorrect?)
 
 Library:
 
-- Support reading compressed headers (look at openquicktime, simple zlib decompression).
+- Support reading compressed headers (look at openquicktime, simple
+  zlib decompression).
 
-- Research, how we can overload the reading and writing functions. With this, we can write
-  modules for files, http, rtsp, ftp, output to a streaming server etc.
+- Research, how we can overload the reading and writing functions.
+  With this, we can write modules for files, http, rtsp, ftp, output to a
+  streaming server etc.
 
 Codecs:
-
-- Try the rtjpeg codec in the libquicktime source (it's documented nowhere and was not
-  activated in quicktime4linux).
 
 - Meditate about an mng codec (there exists an opensource one for windows)
 
@@ -30,21 +22,10 @@ Codecs:
   compatibility (or make a new fourcc for divx4linux?)
   This would bring some more features and maybe more speed.
 
-- Find valid min and max values for all codec parameters (especially divx)
-
-- Wait for xvid (www.videocoding.de) and try this
-
-- Copy the twos codec and make a "swot" quicktime codec from this (by just changing
-  endianess)
-
-- Write an mp3 decoder (with the faster mpg123 or higher quality mad?)
+- Try xvid (www.videocoding.de)
 
 - Check, if we want to have a libuicktime plugin which dlopens the 3ivx codec
 
-- Check for the vp3 codec (www.vp3.com). It's opensource but commercial and available as
-  quicktime codec on Win32 and Mac AFAIK.
-
-- Write a small LGPL library which contains all xanim codecs and the xanim dll loader
-  (Have the permission from xanim author). Write libquicktime plugins for this
-
 - Meditate about loading win32 DLLs to make even cooler things happen.
+
+- Enable the ffmpeg svq3 codec

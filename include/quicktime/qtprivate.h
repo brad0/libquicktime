@@ -6,13 +6,14 @@
 
 /* Version used internally.  You need to query it with the C functions */
 /* These must match quicktime4linux !!! */
-#define QUICKTIME_MAJOR 1
-#define QUICKTIME_MINOR 6
+#define QUICKTIME_MAJOR   2
+#define QUICKTIME_MINOR   0
 #define QUICKTIME_RELEASE 0
 
 #define HEADER_LENGTH 8
 #define MAXTRACKS 1024
-
+ 
+/* Crazy Mich R. Soft constants */
 #define AVI_HASINDEX       0x00000010  // Index at end of file?
 #define AVI_MUSTUSEINDEX   0x00000020
 #define AVI_ISINTERLEAVED  0x00000100
@@ -20,8 +21,12 @@
 #define AVI_WASCAPTUREFILE 0x00010000
 #define AVI_COPYRIGHTED    0x00020000
 #define AVIF_WASCAPTUREFILE     0x00010000
-
+#define AVI_KEYFRAME       0x10
+#define AVI_INDEX_OF_CHUNKS 0x01
+#define AVI_INDEX_OF_INDEXES 0x00
+                                                                                                                     
 #define AVI_FRAME_RATE_BASE 10000
+#define MAX_RIFFS  0x100
 
 
 //#include "codecs.h"
@@ -30,7 +35,9 @@
 
 typedef struct
 {
-	int64_t start;      /* byte start in file */
+/* for AVI it's the end of the 8 byte header in the file */
+/* for Quicktime it's the start of the 8 byte header in the file */
+	int64_t start;
 	int64_t end;        /* byte endpoint in file */
 	int64_t size;       /* byte size for writing */
 	int use_64;         /* Use 64 bit header */
@@ -127,7 +134,9 @@ typedef struct
 /* audio description */
 	int channels;
 	int sample_size;
-	int compression_id;
+/* LQT: We have int16_t for the compression_id, because otherwise negative
+   values don't show up correctly */
+        int16_t compression_id;
 	int packet_size;
 	float sample_rate;
 } quicktime_stsd_table_t;
@@ -368,13 +377,6 @@ typedef struct
 	quicktime_tkhd_t tkhd;
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
-// AVI needs header placeholders before anything else is written
-        int64_t length_offset;
-        int64_t samples_per_chunk_offset;
-// AVI needs chunk sizes
-        int *chunksizes;
-        int total_chunksizes;
-        int allocated_chunksizes;
 } quicktime_trak_t;
 
 
@@ -425,6 +427,132 @@ typedef struct
 	quicktime_atom_t atom;
 } quicktime_mdat_t;
 
+typedef struct
+{
+/* Offset of end of 8 byte chunk header relative to ix->base_offset */
+        int relative_offset;
+/* size of data without 8 byte header */
+        int size;
+} quicktime_ixtable_t;
+                                                                                                                     
+typedef struct
+{
+        quicktime_atom_t atom;
+        quicktime_ixtable_t *table;
+        int table_size;
+        int table_allocation;
+        int longs_per_entry;
+        int index_type;
+/* ixtable relative_offset is relative to this */
+        int64_t base_offset;
+/* ix atom title */
+        char tag[5];
+/* corresponding chunk id */
+        char chunk_id[5];
+} quicktime_ix_t;
+typedef struct
+{
+        quicktime_atom_t atom;
+                                                                                                                     
+/* Partial index */
+/* For writing only, there are multiple movi objects with multiple ix tables. */
+/* This is not used for reading.  Instead an ix_t object in indx_t is used. */
+        quicktime_ix_t *ix[MAXTRACKS];
+} quicktime_movi_t;
+                                                                                                                     
+typedef struct
+{
+/* Start of start of corresponding ix## header */
+        int64_t index_offset;
+/* Size not including 8 byte header */
+        int index_size;
+/* duration in "ticks" */
+        int duration;
+                                                                                                                     
+/* Partial index for reading only. */
+        quicktime_ix_t *ix;
+} quicktime_indxtable_t;
+
+typedef struct
+{
+        quicktime_atom_t atom;
+        int longs_per_entry;
+        int index_subtype;
+        int index_type;
+/* corresponding chunk id: 00wb, 00dc */
+        char chunk_id[5];
+                                                                                                                     
+/* Number of partial indexes here */
+        int table_size;
+        int table_allocation;
+        quicktime_indxtable_t *table;
+} quicktime_indx_t;
+
+typedef struct
+{
+        quicktime_atom_t atom;
+/* Super index for reading */
+        quicktime_indx_t indx;
+/* AVI needs header placeholders before anything else is written */
+        int64_t length_offset;
+        int64_t samples_per_chunk_offset;
+        int64_t sample_size_offset;
+/* Start of indx header for later writing */
+        int64_t indx_offset;
+/* Size of JUNK without 8 byte header which is to be replaced by indx */
+        int64_t padding_size;
+/* Tag for writer with NULL termination: 00wb, 00dc   Not available in reader.*/
+        char tag[5];
+/* Flags for reader.  Not available in writer. */
+        int is_audio;
+        int is_video;
+/* Notify reader the super indexes are valid */
+        int have_indx;
+} quicktime_strl_t;
+
+typedef struct
+{
+        quicktime_atom_t atom;
+        int64_t frames_offset;
+        int64_t bitrate_offset;
+/* Offsets to be written during file closure */
+        int64_t total_frames_offset;
+                                                                                                                     
+/* AVI equivalent for each trak.  Use file->moov.total_tracks */
+/* Need it for super indexes during reading. */
+        quicktime_strl_t *strl[MAXTRACKS];
+} quicktime_hdrl_t;
+
+typedef struct
+{
+        char tag[5];
+        uint32_t flags;
+/* Start of 8 byte chunk header relative to start of the 'movi' string */
+        int32_t offset;
+/* Size of chunk less the 8 byte header */
+        int32_t size;
+} quicktime_idx1table_t;
+typedef struct
+{
+        quicktime_atom_t atom;
+        quicktime_idx1table_t *table;
+        int table_size;
+        int table_allocation;
+} quicktime_idx1_t;
+                                                                                                                     
+typedef struct
+{
+        quicktime_atom_t atom;
+        quicktime_movi_t movi;
+        quicktime_hdrl_t hdrl;
+                                                                                                                     
+/* Full index */
+        quicktime_idx1_t idx1;
+/* Notify reader the idx1 table is valid */
+        int have_idx1;
+        int have_hdrl;
+} quicktime_riff_t;
+
 
 /* table of pointers to every track */
 typedef struct
@@ -443,10 +571,6 @@ typedef struct
 	long current_position;   /* current frame in output file */
 	long current_chunk;      /* current chunk in output file */
 
-/* Array of pointers to frames of raw data when caching frames. */
-//	unsigned char **frame_cache;
-//	long frames_cached;
-
 	void *codec;
 } quicktime_video_map_t;
 
@@ -458,10 +582,18 @@ typedef struct
 	int64_t total_length;
 	quicktime_mdat_t mdat;
 	quicktime_moov_t moov;
-        quicktime_atom_t riff_atom;
 	int rd;
 	int wr;
-	int use_avi;
+
+/* ASF section */
+        int use_asf;
+
+        int use_avi;
+/* AVI tree */
+        quicktime_riff_t *riff[MAX_RIFFS];
+        int total_riffs;
+
+
 /* for begining and ending frame writes where the user wants to write the  */
 /* file descriptor directly */
 	int64_t offset;
@@ -479,9 +611,14 @@ typedef struct
 	int64_t preload_end;       /* End of preload buffer in file */
 	int64_t preload_ptr;       /* Offset of preload_start in preload_buffer */
 
-/* AVI offsets */
-        int64_t frames_offset;
-        int64_t bitrate_offset;
+/* Write ahead buffer */
+/* Amount of data in presave buffer */
+        int64_t presave_size;
+/* Next presave byte's position in file */
+        int64_t presave_position;
+        char *presave_buffer;
+/* Presave doesn't matter a whole lot, so its size is fixed */
+#define QUICKTIME_PRESAVE 0x100000
 
 /* mapping of audio channels to movie tracks */
 /* one audio map entry exists for each channel */
@@ -535,7 +672,21 @@ typedef struct
 	void (*flush)(quicktime_t *file, 
 		int track);
 
+        /* AVI codec ID for audio.  AVI codec ID's are based on WAV files, by the way. */
+        int wav_id;
+                                                                                   
+/* Pointer to static character code for identifying the codec. */
+        char *fourcc;
+                                                                                   
+/* English title of codec.  Optional. */
+        char *title;
+                                                                                   
+/* English description of codec.  Optional. */
+        char *desc;
+
 	void *priv;
+
+        /* The followings are for libquicktime only */
         void *module;     /* Needed by libquicktime for dynamic loading */
         char *codec_name; /* Needed by libquicktime */
 } quicktime_codec_t;

@@ -19,6 +19,11 @@
     
 */
 
+/*
+ *  Support for video, which is no multiple of 16 by
+ *  Burkhard Plaum
+ */
+
 #ifndef QUICKTIME_RTJPEG_H
 #define QUICKTIME_RTJPEG_H
 
@@ -43,6 +48,10 @@ typedef struct
 	unsigned char * decode_rows[3];
 	unsigned char * read_buffer;
 	int read_buffer_size;
+        int jpeg_width;
+        int jpeg_height;
+        int qt_width;
+        int qt_height;
 } quicktime_rtjpeg_codec_t;
 
 #endif

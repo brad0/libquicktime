@@ -17,19 +17,15 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 								quicktime_mdhd_t *mdhd, 
 								int frame_w,
 								int frame_h, 
-								float frame_rate)
+								double frame_rate)
 {
 	mdhd->time_scale = quicktime_get_timescale(frame_rate);
 //printf("quicktime_mdhd_init_video %d %f\n", mdhd->time_scale, frame_rate);
 	mdhd->duration = 0;      /* set this when closing */
 }
 
-void quicktime_mdhd_init_audio(quicktime_t *file, 
-							quicktime_mdhd_t *mdhd, 
-							int channels, 
-							int sample_rate, 
-							int bits, 
-							char *compressor)
+void quicktime_mdhd_init_audio(quicktime_mdhd_t *mdhd, 
+							int sample_rate)
 {
 	mdhd->time_scale = sample_rate;
 	mdhd->duration = 0;      /* set this when closing */

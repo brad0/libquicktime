@@ -51,7 +51,7 @@ void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 	printf("  next_track_id %ld\n", mvhd->next_track_id);
 }
 
-void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)
+void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_atom_t *parent_atom)
 {
 	mvhd->version = quicktime_read_char(file);
 	mvhd->flags = quicktime_read_int24(file);
@@ -72,7 +72,7 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)
 	mvhd->next_track_id = quicktime_read_int32(file);
 }
 
-void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, float frame_rate)
+void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, double frame_rate)
 {
 	mvhd->time_scale = quicktime_get_timescale(frame_rate);
 }

@@ -284,9 +284,9 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   lqt_init_audio_codec_func_t (*get_codec)(int);
     
   void * module;
-  
-  char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
 
+  char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
+  int wav_id       = atrack->track->mdia.minf.stbl.stsd.table[0].compression_id;
   atrack->codec = calloc(1, sizeof(quicktime_codec_t));
   quicktime_codec_defaults((quicktime_codec_t*)atrack->codec);
 
@@ -297,13 +297,23 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   if(!codec_info)
     {
     
+
+    if(compressor && (*compressor != '\0'))
+      {
 #ifndef NDEBUG
     fprintf(stderr, "Trying to find Audio %s for fourcc \"%s\"...",
             (encode ? "Encoder" : "Decoder"), compressor);
 #endif
-    
-    codec_array = lqt_find_audio_codec(compressor, encode);
-    
+      codec_array = lqt_find_audio_codec(compressor, encode);
+      }
+    else if(wav_id)
+      {
+#ifndef NDEBUG
+      fprintf(stderr, "Trying to find Audio %s for wav_id 0x%02x...",
+              (encode ? "Encoder" : "Decoder"), wav_id);
+#endif
+      codec_array = lqt_find_audio_codec_by_wav_id(wav_id, encode);
+      }
     if(!codec_array)
       {
 #ifndef NDEBUG
@@ -371,6 +381,12 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   
   init_codec(atrack);
 
+  /* We set the wav ids from our info structure, so we don't have to do this
+     in the plugin sources */
+
+  if(codec_info->num_wav_ids)
+    ((quicktime_codec_t*)((quicktime_codec_t*)atrack->codec))->wav_id = codec_info->wav_ids[0];
+  
   if(codec_array)
     lqt_destroy_codec_info(codec_array);
   return 0;
@@ -430,12 +446,18 @@ int quicktime_supported_video(quicktime_t *file, int track)
 
 int quicktime_supported_audio(quicktime_t *file, int track)
 {
-	char *compressor = quicktime_audio_compressor(file, track);
-        lqt_codec_info_t ** test_codec =
-          lqt_find_audio_codec(compressor, file->wr);
-        
-        if(!test_codec)
-          return 0;
+         lqt_codec_info_t ** test_codec;
+         char *compressor = quicktime_audio_compressor(file, track);
+
+         test_codec = (lqt_codec_info_t**)0;
+         
+         if(compressor && (*compressor != '\0'))
+           test_codec = lqt_find_audio_codec(compressor, file->wr);
+         else if(lqt_is_avi(file))
+           test_codec = lqt_find_audio_codec_by_wav_id(lqt_get_wav_id(file, track), file->wr);
+         
+         if(!test_codec)
+           return 0;
         
         lqt_destroy_codec_info(test_codec);
         return 1;

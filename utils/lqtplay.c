@@ -553,7 +553,7 @@ static int oss_init(char *dev, int channels, int rate)
 static quicktime_t *qt;
 static int qt_hasvideo,qt_hasaudio;
 
-static int qt_width = 320, qt_height = 32, qt_drop, qt_droptotal;
+static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0;
 static unsigned char *qt_frame,**qt_rows;
 static XImage *qt_ximage;
 static XvImage *qt_xvimage;

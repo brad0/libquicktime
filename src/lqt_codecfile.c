@@ -53,6 +53,9 @@ static const char * direction_both      = "Both";
 static const char * num_fourccs_key     = "NumFourccs: ";
 static const char * fourccs_key         = "Fourccs: ";
 
+static const char * num_wav_ids_key     = "NumWavIds: ";
+static const char * wav_ids_key         = "WavIds: ";
+
 /* Module filename and module index */
 
 static const char * module_filename_key  = "ModuleFilename: ";
@@ -326,12 +329,14 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       codec->num_fourccs = atoi(pos);
 
       /* We allocate memory here */
-      
-      codec->fourccs = malloc(codec->num_fourccs * sizeof(char*));
-      for(i = 0; i < codec->num_fourccs; i++)
-        codec->fourccs[i] = malloc(5 * sizeof(char));
+      if(codec->num_fourccs)
+        {
+        codec->fourccs = malloc(codec->num_fourccs * sizeof(char*));
+        for(i = 0; i < codec->num_fourccs; i++)
+          codec->fourccs[i] = malloc(5 * sizeof(char));
+        }
       }
-
+    
     /* Fourccs */
     
     else if(CHECK_KEYWORD(fourccs_key))
@@ -343,6 +348,30 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
         LQT_FOURCC_2_STRING(codec->fourccs[i], tmp_fourcc);
         if(rest == pos)
           break;
+        pos = rest;
+        }
+      }
+
+    /* Number of wav ids */
+
+    else if(CHECK_KEYWORD(num_wav_ids_key))
+      {
+      pos = line + strlen(num_wav_ids_key);
+      codec->num_wav_ids = atoi(pos);
+
+      /* We allocate memory here */
+      
+      codec->wav_ids = malloc(codec->num_wav_ids * sizeof(int));
+      }
+
+    /* Wav ids */
+    
+    else if(CHECK_KEYWORD(wav_ids_key))
+      {
+      pos = line + strlen(wav_ids_key);
+      for(i = 0; i < codec->num_wav_ids; i++)
+        {
+        codec->wav_ids[i] = strtoul(pos, &rest, 16);
         pos = rest;
         }
       }
@@ -638,14 +667,26 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
   if(tmp)
     fprintf(output, "%s%s\n", direction_key, tmp);
 
-  fprintf(output, "%s%d\n", num_fourccs_key, info->num_fourccs);
-
-  fprintf(output, "%s", fourccs_key);
+  if(info->num_fourccs)
+    {
+    fprintf(output, "%s%d\n", num_fourccs_key, info->num_fourccs);
+    
+    fprintf(output, "%s", fourccs_key);
+    
+    for(i = 0; i < info->num_fourccs; i++)
+      fprintf(output, "0x%08X ", LQT_STRING_2_FOURCC(info->fourccs[i]));
+    fprintf(output, "\n");
+    }
   
-  for(i = 0; i < info->num_fourccs; i++)
-    fprintf(output, "0x%08X ", LQT_STRING_2_FOURCC(info->fourccs[i]));
-  fprintf(output, "\n");
-
+  if(info->num_wav_ids)
+    {
+    fprintf(output, "%s%d\n", num_wav_ids_key, info->num_wav_ids);
+    fprintf(output, "%s", wav_ids_key);
+    for(i = 0; i < info->num_wav_ids; i++)
+      fprintf(output, "0x%02X ", info->wav_ids[i]);
+    fprintf(output, "\n");
+    }
+  
   fprintf(output, "%s%d\n", num_encoding_parameters_key,
           info->num_encoding_parameters);
 

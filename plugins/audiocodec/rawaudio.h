@@ -3,11 +3,4 @@
 
 #include <quicktime/quicktime.h>
 
-typedef struct
-{
-	char *work_buffer;
-	long buffer_size;
-} quicktime_rawaudio_codec_t;
-
-
 #endif

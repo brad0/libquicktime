@@ -14,8 +14,12 @@ xbin :=
 xman :=
 endif
 noinst_PROGRAMS := test_codec testqt
-bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover
+# bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover lqt_transcode
+bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode
 man1_MANS := $(xman)
+
+lqt_transcode_SOURCES=lqt_transcode.c
+lqt_transcode_LDADD=@UTIL_LIBADD@ -lm
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=@UTIL_LIBADD@ -lm
@@ -38,8 +42,8 @@ qtdechunk_LDADD=@UTIL_LIBADD@
 qtrechunk_SOURCES=rechunk.c
 qtrechunk_LDADD=@UTIL_LIBADD@
 
-qtrecover_SOURCES=recover.c
-qtrecover_LDADD=@UTIL_LIBADD@
+# qtrecover_SOURCES=recover.c
+# qtrecover_LDADD=@UTIL_LIBADD@
 
 qtyuv4toyuv_SOURCES=yuv4toyuv.c
 qtyuv4toyuv_LDADD=@UTIL_LIBADD@

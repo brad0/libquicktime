@@ -7,11 +7,13 @@ void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_twos(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack);
 
 static char * fourccs_ima4[]  = { QUICKTIME_IMA4, (char*)0 };
 static char * fourccs_raw[]   = { QUICKTIME_RAW,  (char*)0 };
 static char * fourccs_twos[]  = { QUICKTIME_TWOS, (char*)0 };
 static char * fourccs_ulaw[]  = { QUICKTIME_ULAW, (char*)0 };
+static char * fourccs_sowt[]  = { "sowt",         (char*)0 };
 
 static lqt_codec_info_static_t codec_info_ima4 =
   {
@@ -20,6 +22,7 @@ static lqt_codec_info_static_t codec_info_ima4 =
     description:         "The IMA4 compressor reduces 16 bit audio data to 1/4\
  size, with very good quality",
     fourccs:             fourccs_ima4,
+    wav_ids:             (int[]){ 0x11, LQT_WAV_ID_NONE },
     type:                LQT_CODEC_AUDIO,
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
@@ -57,6 +60,20 @@ static lqt_codec_info_static_t codec_info_ulaw =
     long_name:    "Ulaw",     /* Long name of the codec */
     description:  "Ulaw",      /* Description            */
     fourccs:      fourccs_ulaw,
+    wav_ids:      (int[]){ 0x07, LQT_WAV_ID_NONE },
+    type:         LQT_CODEC_AUDIO,
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
+  };
+
+static lqt_codec_info_static_t codec_info_sowt =
+  {
+    name:         "sowt",
+    long_name:    "Sowt",
+    description:  "8/16/24 bit PCM Little endian",
+    fourccs:      fourccs_sowt,
+    wav_ids:      (int[]){ 0x01, LQT_WAV_ID_NONE },
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
@@ -65,7 +82,7 @@ static lqt_codec_info_static_t codec_info_ulaw =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 4; }
+extern int get_num_codecs() { return 5; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -82,6 +99,9 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
       break;
     case 3: /* Ulaw */
       return &codec_info_ulaw;
+      break;
+    case 4: /* Sowt */
+      return &codec_info_sowt;
       break;
     }
   
@@ -103,6 +123,9 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
       break;
     case 3: /* Ulaw */
       return quicktime_init_codec_ulaw;
+      break;
+    case 4: /* Sowt */
+      return quicktime_init_codec_sowt;
       break;
     }
   return (lqt_init_audio_codec_func_t)0;

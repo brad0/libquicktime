@@ -122,14 +122,14 @@ int quicktime_set_audio(quicktime_t *file,
 	int bits, 
 	char *compressor);
 /* Samplerate can be set after file is created */
-void quicktime_set_framerate(quicktime_t *file, float framerate);
+void quicktime_set_framerate(quicktime_t *file, double framerate);
 
 /* video is stored one layer per quicktime track */
 int quicktime_set_video(quicktime_t *file, 
 	int tracks, 
 	int frame_w, 
 	int frame_h, 
-	float frame_rate, 
+	double frame_rate, 
 	char *compressor);
 
 /* routines for setting various video parameters */
@@ -178,7 +178,7 @@ int quicktime_has_video(quicktime_t *file);
 int quicktime_video_width(quicktime_t *file, int track);
 int quicktime_video_height(quicktime_t *file, int track);
 int quicktime_video_depth(quicktime_t *file, int track);
-float quicktime_frame_rate(quicktime_t *file, int track);
+double quicktime_frame_rate(quicktime_t *file, int track);
 char* quicktime_video_compressor(quicktime_t *file, int track);
 
 /* number of bytes of raw data in this frame */
@@ -245,7 +245,7 @@ int quicktime_divx_write_vol(unsigned char *data_start,
 	int vol_width, 
 	int vol_height, 
 	int time_increment_resolution, 
-	float frame_rate);
+	double frame_rate);
 int quicktime_divx_has_vol(unsigned char *data);
 
 int quicktime_div3_is_key(unsigned char *data, long size);

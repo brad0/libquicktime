@@ -39,7 +39,8 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->packet_size = quicktime_read_int16(file);
 	table->sample_rate = quicktime_read_fixed32(file);
 // Kluge for fixed32 limitation
-if(table->sample_rate + 65536 == 96000) table->sample_rate += 65536;
+if(table->sample_rate + 65536 == 96000 ||
+   table->sample_rate + 65536 == 88200) table->sample_rate += 65536;
 
 }
 

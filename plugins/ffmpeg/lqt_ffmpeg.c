@@ -27,6 +27,7 @@
 #include "ffmpeg.h"
 
 #define MAX_FOURCCS 30
+#define MAX_WAV_IDS 4
 
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
@@ -367,6 +368,7 @@ struct CODECIDMAP {
 	char *short_name;
 	char *name;
 	char *fourccs[MAX_FOURCCS];
+        int   wav_ids[MAX_WAV_IDS];
 };
 
 struct CODECIDMAP codecidmap_v[] = {
@@ -423,8 +425,8 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_mpeg4,
 	  short_name: "msmpeg4v3",
 	  name: "MSMpeg 4v3",
-	  fourccs: {"MPG3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
-                    "div6", "DIV3", "div3", "DIV4", "div4", "AP41", "ap41",
+	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
+                    "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                     (char *)0}
         },
 #if 0
@@ -482,6 +484,16 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"RV10", "rv10", "RV13", "rv13", (char *)0} },
 #endif
 	{
+          id: CODEC_ID_SVQ1,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mpegvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "svq1",
+	  name: "Sorenson Video 1",
+	  fourccs: {"SVQ1", (char *)0} },
+	{
           id: CODEC_ID_MJPEG,
 	  index: -1,
           encoder: NULL,
@@ -504,7 +516,9 @@ struct CODECIDMAP codecidmap_a[] = {
           decode_parameters: decode_parameters_audio,
 	  short_name: "mp2",
 	  name: "Mpeg Layer 2 Audio",
-	  {".mp2", ".MP2", "ms\0\x50", "MS\0\x50", (char *)0} },
+	  fourccs: {".mp2", ".MP2", "ms\0\x50", "MS\0\x50", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_MP3LAME,
 	  index: -1,
@@ -514,7 +528,9 @@ struct CODECIDMAP codecidmap_a[] = {
           decode_parameters: decode_parameters_audio,
 	  short_name: "mp3",
 	  name: "Mpeg Layer 3 Audio",
-	  {".mp3", ".MP3", "ms\0\x55", "MS\0\x55"} },
+	  fourccs: {".mp3", ".MP3", "ms\0\x55", "MS\0\x55", (char *)0},
+          wav_ids: { 0x55, LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_AC3,
 	  index: -1,
@@ -524,7 +540,31 @@ struct CODECIDMAP codecidmap_a[] = {
           decode_parameters: decode_parameters_audio,
 	  short_name: "ac3",
 	  name: "AC3 Audio",
-	  {".ac3", ".AC3", (char *)0} },
+	  fourccs: {".ac3", ".AC3", (char *)0},
+          wav_ids: { 0x2000, LQT_WAV_ID_NONE },
+        },
+#if 0 /* Crashes */
+	{
+          id: CODEC_ID_ADPCM_MS,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          short_name: "adpcm (ms)",
+	  name: "McRowsoft ADPCM",
+	  fourccs: {"ms\0\x02", "MS\0\x02", (char*)0},
+          wav_ids: { 0x02, LQT_WAV_ID_NONE },
+        },
+#endif
+	{
+          id: CODEC_ID_PCM_ALAW,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          short_name: "alaw",
+	  name: "Alaw",
+	  fourccs: { "alaw", (char*)0},
+          wav_ids: { 0x06, LQT_WAV_ID_NONE },
+        },
 };
 
 
@@ -594,6 +634,7 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 	long_name:   ffmpeg_long_name,
 	description: ffmpeg_description,
 	fourccs:     NULL,
+        wav_ids:     NULL,
 	type:        0,
 	direction:   0,
 	encoding_parameters: NULL,
@@ -615,6 +656,7 @@ static void set_codec_info(struct CODECIDMAP * map)
   char * capabilities = (char*)0;
 
   codec_info_ffmpeg.fourccs = map->fourccs;
+  codec_info_ffmpeg.wav_ids = map->wav_ids;
 
   if(map->encoder && map->decoder)
     {
@@ -721,8 +763,8 @@ IFUNC(26)
 IFUNC(27)
 IFUNC(28)
 IFUNC(29)
+#undef IFUNC
 #define MAX_VIDEO_FUNC 29
-
 #define IFUNC(x) \
 void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
 { \

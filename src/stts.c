@@ -19,7 +19,7 @@ void quicktime_stts_init_table(quicktime_stts_t *stts)
 	}
 }
 
-void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int time_scale, float frame_rate)
+void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int time_scale, double frame_rate)
 {
 	quicktime_stts_table_t *table;
 	quicktime_stts_init_table(stts);
@@ -49,7 +49,7 @@ void quicktime_stts_delete(quicktime_stts_t *stts)
 void quicktime_stts_dump(quicktime_stts_t *stts)
 {
 	int i;
-	printf("     time to sample\n");
+	printf("     time to sample (stts)\n");
 	printf("      version %d\n", stts->version);
 	printf("      flags %ld\n", stts->flags);
 	printf("      total_entries %ld\n", stts->total_entries);

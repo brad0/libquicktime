@@ -47,7 +47,7 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 
 		if(quicktime_atom_is(&leaf_atom, "mvhd"))
 		{
-			quicktime_read_mvhd(file, &(moov->mvhd));
+                        quicktime_read_mvhd(file, &(moov->mvhd), &leaf_atom);
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "clip"))

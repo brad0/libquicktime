@@ -754,30 +754,60 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     
   /* Create the fourccs label */
 
-  tmp1 = malloc(info->num_fourccs * 30);
-  tmp2 = malloc(30);
-  
-  *tmp1 = '\0';
-  
-  for(i = 0; i < info->num_fourccs - 1; i++)
+  if(info->num_fourccs)
     {
-    sprintf(tmp2, "0x%08X (%s)\n", STRING_TO_FOURCC(info->fourccs[i]),
+    tmp1 = malloc(info->num_fourccs * 30);
+    tmp2 = malloc(30);
+    
+    *tmp1 = '\0';
+    
+    for(i = 0; i < info->num_fourccs - 1; i++)
+      {
+      sprintf(tmp2, "0x%08X (%s)\n", STRING_TO_FOURCC(info->fourccs[i]),
+              info->fourccs[i]);
+      strcat(tmp1, tmp2);
+      }
+    
+    /* Last one without newline */
+    
+    sprintf(tmp2, "0x%08X (%s)", STRING_TO_FOURCC(info->fourccs[i]),
             info->fourccs[i]);
     strcat(tmp1, tmp2);
+    
+    ret->fourccs_label = gtk_label_new(tmp1);
+    gtk_widget_show(ret->fourccs_label);
+    
+    free(tmp1);
+    free(tmp2);
     }
-
-  /* Last one without newline */
   
-  sprintf(tmp2, "0x%08X (%s)", STRING_TO_FOURCC(info->fourccs[i]),
-          info->fourccs[i]);
-  strcat(tmp1, tmp2);
+  /* Create wav_ids label */
 
-  ret->fourccs_label = gtk_label_new(tmp1);
-  gtk_widget_show(ret->fourccs_label);
-  
-  free(tmp1);
-  free(tmp2);
-
+  if(info->num_wav_ids)
+    {
+    tmp1 = malloc(info->num_wav_ids * 30);
+    tmp2 = malloc(30);
+    
+    *tmp1 = '\0';
+    
+    for(i = 0; i < info->num_wav_ids - 1; i++)
+      {
+      sprintf(tmp2, "0x%02x,", info->wav_ids[i]);
+      strcat(tmp1, tmp2);
+      }
+    
+    /* Last one without comma */
+    
+    sprintf(tmp2, "0x%02x", info->wav_ids[i]);
+    strcat(tmp1, tmp2);
+    
+    ret->wav_ids_label = gtk_label_new(tmp1);
+    gtk_widget_show(ret->wav_ids_label);
+    
+    free(tmp1);
+    free(tmp2);
+    }
+    
   /* Create encoding colormodels label */
 
   if(info->num_encoding_colormodels)
@@ -813,13 +843,24 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     }
   
   /* Pack all widgets onto their containers */
-      
-  ret->fourccs_frame = gtk_frame_new("Fourccs");
+
+  if(ret->fourccs_label)
+    {
+    ret->fourccs_frame = gtk_frame_new("Fourccs");
+    
+    gtk_container_add(GTK_CONTAINER(ret->fourccs_frame), ret->fourccs_label);
+    gtk_widget_show(ret->fourccs_frame);
+    }
   
-  gtk_container_add(GTK_CONTAINER(ret->fourccs_frame), ret->fourccs_label);
-  gtk_widget_show(ret->fourccs_frame);
+  if(ret->wav_ids_label)
+    {
+    ret->wav_ids_frame = gtk_frame_new("WAV Id(s)");
+    
+    gtk_container_add(GTK_CONTAINER(ret->wav_ids_frame), ret->wav_ids_label);
+    gtk_widget_show(ret->wav_ids_frame);
+    }
   
-  ret->label_table = gtk_table_new(5, 2, 0);
+  ret->label_table = gtk_table_new(6, 2, 0);
 
   gtk_table_attach_defaults(GTK_TABLE(ret->label_table),
                             ret->real_name, 0, 2, 0, 1);
@@ -836,7 +877,6 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   gtk_table_attach_defaults(GTK_TABLE(ret->label_table),
                             ret->module_filename, 1, 2, 2, 3);
  
-
   gtk_table_attach_defaults(GTK_TABLE(ret->label_table),
                             ret->description, 0, 2, 3, 4);
 
@@ -849,12 +889,32 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
 
   if(info->type == LQT_CODEC_VIDEO)
     {
-    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
-                              0, 1, 1, 2);
-    gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
-                              1, 2, 1, 2);
+    if(ret->fourccs_frame)
+      {
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
+                                0, 1, 1, 2);
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
+                                1, 2, 1, 2);
+      }
+    else
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
+                                0, 2, 1, 2);
     }
-  else
+  else if(ret->wav_ids_frame)
+    {
+    if(ret->fourccs_frame)
+      {
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
+                                0, 1, 1, 2);
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->wav_ids_frame,
+                                1, 2, 1, 2);
+      }
+    else
+      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->wav_ids_frame,
+                                0, 2, 1, 2);
+    }
+  
+  else if(ret->fourccs_frame)
     gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
                               0, 2, 1, 2);
   gtk_widget_show(ret->table);

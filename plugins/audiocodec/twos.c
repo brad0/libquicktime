@@ -1,8 +1,16 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "funcprotos.h"
+#include "quicktime.h"
 #include "twos.h"
 
 /* =================================== private for twos */
+
+
+typedef struct
+{
+	char *work_buffer;
+	long buffer_size;
+        int le; /* For 8 bits means unsigned operation, for more bits, little endian */
+} quicktime_twos_codec_t;
 
 static int byte_order(void)
 {                /* 1 if little endian */
@@ -12,49 +20,6 @@ static int byte_order(void)
 	byteordertest = 0x0001;
 	byteorder = *((unsigned char *)&byteordertest);
 	return byteorder;
-}
-
-static int swap_bytes(char *buffer, long samples, int channels, int bits)
-{
-	long i = 0;
-	char byte1, byte2, byte3;
-	char *buffer1, *buffer2, *buffer3;
-
-	if(!byte_order()) return 0;
-
-	switch(bits)
-	{
-		case 8:
-			break;
-
-		case 16:
-			buffer1 = buffer;
-			buffer2 = buffer + 1;
-			while(i < samples * 2)
-			{
-				byte1 = buffer2[i];
-				buffer2[i] = buffer1[i];
-				buffer1[i] = byte1;
-				i += 2;
-			}
-			break;
-
-		case 24:
-			buffer1 = buffer;
-			buffer2 = buffer + 2;
-			while(i < samples * 3)
-			{
-				byte1 = buffer2[i];
-				buffer2[i] = buffer1[i];
-				buffer1[i] = byte1;
-				i += 3;
-			}
-			break;
-
-		default:
-			break;
-	}
-	return 0;
 }
 
 static int get_work_buffer(quicktime_t *file, int track, long bytes)
@@ -88,6 +53,53 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 	return 0;
 }
 
+static int swap_bytes(char *buffer, long samples, int channels, int bits)
+{
+	long i = 0;
+	char byte1, byte2, byte3;
+	char *buffer1, *buffer2, *buffer3;
+
+	switch(bits)
+	{
+                case 8:
+                  /* Swap sign */
+                  for(i = 0; i < samples * channels; i++)
+                    buffer[i] ^= 0x80;
+                  break;
+
+		case 16:
+                        if(!byte_order()) return 0;
+			buffer1 = buffer;
+			buffer2 = buffer + 1;
+			while(i < samples * channels * 2)
+			{
+				byte1 = buffer2[i];
+				buffer2[i] = buffer1[i];
+				buffer1[i] = byte1;
+				i += 2;
+			}
+			break;
+
+		case 24:
+                        if(!byte_order()) return 0;
+			buffer1 = buffer;
+			buffer2 = buffer + 2;
+			while(i < samples * channels * 3)
+			{
+				byte1 = buffer2[i];
+				buffer2[i] = buffer1[i];
+				buffer1[i] = byte1;
+				i += 3;
+			}
+			break;
+
+		default:
+			break;
+	}
+	return 0;
+}
+
+
 static int decode(quicktime_t *file, 
 					int16_t *output_i, 
 					float *output_f, 
@@ -95,23 +107,30 @@ static int decode(quicktime_t *file,
 					int track, 
 					int channel)
 {
-//printf("decode 1\n");
 	int result = 0;
 	long i, j;
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_twos_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
+	int step = track_map->channels * quicktime_audio_bits(file, track) / 8;
 
-//printf("decode 2\n");
 	get_work_buffer(file, track, samples * step);
+/*
+ * printf("decode 1 %d\n", quicktime_audio_bits(file, track));
+ * sleep(1);
+ */
 	result = !quicktime_read_audio(file, codec->work_buffer, samples, track);
 
-//printf("decode 3\n");
 
-// Undo increment since this is done in codecs.c
+/* Undo increment since this is done in codecs.c */
 	track_map->current_position -= samples;
 
-//printf("decode 4\n");
+/* Handle AVI byte order */
+	if(codec->le)
+		swap_bytes(codec->work_buffer, 
+			samples, 
+			track_map->channels, 
+			quicktime_audio_bits(file, track));
+
 	switch(quicktime_audio_bits(file, track))
 	{
 		case 8:
@@ -139,10 +158,8 @@ static int decode(quicktime_t *file,
 			{
 				for(i = 0, j = channel * 2; i < samples; i++)
 				{
-//printf("decode 5\n");
 					output_i[i] = ((int16_t)codec->work_buffer[j]) << 8 |
 									((unsigned char)codec->work_buffer[j + 1]);
-//printf("decode 6\n");
 					j += step;
 				}
 			}
@@ -151,10 +168,8 @@ static int decode(quicktime_t *file,
 			{
 				for(i = 0, j = channel * 2; i < samples; i++)
 				{
-//printf("decode 7\n");
 					output_f[i] = (float)((((int16_t)codec->work_buffer[j]) << 8) |
 									((unsigned char)codec->work_buffer[j + 1])) / 0x7fff;
-//printf("decode 8\n");
 					j += step;
 				}
 			}
@@ -186,7 +201,7 @@ static int decode(quicktime_t *file,
 		default:
 			break;
 	}
-//printf("decode 9\n");
+
 
 	return result;
 }
@@ -203,7 +218,7 @@ static int encode(quicktime_t *file,
 	long i, j, offset;
 	quicktime_audio_map_t *track_map = &(file->atracks[track]);
 	quicktime_twos_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
+	int step = track_map->channels * quicktime_audio_bits(file, track) / 8;
 	int sample;
 	float sample_f;
 
@@ -291,26 +306,54 @@ static int encode(quicktime_t *file,
 		}
 	}
 
+/* Handle AVI byte order */
+	if(codec->le)
+		swap_bytes(codec->work_buffer, 
+			samples, 
+			track_map->channels, 
+			quicktime_audio_bits(file, track));
+
 	result = quicktime_write_audio(file, codec->work_buffer, samples, track);
 
 	return result;
 }
 
-
 void quicktime_init_codec_twos(quicktime_audio_map_t *atrack)
 {
 	quicktime_twos_codec_t *codec;
+	quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
 
 /* Init public items */
-	((quicktime_codec_t*)atrack->codec)->priv = calloc(1, sizeof(quicktime_twos_codec_t));
-	((quicktime_codec_t*)atrack->codec)->delete_acodec = delete_codec;
-	((quicktime_codec_t*)atrack->codec)->decode_video = 0;
-	((quicktime_codec_t*)atrack->codec)->encode_video = 0;
-	((quicktime_codec_t*)atrack->codec)->decode_audio = decode;
-	((quicktime_codec_t*)atrack->codec)->encode_audio = encode;
+	codec_base->delete_acodec = delete_codec;
+	codec_base->decode_audio = decode;
+	codec_base->encode_audio = encode;
+	codec_base->fourcc = QUICKTIME_TWOS;
+	codec_base->title = "Twos complement";
+	codec_base->desc = "Twos complement";
 
 /* Init private items */
-	codec = ((quicktime_codec_t*)atrack->codec)->priv;
+	codec = codec_base->priv = calloc(1, sizeof(quicktime_twos_codec_t));
 	codec->work_buffer = 0;
 	codec->buffer_size = 0;
+}
+
+void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack)
+{
+	quicktime_twos_codec_t *codec;
+	quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+
+/* Init public items */
+	codec_base->delete_acodec = delete_codec;
+	codec_base->decode_audio = decode;
+	codec_base->encode_audio = encode;
+	codec_base->fourcc = "SOWT";
+	codec_base->title = "Twos complement (Little endian)";
+	codec_base->desc = "Twos complement (Little endian)";
+	codec_base->wav_id = 0x01;
+
+/* Init private items */
+	codec = codec_base->priv = calloc(1, sizeof(quicktime_twos_codec_t));
+	codec->work_buffer = 0;
+	codec->buffer_size = 0;
+        codec->le = 1;
 }

@@ -1,15 +1,14 @@
-#include <funcprotos.h>
 #include <quicktime/quicktime.h>
-#include <string.h>
+#include <funcprotos.h>
+
+
+
 
 int quicktime_trak_init(quicktime_trak_t *trak)
 {
 	quicktime_tkhd_init(&(trak->tkhd));
 	quicktime_edts_init(&(trak->edts));
 	quicktime_mdia_init(&(trak->mdia));
-	trak->allocated_chunksizes = 4096;
-	trak->chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
-	trak->total_chunksizes = 0;
 	return 0;
 }
 
@@ -17,24 +16,21 @@ int quicktime_trak_init_video(quicktime_t *file,
 							quicktime_trak_t *trak, 
 							int frame_w, 
 							int frame_h, 
-							float frame_rate,
+							double frame_rate,
 							char *compressor)
 {
-//printf("quicktime_trak_init_video 1\n");
+
 	quicktime_tkhd_init_video(file, 
 		&(trak->tkhd), 
 		frame_w, 
 		frame_h);
-//printf("quicktime_trak_init_video 1\n");
 	quicktime_mdia_init_video(file, 
 		&(trak->mdia), 
 		frame_w, 
 		frame_h, 
 		frame_rate, 
 		compressor);
-//printf("quicktime_trak_init_video 2\n");
 	quicktime_edts_init_table(&(trak->edts));
-//printf("quicktime_trak_init_video 2\n");
 
 	return 0;
 }
@@ -46,16 +42,20 @@ int quicktime_trak_init_audio(quicktime_t *file,
 							int bits, 
 							char *compressor)
 {
-	quicktime_mdia_init_audio(file, &(trak->mdia), channels, sample_rate, bits, compressor);
+	quicktime_mdia_init_audio(file, &(trak->mdia), 
+		channels, 
+		sample_rate, 
+		bits, 
+		compressor);
 	quicktime_edts_init_table(&(trak->edts));
-
 	return 0;
 }
 
 int quicktime_trak_delete(quicktime_trak_t *trak)
 {
+	quicktime_mdia_delete(&(trak->mdia));
+	quicktime_edts_delete(&(trak->edts));
 	quicktime_tkhd_delete(&(trak->tkhd));
-	free(trak->chunksizes);
 	return 0;
 }
 
@@ -232,11 +232,22 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 		quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
 		int i;
 		long total = 0;
-
-		for(i = 0; i < stts->total_entries; i++)
-		{
-			total += stts->table[i].sample_count;
-		}
+                /* LQT: Make this correct for VBR files */
+                if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
+                  {
+                  for(i = 0; i < stts->total_entries; i++)
+                    {
+                    total += stts->table[i].sample_count *
+                      stts->table[i].sample_duration;
+                    }
+                  }
+                else
+                  {
+                  for(i = 0; i < stts->total_entries; i++)
+                    {
+                    total += stts->table[i].sample_count;
+                    }
+                  }
 		return total;
 	}
 }
@@ -297,18 +308,15 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 	quicktime_trak_t *trak, 
 	long sample)
 {
-//printf("quicktime_chunk_of_sample 1 %p\n", trak);
 	quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
 	long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
 	long chunk2entry;
 	long chunk1, chunk2, chunk1samples, range_samples, total = 0;
 
-//printf("quicktime_chunk_of_sample 1\n");
 	chunk1 = 1;
 	chunk1samples = 0;
 	chunk2entry = 0;
 
-//printf("quicktime_chunk_of_sample 1\n");
 	if(!total_entries)
 	{
 		*chunk_sample = 0;
@@ -316,7 +324,6 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 		return 0;
 	}
 
-//printf("quicktime_chunk_of_sample 1\n");
 	do
 	{
 		chunk2 = table[chunk2entry].chunk;
@@ -335,15 +342,12 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 		}
 	}while(chunk2entry < total_entries);
 
-//printf("quicktime_chunk_of_sample 1 %d %d %d\n", sample, total, chunk1samples);
 	if(chunk1samples)
 		*chunk = (sample - total) / chunk1samples + chunk1;
 	else
 		*chunk = 1;
 
-//printf("quicktime_chunk_of_sample 1\n");
 	*chunk_sample = total + (*chunk - chunk1) * chunk1samples;
-//printf("quicktime_chunk_of_sample 2\n");
 	return 0;
 }
 
@@ -365,6 +369,7 @@ int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, lon
 // codecs can't use read_chunk
 	if(file->use_avi)
 	{
+//printf("quicktime_chunk_to_offset 1 %llx %d\n", result, file->mdat.atom.start);
 		result += 8 + file->mdat.atom.start;
 	}
 	return result;
@@ -389,13 +394,27 @@ long quicktime_offset_to_chunk(int64_t *chunk_offset,
 	return 1;
 }
 
+int quicktime_chunk_bytes(quicktime_t *file, 
+	int64_t *chunk_offset,
+	int chunk, 
+	quicktime_trak_t *trak)
+{
+	int result;
+	*chunk_offset = quicktime_chunk_to_offset(file, trak, chunk);
+	quicktime_set_position(file, *chunk_offset - 4);
+	result = quicktime_read_int32_le(file);
+	return result;
+}
+
 int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
 	long chunk_sample, 
 	long sample)
 {
 	quicktime_stsz_table_t *table = trak->mdia.minf.stbl.stsz.table;
 	int64_t i, total;
-
+        /* LQT: For VBR audio, quicktime_sample_rage_size makes no sense */
+        if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
+          return 0;
 	if(trak->mdia.minf.stbl.stsz.sample_size)
 	{
 /* assume audio */
@@ -422,8 +441,6 @@ int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, lo
 	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
 	chunk_offset1 = quicktime_chunk_to_offset(file, trak, chunk);
 	chunk_offset2 = chunk_offset1 + quicktime_sample_range_size(trak, chunk_sample, sample);
-//printf("quicktime_sample_to_offset chunk %d sample %d chunk_offset %d chunk_sample %d chunk_offset + samples %d\n",
-//	 chunk, sample, chunk_offset1, chunk_sample, chunk_offset2);
 	return chunk_offset2;
 }
 
@@ -452,28 +469,29 @@ long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset)
 	return sample;
 }
 
-
 void quicktime_write_chunk_header(quicktime_t *file, 
 	quicktime_trak_t *trak, 
 	quicktime_atom_t *chunk)
 {
 	if(file->use_avi)
 	{
-		char tag[4];
-		tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
-		tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
-		if(trak->mdia.minf.is_audio)
+/* Get tag from first riff strl */
+		quicktime_riff_t *first_riff = file->riff[0];
+		quicktime_hdrl_t *hdrl = &first_riff->hdrl;
+		quicktime_strl_t *strl = hdrl->strl[trak->tkhd.track_id - 1];
+		char *tag = strl->tag;
+
+/* Create new RIFF object at 1 Gig mark */
+		quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
+		if(quicktime_position(file) - riff->atom.start > 0x40000000)
 		{
-			tag[2] = 'w';
-			tag[3] = 'b';
-		}
-		else
-		if(trak->mdia.minf.is_video)
-		{
-			tag[2] = 'd';
-			tag[3] = 'c';
+			quicktime_finalize_riff(file, riff);
+			quicktime_init_riff(file);
 		}
 
+		
+
+/* Write AVI header */
 		quicktime_atom_write_header(file, chunk, tag);
 	}
 	else
@@ -491,10 +509,26 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 	int64_t offset = chunk->start;
 	int sample_size = quicktime_position(file) - offset;
 
+
+// Write AVI footer
 	if(file->use_avi)
 	{
 		quicktime_atom_write_footer(file, chunk);
-		offset -= 8;
+
+// Save original index entry for first RIFF only
+		if(file->total_riffs < 2)
+		{
+			quicktime_update_idx1table(file, 
+				trak, 
+				offset, 
+				sample_size);
+		}
+
+// Save partial index entry
+		quicktime_update_ixtable(file, 
+			trak, 
+			offset, 
+			sample_size);
 	}
 
 	if(offset + sample_size > file->mdat.atom.size)
@@ -509,58 +543,37 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		current_chunk - 1, 
 		sample_size);
 
-	if(trak->allocated_chunksizes <= trak->total_chunksizes)
-	{
-		int *new_chunksizes;
-		trak->allocated_chunksizes *= 2;
-		new_chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
-		memcpy(new_chunksizes, trak->chunksizes, trak->total_chunksizes * sizeof(int));
-		free(trak->chunksizes);
-		trak->chunksizes = new_chunksizes;
-	}
-
-	trak->chunksizes[trak->total_chunksizes++] = sample_size;
-
 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
 		current_chunk, 
 		samples);
 }
 
 
-int quicktime_update_tables(quicktime_t *file, 
-							quicktime_trak_t *trak, 
-							int64_t offset, 
-							int64_t chunk, 
-							int64_t sample, 
-							int64_t samples, 
-							int64_t sample_size)
-{
-if(file->use_avi)
-printf("%s: replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n\n", __FUNCTION__ );
-
-	if(offset + sample_size > file->mdat.atom.size) 
-		file->mdat.atom.size = offset + sample_size;
-
-	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), chunk, offset);
-
-	if(trak->mdia.minf.is_video)
-		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), sample, sample_size);
-
-	if(trak->allocated_chunksizes <= trak->total_chunksizes)
-	{
-		int *new_chunksizes;
-		trak->allocated_chunksizes *= 2;
-		new_chunksizes = calloc(sizeof(int), trak->allocated_chunksizes);
-		memcpy(new_chunksizes, trak->chunksizes, trak->total_chunksizes * sizeof(int));
-		free(trak->chunksizes);
-		trak->chunksizes = new_chunksizes;
-	}
-
-	trak->chunksizes[trak->total_chunksizes++] = sample_size;
-
-	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), chunk, samples);
-	return 0;
-}
+/*
+ * int quicktime_update_tables(quicktime_t *file, 
+ * 							quicktime_trak_t *trak, 
+ * 							int64_t offset, 
+ * 							int64_t chunk, 
+ * 							int64_t sample, 
+ * 							int64_t samples, 
+ * 							int64_t sample_size)
+ * {
+ * //if(file->use_avi)
+ * printf("quicktime_update_tables: replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n");
+ * 
+ * 	if(offset + sample_size > file->mdat.atom.size) 
+ * 		file->mdat.atom.size = offset + sample_size;
+ * 
+ * 	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), chunk, offset);
+ * 
+ * 	if(trak->mdia.minf.is_video)
+ * 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), sample, sample_size);
+ * 
+ * 
+ * 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), chunk, samples);
+ * 	return 0;
+ * }
+ */
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
 	long *duration, 
@@ -598,15 +611,22 @@ long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
 {
 	long result, current_chunk;
 	quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
+	quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+	quicktime_stsd_t *stsd = &(trak->mdia.minf.stbl.stsd);
 	long i = stsc->total_entries - 1;
 
+        if(!stsc->total_entries)
+          return 0;
+        //        fprintf(stderr, "quicktime_chunk_samples: total_entries: %ld\n", stsc->total_entries);
 	do
 	{
 		current_chunk = stsc->table[i].chunk;
 		result = stsc->table[i].samples;
 		i--;
 	}while(i >= 0 && current_chunk > chunk);
-
+        /* LQT: Multiply with duration */
+        if(stsd->table[0].compression_id == -2)
+          result *= stts->table[0].sample_duration;
 	return result;
 }
 

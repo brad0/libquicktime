@@ -175,6 +175,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	png_structp png_ptr;
 	png_infop info_ptr;
 	int cmodel = source_cmodel(file, track);
+        quicktime_atom_t chunk_atom;
 
 	codec->buffer_size = 0;
 	codec->buffer_position = 0;
@@ -201,18 +202,15 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	png_write_end(png_ptr, info_ptr);
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 
+        quicktime_write_chunk_header(file, trak, &chunk_atom);
 	result = !quicktime_write_data(file, 
 				codec->buffer, 
 				codec->buffer_size);
-
-//printf("quicktime_encode_png %d\n", codec->buffer_size);
-	quicktime_update_tables(file,
-						file->vtracks[track].track,
-						offset,
-						file->vtracks[track].current_chunk,
-						file->vtracks[track].current_position,
-						1,
-						codec->buffer_size);
+        quicktime_write_chunk_footer(file,
+                trak,
+                vtrack->current_chunk,
+                &chunk_atom,
+                1);
 
 	file->vtracks[track].current_chunk++;
 	return result;

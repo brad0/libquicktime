@@ -16,7 +16,7 @@ void quicktime_minf_init_video(quicktime_t *file,
 								int frame_w,
 								int frame_h, 
 								int time_scale, 
-								float frame_rate,
+								double frame_rate,
 								char *compressor)
 {
 	minf->is_video = 1;

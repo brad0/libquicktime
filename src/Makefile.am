@@ -32,8 +32,12 @@ $(lqt_sources) \
 atom.c \
 avi_hdrl.c \
 avi_idx1.c \
+avi_indx.c \
+avi_ix.c \
 avi_movi.c \
-avi_strh.c \
+avi_odml.c \
+avi_riff.c \
+avi_strl.c \
 cmodel_default.c \
 cmodel_yuv420p.c \
 cmodel_yuv422.c \

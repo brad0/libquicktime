@@ -12,7 +12,7 @@ void quicktime_mdia_init_video(quicktime_t *file,
 								quicktime_mdia_t *mdia,
 								int frame_w,
 								int frame_h, 
-								float frame_rate,
+								double frame_rate,
 								char *compressor)
 {
 //printf("quicktime_mdia_init_video 1\n");
@@ -31,8 +31,14 @@ void quicktime_mdia_init_audio(quicktime_t *file,
 							int bits, 
 							char *compressor)
 {
-	quicktime_mdhd_init_audio(file, &(mdia->mdhd), channels, sample_rate, bits, compressor);
-	quicktime_minf_init_audio(file, &(mdia->minf), channels, sample_rate, bits, compressor);
+        quicktime_mdhd_init_audio(&(mdia->mdhd),
+                sample_rate);
+        quicktime_minf_init_audio(file,
+                &(mdia->minf),
+                channels,
+                sample_rate,
+                bits,
+                compressor);
 	quicktime_hdlr_init_audio(&(mdia->hdlr));
 }
 

@@ -26,19 +26,16 @@
 
 static int delete_acodec(quicktime_audio_map_t *vtrack)
   {
-  quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   
-  if(codec->init_enc)
-    avcodec_close(&codec->ffcodec_enc);
-  if(codec->init_dec)
-    avcodec_close(&codec->ffcodec_dec);
-  
-  if(codec->encode_frame) free(codec->encode_frame);
-  if(codec->write_buffer) free(codec->write_buffer);
-  
-  if(codec->read_buffer) free(codec->read_buffer);
+  if(codec->com.init_enc)
+    avcodec_close(&(codec->com.ffcodec_enc));
+  if(codec->com.init_dec)
+    avcodec_close(&(codec->com.ffcodec_dec));
   
   if(codec->sample_buffer) free(codec->sample_buffer);
+  if(codec->chunk_buffer)  free(codec->chunk_buffer);
+  if(codec->chunk_sizes)   free(codec->chunk_sizes);
   
   free(codec);
   return 0;
@@ -46,16 +43,15 @@ static int delete_acodec(quicktime_audio_map_t *vtrack)
 
 static int delete_vcodec(quicktime_video_map_t *vtrack)
 {
-	quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	
-	if(codec->init_enc)
-		avcodec_close(&codec->ffcodec_enc);
-	if(codec->init_dec)
-		avcodec_close(&codec->ffcodec_dec);
+	if(codec->com.init_enc)
+		avcodec_close(&(codec->com.ffcodec_enc));
+	if(codec->com.init_dec)
+		avcodec_close(&(codec->com.ffcodec_dec));
 
 	if(codec->encode_frame) free(codec->encode_frame);
 	if(codec->write_buffer) free(codec->write_buffer);
-
 	if(codec->read_buffer) free(codec->read_buffer);
 	
 	free(codec);
@@ -69,13 +65,13 @@ static int set_parameter_video(quicktime_t *file,
                                char *key, 
                                void *value)
 {
-	quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 
         
 #define INTPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \
           { \
-          codec->params.x = (*(int *)value) * y; \
+          codec->com.params.x = (*(int *)value) * y; \
           } \
 	}
 	
@@ -101,68 +97,68 @@ static int set_parameter_video(quicktime_t *file,
 	INTPARM(error_resilience, 1) else
 	if(!strcasecmp(key, "flags_hq")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_HQ;
+			codec->com.params.flags |= CODEC_FLAG_HQ;
 		else
-			codec->params.flags &= ~CODEC_FLAG_HQ;
+			codec->com.params.flags &= ~CODEC_FLAG_HQ;
 	} else
 	if(!strcasecmp(key, "flags_4mv")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_4MV;
+			codec->com.params.flags |= CODEC_FLAG_4MV;
 		else
-			codec->params.flags &= ~CODEC_FLAG_4MV;
+			codec->com.params.flags &= ~CODEC_FLAG_4MV;
 	} else
 	if(!strcasecmp(key, "flags_part")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_PART;
+			codec->com.params.flags |= CODEC_FLAG_PART;
 		else
-			codec->params.flags &= ~CODEC_FLAG_PART;
+			codec->com.params.flags &= ~CODEC_FLAG_PART;
 	} else
 	if(!strcasecmp(key, "flags_gray")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_GRAY;
+			codec->com.params.flags |= CODEC_FLAG_GRAY;
 		else
-			codec->params.flags &= ~CODEC_FLAG_GRAY;
+			codec->com.params.flags &= ~CODEC_FLAG_GRAY;
 	} else
 	if(!strcasecmp(key, "flags_fix")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_QSCALE;
+			codec->com.params.flags |= CODEC_FLAG_QSCALE;
 		else
-			codec->params.flags &= ~CODEC_FLAG_QSCALE;
+			codec->com.params.flags &= ~CODEC_FLAG_QSCALE;
 	} else
 	if(!strcasecmp(key, "flags_pass")) {
-		codec->params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
+		codec->com.params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
 		if(*(int *)value == 1) {
-			codec->params.flags |= CODEC_FLAG_PASS1;
+			codec->com.params.flags |= CODEC_FLAG_PASS1;
 		} else if(*(int *)value == 2) {
-			codec->params.flags |= CODEC_FLAG_PASS1;
+			codec->com.params.flags |= CODEC_FLAG_PASS1;
 		}
 	} else
 	if(!strcasecmp(key, "me_method")) {
 		if(!strcasecmp((char *)value, "Zero")) {
-			codec->params.me_method = ME_ZERO;
+			codec->com.params.me_method = ME_ZERO;
 		} else if(!strcasecmp((char *)value, "Full")) {
-			codec->params.me_method = ME_FULL;
+			codec->com.params.me_method = ME_FULL;
 		} else if(!strcasecmp((char *)value, "Log")) {
-			codec->params.me_method = ME_LOG;
+			codec->com.params.me_method = ME_LOG;
 		} else if(!strcasecmp((char *)value, "Phods")) {
-			codec->params.me_method = ME_PHODS;
+			codec->com.params.me_method = ME_PHODS;
 		} else if(!strcasecmp((char *)value, "Epzs")) {
-			codec->params.me_method = ME_EPZS;
+			codec->com.params.me_method = ME_EPZS;
 		} else if(!strcasecmp((char *)value, "X1")) {
-			codec->params.me_method = ME_X1;
+			codec->com.params.me_method = ME_X1;
 		}
 	} else
 	if(!strcasecmp(key, "aspect_ratio_info")) {
 		if(!strcasecmp((char *)value, "Square")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_SQUARE;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_SQUARE;
 		} else if(!strcasecmp((char *)value, "4:3 (625)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_4_3_625;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_625;
 		} else if(!strcasecmp((char *)value, "4:3 (525)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_4_3_525;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_525;
 		} else if(!strcasecmp((char *)value, "16:9 (625)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_16_9_625;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_625;
 		} else if(!strcasecmp((char *)value, "16:9 (525)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_16_9_525;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_525;
 		}
 	} else
 	{
@@ -177,13 +173,13 @@ static int set_parameter_audio(quicktime_t *file,
                                char *key, 
                                void *value)
 {
-	quicktime_ffmpeg_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
+	quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
 
         
 #define INTPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \
           { \
-          codec->params.x = (*(int *)value) * y; \
+          codec->com.params.x = (*(int *)value) * y; \
           } \
 	}
 	
@@ -209,68 +205,68 @@ static int set_parameter_audio(quicktime_t *file,
 	INTPARM(error_resilience, 1) else
 	if(!strcasecmp(key, "flags_hq")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_HQ;
+			codec->com.params.flags |= CODEC_FLAG_HQ;
 		else
-			codec->params.flags &= ~CODEC_FLAG_HQ;
+			codec->com.params.flags &= ~CODEC_FLAG_HQ;
 	} else
 	if(!strcasecmp(key, "flags_4mv")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_4MV;
+			codec->com.params.flags |= CODEC_FLAG_4MV;
 		else
-			codec->params.flags &= ~CODEC_FLAG_4MV;
+			codec->com.params.flags &= ~CODEC_FLAG_4MV;
 	} else
 	if(!strcasecmp(key, "flags_part")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_PART;
+			codec->com.params.flags |= CODEC_FLAG_PART;
 		else
-			codec->params.flags &= ~CODEC_FLAG_PART;
+			codec->com.params.flags &= ~CODEC_FLAG_PART;
 	} else
 	if(!strcasecmp(key, "flags_gray")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_GRAY;
+			codec->com.params.flags |= CODEC_FLAG_GRAY;
 		else
-			codec->params.flags &= ~CODEC_FLAG_GRAY;
+			codec->com.params.flags &= ~CODEC_FLAG_GRAY;
 	} else
 	if(!strcasecmp(key, "flags_fix")) {
 		if(*(int *)value == 1)
-			codec->params.flags |= CODEC_FLAG_QSCALE;
+			codec->com.params.flags |= CODEC_FLAG_QSCALE;
 		else
-			codec->params.flags &= ~CODEC_FLAG_QSCALE;
+			codec->com.params.flags &= ~CODEC_FLAG_QSCALE;
 	} else
 	if(!strcasecmp(key, "flags_pass")) {
-		codec->params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
+		codec->com.params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
 		if(*(int *)value == 1) {
-			codec->params.flags |= CODEC_FLAG_PASS1;
+			codec->com.params.flags |= CODEC_FLAG_PASS1;
 		} else if(*(int *)value == 2) {
-			codec->params.flags |= CODEC_FLAG_PASS1;
+			codec->com.params.flags |= CODEC_FLAG_PASS1;
 		}
 	} else
 	if(!strcasecmp(key, "me_method")) {
 		if(!strcasecmp((char *)value, "Zero")) {
-			codec->params.me_method = ME_ZERO;
+			codec->com.params.me_method = ME_ZERO;
 		} else if(!strcasecmp((char *)value, "Full")) {
-			codec->params.me_method = ME_FULL;
+			codec->com.params.me_method = ME_FULL;
 		} else if(!strcasecmp((char *)value, "Log")) {
-			codec->params.me_method = ME_LOG;
+			codec->com.params.me_method = ME_LOG;
 		} else if(!strcasecmp((char *)value, "Phods")) {
-			codec->params.me_method = ME_PHODS;
+			codec->com.params.me_method = ME_PHODS;
 		} else if(!strcasecmp((char *)value, "Epzs")) {
-			codec->params.me_method = ME_EPZS;
+			codec->com.params.me_method = ME_EPZS;
 		} else if(!strcasecmp((char *)value, "X1")) {
-			codec->params.me_method = ME_X1;
+			codec->com.params.me_method = ME_X1;
 		}
 	} else
 	if(!strcasecmp(key, "aspect_ratio_info")) {
 		if(!strcasecmp((char *)value, "Square")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_SQUARE;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_SQUARE;
 		} else if(!strcasecmp((char *)value, "4:3 (625)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_4_3_625;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_625;
 		} else if(!strcasecmp((char *)value, "4:3 (525)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_4_3_525;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_4_3_525;
 		} else if(!strcasecmp((char *)value, "16:9 (625)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_16_9_625;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_625;
 		} else if(!strcasecmp((char *)value, "16:9 (525)")) {
-			codec->params.aspect_ratio_info = FF_ASPECT_16_9_525;
+			codec->com.params.aspect_ratio_info = FF_ASPECT_16_9_525;
 		}
 	} else
 	{
@@ -300,16 +296,16 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
                                        AVCodec *decoder)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
-	quicktime_ffmpeg_codec_t *codec;
+	quicktime_ffmpeg_video_codec_t *codec;
 
 	avcodec_init();
 
-	codec = calloc(1, sizeof(quicktime_ffmpeg_codec_t));
+	codec = calloc(1, sizeof(quicktime_ffmpeg_video_codec_t));
 	if(!codec)
 	  return;
 
-	codec->ffc_enc = encoder;
-	codec->ffc_dec = decoder;
+	codec->com.ffc_enc = encoder;
+	codec->com.ffc_dec = decoder;
 	
 	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_vcodec;
@@ -328,16 +324,16 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
                                        AVCodec *decoder)
 {
 	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
-	quicktime_ffmpeg_codec_t *codec;
+	quicktime_ffmpeg_audio_codec_t *codec;
 
 	avcodec_init();
 
-	codec = calloc(1, sizeof(quicktime_ffmpeg_codec_t));
+	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
 	if(!codec)
           return;
 
-	codec->ffc_enc = encoder;
-	codec->ffc_dec = decoder;
+	codec->com.ffc_enc = encoder;
+	codec->com.ffc_dec = decoder;
 	
 	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
 	((quicktime_codec_t*)atrack->codec)->delete_acodec = delete_acodec;
@@ -347,33 +343,4 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
           ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
 	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter_audio;
 
-        /* Set the number of samples per frame (ffmpeg lies here for decoders) */
-        
-        if(encoder)
-          {
-          switch(encoder->id)
-            {
-            case CODEC_ID_MP2:
-            case CODEC_ID_MP3LAME:
-              codec->samples_per_frame = 1152;
-              break; 
-            case CODEC_ID_AC3:
-              codec->samples_per_frame = 6*256;
-              break; 
-            }
-          }
-        else if(decoder)
-          {
-          switch(decoder->id)
-            {
-            case CODEC_ID_MP2:
-            case CODEC_ID_MP3LAME:
-              codec->samples_per_frame = 1152;
-              break;
-            case CODEC_ID_AC3:
-              codec->samples_per_frame = 6*256;
-              break;
-            }
-          
-          }
 }

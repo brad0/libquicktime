@@ -4,11 +4,5 @@
 #include <quicktime/colormodels.h>
 #include <quicktime/quicktime.h>
 
-typedef struct
-{
-	cmodel_yuv_t yuv_table;
-	int coded_w, coded_h;
-	unsigned char *work_buffer;
-} quicktime_yv12_codec_t;
 
 #endif
