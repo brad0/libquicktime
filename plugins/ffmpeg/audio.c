@@ -49,12 +49,11 @@ static void deinterleave(int16_t *dst_i, float *dst_f, int16_t * src,
 
 /* Decode the current chunk into the sample buffer */
 
-static int64_t samples_done = 0;
-
 static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *codec,
                         quicktime_audio_map_t *track_map)
   {
   int result;
+  int frame_bytes;
   int64_t offset;
   int num_samples;
   int samples_decoded = 0;
@@ -79,10 +78,12 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
   /* Determine the chunk size */
 
   chunk_size = codec->chunk_sizes[codec->current_chunk-1];
-  fprintf(stderr, "Chunk size: %lld, samples: %d\n", chunk_size, num_samples);
-  if(codec->chunk_buffer_size < chunk_size + FF_INPUT_BUFFER_PADDING_SIZE)
+  //  fprintf(stderr, "Chunk size: %lld, samples: %d\n", chunk_size, num_samples);
+  if(codec->chunk_buffer_size < codec->bytes_in_chunk_buffer + chunk_size +
+     FF_INPUT_BUFFER_PADDING_SIZE)
     {
-    codec->chunk_buffer_size = chunk_size + 100 + FF_INPUT_BUFFER_PADDING_SIZE;
+    codec->chunk_buffer_size = codec->bytes_in_chunk_buffer +
+      chunk_size + 100 + FF_INPUT_BUFFER_PADDING_SIZE;
     codec->chunk_buffer = realloc(codec->chunk_buffer, codec->chunk_buffer_size);
     }
 
@@ -93,10 +94,10 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
   quicktime_set_position(file, offset);
   
   result = !quicktime_read_data(file, codec->chunk_buffer, chunk_size);
-  codec->chunk_buffer[chunk_size]   = 0x00;
-  codec->chunk_buffer[chunk_size+1] = 0x00;
-  codec->chunk_buffer[chunk_size+2] = 0x00;
-  codec->chunk_buffer[chunk_size+3] = 0x00;
+
+  codec->bytes_in_chunk_buffer += chunk_size;
+  
+  memset(&(codec->chunk_buffer[codec->bytes_in_chunk_buffer]), 0, FF_INPUT_BUFFER_PADDING_SIZE);
   
   /* Decode this */
 
@@ -106,31 +107,50 @@ static int decode_chunk(quicktime_t * file, quicktime_ffmpeg_audio_codec_t *code
    *size in BYTES. */
 
   bytes_used = 0;
-  while(chunk_size > bytes_used)
+  while(1)
     {
-    bytes_used +=
+    frame_bytes =
       avcodec_decode_audio(codec->com.ffcodec_dec,
                            &(codec->sample_buffer[track_map->channels * codec->samples_in_buffer]),
                            &bytes_decoded,
-                           &(codec->chunk_buffer[bytes_used]), chunk_size - bytes_used +
-                           FF_INPUT_BUFFER_PADDING_SIZE);
-    if(bytes_decoded < 0)
+                           &(codec->chunk_buffer[bytes_used]), codec->bytes_in_chunk_buffer);
+    if(frame_bytes < 0)
+      {
+      fprintf(stderr, "avcodec_decode_audio error\n");
       break;
+      }
+#if 0
+    fprintf(stderr, "Samples decoded: %d, Bytes used: %d, chunk_size: %lld, chunk buffer: %d\n",
+            bytes_decoded / (track_map->channels * 2),
+            frame_bytes, chunk_size, codec->bytes_in_chunk_buffer);
+#endif
+        
+    /* Incomplete frame, save the data for later use and exit here */
 
+    bytes_used                   += frame_bytes;
+    codec->bytes_in_chunk_buffer -= frame_bytes;
+
+    /* This happens because ffmpeg adds FF_INPUT_BUFFER_PADDING_SIZE to the bytes returned */
+    
+    if(codec->bytes_in_chunk_buffer < 0)
+      codec->bytes_in_chunk_buffer = 0;
+
+    if(bytes_decoded <= 0)
+      {
+      if(codec->bytes_in_chunk_buffer > 0)
+        //        memmove(codec->chunk_buffer, &(codec->chunk_buffer[bytes_used]), codec->bytes_in_chunk_buffer);
+        codec->bytes_in_chunk_buffer = 0;
+      break;
+      }
+    
     samples_decoded += (bytes_decoded / (track_map->channels * 2));
     codec->samples_in_buffer += (bytes_decoded / (track_map->channels * 2));
-#if 1
-    fprintf(stderr, "Samples decoded: %d, Bytes used: %d, chunk_size: %lld\n",
-            bytes_decoded / (track_map->channels * 2),
-            bytes_used, chunk_size);
-#endif
     }
 #if 0
   fprintf(stderr, "Last samples decoded: %d, Bytes used: %d, samples decoded %d, chunk_size: %lld\n",
           bytes_decoded / (track_map->channels * 2),
           bytes_used, samples_decoded, chunk_size);
 #endif
-  samples_done += num_samples;
   return result;
   }
 
@@ -220,10 +240,12 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t *output_i, float *output_
     }
   
   /* Read new chunks until we have enough samples */
-
   
   while(codec->samples_in_buffer < samples)
     {
+    if(codec->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+      return 0;
+    
     result = decode_chunk(file, codec, track_map);
     codec->current_chunk++;
     }

@@ -577,50 +577,36 @@ struct CODECIDMAP codecidmap_a[] = {
 #define NUMMAPS_V ((int)(sizeof(codecidmap_v)/sizeof(struct CODECIDMAP)))
 
 void ffmpeg_map_init(void)
-{
-	AVCodec *codec;
-	int i, found;
-	if(ffmpeg_num_video_codecs >= 0)
-		return;
-	avcodec_register_all();
-	avcodec_init();
-	ffmpeg_num_video_codecs = 0;
-	ffmpeg_num_audio_codecs = 0;
-	for(codec = first_avcodec; codec; codec = codec->next) {
-                found = 0;
-		for(i = 0; i < NUMMAPS_V; i++) {
-			if(codec->id == codecidmap_v[i].id) {
-				if(codecidmap_v[i].index < 0)
-					codecidmap_v[i].index =
-                                          ffmpeg_num_audio_codecs +
-                                          ffmpeg_num_video_codecs++;
-				if(codec->encode)
-					codecidmap_v[i].encoder = codec;
-				if(codec->decode)
-					codecidmap_v[i].decoder = codec;
-                                found = 1;
-				break;
-			}
-		}
-                if(!found) {
-         	  for(i = 0; i < NUMMAPS_A; i++) {
-			if(codec->id == codecidmap_a[i].id) {
-				if(codecidmap_a[i].index < 0)
-                                        codecidmap_a[i].index =
-                                          ffmpeg_num_video_codecs +
-                                          ffmpeg_num_audio_codecs++;
-				if(codec->encode)
-					codecidmap_a[i].encoder = codec;
-				if(codec->decode)
-					codecidmap_a[i].decoder = codec;
-                                found = 1;
-				break;
-			}
-                  }
-                }
-                
-	}
-}
+  {
+  AVCodec *codec;
+  int i, found;
+  if(ffmpeg_num_video_codecs >= 0)
+    return;
+  avcodec_register_all();
+  avcodec_init();
+  ffmpeg_num_video_codecs = 0;
+  ffmpeg_num_audio_codecs = 0;
+  
+  for(i = 0; i < NUMMAPS_V; i++)
+    {
+    codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
+    codecidmap_v[i].decoder = avcodec_find_decoder(codecidmap_v[i].id);
+
+    if(codecidmap_v[i].encoder || codecidmap_v[i].decoder)
+      codecidmap_v[i].index = ffmpeg_num_audio_codecs + ffmpeg_num_video_codecs++;
+    }
+  for(i = 0; i < NUMMAPS_A; i++)
+    {
+    codecidmap_a[i].encoder = avcodec_find_encoder(codecidmap_a[i].id);
+    codecidmap_a[i].decoder = avcodec_find_decoder(codecidmap_a[i].id);
+
+    if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
+      {
+      codecidmap_a[i].index = ffmpeg_num_audio_codecs++ + ffmpeg_num_video_codecs;
+      fprintf(stderr, "Found codec %s %p %p\n", codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder);
+      }
+    }
+  }
 
 /* Common to all */
 static int encoding_colormodels_ffmpeg[] = {
