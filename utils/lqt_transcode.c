@@ -30,9 +30,6 @@
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
-/* Define this for floating point audio support */
-// #define USEFLOAT
-
 /* Supported colormodels */
 
 int colormodels[] =
@@ -66,14 +63,17 @@ typedef struct
   {
   quicktime_t * in_file;
   quicktime_t * out_file;
-
-  int64_t num_audio_samples;
+  
   int64_t num_video_frames;
+  int64_t video_duration;
+  
+  int64_t num_audio_samples;
 
   int64_t audio_samples_written;
   int64_t video_frames_written;
   
   unsigned char ** video_buffer;
+
   float   ** audio_buffer_f;
   int16_t ** audio_buffer_i;
   int samples_per_frame;
@@ -92,6 +92,8 @@ typedef struct
   int samplerate;
   int num_channels;
   int audio_bits;
+
+  /* Progress (0..1) */
 
   float progress;
   } transcode_handle;
@@ -258,14 +260,16 @@ static int transcode_init(transcode_handle * h,
     
   /* Check for video */
 
-  h->do_video = !!quicktime_video_tracks(h->in_file);
-
+  if(quicktime_video_tracks(h->in_file) &&
+     quicktime_supported_video(h->in_file, 0))
+    h->do_video = 1;
+  
   if(h->do_video)
     {
     h->width     = quicktime_video_width(h->in_file, 0);
     h->height    = quicktime_video_height(h->in_file, 0);
     
-    h->timescale = lqt_video_time_scale(h->in_file, 0);
+    h->timescale      = lqt_video_time_scale(h->in_file, 0);
     h->frame_duration = lqt_frame_duration(h->in_file, 0, NULL);
     
     /* Codec info for encoding */
@@ -305,11 +309,13 @@ static int transcode_init(transcode_handle * h,
     lqt_destroy_codec_info(codec_info);
 
     h->num_video_frames = quicktime_video_length(h->in_file, 0);
-
+    h->video_duration = lqt_video_duration(h->in_file, 0);
     }
   /* Check for audio */
-  
-  h->do_audio = !!quicktime_audio_tracks(h->in_file);
+
+  if(quicktime_audio_tracks(h->in_file) &&
+     quicktime_supported_audio(h->in_file, 0))
+    h->do_audio = 1;
   
   if(h->do_audio)
     {
@@ -334,7 +340,7 @@ static int transcode_init(transcode_handle * h,
     lqt_destroy_codec_info(codec_info);
     
     /* Decide about audio frame size */
-#if 1
+#if 0
     if(h->do_video)
       {
       h->samples_per_frame = (int)(((double)h->frame_duration / (double)h->timescale)+0.5);
@@ -344,7 +350,25 @@ static int transcode_init(transcode_handle * h,
     else
       h->samples_per_frame = 4096;
 #else
-    h->samples_per_frame = 8192;
+
+    /* Ok, we must take care about the audio frame size.
+       The sample count, we pass to encode_audio() directly affects interleaving.
+       Too many audio chunks make decoding inefficient, too few make seeking
+       take longer becauuse many samples inside a chunk have to be skipped.
+       
+       On the other hand, having too many audio chunks also slows down seeking...
+
+       Ok, then lets just take half a second and see how it works :-)
+
+       On a 25 fps system this means, that one audio chunks comes after an average of
+       12.5 video frames. This is roughly what we see in files created with other
+       Software
+    */
+    
+    h->samples_per_frame = h->samplerate / 2;
+    /* Avoid too odd numbers */
+    h->samples_per_frame = 16 * ((h->samples_per_frame + 15) / 16);
+
 #endif
     /* Allocate output buffer */
 
@@ -395,6 +419,10 @@ static int transcode_iteration(transcode_handle * h)
   int num_samples;
   int do_audio = 0;
   float progress;
+  int64_t frame_time;
+
+  //  fprintf(stderr, "Transcode iteration\n");
+  
   if(h->do_audio && h->do_video)
     {
     audio_time = (float)(h->audio_samples_written)/(float)(h->samplerate);
@@ -414,26 +442,26 @@ static int transcode_iteration(transcode_handle * h)
 
   if(do_audio)
     {
-    /* Last frame needs special attention */
-    if(h->audio_samples_written + h->samples_per_frame >= h->num_audio_samples)
-      num_samples = h->num_audio_samples - h->audio_samples_written;
-    else
-      num_samples = h->samples_per_frame;
-
-    lqt_decode_audio(h->in_file, h->audio_buffer_i, h->audio_buffer_f, num_samples);
+    //    lqt_decode_audio(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame);
+    lqt_decode_audio_track(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame, 0);
+    num_samples = lqt_last_audio_position(h->in_file, 0) - h->audio_samples_written;
+    
     quicktime_encode_audio(h->out_file, h->audio_buffer_i, h->audio_buffer_f, num_samples);
     h->audio_samples_written += num_samples;
 
-    if(h->audio_samples_written >= h->num_audio_samples)
+    if(num_samples < h->samples_per_frame)
       h->do_audio = 0;
     progress = (float)(h->audio_samples_written)/(float)(h->num_audio_samples);
+
+    //    fprintf(stderr, "Audio iteration %lld %d %d\n", h->audio_samples_written, num_samples, h->samples_per_frame);
     }
   /* Video Iteration */
   else
     {
+    frame_time = lqt_frame_time(h->in_file, 0);
     lqt_decode_video(h->in_file, h->video_buffer, 0);
-    quicktime_encode_video(h->out_file, h->video_buffer, 0);
-
+    lqt_encode_video(h->out_file, h->video_buffer, 0, frame_time);
+    
     h->video_frames_written++;
     if(h->video_frames_written >= h->num_video_frames)
       h->do_video = 0;
@@ -446,6 +474,7 @@ static int transcode_iteration(transcode_handle * h)
 
   if(progress > h->progress)
     h->progress = progress;
+  //  fprintf(stderr, "Progress: %f\n", h->progress);
   return 1;
   }
 

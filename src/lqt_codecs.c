@@ -675,7 +675,6 @@ int lqt_decode_audio(quicktime_t *file,
 				float **poutput_f, 
 				long samples)
 {
-	int quicktime_track;
 	int result = 1;
 	int i = 0;
 	int16_t **output_i;
@@ -687,12 +686,12 @@ int lqt_decode_audio(quicktime_t *file,
         if(poutput_i)
           output_i = poutput_i;
         else
-          poutput_i = (int16_t**)0;
+          output_i = (int16_t**)0;
 
         if(poutput_f)
           output_f = poutput_f;
         else
-          poutput_f = (float**)0;
+          output_f = (float**)0;
         
 	for( i=0; i < total_tracks; i++ )
           {
@@ -703,14 +702,15 @@ int lqt_decode_audio(quicktime_t *file,
                                                                               output_i, 
                                                                               output_f, 
                                                                               samples, 
-                                                                              quicktime_track);
+                                                                              i);
           if(output_f)
             output_f += track_channels;
           if(output_i)
             output_i += track_channels;
+
+          file->atracks[i].current_position += samples;
           }
 
-        file->atracks[quicktime_track].current_position += samples;
 
 	return result;
 }

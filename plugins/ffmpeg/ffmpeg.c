@@ -32,7 +32,7 @@ static int set_parameter_video(quicktime_t *file,
                                void *value)
 {
 	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
-
+        //        fprintf(stderr, "set_parameter_video %s\n", key);
         
 #define INTPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \

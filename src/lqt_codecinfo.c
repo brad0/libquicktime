@@ -1645,7 +1645,7 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
         {
         copy_parameter_value(&(codec_info->decoding_parameters[i].val_default),
                              &(info_from_module->decoding_parameters[i].val_default),
-                             codec_info->encoding_parameters[i].type);
+                             codec_info->decoding_parameters[i].type);
 #ifndef NDEBUG
         //        fprintf(stderr, "Setting decoding parameter %s\n",
         //                codec_info->decoding_parameters[i].name);

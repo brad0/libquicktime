@@ -155,11 +155,12 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 	for(i = 0; i < file->moov.total_tracks; i++)
 	{
 		quicktime_trak_t *trak = file->moov.trak[i];
-		quicktime_strl_t *strl = hdrl->strl[i];
+		quicktime_strl_t *strl = trak->strl;
 
 		if(trak->mdia.minf.is_video)
 		{
 			int length;
+                        //                        fprintf(stderr, "Finalize video strl\n");
 			quicktime_set_position(file, strl->dwLengthOffset);
 			total_frames = length = quicktime_track_samples(file, trak);
 			quicktime_write_int32_le(file, length);
@@ -170,6 +171,14 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 		if(trak->mdia.minf.is_audio)
 		{
 			int length;
+#if 0
+                        fprintf(stderr, "Finalize audio strl %lld %lld %lld %lld\n",
+                                strl->dwLengthOffset,
+                                strl->dwScaleOffset,
+                                strl->dwSampleSizeOffset,
+                                strl->nAvgBytesPerSecOffset
+                                );
+#endif
 			quicktime_set_position(file, strl->dwLengthOffset);
 			length = quicktime_track_samples(file, trak);
 			quicktime_write_int32_le(file, length);

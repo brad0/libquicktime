@@ -733,7 +733,7 @@ static int encode(quicktime_t *file,
 	if(codec->chunk_started)
 	{
 		int new_encoded_samples = codec->enc_os.granulepos;
-#if 1
+#if 0
                 fprintf(stderr, "WRITING CHUNK: %lld %lld\n",
                         codec->enc_os.granulepos, codec->enc_vd.granulepos);
 #endif           

@@ -1656,6 +1656,8 @@ static void apply_default_parameters(quicktime_t * file,
   int num_parameters;
   lqt_parameter_info_t * parameter_info;
   int j;
+
+  //  fprintf(stderr, "APPLY CODEC INFO %s %d\n", codec_info->name, encode);
   
   if(encode)
     {
@@ -1700,18 +1702,15 @@ static void apply_default_parameters(quicktime_t * file,
 
 void lqt_set_default_video_parameters(quicktime_t * file, int track)
   {
-  int i;
   lqt_codec_info_t ** codec_info;
   quicktime_codec_t * codec;
-  for(i = 0; i < file->total_vtracks; i++)
+    
+  codec = (quicktime_codec_t*)(file->vtracks[track].codec);
+  codec_info = lqt_find_video_codec_by_name(codec->codec_name);
+  if(codec_info)
     {
-    codec = (quicktime_codec_t*)(file->vtracks[i].codec);
-    codec_info = lqt_find_video_codec_by_name(codec->codec_name);
-    if(codec_info)
-      {
-      apply_default_parameters(file, i, codec, *codec_info, file->wr);
-      lqt_destroy_codec_info(codec_info);
-      }
+    apply_default_parameters(file, track, codec, *codec_info, file->wr);
+    lqt_destroy_codec_info(codec_info);
     }
   }
 

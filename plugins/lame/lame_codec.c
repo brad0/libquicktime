@@ -348,7 +348,7 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
     if(codec->encoder_output_size)
       memmove(codec->encoder_output, chunk_ptr, codec->encoder_output_size);
     
-#if 1
+#if 0
     fprintf(stderr, "Encoded %d samples, %d bytes %d remaining\n",
             chunk_samples, chunk_bytes, codec->encoder_output_size);
 #endif   
