@@ -29,6 +29,10 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
+
 #include <quicktime/quicktime.h>
 #include <quicktime/colormodels.h>
 
@@ -45,13 +49,14 @@ static XPixmapFormatValues *pf;
 static Widget simple;
 static Dimension swidth,sheight;
 
-static int xv_port = 0;
+static int xv_port      = 0;
 static int xv_have_YUY2 = 0;
 static int xv_have_I420 = 0;
 
-static int no_mitshm = 0;
+static int no_mitshm    = 0;
 static int pixmap_bytes = 0;
 static int x11_byteswap = 0;
+static int use_gl       = 0;
 
 static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
@@ -381,6 +386,106 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 }
 
 /* ------------------------------------------------------------------------ */
+/* OpenGL code                                                              */
+
+static int tw,th;
+static GLint tex;
+static int gl_attrib[] = { GLX_RGBA,
+			   GLX_RED_SIZE, 1,
+			   GLX_GREEN_SIZE, 1,
+			   GLX_BLUE_SIZE, 1,
+			   GLX_DOUBLEBUFFER,
+			   None };
+
+static void gl_resize(Widget widget, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.0, width, 0.0, height);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+}
+
+static void gl_blit(Widget widget, char *rgbbuf,
+		    int iw, int ih, int ww, int wh)
+{
+    char *dummy;
+    float x,y;
+
+    if (0 == tex) {
+	glGenTextures(1,&tex);
+	glBindTexture(GL_TEXTURE_2D,tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	dummy = malloc(tw*th*3);
+	memset(dummy,128,tw*th*3);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,tw,th,0,
+		     GL_RGB,GL_UNSIGNED_BYTE,dummy);
+	free(dummy);
+    }
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0,0,iw,ih,
+		    GL_RGB,GL_UNSIGNED_BYTE,rgbbuf);
+    x = (float)iw/tw;
+    y = (float)ih/th;
+
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0,y);  glVertex3f(0,0,0);
+    glTexCoord2f(0,0);  glVertex3f(0,wh,0);
+    glTexCoord2f(x,0);  glVertex3f(ww,wh,0);
+    glTexCoord2f(x,y);  glVertex3f(ww,0,0);
+    glEnd();
+    glXSwapBuffers(XtDisplay(widget), XtWindow(widget));
+    glDisable(GL_TEXTURE_2D);
+}
+
+static void gl_init(Widget widget, int iw, int ih)
+{
+    XVisualInfo *visinfo;
+    GLXContext ctx;
+    int i = 0;
+
+    visinfo = glXChooseVisual(XtDisplay(widget),
+			      DefaultScreen(XtDisplay(widget)),
+			      gl_attrib);
+    if (!visinfo) {
+	fprintf(stderr,"WARNING: gl: can't get visual (rgb,db)\n");
+	return;
+    }
+    ctx = glXCreateContext(dpy, visinfo, NULL, True);
+    glXMakeCurrent(XtDisplay(widget),XtWindow(widget),ctx);
+    fprintf(stderr, "INFO: gl: DRI=%s\n",
+	    glXIsDirect(dpy, ctx) ? "Yes" : "No");
+    if (!glXIsDirect(dpy, ctx))
+	return;
+    
+    /* check against max size */
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE,&i);
+    fprintf(stderr,"INFO: gl: texture max size: %d\n",i);
+    if (iw > i)
+	return;
+    if (ih > i)
+	return;
+    
+    /* textures have power-of-two x,y dimensions */
+    for (i = 0; iw >= (1 << i); i++)
+	;
+    tw = (1 << i);
+    for (i = 0; ih >= (1 << i); i++)
+	;
+    th = (1 << i);
+    fprintf(stderr,"INFO: gl: frame=%dx%d, texture=%dx%d\n",iw,ih,tw,th);
+
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glShadeModel(GL_FLAT);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    use_gl = 1;
+}
+
+/* ------------------------------------------------------------------------ */
 /* oss code                                                                 */
 
 static int oss_fd = -1;
@@ -547,7 +652,8 @@ static int qt_frame_blit(void)
 	qt_gc = XCreateGC(dpy,XtWindow(simple),0,NULL);
 	switch (qt_cmodel) {
 	case BC_RGB888:
-	    fprintf(stderr,"INFO: using BC_RGB888 + plain X11\n");
+	    fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
+		    use_gl ? "OpenGL" : "plain X11");
 	    qt_ximage = x11_create_ximage(dpy,qt_width,qt_height);
 	    for (i = 0; i < qt_height; i++)
 		qt_rows[i] = qt_frame + qt_width * 3 * i;
@@ -585,15 +691,19 @@ static int qt_frame_blit(void)
 			    qt_cmodel,qt_rows,0);
     switch (qt_cmodel) {
     case BC_RGB888:
-	switch (pixmap_bytes) {
-	case 2:
-	    rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
-	    break;
-	case 4:
-	    rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
-	    break;
+	if (use_gl) {
+	    gl_blit(simple,qt_frame,qt_width,qt_height,swidth,sheight);
+	} else {
+	    switch (pixmap_bytes) {
+	    case 2:
+		rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
+		break;
+	    case 4:
+		rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
+		break;
+	    }
+	    x11_blit(XtWindow(simple),qt_gc,qt_ximage,qt_width,qt_height);
 	}
-	x11_blit(XtWindow(simple),qt_gc,qt_ximage,qt_width,qt_height);
 	break;
     case BC_YUV422:
     case BC_YUV420P:
@@ -696,6 +806,34 @@ static int qt_audio_write(void)
 /* ------------------------------------------------------------------------ */
 /* main                                                                     */
 
+struct ARGS {
+    int  xv;
+    int  gl;
+} args;
+
+XtResource args_desc[] = {
+    /* name, class, type, size, offset, default_type, default_addr */
+    {
+	/* Integer */
+	"xv",
+	XtCValue, XtRInt, sizeof(int),
+	XtOffset(struct ARGS*,xv),
+	XtRString, "1"
+    },{
+	"gl",
+	XtCValue, XtRInt, sizeof(int),
+	XtOffset(struct ARGS*,gl),
+	XtRString, "1"
+    }
+};
+const int args_count = XtNumber(args_desc);
+
+XrmOptionDescRec opt_desc[] = {
+    { "-noxv",  "xv", XrmoptionNoArg,  "0" },
+    { "-nogl",  "gl", XrmoptionNoArg,  "0" },
+};
+const int opt_count = (sizeof(opt_desc)/sizeof(XrmOptionDescRec));
+
 static void usage(FILE *fp, char *prog)
 {
     char *p;
@@ -706,14 +844,13 @@ static void usage(FILE *fp, char *prog)
 	    "\n"
 	    "Very simple quicktime movie player for X11.  Just playes\n"
 	    "the movie and nothing else.  No fancy gui, no controls.\n"
-	    "No command line switches beside the usual toolkit stuff\n"
-	    "like -geometry.  Some info will be printed on stderr.\n"
 	    "\n"
-	    "You can quit with 'Q' and 'ESC' keys.  You can resize the\n"
-	    "window.  When using Xvideo the later will even scale the\n"
-	    "video to fit the window.\n"
+	    "You can quit with 'Q' and 'ESC' keys.\n"
 	    "\n"
-	    "usage: %s <file>\n"
+	    "usage: %s [ options ] <file>\n"
+	    "options:\n"
+	    "  -noxv   don't use the Xvideo extention\n"
+	    "  -nogl   don't use OpenGL\n"
 	    "\n",
 	    prog);
 }
@@ -732,6 +869,8 @@ static void resize_ev(Widget widget, XtPointer client_data,
     case ConfigureNotify:
 	XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
 	fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
+	if (use_gl)
+	    gl_resize(widget,swidth,sheight);
 	break;
     }
 }
@@ -753,9 +892,12 @@ int main(int argc, char *argv[])
     struct timeval start,wait;
     
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
-				  NULL, 0,
+				  opt_desc, opt_count,
 				  &argc, argv,
 				  res, NULL);
+    XtGetApplicationResources(app_shell,&args,
+			      args_desc,args_count,
+			      NULL,0);
 
     /* open file */
     if (argc < 2) {
@@ -775,7 +917,8 @@ int main(int argc, char *argv[])
 				     NULL);
     XtAddEventHandler(simple,StructureNotifyMask, True, resize_ev, NULL);
     x11_init();
-    xv_init();
+    if (args.xv)
+	xv_init();
 
     /* use Xvideo? */
     if (xv_have_YUY2 && quicktime_reads_cmodel(qt,BC_YUV422,0))
@@ -783,8 +926,12 @@ int main(int argc, char *argv[])
     if (xv_have_I420 && quicktime_reads_cmodel(qt,BC_YUV420P,0))
 	qt_cmodel = BC_YUV420P;
 
-    /* enter main loop */
+    /* use OpenGL? */
     XtRealizeWidget(app_shell);
+    if (BC_RGB888 == qt_cmodel && args.gl)
+	gl_init(simple,qt_width,qt_height);
+
+    /* enter main loop */
     gettimeofday(&start,NULL);
     for (;;) {
 	int rc,max;
