@@ -50,4 +50,6 @@ lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
 
 INCLUDES = -I$(top_srcdir)/include @X_CFLAGS@
 
+EXTRA_DIST=lqtplay.1
+
 #CFLAGS += -g3 -Werror
