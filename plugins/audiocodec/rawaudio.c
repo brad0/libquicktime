@@ -10,59 +10,6 @@ typedef struct
 
 /* =================================== private for rawaudio */
 
-int rawaudio_byte_order(void)
-{                /* 1 if little endian */
-	int16_t byteordertest;
-	int byteorder;
-
-	byteordertest = 0x0001;
-	byteorder = *((unsigned char *)&byteordertest);
-	return byteorder;
-}
-
-int rawaudio_swap_bytes(char *buffer, long samples, int channels, int bits)
-{
-	long i;
-	char byte1, byte2, byte3;
-	char *buffer1, *buffer2, *buffer3;
-
-	if(!rawaudio_byte_order()) return 0;
-
-	switch(bits)
-	{
-		case 8:
-			break;
-
-		case 16:
-			buffer1 = buffer;
-			buffer2 = buffer + 1;
-			while(i < samples * 2)
-			{
-				byte1 = buffer2[i];
-				buffer2[i] = buffer1[i];
-				buffer1[i] = byte1;
-				i += 2;
-			}
-			break;
-
-		case 24:
-			buffer1 = buffer;
-			buffer2 = buffer + 2;
-			while(i < samples * 3)
-			{
-				byte1 = buffer2[i];
-				buffer2[i] = buffer1[i];
-				buffer1[i] = byte1;
-				i += 3;
-			}
-			break;
-
-		default:
-			break;
-	}
-	return 0;
-}
-
 static int get_work_buffer(quicktime_t *file, int track, long bytes)
 {
 	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
