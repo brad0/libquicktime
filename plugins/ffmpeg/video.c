@@ -469,7 +469,7 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
           case BC_BGR888:  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
             for(i = 0; i < height; i++)
               {
-              memcpy(&(row_pointers[i]),
+              memcpy(row_pointers[i],
                      &(codec->frame->data[0][i*codec->frame->linesize[0]]),
                      width*3);
               }

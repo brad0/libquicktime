@@ -420,10 +420,11 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 	{
 		if(!codec->temp_frame)
 		{
-			codec->temp_frame = malloc(cmodel_calculate_datasize(width, 
-					height, 
-					-1, 
-					cmodel));
+                codec->temp_frame = malloc(codec->bytes_per_line * height);
+                for(i = 0; i < height; i++)
+                  {
+                  codec->temp_rows[i] = codec->temp_frame + i * codec->bytes_per_line;
+                  }
 		}
                 rows = codec->temp_rows;
         }
