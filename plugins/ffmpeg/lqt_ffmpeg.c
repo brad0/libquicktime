@@ -182,7 +182,7 @@ int ffmpeg_num_video_codecs = -1;
           31 \
         }, \
         {\
-          "qdiff", \
+          "max_qdiff", \
           "max difference between the quantiser scale (VBR)", \
           LQT_PARAMETER_INT, \
           { 3 }, \

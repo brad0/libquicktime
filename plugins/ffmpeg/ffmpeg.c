@@ -36,18 +36,14 @@ static int set_parameter_video(quicktime_t *file,
         
 #define INTPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \
-          { \
           codec->com.params.x = (*(int *)value) * y; \
           return 0; \
-          } \
 	}
 
 #define FLOATPARM(x, y) \
 	if(!strcasecmp(key, #x)) { \
-          { \
           codec->com.params.x = (float)(*(int *)value) * y; \
           return 0; \
-          } \
 	}
 
 #define FLAGPARM(x, y) \
@@ -77,7 +73,8 @@ static int set_parameter_video(quicktime_t *file,
                         codec->com.params.sample_aspect_ratio.num = 16;
                         codec->com.params.sample_aspect_ratio.den = 9;
 		}
-	} else
+        return 0;
+	}
 
           
         /********************
@@ -104,6 +101,7 @@ static int set_parameter_video(quicktime_t *file,
             }
           else
             codec->com.params.flags &= ~CODEC_FLAG_QSCALE;
+          return 0;
           }
         INTPARM(qmin, 1)
 	INTPARM(qmax, 1)
