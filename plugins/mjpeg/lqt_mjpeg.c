@@ -1,10 +1,12 @@
 #include "../../lqt.h"
 #include "../../lqt_codecapi.h"
-#include "jpeg.h"
+
+void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
 
 /*
- *  We cheat here: Actually, this is one codec (from the code) but we tell the
- *  outer world, that we are 2 codecs
+ *  We cheat here: Actually, this is one codec but we tell the
+ *  outer world, that we are 2 codecs because mjpa and jpeg are
+ *  to different to be one codec with 2 fourccs
  */
 
 static char * fourccs_jpeg[]  = { QUICKTIME_JPEG };
@@ -82,3 +84,9 @@ extern lqt_codec_info_t * get_codec_info(int index)
   }
      
 
+extern lqt_init_video_codec_func_t get_video_codec(int index)
+  {
+  if((index == 0) || (index == 1))
+    return quicktime_init_codec_jpeg;
+  return (lqt_init_video_codec_func_t)0;
+  }
