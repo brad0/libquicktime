@@ -354,11 +354,10 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
   int index_supported;
   int i;
 
-  int conversion_price, best_conversion_price;
+  int conversion_price = 0, best_conversion_price = 10;
   int ret = LQT_COLORMODEL_NONE;
 
   lqt_codec_info_t ** codec_info = lqt_video_codec_from_file(file, track);
-
   
   index_supported = 0;
 
@@ -385,6 +384,8 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
     
     while(supported[index_supported] != LQT_COLORMODEL_NONE)
       {
+      fprintf(stderr, "Colormodel: %s\n",
+              lqt_colormodel_to_string(supported[index_supported]));
       if(quicktime_writes_cmodel(file, supported[index_supported], track))
         {
         for(i = 0; i < codec_info[0]->num_encoding_colormodels; i++)
@@ -407,8 +408,10 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
   lqt_destroy_codec_info(codec_info);
 
   if(ret == LQT_COLORMODEL_NONE)
+    {
     ret = BC_RGB888;
-  
+    fprintf(stderr, "lqt_get_best_colormodel_encode: Defaulting to BC_RGB888 %d\n", best_conversion_price);
+    }
   return ret;
   }
 
