@@ -754,7 +754,7 @@ echo "Disabled"
 fi
 
 
-echo -n "gtk-1.x.y   "
+echo -n "gtk >= 2.4.0: "
 if test x$have_gtk = "xtrue"; then
 echo "Yes"
 else
