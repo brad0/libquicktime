@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.4)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.5pre1)
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
@@ -266,16 +266,58 @@ dnl
 LAME_REQUIRED="3.93"
 have_lame="false"
 
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
+
 if test x$have_vorbis = xtrue; then
-    AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="true" ], [], [ -lm -lvorbis])
+LIBS="$LIBS -lmp3lame -lvorbis -lm"
 else
-    AC_CHECK_LIB(mp3lame, lame_decode_init,
-             [ have_lame="true" ], [], [ -lm ])
+LIBS="$LIBS -lmp3lame -lm"
 fi
 
-AM_CONDITIONAL(HAVE_LAME, test x$have_lame = x"true")
+CFLAGS="$CFLAGS"
+
+AC_MSG_CHECKING(for lame)
+have_lame="false"
+
+  AC_TRY_RUN([
+    #include <lame/lame.h>
+    #include <stdio.h>
+    main()
+    {
+    int version_major;
+    int version_minor;
+    const char * version;
+    version = get_lame_version();
+    fprintf(stderr, "lame version: %s\n", version);
+    if(sscanf(version, "%d.%d", &version_major,
+              &version_minor) < 2)
+      return -1;
+    if((version_major != 3) || (version_minor < 93))
+      return 1;
+    return 0;
+    }
+  ],
+  [
+    # program could be run
+    have_lame="true"
+    AC_MSG_RESULT(yes)
+    LAME_CFLAGS=$CFLAGS
+    LAME_LIBS=$LIBS
+
+  ],
+    # program could not be run
+    AC_MSG_RESULT(no)
+)
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+AC_SUBST(LAME_CFLAGS)
+AC_SUBST(LAME_LIBS)
 AC_SUBST(LAME_REQUIRED)
+
+AM_CONDITIONAL(HAVE_LAME, test x$have_lame = xtrue)
 
 dnl
 dnl Check for libjpeg
