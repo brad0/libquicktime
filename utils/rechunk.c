@@ -2,14 +2,64 @@
 #include <quicktime/quicktime.h>
 
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 
 int usage(void)
 {
-	printf("usage: qtrechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] <input frames> <output movie>\n");
-	printf("	Concatenate input frames into a Quicktime movie.\n");
+	printf("usage: qtrechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] [-l file_list | <input frames>] <output movie>\n");
+	printf("	Concatenate input frames into a Quicktime movie.\n\n");
+	printf("	-l <file_list> reads filenames of the frame from\n");
+        printf("           <file_list>, which must contain one filename per line\n");
 	exit(1);
 	return 0;
 }
+
+char ** add_frames_from_file(char ** input_frames,
+                             int * total_input_frames, char * list_filename)
+  {
+  FILE * input;
+  char * pos;
+  char filename[PATH_MAX+10];
+
+  input = fopen(list_filename, "r");
+  if(!input)
+    {
+    fprintf(stderr, "Cannot open %s: %s\n", list_filename, strerror(errno));
+    exit(1);
+    return (char**)0;
+    }
+
+  while(fgets(filename, PATH_MAX+10, input))
+    {
+    /* Delete trailing '\n' and '\r' */
+
+    pos = &(filename[strlen(filename)-1]);
+
+    while(1)
+      {
+      if(*pos == '\r')
+        *pos = '\0';
+      if(*pos == '\n')
+        *pos = '\0';
+      else
+        break;
+
+      if(pos == filename)
+        return input_frames;
+      
+      pos--;      
+      }
+
+    /* Add filename */
+
+    (*total_input_frames)++;
+    input_frames = realloc(input_frames, sizeof(char*) * *total_input_frames);
+    input_frames[*total_input_frames - 1] = strdup(filename);
+    //    fprintf(stderr, "Adding file %s\n", input_frames[*total_input_frames - 1]);
+    }
+  return input_frames;
+  }
 
 int main(int argc, char *argv[])
 {
@@ -80,6 +130,16 @@ int main(int argc, char *argv[])
 			output = argv[i];
 		}
 		else
+		if(!strcmp(argv[i], "-l"))
+		{
+			if(i + 1 < argc)
+                                input_frames =
+                                  add_frames_from_file(input_frames,
+                                                       &total_input_frames, argv[++i]);
+			else
+				usage();
+		}
+		else
 		{
 			total_input_frames++;
 			input_frames = realloc(input_frames, sizeof(char*) * total_input_frames);
@@ -102,7 +162,6 @@ int main(int argc, char *argv[])
 	
 	quicktime_set_video(file, 1, width, height, output_rate, compressor);
 	quicktime_set_depth(file, bit_depth, 0);
-	
 	for(i = 0; i < total_input_frames; i++)
 	{
 /* Get output file */
@@ -121,8 +180,19 @@ int main(int argc, char *argv[])
 		fread(data, bytes, 1, input);
 		quicktime_write_frame(file, data, bytes, 0);
 		fclose(input);
-	}
 
+                if(!(i % 10))
+                  {
+                  if(i)
+                    {
+                    for(j = 0; j < 17; j++)
+                      putchar(0x08);
+                    }
+                  printf("%6.2f%% Completed", 100.0 * (float)(i+1) / (float)(total_input_frames));
+                  fflush(stdout);
+                  }
+        }
+        printf("\n");
 	quicktime_close(file);
 
 	return 0;

@@ -50,62 +50,6 @@ ASFLAGS=
 AC_SUBST(AS)
 AC_SUBST(ASFLAGS)
 
-dnl Build CFLAGS
-
-COMMON_CFLAGS=" -finline-functions -Wall -Winline"
-PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
-DEBUG_CFLAGS=" -g3"
-
-dnl Optimizing flags
-
-OPTIMIZE_CFLAGS="-O3"
-
-AC_TRY_CFLAGS([-funroll-all-loops],   [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -funroll-all-loops"])
-AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-frame-pointer"])
-AC_TRY_CFLAGS([-falign-loops=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-loops=2"])
-AC_TRY_CFLAGS([-falign-jumps=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-jumps=2"])
-AC_TRY_CFLAGS([-falign-functions=2],  [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-functions=2"])
-
-# -Wno-unused-variable -Wno-unused-parameter
-# -std=gnu99 
-
-have_debug=false
-have_profile=false
-compile_mode="optimize"
-
-AH_TEMPLATE([NDEBUG],
-            [Causes debug code to e removed])
-
-AC_ARG_ENABLE(profile,
-    [  --enable-profile        Turn on profile ],
-     [case "${enableval}" in
-       yes) have_profile=true ;;
-       no) ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-profile) ;;
-     esac],[])
-
-AC_ARG_ENABLE(debug,
-    [  --enable-debug          Turn on debugging (turn off optimizations)],
-    [case "${enableval}" in
-       yes) have_debug=true ;;
-       no) ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-     esac],[])
-
-if test x$have_debug = xtrue; then
-compile_mode="debug"
-fi
-
-if test x$have_profile = xtrue; then
-compile_mode="profile"
-fi
-
-case $compile_mode in
-"optimize") CFLAGS="$OPTIMIZE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
-"debug") CFLAGS="$DEBUG_CFLAGS $COMMON_CFLAGS" ;;
-"profile") CFLAGS="$PROFILE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
-esac
-
 AC_SUBST(LIBS)
 
 AH_TEMPLATE([_GNU_SOURCE],
@@ -162,14 +106,6 @@ AC_CHECK_LIB(m, cos)
 
 AC_SEARCH_LIBS(pthread_create, [gthread pthread c_r])
 
-dnl Check for X11
-AC_PATH_XTRA
-AC_SUBST(X_CFLAGS)
-AC_SUBST(X_PRE_LIBS)
-AC_SUBST(X_EXTRA_LIBS)
-AC_SUBST(X_LIBS)
-AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
-
 AC_SUBST(LIBS)
 
 AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h soundcard.h stddef.h)
@@ -193,6 +129,92 @@ AC_HEADER_STDC
 dnl
 dnl Check for optional libraries
 dnl 
+
+dnl
+dnl Check for Vorbis
+dnl 
+
+VORBIS_REQUIRED="1.0"
+ 
+have_vorbis=false
+AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
+  
+XIPH_PATH_VORBIS(have_vorbis=true)
+AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
+  
+if test x$have_vorbis = xtrue; then
+AC_DEFINE(HAVE_VORBIS)
+fi
+ 
+AC_SUBST(VORBIS_REQUIRED)
+
+dnl
+dnl Check for lame
+dnl
+
+LAME_REQUIRED="3.93"
+have_lame="false"
+
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
+
+if test x$have_vorbis = xtrue; then
+LIBS="$LIBS -lmp3lame -lvorbis -lm"
+else
+LIBS="$LIBS -lmp3lame -lm"
+fi
+
+dnl CFLAGS="$CFLAGS"
+
+AC_MSG_CHECKING(for lame)
+have_lame="false"
+
+  AC_TRY_RUN([
+    #include <lame/lame.h>
+    #include <stdio.h>
+    main()
+    {
+    int version_major;
+    int version_minor;
+    const char * version;
+    version = get_lame_version();
+    fprintf(stderr, "lame version: %s\n", version);
+    if(sscanf(version, "%d.%d", &version_major,
+              &version_minor) < 2)
+      return -1;
+    if((version_major != 3) || (version_minor < 93))
+      return 1;
+    return 0;
+    }
+  ],
+  [
+    # program could be run
+    have_lame="true"
+    AC_MSG_RESULT(yes)
+    LAME_CFLAGS=$CFLAGS
+    LAME_LIBS=$LIBS
+
+  ],
+    # program could not be run
+    AC_MSG_RESULT(no)
+)
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+AC_SUBST(LAME_CFLAGS)
+AC_SUBST(LAME_LIBS)
+AC_SUBST(LAME_REQUIRED)
+
+AM_CONDITIONAL(HAVE_LAME, test x$have_lame = xtrue)
+
+dnl Check for X11
+AC_PATH_XTRA
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_PRE_LIBS)
+AC_SUBST(X_EXTRA_LIBS)
+AC_SUBST(X_LIBS)
+AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
 
 dnl
 dnl Check for Alsa
@@ -239,85 +261,6 @@ AC_SUBST(LIBDV_LIBS)
 AC_SUBST(LIBDV_CFLAGS)
 
 AM_CONDITIONAL(HAVE_LIBDV, test x$have_libdv = xtrue)
-
-
-dnl
-dnl Check for Vorbis
-dnl 
-
-VORBIS_REQUIRED="1.0"
- 
-have_vorbis=false
-AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
-  
-XIPH_PATH_VORBIS(have_vorbis=true)
-AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
-  
-if test x$have_vorbis = xtrue; then
-AC_DEFINE(HAVE_VORBIS)
-fi
- 
-AC_SUBST(VORBIS_REQUIRED)
-
-dnl
-dnl Check for lame
-dnl
-
-LAME_REQUIRED="3.93"
-have_lame="false"
-
-OLD_CFLAGS=$CFLAGS
-OLD_LIBS=$LIBS
-
-if test x$have_vorbis = xtrue; then
-LIBS="$LIBS -lmp3lame -lvorbis -lm"
-else
-LIBS="$LIBS -lmp3lame -lm"
-fi
-
-CFLAGS="$CFLAGS"
-
-AC_MSG_CHECKING(for lame)
-have_lame="false"
-
-  AC_TRY_RUN([
-    #include <lame/lame.h>
-    #include <stdio.h>
-    main()
-    {
-    int version_major;
-    int version_minor;
-    const char * version;
-    version = get_lame_version();
-    fprintf(stderr, "lame version: %s\n", version);
-    if(sscanf(version, "%d.%d", &version_major,
-              &version_minor) < 2)
-      return -1;
-    if((version_major != 3) || (version_minor < 93))
-      return 1;
-    return 0;
-    }
-  ],
-  [
-    # program could be run
-    have_lame="true"
-    AC_MSG_RESULT(yes)
-    LAME_CFLAGS=$CFLAGS
-    LAME_LIBS=$LIBS
-
-  ],
-    # program could not be run
-    AC_MSG_RESULT(no)
-)
-
-CFLAGS=$OLD_CFLAGS
-LIBS=$OLD_LIBS
-
-AC_SUBST(LAME_CFLAGS)
-AC_SUBST(LAME_LIBS)
-AC_SUBST(LAME_REQUIRED)
-
-AM_CONDITIONAL(HAVE_LAME, test x$have_lame = xtrue)
 
 dnl
 dnl Check for libjpeg
@@ -660,6 +603,62 @@ AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 PLUGIN_DIR=$plugin_dir
 AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
 AC_SUBST(PLUGIN_DIR)
+
+dnl Build CFLAGS
+
+COMMON_CFLAGS=" -finline-functions -Wall -Winline"
+PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
+DEBUG_CFLAGS=" -g3"
+
+dnl Optimizing flags
+
+OPTIMIZE_CFLAGS="-O3"
+
+AC_TRY_CFLAGS([-funroll-all-loops],   [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -funroll-all-loops"])
+AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-frame-pointer"])
+AC_TRY_CFLAGS([-falign-loops=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-loops=2"])
+AC_TRY_CFLAGS([-falign-jumps=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-jumps=2"])
+AC_TRY_CFLAGS([-falign-functions=2],  [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-functions=2"])
+
+# -Wno-unused-variable -Wno-unused-parameter
+# -std=gnu99 
+
+have_debug=false
+have_profile=false
+compile_mode="optimize"
+
+AH_TEMPLATE([NDEBUG],
+            [Causes debug code to e removed])
+
+AC_ARG_ENABLE(profile,
+    [  --enable-profile        Turn on profile ],
+     [case "${enableval}" in
+       yes) have_profile=true ;;
+       no) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-profile) ;;
+     esac],[])
+
+AC_ARG_ENABLE(debug,
+    [  --enable-debug          Turn on debugging (turn off optimizations)],
+    [case "${enableval}" in
+       yes) have_debug=true ;;
+       no) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
+     esac],[])
+
+if test x$have_debug = xtrue; then
+compile_mode="debug"
+fi
+
+if test x$have_profile = xtrue; then
+compile_mode="profile"
+fi
+
+case $compile_mode in
+"optimize") CFLAGS="$OPTIMIZE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
+"debug") CFLAGS="$DEBUG_CFLAGS $COMMON_CFLAGS" ;;
+"profile") CFLAGS="$PROFILE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
+esac
 
 # -L is required so that linker can find libquicktime when DESTDIR is used.
 # libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
