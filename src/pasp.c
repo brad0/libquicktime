@@ -1,5 +1,5 @@
 /*
- * $Id: pasp.c,v 1.3 2004/12/05 12:47:39 gmerlin Exp $
+ * $Id: pasp.c,v 1.4 2005/05/05 18:50:37 gmerlin Exp $
  *
  * init, read, write handler for the "pasp" (Pixel Aspect) atom
 */
@@ -59,8 +59,56 @@ int lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp)
 	if	((track < 0) || (track >= file->total_vtracks))
 		return 0;
 
-	trk_pasp = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
+	trk_pasp =
+          &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
 	pasp->hSpacing = trk_pasp->hSpacing;
 	pasp->vSpacing = trk_pasp->vSpacing;
 	return 1;
+}
+
+int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
+                         int * pixel_height)
+{
+	quicktime_pasp_t *pasp;
+
+	if	((track < 0) || (track >= file->total_vtracks))
+		return 0;
+
+	pasp =
+          &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
+        if(pasp->hSpacing)
+          {
+          *pixel_width  = pasp->hSpacing;
+          *pixel_height = pasp->vSpacing;
+          }
+        else /* Assume square pixels */
+          {
+          *pixel_width  = 1;
+          *pixel_height = 1;
+          }
+        return 1;
+}
+
+int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
+                         int pixel_height)
+{
+	quicktime_pasp_t *pasp;
+
+	if	((track < 0) || (track >= file->total_vtracks))
+		return 0;
+
+	pasp =
+          &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
+        if(pixel_width == pixel_height) /* Don't write pasp atom */
+          {
+          pasp->hSpacing = 0;
+          pasp->vSpacing = 0;
+          }
+        else
+          {
+          pasp->hSpacing = pixel_width;
+          pasp->vSpacing = pixel_height;
+          }
+        
+        return 1;
 }
