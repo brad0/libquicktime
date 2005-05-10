@@ -79,7 +79,7 @@ while test $# -gt 0; do
           includes=-I@includedir@
       fi
       if test x$old_include_names = xyes; then
-	the_cflags="$includes -I@includedir@/quicktime $the_cflags"
+	the_cflags="$includes -I@includedir@/lqt $the_cflags"
       else
 	the_cflags="$includes $the_cflags"
       fi
