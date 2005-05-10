@@ -1,5 +1,3 @@
-libquicktimeincludedir = $(includedir)/quicktime
-
 pkglib_LTLIBRARIES = lqt_lame.la
 
 lqt_lame_la_SOURCES = \

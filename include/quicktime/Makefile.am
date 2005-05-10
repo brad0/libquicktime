@@ -1,4 +1,4 @@
-libquicktimeincludedir = $(includedir)/quicktime
+libquicktimeincludedir = $(includedir)/lqt
 
 libquicktimeinclude_HEADERS = \
 quicktime.h \
