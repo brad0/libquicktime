@@ -235,6 +235,15 @@ fi
 ALSA_CFLAGS="$ALSA_CFLAGS"
 AC_SUBST(ALSA_CFLAGS)
 
+# NetBSD 2.0 (for whatever reason) moved the audio routines to a new place
+AH_TEMPLATE([HAVE_LIBOSSAUDIO], [Have -lossaudio for NetBSD 2.x?])
+AC_CHECK_LIB(ossaudio, _oss_ioctl)
+if test x$have_libossaudio = xtrue; then
+AC_DEFINE(HAVE_LIBOSSAUDIO,1)
+OSSAUDIO_LIBS=-lossaudio
+AC_SUBST(OSSAUDIO_LIBS)
+fi
+
 dnl
 dnl Check for gtk
 dnl This is neccesary for the utils/gtk subdirectory
