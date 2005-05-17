@@ -176,17 +176,17 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB161616:      \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_RGB161616((uint16_t**)(output), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+                                        transfer_YUV422P_to_RGB161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616:      \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_RGBA16161616((uint16_t**)(output), \
-						input_y + (y_in_offset), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+                                                transfer_YUV422P_to_RGBA16161616((output), \
+                                                input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
@@ -208,16 +208,16 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUV161616: \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_YUV161616((uint16_t**)(output), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+                                        transfer_YUV422P_to_YUV161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUVA16161616: \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_YUVA16161616((uint16_t**)(output), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+					transfer_YUV422P_to_YUVA16161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -302,16 +302,16 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB161616:      \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_RGB161616((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGB161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616:      \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_RGBA16161616((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGBA16161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -334,16 +334,16 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUV161616: \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_YUV161616((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+                                          transfer_YUV422P_to_YUV161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUVA16161616: \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_YUVA16161616((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+					transfer_YUV422P_to_YUVA16161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -501,16 +501,16 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB161616:      \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_RGB161616((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGB161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616:      \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_RGBA16161616((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGBA16161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -533,16 +533,16 @@
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUV161616: \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_YUV161616((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_YUV161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUVA16161616: \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_YUVA16161616((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_YUVA16161616((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \

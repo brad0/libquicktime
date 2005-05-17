@@ -3842,6 +3842,15 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_FRAME_HEAD_16 \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t*)(output_rows[i + out_y] + out_x * out_pixelsize); \
+		unsigned char *input_row = input_rows[row_table[i]]; \
+		for(j = 0; j < out_w; j++) \
+		{
+
+
 
 #define TRANSFER_FRAME_TAIL \
 		} \
@@ -3887,6 +3896,16 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_YUV420P_IN_HEAD_16 \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t*)(output_rows[i + out_y] + out_x * out_pixelsize); \
+		unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
+		unsigned char *input_u = in_u_plane + (row_table[i] / 2) * (total_in_w / 2); \
+		unsigned char *input_v = in_v_plane + (row_table[i] / 2) * (total_in_w / 2); \
+		for(j = 0; j < out_w; j++) \
+		{
+
 
 #define TRANSFER_YUV422P_IN_HEAD \
 	for(i = 0; i < out_h; i++) \
@@ -3898,10 +3917,30 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_YUV422P_IN_HEAD_16   \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t *)(output_rows[i + out_y] + out_x * out_pixelsize); \
+		unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
+		unsigned char *input_u = in_u_plane + row_table[i] * (total_in_w / 2); \
+		unsigned char *input_v = in_v_plane + row_table[i] * (total_in_w / 2); \
+		for(j = 0; j < out_w; j++) \
+		{
+
 #define TRANSFER_YUV444P_IN_HEAD \
 	for(i = 0; i < out_h; i++) \
 	{ \
 		unsigned char *output_row = output_rows[i + out_y] + out_x * out_pixelsize; \
+		unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
+		unsigned char *input_u = in_u_plane + row_table[i] * total_in_w; \
+		unsigned char *input_v = in_v_plane + row_table[i] * total_in_w; \
+		for(j = 0; j < out_w; j++) \
+		{
+
+#define TRANSFER_YUV444P_IN_HEAD_16   \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t *)(output_rows[i + out_y] + out_x * out_pixelsize); \
 		unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
 		unsigned char *input_u = in_u_plane + row_table[i] * total_in_w; \
 		unsigned char *input_v = in_v_plane + row_table[i] * total_in_w; \
@@ -3961,4 +4000,5 @@ static inline void transfer_YUV422_to_YUV422(unsigned char *(*output),
 void cmodel_yuv420p(PERMUTATION_ARGS);
 void cmodel_yuv422p(PERMUTATION_ARGS);
 void cmodel_yuv444p(PERMUTATION_ARGS);
+void cmodel_yuv422(PERMUTATION_ARGS);
 void cmodel_default(PERMUTATION_ARGS);

@@ -649,7 +649,7 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
                             int track)
   {
   int samples_decoded;
-  int result = 0;
+  //  int result = 0;
   int64_t chunk_sample; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;

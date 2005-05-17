@@ -66,23 +66,23 @@
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_RGB161616:      \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_RGB161616((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+			transfer_YUV422_to_RGB161616((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_RGBA16161616:      \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_RGBA16161616((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+			transfer_YUV422_to_RGBA16161616((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_YUV161616:      \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_YUV161616((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+			transfer_YUV422_to_YUV161616((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_YUVA16161616:      \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_YUVA16161616((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+			transfer_YUV422_to_YUVA16161616((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_BGR888:      \
