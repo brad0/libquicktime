@@ -23,7 +23,7 @@ static char * fourccs_v410[] = { QUICKTIME_YUV444_10bit , (char*)0 };
 
 static char * fourccs_yuv2[] = { QUICKTIME_YUV422 ,       (char*)0 };
 
-static char * fourccs_2vuy[] = { "2vuy"           ,       (char*)0 };
+static char * fourccs_2vuy[] = { QUICKTIME_2VUY ,         (char*)0 };
 
 static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 

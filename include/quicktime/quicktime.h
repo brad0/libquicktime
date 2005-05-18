@@ -49,8 +49,10 @@ extern "C" {
 #define QUICKTIME_YUV420  "yv12"
 /* 8 bit Planar YUV 4:1:1 */
 #define QUICKTIME_YUV411  "y411"
-/* 8 bit Packed YUV 4:2:2 */
+/* 8 bit Packed full-range (not video) YUV 4:2:2 */
 #define QUICKTIME_YUV422 "yuv2"
+/* 8 bit Packed YUV (video range) 4:2:2 */
+#define QUICKTIME_2VUY "2vuy"
 /* 8 bit Planar YUV 4:4:4 */
 #define QUICKTIME_YUV444  "v308"
 /* 8 bit Planar YUVA 4:4:4:4 */

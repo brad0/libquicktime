@@ -335,7 +335,7 @@ void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack)
 	codec_base->encode_audio = 0;
 	codec_base->reads_colormodel = reads_colormodel;
 	codec_base->writes_colormodel = writes_colormodel;
-	codec_base->fourcc = "2vuy";
+	codec_base->fourcc = QUICKTIME_2VUY;
 	codec_base->title = "Component Video";
 	codec_base->desc = "YUV 4:2:2";
         codec = (quicktime_yuv2_codec_t *)(codec_base->priv);
