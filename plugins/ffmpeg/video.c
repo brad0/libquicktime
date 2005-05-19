@@ -742,9 +742,14 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
 	if(!codec->com.init_enc) {
                 codec->com.ffcodec_enc = avcodec_alloc_context();
                 codec->frame = avcodec_alloc_frame();
+#if LIBAVCODEC_BUILD >= 4754
+                codec->com.ffcodec_enc->time_base.den = lqt_video_time_scale(file, track);
+                codec->com.ffcodec_enc->time_base.num = lqt_frame_duration(file, track, NULL);
+#else
 		codec->com.ffcodec_enc->frame_rate =
                   (int)(quicktime_frame_rate(file, track) * (float)DEFAULT_FRAME_RATE_BASE);
                 codec->com.ffcodec_enc->frame_rate_base = DEFAULT_FRAME_RATE_BASE;
+#endif
 		codec->com.ffcodec_enc->width = width;
 		codec->com.ffcodec_enc->height = height;
 
