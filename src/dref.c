@@ -31,7 +31,7 @@ void quicktime_read_dref_table(quicktime_t *file, quicktime_dref_table_t *table)
 
 	table->data_reference = malloc(table->size);
 	if(table->size > 12)
-		quicktime_read_data(file, table->data_reference, table->size - 12);
+          quicktime_read_data(file, (uint8_t*)(table->data_reference), table->size - 12);
 	table->data_reference[table->size - 12] = 0;
 }
 
@@ -43,7 +43,7 @@ void quicktime_write_dref_table(quicktime_t *file, quicktime_dref_table_t *table
 	quicktime_write_char(file, table->version);
 	quicktime_write_int24(file, table->flags);
 	if(len)
-		quicktime_write_data(file, table->data_reference, len);
+          quicktime_write_data(file, (uint8_t*)(table->data_reference), len);
 }
 
 void quicktime_dref_table_dump(quicktime_dref_table_t *table)

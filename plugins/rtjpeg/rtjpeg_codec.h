@@ -35,7 +35,7 @@ typedef struct
 	RTjpeg_t * compress_struct;
 	unsigned char * encode_frame;
 	unsigned char * encode_rows[3];
-	unsigned char * write_buffer;
+	uint8_t * write_buffer;
 	int Q;
 	int K;
 	int LQ;
@@ -45,7 +45,7 @@ typedef struct
 	RTjpeg_t * decompress_struct;
 	unsigned char * decode_frame;
 	unsigned char * decode_rows[3];
-	unsigned char * read_buffer;
+	uint8_t * read_buffer;
 	int read_buffer_size;
         int jpeg_width;
         int jpeg_height;

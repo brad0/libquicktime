@@ -32,7 +32,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 {
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
-	quicktime_read_data(file, table->vendor, 4);
+	quicktime_read_data(file, (uint8_t*)(table->vendor), 4);
 	table->channels = quicktime_read_int16(file);
 	table->sample_size = quicktime_read_int16(file);
 	table->compression_id = quicktime_read_int16(file);
@@ -48,7 +48,7 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
 {
 	quicktime_write_int16(file, table->version);
 	quicktime_write_int16(file, table->revision);
-	quicktime_write_data(file, table->vendor, 4);
+	quicktime_write_data(file, (uint8_t*)(table->vendor), 4);
 	quicktime_write_int16(file, table->channels);
 	quicktime_write_int16(file, table->sample_size);
 	quicktime_write_int16(file, table->compression_id);
@@ -80,7 +80,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
         
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
-	quicktime_read_data(file, table->vendor, 4);
+	quicktime_read_data(file, (uint8_t*)table->vendor, 4);
 	table->temporal_quality = quicktime_read_int32(file);
 	table->spatial_quality = quicktime_read_int32(file);
 	table->width = quicktime_read_int16(file);
@@ -90,7 +90,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->data_size = quicktime_read_int32(file);
 	table->frames_per_sample = quicktime_read_int16(file);
 	len = quicktime_read_char(file);
-	quicktime_read_data(file, table->compressor_name, 31);
+	quicktime_read_data(file, (uint8_t*)table->compressor_name, 31);
 	table->depth = quicktime_read_int16(file);
 	table->ctab_id = quicktime_read_int16(file);
 
@@ -159,7 +159,7 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 {
 	quicktime_write_int16(file, table->version);
 	quicktime_write_int16(file, table->revision);
-	quicktime_write_data(file, table->vendor, 4);
+	quicktime_write_data(file, (uint8_t*)table->vendor, 4);
 	quicktime_write_int32(file, table->temporal_quality);
 	quicktime_write_int32(file, table->spatial_quality);
 	quicktime_write_int16(file, table->width);
@@ -169,7 +169,7 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 	quicktime_write_int32(file, table->data_size);
 	quicktime_write_int16(file, table->frames_per_sample);
 	quicktime_write_char(file, strlen(table->compressor_name));
-	quicktime_write_data(file, table->compressor_name, 31);
+	quicktime_write_data(file, (uint8_t*)table->compressor_name, 31);
 	quicktime_write_int16(file, table->depth);
 	quicktime_write_int16(file, table->ctab_id);
 

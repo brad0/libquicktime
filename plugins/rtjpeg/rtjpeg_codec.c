@@ -94,7 +94,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	result = !quicktime_read_data(file, codec->read_buffer, buffer_size);
 	if(buffer_size > 0) {
 		if(!result)
-			RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->decode_rows);
+                  RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->decode_rows);
 	}
         file_rowspan = file->vtracks[track].row_span ? file->vtracks[track].row_span : file->out_w;
 	if(use_temp) {

@@ -6,15 +6,15 @@
 
 /* Atom IDs */
 
-static unsigned char copyright_id[] = { 0xa9, 'c', 'p', 'y' };
-static unsigned char info_id[]      = { 0xa9, 'i', 'n', 'f' };
-static unsigned char name_id[]      = { 0xa9, 'n', 'a', 'm' };
-static unsigned char artist_id[]    = { 0xa9, 'A', 'R', 'T' };
-static unsigned char album_id[]     = { 0xa9, 'a', 'l', 'b' };
-static unsigned char track_id[]     = { 0xa9, 't', 'r', 'k' };
-static unsigned char comment_id[]   = { 0xa9, 'c', 'm', 't' };
-static unsigned char author_id[]    = { 0xa9, 'a', 'u', 't' };
-static unsigned char genre_id[]     = { 0xa9, 'g', 'e', 'n' };
+static char copyright_id[] = { 0xa9, 'c', 'p', 'y' };
+static char info_id[]      = { 0xa9, 'i', 'n', 'f' };
+static char name_id[]      = { 0xa9, 'n', 'a', 'm' };
+static char artist_id[]    = { 0xa9, 'A', 'R', 'T' };
+static char album_id[]     = { 0xa9, 'a', 'l', 'b' };
+static char track_id[]     = { 0xa9, 't', 'r', 'k' };
+static char comment_id[]   = { 0xa9, 'c', 'm', 't' };
+static char author_id[]    = { 0xa9, 'a', 'u', 't' };
+static char genre_id[]     = { 0xa9, 'g', 'e', 'n' };
 
 int quicktime_udta_init(quicktime_udta_t *udta)
 {
@@ -99,7 +99,7 @@ int quicktime_read_udta_string(quicktime_t *file, char **string, int *size)
 	*size = quicktime_read_int16(file);  /* Size of string */
 	quicktime_read_int16(file);  /* Discard language code */
 	*string = malloc(*size + 1);
-	result = quicktime_read_data(file, *string, *size);
+	result = quicktime_read_data(file, (uint8_t*)(*string), *size);
 	(*string)[*size] = 0;
 	return !result;
 }
@@ -110,7 +110,7 @@ int quicktime_write_udta_string(quicktime_t *file, char *string, int size)
 	int result;
 	quicktime_write_int16(file, new_size);    /* String size */
 	quicktime_write_int16(file, 0);    /* Language code */
-	result = quicktime_write_data(file, string, new_size);
+	result = quicktime_write_data(file, (uint8_t*)string, new_size);
 	return !result;
 }
 

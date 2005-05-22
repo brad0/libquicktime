@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	int i, j;
 	int64_t length;
 	char string[1024], *prefix = 0, *input = 0;
-	char *data = 0;
+	uint8_t *data = 0;
 	int bytes = 0, old_bytes = 0;
 	float output_rate = 0;
 	float input_rate;

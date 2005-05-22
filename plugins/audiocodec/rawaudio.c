@@ -10,7 +10,7 @@
 
 typedef struct
 {
-	char *work_buffer;
+	uint8_t *work_buffer;
 	long buffer_size;
 
 /* Decode specific stuff */

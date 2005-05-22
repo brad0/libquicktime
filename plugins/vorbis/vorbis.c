@@ -23,7 +23,7 @@ typedef struct
 	int encode_initialized;
 	ogg_stream_state enc_os;
 	ogg_page enc_og;
-        char * enc_header;
+        uint8_t * enc_header;
         int enc_header_len;
         int header_written;
 
@@ -131,7 +131,7 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 static int next_chunk(quicktime_t * file, int track)
   {
   int chunk_size;
-  uint8_t * buffer;
+  char * buffer;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 

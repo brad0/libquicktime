@@ -43,7 +43,7 @@ void quicktime_finalize_movi(quicktime_t *file, quicktime_movi_t *movi)
 {
 //	int i;
 // Pad movi to get an even number of bytes
-	char temp[2] = { 0, 0 };
+	uint8_t temp[2] = { 0, 0 };
 	quicktime_write_data(file, 
 		temp, 
 		(quicktime_position(file) - movi->atom.start) % 2);

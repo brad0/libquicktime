@@ -233,8 +233,10 @@ static void x11_init(void)
 static void xv_init(void)
 {
     int cmodel_index;
-    int ver, rel, req, ev, err, i;
-    int adaptors, formats;
+    unsigned int ver, rel, req, ev, err;
+    int i;
+    unsigned int adaptors;
+    int formats;
     XvAdaptorInfo        *ai;
     XvImageFormatValues  *fo;
     
@@ -304,7 +306,7 @@ static XImage*
 x11_create_ximage(Display *dpy, int width, int height)
 {
     XImage          *ximage = NULL;
-    unsigned char   *ximage_data;
+    char   *ximage_data;
     XShmSegmentInfo *shminfo = NULL;
     void            *old_handler;
     
@@ -370,7 +372,7 @@ static XvImage*
 xv_create_ximage(Display *dpy, int width, int height, int port, int format)
 {
     XvImage         *xvimage = NULL;
-    unsigned char   *ximage_data;
+    char   *ximage_data;
     XShmSegmentInfo *shminfo = NULL;
     void            *old_handler;
     
@@ -448,7 +450,7 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 /* OpenGL code                                                              */
 #ifdef USE_GL
 static int gl_texture_width,gl_texture_height;
-static GLint gl_texture;
+static GLuint gl_texture;
 static int gl_attrib[] = { GLX_RGBA,
                            GLX_RED_SIZE, 8,
                            GLX_GREEN_SIZE, 8,
@@ -468,7 +470,7 @@ static void gl_resize(Widget widget, int width, int height)
 
 }
 
-static void gl_blit(Widget widget, char *rgbbuf,
+static void gl_blit(Widget widget, uint8_t *rgbbuf,
 		    int iw, int ih, int ww, int wh)
 {
     char *dummy;
@@ -585,7 +587,7 @@ static snd_pcm_t *pcm_handle;
 /* the hardware and can be used to specify the  */
 /* configuration to be used for the PCM stream. */
 static snd_pcm_hw_params_t *hwparams;
-snd_pcm_sframes_t buffer_size;
+snd_pcm_uframes_t buffer_size;
 
 #else
 
@@ -600,7 +602,7 @@ static int alsa_init(char *dev, int channels, int rate)
     int dir;
     //    int exact_param;   /* parameter returned by          */
                        /* snd_pcm_hw_params_set_*_near   */ 
-    int tmprate;
+    unsigned int tmprate;
     int err = 0;
     tmprate = rate;
     oss_hr = rate;
@@ -952,7 +954,7 @@ static int qt_init_video(void)
 	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 					  xv_port,FOURCC_YUV2);
 	    for (i = 0; i < qt_height; i++)
-		qt_rows[i] = qt_xvimage->data + qt_width * 2 * i;
+              qt_rows[i] = (uint8_t*)(qt_xvimage->data + qt_width * 2 * i);
 
             lqt_set_row_span(qt,0,qt_xvimage->pitches[0]);
             
@@ -964,9 +966,9 @@ static int qt_init_video(void)
                       "INFO: using BC_YUV420P + Xvideo extention (YV12)\n");
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
               xv_port,FOURCC_YV12);
-              qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
-              qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[2];
-              qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[1];
+              qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
+              qt_rows[1] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[2]);
+              qt_rows[2] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[1]);
               }
 	    else if(xv_have_I420)
               {
@@ -974,9 +976,9 @@ static int qt_init_video(void)
                       "INFO: using BC_YUV420P + Xvideo extention (I420)\n");
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 	                                    xv_port,FOURCC_I420);
-	      qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
-	      qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[1];
-	      qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[2];
+	      qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
+	      qt_rows[1] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[1]);
+	      qt_rows[2] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[2]);
 	      }
             lqt_set_row_span(qt,0,qt_xvimage->pitches[0]);
             lqt_set_row_span_uv(qt,0,qt_xvimage->pitches[1]);
@@ -1024,10 +1026,10 @@ static int qt_frame_blit(void)
         {
 	    switch (pixmap_bytes) {
 	    case 2:
-		rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
+              rgb_to_lut2((uint8_t*)(qt_ximage->data),qt_frame,qt_width*qt_height);
 		break;
 	    case 4:
-		rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
+              rgb_to_lut4((uint8_t*)(qt_ximage->data),qt_frame,qt_width*qt_height);
 		break;
 	    }
 	    x11_blit(XtWindow(simple),qt_gc,qt_ximage,qt_width,qt_height);

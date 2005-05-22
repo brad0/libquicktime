@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	FILE *input;
 	int i, j;
 	char *output = 0;
-	char *data = 0;
+	uint8_t *data = 0;
 	int bytes = 0;
 	float output_rate = 0;
 	char **input_frames = 0;

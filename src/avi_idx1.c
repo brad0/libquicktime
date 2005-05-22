@@ -52,7 +52,7 @@ void quicktime_read_idx1(quicktime_t *file,
 	{
 		quicktime_idx1table_t *idx1table = idx1->table + i;
 
-		quicktime_read_data(file, idx1table->tag, 4);
+		quicktime_read_data(file, (uint8_t*)(idx1table->tag), 4);
 		idx1table->flags = quicktime_read_int32_le(file);
 		idx1table->offset = quicktime_read_int32_le(file);
 		idx1table->size = quicktime_read_int32_le(file);

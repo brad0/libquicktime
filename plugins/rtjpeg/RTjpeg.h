@@ -105,9 +105,11 @@ extern int RTjpeg_set_format(RTjpeg_t *rtj, int *format);
 extern int RTjpeg_set_size(RTjpeg_t *rtj, int *w, int *h);
 extern int RTjpeg_set_intra(RTjpeg_t *rtj, int *key, int *lm, int *cm);
 
-extern int RTjpeg_compress(RTjpeg_t *rtj, int8_t *sp, uint8_t **planes);
-extern int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp);
-extern void RTjpeg_decompress(RTjpeg_t *rtj, int8_t *sp, uint8_t **planes);
+extern int RTjpeg_compress(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes);
+
+// Not used externally 
+// extern int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp);
+extern void RTjpeg_decompress(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes);
 
 void RTjpeg_yuv420rgb32(RTjpeg_t *rtj, uint8_t **planes, uint8_t **rows);
 void RTjpeg_yuv420bgr32(RTjpeg_t *rtj, uint8_t **planes, uint8_t **rows);

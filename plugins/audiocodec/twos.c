@@ -16,7 +16,7 @@
 
 typedef struct
 {
-	char *work_buffer;
+	uint8_t *work_buffer;
 	long buffer_size;
         int le; /* For 8 bits means unsigned operation, for more bits, little endian */
         int encode_initialized;
@@ -86,11 +86,11 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 	return 0;
 }
 
-static int swap_bytes(char *buffer, long samples, int bits)
+static int swap_bytes(uint8_t *buffer, long samples, int bits)
 {
 	long i = 0;
 	char byte1;
-	char *buffer1, *buffer2;
+	uint8_t *buffer1, *buffer2;
 
 	switch(bits)
 	{

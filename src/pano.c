@@ -82,9 +82,9 @@ int quicktime_read_pano(quicktime_t *file, quicktime_pano_t *pano, quicktime_ato
 
        pano->STrack = quicktime_read_int32(file);
        pano->LowResSTrack = quicktime_read_int32(file);
-       quicktime_read_data(file, (char *)pano->reserved3,  4 * 6);
+       quicktime_read_data(file, (uint8_t *)pano->reserved3,  4 * 6);
        pano->HSTrack = quicktime_read_int32(file);
-       quicktime_read_data(file, (char *)pano->reserved4, 4 * 9);
+       quicktime_read_data(file, (uint8_t *)pano->reserved4, 4 * 9);
 
        pano->HPanStart = quicktime_read_fixed32(file);
        pano->HPanEnd = quicktime_read_fixed32(file);
@@ -123,9 +123,9 @@ void quicktime_write_pano(quicktime_t *file, quicktime_pano_t *pano)
 
        quicktime_write_int32(file, pano->STrack);
        quicktime_write_int32(file, pano->LowResSTrack);
-       quicktime_write_data(file, (char *)pano->reserved3, 4 * 6);
+       quicktime_write_data(file, (uint8_t *)pano->reserved3, 4 * 6);
        quicktime_write_int32(file, pano->HSTrack);
-       quicktime_write_data(file, (char *)pano->reserved4, 4 * 9);
+       quicktime_write_data(file, (uint8_t *)pano->reserved4, 4 * 9);
 
        quicktime_write_fixed32(file, pano->HPanStart);
        quicktime_write_fixed32(file, pano->HPanEnd);

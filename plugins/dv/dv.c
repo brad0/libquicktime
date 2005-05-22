@@ -88,7 +88,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-	result = !quicktime_read_data(file, (char*)codec->data, bytes);
+	result = !quicktime_read_data(file, codec->data, bytes);
 
 	if( codec->dv_decoder && codec->parameters_changed )
 	{

@@ -95,7 +95,7 @@ int quicktime_fseek(quicktime_t *file, int64_t offset)
 }
 
 /* Read entire buffer from the preload buffer */
-static int read_preload(quicktime_t *file, char *data, int64_t size)
+static int read_preload(quicktime_t *file, uint8_t *data, int64_t size)
 {
 	int64_t selection_start = 0;
 	int64_t selection_end = 0;
@@ -125,7 +125,7 @@ static int read_preload(quicktime_t *file, char *data, int64_t size)
 	return 0;
 }
 
-int quicktime_read_data(quicktime_t *file, char *data, int64_t size)
+int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
 {
 	int result = 1;
 	if(!file->preload_size)
@@ -212,7 +212,7 @@ printf("read data Size is larger than preload size. size=%llx preload_size=%llx\
 	return result;
 }
 
-int quicktime_write_data(quicktime_t *file, char *data, int size)
+int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
 {
         int data_offset = 0;
         int writes_attempted = 0;
@@ -287,21 +287,21 @@ int64_t quicktime_byte_position(quicktime_t *file)
 void quicktime_read_pascal(quicktime_t *file, char *data)
 {
 	char len = quicktime_read_char(file);
-	quicktime_read_data(file, data, len);
+	quicktime_read_data(file, (uint8_t*)data, len);
 	data[(int)len] = 0;
 }
 
 void quicktime_write_pascal(quicktime_t *file, char *data)
 {
-	char len = strlen(data);
+	uint8_t len = strlen(data);
 	quicktime_write_data(file, &len, 1);
-	quicktime_write_data(file, data, len);
+	quicktime_write_data(file, (uint8_t*)data, len);
 }
 
 float quicktime_read_fixed32(quicktime_t *file)
 {
 	unsigned long a, b, c, d;
-	unsigned char data[4];
+	uint8_t data[4];
 
 	quicktime_read_data(file, data, 4);
 	a = data[0];
@@ -392,7 +392,7 @@ int quicktime_write_int32_le(quicktime_t *file, long value)
 
 int quicktime_write_char32(quicktime_t *file, char *string)
 {
-	return quicktime_write_data(file, string, 4);
+return quicktime_write_data(file, (uint8_t*)string, 4);
 }
 
 
@@ -425,13 +425,13 @@ unsigned long quicktime_read_uint32(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b, c, d;
-	char data[4];
+	uint8_t data[4];
 
 	quicktime_read_data(file, data, 4);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
 
 	result = (a << 24) | (b << 16) | (c << 8) | d;
 	return result;
@@ -441,13 +441,13 @@ long quicktime_read_int32(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b, c, d;
-	char data[4];
+	uint8_t data[4];
 
 	quicktime_read_data(file, data, 4);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
 
 	result = (a << 24) | (b << 16) | (c << 8) | d;
 	return (long)result;
@@ -457,13 +457,13 @@ long quicktime_read_int32_le(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b, c, d;
-	char data[4];
+	uint8_t data[4];
 
 	quicktime_read_data(file, data, 4);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
 
 	result = (d << 24) | (c << 16) | (b << 8) | a;
 	return (long)result;
@@ -472,17 +472,17 @@ long quicktime_read_int32_le(quicktime_t *file)
 int64_t quicktime_read_int64(quicktime_t *file)
 {
 	uint64_t result, a, b, c, d, e, f, g, h;
-	char data[8];
+	uint8_t data[8];
 
 	quicktime_read_data(file, data, 8);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
-	e = (unsigned char)data[4];
-	f = (unsigned char)data[5];
-	g = (unsigned char)data[6];
-	h = (unsigned char)data[7];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
+	e = data[4];
+	f = data[5];
+	g = data[6];
+	h = data[7];
 
 	result = (a << 56) | 
 		(b << 48) | 
@@ -499,17 +499,17 @@ int64_t quicktime_read_int64(quicktime_t *file)
 int64_t quicktime_read_int64_le(quicktime_t *file)
 {
         uint64_t result, a, b, c, d, e, f, g, h;
-        char data[8];
+        uint8_t data[8];
                                                                                                                   
         quicktime_read_data(file, data, 8);
-        a = (unsigned char)data[7];
-        b = (unsigned char)data[6];
-        c = (unsigned char)data[5];
-        d = (unsigned char)data[4];
-        e = (unsigned char)data[3];
-        f = (unsigned char)data[2];
-        g = (unsigned char)data[1];
-        h = (unsigned char)data[0];
+        a = data[7];
+        b = data[6];
+        c = data[5];
+        d = data[4];
+        e = data[3];
+        f = data[2];
+        g = data[1];
+        h = data[0];
                                                                                                                   
         result = (a << 56) |
                 (b << 48) |
@@ -527,12 +527,12 @@ long quicktime_read_int24(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b, c;
-	char data[4];
+        uint8_t data[4];
 	
 	quicktime_read_data(file, data, 3);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
+	a = data[0];
+	b = data[1];
+	c = data[2];
 
 	result = (a << 16) | (b << 8) | c;
 	return (long)result;
@@ -552,11 +552,11 @@ int quicktime_read_int16(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b;
-	char data[2];
+        uint8_t data[2];
 	
 	quicktime_read_data(file, data, 2);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
+	a = data[0];
+	b = data[1];
 
 	result = (a << 8) | b;
 	return (int)result;
@@ -566,11 +566,11 @@ int quicktime_read_int16_le(quicktime_t *file)
 {
 	unsigned long result;
 	unsigned long a, b;
-	char data[2];
+	uint8_t data[2];
 	
 	quicktime_read_data(file, data, 2);
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
+	a = data[0];
+	b = data[1];
 
 	result = (b << 8) | a;
 	return (int)result;
@@ -597,18 +597,18 @@ int quicktime_write_int16_le(quicktime_t *file, int number)
 int quicktime_read_char(quicktime_t *file)
 {
 	char output;
-	quicktime_read_data(file, &output, 1);
+	quicktime_read_data(file, (uint8_t*)(&output), 1);
 	return output;
 }
 
 int quicktime_write_char(quicktime_t *file, char x)
 {
-	return quicktime_write_data(file, &x, 1);
+return quicktime_write_data(file, (uint8_t*)(&x), 1);
 }
 
 void quicktime_read_char32(quicktime_t *file, char *string)
 {
-	quicktime_read_data(file, string, 4);
+quicktime_read_data(file, (uint8_t*)string, 4);
 }
 
 int64_t quicktime_position(quicktime_t *file) 
@@ -631,11 +631,11 @@ void quicktime_copy_char32(char *output, char *input)
 }
 
 
-void quicktime_print_chars(char *desc, char *input, int len)
+void quicktime_print_chars(char *desc, uint8_t *input, int len)
 {
 	int i;
 	printf("%s", desc);
-	for(i = 0; i < len; i++) printf("%c", input[i]);
+	for(i = 0; i < len; i++) printf("%02x ", input[i]);
 	printf("\n");
 }
 
@@ -646,8 +646,10 @@ unsigned long quicktime_current_time(void)
 	return (t+(66*31536000)+1468800);
 }
 
-int quicktime_match_32(char *input, char *output)
+int quicktime_match_32(void *_input, void *_output)
 {
+        uint8_t * input = (uint8_t*)_input;
+        uint8_t * output = (uint8_t*)_output;
 	if(input[0] == output[0] &&
 		input[1] == output[1] &&
 		input[2] == output[2] &&

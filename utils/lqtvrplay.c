@@ -201,8 +201,10 @@ static void x11_init(void)
 
 static void xv_init(void)
 {
-    int ver, rel, req, ev, err, i;
-    int adaptors, formats;
+    unsigned int ver, rel, req, ev, err;
+    int i;
+    unsigned int adaptors;
+    int formats;
     XvAdaptorInfo        *ai;
     XvImageFormatValues  *fo;
     
@@ -264,7 +266,7 @@ static XImage*
 x11_create_ximage(Display *dpy, int width, int height)
 {
     XImage          *ximage = NULL;
-    unsigned char   *ximage_data;
+    char            *ximage_data;
     XShmSegmentInfo *shminfo = NULL;
     void            *old_handler;
     
@@ -330,7 +332,7 @@ static XvImage*
 xv_create_ximage(Display *dpy, int width, int height, int port, int format)
 {
     XvImage         *xvimage = NULL;
-    unsigned char   *ximage_data;
+    char            *ximage_data;
     XShmSegmentInfo *shminfo = NULL;
     void            *old_handler;
     
@@ -408,7 +410,7 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 /* OpenGL code                                                              */
 
 static int tw,th;
-static GLint tex;
+static GLuint tex;
 static int gl_attrib[] = { GLX_RGBA,
 			   GLX_RED_SIZE, 1,
 			   GLX_GREEN_SIZE, 1,
@@ -427,7 +429,7 @@ static void gl_resize(Widget widget, int width, int height)
 
 }
 
-static void gl_blit(Widget widget, char *rgbbuf,
+static void gl_blit(Widget widget, uint8_t *rgbbuf,
 		    int iw, int ih, int ww, int wh)
 {
     char *dummy;
@@ -666,7 +668,7 @@ static int qt_frame_blit(void)
 	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 					  xv_port,FOURCC_YUV2);
 	    for (i = 0; i < qt_height; i++)
-		qt_rows[i] = qt_xvimage->data + qt_width * 2 * i;
+              qt_rows[i] = (uint8_t*)(qt_xvimage->data + qt_width * 2 * i);
 	    break;
 	case BC_YUV420P:
             if(xv_have_YV12)
@@ -675,9 +677,9 @@ static int qt_frame_blit(void)
                       "INFO: using BC_YUV420P + Xvideo extention (YV12)\n");
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
               xv_port,FOURCC_YV12);
-              qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
-              qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[2];
-              qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[1];
+              qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
+              qt_rows[1] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[2]);
+              qt_rows[2] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[1]);
               }
 	    else if(xv_have_I420)
               {
@@ -685,9 +687,9 @@ static int qt_frame_blit(void)
                       "INFO: using BC_YUV420P + Xvideo extention (I420)\n");
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 	                                    xv_port,FOURCC_I420);
-	      qt_rows[0] = qt_xvimage->data + qt_xvimage->offsets[0];
-	      qt_rows[1] = qt_xvimage->data + qt_xvimage->offsets[1];
-	      qt_rows[2] = qt_xvimage->data + qt_xvimage->offsets[2];
+	      qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
+	      qt_rows[1] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[1]);
+	      qt_rows[2] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[2]);
 	      }
               break;
 	default:
@@ -755,14 +757,14 @@ else {
 	    switch (pixmap_bytes) {
 	    case 2:
 	    	if (qt_ispanorama == 1) {
-		    rgb_to_lut2(qt_ximage->data,qt_panorama_buffer,(lqt_qtvr_get_height(qt))*(lqt_qtvr_get_width(qt)+overhead_frames));
-		} else rgb_to_lut2(qt_ximage->data,qt_frame,qt_width*qt_height);
+                rgb_to_lut2((uint8_t*)(qt_ximage->data),qt_panorama_buffer,(lqt_qtvr_get_height(qt))*(lqt_qtvr_get_width(qt)+overhead_frames));
+		} else rgb_to_lut2((uint8_t*)(qt_ximage->data),qt_frame,qt_width*qt_height);
 		break;
 	    case 4:
 	    if (qt_ispanorama == 1) {
 
-		rgb_to_lut4(qt_ximage->data,qt_panorama_buffer,(lqt_qtvr_get_height(qt))*(lqt_qtvr_get_width(qt)+overhead_frames));
-	    } else rgb_to_lut4(qt_ximage->data,qt_frame,qt_width*qt_height);
+            rgb_to_lut4((uint8_t*)(qt_ximage->data),qt_panorama_buffer,(lqt_qtvr_get_height(qt))*(lqt_qtvr_get_width(qt)+overhead_frames));
+	    } else rgb_to_lut4((uint8_t*)(qt_ximage->data),qt_frame,qt_width*qt_height);
 	    break;
 	    }
 	    if (qt_ispanorama == 1) {

@@ -8,7 +8,7 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
 	quicktime_riff_t *riff = quicktime_new_riff(file);
 	quicktime_atom_t leaf_atom;
 	int result = 0;
-	char data[5];
+	uint8_t data[5];
 
 	riff->atom = *parent_atom;
 

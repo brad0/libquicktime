@@ -70,7 +70,7 @@ typedef struct
 	int track_id;
 	long reserved1;
 	long duration;
-	char reserved2[8];
+	uint8_t reserved2[8];
 	int layer;
 	int alternate_group;
 	float volume;
@@ -146,9 +146,9 @@ typedef struct
 	
 	long STrack; /* Prefix 'S' == Scene */
 	long LowResSTrack;
-	long reserved3[6];
+	uint32_t reserved3[6];
 	long HSTrack; /* Prefix 'HS' == HotSpot */
-	long reserved4[9];
+	uint32_t reserved4[9];
 	
 	float HPanStart;
 	float HPanEnd;
@@ -176,7 +176,7 @@ typedef struct
 typedef struct
 {
 	char format[4];
-	char reserved[6];
+	uint8_t reserved[6];
 	int data_reference;
 
 /* common to audio and video */
@@ -533,7 +533,7 @@ typedef struct
 	long duration;
 	float preferred_rate;
 	float preferred_volume;
-	char reserved[10];
+	uint8_t reserved[10];
 	quicktime_matrix_t matrix;
 	long preview_time;
 	long preview_duration;
@@ -821,7 +821,7 @@ typedef struct
         int64_t moov_end;
         int64_t moov_size;
         int64_t old_preload_size;
-        char *old_preload_buffer;
+        uint8_t *old_preload_buffer;
         int64_t old_preload_start;
         int64_t old_preload_end;
         int64_t old_preload_ptr;
@@ -847,7 +847,7 @@ typedef struct
 
 /* Read ahead buffer */
 	int64_t preload_size;      /* Enables preload when nonzero. */
-	char *preload_buffer;
+	uint8_t *preload_buffer;
 	int64_t preload_start;     /* Start of preload_buffer in file */
 	int64_t preload_end;       /* End of preload buffer in file */
 	int64_t preload_ptr;       /* Offset of preload_start in preload_buffer */
@@ -857,7 +857,7 @@ typedef struct
         int64_t presave_size;
 /* Next presave byte's position in file */
         int64_t presave_position;
-        char *presave_buffer;
+        uint8_t *presave_buffer;
 /* Presave doesn't matter a whole lot, so its size is fixed */
 #define QUICKTIME_PRESAVE 0x100000
 

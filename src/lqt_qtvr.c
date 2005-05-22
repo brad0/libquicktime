@@ -34,10 +34,10 @@ int lqt_is_qtvr(quicktime_t  *file)
 int lqt_qtvr_write_dummy_node(quicktime_t *file)
 {
         int result = 0;
-	char *dummy;
+	uint8_t *dummy;
         quicktime_atom_t chunk_atom, atom;
         quicktime_trak_t *trak = file->moov.trak[lqt_qtvr_get_panorama_track(file)];
-        dummy = calloc(sizeof(char), sizeof(quicktime_pHdr_t));
+        dummy = calloc(sizeof(uint8_t), sizeof(quicktime_pHdr_t));
         quicktime_write_chunk_header(file, trak, &chunk_atom);
 	quicktime_atom_write_header(file, &atom, "pHdr");
         result = !quicktime_write_data(file, dummy, sizeof(quicktime_pHdr_t));

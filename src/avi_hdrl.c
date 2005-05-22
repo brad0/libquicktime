@@ -18,7 +18,7 @@ void quicktime_read_hdrl(quicktime_t *file,
 	quicktime_atom_t *parent_atom)
 {
 	quicktime_atom_t leaf_atom;
-	char data[4];
+	uint8_t data[4];
 	int current_track = 0;
 
 //printf("quicktime_read_hdrl 1\n");

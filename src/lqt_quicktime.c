@@ -93,7 +93,7 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 /* moov wasn't the first atom */
 		if(moov_exists > 1)
 		{
-			char *buffer;
+			uint8_t *buffer;
 			int64_t buf_size = 1000000;
 
 			result = 0;
@@ -975,7 +975,7 @@ char* quicktime_video_compressor(quicktime_t *file, int track)
 }
 
 int quicktime_write_audio(quicktime_t *file, 
-	char *audio_buffer, 
+	uint8_t *audio_buffer, 
 	long samples, 
 	int track)
 {
@@ -1061,13 +1061,6 @@ long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, i
 }
 #endif
 
-int quicktime_read_chunk(quicktime_t *file, char *output, int track, int64_t chunk, int64_t byte_start, int64_t byte_len)
-{
-	quicktime_set_position(file, quicktime_chunk_to_offset(file, file->atracks[track].track, chunk) + byte_start);
-	if(quicktime_read_data(file, output, byte_len)) return 0;
-	else
-	return 1;
-}
 
 long quicktime_frame_size(quicktime_t *file, long frame, int track)
 {
@@ -1315,7 +1308,7 @@ int quicktime_read_info(quicktime_t *file)
         int result = 0, got_header = 0;
         int64_t start_position = quicktime_position(file);
         quicktime_atom_t leaf_atom;
-        char avi_avi[4];
+        uint8_t avi_avi[4];
         int got_avi = 0;
         int got_asf = 0;
                                                                                                                   
@@ -1459,7 +1452,7 @@ int quicktime_check_sig(char *path)
         quicktime_t file;
         quicktime_atom_t leaf_atom;
         int result = 0, result1 = 0, result2 = 0;
-        char avi_test[12];
+        uint8_t avi_test[12];
                                                                                                                   
         quicktime_init(&file);
         result = quicktime_file_open(&file, path, 1, 0);

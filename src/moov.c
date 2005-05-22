@@ -62,7 +62,7 @@ static int read_cmov(quicktime_t *file,
                 {
                         char data[5];
 //printf("read_cmov 1 %lld\n", quicktime_position(file));
-                        quicktime_read_data(file, data, 4);
+                        quicktime_read_data(file, (uint8_t*)data, 4);
                         data[4] = 0;
                         if(strcmp(data, "zlib"))
                         {

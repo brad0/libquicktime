@@ -4,7 +4,7 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom);
 int quicktime_atom_write_header64(quicktime_t *file, quicktime_atom_t *atom, char *text);
 int quicktime_atom_write_header(quicktime_t *file, quicktime_atom_t *atom, char *text);
 void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom);
-int quicktime_atom_is(quicktime_atom_t *atom, unsigned char *type);
+int quicktime_atom_is(quicktime_atom_t *atom, char *type);
 int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom);
 
 /* avi_hdrl.c */
@@ -633,8 +633,8 @@ int quicktime_file_open(quicktime_t *file, char *path, int rd, int wr);
 int quicktime_file_close(quicktime_t *file);
 int64_t quicktime_ftell(quicktime_t *file);
 int quicktime_fseek(quicktime_t *file, int64_t offset);
-int quicktime_read_data(quicktime_t *file, char *data, int64_t size);
-int quicktime_write_data(quicktime_t *file, char *data, int size);
+int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size);
+int quicktime_write_data(quicktime_t *file, uint8_t *data, int size);
 int64_t quicktime_byte_position(quicktime_t *file);
 void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);
@@ -664,9 +664,9 @@ void quicktime_read_char32(quicktime_t *file, char *string);
 int64_t quicktime_position(quicktime_t *file);
 int quicktime_set_position(quicktime_t *file, int64_t position);
 void quicktime_copy_char32(char *output, char *input);
-void quicktime_print_chars(char *desc, char *input, int len);
+void quicktime_print_chars(char *desc, uint8_t *input, int len);
 unsigned long quicktime_current_time(void);
-int quicktime_match_32(char *input, char *output);
+int quicktime_match_32(void *input, void *output);
 int quicktime_match_24(char *input, char *output);
 
 /* lqt_quicktime.c */

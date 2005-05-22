@@ -221,7 +221,8 @@ void quicktime_read_strl(quicktime_t *file,
 {
 // These are 0 if no track is currently being processed.
 // Set to 1 if audio or video track is being processed.
-	char data[4], codec[4];
+        uint8_t data[4];
+        uint8_t codec[4];
         //	int denominator;
         //	int numerator;
         int frame_duration = 0;
@@ -397,7 +398,7 @@ void quicktime_read_strl(quicktime_t *file,
 			height, 
 			frame_duration,
                         timescale,
-			codec);
+                        (char*)codec);
 		quicktime_mhvd_init_video(file, 
 			&file->moov.mvhd, 
                         timescale);
@@ -416,7 +417,7 @@ void quicktime_read_strl(quicktime_t *file,
 					channels, 
 					sample_rate, 
                                         strl->wBitsPerSample, 
-					codec);
+					(char*)codec);
 
 
 // We store a constant samples per chunk based on the 

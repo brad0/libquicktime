@@ -204,13 +204,8 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track);
 /* ========================== Access to raw data follows. */
 /* write data for one quicktime track */
 /* the user must handle conversion to the channels in this track */
-int quicktime_write_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
-int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_t bytes, int track);
-
-/* Read an entire chunk. */
-/* read the number of bytes starting at the byte_start in the specified chunk */
-/* You must provide enough space to store the chunk. */
-int quicktime_read_chunk(quicktime_t *file, char *output, int track, int64_t chunk, int64_t byte_start, int64_t byte_len);
+int quicktime_write_audio(quicktime_t *file, uint8_t *audio_buffer, long samples, int track);
+int quicktime_write_frame(quicktime_t *file, uint8_t *video_buffer, int64_t bytes, int track);
 
 /* read raw data */
 long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track);

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 	for(i = 0; i < length; i++)
 	{
 		quicktime_set_video_position(file, i, 0);
-		quicktime_read_data(file, buffer_in, bytes);
+		quicktime_read_data(file, (uint8_t*)buffer_in, bytes);
 
 		u_out1 = u_out;
 		v_out1 = v_out;

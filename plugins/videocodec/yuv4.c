@@ -111,7 +111,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
 	unsigned char *buffer;
-	char *input_row;
+	uint8_t *input_row;
 	unsigned char *row_pointer1, *row_pointer2;
 	int result = 0;
 	int u, v;
@@ -142,12 +142,12 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 				out_y++;
 				for(x1 = 0, x2 = 0; x1 < bytes_per_row; )
 				{
-					u = *input_row++;
-					v = *input_row++;
-					y1 = (unsigned char)*input_row++;
-					y2 = (unsigned char)*input_row++;
-					y3 = (unsigned char)*input_row++;
-					y4 = (unsigned char)*input_row++;
+                                        u = (char)*input_row++;
+					v = (char)*input_row++;
+					y1 = *input_row++;
+					y2 = *input_row++;
+					y3 = *input_row++;
+					y4 = *input_row++;
 					y1 <<= 16;
 					y2 <<= 16;
 					y3 <<= 16;

@@ -3,7 +3,7 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
-static int read_type(char *data, char *type)
+static int read_type(uint8_t *data, uint8_t *type)
 {
 	type[0] = data[4];
 	type[1] = data[5];
@@ -19,15 +19,15 @@ static int read_type(char *data, char *type)
 }
 
 
-static unsigned long read_size(char *data)
+static unsigned long read_size(uint8_t *data)
 {
 	unsigned long result;
 	unsigned long a, b, c, d;
 	
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
 
 	result = (a << 24) | (b << 16) | (c << 8) | d;
 
@@ -36,18 +36,18 @@ static unsigned long read_size(char *data)
 	return result;
 }
 
-static int64_t read_size64(char *data)
+static int64_t read_size64(uint8_t *data)
 {
 	uint64_t result, a, b, c, d, e, f, g, h;
 
-	a = (unsigned char)data[0];
-	b = (unsigned char)data[1];
-	c = (unsigned char)data[2];
-	d = (unsigned char)data[3];
-	e = (unsigned char)data[4];
-	f = (unsigned char)data[5];
-	g = (unsigned char)data[6];
-	h = (unsigned char)data[7];
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
+	e = data[4];
+	f = data[5];
+	g = data[6];
+	h = data[7];
 
 	result = (a << 56) | 
 		(b << 48) | 
@@ -72,7 +72,7 @@ static int reset(quicktime_atom_t *atom)
 int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 {
 	int result = 0;
-	char header[10];
+	uint8_t header[10];
 
 	if(file->use_avi)
 	{
@@ -211,7 +211,7 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 
 }
 
-int quicktime_atom_is(quicktime_atom_t *atom, unsigned char *type)
+int quicktime_atom_is(quicktime_atom_t *atom, char *type)
 {
 	if(atom->type[0] == type[0] &&
 		atom->type[1] == type[1] &&
