@@ -213,10 +213,10 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 
 int quicktime_atom_is(quicktime_atom_t *atom, char *type)
 {
-	if(atom->type[0] == type[0] &&
-		atom->type[1] == type[1] &&
-		atom->type[2] == type[2] &&
-		atom->type[3] == type[3])
+if(atom->type[0] == (uint8_t)type[0] &&
+		atom->type[1] == (uint8_t)type[1] &&
+		atom->type[2] == (uint8_t)type[2] &&
+		atom->type[3] == (uint8_t)type[3])
 	return 1;
 	else
 	return 0;
