@@ -306,10 +306,12 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
   {
   mpeg_header h;
   quicktime_atom_t chunk_atom;
-  int result;
+  int result = 0;
   int chunk_bytes = 0, chunk_samples = 0;
 
   uint8_t * chunk_ptr;
+
+  memset(&h, 0, sizeof(h));
   
   /* We write each mp3 frame into an own chunk. This increases the chance,
      that M$ software will be able to play our files */
