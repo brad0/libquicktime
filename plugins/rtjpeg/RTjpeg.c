@@ -175,8 +175,8 @@ void RTjpeg_quant_init(RTjpeg_t *rtj)
  for(i=0; i<64; i++)qtbl[i]=(int16_t)rtj->cqt[i];
 }
 
-static mmx_t RTjpeg_ones=(mmx_t)(int64_t)0x0001000100010001LL;
-static mmx_t RTjpeg_half=(mmx_t)(int64_t)0x7fff7fff7fff7fffLL;
+static mmx_t RTjpeg_ones=(mmx_t)0x0001000100010001LL;
+static mmx_t RTjpeg_half=(mmx_t)0x7fff7fff7fff7fffLL;
 
 void RTjpeg_quant(int16_t *block, int32_t *qtbl)
 {
@@ -233,11 +233,11 @@ void RTjpeg_quant(int16_t *block, int32_t *qtbl)
  * Perform the forward DCT on one block of samples.
  */
 #ifdef MMX
-static mmx_t RTjpeg_C4   =(mmx_t)(int64_t)0x2D412D412D412D41LL;
-static mmx_t RTjpeg_C6   =(mmx_t)(int64_t)0x187E187E187E187ELL;
-static mmx_t RTjpeg_C2mC6=(mmx_t)(int64_t)0x22A322A322A322A3LL;
-static mmx_t RTjpeg_C2pC6=(mmx_t)(int64_t)0x539F539F539F539FLL;
-static mmx_t RTjpeg_zero =(mmx_t)(int64_t)0x0000000000000000LL;
+static mmx_t RTjpeg_C4   =(mmx_t)0x2D412D412D412D41LL;
+static mmx_t RTjpeg_C6   =(mmx_t)0x187E187E187E187ELL;
+static mmx_t RTjpeg_C2mC6=(mmx_t)0x22A322A322A322A3LL;
+static mmx_t RTjpeg_C2pC6=(mmx_t)0x539F539F539F539FLL;
+static mmx_t RTjpeg_zero =(mmx_t)0x0000000000000000LL;
 
 #else
 
@@ -1197,11 +1197,11 @@ void RTjpeg_idct(RTjpeg_t *rtj, uint8_t *odata, int16_t *data, int rskip)
 {
 #ifdef MMX
 
-static mmx_t fix_141			= (mmx_t)(int64_t)0x5a825a825a825a82LL;
-static mmx_t fix_184n261	= (mmx_t)(int64_t)0xcf04cf04cf04cf04LL;
-static mmx_t fix_184			= (mmx_t)(int64_t)0x7641764176417641LL;
-static mmx_t fix_n184		= (mmx_t)(int64_t)0x896f896f896f896fLL;
-static mmx_t fix_108n184	= (mmx_t)(int64_t)0xcf04cf04cf04cf04LL;
+static mmx_t fix_141		= (mmx_t)0x5a825a825a825a82LL;
+static mmx_t fix_184n261	= (mmx_t)0xcf04cf04cf04cf04LL;
+static mmx_t fix_184		= (mmx_t)0x7641764176417641LL;
+static mmx_t fix_n184		= (mmx_t)0x896f896f896f896fLL;
+static mmx_t fix_108n184	= (mmx_t)0xcf04cf04cf04cf04LL;
 
   mmx_t *wsptr = (mmx_t *)rtj->ws;
   register mmx_t *dataptr = (mmx_t *)odata;
@@ -2445,8 +2445,8 @@ int RTjpeg_set_intra(RTjpeg_t *rtj, int *key, int *lm, int *cm)
  if (*cm < 0) *cm = 0;
  if (*cm > 16) *cm = 16;
 #ifdef MMX
- rtj->lmask=(mmx_t)(((uint64_t)(*lm)<<48)|((uint64_t)(*lm)<<32)|((uint64_t)(*lm)<<16)|(uint64_t)(*lm));
- rtj->cmask=(mmx_t)(((uint64_t)(*cm)<<48)|((uint64_t)(*cm)<<32)|((uint64_t)(*cm)<<16)|(uint64_t)(*cm));
+ rtj->lmask=(mmx_t)(((unsigned long long)(*lm)<<48)|((unsigned long long)(*lm)<<32)|((unsigned long long)(*lm)<<16)|(unsigned long long)(*lm));
+ rtj->cmask=(mmx_t)(((unsigned long long)(*cm)<<48)|((unsigned long long)(*cm)<<32)|((unsigned long long)(*cm)<<16)|(unsigned long long)(*cm));
 #else
  rtj->lmask=*lm;
  rtj->cmask=*cm;
@@ -2767,7 +2767,7 @@ int RTjpeg_bcomp(int16_t *rblock, int16_t *old, mmx_t *mask)
  mmx_t *mold=(mmx_t *)old;
  mmx_t *mblock=(mmx_t *)rblock;
  volatile mmx_t result;
- static mmx_t neg=(mmx_t)(uint64_t)0xffffffffffffffffULL;
+ static mmx_t neg=(mmx_t)0xffffffffffffffffULL;
  
  movq_m2r(*mask, mm7);
  movq_m2r(neg, mm6);
