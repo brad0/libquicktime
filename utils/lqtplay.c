@@ -1433,7 +1433,8 @@ int main(int argc, char *argv[])
       break;
     }
     qt_cleanup();
-    fprintf(stderr, "Decoded %lld samples\n", total_samples_decoded);    
+    fprintf(stderr, "Decoded %lld samples\n",
+            (long long)total_samples_decoded);    
     return 0;
 }
 

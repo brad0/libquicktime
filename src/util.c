@@ -145,7 +145,8 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
 		{
 /* Size is larger than preload size.  Should never happen. */
 printf("read data Size is larger than preload size. size=%llx preload_size=%llx\n",
-	selection_end - selection_start, file->preload_size);
+       (long long)(selection_end - selection_start),
+       (long long)(file->preload_size));
 			quicktime_fseek(file, file->file_position);
 			result = fread(data, size, 1, file->stream);
 			file->ftell_position += size;

@@ -310,7 +310,7 @@ static int quicktime_decode_ulaw(quicktime_t *file,
           if(samples_to_skip < 0)
             {
             fprintf(stderr, "ulaw: Cannot skip %d samples backwards %lld %ld\n", samples_to_skip,
-                    file->atracks[track].current_position, file->atracks[track].last_position);
+                    (long long)(file->atracks[track].current_position), file->atracks[track].last_position);
             samples_to_skip = 0;
             }
           codec->decode_buffer_ptr = codec->decode_buffer + samples_to_skip * codec->decode_block_align;
