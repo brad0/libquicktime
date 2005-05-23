@@ -625,9 +625,6 @@ OPTIMIZE_CFLAGS="-O3"
 
 AC_TRY_CFLAGS([-funroll-all-loops],   [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -funroll-all-loops"])
 AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-frame-pointer"])
-AC_TRY_CFLAGS([-falign-loops=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-loops=2"])
-AC_TRY_CFLAGS([-falign-jumps=2],      [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-jumps=2"])
-AC_TRY_CFLAGS([-falign-functions=2],  [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -falign-functions=2"])
 
 # -Wno-unused-variable -Wno-unused-parameter
 # -std=gnu99 
