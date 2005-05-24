@@ -1,5 +1,8 @@
 # libquicktime top-level Makefile.am
 
+# aclocal Path
+ACLOCAL_AMFLAGS = -I m4
+
 if HAVE_FIREWIRE
 FIREWIRE_DIR=quicktime1394
 else

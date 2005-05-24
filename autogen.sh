@@ -4,7 +4,7 @@
 do_autogen () {
     echo "Doing autogen in $PWD... "
     echo -n "aclocal..."
-    aclocal -I /usr/local/share/aclocal $ACLOCAL_FLAGS
+    aclocal -I m4 -I /usr/local/share/aclocal $ACLOCAL_FLAGS
     echo "done"
     echo -n "libtoolize..."
     libtoolize --automake --copy --force

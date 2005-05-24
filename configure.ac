@@ -554,46 +554,6 @@ if test "x$HAVE_MMX" = "xyes" ; then
   RTJPEG_CFLAGS="-DMMX $RTJPEG_CFLAGS"
 fi
 
-# Set CPU specific compiler options
-
-if test "x$RPM_OPT_FLAGS" = "x" ; then
-    # detect Athlon CPU
-    # the idea is to use -mcpu=athlon to get the important optimization
-    # but keep -march=${host_cpu} from the command line. -march=i686
-    # should not have a negative impact on athlons, but -march=i586 or
-    # worse has.
-    AC_MSG_CHECKING(for Athlon CPU)
-    if grep Athlon /proc/cpuinfo > /dev/null ; then
-         AC_MSG_RESULT(yes)
-         AC_TRY_CFLAGS([-march=athlon], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=athlon"],
-           AC_TRY_CFLAGS([-march=i686], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=i686"]))
-    else
-         AC_MSG_RESULT(no)
-         AC_MSG_CHECKING(for K6 CPU)
-         if grep -i k6 /proc/cpuinfo > /dev/null ; then
-              AC_MSG_RESULT(yes)
-              AC_TRY_CFLAGS([-march=k6], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=k6"],
-                AC_TRY_CFLAGS([-march=i686], [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=i686"]))
-         else
-              AC_MSG_RESULT(no)
-              AC_TRY_CFLAGS([-march=pentium], 
-                            [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -march=pentium"])
-         fi
-    fi
-    
-    # basic optimization
-dnl    AC_TRY_CFLAGS([-malign-double -fschedule-insns2],
-dnl                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -malign-double -fschedule-insns2"])
-dnl    AC_TRY_CFLAGS([-O6],
-dnl                  [RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O6"],
-dnl                   AC_TRY_CFLAGS([-O3],[RTJPEG_CFLAGS="$RTJPEG_CFLAGS -O3"]))
-
-else
-    # use optimization as required for RPM host CPU
-    RTJPEG_CFLAGS="$RTJPEG_CFLAGS $RPM_OPT_FLAGS"
-    RTJPEG_CFLAGS="$RTJPEG_CFLAGS"
-fi
-
 AC_SUBST(RTJPEG_CFLAGS)
 
 dnl jpeg/Makefile
@@ -613,58 +573,24 @@ PLUGIN_DIR=$plugin_dir
 AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
 AC_SUBST(PLUGIN_DIR)
 
+dnl
 dnl Build CFLAGS
+dnl
 
-COMMON_CFLAGS=" -finline-functions -Wall -Winline"
-PROFILE_CFLAGS=" -pg -fprofile-arcs -ftest-coverage"
-DEBUG_CFLAGS=" -g3"
+COMMON_CFLAGS="-finline-functions -Wall -Winline"
 
 dnl Optimizing flags
 
-OPTIMIZE_CFLAGS="-O3"
-
-AC_TRY_CFLAGS([-funroll-all-loops],   [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -funroll-all-loops"])
-AC_TRY_CFLAGS([-fomit-frame-pointer], [OPTIMIZE_CFLAGS="$OPTIMIZE_CFLAGS -fomit-frame-pointer"])
-
-# -Wno-unused-variable -Wno-unused-parameter
-# -std=gnu99 
-
-have_debug=false
-have_profile=false
-compile_mode="optimize"
+LQT_OPT_CFLAGS($host_cpu, ["-O3 -funroll-all-loops -fomit-frame-pointer"])
 
 AH_TEMPLATE([NDEBUG],
             [Causes debug code to e removed])
 
-AC_ARG_ENABLE(profile,
-    [  --enable-profile        Turn on profile ],
-     [case "${enableval}" in
-       yes) have_profile=true ;;
-       no) ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-profile) ;;
-     esac],[])
-
-AC_ARG_ENABLE(debug,
-    [  --enable-debug          Turn on debugging (turn off optimizations)],
-    [case "${enableval}" in
-       yes) have_debug=true ;;
-       no) ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
-     esac],[])
-
-if test x$have_debug = xtrue; then
-compile_mode="debug"
+if test x$LQT_DEBUG != xtrue; then
+AC_DEFINE(NDEBUG)
 fi
 
-if test x$have_profile = xtrue; then
-compile_mode="profile"
-fi
-
-case $compile_mode in
-"optimize") CFLAGS="$OPTIMIZE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
-"debug") CFLAGS="$DEBUG_CFLAGS $COMMON_CFLAGS" ;;
-"profile") CFLAGS="$PROFILE_CFLAGS $COMMON_CFLAGS"; AC_DEFINE(NDEBUG);;
-esac
+CFLAGS="$OPT_CFLAGS $COMMON_CFLAGS"
 
 # -L is required so that linker can find libquicktime when DESTDIR is used.
 # libtool bug, documented at: http://www.geocrawler.com/mail/thread.php3?subject=install+phase+fails&list=404
