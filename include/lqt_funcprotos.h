@@ -628,8 +628,8 @@ void quicktime_write_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 /* util.c */
 
 /* Disk I/O */
-int64_t quicktime_get_file_length(char *path);
-int quicktime_file_open(quicktime_t *file, char *path, int rd, int wr);
+int64_t quicktime_get_file_length(const char *path);
+int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr);
 int quicktime_file_close(quicktime_t *file);
 int64_t quicktime_ftell(quicktime_t *file);
 int quicktime_fseek(quicktime_t *file, int64_t offset);

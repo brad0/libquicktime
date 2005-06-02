@@ -15,7 +15,7 @@
 
 /* Disk I/O */
 
-int64_t quicktime_get_file_length(char *path)
+int64_t quicktime_get_file_length(const char *path)
 {
       struct stat status;
       if(stat(path, &status))
@@ -23,7 +23,7 @@ int64_t quicktime_get_file_length(char *path)
       return status.st_size;
 }
 
-int quicktime_file_open(quicktime_t *file, char *path, int rd, int wr)
+int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr)
 {
 	int exists = 0;
 	char flags[10];

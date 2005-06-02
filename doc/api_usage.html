@@ -56,7 +56,7 @@ for the whole truth.<br>
 To open a Quicktime or sufficiently compatible AVI file, use:<br>
 <br>
 <code></code><span style="font-family: monospace;">quicktime_t*
-quicktime_open(char *filename, int rd, int wr);</span><br>
+quicktime_open(const char *filename, int rd, int wr);</span><br>
 <br>
 This returns an opaque pointer type quicktime_t* or NULL if the file
 could not be opened. The returned handle is the first argument for most

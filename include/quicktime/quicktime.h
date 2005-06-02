@@ -100,7 +100,7 @@ int quicktime_release();
 int quicktime_check_sig(char *path);
 
 /* call this first to open the file and create all the objects */
-quicktime_t* quicktime_open(char *filename, int rd, int wr);
+quicktime_t* quicktime_open(const char *filename, int rd, int wr);
 
 /* make the quicktime file streamable */
 int quicktime_make_streamable(char *in_path, char *out_path);

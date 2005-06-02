@@ -1514,7 +1514,7 @@ void quicktime_set_asf(quicktime_t *file, int value)
 }
 
 
-quicktime_t* quicktime_open(char *filename, int rd, int wr)
+quicktime_t* quicktime_open(const char *filename, int rd, int wr)
 {
         int i;
 	quicktime_t *new_file = calloc(1, sizeof(quicktime_t));
@@ -1535,7 +1535,6 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 	}
 #endif
 
-//printf("quicktime_open 1\n");
 	quicktime_init(new_file);
 	new_file->wr = wr;
 	new_file->rd = rd;
@@ -1543,7 +1542,6 @@ quicktime_t* quicktime_open(char *filename, int rd, int wr)
 
         result = quicktime_file_open(new_file, filename, rd, wr);
 
-   //printf("quicktime_open 1\n");
         if(!result)
           {
           if(rd)
