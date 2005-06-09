@@ -40,8 +40,6 @@ int colormodels[] =
     BC_BGR8888,
     BC_RGB888,
     BC_RGBA8888,
-    BC_ARGB8888,
-    BC_ABGR8888,
     BC_RGB161616,
     BC_RGBA16161616,
     BC_YUV888,
@@ -49,9 +47,6 @@ int colormodels[] =
     BC_YUV161616,
     BC_YUVA16161616,
     BC_YUV422,
-    BC_YUV101010,
-    BC_VYU888,
-    BC_UYVA8888,
     BC_YUV420P,
     BC_YUV422P,
     BC_YUV444P,
@@ -158,6 +153,7 @@ static void list_audio_codecs()
   lqt_destroy_codec_info(info);
   }
 
+#if 0
 static unsigned char ** alloc_video_buffer(int width, int height, int colormodel)
   {
   int bytes_per_line = 0;
@@ -200,16 +196,11 @@ static unsigned char ** alloc_video_buffer(int width, int height, int colormodel
       case BC_BGR888:
       case BC_RGB888:
       case BC_YUV888:
-      case BC_VYU888:
         bytes_per_line = width * 3;
         break;
       case BC_BGR8888:
       case BC_RGBA8888:
-      case BC_ARGB8888:
-      case BC_ABGR8888:
-      case BC_YUV101010:
       case BC_YUVA8888:
-      case BC_UYVA8888:
         bytes_per_line = width * 4;
         break;
         
@@ -229,6 +220,7 @@ static unsigned char ** alloc_video_buffer(int width, int height, int colormodel
     }
   return video_buffer;
   }
+#endif
 
 static int transcode_init(transcode_handle * h,
                           char * in_file,
@@ -301,7 +293,7 @@ static int transcode_init(transcode_handle * h,
     fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
             h->width, h->height, lqt_colormodel_to_string(h->colormodel));
     
-    h->video_buffer = alloc_video_buffer(h->width, h->height, h->colormodel);
+    h->video_buffer = lqt_rows_alloc(h->width, h->height, h->colormodel, 0, 0);
     
     quicktime_set_cmodel(h->in_file,  h->colormodel);
     quicktime_set_cmodel(h->out_file, h->colormodel);

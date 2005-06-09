@@ -67,6 +67,7 @@ file_info(char *filename)
 			 quicktime_frame_rate(qtfile, i),
 			 quicktime_video_length(qtfile, i),
 			 quicktime_video_compressor(qtfile, i));
+          printf("    Native colormodel: %s\n", lqt_colormodel_to_string(lqt_get_cmodel(qtfile, i)));
 	  printf("    %ssupported.\n",
 			 quicktime_supported_video(qtfile, i)?"":"NOT ");
 	}

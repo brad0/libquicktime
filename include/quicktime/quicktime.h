@@ -295,6 +295,7 @@ int64_t quicktime_byte_position(quicktime_t *file);
 
 void quicktime_set_avi(quicktime_t *file, int value);
 
+  
 
 #ifdef __cplusplus
 }

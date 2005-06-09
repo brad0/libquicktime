@@ -59,10 +59,9 @@ typedef struct
 
   /* Colormodel */
 
-  int lqt_colormodel;
   int do_imgconvert;
     
-  unsigned char ** tmp_buffer;
+  //  unsigned char ** tmp_buffer;
   unsigned char ** row_pointers;
     
   /* Quality must be passed to the individual frame */

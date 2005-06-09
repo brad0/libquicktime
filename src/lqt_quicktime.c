@@ -459,6 +459,11 @@ int lqt_add_video_track(quicktime_t *file,
         quicktime_trak_init_video(file, trak, frame_w, frame_h, frame_duration, timescale, compressor);
 	quicktime_init_video_map(&(file->vtracks[file->total_vtracks]), trak, file->wr, info);
         lqt_set_default_video_parameters(file, file->total_vtracks);
+
+        /* Get encoding colormodel */
+        ((quicktime_codec_t*)(file->vtracks[file->total_vtracks].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks);
+        file->vtracks[file->total_vtracks].io_cmodel = file->vtracks[file->total_vtracks].stream_cmodel;
+      
         file->total_vtracks++;
         return 0;
   }
@@ -830,13 +835,22 @@ void quicktime_set_cmodel(quicktime_t *file, int colormodel)
   {
   int i;
   for(i = 0; i < file->total_vtracks; i++)
-    file->vtracks[i].color_model = colormodel;
+    file->vtracks[i].io_cmodel = colormodel;
   }
+
+int lqt_get_cmodel(quicktime_t * file, int track)
+  {
+  if((track < file->total_vtracks) && (track >= 0))
+    return file->vtracks[track].io_cmodel;
+  else
+    return LQT_COLORMODEL_NONE;
+  }
+
 
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
   {
   if((track < file->total_vtracks) && (track >= 0))
-    file->vtracks[track].color_model = colormodel;
+    file->vtracks[track].io_cmodel = colormodel;
   else
     fprintf(stderr, "lqt_set_cmodel: No track No. %d\n", track);
   }
@@ -845,17 +859,17 @@ void quicktime_set_row_span(quicktime_t *file, int row_span)
 {
 int i;
   for(i = 0; i < file->total_vtracks; i++)
-    file->vtracks[i].row_span = row_span;
+    file->vtracks[i].io_row_span = row_span;
 }
 
 void lqt_set_row_span(quicktime_t *file, int track, int row_span)
   {
-  file->vtracks[track].row_span = row_span;
+  file->vtracks[track].io_row_span = row_span;
   }
 
 void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv)
   {
-  file->vtracks[track].row_span_uv = row_span_uv;
+  file->vtracks[track].io_row_span_uv = row_span_uv;
   }
 
 void quicktime_set_window(quicktime_t *file,
@@ -868,19 +882,12 @@ void quicktime_set_window(quicktime_t *file,
 {
         if(in_x >= 0 && in_y >= 0 && in_w > 0 && in_h > 0 && out_w > 0 && out_h > 0)
         {
-                file->do_scaling = 1;
                 file->in_x = in_x;
                 file->in_y = in_y;
                 file->in_w = in_w;
                 file->in_h = in_h;
                 file->out_w = out_w;
                 file->out_h = out_h;
-        }
-        else
-        {
-                file->do_scaling = 0;
-/* quicktime_decode_video now sets the window for every frame based on the */
-/* track dimensions */
         }
 }
 
@@ -1239,7 +1246,7 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 	vtrack->track = trak;
 	vtrack->current_position = 0;
 	vtrack->current_chunk = 1;
-        vtrack->color_model = BC_RGB888;
+        vtrack->io_cmodel = BC_RGB888;
 	quicktime_init_vcodec(vtrack, encode, info);
 	return 0;
 }
@@ -1247,6 +1254,8 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 {
 	quicktime_delete_vcodec(vtrack);
+        if(vtrack->temp_frame)
+          lqt_rows_free(vtrack->temp_frame);
 	return 0;
 }
 
@@ -1299,6 +1308,9 @@ void quicktime_init_maps(quicktime_t * file)
       quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track],
                                file->wr,
                                (lqt_codec_info_t*)0);
+      /* Get decoder colormodel */
+      ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, track);
+      file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
       }
     }
   }

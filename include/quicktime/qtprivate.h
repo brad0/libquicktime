@@ -772,7 +772,14 @@ typedef struct
         int64_t timestamp;
         int64_t stts_index;
         int64_t stts_count;
-        int color_model, row_span, row_span_uv;
+        int stream_cmodel;  /* Colormodel, which is read/written natively by the codec  */
+        int stream_row_span, stream_row_span_uv;
+
+        int io_cmodel;      /* Colormodel, which is used by the encode/decode functions */
+        int io_row_span, io_row_span_uv;
+
+        /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
+        uint8_t ** temp_frame;
 
 } quicktime_video_map_t;
 
@@ -874,7 +881,6 @@ typedef struct
 	int cpus;
 
 /* Parameters for frame currently being decoded */
-	int do_scaling;
 	int in_x, in_y, in_w, in_h, out_w, out_h;
 /*      Libquicktime change: color_model and row_span are now saved per track */
 /*	int color_model, row_span; */

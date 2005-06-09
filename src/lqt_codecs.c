@@ -271,6 +271,8 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
   if(codec_array)
     lqt_destroy_codec_info(codec_array);
 
+  //  vtrack->stream_cmodel = lqt_get_decoder_colormodel(quicktime_t * file, int track);
+  
   return 0;
   
   }
@@ -478,36 +480,6 @@ void lqt_update_frame_position(quicktime_video_map_t * track)
   track->current_position++;
   }
 
-int quicktime_decode_video(quicktime_t *file,
-                           unsigned char **row_pointers, int track)
-{
-	int result;
-        int track_height;
-	int track_width;
-
-        
-	track_height = quicktime_video_height(file, track);
-	track_width =  quicktime_video_width(file, track);
-
-//printf("quicktime_decode_video 1\n");
-// Fake scaling parameters
-	file->do_scaling = 0;
-                
-        file->vtracks[track].color_model = BC_RGB888;
-	file->in_x = 0;
-	file->in_y = 0;
-	file->in_w = track_width;
-	file->in_h = track_height;
-	file->out_w = track_width;
-	file->out_h = track_height;
-
-        //printf("quicktime_decode_video 1\n");
-	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
-        lqt_update_frame_position(&(file->vtracks[track]));
-//printf("quicktime_decode_video 2\n");
-	return result;
-}
-
 /*
  *  Same as quicktime_decode_video but doesn't force BC_RGB888
  */
@@ -515,31 +487,70 @@ int quicktime_decode_video(quicktime_t *file,
 int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track)
 {
-        int result;
-        int track_height;
-	int track_width;
-
+	int result;
+        int height;
+	int width;
         
-	track_height = quicktime_video_height(file, track);
-	track_width =  quicktime_video_width(file, track);
+	height = quicktime_video_height(file, track);
+	width =  quicktime_video_width(file, track);
 
 //printf("quicktime_decode_video 1\n");
 // Fake scaling parameters
-	file->do_scaling = 0;
-	file->in_x = 0;
-	file->in_y = 0;
-	file->in_w = track_width;
-	file->in_h = track_height;
-	file->out_w = track_width;
-	file->out_h = track_height;
-
-//printf("quicktime_decode_video 1\n");
-	result =
-          ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
+      
+        if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
+          {
+          if(!file->vtracks[track].temp_frame)
+            {
+            file->vtracks[track].temp_frame =
+              lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
+                             &(file->vtracks[track].stream_row_span),
+                             &(file->vtracks[track].stream_row_span_uv));
+            }
+          result =
+            ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file,
+                                                                           file->vtracks[track].temp_frame,
+                                                                           track);
+          cmodel_transfer(row_pointers,                    //    unsigned char **output_rows, /* Leave NULL if non existent */
+                          file->vtracks[track].temp_frame, //    unsigned char **input_rows,
+                          0, //                                  int in_x,        /* Dimensions to capture from input frame */
+                          0, //                                  int in_y, 
+                          width, //                              int in_w, 
+                          height, //                             int in_h,
+                          width, //                              int out_w, 
+                          height, //                             int out_h,
+                          file->vtracks[track].stream_cmodel, // int in_colormodel, 
+                          file->vtracks[track].io_cmodel,     // int out_colormodel,
+                          0, //                                  int bg_color,
+                          file->vtracks[track].stream_row_span,   /* For planar use the luma rowspan */
+                          file->vtracks[track].io_row_span,       /* For planar use the luma rowspan */
+                          file->vtracks[track].stream_row_span_uv, /* Chroma rowspan */
+                          file->vtracks[track].io_row_span_uv      /* Chroma rowspan */);
+         
+          }
+        else
+          {
+          file->vtracks[track].stream_row_span    = file->vtracks[track].io_row_span;
+          file->vtracks[track].stream_row_span_uv = file->vtracks[track].io_row_span_uv;
+          
+          result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
+          
+          }
+        
+        //printf("quicktime_decode_video 1\n");
         lqt_update_frame_position(&(file->vtracks[track]));
 //printf("quicktime_decode_video 2\n");
 	return result;
 }
+
+/* The original function, which forces BG_RGB888 */
+int quicktime_decode_video(quicktime_t *file,
+                           unsigned char **row_pointers, int track)
+  {
+  
+  file->vtracks[track].io_cmodel = BC_RGB888;
+  return lqt_decode_video(file, row_pointers, track);
+  }
+
 
 long quicktime_decode_scaled(quicktime_t *file, 
 	int in_x,                    /* Location of input frame to take picture */
@@ -554,29 +565,108 @@ long quicktime_decode_scaled(quicktime_t *file,
 {
 	int result;
 
-	file->do_scaling = 1;
-	file->vtracks[track].color_model = color_model;
-	file->in_x = in_x;
-	file->in_y = in_y;
-	file->in_w = in_w;
-	file->in_h = in_h;
-	file->out_w = out_w;
-	file->out_h = out_h;
+        int height;
+	int width;
+        
+	height = quicktime_video_height(file, track);
+	width =  quicktime_video_width(file, track);
 
-	result = ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file, row_pointers, track);
+        
+	file->vtracks[track].io_cmodel = color_model;
+
+        if(!file->vtracks[track].temp_frame)
+          {
+          file->vtracks[track].temp_frame =
+            lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
+                           &(file->vtracks[track].stream_row_span),
+                           &(file->vtracks[track].stream_row_span_uv));
+          }
+        result =
+          ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file,
+                                                                         file->vtracks[track].temp_frame,
+                                                                         track);
+        cmodel_transfer(row_pointers,                    //    unsigned char **output_rows, /* Leave NULL if non existent */
+                        file->vtracks[track].temp_frame, //    unsigned char **input_rows,
+                        in_x, //                               int in_x,        /* Dimensions to capture from input frame */
+                        in_y, //                               int in_y, 
+                        in_w, //                               int in_w, 
+                        in_h, //                               int in_h,
+                        out_w, //                              int out_w, 
+                        out_h, //                              int out_h,
+                        file->vtracks[track].stream_cmodel, // int in_colormodel, 
+                        file->vtracks[track].io_cmodel,     // int out_colormodel,
+                        0, //                                  int bg_color,
+                        file->vtracks[track].stream_row_span,   /* For planar use the luma rowspan */
+                        file->vtracks[track].io_row_span,       /* For planar use the luma rowspan */
+                        file->vtracks[track].stream_row_span_uv, /* Chroma rowspan */
+                        file->vtracks[track].io_row_span_uv      /* Chroma rowspan */);
+        
         lqt_update_frame_position(&(file->vtracks[track]));
 	return result;
 }
 
+static int do_encode_video(quicktime_t *file, 
+                           unsigned char **row_pointers, 
+                           int track)
+  {
+  int result;
+
+  int height;
+  int width;
+  
+  height = quicktime_video_height(file, track);
+  width =  quicktime_video_width(file, track);
+  
+  //printf("quicktime_decode_video 1\n");
+  // Fake scaling parameters
+  
+  if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
+    {
+    if(!file->vtracks[track].temp_frame)
+      {
+      file->vtracks[track].temp_frame =
+        lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
+                       &(file->vtracks[track].stream_row_span),
+                       &(file->vtracks[track].stream_row_span_uv));
+      }
+    result =
+      ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file,
+                                                                     file->vtracks[track].temp_frame,
+                                                                     track);
+    cmodel_transfer(file->vtracks[track].temp_frame, //    unsigned char **output_rows, /* Leave NULL if non existent */
+                    row_pointers,                    //    unsigned char **input_rows,
+                    0, //                                  int in_x,        /* Dimensions to capture from input frame */
+                    0, //                                  int in_y, 
+                    width, //                              int in_w, 
+                    height, //                             int in_h,
+                    width, //                              int out_w, 
+                    height, //                             int out_h,
+                    file->vtracks[track].io_cmodel, // int in_colormodel, 
+                    file->vtracks[track].stream_cmodel,     // int out_colormodel,
+                    0, //                                  int bg_color,
+                    file->vtracks[track].io_row_span,   /* For planar use the luma rowspan */
+                    file->vtracks[track].stream_row_span,       /* For planar use the luma rowspan */
+                    file->vtracks[track].io_row_span_uv, /* Chroma rowspan */
+                    file->vtracks[track].stream_row_span_uv      /* Chroma rowspan */);
+    result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, file->vtracks[track].temp_frame, track);
+    }
+  else
+    {
+    file->vtracks[track].stream_row_span    = file->vtracks[track].io_row_span;
+    file->vtracks[track].stream_row_span_uv = file->vtracks[track].io_row_span_uv;
+    result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, row_pointers, track);
+    }
+  return result;
+  }
 
 int quicktime_encode_video(quicktime_t *file, 
 	unsigned char **row_pointers, 
 	int track)
 {
 	int result;
-//printf("quicktime_encode_video 1 %p\n", ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video);
-	result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, row_pointers, track);
-//printf("quicktime_encode_video 2\n");
+
+        result = do_encode_video(file, row_pointers, track);
+        
         quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                               file->vtracks[track].current_position, 0);
         file->vtracks[track].current_position++;
@@ -588,10 +678,8 @@ int lqt_encode_video(quicktime_t *file,
                      int track, int64_t time)
 {
 	int result;
-//printf("quicktime_encode_video 1 %p\n", ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video);
-	result = ((quicktime_codec_t*)file->vtracks[track].codec)->encode_video(file, row_pointers, track);
-//printf("quicktime_encode_video 2\n");
-
+        result = do_encode_video(file, row_pointers, track);
+        
         if(file->vtracks[track].current_position)
           quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                                 file->vtracks[track].current_position - 1,

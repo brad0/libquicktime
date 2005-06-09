@@ -117,113 +117,115 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int u, v;
 	register int y1, y2, y3, y4;
 	int r, g, b;
-	int bytes_per_row = width * cmodel_calculate_pixelsize(file->vtracks[track].color_model);
-	initialize(vtrack, codec);
+	int bytes_per_row = width * 3;
+
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_RGB888;
+          return 0;
+          }
+        
+        initialize(vtrack, codec);
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-	switch(file->vtracks[track].color_model)
-	{
-		case BC_RGB888:
-			buffer = codec->work_buffer;
-			result = quicktime_read_data(file, buffer, bytes);
-			if(result) result = 0; else result = 1;
 
-			for(out_y = 0, in_y = 0; out_y < height; in_y++)
-			{
-				input_row = &buffer[in_y * codec->bytes_per_line];
-				row_pointer1 = row_pointers[out_y++];
+        buffer = codec->work_buffer;
+        result = quicktime_read_data(file, buffer, bytes);
+        if(result) result = 0; else result = 1;
+        
+        for(out_y = 0, in_y = 0; out_y < height; in_y++)
+          {
+          input_row = &buffer[in_y * codec->bytes_per_line];
+          row_pointer1 = row_pointers[out_y++];
+          
+          if(out_y < height)
+            row_pointer2 = row_pointers[out_y];
+          else
+            row_pointer2 = row_pointer1;
+          
+          out_y++;
+          for(x1 = 0, x2 = 0; x1 < bytes_per_row; )
+            {
+            u = (char)*input_row++;
+            v = (char)*input_row++;
+            y1 = *input_row++;
+            y2 = *input_row++;
+            y3 = *input_row++;
+            y4 = *input_row++;
+            y1 <<= 16;
+            y2 <<= 16;
+            y3 <<= 16;
+            y4 <<= 16;
 
-				if(out_y < height)
-					row_pointer2 = row_pointers[out_y];
-				else
-					row_pointer2 = row_pointer1;
+            /* Top left pixel */
+            r = ((y1 + codec->vtor[v]) >> 16);
+            g = ((y1 + codec->utog[u] + codec->vtog[v]) >> 16);
+            b = ((y1 + codec->utob[u]) >> 16);
+            if(r < 0) r = 0;
+            if(g < 0) g = 0;
+            if(b < 0) b = 0;
+            if(r > 255) r = 255;
+            if(g > 255) g = 255;
+            if(b > 255) b = 255;
 
-				out_y++;
-				for(x1 = 0, x2 = 0; x1 < bytes_per_row; )
-				{
-                                        u = (char)*input_row++;
-					v = (char)*input_row++;
-					y1 = *input_row++;
-					y2 = *input_row++;
-					y3 = *input_row++;
-					y4 = *input_row++;
-					y1 <<= 16;
-					y2 <<= 16;
-					y3 <<= 16;
-					y4 <<= 16;
+            row_pointer1[x1++] = r;
+            row_pointer1[x1++] = g;
+            row_pointer1[x1++] = b;
 
-		/* Top left pixel */
-					r = ((y1 + codec->vtor[v]) >> 16);
-					g = ((y1 + codec->utog[u] + codec->vtog[v]) >> 16);
-					b = ((y1 + codec->utob[u]) >> 16);
-					if(r < 0) r = 0;
-					if(g < 0) g = 0;
-					if(b < 0) b = 0;
-					if(r > 255) r = 255;
-					if(g > 255) g = 255;
-					if(b > 255) b = 255;
+            /* Top right pixel */
+            if(x1 < bytes_per_row)
+              {
+              r = ((y2 + codec->vtor[v]) >> 16);
+              g = ((y2 + codec->utog[u] + codec->vtog[v]) >> 16);
+              b = ((y2 + codec->utob[u]) >> 16);
+              if(r < 0) r = 0;
+              if(g < 0) g = 0;
+              if(b < 0) b = 0;
+              if(r > 255) r = 255;
+              if(g > 255) g = 255;
+              if(b > 255) b = 255;
 
-					row_pointer1[x1++] = r;
-					row_pointer1[x1++] = g;
-					row_pointer1[x1++] = b;
+              row_pointer1[x1++] = r;
+              row_pointer1[x1++] = g;
+              row_pointer1[x1++] = b;
+              }
 
-		/* Top right pixel */
-					if(x1 < bytes_per_row)
-					{
-						r = ((y2 + codec->vtor[v]) >> 16);
-						g = ((y2 + codec->utog[u] + codec->vtog[v]) >> 16);
-						b = ((y2 + codec->utob[u]) >> 16);
-						if(r < 0) r = 0;
-						if(g < 0) g = 0;
-						if(b < 0) b = 0;
-						if(r > 255) r = 255;
-						if(g > 255) g = 255;
-						if(b > 255) b = 255;
+            /* Bottom left pixel */
+            r = ((y3 + codec->vtor[v]) >> 16);
+            g = ((y3 + codec->utog[u] + codec->vtog[v]) >> 16);
+            b = ((y3 + codec->utob[u]) >> 16);
+            if(r < 0) r = 0;
+            if(g < 0) g = 0;
+            if(b < 0) b = 0;
+            if(r > 255) r = 255;
+            if(g > 255) g = 255;
+            if(b > 255) b = 255;
 
-						row_pointer1[x1++] = r;
-						row_pointer1[x1++] = g;
-						row_pointer1[x1++] = b;
-					}
+            row_pointer2[x2++] = r;
+            row_pointer2[x2++] = g;
+            row_pointer2[x2++] = b;
 
-		/* Bottom left pixel */
-					r = ((y3 + codec->vtor[v]) >> 16);
-					g = ((y3 + codec->utog[u] + codec->vtog[v]) >> 16);
-					b = ((y3 + codec->utob[u]) >> 16);
-					if(r < 0) r = 0;
-					if(g < 0) g = 0;
-					if(b < 0) b = 0;
-					if(r > 255) r = 255;
-					if(g > 255) g = 255;
-					if(b > 255) b = 255;
+            /* Bottom right pixel */
+            if(x2 < bytes_per_row)
+              {
+              r = ((y4 + codec->vtor[v]) >> 16);
+              g = ((y4 + codec->utog[u] + codec->vtog[v]) >> 16);
+              b = ((y4 + codec->utob[u]) >> 16);
+              if(r < 0) r = 0;
+              if(g < 0) g = 0;
+              if(b < 0) b = 0;
+              if(r > 255) r = 255;
+              if(g > 255) g = 255;
+              if(b > 255) b = 255;
 
-					row_pointer2[x2++] = r;
-					row_pointer2[x2++] = g;
-					row_pointer2[x2++] = b;
-
-		/* Bottom right pixel */
-					if(x2 < bytes_per_row)
-					{
-						r = ((y4 + codec->vtor[v]) >> 16);
-						g = ((y4 + codec->utog[u] + codec->vtog[v]) >> 16);
-						b = ((y4 + codec->utob[u]) >> 16);
-						if(r < 0) r = 0;
-						if(g < 0) g = 0;
-						if(b < 0) b = 0;
-						if(r > 255) r = 255;
-						if(g > 255) g = 255;
-						if(b > 255) b = 255;
-
-						row_pointer2[x2++] = r;
-						row_pointer2[x2++] = g;
-						row_pointer2[x2++] = b;
-					}
-				}
-			}
-			break;
-	}
-
-	return result;
+              row_pointer2[x2++] = r;
+              row_pointer2[x2++] = g;
+              row_pointer2[x2++] = b;
+              }
+            }
+          }
+        return result;
 }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
@@ -245,6 +247,13 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int r, g, b;
 	int bytes_per_row = width * 3;
 	quicktime_atom_t chunk_atom;
+
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_RGB888;
+          return 0;
+          }
+        
 	initialize(vtrack, codec);
         buffer = codec->work_buffer;
 

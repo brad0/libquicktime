@@ -1,6 +1,6 @@
 
 noinst_HEADERS = \
-libmjpeg.h jpeg.h
+libmjpeg.h 
 
 AM_CFLAGS = @JPEG_CFLAGS@
 

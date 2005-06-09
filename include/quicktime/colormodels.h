@@ -20,9 +20,9 @@
 #define COLORMODELS_H
 
 // Colormodels
-#define BC_TRANSPARENCY 0
+// #define BC_TRANSPARENCY 0
 #define BC_COMPRESSED   1
-#define BC_RGB8         2
+// #define BC_RGB8         2
 #define BC_RGB565       3
 #define BC_BGR565       4
 #define BC_BGR888       5
@@ -30,8 +30,8 @@
 // Working bitmaps are packed to simplify processing
 #define BC_RGB888       9
 #define BC_RGBA8888     10
-#define BC_ARGB8888     20
-#define BC_ABGR8888     21
+//#define BC_ARGB8888     20
+//#define BC_ABGR8888     21
 #define BC_RGB161616    11
 #define BC_RGBA16161616 12
 #define BC_YUV888       13
@@ -39,11 +39,11 @@
 #define BC_YUV161616    15
 #define BC_YUVA16161616 16
 #define BC_YUV422       19
-#define BC_A8           22
-#define BC_A16          23
-#define BC_YUV101010    24
-#define BC_VYU888       25
-#define BC_UYVA8888     26
+//#define BC_A8           22
+//#define BC_A16          23
+//#define BC_YUV101010    24
+//#define BC_VYU888       25
+//#define BC_UYVA8888     26
 // Planar
 #define BC_YUV420P      7
 #define BC_YUV422P      17
@@ -93,25 +93,19 @@ int cmodel_is_yuv(int colormodel);
 
 void cmodel_transfer(unsigned char **output_rows, /* Leave NULL if non existent */
 	unsigned char **input_rows,
-	unsigned char *out_y_plane, /* Leave NULL if non existent */
-	unsigned char *out_u_plane,
-	unsigned char *out_v_plane,
-	unsigned char *in_y_plane, /* Leave NULL if non existent */
-	unsigned char *in_u_plane,
-	unsigned char *in_v_plane,
 	int in_x,        /* Dimensions to capture from input frame */
 	int in_y, 
 	int in_w, 
 	int in_h,
-	int out_x,       /* Dimensions to project on output frame */
-	int out_y, 
 	int out_w, 
 	int out_h,
 	int in_colormodel, 
 	int out_colormodel,
 	int bg_color,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 	int in_rowspan,       /* For planar use the luma rowspan */
-	int out_rowspan);     /* For planar use the luma rowspan */
+        int out_rowspan,      /* For planar use the luma rowspan */
+        int in_rowspan_uv,    /* Chroma rowspan */
+        int out_rowspan_uv    /* Chroma rowspan */);     
 
 void cmodel_init_yuv(cmodel_yuv_t *yuv_table);
 void cmodel_delete_yuv(cmodel_yuv_t *yuv_table);

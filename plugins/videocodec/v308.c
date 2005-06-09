@@ -5,6 +5,7 @@
 #include "v308.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 
 typedef struct
@@ -34,7 +35,6 @@ static int reads_colormodel(quicktime_t *file,
 		colormodel == BC_YUVA8888 ||
 		colormodel == BC_YUV161616 ||
 		colormodel == BC_YUVA16161616 ||
-		colormodel == BC_RGB8 ||
 		colormodel == BC_RGB565 ||
 		colormodel == BC_BGR888 ||
 		colormodel == BC_BGR8888);
@@ -59,55 +59,44 @@ static int writes_colormodel(quicktime_t *file,
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int i;
+        uint8_t *in_ptr, *out_ptr;
+        int i, j;
 	int64_t bytes;
 	int result = 0;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_v308_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	unsigned char **input_rows;
-	if(!codec->work_buffer)
-		codec->work_buffer = malloc(vtrack->track->tkhd.track_width * 
-			vtrack->track->tkhd.track_height *
-			3);
 
-
-
+        if(!row_pointers)
+          {
+          //          vtrack->stream_cmodel = BC_VYU888;
+          vtrack->stream_cmodel = BC_YUV888;
+          return 0;
+          }
+        
+        if(!codec->work_buffer)
+          codec->work_buffer = malloc(width * height * 3);
+        
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 	result = !quicktime_read_data(file, codec->work_buffer, bytes);
 
-
-
-	input_rows = malloc(sizeof(unsigned char*) * height);
+        in_ptr = codec->work_buffer;
 	for(i = 0; i < height; i++)
-		input_rows[i] = codec->work_buffer + i * width * 3;
+          {
+          out_ptr = row_pointers[i];
+          for(j = 0; j < width; j++)
+            {
+            out_ptr[0] = in_ptr[1]; /* Y */
+            out_ptr[1] = in_ptr[2]; /* U */
+            out_ptr[2] = in_ptr[0]; /* V */
 
-	cmodel_transfer(row_pointers, 
-		input_rows,
-		row_pointers[0],
-		row_pointers[1],
-		row_pointers[2],
-		0,
-		0,
-		0,
-		file->in_x, 
-		file->in_y, 
-		file->in_w, 
-		file->in_h,
-		0, 
-		0, 
-		file->out_w, 
-		file->out_h,
-		BC_VYU888, 
-		file->vtracks[track].color_model,
-		0,
-		width,
-		file->out_w);
-
-	free(input_rows);
-
+            out_ptr += 3;
+            in_ptr += 3;
+            }
+          }
+        
 	return result;
 }
 
@@ -119,6 +108,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
+        uint8_t *in_ptr, *out_ptr;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_v308_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
@@ -126,41 +116,35 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int height = vtrack->track->tkhd.track_height;
 	int bytes = width * height * 3;
 	int result = 0;
-	unsigned char **output_rows;
-	int i;
+	int i, j;
 	quicktime_atom_t chunk_atom;
-	if(!codec->work_buffer)
-		codec->work_buffer = malloc(vtrack->track->tkhd.track_width * 
-			vtrack->track->tkhd.track_height *
-			3);
 
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_YUV888;
+          //          vtrack->stream_cmodel = BC_VYU888;
+          return 0;
+          }
+        
+        if(!codec->work_buffer)
+          codec->work_buffer = malloc(width * height * 3);
 
-	output_rows = malloc(sizeof(unsigned char*) * height);
+        out_ptr = codec->work_buffer;
 	for(i = 0; i < height; i++)
-		output_rows[i] = codec->work_buffer + i * width * 3;
+          {
+          in_ptr = row_pointers[i];
+          for(j = 0; j < width; j++)
+            {
+            out_ptr[1] = in_ptr[0]; /* Y */
+            out_ptr[2] = in_ptr[1]; /* U */
+            out_ptr[0] = in_ptr[2]; /* V */
+            
+            out_ptr += 3;
+            in_ptr += 3;
+            }
+          }
 
-	cmodel_transfer(output_rows, 
-		row_pointers,
-		0,
-		0,
-		0,
-		row_pointers[0],
-		row_pointers[1],
-		row_pointers[2],
-		0, 
-		0, 
-		width, 
-		height,
-		0, 
-		0, 
-		width, 
-		height,
-		file->vtracks[track].color_model,
-		BC_VYU888, 
-		0,
-		width,
-		width);
-
+        
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
 	result = !quicktime_write_data(file, codec->work_buffer, bytes);
 	quicktime_write_chunk_footer(file, 
@@ -171,7 +155,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	vtrack->current_chunk++;
 	
-	free(output_rows);
 	return result;
 }
 

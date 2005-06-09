@@ -67,11 +67,16 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int64_t bytes;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int width = vtrack->track->tkhd.track_width;
-	int height = vtrack->track->tkhd.track_height;
 	int64_t y_size, u_size, v_size;
 	int result = 0;
-	initialize(vtrack);
+
+        if(!row_pointers)
+          {
+          file->vtracks[track].stream_cmodel = BC_YUV420P;
+          return 0;
+          }
+        
+        initialize(vtrack);
 
 	y_size = codec->coded_h * codec->coded_w;
 	u_size = codec->coded_h * codec->coded_w / 4;
@@ -79,45 +84,10 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-
-
-	if(file->vtracks[track].color_model == BC_YUV420P && 
-			file->in_x == 0 && 
-			file->in_y == 0 && 
-			file->in_w == width &&
-			file->in_h == height &&
-			file->out_w == width &&
-			file->out_h == height)
-	{
-		result = !quicktime_read_data(file, row_pointers[0], y_size);
-		result = !quicktime_read_data(file, row_pointers[1], u_size);
-		result = !quicktime_read_data(file, row_pointers[2], v_size);
-	}
-	else
-	{
-		result = !quicktime_read_data(file, codec->work_buffer, bytes);
-		cmodel_transfer(row_pointers, 
-			0,
-			row_pointers[0],
-			row_pointers[1],
-			row_pointers[2],
-			codec->work_buffer,
-			codec->work_buffer + y_size,
-			codec->work_buffer + y_size + u_size,
-			file->in_x, 
-			file->in_y, 
-			file->in_w, 
-			file->in_h,
-			0, 
-			0, 
-			file->out_w, 
-			file->out_h,
-			BC_YUV420P, 
-			file->vtracks[track].color_model,
-			0,
-			codec->coded_w,
-			file->out_w);
-	}
+        
+        result = !quicktime_read_data(file, row_pointers[0], y_size);
+        result = !quicktime_read_data(file, row_pointers[1], u_size);
+        result = !quicktime_read_data(file, row_pointers[2], v_size);
 
 	return result;
 }
@@ -128,8 +98,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	quicktime_trak_t *trak = vtrack->track;
 	int result = 0;
-	int width = vtrack->track->tkhd.track_width;
-	int height = vtrack->track->tkhd.track_height;
 	int64_t y_size, u_size, v_size;
 	int64_t bytes = (int64_t)0;
 	quicktime_atom_t chunk_atom;
@@ -141,39 +109,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	bytes = quicktime_add3(y_size, u_size, v_size);
 
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
-	if(file->vtracks[track].color_model == BC_YUV420P)
-	{
-		result = !quicktime_write_data(file, row_pointers[0], y_size);
-		if(!result) result = !quicktime_write_data(file, row_pointers[1], u_size);
-		if(!result) result = !quicktime_write_data(file, row_pointers[2], v_size);
-	}
-	else
-	{
-		cmodel_transfer(0, 
-			row_pointers,
-			codec->work_buffer,
-			codec->work_buffer + y_size,
-			codec->work_buffer + y_size + u_size,
-			row_pointers[0],
-			row_pointers[1],
-			row_pointers[2],
-			0, 
-			0, 
-			width, 
-			height,
-			0, 
-			0, 
-			width, 
-			height,
-			file->vtracks[track].color_model,
-			BC_YUV420P, 
-			0,
-			width,
-			codec->coded_w);
-		result = !quicktime_write_data(file, codec->work_buffer, bytes);
-	}
-
-	quicktime_write_chunk_footer(file, 
+        result = !quicktime_write_data(file, row_pointers[0], y_size);
+        if(!result) result = !quicktime_write_data(file, row_pointers[1], u_size);
+        if(!result) result = !quicktime_write_data(file, row_pointers[2], v_size);
+        quicktime_write_chunk_footer(file, 
 		trak,
 		vtrack->current_chunk,
 		&chunk_atom, 

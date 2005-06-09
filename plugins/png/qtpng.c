@@ -69,43 +69,17 @@ static void flush_function(png_structp png_ptr)
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
-	int64_t i;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_trak_t *trak = vtrack->track;
 	png_structp png_ptr;
 	png_infop info_ptr;
 	png_infop end_info = 0;	
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
 	quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int cmodel = source_cmodel(file, track);
-	int use_temp = (cmodel != file->vtracks[track].color_model ||
-		file->in_x != 0 ||
-		file->in_y != 0 ||
-		file->in_w != width ||
-		file->in_h != height ||
-		file->out_w != width ||
-		file->out_h != height);
-	unsigned char **temp_rows = malloc(sizeof(unsigned char*) * height);
 
-	if(use_temp)
-	{
-		if(!codec->temp_frame)
-		{
-			codec->temp_frame = malloc(cmodel_calculate_datasize(width, 
-					height, 
-					-1, 
-					cmodel));
-		}
-		for(i = 0; i < height; i++)
-			temp_rows[i] = codec->temp_frame + 
-				cmodel_calculate_pixelsize(cmodel) * width * i;
-	}
-	else
-	{
-		for(i = 0; i < height; i++)
-			temp_rows[i] = row_pointers[i];
-	}
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = source_cmodel(file, track);
+          return 0;
+          }
 
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	codec->buffer_size = quicktime_frame_size(file, vtrack->current_position, track);
@@ -126,37 +100,10 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 		png_read_info(png_ptr, info_ptr);
 
 /* read the image */
-		png_read_image(png_ptr, temp_rows);
+		png_read_image(png_ptr, row_pointers);
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 	}
 
-	if(use_temp)
-	{
-		cmodel_transfer(row_pointers, 
-			temp_rows,
-			row_pointers[0],
-			row_pointers[1],
-			row_pointers[2],
-			0,
-			0,
-			0,
-			file->in_x, 
-			file->in_y, 
-			file->in_w, 
-			file->in_h,
-			0, 
-			0, 
-			file->out_w, 
-			file->out_h,
-			cmodel, 
-			file->vtracks[track].color_model,
-			0,
-			width,
-			file->out_w);
-	}
-
-
-	free(temp_rows);
 
 	return result;
 }

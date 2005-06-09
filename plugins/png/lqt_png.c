@@ -77,12 +77,9 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
  *  Return internal colormodel of the stream
  */
 
-extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
-                          int * exact)
+extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index)
   {
   int depth;
-  if(exact)
-    *exact = 1;
 
   if(codec_index == 0)
     {

@@ -48,6 +48,8 @@ int lqt_colormodel_is_planar(int colormodel);
 int lqt_colormodel_has_alpha(int colormodel);
 int lqt_colormodel_is_rgb(int colormodel);
 int lqt_colormodel_is_yuv(int colormodel);
+void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v);
+
   
 /* Query supported colormodels */
 
@@ -63,8 +65,7 @@ int lqt_get_colormodel(int index);
  *  it returns LQT_COLORMODEL_NONE then
  */
 
-int lqt_get_decoder_colormodel(quicktime_t * file, int track,
-                               int * exact);
+int lqt_get_decoder_colormodel(quicktime_t * file, int track);
 
 /*
  *   Convenience function for application developers:
@@ -76,6 +77,29 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track,
 
 int lqt_get_best_colormodel(quicktime_t * file, int track, int * supported);
 
+/*
+ *  Get the colormodel, which will be valid for the next decode() call.
+ *  By default, it will return the colormodel, which is read/written natively
+ *  by the codec
+ */
+  
+int lqt_get_cmodel(quicktime_t * file, int track);
+  
+/*
+ *  Allocate and free row_pointers for use with libquicktime
+ *  Rowspan can be <= 0, in this case it's set from width, and
+ *  the values will be updated with the row_span actually used
+ */
+
+  
+uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, int * rowspan_uv);
+
+void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan, int in_rowspan_uv,
+                   int out_rowspan, int out_rowspan_uv, int colormodel);
+  
+  
+void lqt_rows_free(uint8_t **);
+  
 
 /**************************************
  * Set streams for encoding
@@ -378,6 +402,9 @@ int lqt_qtvr_set_scene_track(quicktime_t  *file, int track);
 /* write a dummy node into panorama track */
 int lqt_qtvr_write_dummy_node(quicktime_t *file);
 
+
+  
+  
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

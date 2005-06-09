@@ -5,6 +5,7 @@
 #include "v410.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct
 {
@@ -33,7 +34,6 @@ static int reads_colormodel(quicktime_t *file,
 		colormodel == BC_YUVA8888 ||
 		colormodel == BC_YUV161616 ||
 		colormodel == BC_YUVA16161616 ||
-		colormodel == BC_RGB8 ||
 		colormodel == BC_RGB565 ||
 		colormodel == BC_BGR888 ||
 		colormodel == BC_BGR8888);
@@ -53,30 +53,26 @@ static int writes_colormodel(quicktime_t *file,
 		colormodel == BC_YUVA16161616);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int i;
+        uint32_t input_i;
+        uint8_t * in_ptr;
+        uint16_t * out_ptr;
+        int i, j;
 	int64_t bytes;
 	int result = 0;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_v410_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
-	unsigned char **input_rows;
-	if(!codec->work_buffer)
+
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_YUV161616;
+          return 0;
+          }
+
+        if(!codec->work_buffer)
 		codec->work_buffer = malloc(vtrack->track->tkhd.track_width * 
 			vtrack->track->tkhd.track_height *
 			4);
@@ -86,36 +82,23 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 	result = !quicktime_read_data(file, codec->work_buffer, bytes);
 
-
-
-	input_rows = malloc(sizeof(unsigned char*) * height);
+        in_ptr = codec->work_buffer;
+        
 	for(i = 0; i < height; i++)
-		input_rows[i] = codec->work_buffer + i * width * 4;
+          {
+          out_ptr = (uint16_t*)(row_pointers[i]);
+          for(j = 0; j < width; j++)
+            {
+            /* v410 is LITTLE endian!! */
+            input_i = in_ptr[0] | (in_ptr[1] << 8) | (in_ptr[2] << 16) | (in_ptr[3] << 24);
 
-	cmodel_transfer(row_pointers, 
-		input_rows,
-		row_pointers[0],
-		row_pointers[1],
-		row_pointers[2],
-		0,
-		0,
-		0,
-		file->in_x, 
-		file->in_y, 
-		file->in_w, 
-		file->in_h,
-		0, 
-		0, 
-		file->out_w, 
-		file->out_h,
-		BC_YUV101010, 
-		file->vtracks[track].color_model,
-		0,
-		width,
-		file->out_w);
+            *(out_ptr++) = (input_i & 0xffc00000) >> 16; /* Y */
+            *(out_ptr++) = (input_i & 0x3ff000) >> 6;    /* U */
+            *(out_ptr++) = (input_i & 0xffc) << 4;       /* V */
 
-	free(input_rows);
-
+            in_ptr += 4;
+            }
+          }
 	return result;
 }
 
@@ -134,41 +117,36 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int height = vtrack->track->tkhd.track_height;
 	int bytes = width * height * 4;
 	int result = 0;
-	unsigned char **output_rows;
-	int i;
+	int i, j;
 	quicktime_atom_t chunk_atom;
-	if(!codec->work_buffer)
-		codec->work_buffer = malloc(vtrack->track->tkhd.track_width * 
-			vtrack->track->tkhd.track_height *
-			4);
+        uint16_t * in_ptr;
+        uint8_t * out_ptr;
+        uint32_t output_i;
+        
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_YUV161616;
+          return 0;
+          }
 
+        if(!codec->work_buffer)
+          codec->work_buffer = malloc(width * height * 4);
 
-	output_rows = malloc(sizeof(unsigned char*) * height);
+        out_ptr = codec->work_buffer;
 	for(i = 0; i < height; i++)
-		output_rows[i] = codec->work_buffer + i * width * 4;
-
-	cmodel_transfer(output_rows, 
-		row_pointers,
-		0,
-		0,
-		0,
-		row_pointers[0],
-		row_pointers[1],
-		row_pointers[2],
-		0, 
-		0, 
-		width, 
-		height,
-		0, 
-		0, 
-		width, 
-		height,
-                file->vtracks[track].color_model,
-		BC_YUV101010, 
-		0,
-		width,
-		width);
-
+          {
+          in_ptr = (uint16_t*)(row_pointers[i]);
+          for(j = 0; j < width; j++)
+            {
+            output_i = ((in_ptr[0] & 0xffc0) << 16) | ((in_ptr[1] & 0xffc0) << 6) | ((in_ptr[2] & 0xffc0) >> 4);
+            *(out_ptr++) = (output_i & 0xff);
+            *(out_ptr++) = (output_i & 0xff00) >> 8;
+            *(out_ptr++) = (output_i & 0xff0000) >> 16;
+            *(out_ptr++) = (output_i & 0xff000000) >> 24;
+            in_ptr += 3;
+            }
+          }
+        
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
 	result = !quicktime_write_data(file, codec->work_buffer, bytes);
 	quicktime_write_chunk_footer(file, 
@@ -180,7 +158,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	vtrack->current_chunk++;
 	
-	free(output_rows);
 	return result;
 }
 

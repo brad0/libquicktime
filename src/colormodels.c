@@ -106,8 +106,6 @@ int cmodel_components(int colormodel)
 {
 	switch(colormodel)
 	{
-		case BC_A8:           return 1; break;
-		case BC_A16:          return 1; break;
 		case BC_RGB888:       return 3; break;
 		case BC_RGBA8888:     return 4; break;
 		case BC_RGB161616:    return 3; break;
@@ -116,7 +114,6 @@ int cmodel_components(int colormodel)
 		case BC_YUVA8888:     return 4; break;
 		case BC_YUV161616:    return 3; break;
 		case BC_YUVA16161616: return 4; break;
-		case BC_YUV101010:    return 3; break;
 	}
 	return 1;
 }
@@ -125,19 +122,13 @@ int cmodel_calculate_pixelsize(int colormodel)
 {
 	switch(colormodel)
 	{
-		case BC_A8:           return 1; break;
-		case BC_A16:          return 2; break;
-		case BC_TRANSPARENCY: return 1; break;
 		case BC_COMPRESSED:   return 1; break;
-		case BC_RGB8:         return 1; break;
 		case BC_RGB565:       return 2; break;
 		case BC_BGR565:       return 2; break;
 		case BC_BGR888:       return 3; break;
 		case BC_BGR8888:      return 4; break;
 // Working bitmaps are packed to simplify processing
 		case BC_RGB888:       return 3; break;
-		case BC_ARGB8888:     return 4; break;
-		case BC_ABGR8888:     return 4; break;
 		case BC_RGBA8888:     return 4; break;
 		case BC_RGB161616:    return 6; break;
 		case BC_RGBA16161616: return 8; break;
@@ -145,9 +136,6 @@ int cmodel_calculate_pixelsize(int colormodel)
 		case BC_YUVA8888:     return 4; break;
 		case BC_YUV161616:    return 6; break;
 		case BC_YUVA16161616: return 8; break;
-		case BC_YUV101010:    return 4; break;
-		case BC_VYU888:       return 3; break;
-		case BC_UYVA8888:     return 4; break;
 // Planar
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
@@ -163,8 +151,6 @@ int cmodel_calculate_max(int colormodel)
 	switch(colormodel)
 	{
 // Working bitmaps are packed to simplify processing
-		case BC_A8:           return 0xff; break;
-		case BC_A16:          return 0xffff; break;
 		case BC_RGB888:       return 0xff; break;
 		case BC_RGBA8888:     return 0xff; break;
 		case BC_RGB161616:    return 0xffff; break;
@@ -238,25 +224,19 @@ static void get_scale_tables(int **column_table,
 
 void cmodel_transfer(unsigned char **output_rows, 
 	unsigned char **input_rows,
-	unsigned char *out_y_plane,
-	unsigned char *out_u_plane,
-	unsigned char *out_v_plane,
-	unsigned char *in_y_plane,
-	unsigned char *in_u_plane,
-	unsigned char *in_v_plane,
 	int in_x, 
 	int in_y, 
 	int in_w, 
 	int in_h,
-	int out_x, 
-	int out_y, 
 	int out_w, 
 	int out_h,
 	int in_colormodel, 
 	int out_colormodel,
 	int bg_color,
 	int in_rowspan,
-	int out_rowspan)
+        int out_rowspan,
+	int in_rowspan_uv,
+	int out_rowspan_uv)
 {
 	int *column_table;
 	int *row_table;
@@ -280,10 +260,8 @@ void cmodel_transfer(unsigned char **output_rows,
 	scale = (out_w != in_w) || (in_x != 0);
 	get_scale_tables(&column_table, &row_table, 
 		in_x, in_y, in_x + in_w, in_y + in_h,
-		out_x, out_y, out_x + out_w, out_y + out_h);
+		0, 0, out_w, out_h);
 
-//printf("cmodel_transfer %d %d %d,%d %d,%d %d,%d %d,%d\n", 
-//	in_colormodel, out_colormodel, out_x, out_y, out_w, out_h, in_x, in_y, in_w, in_h);
 
 // Handle planar cmodels separately
 	switch(in_colormodel)
@@ -292,18 +270,10 @@ void cmodel_transfer(unsigned char **output_rows,
 		case BC_YUV422P:
 			cmodel_yuv420p(output_rows,  \
 				input_rows, \
-				out_y_plane, \
-				out_u_plane, \
-				out_v_plane, \
-				in_y_plane, \
-				in_u_plane, \
-				in_v_plane, \
 				in_x,  \
 				in_y,  \
 				in_w,  \
 				in_h, \
-				out_x,  \
-				out_y,  \
 				out_w,  \
 				out_h, \
 				in_colormodel,  \
@@ -311,6 +281,8 @@ void cmodel_transfer(unsigned char **output_rows,
 				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
+				in_rowspan_uv, \
+				out_rowspan_uv, \
 				scale, \
 				out_pixelsize, \
 				in_pixelsize, \
@@ -323,18 +295,10 @@ void cmodel_transfer(unsigned char **output_rows,
                 case BC_YUV444P:
                         cmodel_yuv444p(output_rows,  \
                                 input_rows, \
-                                out_y_plane, \
-                                out_u_plane, \
-                                out_v_plane, \
-                                in_y_plane, \
-                                in_u_plane, \
-                                in_v_plane, \
                                 in_x,  \
                                 in_y,  \
                                 in_w,  \
                                 in_h, \
-                                out_x,  \
-                                out_y,  \
                                 out_w,  \
                                 out_h, \
                                 in_colormodel,  \
@@ -342,6 +306,8 @@ void cmodel_transfer(unsigned char **output_rows,
                                 bg_color, \
                                 in_rowspan, \
                                 out_rowspan, \
+                                in_rowspan_uv, \
+                                out_rowspan_uv, \
                                 scale, \
                                 out_pixelsize, \
                                 in_pixelsize, \
@@ -355,18 +321,10 @@ void cmodel_transfer(unsigned char **output_rows,
 		case BC_YUV422:
 			cmodel_yuv422(output_rows,  \
 				input_rows, \
-				out_y_plane, \
-				out_u_plane, \
-				out_v_plane, \
-				in_y_plane, \
-				in_u_plane, \
-				in_v_plane, \
 				in_x,  \
 				in_y,  \
 				in_w,  \
 				in_h, \
-				out_x,  \
-				out_y,  \
 				out_w,  \
 				out_h, \
 				in_colormodel,  \
@@ -374,6 +332,8 @@ void cmodel_transfer(unsigned char **output_rows,
 				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
+				in_rowspan_uv, \
+				out_rowspan_uv, \
 				scale, \
 				out_pixelsize, \
 				in_pixelsize, \
@@ -387,18 +347,10 @@ void cmodel_transfer(unsigned char **output_rows,
 		default:
 			cmodel_default(output_rows,  \
 				input_rows, \
-				out_y_plane, \
-				out_u_plane, \
-				out_v_plane, \
-				in_y_plane, \
-				in_u_plane, \
-				in_v_plane, \
 				in_x,  \
 				in_y,  \
 				in_w,  \
 				in_h, \
-				out_x,  \
-				out_y,  \
 				out_w,  \
 				out_h, \
 				in_colormodel,  \
@@ -406,6 +358,8 @@ void cmodel_transfer(unsigned char **output_rows,
 				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
+				in_rowspan_uv, \
+				out_rowspan_uv, \
 				scale, \
 				out_pixelsize, \
 				in_pixelsize, \

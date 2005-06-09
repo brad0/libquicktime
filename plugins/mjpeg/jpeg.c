@@ -4,8 +4,28 @@
 #include <quicktime/colormodels.h>
 #include "funcprotos.h"
 #include <string.h>
-#include "jpeg.h"
 #include <quicktime/quicktime.h>
+
+#include "libmjpeg.h"
+
+// Jpeg types
+#define JPEG_PROGRESSIVE 0
+#define JPEG_MJPA 1
+
+/* MJPB isn't supported anyway */
+// #define JPEG_MJPB 2 
+
+typedef struct
+  {
+  unsigned char *buffer;
+  long buffer_allocated;
+  long buffer_size;
+  mjpeg_t *mjpeg;
+  int jpeg_type;
+  unsigned char *temp_video;
+  
+  int have_frame;
+  } quicktime_jpeg_codec_t;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
@@ -41,134 +61,63 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 */
 
 static int decode(quicktime_t *file, 
-	unsigned char **row_pointers, 
-	int track)
-{
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	quicktime_trak_t *trak = vtrack->track;
-	mjpeg_t *mjpeg = codec->mjpeg;
-	long size, field2_offset;
-	int track_height = trak->tkhd.track_height;
-	int track_width = trak->tkhd.track_width;
-	int result = 0;
-//printf("decode 1\n");
+                  unsigned char **row_pointers, 
+                  int track)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  mjpeg_t *mjpeg = codec->mjpeg;
+  long size, field2_offset;
+  int result = 0;
+  
+  if(!codec->have_frame)
+    {
+    quicktime_set_video_position(file, vtrack->current_position, track);
+    size = quicktime_frame_size(file, vtrack->current_position, track);
+    codec->buffer_size = size;
+    //printf("decode 1 %x\n", size);
+    
+    if(size > codec->buffer_allocated)
+      {
+      codec->buffer_allocated = size;
+      codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
+      }
+    
+    result = !quicktime_read_data(file, codec->buffer, size);
+    if(result)
+      return result;
+    
+    if(mjpeg_get_fields(mjpeg) == 2)
+      {
+      field2_offset = mjpeg_get_quicktime_field2(codec->buffer, size);
+      }
+    else
+      field2_offset = 0;
+    
+    mjpeg_decompress(codec->mjpeg, 
+                     codec->buffer, 
+                     size,
+                     field2_offset);
+    
+    if(!row_pointers)
+      {
+      /* Detect colormodel and return */
+      vtrack->stream_cmodel = mjpeg->jpeg_color_model;
+      codec->have_frame = 1;
+      return 0;
+      }
+    }
 
-	mjpeg_set_cpus(codec->mjpeg, file->cpus);
-	if(file->vtracks[track].row_span) 
-		mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].row_span);
-	else
-		mjpeg_set_rowspan(codec->mjpeg, 0);
-
-	quicktime_set_video_position(file, vtrack->current_position, track);
-	size = quicktime_frame_size(file, vtrack->current_position, track);
-	codec->buffer_size = size;
-//printf("decode 1 %x\n", size);
-
-	if(size > codec->buffer_allocated)
-	{
-		codec->buffer_allocated = size;
-		codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
-	}
-
-//printf("decode 2 %llx %02x %02x\n", 
-//	quicktime_chunk_to_offset(trak, vtrack->current_position), codec->buffer[0], codec->buffer[1]);
-	result = !quicktime_read_data(file, codec->buffer, size);
-//printf("decode 3 %x\n", size);
-
-	if(!result)
-	{
-		if(mjpeg_get_fields(mjpeg) == 2)
-		{
-//printf("decode 4\n");
-			field2_offset = mjpeg_get_quicktime_field2(codec->buffer, size);
-//printf("decode 5\n");
-		}
-		else
-			field2_offset = 0;
-
-/*
- * printf("decode 6 %02x%02x %02x%02x\n", codec->buffer[0], codec->buffer[1],
- * 	codec->buffer[field2_offset], codec->buffer[field2_offset + 1]);
- */
-//printf("decode 6 %d %d %d %d %d %d\n",
-//	file->in_x, file->in_y, file->in_w, file->in_h, file->out_w, file->out_h);
-
- 		if(file->in_x == 0 && 
-			file->in_y == 0 && 
-			file->in_w == track_width &&
-			file->in_h == track_height &&
-			file->out_w == track_width &&
-			file->out_h == track_height)
-		{
-//printf("decode 6\n");
-			mjpeg_decompress(codec->mjpeg, 
-				codec->buffer, 
-				size,
-				field2_offset,  
-				row_pointers, 
-				row_pointers[0], 
-				row_pointers[1], 
-				row_pointers[2],
-				file->vtracks[track].color_model,
-				file->cpus);
-//printf("decode 7\n");
-		}
-		else
-		{
-			int i;
-			unsigned char **temp_rows;
-			int temp_cmodel = BC_YUV888;
-			int temp_rowsize = cmodel_calculate_pixelsize(temp_cmodel) * track_width;
-
-//printf("decode 8\n");
-			if(!codec->temp_video)
-				codec->temp_video = malloc(temp_rowsize * track_height);
-			temp_rows = malloc(sizeof(unsigned char*) * track_height);
-			for(i = 0; i < track_height; i++)
-				temp_rows[i] = codec->temp_video + i * temp_rowsize;
-
-			mjpeg_decompress(codec->mjpeg, 
-				codec->buffer, 
-				size,
-				field2_offset,  
-				temp_rows, 
-				temp_rows[0], 
-				temp_rows[1], 
-				temp_rows[2],
-				temp_cmodel,
-				file->cpus);
-
-			cmodel_transfer(row_pointers, 
-				temp_rows,
-				row_pointers[0],
-				row_pointers[1],
-				row_pointers[2],
-				temp_rows[0],
-				temp_rows[1],
-				temp_rows[2],
-				file->in_x, 
-				file->in_y, 
-				file->in_w, 
-				file->in_h,
-				0, 
-				0, 
-				file->out_w, 
-				file->out_h,
-				temp_cmodel, 
-				file->vtracks[track].color_model,
-				0,
-				track_width,
-				file->out_w);
-
-			free(temp_rows);
-//printf("decode 9\n");
-		}
-	}
-//printf("decode 8\n");
-
-	return result;
-}
+  if(file->vtracks[track].stream_row_span) 
+    mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
+  else
+    mjpeg_set_rowspan(codec->mjpeg, 0, 0);
+    
+  mjpeg_get_frame(codec->mjpeg, row_pointers);
+  codec->have_frame = 0;
+  
+  return result;
+  }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
@@ -178,16 +127,24 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int result = 0;
 	long field2_offset;
         quicktime_atom_t chunk_atom;
-	mjpeg_set_cpus(codec->mjpeg, file->cpus);
 
-	mjpeg_compress(codec->mjpeg, 
-		row_pointers, 
-		row_pointers[0], 
-		row_pointers[1], 
-		row_pointers[2],
-		file->vtracks[track].color_model,
-		file->cpus);
-	if(codec->jpeg_type == JPEG_MJPA) 
+        if(!row_pointers)
+          {
+          if(codec->jpeg_type == JPEG_PROGRESSIVE)
+            vtrack->stream_cmodel = BC_YUV420P;
+          else
+            vtrack->stream_cmodel = BC_YUV422P;
+          return 0;
+          }
+
+        if(file->vtracks[track].stream_row_span) 
+          mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
+        else
+          mjpeg_set_rowspan(codec->mjpeg, 0, 0);
+                
+	mjpeg_compress(codec->mjpeg, row_pointers);
+
+        if(codec->jpeg_type == JPEG_MJPA) 
 		mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,
 			&codec->mjpeg->output_size,
 			&codec->mjpeg->output_allocated,
@@ -280,13 +237,18 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_jpeg_codec_t *codec;
-	int jpeg_type=0;
+	int jpeg_type=0, num_fields = 0;
 
 	if(quicktime_match_32(compressor, QUICKTIME_JPEG))
-		jpeg_type = JPEG_PROGRESSIVE;
+          {
+          jpeg_type = JPEG_PROGRESSIVE;
+          num_fields = 1;
+          }
 	if(quicktime_match_32(compressor, QUICKTIME_MJPA))
-		jpeg_type = JPEG_MJPA;
-
+          {
+          num_fields = 2;
+          jpeg_type = JPEG_MJPA;
+          }
 /* Init public items */
 	((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_jpeg_codec_t));
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
@@ -301,15 +263,15 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 /* Init private items */
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	codec->mjpeg = mjpeg_new(vtrack->track->tkhd.track_width, 
-		vtrack->track->tkhd.track_height, 
-		1 + (jpeg_type == JPEG_MJPA || jpeg_type == JPEG_MJPB));
+                                 vtrack->track->tkhd.track_height, 
+                                 1 + num_fields);
 	codec->jpeg_type = jpeg_type;
-
-/* This information must be stored in the initialization routine because of */
-/* direct copy rendering.  Quicktime for Windows must have this information. */
+        
+        /* This information must be stored in the initialization routine because of */
+        /* direct copy rendering.  Quicktime for Windows must have this information. */
 	if(quicktime_match_32(compressor, QUICKTIME_MJPA) && !vtrack->track->mdia.minf.stbl.stsd.table[0].fields)
-	{
-		vtrack->track->mdia.minf.stbl.stsd.table[0].fields = 2;
-		vtrack->track->mdia.minf.stbl.stsd.table[0].field_dominance = 1;
-	}
+          {
+          vtrack->track->mdia.minf.stbl.stsd.table[0].fields = 2;
+          vtrack->track->mdia.minf.stbl.stsd.table[0].field_dominance = 1;
+          }
 }

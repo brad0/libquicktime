@@ -1343,8 +1343,9 @@ int main(int argc, char *argv[])
 	xv_init();
     if(qt_hasvideo) {
         /* Decide about the colormodel */
+        fprintf(stderr, "Stream colormodel %s, ", lqt_colormodel_to_string(lqt_get_cmodel(qt, 0)));
         qt_cmodel = lqt_get_best_colormodel(qt, 0, qt_cmodels);
-        fprintf(stderr, "Using colormodel %s\n", lqt_colormodel_to_string(qt_cmodel));
+        fprintf(stderr, "using %s\n", lqt_colormodel_to_string(qt_cmodel));
         /* Set decoding colormodel */
         lqt_set_cmodel(qt, 0, qt_cmodel);
     }

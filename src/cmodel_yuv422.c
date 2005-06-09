@@ -34,11 +34,6 @@
  \
 	switch(out_colormodel) \
 	{ \
-		case BC_RGB8: \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_RGB8((output), (input), (input_column)); \
-			TRANSFER_FRAME_TAIL \
-			break; \
 		case BC_BGR565: \
 		case BC_RGB565: \
 			TRANSFER_FRAME_HEAD \

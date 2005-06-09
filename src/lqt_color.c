@@ -19,17 +19,13 @@ typedef struct
 
 static lqt_colormodel_tab colormodel_table[] =
   {
-    { "Transparency",            BC_TRANSPARENCY },
     { "Compressed",              BC_COMPRESSED },
-    { "8 bpp BGB",               BC_RGB8 },
     { "16 bpp RGB 565",          BC_RGB565 },
     { "16 bpp BGR 565",          BC_BGR565 },
     { "24 bpp BGR",              BC_BGR888 },
     { "32 bpp BGR",              BC_BGR8888 },
     { "24 bpp RGB",              BC_RGB888 },
     { "32 bpp RGBA",             BC_RGBA8888 },
-    { "32 bpp ARGB",             BC_ARGB8888 },
-    { "32 bpp ABGR",             BC_ABGR8888  },  
     { "48 bpp RGB",              BC_RGB161616  }, 
     { "64 bpp RGBA",             BC_RGBA16161616  },
     { "24 bpp YUV",              BC_YUV888  },
@@ -37,11 +33,6 @@ static lqt_colormodel_tab colormodel_table[] =
     { "48 bpp YUV",              BC_YUV161616  }, 
     { "64 bpp YUVA",             BC_YUVA16161616  },
     { "YUV 4:2:2 packed (YUY2)", BC_YUV422  },
-    { "8 bpp Alpha",             BC_A8  },
-    { "16 bpp Alpha",            BC_A16 },
-    { "30 bpp YUV",              BC_YUV101010 },
-    { "24 bpp VYU",              BC_VYU888 }, 
-    { "32 bpp UYVA",             BC_UYVA8888 },
     { "YUV 4:2:0 planar",        BC_YUV420P },
     { "YUV 4:2:2 planar",        BC_YUV422P },
     { "YUV 4:4:4 planar",        BC_YUV444P },
@@ -60,9 +51,6 @@ int lqt_colormodel_is_yuv(int colormodel)
     case BC_YUV161616: 
     case BC_YUVA16161616:
     case BC_YUV422:
-    case BC_YUV101010:
-    case BC_VYU888:
-    case BC_UYVA8888:
     case BC_YUV420P:
     case BC_YUV422P:
     case BC_YUV444P:
@@ -77,15 +65,12 @@ int lqt_colormodel_is_rgb(int colormodel)
   {
   switch(colormodel)
     {
-    case BC_RGB8:
     case BC_RGB565:
     case BC_BGR565:
     case BC_BGR888:
     case BC_BGR8888:
     case BC_RGB888:
     case BC_RGBA8888:
-    case BC_ARGB8888:
-    case BC_ABGR8888:  
     case BC_RGB161616:
     case BC_RGBA16161616:
       return 1;
@@ -99,14 +84,9 @@ int lqt_colormodel_has_alpha(int colormodel)
   switch(colormodel)
     {
     case BC_RGBA8888:
-    case BC_ARGB8888:
-    case BC_ABGR8888:  
     case BC_RGBA16161616:
     case BC_YUVA8888:   
     case BC_YUVA16161616:
-    case BC_A8:
-    case BC_A16:
-    case BC_UYVA8888:
       return 1;
     default:
       return 0;
@@ -128,6 +108,32 @@ int lqt_colormodel_is_planar(int colormodel)
   
   }
 
+/* Get chroma subsampling factors */
+
+void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v)
+  {
+  switch(colormodel)
+    {
+    case BC_YUV420P:
+      *sub_h = 2;
+      *sub_v = 2;
+      break;
+    case BC_YUV422P:
+      *sub_h = 2;
+      *sub_v = 1;
+      break;
+    case BC_YUV411P:
+      *sub_h = 4;
+      *sub_v = 1;
+      break;
+    default:
+      *sub_h = 1;
+      *sub_v = 1;
+      break;
+    }
+
+  }
+
 
 /*
  *   Return the bits of a colormodel. This is used only internally
@@ -140,31 +146,21 @@ static int colormodel_get_bits(int colormodel)
   {
   switch(colormodel)
     {
-    case BC_RGB8:
-    case BC_A8:
-      return 8;
     case BC_RGB565:
     case BC_BGR565:
-    case BC_A16:
       return 16;
     case BC_BGR888:
     case BC_BGR8888:
     case BC_RGB888:
     case BC_YUV888:
     case BC_YUV422:
-    case BC_VYU888: 
     case BC_YUV420P:
     case BC_YUV422P:
     case BC_YUV444P:
     case BC_YUV411P:
       return 24;
-    case BC_YUV101010:
-      return 30;
     case BC_RGBA8888:
-    case BC_ARGB8888:
-    case BC_ABGR8888:  
     case BC_YUVA8888:   
-    case BC_UYVA8888:
       return 32;
     case BC_RGB161616: 
     case BC_YUV161616: 
@@ -257,50 +253,9 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
   return 1;
   }
 
-static int lqt_get_decoder_colormodel_private(quicktime_t * file, int track,
-                                              int * exact,
-                                              lqt_codec_info_t ** codec_info)
+int lqt_get_decoder_colormodel(quicktime_t * file, int track)
   {
-  int ret = LQT_COLORMODEL_NONE;
-  quicktime_codec_t * codec =
-    (quicktime_codec_t *)(file->vtracks[track].codec);
-  void * module = codec->module;
-  int module_index;
-  int (*get_stream_colormodel)(quicktime_t*,int, int, int *);
-  ret = codec_info[0]->decoding_colormodel;
-
-  /* Check, if the decoder has a fixed colormodel */
-  
-  if(ret != LQT_COLORMODEL_NONE)
-    {
-    if(exact)
-      *exact = 1;
-    return ret;
-    }
-
-  /* Next try: get colormodel from module */
-
-  get_stream_colormodel =
-    (int (*)(quicktime_t*,int, int, int *))(dlsym(module, "get_stream_colormodel"));
-  
-  if(!get_stream_colormodel)
-    return LQT_COLORMODEL_NONE;
-  
-  module_index = codec_info[0]->module_index;
-  ret = get_stream_colormodel(file, track, module_index, exact);
-  return ret;
-  }
-
-int lqt_get_decoder_colormodel(quicktime_t * file, int track,
-                               int * exact)
-  {
-  int ret;
-  lqt_codec_info_t ** codec_info = lqt_video_codec_from_file(file, track);
-
-  ret = lqt_get_decoder_colormodel_private(file, track, exact, codec_info);
-
-  lqt_destroy_codec_info(codec_info);
-  return ret;
+  return file->vtracks[track].stream_cmodel;
   }
 
 static int
@@ -314,10 +269,8 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
   int conversion_price;
   
   int decoder_colormodel = LQT_COLORMODEL_NONE;
-  int decoder_colormodel_exact = 1;
 
-  decoder_colormodel = lqt_get_decoder_colormodel(file, track,
-                                                  &decoder_colormodel_exact);
+  decoder_colormodel = lqt_get_decoder_colormodel(file, track);
   
   /* Check, if the decoder colormodel is directly supported */
 
@@ -491,4 +444,175 @@ const char * lqt_get_colormodel_string(int index)
 int lqt_get_colormodel(int index)
   {
   return colormodel_table[index].colormodel;
+  }
+
+static int get_bytes_per_line(int colormodel, int width)
+  {
+  switch(colormodel)
+    {
+    case BC_RGB565:
+    case BC_BGR565:
+    case BC_YUV422:
+      return width * 2;
+      break;
+    case BC_BGR888:
+    case BC_RGB888:
+    case BC_YUV888:
+      return width * 3;
+      break;
+    case BC_BGR8888:
+    case BC_RGBA8888:
+    case BC_YUVA8888:
+      return width * 4;
+      break;
+      
+    case BC_RGB161616:
+    case BC_YUV161616:
+      return width * 6;
+      break;
+    case BC_RGBA16161616:
+    case BC_YUVA16161616:
+      return width * 8;
+      break;
+    default:
+      return width;
+    }
+  }
+
+/* Allocate and free row_pointers for use with libquicktime */
+
+uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, int * rowspan_uv)
+  {
+  int bytes_per_line = 0;
+  int i;
+  int y_size = 0, uv_size = 0;
+  uint8_t ** video_buffer;
+  /* Allocate frame buffer */
+
+  if(cmodel_is_planar(colormodel))
+    {
+    switch(colormodel)
+      {
+      case BC_YUV420P:
+        if(*rowspan <= 0)
+          *rowspan = width;
+
+        if(*rowspan_uv <= 0)
+          *rowspan_uv = *rowspan / 2;
+
+        y_size = *rowspan * height;
+        uv_size = (*rowspan_uv * height)/2;
+        break;
+      case BC_YUV411P:
+        if(*rowspan <= 0)
+          *rowspan = width;
+
+        if(*rowspan_uv <= 0)
+          *rowspan_uv = *rowspan / 4;
+
+        y_size = *rowspan * height;
+        uv_size = *rowspan_uv * height;
+        
+        break;
+      case BC_YUV422P:
+        if(*rowspan <= 0)
+          *rowspan = width;
+
+        if(*rowspan_uv <= 0)
+          *rowspan_uv = *rowspan / 2;
+        
+        y_size = *rowspan * height;
+        uv_size = (*rowspan_uv * height);
+        
+        break;
+      case BC_YUV444P:
+        if(*rowspan <= 0)
+          *rowspan = width;
+        if(*rowspan_uv <= 0)
+          *rowspan_uv = *rowspan;
+        y_size = *rowspan * height;
+        uv_size = (*rowspan_uv * height);
+      }
+    video_buffer    = malloc(3 * sizeof(unsigned char*));
+    video_buffer[0] = malloc(y_size + 2 * uv_size);
+    video_buffer[1] = &(video_buffer[0][y_size]);
+    video_buffer[2] = &(video_buffer[0][y_size+uv_size]);
+    }
+  else
+    {
+    video_buffer    = malloc(height * sizeof(unsigned char*));
+
+    bytes_per_line = get_bytes_per_line(colormodel, width);
+    
+    if(*rowspan <= 0)
+      *rowspan = bytes_per_line;
+        
+    video_buffer[0] = malloc(height * bytes_per_line);
+    for(i = 1; i < height; i++)
+      video_buffer[i] = &(video_buffer[0][i*bytes_per_line]);
+    
+    }
+  return video_buffer;
+  }
+
+void lqt_rows_free(uint8_t ** rows)
+  {
+  free(rows[0]);
+  free(rows);
+  }
+
+void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan, int in_rowspan_uv,
+                   int out_rowspan, int out_rowspan_uv, int colormodel)
+  {
+  uint8_t * src_ptr, *dst_ptr;
+  int i;
+  int sub_h = 0, sub_v = 0;
+
+  int bytes_per_line;
+#if 0
+  fprintf(stderr, "lqt_rows_copy: w: %d, h: %d, in_rowspan: %d, in_rowspan_uv: %d, out_rowspan: %d, out_rowspan_uv: %d, colormodel: %s\n",
+          width, height, in_rowspan, in_rowspan_uv, out_rowspan, out_rowspan_uv, lqt_colormodel_to_string(colormodel));
+#endif
+  if(lqt_colormodel_is_planar(colormodel))
+    {
+    lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
+
+    /* Luma plane */
+        
+    src_ptr = in_rows[0];
+    dst_ptr = out_rows[0];
+    for(i = 0; i < height; i++)
+      {
+      memcpy(dst_ptr, src_ptr, width);
+      src_ptr += in_rowspan;
+      dst_ptr += out_rowspan;
+      }
+    /* Chroma planes */
+
+    src_ptr = in_rows[1];
+    dst_ptr = out_rows[1];
+    for(i = 0; i < height/sub_v; i++)
+      {
+      memcpy(dst_ptr, src_ptr, width/sub_h);
+      src_ptr += in_rowspan_uv;
+      dst_ptr += out_rowspan_uv;
+      }
+
+    src_ptr = in_rows[2];
+    dst_ptr = out_rows[2];
+    for(i = 0; i < height/sub_v; i++)
+      {
+      memcpy(dst_ptr, src_ptr, width/sub_h);
+      src_ptr += in_rowspan_uv;
+      dst_ptr += out_rowspan_uv;
+      }
+    
+    }
+  else /* Packed */
+    {
+    bytes_per_line = get_bytes_per_line(colormodel, width);
+    for(i = 0; i < height; i++)
+      memcpy(out_rows[i], in_rows[i], bytes_per_line);
+    }
+  
   }

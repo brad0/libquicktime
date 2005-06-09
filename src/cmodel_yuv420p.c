@@ -31,14 +31,6 @@
 		case BC_YUV420P: \
 			switch(out_colormodel) \
 			{ \
-				case BC_RGB8: \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_RGB8((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
 				case BC_BGR565: \
 					TRANSFER_YUV420P_IN_HEAD \
 					transfer_YUV422P_to_BGR565((output), \
@@ -74,12 +66,12 @@
 				case BC_YUV420P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_out_w; \
-						unsigned char *output_u = out_u_plane + i / 2 * total_out_w / 2; \
-						unsigned char *output_v = out_v_plane + i / 2 * total_out_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] / 2 * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] / 2 * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i / 2 * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i / 2 * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] / 2 * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] / 2 * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -104,12 +96,12 @@
 				case BC_YUV422P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_out_w; \
-						unsigned char *output_u = out_u_plane + i * total_out_w / 2; \
-						unsigned char *output_v = out_v_plane + i * total_out_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] / 2 * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] / 2 * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] / 2 * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] / 2 * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -125,12 +117,12 @@
 				case BC_YUV444P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_out_w; \
-						unsigned char *output_u = out_u_plane + i * total_out_w; \
-						unsigned char *output_v = out_v_plane + i * total_out_w; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] / 2 * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] / 2 * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] / 2 * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] / 2 * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV444P(input_y + (y_in_offset), \
@@ -146,22 +138,6 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV420P_IN_HEAD \
 					transfer_YUV422P_to_RGB888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ARGB8888:      \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_ARGB8888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ABGR8888:      \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_ABGR8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -229,14 +205,6 @@
 		case BC_YUV422P: \
 			switch(out_colormodel) \
 			{ \
-				case BC_RGB8: \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_RGB8((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
 				case BC_BGR565: \
 					TRANSFER_YUV422P_IN_HEAD \
 					transfer_YUV422P_to_BGR565((output), \
@@ -272,22 +240,6 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV422P_IN_HEAD \
 					transfer_YUV422P_to_RGB888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ARGB8888:      \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_ARGB8888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ABGR8888:      \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_ABGR8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -352,12 +304,12 @@
 				case BC_YUV420P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i / 2 * total_in_w / 2; \
-						unsigned char *output_v = out_v_plane + i / 2 * total_in_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i / 2 * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i / 2 * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -382,12 +334,12 @@
 				case BC_YUV422P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i * total_in_w / 2; \
-						unsigned char *output_v = out_v_plane + i * total_in_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -403,12 +355,12 @@
 				case BC_YUV444P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i * total_in_w; \
-						unsigned char *output_v = out_v_plane + i * total_in_w; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w / 2; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w / 2; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV444P(input_y + (y_in_offset), \
@@ -428,14 +380,6 @@
 		case BC_YUV444P: \
 			switch(out_colormodel) \
 			{ \
-				case BC_RGB8: \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_RGB8((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
 				case BC_BGR565: \
 					TRANSFER_YUV444P_IN_HEAD \
 					transfer_YUV422P_to_BGR565((output), \
@@ -471,22 +415,6 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV444P_IN_HEAD \
 					transfer_YUV422P_to_RGB888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ARGB8888:      \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_ARGB8888((output), \
-						input_y + (y_in_offset), \
-						input_u + (u_in_offset), \
-						input_v + (v_in_offset)); \
-					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_ABGR8888:      \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_ABGR8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -551,12 +479,12 @@
 				case BC_YUV420P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i / 2 * total_in_w / 2; \
-						unsigned char *output_v = out_v_plane + i / 2 * total_in_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i / 2 * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i / 2 * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -581,12 +509,12 @@
 				case BC_YUV422P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i * total_in_w / 2; \
-						unsigned char *output_v = out_v_plane + i * total_in_w / 2; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w; \
+						unsigned char *output_y = output_rows[0] + i * in_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * in_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * in_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * out_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * out_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * out_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
@@ -602,12 +530,12 @@
 				case BC_YUV444P: \
 					for(i = 0; i < out_h; i++) \
 					{ \
-						unsigned char *output_y = out_y_plane + i * total_in_w; \
-						unsigned char *output_u = out_u_plane + i * total_in_w; \
-						unsigned char *output_v = out_v_plane + i * total_in_w; \
-						unsigned char *input_y = in_y_plane + row_table[i] * total_in_w; \
-						unsigned char *input_u = in_u_plane + row_table[i] * total_in_w; \
-						unsigned char *input_v = in_v_plane + row_table[i] * total_in_w; \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 						for(j = 0; j < out_w; j++) \
 						{ \
 							transfer_YUV444P_to_YUV444P(input_y + (y_in_offset), \

@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.7)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.8pre1)
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
@@ -19,7 +19,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="3"
+LQT_CODEC_API_VERSION="4"
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
@@ -424,27 +424,6 @@ AC_SUBST(HAVE_FIREWIRE)
 AC_SUBST(FIREWIRE_LIBS)
 AC_SUBST(FIREWIRE_CFLAGS)
 AC_SUBST(FIREWIRE_SUBDIRS)
-
-dnl
-dnl Multithread support is now optional and
-dnl disabled by default
-dnl
-
-have_mt_jpeg=false
-
-AH_TEMPLATE([HAVE_MT_JPEG], [Multithreaded jpeg supported?])
-
-AC_ARG_ENABLE(mt-jpeg,
-    [  --enable-mt-jpeg        Enable multithreaded jpeg codec ],
-     [case "${enableval}" in
-       yes) have_mt_jpeg=true ;;
-       no) ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-mt-jpeg) ;;
-     esac],[])
-
-if test x$have_mt_jpeg = xtrue; then
-AC_DEFINE(HAVE_MT_JPEG)
-fi
 
 dnl
 dnl Check for libavcodec (ffmpeg)

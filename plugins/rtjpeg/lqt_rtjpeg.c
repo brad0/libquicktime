@@ -107,11 +107,3 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
 	return (lqt_init_video_codec_func_t)0;
 }
 
-/* Not used if we have only one colormodel */
-#if 0
-int get_stream_colormodel(quicktime_t * file, int track, int codec_index,
-                          int * exact)
-{
-	return BC_YUV420P;
-}
-#endif
