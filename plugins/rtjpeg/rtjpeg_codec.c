@@ -31,16 +31,16 @@
 #include <quicktime/colormodels.h>
 #include <funcprotos.h>
 #include "rtjpeg_codec.h"
+#include <lqt.h>
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	if(codec->compress_struct) RTjpeg_close(codec->compress_struct);
-	if(codec->encode_frame) free(codec->encode_frame);
+	if(codec->rows) lqt_rows_free(codec->rows);
         if(codec->write_buffer) free(codec->write_buffer);
 
 	if(codec->decompress_struct) RTjpeg_close(codec->decompress_struct);
-        if(codec->decode_frame) free(codec->decode_frame);
 	if(codec->read_buffer) free(codec->read_buffer);
         free(codec);
         return 0;
@@ -48,28 +48,34 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	int result = 0;
-	int t, i, file_rowspan;
+        int result = 0;
+	int t;
 	int buffer_size;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_trak_t *trak = vtrack->track;
+        //	quicktime_trak_t *trak = vtrack->track;
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	if(!codec->decompress_struct) {
+
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_YUV420P;
+          return 0;
+          }
+        
+        if(!codec->decompress_struct) {
 		codec->decompress_struct = RTjpeg_init();
 		if(!codec->decompress_struct)
 			return -1;
-                codec->qt_height = trak->tkhd.track_height;
-                codec->qt_width  = trak->tkhd.track_width;
+                codec->qt_height = quicktime_video_height(file, track);
+                codec->qt_width  = quicktime_video_width(file, track);
                 codec->jpeg_height = BLOCK_SIZE * ((codec->qt_height + BLOCK_SIZE - 1) / (BLOCK_SIZE));
                 codec->jpeg_width  = BLOCK_SIZE * ((codec->qt_width  + BLOCK_SIZE - 1) / (BLOCK_SIZE));
 		t = RTJ_YUV420;
 		RTjpeg_set_format(codec->decompress_struct, &t);
-		codec->decode_frame = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2);
-		if(!codec->decode_frame)
-			return -1;
-		codec->decode_rows[0] = codec->decode_frame;
-		codec->decode_rows[1] = codec->decode_rows[0] + codec->jpeg_width * codec->jpeg_height;
-		codec->decode_rows[2] = codec->decode_rows[1] + (codec->jpeg_width * codec->jpeg_height) / 4;
+
+                codec->rows = lqt_rows_alloc(codec->jpeg_width, codec->jpeg_height,
+                                             vtrack->stream_cmodel, &(codec->rowspan),
+                                             &(codec->rowspan_uv));
+                
 	}
         
 	quicktime_set_video_position(file, vtrack->current_position, track);
@@ -85,19 +91,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	result = !quicktime_read_data(file, codec->read_buffer, buffer_size);
 	if(buffer_size > 0) {
 		if(!result)
-                  RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->decode_rows);
+                  RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->rows);
 	}
-        file_rowspan = file->vtracks[track].stream_row_span ? file->vtracks[track].stream_row_span : file->out_w;
-        for(i = 0; i < codec->qt_height; i++) {
-        memcpy(&row_pointers[0][i*file_rowspan], &codec->decode_rows[0][i*codec->jpeg_width],
-               codec->jpeg_width);
-        }
-        for(i = 0; i < codec->qt_height/2; i++) {
-        memcpy(&row_pointers[1][i*file_rowspan/2], &codec->decode_rows[1][i*codec->jpeg_width/2],
-               codec->jpeg_width/2);
-        memcpy(&row_pointers[2][i*file_rowspan/2], &codec->decode_rows[2][i*codec->jpeg_width/2],
-               codec->jpeg_width/2);
-        }
+        
+        lqt_rows_copy(row_pointers, codec->rows, codec->qt_width, codec->qt_height,
+                      codec->rowspan, codec->rowspan_uv,
+                      vtrack->stream_row_span, vtrack->stream_row_span_uv, vtrack->stream_cmodel);
+
         
 	return result;
 }
@@ -106,12 +106,17 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
 	int i;
-        int file_rowspan;
         quicktime_atom_t chunk_atom;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = BC_YUV420P;
+          return 0;
+          }
+        
 	if(!codec->compress_struct) {
 		codec->compress_struct = RTjpeg_init();
 		if(!codec->compress_struct)
@@ -129,29 +134,23 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		i = RTJ_YUV420;
 		RTjpeg_set_format(codec->compress_struct, &i);
 		RTjpeg_set_intra(codec->compress_struct, &codec->K, &codec->LQ, &codec->CQ);
-		codec->encode_frame = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2);
-		if(!codec->encode_frame)
-		  return -1;
-		codec->encode_rows[0] = codec->encode_frame;
-		codec->encode_rows[1] = codec->encode_rows[0] + codec->jpeg_width * codec->jpeg_height;
-		codec->encode_rows[2] = codec->encode_rows[1] + (codec->jpeg_width * codec->jpeg_height) / 4;
+
+                codec->rows = lqt_rows_alloc(codec->jpeg_width, codec->jpeg_height,
+                                             vtrack->stream_cmodel, &(codec->rowspan),
+                                             &(codec->rowspan_uv));
+                
 		codec->write_buffer = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2 + 100);
 		if(!codec->write_buffer)
 			return -1;
 	}
-        file_rowspan = file->vtracks[track].stream_row_span ? file->vtracks[track].stream_row_span : codec->qt_width;
-                for(i = 0; i < codec->qt_height; i++) {
-                        memcpy(&codec->encode_rows[0][i*codec->jpeg_width], &row_pointers[0][i*file_rowspan], 
-                               codec->jpeg_width);
-                }
-                for(i = 0; i < codec->qt_height/2; i++) {
-                memcpy(&codec->encode_rows[1][i*codec->jpeg_width/2], &row_pointers[1][i*file_rowspan/2],
-                               codec->jpeg_width/2);
-                memcpy(&codec->encode_rows[2][i*codec->jpeg_width/2], &row_pointers[2][i*file_rowspan/2],
-                               codec->jpeg_width/2);
-                }
+
+        lqt_rows_copy(codec->rows, row_pointers, codec->qt_width, codec->qt_height,
+                      vtrack->stream_row_span, vtrack->stream_row_span_uv,
+                      codec->rowspan, codec->rowspan_uv,
+                      vtrack->stream_cmodel);
         
-	i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, codec->encode_rows);
+                
+	i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, codec->rows);
 
         quicktime_write_chunk_header(file, trak, &chunk_atom);
         result = !quicktime_write_data(file, 

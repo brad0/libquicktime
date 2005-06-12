@@ -118,9 +118,14 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int width = trak->tkhd.track_width;
 	png_structp png_ptr;
 	png_infop info_ptr;
-	int cmodel = source_cmodel(file, track);
         quicktime_atom_t chunk_atom;
 
+        if(!row_pointers)
+          {
+          vtrack->stream_cmodel = source_cmodel(file, track);
+          return 0;
+          }
+        
 	codec->buffer_size = 0;
 	codec->buffer_position = 0;
 
@@ -135,7 +140,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		info_ptr, 
 		width, height,
     	8, 
-		cmodel == BC_RGB888 ? 
+		vtrack->stream_cmodel == BC_RGB888 ? 
 		  PNG_COLOR_TYPE_RGB : 
 		  PNG_COLOR_TYPE_RGB_ALPHA, 
 		PNG_INTERLACE_NONE, 

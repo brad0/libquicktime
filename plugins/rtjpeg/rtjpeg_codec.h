@@ -31,10 +31,11 @@
 
 typedef struct
 {
+        uint8_t ** rows;
+        int rowspan, rowspan_uv;
+
 	/* Compression stuff */
 	RTjpeg_t * compress_struct;
-	unsigned char * encode_frame;
-	unsigned char * encode_rows[3];
 	uint8_t * write_buffer;
 	int Q;
 	int K;
@@ -43,8 +44,6 @@ typedef struct
 	
 	/* DeCompression stuff */
 	RTjpeg_t * decompress_struct;
-	unsigned char * decode_frame;
-	unsigned char * decode_rows[3];
 	uint8_t * read_buffer;
 	int read_buffer_size;
         int jpeg_width;

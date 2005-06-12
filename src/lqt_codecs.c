@@ -629,10 +629,6 @@ static int do_encode_video(quicktime_t *file,
                        &(file->vtracks[track].stream_row_span),
                        &(file->vtracks[track].stream_row_span_uv));
       }
-    result =
-      ((quicktime_codec_t*)file->vtracks[track].codec)->decode_video(file,
-                                                                     file->vtracks[track].temp_frame,
-                                                                     track);
     cmodel_transfer(file->vtracks[track].temp_frame, //    unsigned char **output_rows, /* Leave NULL if non existent */
                     row_pointers,                    //    unsigned char **input_rows,
                     0, //                                  int in_x,        /* Dimensions to capture from input frame */
