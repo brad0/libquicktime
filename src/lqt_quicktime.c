@@ -1309,7 +1309,7 @@ void quicktime_init_maps(quicktime_t * file)
                                file->wr,
                                (lqt_codec_info_t*)0);
       /* Get decoder colormodel */
-      ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, track);
+      ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, i);
       file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
       }
     }
