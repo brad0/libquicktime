@@ -4,7 +4,7 @@
 #include <quicktime/colormodels.h>
 #include "funcprotos.h"
 #include <string.h>
-#include <quicktime/quicktime.h>
+#include <quicktime.h>
 
 #include "libmjpeg.h"
 
@@ -75,7 +75,7 @@ static int decode(quicktime_t *file,
     quicktime_set_video_position(file, vtrack->current_position, track);
     size = quicktime_frame_size(file, vtrack->current_position, track);
     codec->buffer_size = size;
-    //printf("decode 1 %x\n", size);
+    //    fprintf(stderr, "decode %p\n", row_pointers);
     
     if(size > codec->buffer_allocated)
       {
@@ -103,6 +103,7 @@ static int decode(quicktime_t *file,
       {
       /* Detect colormodel and return */
       vtrack->stream_cmodel = mjpeg->jpeg_color_model;
+      fprintf(stderr, "Got colormodel: %s\n", lqt_colormodel_to_string(mjpeg->jpeg_color_model));
       codec->have_frame = 1;
       return 0;
       }
@@ -264,7 +265,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	codec->mjpeg = mjpeg_new(vtrack->track->tkhd.track_width, 
                                  vtrack->track->tkhd.track_height, 
-                                 1 + num_fields);
+                                 num_fields);
 	codec->jpeg_type = jpeg_type;
         
         /* This information must be stored in the initialization routine because of */

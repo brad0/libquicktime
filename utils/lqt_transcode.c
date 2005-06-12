@@ -81,6 +81,8 @@ typedef struct
   int colormodel;
   int width;
   int height;
+  int rowspan;
+  int rowspan_uv;
 
   int frame_duration;
   int timescale;
@@ -293,7 +295,7 @@ static int transcode_init(transcode_handle * h,
     fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
             h->width, h->height, lqt_colormodel_to_string(h->colormodel));
     
-    h->video_buffer = lqt_rows_alloc(h->width, h->height, h->colormodel, 0, 0);
+    h->video_buffer = lqt_rows_alloc(h->width, h->height, h->colormodel, &(h->rowspan), &(h->rowspan_uv));
     
     quicktime_set_cmodel(h->in_file,  h->colormodel);
     quicktime_set_cmodel(h->out_file, h->colormodel);

@@ -101,7 +101,14 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int64_t y_size, u_size, v_size;
 	int64_t bytes = (int64_t)0;
 	quicktime_atom_t chunk_atom;
-	initialize(vtrack);
+
+        if(!row_pointers)
+          {
+          file->vtracks[track].stream_cmodel = BC_YUV420P;
+          return 0;
+          }
+        
+        initialize(vtrack);
 
 	y_size = codec->coded_h * codec->coded_w;
 	u_size = codec->coded_h * codec->coded_w / 4;

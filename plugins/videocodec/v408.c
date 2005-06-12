@@ -68,6 +68,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
           {
           //          vtrack->stream_cmodel = BC_UYVA8888;
           vtrack->stream_cmodel = BC_YUVA8888;
+          return 0;
           }
 
         if(!codec->work_buffer)
@@ -113,6 +114,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           {
           //          vtrack->stream_cmodel = BC_UYVA8888;
           vtrack->stream_cmodel = BC_YUVA8888;
+          return 0;
           }
                 
         if(!codec->work_buffer)

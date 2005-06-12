@@ -488,7 +488,10 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
   int y_size = 0, uv_size = 0;
   uint8_t ** video_buffer;
   /* Allocate frame buffer */
-
+  
+  fprintf(stderr, "lqt_rows_alloc: %d x %d, %s, %d %d\n", width, height, lqt_colormodel_to_string(colormodel),
+          *rowspan, *rowspan_uv);
+  
   if(cmodel_is_planar(colormodel))
     {
     switch(colormodel)

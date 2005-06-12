@@ -504,6 +504,8 @@ static void decompress_field(mjpeg_compressor *engine)
   unsigned char *buffer = mjpeg->input_data + buffer_offset;
   long buffer_size;
 
+  //  fprintf(stderr, "** DECOMPRESS_FIELD\n");
+  
   if(engine->instance == 0 && mjpeg->fields > 1)
     buffer_size = mjpeg->input_field2 - buffer_offset;
   else
