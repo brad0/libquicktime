@@ -1,4 +1,6 @@
 #include "funcprotos.h"
+
+#include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 #include "qtpng.h"
 
@@ -78,6 +80,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = source_cmodel(file, track);
+          fprintf(stderr, "Detected stream_cmodel: %s\n", lqt_colormodel_to_string(vtrack->stream_cmodel));
           return 0;
           }
 
@@ -123,6 +126,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = source_cmodel(file, track);
+          fprintf(stderr, "Detected stream_cmodel: %s, %d\n",
+                  lqt_colormodel_to_string(vtrack->stream_cmodel),
+                  quicktime_video_depth(file, track));
           return 0;
           }
         
@@ -146,9 +152,15 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		PNG_INTERLACE_NONE, 
 		PNG_COMPRESSION_TYPE_DEFAULT, 
 		PNG_FILTER_TYPE_DEFAULT);
-	png_write_info(png_ptr, info_ptr);
+
+#if 0
+        png_write_info(png_ptr, info_ptr);
 	png_write_image(png_ptr, row_pointers);
 	png_write_end(png_ptr, info_ptr);
+#else
+        png_set_rows(png_ptr, info_ptr, row_pointers);
+        png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+#endif
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 
         quicktime_write_chunk_header(file, trak, &chunk_atom);

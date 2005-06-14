@@ -456,15 +456,17 @@ int lqt_add_video_track(quicktime_t *file,
         memset(&(file->vtracks[file->total_vtracks]), 0, sizeof(quicktime_video_map_t));
         trak = quicktime_add_track(file);
 
+        file->total_vtracks++;
+        
         quicktime_trak_init_video(file, trak, frame_w, frame_h, frame_duration, timescale, compressor);
-	quicktime_init_video_map(&(file->vtracks[file->total_vtracks]), trak, file->wr, info);
-        lqt_set_default_video_parameters(file, file->total_vtracks);
+	quicktime_init_video_map(&(file->vtracks[file->total_vtracks-1]), trak, file->wr, info);
+        lqt_set_default_video_parameters(file, file->total_vtracks-1);
 
         /* Get encoding colormodel */
-        ((quicktime_codec_t*)(file->vtracks[file->total_vtracks].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks);
-        file->vtracks[file->total_vtracks].io_cmodel = file->vtracks[file->total_vtracks].stream_cmodel;
+        ((quicktime_codec_t*)(file->vtracks[file->total_vtracks-1].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
+        file->vtracks[file->total_vtracks-1].io_cmodel = file->vtracks[file->total_vtracks-1].stream_cmodel;
       
-        file->total_vtracks++;
+        
         return 0;
   }
 

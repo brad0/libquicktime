@@ -567,8 +567,6 @@ static void decompress_field(mjpeg_compressor *engine)
   ;
   }
 
-
-
 static void compress_field(mjpeg_compressor *engine)
   {
   mjpeg_t *mjpeg = engine->mjpeg;

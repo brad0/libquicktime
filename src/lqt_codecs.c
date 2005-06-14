@@ -490,13 +490,13 @@ int lqt_decode_video(quicktime_t *file,
 	int result;
         int height;
 	int width;
-        
+#if 0
+        fprintf(stderr, "lqt_decode_video: %s -> %s\n", lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
+                lqt_colormodel_to_string(file->vtracks[track].io_cmodel));
+#endif   
 	height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
-
-//printf("quicktime_decode_video 1\n");
-// Fake scaling parameters
-      
+        
         if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
           {
           if(!file->vtracks[track].temp_frame)
@@ -616,9 +616,12 @@ static int do_encode_video(quicktime_t *file,
   
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
-  
-  //printf("quicktime_decode_video 1\n");
-  // Fake scaling parameters
+
+#if 1
+  fprintf(stderr, "lqt_encode_video: %s -> %s\n",
+          lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
+          lqt_colormodel_to_string(file->vtracks[track].stream_cmodel));
+#endif   
   
   if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
     {
