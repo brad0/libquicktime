@@ -191,16 +191,16 @@ static int set_parameter_video(quicktime_t *file,
 static int reads_colormodel(quicktime_t *file,
                             int colormodel, 
                             int track)
-{
-	return (colormodel == BC_YUV420P);
-}
+  {
+  return (colormodel == file->vtracks[track].stream_cmodel) || (colormodel == BC_RGB888);
+  }
 
 static int writes_colormodel(quicktime_t *file, 
                              int colormodel, 
                              int track)
-{
-	return (colormodel == BC_YUV420P);
-}
+  {
+  return (colormodel == file->vtracks[track].stream_cmodel) || (colormodel == BC_RGB888);
+  }
 
 
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
