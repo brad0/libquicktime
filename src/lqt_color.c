@@ -477,55 +477,28 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
   int i;
   int y_size = 0, uv_size = 0;
   uint8_t ** video_buffer;
+  int sub_h = 0, sub_v = 0;
+
   /* Allocate frame buffer */
-  
+#if 0  
   fprintf(stderr, "lqt_rows_alloc: %d x %d, %s, %d %d\n", width, height, lqt_colormodel_to_string(colormodel),
           *rowspan, *rowspan_uv);
-  
+#endif
+  bytes_per_line = get_bytes_per_line(colormodel, width);
+    
   if(cmodel_is_planar(colormodel))
     {
-    switch(colormodel)
-      {
-      case BC_YUV420P:
-        if(*rowspan <= 0)
-          *rowspan = width;
+    lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
 
-        if(*rowspan_uv <= 0)
-          *rowspan_uv = *rowspan / 2;
+    if(*rowspan <= 0)
+      *rowspan = bytes_per_line;
 
-        y_size = *rowspan * height;
-        uv_size = (*rowspan_uv * height)/2;
-        break;
-      case BC_YUV411P:
-        if(*rowspan <= 0)
-          *rowspan = width;
+    if(*rowspan_uv <= 0)
+      *rowspan_uv = *rowspan / sub_h;
 
-        if(*rowspan_uv <= 0)
-          *rowspan_uv = *rowspan / 4;
+    y_size = *rowspan * height;
+    uv_size = (*rowspan_uv * height)/sub_v;
 
-        y_size = *rowspan * height;
-        uv_size = *rowspan_uv * height;
-        
-        break;
-      case BC_YUV422P:
-        if(*rowspan <= 0)
-          *rowspan = width;
-
-        if(*rowspan_uv <= 0)
-          *rowspan_uv = *rowspan / 2;
-        
-        y_size = *rowspan * height;
-        uv_size = (*rowspan_uv * height);
-        
-        break;
-      case BC_YUV444P:
-        if(*rowspan <= 0)
-          *rowspan = width;
-        if(*rowspan_uv <= 0)
-          *rowspan_uv = *rowspan;
-        y_size = *rowspan * height;
-        uv_size = (*rowspan_uv * height);
-      }
     video_buffer    = malloc(3 * sizeof(unsigned char*));
     video_buffer[0] = malloc(y_size + 2 * uv_size);
     video_buffer[1] = &(video_buffer[0][y_size]);
@@ -534,9 +507,7 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
   else
     {
     video_buffer    = malloc(height * sizeof(unsigned char*));
-
-    bytes_per_line = get_bytes_per_line(colormodel, width);
-    
+        
     if(*rowspan <= 0)
       *rowspan = bytes_per_line;
         
@@ -546,6 +517,17 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
     
     }
   return video_buffer;
+  }
+
+void lqt_get_default_rowspan(int colormodel, int width, int * rowspan, int * rowspan_uv)
+  {
+  int bytes_per_line;
+  int sub_h = 0, sub_v = 0;
+  bytes_per_line = get_bytes_per_line(colormodel, width);
+  lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
+
+  *rowspan = bytes_per_line;
+  *rowspan_uv = bytes_per_line / sub_h;
   }
 
 void lqt_rows_free(uint8_t ** rows)

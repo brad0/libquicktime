@@ -49,6 +49,7 @@ int lqt_colormodel_has_alpha(int colormodel);
 int lqt_colormodel_is_rgb(int colormodel);
 int lqt_colormodel_is_yuv(int colormodel);
 void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v);
+void lqt_get_default_rowspan(int colormodel, int width, int * rowspan, int * rowspan_uv);
 
   
 /* Query supported colormodels */

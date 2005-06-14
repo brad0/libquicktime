@@ -491,8 +491,11 @@ int lqt_decode_video(quicktime_t *file,
         int height;
 	int width;
 #if 0
-        fprintf(stderr, "lqt_decode_video: %s -> %s\n", lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
-                lqt_colormodel_to_string(file->vtracks[track].io_cmodel));
+        fprintf(stderr, "lqt_decode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
+                lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
+                lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
+                file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
+                file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
 #endif   
 	height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
@@ -617,10 +620,12 @@ static int do_encode_video(quicktime_t *file,
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
 
-#if 1
-  fprintf(stderr, "lqt_encode_video: %s -> %s\n",
+#if 0
+  fprintf(stderr, "lqt_encode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
           lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
-          lqt_colormodel_to_string(file->vtracks[track].stream_cmodel));
+          lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
+          file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
+          file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
 #endif   
   
   if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
