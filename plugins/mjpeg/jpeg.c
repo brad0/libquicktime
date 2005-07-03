@@ -103,7 +103,7 @@ static int decode(quicktime_t *file,
       {
       /* Detect colormodel and return */
       vtrack->stream_cmodel = mjpeg->jpeg_color_model;
-      fprintf(stderr, "Got colormodel: %s\n", lqt_colormodel_to_string(mjpeg->jpeg_color_model));
+      //      fprintf(stderr, "Got colormodel: %s\n", lqt_colormodel_to_string(mjpeg->jpeg_color_model));
       codec->have_frame = 1;
       return 0;
       }
@@ -166,54 +166,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	return result;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-
-// Some JPEG_PROGRESSIVE is BC_YUV422P
-	if(codec->jpeg_type == JPEG_PROGRESSIVE)
-	{
-		return (colormodel == BC_RGB888 ||
-			colormodel == BC_YUV888 ||
-			colormodel == BC_YUV420P ||
-			colormodel == BC_YUV422P ||
-			colormodel == BC_YUV422);
-	}
-	else
-	{
-		return (colormodel == BC_RGB888 ||
-			colormodel == BC_YUV888 ||
-//			colormodel == BC_YUV420P ||
-			colormodel == BC_YUV422P ||
-			colormodel == BC_YUV422);
-// The BC_YUV420P option was provided only for mpeg2movie use.because some 
-// interlaced movies were accidentally in YUV4:2:0
-	}
-}
-
-static int writes_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-
-	if(codec->jpeg_type == JPEG_PROGRESSIVE)
-	{
-		return (colormodel == BC_RGB888 ||
-			colormodel == BC_YUV888 ||
-			colormodel == BC_YUV420P);
-	}
-	else
-	{
-		return (colormodel == BC_RGB888 ||
-			colormodel == BC_YUV888 ||
-			colormodel == BC_YUV422P);
-	}
-}
 
 static int set_parameter(quicktime_t *file, 
 		int track, 
@@ -257,8 +209,6 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
 
 /* Init private items */

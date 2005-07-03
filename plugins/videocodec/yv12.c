@@ -11,7 +11,6 @@
 
 typedef struct
 {
-	cmodel_yuv_t yuv_table;
 	int coded_w, coded_h;
 	unsigned char *work_buffer;
 	int initialized;
@@ -27,23 +26,6 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUV420P);
-}
-
-#if 0
-static int writes_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_YUV420P);
-}
-#endif
 static void initialize(quicktime_video_map_t *vtrack)
 {
 	quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
@@ -55,7 +37,6 @@ static void initialize(quicktime_video_map_t *vtrack)
 		codec->coded_w *= 2;
 		codec->coded_h = (int)(vtrack->track->tkhd.track_height / 2);
 		codec->coded_h *= 2;
-		cmodel_init_yuv(&codec->yuv_table);
 		codec->work_buffer = malloc(codec->coded_w * codec->coded_h + 
 			codec->coded_w * codec->coded_h / 2);
 		codec->initialized = 1;
@@ -140,7 +121,6 @@ void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->reads_colormodel = reads_colormodel;
 	codec_base->fourcc = QUICKTIME_YUV420;
 	codec_base->title = "YUV 4:2:0 Planar";
 	codec_base->desc = "YUV 4:2:0 Planar";

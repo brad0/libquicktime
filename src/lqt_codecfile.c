@@ -81,11 +81,6 @@ static const char * real_name_key       = "RealName: ";
 static const char * num_options_key     = "NumOptions: ";
 static const char * option_key          = "Options: ";
 
-/* Encoding colormodels */
-
-static const char * num_encoding_colormodels_key = "NumEncodingColormodels: ";
-static const char * encoding_colormodel_key =      "EncodingColormodel: ";
-static const char * decoding_colormodel_key =      "DecodingColormodel: ";
 
 /* Codec order */
 
@@ -246,7 +241,6 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
   int i;
   
   int encoding_parameters_read = 0;
-  int encoding_colormodels_read = 0;
   int decoding_parameters_read = 0;
   
   uint32_t tmp_fourcc;
@@ -431,32 +425,6 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       }
     else if(CHECK_KEYWORD(end_codec_key))
       break;
-
-    /* Number of encoding colormodels */
-
-    else if(CHECK_KEYWORD(num_encoding_colormodels_key))
-      {
-      pos = line + strlen(num_encoding_colormodels_key);
-      codec->num_encoding_colormodels = atoi(pos);
-      if(codec->num_encoding_colormodels)
-        codec->encoding_colormodels =
-          malloc(codec->num_encoding_colormodels *
-                 sizeof(int));
-      else
-        codec->encoding_colormodels = (int*)0;
-      }
-    else if(CHECK_KEYWORD(encoding_colormodel_key))
-      {
-      pos = line + strlen(encoding_colormodel_key);
-      codec->encoding_colormodels[encoding_colormodels_read] =
-        lqt_string_to_colormodel(pos);
-      encoding_colormodels_read++;
-      }
-    else if(CHECK_KEYWORD(decoding_colormodel_key))
-      {
-      pos = line + strlen(decoding_colormodel_key);
-      codec->decoding_colormodel = lqt_string_to_colormodel(pos);
-      }
     }
   
   }
@@ -715,29 +683,7 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
     {
     write_parameter_info(output, &(info->decoding_parameters[i]), 0);
     }
-
-  if(info->type == LQT_CODEC_VIDEO)
-    {
-    if(info->direction != LQT_DIRECTION_DECODE)
-      {
-      fprintf(output, "%s%d\n", num_encoding_colormodels_key,
-              info->num_encoding_colormodels);
-      
-      for(i = 0; i < info->num_encoding_colormodels; i++)
-        {
-        fprintf(output, "%s%s\n", encoding_colormodel_key,
-                lqt_colormodel_to_string(info->encoding_colormodels[i]));
-        }
-      }
-    if(info->direction != LQT_DIRECTION_ENCODE)
-      {
-      fprintf(output, "%s%s\n", decoding_colormodel_key,
-              lqt_colormodel_to_string(info->decoding_colormodel));
-      
-      }
-    
-    }
-  
+ 
   
   /* Module filename and index */
   fprintf(output, "%s%s\n", module_filename_key, info->module_filename);

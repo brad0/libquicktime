@@ -59,22 +59,6 @@ static int quicktime_encode_audio_stub(quicktime_t *file,
 	return 1;
 }
 
-
-static int quicktime_reads_colormodel_stub(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	fprintf(stderr, "quicktime_reads_colormodel_stub called\n");
-	return (colormodel == BC_RGB888);
-}
-
-static int quicktime_writes_colormodel_stub(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888);
-}
-
 static void quicktime_flush_codec_stub(quicktime_t *file, int track)
 {
 }
@@ -120,8 +104,6 @@ int quicktime_codec_defaults(quicktime_codec_t *codec)
 	codec->encode_video = quicktime_encode_video_stub;
 	codec->decode_audio = quicktime_decode_audio_stub;
 	codec->encode_audio = quicktime_encode_audio_stub;
-	codec->reads_colormodel = quicktime_reads_colormodel_stub;
-	codec->writes_colormodel = quicktime_writes_colormodel_stub;
 	codec->flush = quicktime_flush_codec_stub;
 	return 0;
 }
@@ -523,7 +505,6 @@ int lqt_decode_video(quicktime_t *file,
                           height, //                             int out_h,
                           file->vtracks[track].stream_cmodel, // int in_colormodel, 
                           file->vtracks[track].io_cmodel,     // int out_colormodel,
-                          0, //                                  int bg_color,
                           file->vtracks[track].stream_row_span,   /* For planar use the luma rowspan */
                           file->vtracks[track].io_row_span,       /* For planar use the luma rowspan */
                           file->vtracks[track].stream_row_span_uv, /* Chroma rowspan */
@@ -598,7 +579,6 @@ long quicktime_decode_scaled(quicktime_t *file,
                         out_h, //                              int out_h,
                         file->vtracks[track].stream_cmodel, // int in_colormodel, 
                         file->vtracks[track].io_cmodel,     // int out_colormodel,
-                        0, //                                  int bg_color,
                         file->vtracks[track].stream_row_span,   /* For planar use the luma rowspan */
                         file->vtracks[track].io_row_span,       /* For planar use the luma rowspan */
                         file->vtracks[track].stream_row_span_uv, /* Chroma rowspan */
@@ -647,7 +627,6 @@ static int do_encode_video(quicktime_t *file,
                     height, //                             int out_h,
                     file->vtracks[track].io_cmodel, // int in_colormodel, 
                     file->vtracks[track].stream_cmodel,     // int out_colormodel,
-                    0, //                                  int bg_color,
                     file->vtracks[track].io_row_span,   /* For planar use the luma rowspan */
                     file->vtracks[track].stream_row_span,       /* For planar use the luma rowspan */
                     file->vtracks[track].io_row_span_uv, /* Chroma rowspan */
@@ -863,16 +842,14 @@ int quicktime_reads_cmodel(quicktime_t *file,
 	int colormodel, 
 	int track)
 {
-	int result = ((quicktime_codec_t*)file->vtracks[track].codec)->reads_colormodel(file, colormodel, track);
-/*         fprintf(stderr, "quicktime_reads_cmodel: %s\n", lqt_colormodel_to_string(colormodel)); */
-	return result;
+        return lqt_colormodel_has_conversion(file->vtracks[track].stream_cmodel, colormodel);
 }
 
 int quicktime_writes_cmodel(quicktime_t *file, 
 	int colormodel, 
 	int track)
 {
-	return ((quicktime_codec_t*)file->vtracks[track].codec)->writes_colormodel(file, colormodel, track);
+        return lqt_colormodel_has_conversion(colormodel, file->vtracks[track].stream_cmodel);
 }
 
 /* Compressors that can only encode a window at a time */

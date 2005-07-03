@@ -920,37 +920,6 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     
   /* Create encoding colormodels label */
 
-  if(info->num_encoding_colormodels)
-    {
-    tmp1 = malloc(info->num_encoding_colormodels * 30);
-    tmp2 = malloc(30);
-    
-    *tmp1 = '\0';
-    
-    for(i = 0; i < info->num_encoding_colormodels - 1; i++)
-      {
-      sprintf(tmp2, "%s\n",
-              lqt_colormodel_to_string(info->encoding_colormodels[i]));
-      strcat(tmp1, tmp2);
-      }
-    
-    /* Last one without newline */
-    
-    strcat(tmp1,
-           lqt_colormodel_to_string(info->encoding_colormodels[info->num_encoding_colormodels-1]));
-    
-    ret->encoding_colormodels_label = gtk_label_new(tmp1);
-    gtk_widget_show(ret->encoding_colormodels_label);
-    
-    free(tmp1);
-    free(tmp2);
-
-    ret->colormodels_frame = gtk_frame_new("Colormodels");
-    
-    gtk_container_add(GTK_CONTAINER(ret->colormodels_frame),
-                      ret->encoding_colormodels_label);
-    gtk_widget_show(ret->colormodels_frame);
-    }
   
   /* Pack all widgets onto their containers */
 
@@ -1002,13 +971,8 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     if(ret->fourccs_frame)
       {
       gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->fourccs_frame,
-                                0, 1, 1, 2);
-      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
-                                1, 2, 1, 2);
-      }
-    else
-      gtk_table_attach_defaults(GTK_TABLE(ret->table), ret->colormodels_frame,
                                 0, 2, 1, 2);
+      }
     }
   else if(ret->wav_ids_frame)
     {

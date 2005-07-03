@@ -907,12 +907,6 @@ typedef struct
 				float **input_f, 
 				int track, 
                             long samples);
-	int (*reads_colormodel)(quicktime_t *file, 
-		int colormodel, 
-		int track);
-	int (*writes_colormodel)(quicktime_t *file, 
-		int colormodel, 
-		int track);
 	int (*set_parameter)(quicktime_t *file, 
 		int track, 
 		char *key, 

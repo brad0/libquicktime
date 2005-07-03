@@ -82,10 +82,6 @@ typedef struct
 
   lqt_parameter_info_static_t * encoding_parameters;
   lqt_parameter_info_static_t * decoding_parameters;
-
-  int * encoding_colormodels;
-
-  int decoding_colormodel;
   
   } lqt_codec_info_static_t;
 
@@ -139,3 +135,14 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
                            long chunk,
                            uint8_t ** buffer, int * buffer_alloc,
                            int initial_bytes);
+
+/*
+ *  Read one video frame
+ *  buffer will be realloced if too small and buffer_alloc will be the
+ *  new allocated size. Return value is the number of valid bytes,
+ *  which might be smaller than buffer_alloc.
+ */
+
+int lqt_read_video_frame(quicktime_t * file, int track,
+                         long frame,
+                         uint8_t ** buffer, int * buffer_alloc);

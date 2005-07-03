@@ -19,24 +19,26 @@ typedef struct
 
 static lqt_colormodel_tab colormodel_table[] =
   {
-    { "Compressed",              BC_COMPRESSED },
-    { "16 bpp RGB 565",          BC_RGB565 },
-    { "16 bpp BGR 565",          BC_BGR565 },
-    { "24 bpp BGR",              BC_BGR888 },
-    { "32 bpp BGR",              BC_BGR8888 },
-    { "24 bpp RGB",              BC_RGB888 },
-    { "32 bpp RGBA",             BC_RGBA8888 },
-    { "48 bpp RGB",              BC_RGB161616  }, 
-    { "64 bpp RGBA",             BC_RGBA16161616  },
-    { "24 bpp YUV",              BC_YUV888  },
-    { "32 bpp YUVA",             BC_YUVA8888  },   
-    { "48 bpp YUV",              BC_YUV161616  }, 
-    { "64 bpp YUVA",             BC_YUVA16161616  },
-    { "YUV 4:2:2 packed (YUY2)", BC_YUV422  },
-    { "YUV 4:2:0 planar",        BC_YUV420P },
-    { "YUV 4:2:2 planar",        BC_YUV422P },
-    { "YUV 4:4:4 planar",        BC_YUV444P },
-    { "YUV 4:1:1 planar",        BC_YUV411P },
+    { "Compressed",                BC_COMPRESSED },
+    { "16 bpp RGB 565",            BC_RGB565 },
+    { "16 bpp BGR 565",            BC_BGR565 },
+    { "24 bpp BGR",                BC_BGR888 },
+    { "32 bpp BGR",                BC_BGR8888 },
+    { "24 bpp RGB",                BC_RGB888 },
+    { "32 bpp RGBA",               BC_RGBA8888 },
+    { "48 bpp RGB",                BC_RGB161616  }, 
+    { "64 bpp RGBA",               BC_RGBA16161616  },
+    { "32 bpp YUVA",               BC_YUVA8888  },   
+    { "YUV 4:2:2 packed (YUY2)",   BC_YUV422  },
+    { "YUV 4:2:0 planar",          BC_YUV420P },
+    { "YUV 4:2:2 planar",          BC_YUV422P },
+    { "YUV 4:4:4 planar",          BC_YUV444P },
+    { "YUV 4:2:2 planar (16 bit)", BC_YUV422P16 },
+    { "YUV 4:4:4 planar (16 bit)", BC_YUV444P16 },
+    { "YUV 4:2:0 planar (jpeg)",   BC_YUVJ420P },
+    { "YUV 4:2:2 planar (jpeg)",   BC_YUVJ422P },
+    { "YUV 4:4:4 planar (jpeg)",   BC_YUVJ444P },
+    { "YUV 4:1:1 planar",          BC_YUV411P },
     { (char*)0, LQT_COLORMODEL_NONE }
   };
 
@@ -46,14 +48,16 @@ int lqt_colormodel_is_yuv(int colormodel)
   {
   switch(colormodel)
     {
-    case BC_YUV888:
     case BC_YUVA8888:
-    case BC_YUV161616: 
-    case BC_YUVA16161616:
     case BC_YUV422:
     case BC_YUV420P:
     case BC_YUV422P:
     case BC_YUV444P:
+    case BC_YUV422P16:
+    case BC_YUV444P16:
+    case BC_YUVJ420P:
+    case BC_YUVJ422P:
+    case BC_YUVJ444P:
     case BC_YUV411P:
       return 1;
     default:
@@ -86,7 +90,6 @@ int lqt_colormodel_has_alpha(int colormodel)
     case BC_RGBA8888:
     case BC_RGBA16161616:
     case BC_YUVA8888:   
-    case BC_YUVA16161616:
       return 1;
     default:
       return 0;
@@ -100,6 +103,11 @@ int lqt_colormodel_is_planar(int colormodel)
     case BC_YUV420P:
     case BC_YUV422P:
     case BC_YUV444P:
+    case BC_YUV422P16:
+    case BC_YUV444P16:
+    case BC_YUVJ422P:
+    case BC_YUVJ444P:
+    case BC_YUVJ420P:
     case BC_YUV411P:
       return 1;
     default:
@@ -115,10 +123,13 @@ void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v)
   switch(colormodel)
     {
     case BC_YUV420P:
+    case BC_YUVJ420P:
       *sub_h = 2;
       *sub_v = 2;
       break;
     case BC_YUV422P:
+    case BC_YUVJ422P:
+    case BC_YUV422P16:
       *sub_h = 2;
       *sub_v = 1;
       break;
@@ -152,21 +163,23 @@ static int colormodel_get_bits(int colormodel)
     case BC_BGR888:
     case BC_BGR8888:
     case BC_RGB888:
-    case BC_YUV888:
     case BC_YUV422:
     case BC_YUV420P:
     case BC_YUV422P:
     case BC_YUV444P:
+    case BC_YUVJ420P:
+    case BC_YUVJ422P:
+    case BC_YUVJ444P:
     case BC_YUV411P:
       return 24;
     case BC_RGBA8888:
     case BC_YUVA8888:   
       return 32;
     case BC_RGB161616: 
-    case BC_YUV161616: 
+    case BC_YUV422P16:
+    case BC_YUV444P16:
       return 48;
     case BC_RGBA16161616:
-    case BC_YUVA16161616:
       return 64;
     default:
       fprintf(stderr,"lqt: warning: unknown colormodel (%d)\n",colormodel);
@@ -443,11 +456,12 @@ static int get_bytes_per_line(int colormodel, int width)
     case BC_RGB565:
     case BC_BGR565:
     case BC_YUV422:
+    case BC_YUV422P16:
+    case BC_YUV444P16:
       return width * 2;
       break;
     case BC_BGR888:
     case BC_RGB888:
-    case BC_YUV888:
       return width * 3;
       break;
     case BC_BGR8888:
@@ -457,11 +471,9 @@ static int get_bytes_per_line(int colormodel, int width)
       break;
       
     case BC_RGB161616:
-    case BC_YUV161616:
       return width * 6;
       break;
     case BC_RGBA16161616:
-    case BC_YUVA16161616:
       return width * 8;
       break;
     default:
@@ -590,4 +602,454 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
       memcpy(out_rows[i], in_rows[i], bytes_per_line);
     }
   
+  }
+
+// for i in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do for j in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do echo $i"_to_"$j.png; gthumb $i"_to_"$j.png; done; done
+
+int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
+  {
+  if(in_cmodel == out_cmodel)
+    return 1;
+  
+  switch(in_cmodel)
+    {
+    case BC_RGB565:
+      switch(out_cmodel)
+        {
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 0; break; // !
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_BGR565:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 0; break; // !
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_BGR888:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_BGR8888:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_RGB888:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 1; break;
+        case BC_YUVJ420P:     return 1; break;
+        case BC_YUVJ422P:     return 1; break;
+        case BC_YUVJ444P:     return 1; break;
+        case BC_YUV422P16:    return 1; break;
+        case BC_YUV444P16:    return 1; break;
+        }
+      break;
+    case BC_RGBA8888:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_RGB161616:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_RGBA16161616:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUVA8888:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV422:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV420P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV422P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV444P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 1; break;
+        case BC_BGR565:       return 1; break;
+        case BC_BGR888:       return 1; break;
+        case BC_BGR8888:      return 1; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 1; break;
+        case BC_RGB161616:    return 1; break;
+        case BC_RGBA16161616: return 1; break;
+        case BC_YUVA8888:     return 1; break;
+        case BC_YUV422:       return 1; break;
+        case BC_YUV420P:      return 1; break;
+        case BC_YUV422P:      return 1; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV411P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUVJ420P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUVJ422P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUVJ444P:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV422P16:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV444P16:    return 0; break;
+        }
+      break;
+    case BC_YUV444P16:
+      switch(out_cmodel)
+        {
+        case BC_RGB565:       return 0; break;
+        case BC_BGR565:       return 0; break;
+        case BC_BGR888:       return 0; break;
+        case BC_BGR8888:      return 0; break;
+        case BC_RGB888:       return 1; break;
+        case BC_RGBA8888:     return 0; break;
+        case BC_RGB161616:    return 0; break;
+        case BC_RGBA16161616: return 0; break;
+        case BC_YUVA8888:     return 0; break;
+        case BC_YUV422:       return 0; break;
+        case BC_YUV420P:      return 0; break;
+        case BC_YUV422P:      return 0; break;
+        case BC_YUV444P:      return 0; break;
+        case BC_YUV411P:      return 0; break;
+        case BC_YUVJ420P:     return 0; break;
+        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ444P:     return 0; break;
+        case BC_YUV422P16:    return 0; break;
+        }
+      break;
+    }
+  return 0;
   }

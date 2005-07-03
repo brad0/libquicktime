@@ -37,19 +37,6 @@
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
 
-
-static int encoding_colormodels_ffmpeg[] = {
-	BC_YUV420P, 
-	LQT_COLORMODEL_NONE
-};
-
-static int encoding_colormodels_dvc[] = {
-	BC_YUV411P, 
-	LQT_COLORMODEL_NONE
-};
-
-
-
 #define ENCODE_PARAM_AUDIO \
 	{\
 	  "bit_rate_audio",\
@@ -420,7 +407,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
                     "MP4V", (char *)0 },
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1 },
 	{
           id: CODEC_ID_MSMPEG4V1,
@@ -454,7 +440,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                     (char *)0},
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1,
         },
 #if 0
@@ -479,7 +464,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "h263",
 	  name: "H263",
 	  fourccs: {"H263", "h263", "U263", "u263", (char *)0},
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1, },
 	{
           id: CODEC_ID_H263P,
@@ -491,7 +475,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "h263p",
 	  name: "H263+",
 	  fourccs: {"U263", "u263", (char *)0},
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1, },
 	{
           id: CODEC_ID_H263I,
@@ -502,7 +485,6 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "i263",
 	  name: "I263",
-          encoding_colormodels: encoding_colormodels_ffmpeg,
 	  fourccs: {"I263", "i263", "viv1", "VIV1", (char *)0},
         },
 #if 0
@@ -547,7 +529,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "mjpg",
 	  name: "MJPEG",
 	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0},
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1, },
 	{
           id: CODEC_ID_8BPS,
@@ -639,7 +620,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "dv_ntsc",
 	  name: "DV (NTSC)",
 	  fourccs: {"dvc ", (char *)0 },
-          encoding_colormodels: encoding_colormodels_dvc,
           do_encode: 1 },
         {
           id: CODEC_ID_DVVIDEO,
@@ -651,7 +631,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "dv_pal",
 	  name: "DV (PAL)",
 	  fourccs: {"dvcp", "dvpp", (char *)0 },
-          encoding_colormodels: encoding_colormodels_ffmpeg,
           do_encode: 1 },
 };
 
@@ -806,7 +785,6 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 	direction:   0,
 	encoding_parameters: NULL,
 	decoding_parameters: NULL,
-	decoding_colormodel:  LQT_COLORMODEL_NONE,
 };
 
 /* These are called from the plugin loader */
@@ -830,7 +808,6 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
-    codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
     //    capabilities = "Codec";
     }
   else if(map->encoder)
@@ -838,7 +815,6 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = NULL;
-    codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
       
     //    capabilities = "Encoder";
     }

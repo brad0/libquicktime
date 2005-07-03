@@ -190,22 +190,6 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-static int reads_colormodel(quicktime_t *file, 
-                            int colormodel, 
-                            int track)
-  {
-  return (colormodel == source_cmodel(file, track));
-  }
-
-static int writes_colormodel(quicktime_t *file, 
-                             int colormodel, 
-                             int track)
-  {
-  return ((colormodel == BC_RGBA8888) || (colormodel == BC_RGB888));
-  }
-
-
-
 void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
 {
 	quicktime_png_codec_t *codec;
@@ -219,8 +203,6 @@ void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
 
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 
 /* Init private items */
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;

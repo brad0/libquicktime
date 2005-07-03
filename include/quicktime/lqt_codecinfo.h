@@ -129,11 +129,6 @@ struct lqt_codec_info_s
   int num_decoding_parameters;
   lqt_parameter_info_t * decoding_parameters;
 
-  /* Colormodels this codec can handle */
-  
-  int num_encoding_colormodels;
-  int * encoding_colormodels;
-
   /*
    *  Colormodel for decoding.
    *  Must be set to LQT_COLORMODEL_NONE if the stream colormodel

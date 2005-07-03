@@ -14,14 +14,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
  * USA
  */
-
-
-
-
+#include <inttypes.h>
 #include <cmodel_permutation.h>
-
-
-
+#include <lqt.h>
+#include <lqt_funcprotos.h>
 
 #define TRANSFER_FRAME_DEFAULT(output, \
 	input, \
@@ -35,9 +31,13 @@
 	switch(out_colormodel) \
 	{ \
 		case BC_BGR565: \
+			TRANSFER_FRAME_HEAD \
+                          transfer_YUV422_to_BGR565((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_TAIL \
+			break; \
 		case BC_RGB565: \
 			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_RGB565((output), (input), (input_column)); \
+                          transfer_YUV422_to_RGB565((uint16_t**)(output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_RGB888:      \
@@ -48,11 +48,6 @@
 		case BC_RGBA8888:      \
 			TRANSFER_FRAME_HEAD \
 			transfer_YUV422_to_RGBA8888((output), (input), (input_column)); \
-			TRANSFER_FRAME_TAIL \
-			break; \
-		case BC_YUV888:      \
-			TRANSFER_FRAME_HEAD \
-			transfer_YUV422_to_YUV888((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_YUVA8888:      \
@@ -68,16 +63,6 @@
 		case BC_RGBA16161616:      \
 			TRANSFER_FRAME_HEAD_16 \
 			transfer_YUV422_to_RGBA16161616((output), (input), (input_column)); \
-			TRANSFER_FRAME_TAIL \
-			break; \
-		case BC_YUV161616:      \
-			TRANSFER_FRAME_HEAD_16 \
-			transfer_YUV422_to_YUV161616((output), (input), (input_column)); \
-			TRANSFER_FRAME_TAIL \
-			break; \
-		case BC_YUVA16161616:      \
-			TRANSFER_FRAME_HEAD_16 \
-			transfer_YUV422_to_YUVA16161616((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_BGR888:      \

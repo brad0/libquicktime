@@ -184,20 +184,6 @@ static int set_parameter(quicktime_t *file,
 	return 0;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-                            int colormodel, 
-                            int track)
-{
-	return (colormodel == BC_YUV420P);
-}
-
-static int writes_colormodel(quicktime_t *file, 
-                             int colormodel, 
-                             int track)
-{
-	return (colormodel == BC_YUV420P);
-}
-
 void quicktime_init_codec_rtjpeg(quicktime_video_map_t *vtrack)
 {
 	quicktime_rtjpeg_codec_t *codec;
@@ -216,6 +202,4 @@ void quicktime_init_codec_rtjpeg(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
 	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 }

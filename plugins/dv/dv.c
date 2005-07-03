@@ -180,14 +180,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 // we include that.
 
 // This function is used as both reads_colormodel and writes_colormodel
-static int colormodel_dv(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-			colormodel == BC_YUV888 ||
-			colormodel == BC_YUV422);
-}
 
 static int set_parameter(quicktime_t *file, 
 		int track, 
@@ -243,8 +235,6 @@ void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = colormodel_dv;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = colormodel_dv;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
 
 

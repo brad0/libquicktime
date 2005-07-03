@@ -206,37 +206,6 @@ static int source_cmodel(quicktime_t *file, int track)
                 return BC_RGB888;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-                            int colormodel, 
-                            int track)
-  {
-  
-  if(source_cmodel(file, track) == BC_RGB888)
-    return (colormodel == BC_RGB888) ||
-      (colormodel == BC_BGR8888);
-  else
-    return (colormodel == BC_RGBA8888) ||
-      (colormodel == BC_RGB888) ||
-      (colormodel == BC_BGR8888);
-  }
-
-/* static int quicktime_reads_colormodel_raw(quicktime_t *file,  */
-/* 		int colormodel,  */
-/* 		int track) */
-/* { */
-/* 	return (colormodel == BC_RGB888 || */
-/* 		colormodel == BC_BGR8888); */
-/* } */
-
-
-static int writes_colormodel(quicktime_t *file, 
-                             int colormodel, 
-                             int track)
-  {
-  return ((colormodel == BC_RGBA8888) ||
-          (colormodel == BC_RGB888));
-  }
-
 static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
@@ -454,8 +423,6 @@ void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
         codec_base->encode_video = quicktime_encode_raw;
         codec_base->decode_audio = 0;
         codec_base->encode_audio = 0;
-        codec_base->reads_colormodel = reads_colormodel;
-        codec_base->writes_colormodel = writes_colormodel;
         codec_base->fourcc = QUICKTIME_RAW;
         codec_base->title = "RGB uncompressed";
         codec_base->desc = "RGB uncompressed";

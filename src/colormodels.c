@@ -19,77 +19,6 @@
 #include <string.h>
 #include <funcprotos.h>
 
-cmodel_yuv_t *yuv_table = 0;
-
-void cmodel_init_yuv(cmodel_yuv_t *yuv_table)
-{
-	int i;
-	for(i = 0; i < 0x100; i++)
-	{
-/* compression */
-		yuv_table->rtoy_tab[i] = (int)( 0.2990 * 0x10000 * i);
-		yuv_table->rtou_tab[i] = (int)(-0.1687 * 0x10000 * i);
-		yuv_table->rtov_tab[i] = (int)( 0.5000 * 0x10000 * i);
-
-		yuv_table->gtoy_tab[i] = (int)( 0.5870 * 0x10000 * i);
-		yuv_table->gtou_tab[i] = (int)(-0.3320 * 0x10000 * i);
-		yuv_table->gtov_tab[i] = (int)(-0.4187 * 0x10000 * i);
-
-		yuv_table->btoy_tab[i] = (int)( 0.1140 * 0x10000 * i);
-		yuv_table->btou_tab[i] = (int)( 0.5000 * 0x10000 * i) + 0x800000;
-		yuv_table->btov_tab[i] = (int)(-0.0813 * 0x10000 * i) + 0x800000;
-	}
-
-	yuv_table->vtor = &(yuv_table->vtor_tab[0x80]);
-	yuv_table->vtog = &(yuv_table->vtog_tab[0x80]);
-	yuv_table->utog = &(yuv_table->utog_tab[0x80]);
-	yuv_table->utob = &(yuv_table->utob_tab[0x80]);
-	for(i = -0x80; i < 0x80; i++)
-	{
-/* decompression */
-		yuv_table->vtor[i] = (int)( 1.4020 * 0x10000 * i);
-		yuv_table->vtog[i] = (int)(-0.7141 * 0x10000 * i);
-
-		yuv_table->utog[i] = (int)(-0.3441 * 0x10000 * i);
-		yuv_table->utob[i] = (int)( 1.7720 * 0x10000 * i);
-	}
-
-	for(i = 0; i < 0x10000; i++)
-	{
-/* compression */
-		yuv_table->rtoy_tab16[i] = (int)( 0.2990 * 0x100 * i);
-		yuv_table->rtou_tab16[i] = (int)(-0.1687 * 0x100 * i);
-		yuv_table->rtov_tab16[i] = (int)( 0.5000 * 0x100 * i);
-
-		yuv_table->gtoy_tab16[i] = (int)( 0.5870 * 0x100 * i);
-		yuv_table->gtou_tab16[i] = (int)(-0.3320 * 0x100 * i);
-		yuv_table->gtov_tab16[i] = (int)(-0.4187 * 0x100 * i);
-
-		yuv_table->btoy_tab16[i] = (int)( 0.1140 * 0x100 * i);
-		yuv_table->btou_tab16[i] = (int)( 0.5000 * 0x100 * i) + 0x800000;
-		yuv_table->btov_tab16[i] = (int)(-0.0813 * 0x100 * i) + 0x800000;
-	}
-
-	yuv_table->vtor16 = &(yuv_table->vtor_tab16[0x8000]);
-	yuv_table->vtog16 = &(yuv_table->vtog_tab16[0x8000]);
-	yuv_table->utog16 = &(yuv_table->utog_tab16[0x8000]);
-	yuv_table->utob16 = &(yuv_table->utob_tab16[0x8000]);
-	for(i = -0x8000; i < 0x8000; i++)
-	{
-/* decompression */
-		yuv_table->vtor16[i] = (int)( 1.4020 * 0x100 * i);
-		yuv_table->vtog16[i] = (int)(-0.7141 * 0x100 * i);
-
-		yuv_table->utog16[i] = (int)(-0.3441 * 0x100 * i);
-		yuv_table->utob16[i] = (int)( 1.7720 * 0x100 * i);
-	}
-}
-
-
-void cmodel_delete_yuv(cmodel_yuv_t *yuv_table)
-{
-}
-
 int cmodel_is_planar(int colormodel)
 {
 	switch(colormodel)
@@ -100,22 +29,6 @@ int cmodel_is_planar(int colormodel)
 		case BC_YUV411P:      return 1; break;
 	}
 	return 0;
-}
-
-int cmodel_components(int colormodel)
-{
-	switch(colormodel)
-	{
-		case BC_RGB888:       return 3; break;
-		case BC_RGBA8888:     return 4; break;
-		case BC_RGB161616:    return 3; break;
-		case BC_RGBA16161616: return 4; break;
-		case BC_YUV888:       return 3; break;
-		case BC_YUVA8888:     return 4; break;
-		case BC_YUV161616:    return 3; break;
-		case BC_YUVA16161616: return 4; break;
-	}
-	return 1;
 }
 
 int cmodel_calculate_pixelsize(int colormodel)
@@ -132,61 +45,21 @@ int cmodel_calculate_pixelsize(int colormodel)
 		case BC_RGBA8888:     return 4; break;
 		case BC_RGB161616:    return 6; break;
 		case BC_RGBA16161616: return 8; break;
-		case BC_YUV888:       return 3; break;
 		case BC_YUVA8888:     return 4; break;
-		case BC_YUV161616:    return 6; break;
-		case BC_YUVA16161616: return 8; break;
 // Planar
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
                 case BC_YUV444P:      return 1; break;
+		case BC_YUVJ420P:     return 1; break;
+		case BC_YUVJ422P:     return 1; break;
+                case BC_YUVJ444P:     return 1; break;
+		case BC_YUV422P16:    return 2; break;
+                case BC_YUV444P16:    return 2; break;
                 case BC_YUV422:       return 2; break;
 		case BC_YUV411P:      return 1; break;
 	}
 	return 0;
 }
-
-int cmodel_calculate_max(int colormodel)
-{
-	switch(colormodel)
-	{
-// Working bitmaps are packed to simplify processing
-		case BC_RGB888:       return 0xff; break;
-		case BC_RGBA8888:     return 0xff; break;
-		case BC_RGB161616:    return 0xffff; break;
-		case BC_RGBA16161616: return 0xffff; break;
-		case BC_YUV888:       return 0xff; break;
-		case BC_YUVA8888:     return 0xff; break;
-		case BC_YUV161616:    return 0xffff; break;
-		case BC_YUVA16161616: return 0xffff; break;
-	}
-	return 0;
-}
-
-int cmodel_calculate_datasize(int w, int h, int bytes_per_line, int color_model)
-{
-	if(bytes_per_line < 0) bytes_per_line = w * cmodel_calculate_pixelsize(color_model);
-	switch(color_model)
-	{
-		case BC_YUV420P:
-		case BC_YUV411P:
-			return w * h + w * h / 2 + 4;
-			break;
-
-		case BC_YUV422P:
-			return w * h * 2 + 4;
-			break;
-                case BC_YUV444P:
-                        return w * h * 3 + 4;
-                        break;
-
-		default:
-			return h * bytes_per_line + 4;
-			break;
-	}
-	return 0;
-}
-
 
 static void get_scale_tables(int **column_table, 
 	int **row_table, 
@@ -232,7 +105,6 @@ void cmodel_transfer(unsigned char **output_rows,
 	int out_h,
 	int in_colormodel, 
 	int out_colormodel,
-	int bg_color,
 	int in_rowspan,
         int out_rowspan,
 	int in_rowspan_uv,
@@ -241,20 +113,8 @@ void cmodel_transfer(unsigned char **output_rows,
 	int *column_table;
 	int *row_table;
 	int scale;
-	int bg_r, bg_g, bg_b;
 	int in_pixelsize = cmodel_calculate_pixelsize(in_colormodel);
 	int out_pixelsize = cmodel_calculate_pixelsize(out_colormodel);
-
-	bg_r = (bg_color & 0xff0000) >> 16;
-	bg_g = (bg_color & 0xff00) >> 8;
-	bg_b = (bg_color & 0xff);
-
-// Initialize tables
-	if(yuv_table == 0)
-	{
-		yuv_table = calloc(1, sizeof(cmodel_yuv_t));
-		cmodel_init_yuv(yuv_table);
-	}
 
 // Get scaling
 	scale = (out_w != in_w) || (in_x != 0);
@@ -268,7 +128,10 @@ void cmodel_transfer(unsigned char **output_rows,
 	{
 		case BC_YUV420P:
 		case BC_YUV422P:
-			cmodel_yuv420p(output_rows,  \
+		case BC_YUV422P16:
+		case BC_YUVJ420P:
+		case BC_YUVJ422P:
+ 			cmodel_yuv420p(output_rows,  \
 				input_rows, \
 				in_x,  \
 				in_y,  \
@@ -278,7 +141,6 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_h, \
 				in_colormodel,  \
 				out_colormodel, \
-				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
 				in_rowspan_uv, \
@@ -287,12 +149,32 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_pixelsize, \
 				in_pixelsize, \
 				row_table, \
-				column_table, \
-				bg_r, \
-				bg_g, \
-				bg_b);
-			break;
+				column_table); \
+			break; \
+		case BC_YUV411P:
+ 			cmodel_yuv411p(output_rows,  \
+				input_rows, \
+				in_x,  \
+				in_y,  \
+				in_w,  \
+				in_h, \
+				out_w,  \
+				out_h, \
+				in_colormodel,  \
+				out_colormodel, \
+				in_rowspan, \
+				out_rowspan, \
+				in_rowspan_uv, \
+				out_rowspan_uv, \
+				scale, \
+				out_pixelsize, \
+				in_pixelsize, \
+				row_table, \
+				column_table); \
+			break; \
                 case BC_YUV444P:
+                case BC_YUV444P16:
+                case BC_YUVJ444P:
                         cmodel_yuv444p(output_rows,  \
                                 input_rows, \
                                 in_x,  \
@@ -303,7 +185,6 @@ void cmodel_transfer(unsigned char **output_rows,
                                 out_h, \
                                 in_colormodel,  \
                                 out_colormodel, \
-                                bg_color, \
                                 in_rowspan, \
                                 out_rowspan, \
                                 in_rowspan_uv, \
@@ -312,10 +193,7 @@ void cmodel_transfer(unsigned char **output_rows,
                                 out_pixelsize, \
                                 in_pixelsize, \
                                 row_table, \
-                                column_table, \
-                                bg_r, \
-                                bg_g, \
-                                bg_b);
+                                column_table); \
                         break;
 
 		case BC_YUV422:
@@ -329,7 +207,6 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_h, \
 				in_colormodel,  \
 				out_colormodel, \
-				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
 				in_rowspan_uv, \
@@ -338,10 +215,7 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_pixelsize, \
 				in_pixelsize, \
 				row_table, \
-				column_table, \
-				bg_r, \
-				bg_g, \
-				bg_b);
+				column_table);
 			break;
 
 		default:
@@ -355,7 +229,6 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_h, \
 				in_colormodel,  \
 				out_colormodel, \
-				bg_color, \
 				in_rowspan, \
 				out_rowspan, \
 				in_rowspan_uv, \
@@ -364,10 +237,7 @@ void cmodel_transfer(unsigned char **output_rows,
 				out_pixelsize, \
 				in_pixelsize, \
 				row_table, \
-				column_table, \
-				bg_r, \
-				bg_g, \
-				bg_b);
+				column_table);
 			break;
 	}
 
@@ -389,43 +259,12 @@ int cmodel_bc_to_x(int color_model)
 	return -1;
 }
 
-void cmodel_to_text(char *string, int cmodel)
-{
-	switch(cmodel)
-	{
-		case BC_RGB888:       strcpy(string, "RGB-8 Bit");   break;
-		case BC_RGBA8888:     strcpy(string, "RGBA-8 Bit");  break;
-		case BC_RGB161616:    strcpy(string, "RGB-16 Bit");  break;
-		case BC_RGBA16161616: strcpy(string, "RGBA-16 Bit"); break;
-		case BC_YUV888:       strcpy(string, "YUV-8 Bit");   break;
-		case BC_YUVA8888:     strcpy(string, "YUVA-8 Bit");  break;
-		case BC_YUV161616:    strcpy(string, "YUV-16 Bit");  break;
-		case BC_YUVA16161616: strcpy(string, "YUVA-16 Bit"); break;
-		default: strcpy(string, "RGB-8 Bit"); break;
-	}
-}
-
-int cmodel_from_text(char *text)
-{
-	if(!strcasecmp(text, "RGB-8 Bit"))   return BC_RGB888;
-	if(!strcasecmp(text, "RGBA-8 Bit"))  return BC_RGBA8888;
-	if(!strcasecmp(text, "RGB-16 Bit"))  return BC_RGB161616;
-	if(!strcasecmp(text, "RGBA-16 Bit")) return BC_RGBA16161616;
-	if(!strcasecmp(text, "YUV-8 Bit"))   return BC_YUV888;
-	if(!strcasecmp(text, "YUVA-8 Bit"))  return BC_YUVA8888;
-	if(!strcasecmp(text, "YUV-16 Bit"))  return BC_YUV161616;
-	if(!strcasecmp(text, "YUVA-16 Bit")) return BC_YUVA16161616;
-	return BC_RGB888;
-}
 
 int cmodel_is_yuv(int colormodel)
 {
 	switch(colormodel)
 	{
-		case BC_YUV888:
 		case BC_YUVA8888:
-		case BC_YUV161616:
-		case BC_YUVA16161616:
 		case BC_YUV422:
 		case BC_YUV420P:
 		case BC_YUV422P:

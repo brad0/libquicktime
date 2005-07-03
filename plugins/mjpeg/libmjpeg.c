@@ -325,7 +325,7 @@ static void allocate_temps(mjpeg_t *mjpeg)
     {
     switch(mjpeg->jpeg_color_model)
       {
-      case BC_YUV422P:
+      case BC_YUVJ422P:
         mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h * 2);
         mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
         mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
@@ -338,7 +338,7 @@ static void allocate_temps(mjpeg_t *mjpeg)
           }
         break;
         
-      case BC_YUV444P:
+      case BC_YUVJ444P:
         mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h * 3);
         mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
         mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
@@ -351,7 +351,7 @@ static void allocate_temps(mjpeg_t *mjpeg)
           }
         break;
         
-      case BC_YUV420P:
+      case BC_YUVJ420P:
         mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h + mjpeg->coded_w * mjpeg->coded_h / 2);
         mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
         mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
@@ -387,7 +387,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
   int i;
   switch(mjpeg->jpeg_color_model)
     {
-    case BC_YUV444P:
+    case BC_YUVJ444P:
       {
       if(!compressor->rows[0])
         {
@@ -406,7 +406,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
       break;
       }
 
-    case BC_YUV422P:
+    case BC_YUVJ422P:
       {
       if(!compressor->rows[0])
         {
@@ -425,7 +425,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
       break;
       }
 
-    case BC_YUV420P:
+    case BC_YUVJ420P:
       {
       if(!compressor->rows[0])
         {
@@ -486,10 +486,10 @@ static void get_mcu_rows(mjpeg_t *mjpeg,
     {
     for(j = 0; j < 16; j++)
       {
-      if(i > 0 && j >= 8 && mjpeg->jpeg_color_model == BC_YUV420P) break;
+      if(i > 0 && j >= 8 && mjpeg->jpeg_color_model == BC_YUVJ420P) break;
 
       scanline = start_row;
-      if(i > 0 && mjpeg->jpeg_color_model == BC_YUV420P) scanline /= 2;
+      if(i > 0 && mjpeg->jpeg_color_model == BC_YUVJ420P) scanline /= 2;
       scanline += j;
       if(scanline >= engine->field_h) scanline = engine->field_h - 1;
       engine->mcu_rows[i][j] = engine->rows[i][scanline];
@@ -535,18 +535,18 @@ static void decompress_field(mjpeg_compressor *engine)
   if(engine->jpeg_decompress.comp_info[0].v_samp_factor == 2 &&
      engine->jpeg_decompress.comp_info[0].h_samp_factor == 2)
     {
-    mjpeg->jpeg_color_model = BC_YUV420P;
+    mjpeg->jpeg_color_model = BC_YUVJ420P;
     mjpeg->coded_w_uv = mjpeg->coded_w / 2;
     }
   else if(engine->jpeg_decompress.comp_info[0].v_samp_factor == 1 &&
           engine->jpeg_decompress.comp_info[0].h_samp_factor == 2)
     {
-    mjpeg->jpeg_color_model = BC_YUV422P;
+    mjpeg->jpeg_color_model = BC_YUVJ422P;
     mjpeg->coded_w_uv = mjpeg->coded_w / 2;
     }
   else
     {
-    mjpeg->jpeg_color_model = BC_YUV444P;
+    mjpeg->jpeg_color_model = BC_YUVJ444P;
     mjpeg->coded_w_uv = mjpeg->coded_w;
     }
   // Must be here because the color model isn't known until now
@@ -664,7 +664,7 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
   switch(mjpeg->fields)
     {
     case 1:
-      mjpeg->jpeg_color_model = BC_YUV420P;
+      mjpeg->jpeg_color_model = BC_YUVJ420P;
       result->jpeg_compress.comp_info[0].h_samp_factor = 2;
       result->jpeg_compress.comp_info[0].v_samp_factor = 2;
       result->jpeg_compress.comp_info[1].h_samp_factor = 1;
@@ -673,7 +673,7 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
       result->jpeg_compress.comp_info[2].v_samp_factor = 1;
       break;
     case 2:
-      mjpeg->jpeg_color_model = BC_YUV422P;
+      mjpeg->jpeg_color_model = BC_YUVJ422P;
       result->jpeg_compress.comp_info[0].h_samp_factor = 2;
       result->jpeg_compress.comp_info[0].v_samp_factor = 1;
       result->jpeg_compress.comp_info[1].h_samp_factor = 1;

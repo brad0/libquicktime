@@ -2011,6 +2011,22 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   return result ? trak->chunk_sizes[chunk-1] : 0;
   }
 
+int lqt_read_video_frame(quicktime_t * file, int track,
+                         long frame,
+                         uint8_t ** buffer, int * buffer_alloc)
+  {
+  int size;
+  quicktime_set_video_position(file, frame, track);
+  size = quicktime_frame_size(file,  frame, track);
+
+  if(*buffer_alloc < size)
+    {
+    *buffer_alloc = size + 1024;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+  
+  return quicktime_read_data(file, *buffer, size);
+  }
 
 int64_t lqt_last_audio_position(quicktime_t * file, int track)
   {

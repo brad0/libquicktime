@@ -27,11 +27,6 @@
 
 static char * fourccs_rtjpeg[]  = { "RTJ0", (char*)0 };
 
-static int encoding_colormodels_rtjpeg[] = {
-	BC_YUV420P, 
-	LQT_COLORMODEL_NONE
-};
-
 static lqt_parameter_info_static_t encode_parameters_rtjpeg[] = {
 	{
 		"rtjpeg_quality",
@@ -81,8 +76,6 @@ static lqt_codec_info_static_t codec_info_rtjpeg = {
 	direction:   LQT_DIRECTION_BOTH,
 	encoding_parameters: encode_parameters_rtjpeg,
 	decoding_parameters: (lqt_parameter_info_static_t*)0,
-	encoding_colormodels: encoding_colormodels_rtjpeg,
-	decoding_colormodel: BC_YUV420P
 };
 
 /* These are called from the plugin loader */

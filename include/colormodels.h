@@ -14,4 +14,3 @@ int cmodel_components(int colormodel);
 int cmodel_is_planar(int colormodel);
 extern cmodel_yuv_t *yuv_table;
 void cmodel_delete_yuv(cmodel_yuv_t *yuv_table);
-void cmodel_init_yuv(cmodel_yuv_t *yuv_table);

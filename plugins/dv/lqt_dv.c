@@ -12,11 +12,6 @@
 static char * fourccs_dv_ntsc[] = { "dvc ", (char*)0 };
 static char * fourccs_dv_pal[]  = { "dvcp", (char*)0 };
 
-static int encoding_colormodels_dv[] =
-  {
-    BC_YUV422,
-    LQT_COLORMODEL_NONE
-  };
 
 #if 0  
 static lqt_parameter_info_static_t decode_parameters_dv[] =
@@ -122,8 +117,6 @@ static lqt_codec_info_static_t codec_info_dv_pal =
     direction:   LQT_DIRECTION_ENCODE,
     encoding_parameters: encode_parameters_dv,
     //    decoding_parameters: decode_parameters_dv,
-    encoding_colormodels: encoding_colormodels_dv,
-    decoding_colormodel:  BC_YUV422
   };
 
 static lqt_codec_info_static_t codec_info_dv_ntsc =
@@ -137,8 +130,6 @@ static lqt_codec_info_static_t codec_info_dv_ntsc =
     direction:   LQT_DIRECTION_ENCODE,
     encoding_parameters: encode_parameters_dv,
     //    decoding_parameters: decode_parameters_dv,
-    encoding_colormodels: encoding_colormodels_dv,
-    decoding_colormodel:  BC_YUV422
   };
 
 

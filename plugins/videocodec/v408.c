@@ -22,37 +22,6 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_RGBA8888 ||
-		colormodel == BC_RGB161616 ||
-		colormodel == BC_RGBA16161616 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUVA8888 ||
-		colormodel == BC_YUV161616 ||
-		colormodel == BC_YUVA16161616 ||
-		colormodel == BC_RGB565 ||
-		colormodel == BC_BGR888 ||
-		colormodel == BC_BGR8888);
-}
-
-static int writes_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_RGBA8888 ||
-		colormodel == BC_RGB161616 ||
-		colormodel == BC_RGBA16161616 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUVA8888 ||
-		colormodel == BC_YUV161616 ||
-		colormodel == BC_YUVA16161616);
-}
-
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
         uint8_t * in_ptr, *out_ptr;
@@ -160,8 +129,6 @@ void quicktime_init_codec_v408(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->reads_colormodel = reads_colormodel;
-	codec_base->writes_colormodel = writes_colormodel;
 	codec_base->fourcc = QUICKTIME_YUVA4444;
 	codec_base->title = "Component Y'CbCrA 8-bit 4:4:4:4";
 	codec_base->desc = "Component Y'CbCrA 8-bit 4:4:4:4";

@@ -29,49 +29,6 @@ static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 
 static char * fourccs_yv12[] = { QUICKTIME_YUV420 ,       (char*)0 };
 
-static int encoding_colormodels_raw[] =
-  {
-    BC_RGB888,
-    BC_RGBA8888,
-    LQT_COLORMODEL_NONE
-  };
-
-static int encoding_colormodels_v308[] =
-  {
-    BC_YUV888,
-    LQT_COLORMODEL_NONE,
-  };
-
-static int encoding_colormodels_v408[] =
-  {
-    BC_YUVA8888,
-    LQT_COLORMODEL_NONE,
-  };
-
-static int encoding_colormodels_v410[] =
-  {
-    BC_YUV161616,
-    LQT_COLORMODEL_NONE,
-  };
-
-static int encoding_colormodels_yuv2[] =
-  {
-    BC_YUV422,
-    LQT_COLORMODEL_NONE,
-  };
-
-static int encoding_colormodels_yuv4[] =
-  {
-    BC_RGB888,
-    LQT_COLORMODEL_NONE,
-  };
-
-static int encoding_colormodels_yv12[] =
-  {
-    BC_YUV420P,
-    LQT_COLORMODEL_NONE,
-  };
-
 // if DUMMY_PARAMETERS is defined it will cause segfaults
 #undef DUMMY_PARAMETERS
 
@@ -125,8 +82,6 @@ static lqt_codec_info_static_t codec_info_raw =
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
-  encoding_colormodels: encoding_colormodels_raw,
-  decoding_colormodel:  LQT_COLORMODEL_NONE
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
@@ -139,8 +94,6 @@ static lqt_codec_info_static_t codec_info_v308 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v308,
-  decoding_colormodel:  BC_YUV888
   };
 
 static lqt_codec_info_static_t codec_info_v408 =
@@ -153,8 +106,6 @@ static lqt_codec_info_static_t codec_info_v408 =
   direction:         LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v408,
-  decoding_colormodel:  BC_YUVA8888
 
   };
 
@@ -168,8 +119,6 @@ static lqt_codec_info_static_t codec_info_v410 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_v410,
-  decoding_colormodel: BC_YUV161616
   };
 
 static lqt_codec_info_static_t codec_info_yuv2 =
@@ -182,8 +131,6 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_yuv2,
-  decoding_colormodel: BC_YUV422
 
   };
 
@@ -197,8 +144,6 @@ static lqt_codec_info_static_t codec_info_2vuy =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_yuv2,
-  decoding_colormodel: BC_YUV422
 
   };
 
@@ -212,8 +157,6 @@ static lqt_codec_info_static_t codec_info_yuv4 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_yuv4,
-    decoding_colormodel: BC_RGB888
 
   };
 
@@ -227,8 +170,6 @@ static lqt_codec_info_static_t codec_info_yv12 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
-    encoding_colormodels: encoding_colormodels_yv12,
-    decoding_colormodel: BC_YUV420P
     
   };
 

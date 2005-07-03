@@ -45,11 +45,11 @@ colormodels[] =
     { PIX_FMT_YUV444P,  BC_YUV444P,  1 },  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
     { PIX_FMT_YUV411P,  BC_YUV411P,  1 },  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
     { PIX_FMT_RGB565,   BC_RGB565,   1 },  ///< always stored in cpu endianness
+    { PIX_FMT_YUVJ420P, BC_YUVJ420P, 1 }, ///< Planar YUV 4:2:0 full scale (jpeg)
+    { PIX_FMT_YUVJ422P, BC_YUVJ422P, 1 }, ///< Planar YUV 4:2:2 full scale (jpeg)
+    { PIX_FMT_YUVJ444P, BC_YUVJ444P, 1 }, ///< Planar YUV 4:4:4 full scale (jpeg)
     { PIX_FMT_RGBA32,   BC_RGBA8888, 0 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
     { PIX_FMT_RGB555,   BC_RGB888,   0 },  ///< always stored in cpu endianness, most significant bit to 1
-    { PIX_FMT_YUVJ420P, BC_YUV420P,  0 }, ///< Planar YUV 4:2:0 full scale (jpeg)
-    { PIX_FMT_YUVJ422P, BC_YUV422P,  0 }, ///< Planar YUV 4:2:2 full scale (jpeg)
-    { PIX_FMT_YUVJ444P, BC_YUV444P,  0 }, ///< Planar YUV 4:4:4 full scale (jpeg)
     { PIX_FMT_GRAY8,    BC_RGB888,   0 },
     { PIX_FMT_MONOWHITE, BC_RGB888,  0 },///< 0 is white
     { PIX_FMT_MONOBLACK, BC_RGB888,  0 },///< 0 is black

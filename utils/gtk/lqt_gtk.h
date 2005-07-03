@@ -118,10 +118,6 @@ typedef struct
   GtkWidget * wav_ids_label;
   GtkWidget * wav_ids_frame;
   
-  GtkWidget * encoding_colormodels_label;
-  GtkWidget * decoding_colormodel_label;
-  GtkWidget * colormodels_frame;
-  
   } LqtGtkCodecInfoWidget;
 
 LqtGtkCodecInfoWidget *

@@ -6,12 +6,6 @@
 
 static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
 
-static int encoding_colormodels_png[] =
-  {
-    BC_RGB888,
-    BC_RGBA8888,
-    LQT_COLORMODEL_NONE
-  };
 
 static lqt_parameter_info_static_t encode_parameters_png[] =
   {
@@ -37,8 +31,6 @@ static lqt_codec_info_static_t codec_info_png =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: encode_parameters_png,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-  encoding_colormodels: encoding_colormodels_png,
-  decoding_colormodel: LQT_COLORMODEL_NONE
   };
 
 /* These are called from the plugin loader */

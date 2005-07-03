@@ -46,12 +46,6 @@ static int quicktime_delete_codec_yuv4(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return colormodel == BC_RGB888;
-}
 
 static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv4_codec_t *codec)
 {
@@ -377,7 +371,6 @@ void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->reads_colormodel = reads_colormodel;
 	codec_base->fourcc = QUICKTIME_YUV4;
 	codec_base->title = "YUV 4:2:0 packed";
 	codec_base->desc = "YUV 4:2:0 packed (Not standardized)";

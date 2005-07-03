@@ -20,6 +20,7 @@
 typedef struct
 {
 	unsigned char *work_buffer;
+        int work_buffer_alloc;
 	int coded_w, coded_h;
 
 /* The YUV2 codec requires a bytes per line that is a multiple of 4 */
@@ -40,64 +41,67 @@ static int quicktime_delete_codec_yuv2(quicktime_video_map_t *vtrack)
         free(codec);
 	return 0;
 }
-#if 0
-static int quicktime_reads_colormodel_yuv2(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUV422P);
-}
-#endif
 
-static void convert_encode_yuv2(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+static void convert_encode_yuv2(quicktime_t * file, int track, quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
+        uint8_t *out_row, *in_y, *in_u, *in_v;
 	int y, x;
 	for(y = 0; y < codec->coded_h; y++)
 	{
-		unsigned char *out_row = codec->work_buffer + y * codec->bytes_per_line;
-		unsigned char *in_row = row_pointers[y];
-		for(x = 0; x < codec->bytes_per_line; )
+		out_row = codec->work_buffer + y * codec->bytes_per_line;
+
+                in_y = row_pointers[0] + y * file->vtracks[track].stream_row_span;
+                in_u = row_pointers[1] + y * file->vtracks[track].stream_row_span_uv;
+                in_v = row_pointers[2] + y * file->vtracks[track].stream_row_span_uv;
+
+                for(x = 0; x < codec->bytes_per_line; )
 		{
-			*out_row++ = *in_row++;
-			*out_row++ = (int)(*in_row++) - 128;
-			*out_row++ = *in_row++;
-			*out_row++ = (int)(*in_row++) - 128;
+			*out_row++ = *in_y++;
+			*out_row++ = (int)(*in_u++) - 128;
+			*out_row++ = *in_y++;
+			*out_row++ = (int)(*in_v++) - 128;
 			x += 4;
 		}
 	}
 }
 
-static void convert_decode_yuv2(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+static void convert_decode_yuv2(quicktime_t * file, int track, quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
+        uint8_t *in_row, *out_y, *out_u, *out_v;
 	int y, x;
 	for(y = 0; y < codec->coded_h; y++)
-	{
-		unsigned char *in_row = row_pointers[y];
-		for(x = 0; x < codec->bytes_per_line; )
-		{
-			in_row[1] += 128;
-			in_row[3] += 128;
-			x += 4;
-			in_row += 4;
-		}
-	}
+          {
+          in_row = codec->work_buffer + y * codec->bytes_per_line;
+          
+          out_y = row_pointers[0] + y * file->vtracks[track].stream_row_span;
+          out_u = row_pointers[1] + y * file->vtracks[track].stream_row_span_uv;
+          out_v = row_pointers[2] + y * file->vtracks[track].stream_row_span_uv;
+          
+          for(x = 0; x < codec->bytes_per_line; )
+            {
+            *out_y++ = *in_row++;
+            *out_u++ = (int)(*in_row++) + 128;
+            *out_y++ = *in_row++;
+            *out_v++ = (int)(*in_row++) + 128;
+            x += 4;
+            }
+          }
 }
 
 static void convert_encode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
+        uint8_t *in_row, *out_row;
 	int y, x;
 	for(y = 0; y < codec->coded_h; y++)
 	{
-		unsigned char *out_row = codec->work_buffer + y * codec->bytes_per_line;
-		unsigned char *in_row = row_pointers[y];
+		out_row = codec->work_buffer + y * codec->bytes_per_line;
+		in_row = row_pointers[y];
 		for(x = 0; x < codec->bytes_per_line; )
 		{
-                        out_row[0] = in_row[1]; /* Y */
-			out_row[1] = in_row[0]; /* U */
-			out_row[2] = in_row[3]; /* Y */
-			out_row[3] = in_row[2]; /* V */
+                        out_row[0] = in_row[1]; /* U */
+			out_row[1] = in_row[0]; /* Y */
+			out_row[2] = in_row[3]; /* V */
+			out_row[3] = in_row[2]; /* Y */
 			x += 4;
                         out_row += 4;
                         in_row += 4;
@@ -107,25 +111,23 @@ static void convert_encode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **r
 
 static void convert_decode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
 {
-        uint8_t swap;
+        uint8_t *in_row, *out_row;
         int y, x;
 	for(y = 0; y < codec->coded_h; y++)
-	{
-		unsigned char *in_row = row_pointers[y];
-		for(x = 0; x < codec->bytes_per_line; )
-		{
-                        swap = in_row[0];
-                        in_row[0] = in_row[1];
-                        in_row[1] = swap;
-
-                        swap = in_row[2];
-                        in_row[2] = in_row[3];
-                        in_row[3] = swap;
-                        
-                        x += 4;
-			in_row += 4;
-		}
-	}
+          {
+          for(x = 0; x < codec->bytes_per_line; )
+            {
+            in_row = codec->work_buffer + y * codec->bytes_per_line;
+            out_row = row_pointers[y];
+            out_row[1] = in_row[0]; /* U */
+            out_row[0] = in_row[1]; /* Y */
+            out_row[3] = in_row[2]; /* V */
+            out_row[2] = in_row[3]; /* Y */
+            x += 4;
+            out_row += 4;
+            in_row += 4;
+            }
+          }
 }
 
 
@@ -135,12 +137,12 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 	if(!codec->initialized)
 	{
 /* Init private items */
-		codec->coded_w = (int)((float)width / 4 + 0.5) * 4;
+        codec->coded_w = ((width+3)/4)*4;
                 //		codec->coded_h = (int)((float)vtrack->track->tkhd.track_height / 4 + 0.5) * 4;
                 codec->coded_h = height;
 		codec->bytes_per_line = codec->coded_w * 2;
-		codec->work_buffer = malloc(codec->bytes_per_line *
-								codec->coded_h);
+                codec->work_buffer_alloc = codec->bytes_per_line * codec->coded_h;
+		codec->work_buffer = calloc(1, codec->work_buffer_alloc);
 		codec->initialized = 1;
          }
 }
@@ -156,7 +158,10 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
         if(!row_pointers)
           {
-          vtrack->stream_cmodel = BC_YUV422;
+          if(codec->is_2vuy)
+            vtrack->stream_cmodel = BC_YUV422;
+          else
+            vtrack->stream_cmodel = BC_YUVJ422P;
           return 0;
           }
 
@@ -169,7 +174,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(codec->is_2vuy)
           convert_decode_2vuy(codec, row_pointers);
         else
-          convert_decode_yuv2(codec, row_pointers);
+          convert_decode_yuv2(file, track, codec, row_pointers);
         
 	return result;
 }
@@ -188,7 +193,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
         if(!row_pointers)
           {
-          vtrack->stream_cmodel = BC_YUV422;
+          if(codec->is_2vuy)
+            vtrack->stream_cmodel = BC_YUV422;
+          else
+            vtrack->stream_cmodel = BC_YUVJ422P;
           return 0;
           }
         
@@ -200,7 +208,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(codec->is_2vuy)
           convert_encode_2vuy(codec, row_pointers);
         else
-          convert_encode_yuv2(codec, row_pointers);
+          convert_encode_yuv2(file, track, codec, row_pointers);
         quicktime_write_chunk_header(file, trak, &chunk_atom);
         result = !quicktime_write_data(file, buffer, bytes);
         
@@ -214,27 +222,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	return result;
 }
 
-static int reads_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUV422P ||
-		colormodel == BC_YUV422);
-}
-
-static int writes_colormodel(quicktime_t *file, 
-		int colormodel, 
-		int track)
-{
-
-	return (colormodel == BC_RGB888 ||
-		colormodel == BC_YUV888 ||
-		colormodel == BC_YUV422P ||
-		colormodel == BC_YUV422);
-}
 
 void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack)
 {
@@ -247,8 +234,6 @@ void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->reads_colormodel = reads_colormodel;
-	codec_base->writes_colormodel = writes_colormodel;
 	codec_base->fourcc = QUICKTIME_YUV2;
 	codec_base->title = "Component Video";
 	codec_base->desc = "YUV 4:2:2 (yuv2)";
@@ -265,8 +250,6 @@ void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->reads_colormodel = reads_colormodel;
-	codec_base->writes_colormodel = writes_colormodel;
 	codec_base->fourcc = QUICKTIME_2VUY;
 	codec_base->title = "Component Video";
 	codec_base->desc = "YUV 4:2:2 (2vuy)";

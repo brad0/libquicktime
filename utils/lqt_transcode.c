@@ -42,10 +42,7 @@ int colormodels[] =
     BC_RGBA8888,
     BC_RGB161616,
     BC_RGBA16161616,
-    BC_YUV888,
     BC_YUVA8888,
-    BC_YUV161616,
-    BC_YUVA16161616,
     BC_YUV422,
     BC_YUV420P,
     BC_YUV422P,
@@ -236,8 +233,8 @@ static int transcode_init(transcode_handle * h,
                           int qtvr_columns)
   {
   lqt_codec_info_t ** codec_info;
-  int * colormodels;
   int i;
+  int in_cmodel, out_cmodel;
   
   h->in_file = quicktime_open(in_file, 1, 0);
   if(!h->in_file)
@@ -274,23 +271,27 @@ static int transcode_init(transcode_handle * h,
       fprintf(stderr, "Unsupported video cocec %s, try -lv\n", video_codec);
       return 0;
       }
-    
 
     /* Set up the output track */
     
-    lqt_set_video(h->out_file, 1,
-                  h->width, h->height,
-                  h->frame_duration, h->timescale,
-                  codec_info[0]);
+    lqt_set_video(h->out_file, 1, h->width, h->height, h->frame_duration, h->timescale, codec_info[0]);
     
     /* Get colormodel */
+    in_cmodel = lqt_get_cmodel(h->in_file, 0);
+    out_cmodel = lqt_get_cmodel(h->out_file, 0);
     
-    colormodels = malloc((codec_info[0]->num_encoding_colormodels + 1) * sizeof(int));
-    for(i = 0; i < codec_info[0]->num_encoding_colormodels; i++)
-      colormodels[i] = codec_info[0]->encoding_colormodels[i];
-    colormodels[codec_info[0]->num_encoding_colormodels] = LQT_COLORMODEL_NONE;
-    
-    h->colormodel = lqt_get_best_colormodel(h->in_file, 0, colormodels);
+    if(quicktime_reads_cmodel(h->in_file, out_cmodel, 0))
+      {
+      h->colormodel = out_cmodel;
+      }
+    else if(quicktime_writes_cmodel(h->out_file, in_cmodel, 0))
+      {
+      h->colormodel = in_cmodel;
+      }
+    else
+      {
+      h->colormodel = BC_RGB888;
+      }
     
     fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
             h->width, h->height, lqt_colormodel_to_string(h->colormodel));

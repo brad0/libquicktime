@@ -20,35 +20,32 @@
 #define COLORMODELS_H
 
 // Colormodels
-// #define BC_TRANSPARENCY 0
 #define BC_COMPRESSED   1
-// #define BC_RGB8         2
-#define BC_RGB565       3
-#define BC_BGR565       4
-#define BC_BGR888       5
-#define BC_BGR8888      6
+
+#define BC_RGB565       2
+#define BC_BGR565       3
+#define BC_BGR888       4
+#define BC_BGR8888      5
 // Working bitmaps are packed to simplify processing
-#define BC_RGB888       9
-#define BC_RGBA8888     10
-//#define BC_ARGB8888     20
-//#define BC_ABGR8888     21
-#define BC_RGB161616    11
-#define BC_RGBA16161616 12
-#define BC_YUV888       13
-#define BC_YUVA8888     14
-#define BC_YUV161616    15
-#define BC_YUVA16161616 16
-#define BC_YUV422       19
-//#define BC_A8           22
-//#define BC_A16          23
-//#define BC_YUV101010    24
-//#define BC_VYU888       25
-//#define BC_UYVA8888     26
+#define BC_RGB888       6
+#define BC_RGBA8888     7
+#define BC_RGB161616    8
+#define BC_RGBA16161616 9
+#define BC_YUVA8888     10
+#define BC_YUV422       13
 // Planar
-#define BC_YUV420P      7
-#define BC_YUV422P      17
-#define BC_YUV444P      27
-#define BC_YUV411P      18
+#define BC_YUV420P      14
+#define BC_YUV422P      15
+#define BC_YUV444P      16
+#define BC_YUV411P      17
+/* JPEG scaled colormodels */
+#define BC_YUVJ420P     18
+#define BC_YUVJ422P     19
+#define BC_YUVJ444P     20
+/* 16 bit per component plana formats */
+#define BC_YUV422P16    21
+#define BC_YUV444P16    22
+
 
 // Colormodels purely used by Quicktime are done in Quicktime.
 
@@ -57,33 +54,12 @@
 #define FOURCC_YUV2 0x32595559  /* YUV2   YUV422 */
 #define FOURCC_I420 0x30323449  /* I420   Intel Indeo 4 */
 
-#undef RECLIP
-#define RECLIP(x, y, z) ((x) = ((x) < (y) ? (y) : ((x) > (z) ? (z) : (x))))
+// #undef RECLIP
+// #define RECLIP(x, y, z) ((x) = ((x) < (y) ? (y) : ((x) > (z) ? (z) : (x))))
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct
-{
-	int rtoy_tab[0x100], gtoy_tab[0x100], btoy_tab[0x100];
-	int rtou_tab[0x100], gtou_tab[0x100], btou_tab[0x100];
-	int rtov_tab[0x100], gtov_tab[0x100], btov_tab[0x100];
-
-	int vtor_tab[0x100], vtog_tab[0x100];
-	int utog_tab[0x100], utob_tab[0x100];
-	int *vtor, *vtog, *utog, *utob;
-
-	int rtoy_tab16[0x10000], gtoy_tab16[0x10000], btoy_tab16[0x10000];
-	int rtou_tab16[0x10000], gtou_tab16[0x10000], btou_tab16[0x10000];
-	int rtov_tab16[0x10000], gtov_tab16[0x10000], btov_tab16[0x10000];
-
-	int vtor_tab16[0x10000], vtog_tab16[0x10000];
-	int utog_tab16[0x10000], utob_tab16[0x10000];
-	int *vtor16, *vtog16, *utog16, *utob16;
-} cmodel_yuv_t;
-
-extern cmodel_yuv_t *yuv_table;
 
 int cmodel_calculate_pixelsize(int colormodel);
 int cmodel_calculate_datasize(int w, int h, int bytes_per_line, int color_model);
@@ -101,19 +77,18 @@ void cmodel_transfer(unsigned char **output_rows, /* Leave NULL if non existent 
 	int out_h,
 	int in_colormodel, 
 	int out_colormodel,
-	int bg_color,         /* When transfering BC_RGBA8888 to non-alpha this is the background color in 0xRRGGBB hex */
 	int in_rowspan,       /* For planar use the luma rowspan */
         int out_rowspan,      /* For planar use the luma rowspan */
         int in_rowspan_uv,    /* Chroma rowspan */
         int out_rowspan_uv    /* Chroma rowspan */);     
 
-void cmodel_init_yuv(cmodel_yuv_t *yuv_table);
-void cmodel_delete_yuv(cmodel_yuv_t *yuv_table);
 int cmodel_bc_to_x(int color_model);
 // Tell when to use plane arguments or row pointer arguments to functions
 int cmodel_is_planar(int color_model);
-void cmodel_to_text(char *string, int cmodel);
-int cmodel_from_text(char *text);
+
+
+
+
 
 #ifdef __cplusplus
 }

@@ -108,6 +108,40 @@ void quicktime_init_strl(quicktime_t *file,
                          quicktime_trak_t *trak,
                          quicktime_strl_t *strl);
 
+// ******************************** Permutation *******************************
+
+#define PERMUTATION_ARGS \
+	unsigned char **output_rows,  \
+	unsigned char **input_rows, \
+	int in_x,  \
+	int in_y,  \
+	int in_w,  \
+	int in_h, \
+	int out_w,  \
+	int out_h, \
+	int in_colormodel,  \
+	int out_colormodel, \
+	int in_rowspan, \
+	int out_rowspan, \
+	int in_rowspan_uv, \
+	int out_rowspan_uv, \
+	int scale, \
+	int out_pixelsize, \
+	int in_pixelsize, \
+	int *row_table, \
+	int *column_table
+
+
+
+/* cmodel_default.c */
+
+void cmodel_yuv420p(PERMUTATION_ARGS);
+void cmodel_yuv422p(PERMUTATION_ARGS);
+void cmodel_yuv411p(PERMUTATION_ARGS);
+void cmodel_yuv444p(PERMUTATION_ARGS);
+void cmodel_yuv422(PERMUTATION_ARGS);
+void cmodel_default(PERMUTATION_ARGS);
+
 /* ctab.c */
 
 int quicktime_ctab_init(quicktime_ctab_t *ctab);

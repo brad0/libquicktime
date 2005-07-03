@@ -187,22 +187,6 @@ static int set_parameter_video(quicktime_t *file,
 #undef INTPARM
 }
 
-
-static int reads_colormodel(quicktime_t *file,
-                            int colormodel, 
-                            int track)
-  {
-  return (colormodel == file->vtracks[track].stream_cmodel) || (colormodel == BC_RGB888);
-  }
-
-static int writes_colormodel(quicktime_t *file, 
-                             int colormodel, 
-                             int track)
-  {
-  return (colormodel == file->vtracks[track].stream_cmodel) || (colormodel == BC_RGB888);
-  }
-
-
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
                                        AVCodec *decoder)
 {
@@ -235,7 +219,5 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
           ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_ffmpeg_decode_video;
 
         ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_video;
-	((quicktime_codec_t*)vtrack->codec)->reads_colormodel = reads_colormodel;
-	((quicktime_codec_t*)vtrack->codec)->writes_colormodel = writes_colormodel;
 }
 
