@@ -2,6 +2,8 @@ SUBDIRS = quicktime
 
 noinst_HEADERS = \
 cmodel_permutation.h \
+colorspace_tables.h \
+colorspace_macros.h \
 codecs.h \
 colormodels.h \
 funcprotos.h \
