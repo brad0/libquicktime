@@ -213,6 +213,20 @@ static long ima4_samples_to_bytes(long samples, int channels)
 	return bytes;
 }
 
+static int read_audio_chunk(quicktime_t * file, int track,
+                            long chunk,
+                            uint8_t ** buffer, int * buffer_alloc)
+  {
+  int bytes, samples, bytes_from_samples;
+
+  bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
+  bytes_from_samples = ima4_samples_to_bytes(samples, file->atracks[track].channels);
+  if(bytes > bytes_from_samples)
+    return bytes_from_samples;
+  else
+    return bytes;
+  }
+
 /* =================================== public for ima4 */
 
 static int delete_codec(quicktime_audio_map_t *atrack)
@@ -262,7 +276,7 @@ static int decode(quicktime_t *file,
 
           /* Read first chunk */
           
-          codec->decode_buffer_size = lqt_read_audio_chunk(file,
+          codec->decode_buffer_size = read_audio_chunk(file,
                                                            track, file->atracks[track].current_chunk,
                                                            &(codec->decode_buffer),
                                                            &(codec->decode_buffer_alloc));
@@ -284,7 +298,7 @@ static int decode(quicktime_t *file,
             //          if(1)
             {
             file->atracks[track].current_chunk = chunk;
-            codec->decode_buffer_size = lqt_read_audio_chunk(file,
+            codec->decode_buffer_size = read_audio_chunk(file,
                                                              track, file->atracks[track].current_chunk,
                                                              &(codec->decode_buffer),
                                                              &(codec->decode_buffer_alloc));
@@ -348,7 +362,7 @@ static int decode(quicktime_t *file,
             if(!codec->decode_buffer_size)
               {
               file->atracks[track].current_chunk++;
-              codec->decode_buffer_size = lqt_read_audio_chunk(file,
+              codec->decode_buffer_size = read_audio_chunk(file,
                                                                track, file->atracks[track].current_chunk,
                                                                &(codec->decode_buffer),
                                                                &(codec->decode_buffer_alloc));

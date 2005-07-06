@@ -9,8 +9,6 @@
 
 #define SAMPLES_PER_BLOCK 1024
 
-
-
 /* =================================== private for twos */
 
 
@@ -132,6 +130,22 @@ static int swap_bytes(uint8_t *buffer, long samples, int bits)
 	return 0;
 }
 
+static int read_audio_chunk(quicktime_t * file, int track,
+                            long chunk,
+                            uint8_t ** buffer, int * buffer_alloc)
+  {
+  int bytes, samples, bytes_from_samples;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_twos_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+
+  bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
+  bytes_from_samples = samples * codec->decode_block_align;
+  if(bytes > bytes_from_samples)
+    return bytes_from_samples;
+  else
+    return bytes;
+  }
+
 
 static int decode(quicktime_t *file, 
 					int16_t **output_i, 
@@ -182,7 +196,7 @@ static int decode(quicktime_t *file,
 
           /* Read first chunk */
 
-          codec->decode_buffer_size = lqt_read_audio_chunk(file,
+          codec->decode_buffer_size = read_audio_chunk(file,
                                                            track, file->atracks[track].current_chunk,
                                                            &(codec->decode_buffer),
                                                            &(codec->decode_buffer_alloc));
@@ -209,7 +223,7 @@ static int decode(quicktime_t *file,
           if(file->atracks[track].current_chunk != chunk)
             {
             file->atracks[track].current_chunk = chunk;
-            codec->decode_buffer_size = lqt_read_audio_chunk(file,
+            codec->decode_buffer_size = read_audio_chunk(file,
                                                              track, file->atracks[track].current_chunk,
                                                              &(codec->decode_buffer),
                                                              &(codec->decode_buffer_alloc));
@@ -258,7 +272,7 @@ static int decode(quicktime_t *file,
             if(!codec->decode_buffer_size)
               {
               file->atracks[track].current_chunk++;
-              codec->decode_buffer_size = lqt_read_audio_chunk(file,
+              codec->decode_buffer_size = read_audio_chunk(file,
                                                                track, file->atracks[track].current_chunk,
                                                                &(codec->decode_buffer),
                                                                &(codec->decode_buffer_alloc));

@@ -130,7 +130,7 @@ int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
 
 int lqt_read_audio_chunk(quicktime_t * file, int track,
                          long chunk,
-                         uint8_t ** buffer, int * buffer_alloc);
+                         uint8_t ** buffer, int * buffer_alloc, int * samples);
 int lqt_append_audio_chunk(quicktime_t * file, int track,
                            long chunk,
                            uint8_t ** buffer, int * buffer_alloc,

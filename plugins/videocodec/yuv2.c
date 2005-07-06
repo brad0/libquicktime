@@ -115,10 +115,10 @@ static void convert_decode_2vuy(quicktime_yuv2_codec_t *codec, unsigned char **r
         int y, x;
 	for(y = 0; y < codec->coded_h; y++)
           {
+          in_row = codec->work_buffer + y * codec->bytes_per_line;
+          out_row = row_pointers[y];
           for(x = 0; x < codec->bytes_per_line; )
             {
-            in_row = codec->work_buffer + y * codec->bytes_per_line;
-            out_row = row_pointers[y];
             out_row[1] = in_row[0]; /* U */
             out_row[0] = in_row[1]; /* Y */
             out_row[3] = in_row[2]; /* V */
@@ -170,7 +170,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	quicktime_set_video_position(file, vtrack->current_position, track);
 	bytes = quicktime_frame_size(file, vtrack->current_position, track);
 
-        result = !quicktime_read_data(file, row_pointers[0], bytes);
+        result = !quicktime_read_data(file, codec->work_buffer, bytes);
         if(codec->is_2vuy)
           convert_decode_2vuy(codec, row_pointers);
         else

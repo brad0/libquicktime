@@ -140,7 +140,7 @@ static int next_chunk(quicktime_t * file, int track)
   chunk_size = lqt_read_audio_chunk(file,
                                     track, track_map->current_chunk,
                                     &(codec->chunk_buffer),
-                                    &(codec->chunk_buffer_alloc));
+                                    &(codec->chunk_buffer_alloc), (int*)0);
   if(chunk_size <= 0)
     {
     //    fprintf(stderr, "Shit\n");

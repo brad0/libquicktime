@@ -5,6 +5,7 @@
 #include <quicktime/colormodels.h>
 #include <quicktime/quicktime.h>
 #include <quicktime/lqt.h>
+#include <quicktime/lqt_codecapi.h>
 #include <lqt_codecinfo_private.h>
 
 #include <lqt_private.h>
@@ -1922,7 +1923,7 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
 
 int lqt_read_audio_chunk(quicktime_t * file, int track,
                          long chunk,
-                         uint8_t ** buffer, int * buffer_alloc)
+                         uint8_t ** buffer, int * buffer_alloc, int * samples)
   {
   int64_t offset;
   quicktime_trak_t * trak;
@@ -1945,7 +1946,8 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
     {
     trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);
     }
-
+  if(samples)
+    *samples = quicktime_chunk_samples(trak, chunk);
   /* Reallocate buffer */
 
   if(*buffer_alloc < trak->chunk_sizes[chunk-1] + 16)
