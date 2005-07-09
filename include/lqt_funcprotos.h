@@ -323,6 +323,7 @@ int quicktime_moov_init(quicktime_moov_t *moov);
 int quicktime_moov_delete(quicktime_moov_t *moov);
 void quicktime_moov_dump(quicktime_moov_t *moov);
 int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_atom_t *parent_atom);
+void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov);
 void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov);
 void quicktime_update_durations(quicktime_moov_t *moov);
 int quicktime_shift_offsets(quicktime_moov_t *moov, int64_t offset);

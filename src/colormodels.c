@@ -26,6 +26,11 @@ int cmodel_is_planar(int colormodel)
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
                 case BC_YUV444P:      return 1; break;
+		case BC_YUV422P16:    return 1; break;
+                case BC_YUV444P16:    return 1; break;
+		case BC_YUVJ420P:     return 1; break;
+		case BC_YUVJ422P:     return 1; break;
+                case BC_YUVJ444P:     return 1; break;
 		case BC_YUV411P:      return 1; break;
 	}
 	return 0;

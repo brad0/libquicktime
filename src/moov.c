@@ -220,13 +220,32 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 	return 0;
 }
 
+void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
+  {
+  int i;
+  long longest_duration = 0;
+  long duration, timescale;
+  /* get the duration from the longest track in the mvhd's timescale */
+  for(i = 0; i < moov->total_tracks; i++)
+    {
+    quicktime_trak_fix_counts(file, moov->trak[i]);
+    quicktime_trak_duration(moov->trak[i], &duration, &timescale);
+    
+    duration = (long)((float)duration / timescale * moov->mvhd.time_scale);
+    
+    if(duration > longest_duration)
+      {
+      longest_duration = duration;
+      }
+    }
+  moov->mvhd.duration = longest_duration;
+  moov->mvhd.selection_duration = longest_duration;
+  }
+
 void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 {
 	quicktime_atom_t atom;
-	int i;
-	long longest_duration = 0;
-	long duration, timescale;
-	int result;
+	int result, i;
 
 
 // Try moov header immediately
@@ -240,23 +259,7 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 		file->mdat.atom.end = quicktime_position(file);
 		quicktime_atom_write_header(file, &atom, "moov");
 	}
-
-/* get the duration from the longest track in the mvhd's timescale */
-	for(i = 0; i < moov->total_tracks; i++)
-	{
-		quicktime_trak_fix_counts(file, moov->trak[i]);
-		quicktime_trak_duration(moov->trak[i], &duration, &timescale);
-
-		duration = (long)((float)duration / timescale * moov->mvhd.time_scale);
-
-		if(duration > longest_duration)
-		{
-			longest_duration = duration;
-		}
-	}
-	moov->mvhd.duration = longest_duration;
-	moov->mvhd.selection_duration = longest_duration;
-
+        
 	quicktime_write_mvhd(file, &(moov->mvhd));
 	quicktime_write_udta(file, &(moov->udta));
 	for(i = 0; i < moov->total_tracks; i++)

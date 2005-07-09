@@ -1654,6 +1654,7 @@ int quicktime_close(quicktime_t *file)
                 else
                 {
 // Atoms are only written here
+                        quicktime_finalize_moov(file, &(file->moov));
                         quicktime_write_moov(file, &(file->moov));
                         quicktime_atom_write_footer(file, &file->mdat.atom);
                 }
