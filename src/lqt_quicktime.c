@@ -1293,7 +1293,7 @@ void quicktime_init_maps(quicktime_t * file)
   if(file->total_atracks)
     {
     file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
-    for(i = 0, track = 0; i < file->total_atracks; i++)
+    for(i = 0, track = 0; i < file->total_atracks; i++, track++)
       {
       while(!file->moov.trak[track]->mdia.minf.is_audio)
         track++;
@@ -1309,7 +1309,7 @@ void quicktime_init_maps(quicktime_t * file)
     {
     file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
     
-    for(track = 0, i = 0; i < file->total_vtracks; i++)
+    for(track = 0, i = 0; i < file->total_vtracks; i++, track++)
       {
       while(!file->moov.trak[track]->mdia.minf.is_video)
         track++;
@@ -1321,13 +1321,13 @@ void quicktime_init_maps(quicktime_t * file)
       ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, i);
       file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
 
-      lqt_get_default_rowspan(file->vtracks[file->total_vtracks-1].io_cmodel,
-                              quicktime_video_width(file, file->total_vtracks-1),
-                              &(file->vtracks[file->total_vtracks-1].io_row_span),
-                              &(file->vtracks[file->total_vtracks-1].io_row_span_uv));
+      lqt_get_default_rowspan(file->vtracks[i].io_cmodel,
+                              quicktime_video_width(file, i),
+                              &(file->vtracks[i].io_row_span),
+                              &(file->vtracks[i].io_row_span_uv));
       
-      file->vtracks[file->total_vtracks-1].stream_row_span = file->vtracks[file->total_vtracks-1].io_row_span;
-      file->vtracks[file->total_vtracks-1].stream_row_span_uv = file->vtracks[file->total_vtracks-1].io_row_span_uv;
+      file->vtracks[i].stream_row_span = file->vtracks[i].io_row_span;
+      file->vtracks[i].stream_row_span_uv = file->vtracks[i].io_row_span_uv;
       
       }
     }
