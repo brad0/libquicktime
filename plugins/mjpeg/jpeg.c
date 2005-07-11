@@ -132,9 +132,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           if(codec->jpeg_type == JPEG_PROGRESSIVE)
-            vtrack->stream_cmodel = BC_YUV420P;
+            vtrack->stream_cmodel = BC_YUVJ420P;
           else
-            vtrack->stream_cmodel = BC_YUV422P;
+            vtrack->stream_cmodel = BC_YUVJ422P;
           return 0;
           }
 
