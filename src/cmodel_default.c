@@ -36,7 +36,7 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_RGB565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
                                           transfer_RGB565_to_RGB565((uint16_t**)(output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
@@ -51,7 +51,7 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
                                           transfer_BGR565_to_BGR565((uint16_t**)(output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
@@ -66,12 +66,12 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
                                           transfer_YUVA8888_to_BGR565((uint16_t**)(output), (input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
 					transfer_YUVA8888_to_RGB565((uint16_t**)(output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
@@ -141,12 +141,12 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
 					transfer_RGB888_to_BGR565((uint16_t**)(output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_FRAME_HEAD \
+					TRANSFER_FRAME_HEAD_16 \
 					transfer_RGB888_to_RGB565((uint16_t**)(output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
@@ -167,12 +167,12 @@
 					break; \
 				case BC_RGB161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGB888_to_RGB161616((uint16_t**)(output), (input));    \
+					transfer_RGB888_to_RGB161616((output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGB888_to_RGBA16161616((uint16_t**)(output), (input));    \
+					transfer_RGB888_to_RGBA16161616((output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR8888: \
@@ -278,13 +278,13 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-						TRANSFER_FRAME_HEAD \
-                                                  transfer_RGBA8888_to_BGR565((uint16_t**)(output), (input)); \
+						TRANSFER_FRAME_HEAD_16 \
+                                                  transfer_RGBA8888_to_BGR565((output), (input)); \
 						TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-						TRANSFER_FRAME_HEAD \
-						transfer_RGBA8888_to_RGB565((uint16_t**)(output), (input)); \
+						TRANSFER_FRAME_HEAD_16 \
+						transfer_RGBA8888_to_RGB565((output), (input)); \
 						TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR888: \
@@ -304,12 +304,12 @@
 					break; \
 				case BC_RGB161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGBA8888_to_RGB161616((uint16_t**)(output), (input)); \
+					transfer_RGBA8888_to_RGB161616((output), (input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGBA8888_to_RGBA16161616((uint16_t**)(output), (input)); \
+					transfer_RGBA8888_to_RGBA16161616((output), (input)); \
  					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR8888: \
@@ -361,13 +361,13 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_FRAME_HEAD \
-					transfer_RGB161616_to_BGR565((uint16_t**)(output), (uint16_t*)(input));    \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGB161616_to_BGR565((output), (uint16_t*)(input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_FRAME_HEAD \
-					transfer_RGB161616_to_RGB565((uint16_t**)(output), (uint16_t*)(input));    \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGB161616_to_RGB565((output), (uint16_t*)(input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR888: \
@@ -429,13 +429,13 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_FRAME_HEAD \
-					transfer_RGBA16161616_to_BGR565((uint16_t**)(output), (uint16_t*)(input)); \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGBA16161616_to_BGR565((output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_FRAME_HEAD \
-					transfer_RGBA16161616_to_RGB565((uint16_t**)(output), (uint16_t*)(input)); \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGBA16161616_to_RGB565((output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR888:      \
