@@ -271,6 +271,7 @@ int cmodel_is_yuv(int colormodel)
 	{
 		case BC_YUVA8888:
 		case BC_YUV422:
+		case BC_YUVJ422P:
 		case BC_YUV420P:
 		case BC_YUV422P:
                 case BC_YUV444P:

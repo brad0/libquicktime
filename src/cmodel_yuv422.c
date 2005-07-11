@@ -84,6 +84,15 @@
 				j); \
 			TRANSFER_FRAME_TAIL \
 			break; \
+		case BC_YUVJ422P: \
+			TRANSFER_YUV422P_OUT_HEAD \
+			transfer_YUV422_to_YUVJ422P(output_y, \
+				output_u, \
+				output_v, \
+				(input), \
+				j); \
+			TRANSFER_FRAME_TAIL \
+			break; \
 		case BC_YUV422: \
 			TRANSFER_FRAME_HEAD \
 			transfer_YUV422_to_YUV422((output), \

@@ -261,6 +261,15 @@
 						} \
 					} \
 					break; \
+				case BC_YUV422:      \
+					TRANSFER_YUV422_IN_HEAD \
+					transfer_YUVJ422P_to_YUV422((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 			} \
 			break; \
  \
