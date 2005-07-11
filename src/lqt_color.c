@@ -619,7 +619,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_BGR565:       return 0; break;
         case BC_BGR888:       return 0; break;
         case BC_BGR8888:      return 0; break;
-        case BC_RGB888:       return 0; break; // !
+        case BC_RGB888:       return 1; break;
         case BC_RGBA8888:     return 0; break;
         case BC_RGB161616:    return 0; break;
         case BC_RGBA16161616: return 0; break;
@@ -642,7 +642,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_RGB565:       return 0; break;
         case BC_BGR888:       return 0; break;
         case BC_BGR8888:      return 0; break;
-        case BC_RGB888:       return 0; break; // !
+        case BC_RGB888:       return 1; break;
         case BC_RGBA8888:     return 0; break;
         case BC_RGB161616:    return 0; break;
         case BC_RGBA16161616: return 0; break;
