@@ -386,7 +386,7 @@ static int transcode_init(transcode_handle * h,
 
     if (qtvr) {
 	if(strncmp(qtvr,"obj", 3) == 0) {
-	    lqt_qtvr_set_type(h->out_file, QTVR_OBJ, 0 , 0, 0, 0, 0);
+	    lqt_qtvr_set_type(h->out_file, QTVR_OBJ, h->width , h->height, h->frame_duration, h->timescale, 0);
 	}
 	
 	if(strncmp(qtvr,"pano", 4) == 0) {

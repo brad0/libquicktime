@@ -6,6 +6,8 @@ void quicktime_minf_init(quicktime_minf_t *minf)
 {
 	minf->is_video = minf->is_audio = 0;
 	minf->is_panorama = 0;
+	minf->is_qtvr = 0;
+	minf->is_object = 0;
 	quicktime_vmhd_init(&(minf->vmhd));
 	quicktime_smhd_init(&(minf->smhd));
 	quicktime_gmhd_init(&(minf->gmhd));
@@ -13,6 +15,21 @@ void quicktime_minf_init(quicktime_minf_t *minf)
 	quicktime_dinf_init(&(minf->dinf));
 	quicktime_stbl_init(&(minf->stbl));
 }
+
+
+void quicktime_minf_init_qtvr(quicktime_t *file,
+								quicktime_minf_t *minf,
+								int track_type,
+								int width,
+								int height,
+								int frame_duration)
+{
+	minf->is_qtvr = track_type;
+	quicktime_stbl_init_qtvr(file, &(minf->stbl), track_type, width, height, frame_duration);
+	quicktime_hdlr_init_data(&(minf->hdlr));
+	quicktime_dinf_init_all(&(minf->dinf));
+}
+
 
 void quicktime_minf_init_panorama(quicktime_t *file,
 								quicktime_minf_t *minf,
@@ -130,6 +147,8 @@ void quicktime_write_minf(quicktime_t *file, quicktime_minf_t *minf)
 	if(minf->is_video) quicktime_write_vmhd(file, &(minf->vmhd));
 	if(minf->is_audio) quicktime_write_smhd(file, &(minf->smhd));
 	if(minf->is_panorama) quicktime_write_gmhd(file, &(minf->gmhd));
+	if(minf->is_qtvr != 0) quicktime_write_gmhd(file, &(minf->gmhd));
+	
 	quicktime_write_hdlr(file, &(minf->hdlr));
 	quicktime_write_dinf(file, &(minf->dinf));
 	quicktime_write_stbl(file, minf, &(minf->stbl));

@@ -12,7 +12,8 @@
 
 #define HEADER_LENGTH 8
 #define MAXTRACKS 1024
- 
+#define MAXNODES 1
+
 /* Crazy Mich R. Soft constants */
 #define AVI_HASINDEX       0x00000010  // Index at end of file?
 #define AVI_MUSTUSEINDEX   0x00000020
@@ -28,12 +29,15 @@
 #define AVI_FRAME_RATE_BASE 10000
 #define MAX_RIFFS  0x100
 
-#define QTVR_OBJ 1
-#define QTVR_PAN 2
+#define QTVR_OBJ 2
+#define QTVR_PAN 3
+#define QTVR_QTVR 1
 
-#define QTVR_STANDARD_OBJECT 1
-#define QTVR_OLD_NAVIGABLE_MOVIE_SCENE 2 
-#define QTVR_OBJECT_IN_SCENE 3
+#define QTVR_GRABBER_SCROLLER_UI 1
+#define QTVR_OLD_JOYSTICK_UI 2 
+#define QTVR_JOYSTICK_UI 3
+#define QTVR_GRABBER_UI 4
+#define QTVR_ABSOLUTE_UI 5
 
 
 //#include "codecs.h"
@@ -54,6 +58,18 @@ typedef struct
 	int use_64;         /* Use 64 bit header */
 	unsigned char type[4];
 } quicktime_atom_t;
+
+
+typedef struct
+{
+	int64_t start;
+	int64_t end;        /* byte endpoint in file */
+	int64_t size;       /* byte size for writing */
+	unsigned char type[4];
+	int child_count;
+	int use_64;
+	long ID;
+} quicktime_qtatom_t;
 
 typedef struct
 {
@@ -139,6 +155,25 @@ typedef struct
 
 typedef struct
 {
+    int version;
+    int revision;
+    long imagingMode;
+    long imagingValidFlags;
+    long correction;
+    long quality;
+    long directdraw;
+    long imagingProperties[5];
+    long reserved1;
+    long reserved2;
+} quicktime_impn_t;
+
+typedef struct
+{
+    quicktime_impn_t impn;
+} quicktime_imgp_t;
+
+typedef struct
+{
 	long reserved1;
 	long reserved2;
 	int version;
@@ -175,6 +210,60 @@ typedef struct
 
 typedef struct
 {
+	int version;
+	int revision;
+	char nodeType[4];
+	long locationFlags;
+	long locationData;
+	long reserved1;
+	long reserved2;
+} quicktime_nloc_t;
+
+typedef struct
+{
+	int version;
+	int revision;
+	char nodeType[4];
+	long nodeID;
+	long nameAtomID;
+	long commentAtomID;
+	long reserved1;
+	long reserved2;
+} quicktime_ndhd_t;
+
+typedef struct
+{
+	quicktime_nloc_t nloc;
+	int ID;
+} quicktime_vrni_t;
+
+typedef struct
+{
+	quicktime_vrni_t vrni[MAXNODES];
+	int children;
+} quicktime_vrnp_t;
+
+typedef struct
+{
+	int version;
+	int revision;
+	long NameAtomID;
+	long DefaultNodeID;
+	long flags;
+	long reserved1;
+	long reserved2;
+	
+} quicktime_vrsc_t;
+
+typedef struct
+{
+	quicktime_vrsc_t vrsc;
+	quicktime_imgp_t imgp;
+	quicktime_vrnp_t vrnp;
+} quicktime_qtvr_t;
+
+typedef struct
+{
 	char format[4];
 	uint8_t reserved[6];
 	int data_reference;
@@ -206,6 +295,7 @@ typedef struct
 	quicktime_colr_t colr;
 	quicktime_clap_t clap;
 	quicktime_pano_t pano;
+	quicktime_qtvr_t qtvr;
 
 /* audio description */
 	int channels;
@@ -335,6 +425,12 @@ typedef struct
 	quicktime_stco_t stco;
 } quicktime_stbl_t;
 
+typedef struct
+{
+    	char refType[4];
+	long trackIndex;
+} quicktime_tref_t;
+
 /* data reference */
 
 typedef struct
@@ -426,6 +522,8 @@ typedef struct
 	int is_audio;
 	int has_baseheader;
 	int is_panorama;
+	int is_qtvr;
+	int is_object;
 	quicktime_vmhd_t vmhd;
 	quicktime_smhd_t smhd;
 	quicktime_gmhd_t gmhd;
@@ -515,11 +613,13 @@ typedef struct
 	quicktime_tkhd_t tkhd;
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
+	quicktime_tref_t tref;
         quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
         int chunk_sizes_alloc;
         int64_t * chunk_sizes; /* This contains the chunk sizes for audio
                                   tracks. They can not so easily be obtained
                                   during decoding */
+	int has_tref;
 } quicktime_trak_t;
 
 
@@ -721,6 +821,7 @@ typedef struct
 /* Size of chunk less the 8 byte header */
         int32_t size;
 } quicktime_idx1table_t;
+
 typedef struct
 {
         quicktime_atom_t atom;
@@ -783,6 +884,37 @@ typedef struct
 
 } quicktime_video_map_t;
 
+/* obji */
+
+typedef struct
+{
+    int version;
+    int revision;
+    int movieType;
+    int viewStateCount;
+    int defaultViewState;
+    int mouseDownViewState;
+    long viewDuration;
+    long columns;
+    long rows;
+    float mouseMotionScale;
+    float minPan;
+    float maxPan;
+    float defaultPan;
+    float minTilt;
+    float maxTilt;
+    float defaultTilt;
+    float minFOV;
+    float FOV;
+    float defaultFOV;
+    float defaultViewCenterH;
+    float defaultViewCenterV;
+    float viewRate;
+    float frameRate;
+    long animSettings;
+    long controlSettings;
+} quicktime_obji_t;
+
 /* pHdr */
 
 typedef struct
@@ -806,6 +938,16 @@ typedef struct
     long        commentStrOffset;    // offset into string table atom
 } quicktime_pHdr_t;
 
+/* qtvr node */
+
+typedef struct
+{
+    	int node_type;
+	int64_t node_start; /* start frame */ 
+	int64_t node_size; /* size of node in frames */
+	quicktime_ndhd_t ndhd;
+	quicktime_obji_t obji;
+	} quicktime_qtvr_node_t;
 
 /* file descriptor passed to all routines */
 
@@ -884,6 +1026,8 @@ typedef struct
 	int in_x, in_y, in_w, in_h, out_w, out_h;
 /*      Libquicktime change: color_model and row_span are now saved per track */
 /*	int color_model, row_span; */
+
+	quicktime_qtvr_node_t qtvr_node[MAXNODES];
 } quicktime_t;
 
 typedef struct

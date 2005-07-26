@@ -803,8 +803,8 @@ static void qt_init(FILE *fp, char *filename)
 {
     char *str;
     int i;
-    int hpan;
-    float shp, ehp;
+    int ipos;
+    float minpan, maxpan;
     
     /* audio device */
     char *adev_name;
@@ -884,12 +884,12 @@ static void qt_init(FILE *fp, char *filename)
 	    exit(1);
 	}
 	
-	hpan = lqt_qtvr_get_initial_pan(qt, NULL, NULL);
-	lqt_qtvr_get_extra_settings(qt, &(shp), &(ehp), NULL, NULL, NULL, NULL);
-	fprintf(stderr, "startpos :%i\n", hpan);
-	fprintf(stderr, "fov :%f\n", lqt_qtvr_get_fov(qt));
+	ipos = lqt_qtvr_initial_position(qt);
+	lqt_qtvr_get_pan(qt, &(minpan), &(maxpan), NULL);
+	fprintf(stderr, "startpos :%i\n", ipos);
+	//fprintf(stderr, "fov :%f\n", lqt_qtvr_get_fov(qt));
 	fprintf(stderr, "movietype :%i\n", lqt_qtvr_get_movietype(qt));
-	fprintf(stderr, "panning :%f %f\n", shp, ehp);
+	fprintf(stderr, "panning :%f %f\n", minpan, maxpan);
 	fprintf(stderr, "rows :%i\n", lqt_qtvr_get_rows(qt));
 	fprintf(stderr, "colums :%i\n", lqt_qtvr_get_columns(qt));
 	fprintf(stderr, "disp width :%i\n", lqt_qtvr_get_display_width(qt));
@@ -1039,7 +1039,7 @@ static int qt_init_video(void)
 	}
 	if (qt_isqtvr) {
 	    /* has to be done here to set initial pov */ // look into this
-	    quicktime_set_video_position(qt, lqt_qtvr_get_initial_pan(qt, NULL, NULL),0);
+	    quicktime_set_video_position(qt, lqt_qtvr_initial_position(qt),0);
 	    XSetInputFocus(dpy, XtWindow(simple), RevertToPointerRoot, CurrentTime);
 	    
 	    if (qt_isqtvr == QTVR_PAN) {
@@ -1619,7 +1619,7 @@ int main(int argc, char *argv[])
     /* use OpenGL? */
     XtRealizeWidget(app_shell);
 #ifdef USE_GL
-    if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo)
+    if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo && !qt_isqtvr)
 	gl_init(simple,qt_width,qt_height);
 #endif    
     /* frames per chunk for alsa */

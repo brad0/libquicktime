@@ -8,6 +8,22 @@ void quicktime_mdia_init(quicktime_mdia_t *mdia)
 	quicktime_minf_init(&(mdia->minf));
 }
 
+void quicktime_mdia_init_qtvr(quicktime_t *file,
+								quicktime_mdia_t *mdia,
+								int track_type,
+								int width,
+								int height,
+								int timescale,
+								int frame_duration)
+{
+//printf("quicktime_mdia_init_panorama 1\n");
+	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
+//printf("quicktime_mdia_init_panorama 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
+	quicktime_minf_init_qtvr(file, &(mdia->minf), track_type, width, height, frame_duration);
+//printf("quicktime_mdia_init_panorama 1\n");
+	quicktime_hdlr_init_qtvr(&(mdia->hdlr), track_type);
+//printf("quicktime_mdia_init_panorama 2\n");
+}
 
 void quicktime_mdia_init_panorama(quicktime_t *file,
 								quicktime_mdia_t *mdia,
@@ -17,7 +33,7 @@ void quicktime_mdia_init_panorama(quicktime_t *file,
 								int frame_duration)
 {
 //printf("quicktime_mdia_init_panorama 1\n");
-	quicktime_mdhd_init_panorama(file, &(mdia->mdhd), timescale);
+	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
 //printf("quicktime_mdia_init_panorama 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
 	quicktime_minf_init_panorama(file, &(mdia->minf), width, height, frame_duration);
 //printf("quicktime_mdia_init_panorama 1\n");

@@ -214,6 +214,15 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quickt
 	    minf->is_panorama = 1;
 	    quicktime_read_pano(file, &(table->pano), &leaf_atom);
 	}
+	else if (quicktime_match_32(leaf_atom.type, "qtvr"))
+	{	    
+	    minf->is_qtvr = 1;
+	    quicktime_read_qtvr(file, &(table->qtvr), &leaf_atom);
+	}
+	else if (quicktime_match_32(leaf_atom.type, "\0\0\0\0") && file->moov.udta.is_qtvr)
+	{	    
+	    minf->is_object = 1;
+	}
 	else 
 	{
 	    if(minf->is_audio) quicktime_read_stsd_audio(file, table, &leaf_atom);
@@ -260,7 +269,8 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	quicktime_mjqt_init(&(table->mjqt));
 	quicktime_mjht_init(&(table->mjht));
 	quicktime_pano_init(&(table->pano));
-
+	quicktime_qtvr_init(&(table->qtvr));
+	
 	table->channels = 0;
 	table->sample_size = 0;
 	table->compression_id = 0;
@@ -340,6 +350,8 @@ void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 
 	if (quicktime_match_32(table->format, "pano"))
 	    quicktime_pano_dump(&(table->pano));
+	if (quicktime_match_32(table->format, "qtvr"))
+	    quicktime_qtvr_dump(&(table->qtvr));
 }
 
 void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table)
@@ -353,6 +365,7 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 	if(minf->is_audio) quicktime_write_stsd_audio(file, table);
 	if(minf->is_video) quicktime_write_stsd_video(file, table);
 	if(minf->is_panorama) quicktime_write_pano(file, &(table->pano));
+	if(minf->is_qtvr == QTVR_QTVR) quicktime_write_qtvr(file, &(table->qtvr));
 
 	quicktime_atom_write_footer(file, &atom);
 }

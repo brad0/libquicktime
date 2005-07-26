@@ -31,23 +31,21 @@ int quicktime_navg_delete(quicktime_navg_t *navg)
 
 void quicktime_navg_dump(quicktime_navg_t *navg)
 {
-	printf("  Object Parameter (navg)\n");
-	if(navg->version) 	 printf("    Version:             %i\n", navg->version);
-	if(navg->columns)        printf("    Columns:             %i\n", navg->columns);
-	if(navg->rows)           printf("    rows:                %i\n", navg->rows);
-	/* reserved */
-	if(navg->loop_frames)    printf("    Loop Frames:         %i\n", navg->loop_frames);
-	if(navg->loop_dur)       printf("    Loop Frame duration: %i\n", navg->loop_dur);
-	if(navg->movietype)      printf("    Movie Type:          %i\n", navg->movietype);
-	if(navg->loop_timescale) printf("    Loop Timescale:      %i\n", navg->loop_timescale);
-	if(navg->fieldofview)    printf("    Field of View:       %f\n", navg->fieldofview);
-	if(navg->startHPan)      printf("    startHPan:           %f\n", navg->startHPan);
-	if(navg->endHPan)        printf("    endHPan:             %f\n", navg->endHPan);
-	if(navg->endVPan)        printf("    endVPan:             %f\n", navg->endVPan);
-	if(navg->startVPan)      printf("    startVPan:           %f\n", navg->startVPan);
-	if(navg->initialHPan)    printf("    initialHPan:         %f\n", navg->initialHPan);
-	if(navg->initialVPan)    printf("    initialVPan:         %f\n", navg->initialVPan);
-	/* reserved */
+	printf("  object parameters (navg)\n");
+	printf("    version %i\n", navg->version);
+	printf("    columns %i\n", navg->columns);
+	printf("    rows %i\n", navg->rows);
+	printf("    loop frames %i\n", navg->loop_frames);
+	printf("    loop frame duration %i\n", navg->loop_dur);
+	printf("    movie type %i\n", navg->movietype);
+	printf("    loop timescale %i\n", navg->loop_timescale);
+	printf("    field of view %f\n", navg->fieldofview);
+	printf("    horizontal start pan %f\n", navg->startHPan);
+	printf("    horizontal end pan %f\n", navg->endHPan);
+	printf("    vertical end pan %f\n", navg->endVPan);
+	printf("    vertical start pan %f\n", navg->startVPan);
+	printf("    initial horizontal pan %f\n", navg->initialHPan);
+	printf("    initial vertical pan %f\n", navg->initialVPan);
 }
 
 int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_atom_t *navg_atom)

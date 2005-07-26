@@ -181,6 +181,7 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_ato
 			udta->ctyp[2] = quicktime_read_char(file);
 			udta->ctyp[3] = quicktime_read_char(file);
 			if (quicktime_match_32(udta->ctyp, "stna") ||
+			    quicktime_match_32(udta->ctyp, "qtvr") ||
 			    quicktime_match_32(udta->ctyp, "STpn")) udta->is_qtvr = 1;
                 }
 		else

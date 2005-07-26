@@ -42,41 +42,37 @@ int quicktime_pano_delete(quicktime_pano_t *pano)
 
 void quicktime_pano_dump(quicktime_pano_t *pano)
 {
-       printf("       Panorama (pano)\n");
-       printf("        Version %i\n", pano->version );
-       printf("        Revision %i\n", pano->revision );
+       printf("       panorama (pano)\n");
+       printf("        version %i\n", pano->version );
+       printf("        revision %i\n", pano->revision );
 
-       printf("        Scene Track %ld\n", pano->STrack );
-       printf("        LowRes Scene Track %ld\n", pano->LowResSTrack );
-       printf("        HotSpot Track %ld\n", pano->HSTrack );
+       printf("        scene track %ld\n", pano->STrack );
+       printf("        lowres scene track %ld\n", pano->LowResSTrack );
+       printf("        hotspot track %ld\n", pano->HSTrack );
 
-       printf("        HPanStart %f\n", pano->HPanStart );
-       printf("        HpanEnd %f\n", pano->HPanEnd );
-       printf("        VPanStart %f\n", pano->VPanStart );
-       printf("        VPanEnd %f\n", pano->VPanEnd );
-       printf("        Minimum Zoom %f\n", pano->MinZoom );
-       printf("        Maximum Zoom %f\n", pano->MaxZoom );
+       printf("        horizontal start pan %f\n", pano->HPanStart );
+       printf("        horizontal end pan %f\n", pano->HPanEnd );
+       printf("        vertical start pan %f\n", pano->VPanStart );
+       printf("        vertical end pan %f\n", pano->VPanEnd );
+       printf("        minimum zoom %f\n", pano->MinZoom );
+       printf("        maximum zoom %f\n", pano->MaxZoom );
 
-       printf("        Scene Height %ld\n", pano->SHeight );
-       printf("        Scene Width %ld\n", pano->SWidth );
-       printf("        Num. Frames %ld\n", pano->NumFrames );
-       printf("        Num. Frames(Height) %i\n", pano->SNumFramesHeight );
-       printf("        Num. Frames(Width) %i\n", pano->SNumFramesWidth );
-       printf("        Scene Depth %i\n", pano->SDepth );
+       printf("        scene height %ld\n", pano->SHeight );
+       printf("        scene width %ld\n", pano->SWidth );
+       printf("        num frames %ld\n", pano->NumFrames );
+       printf("        num frames(height) %i\n", pano->SNumFramesHeight );
+       printf("        num frames(width) %i\n", pano->SNumFramesWidth );
+       printf("        scene depth %i\n", pano->SDepth );
 
-       printf("        HotSpot Height %ld\n", pano->HSHeight );
-       printf("        HotSpot Width %ld\n", pano->HSWidth );
-       printf("        Num. HotSPot Frames (Height) %i\n", pano->HSNumFramesHeight );
-       printf("        Num. HotSpot Frames (Width) %i\n", pano->HSNumFramesWidth );
-       printf("        Hotspot Depth %i\n", pano->HSDepth );
+       printf("        hotspot height %ld\n", pano->HSHeight );
+       printf("        hotspot width %ld\n", pano->HSWidth );
+       printf("        num. hotspot frames (height) %i\n", pano->HSNumFramesHeight );
+       printf("        num. hotspot frames (width) %i\n", pano->HSNumFramesWidth );
+       printf("        hotspot depth %i\n", pano->HSDepth );
 }
 
 int quicktime_read_pano(quicktime_t *file, quicktime_pano_t *pano, quicktime_atom_t *pano_atom)
 {
-       //quicktime_atom_t leaf_atom;
-//     pano->reserved1 = quicktime_read_int32(file);
-//     pano->reserved2 = quicktime_read_int32(file);
-
        pano->version = quicktime_read_int16(file);
        pano->revision = quicktime_read_int16(file);
 
@@ -112,12 +108,6 @@ int quicktime_read_pano(quicktime_t *file, quicktime_pano_t *pano, quicktime_ato
 
 void quicktime_write_pano(quicktime_t *file, quicktime_pano_t *pano)
 {
-/*     quicktime_atom_t atom, subatom;
-       quicktime_atom_write_header(file, &atom, "pano");
-
-       quicktime_write_int32(file, pano->reserved1);
-       quicktime_write_int32(file, pano->reserved1);
-*/
        quicktime_write_int16(file, pano->version);
        quicktime_write_int16(file, pano->revision);
 
@@ -148,7 +138,5 @@ void quicktime_write_pano(quicktime_t *file, quicktime_pano_t *pano)
        quicktime_write_int16(file, pano->HSNumFramesHeight);
        quicktime_write_int16(file, pano->HSNumFramesWidth);
        quicktime_write_int16(file, pano->HSDepth);
-
-//     quicktime_atom_write_footer(file, &atom);
 }
 

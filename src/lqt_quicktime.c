@@ -1435,16 +1435,58 @@ int quicktime_read_info(quicktime_t *file)
                                         quicktime_atom_skip(file, &leaf_atom);
                         }
                 }while(!result && quicktime_position(file) < file->total_length);
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
-                                                                                                                  
+		
+		/* read QTVR sample atoms */
+		if (lqt_qtvr_get_object_track(file) >= 0)
+		{
+			quicktime_qtatom_t leaf_atom, root_atom;
+			int64_t start_position = quicktime_position(file);
+			quicktime_set_position(file, file->moov.trak[lqt_qtvr_get_object_track(file)]->mdia.minf.stbl.stco.table[0].offset);
+			quicktime_qtatom_read_container_header(file);
+			/* root qtatom "sean" */
+			quicktime_qtatom_read_header(file, &root_atom);
+			
+			do
+			{
+				quicktime_qtatom_read_header(file, &leaf_atom);
+				if(quicktime_qtatom_is(&leaf_atom, "obji"))
+				{
+					quicktime_read_obji(file, &file->qtvr_node[0].obji);					
+				}     
+				else
+				if(quicktime_qtatom_is(&leaf_atom, "ndhd"))
+				{
+					quicktime_read_ndhd(file, &file->qtvr_node[0].ndhd);					
+				}     
+				else
+                                        quicktime_qtatom_skip(file, &leaf_atom);
+			} while(quicktime_position(file) < root_atom.end);
+			
+			quicktime_set_position(file, start_position);
+		}
+
+		if (lqt_qtvr_get_qtvr_track(file) >= 0)
+		{
+			quicktime_qtatom_t leaf_atom, root_atom;
+			int64_t start_position = quicktime_position(file);
+			quicktime_set_position(file, file->moov.trak[lqt_qtvr_get_qtvr_track(file)]->mdia.minf.stbl.stco.table[0].offset);
+			quicktime_qtatom_read_container_header(file);
+			/* root qtatom "sean" */
+			quicktime_qtatom_read_header(file, &root_atom);
+			
+			do
+			{
+				quicktime_qtatom_read_header(file, &leaf_atom);
+				if(quicktime_qtatom_is(&leaf_atom, "ndhd"))
+				{
+					quicktime_read_ndhd(file, &file->qtvr_node[0].ndhd);					
+				}     
+				else
+                                        quicktime_qtatom_skip(file, &leaf_atom);
+			} while(quicktime_position(file) < root_atom.end);
+			
+			quicktime_set_position(file, start_position);
+		}
 /* go back to the original position */
                 quicktime_set_position(file, start_position);
                                                                                                                   
@@ -1471,6 +1513,14 @@ int quicktime_dump(quicktime_t *file)
 	printf(" size %lld\n", file->mdat.atom.size);
 	printf(" start %lld\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));
+	if (lqt_qtvr_get_object_track(file) >= 0)
+	{
+		quicktime_obji_dump(&(file->qtvr_node[0].obji));
+	}
+	if (lqt_qtvr_get_qtvr_track(file) >= 0)
+	{
+		quicktime_ndhd_dump(&(file->qtvr_node[0].ndhd));
+	}
 	return 0;
 }
 
@@ -1653,6 +1703,11 @@ int quicktime_close(quicktime_t *file)
                 }
                 else
                 {
+		    	if (lqt_qtvr_get_object_track(file) >= 0)
+			{
+			    lqt_qtvr_add_node(file);
+			    lqt_qtvr_add_node(file);
+			}
 // Atoms are only written here
                         quicktime_finalize_moov(file, &(file->moov));
                         quicktime_write_moov(file, &(file->moov));

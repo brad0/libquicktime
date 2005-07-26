@@ -9,6 +9,8 @@ int quicktime_trak_init(quicktime_trak_t *trak)
 	quicktime_tkhd_init(&(trak->tkhd));
 	quicktime_edts_init(&(trak->edts));
 	quicktime_mdia_init(&(trak->mdia));
+	quicktime_tref_init(&(trak->tref));
+	trak->has_tref = 0;
 	return 0;
 }
 
@@ -32,6 +34,22 @@ int quicktime_trak_init_video(quicktime_t *file,
                 frame_duration,
                 timescale,
 		compressor);
+
+	return 0;
+}
+
+
+int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int track_type, int width, int height, int frame_duration, int timescale)
+{
+
+	quicktime_tkhd_init_video(file, 
+		&(trak->tkhd), 
+		height, 
+		height/2);
+	quicktime_mdia_init_qtvr(file, 
+		&(trak->mdia), track_type, width, height, timescale, frame_duration);
+	quicktime_edts_init_table(&(trak->edts));
+	quicktime_tref_init_qtvr(&(trak->tref), track_type);
 
 	return 0;
 }
@@ -73,6 +91,7 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
 	quicktime_mdia_delete(&(trak->mdia));
 	quicktime_edts_delete(&(trak->edts));
 	quicktime_tkhd_delete(&(trak->tkhd));
+	quicktime_tref_delete(&(trak->tref));
 
         if(trak->chunk_sizes)
           free(trak->chunk_sizes);
@@ -85,6 +104,8 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
 	printf(" track\n");
 	quicktime_tkhd_dump(&(trak->tkhd));
 	quicktime_edts_dump(&(trak->edts));
+	if (trak->has_tref)
+	    quicktime_tref_dump(&(trak->tref));
 	quicktime_mdia_dump(&(trak->mdia));
 
 	return 0;
@@ -144,14 +165,14 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 		if(quicktime_atom_is(&leaf_atom, "load"))
 			{ quicktime_atom_skip(file, &leaf_atom); }
 		else
-		if(quicktime_atom_is(&leaf_atom, "tref"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
 		if(quicktime_atom_is(&leaf_atom, "imap"))
 			{ quicktime_atom_skip(file, &leaf_atom); }
 		else
 		if(quicktime_atom_is(&leaf_atom, "udta"))
 			{ quicktime_atom_skip(file, &leaf_atom); }
+		else
+		if(quicktime_atom_is(&leaf_atom, "tref"))
+			{ trak->has_tref = 1; quicktime_read_tref(file, &(trak->tref)); }
 		else
 			quicktime_atom_skip(file, &leaf_atom);
 //printf("quicktime_read_trak %llx %llx\n", quicktime_position(file), leaf_atom.end);
@@ -180,7 +201,13 @@ int quicktime_write_trak(quicktime_t *file,
 	if (trak->mdia.minf.is_panorama) trak->edts.elst.total_entries = 1;
 	quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
 	quicktime_write_mdia(file, &(trak->mdia));
-
+	
+	if (trak->mdia.minf.is_qtvr) 
+	    quicktime_write_tref(file, &(trak->tref));
+//	printf("isobj: %i",trak->mdia.minf.is_object );
+//	if (trak->mdia.minf.is_object) 
+//	    quicktime_write_tref(file, &(trak->tref));
+	
 	quicktime_atom_write_footer(file, &atom);
 
 	return 0;
@@ -574,6 +601,12 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
 		current_chunk - 1, 
 		sample_size);	
+	}
+	
+	if(trak->mdia.minf.is_qtvr) {
+		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+		current_chunk - 1, 
+		sample_size);
 	}
 	
 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 

@@ -18,6 +18,32 @@ void quicktime_stsd_init_table(quicktime_stsd_t *stsd)
 	}
 }
 
+void quicktime_stsd_init_qtvr(quicktime_t *file, 
+								quicktime_stsd_t *stsd,
+								int track_type, int width,
+								int height)
+{
+	quicktime_stsd_table_t *table;
+	quicktime_stsd_init_table(stsd);
+	
+	table = &(stsd->table[0]);
+	if (track_type == QTVR_QTVR)
+	{
+	    table->format[0] = 'q';
+	    table->format[1] = 't';
+	    table->format[2] = 'v';
+	    table->format[3] = 'r';
+	} else
+	if (track_type == QTVR_OBJ)
+	{
+	    table->format[0] = '\0';
+	    table->format[1] = '\0';
+	    table->format[2] = '\0';
+	    table->format[3] = '\0';
+	}
+
+}
+
 
 void quicktime_stsd_init_panorama(quicktime_t *file, 
 								quicktime_stsd_t *stsd,

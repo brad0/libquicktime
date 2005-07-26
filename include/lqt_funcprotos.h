@@ -1,3 +1,4 @@
+
 /* atom.c */
 
 int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom);
@@ -82,18 +83,21 @@ void quicktime_write_movi(quicktime_t *file);
 void quicktime_delete_movi(quicktime_t *file, quicktime_movi_t *movi);
 void quicktime_init_movi(quicktime_t *file, quicktime_riff_t *riff);
 void quicktime_finalize_movi(quicktime_t *file, quicktime_movi_t *movi);
+
 /* avi_odml.c */
 
 void quicktime_finalize_odml(quicktime_t *file, quicktime_hdrl_t *hdrl);
 void quicktime_init_odml(quicktime_t *file, quicktime_hdrl_t *hdrl);
 
 /* avi_riff.c */
+
 void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom);
 void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff);
 int quicktime_import_avi(quicktime_t *file);
 void quicktime_init_riff(quicktime_t *file);
 void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff);
 quicktime_riff_t* quicktime_new_riff(quicktime_t *file);
+
 /* avi_strl.c */
 
 void quicktime_delete_strl(quicktime_strl_t *strl);
@@ -107,6 +111,17 @@ void quicktime_init_strl(quicktime_t *file,
                          quicktime_video_map_t *vtrack,
                          quicktime_trak_t *trak,
                          quicktime_strl_t *strl);
+
+/* clap.c */
+
+void quicktime_clap_init(quicktime_clap_t *clap);
+void quicktime_clap_delete(quicktime_clap_t *clap);
+void quicktime_clap_dump(quicktime_clap_t *clap);
+void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap);
+void quicktime_write_clap(quicktime_t *file, quicktime_clap_t *clap);
+int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+
 
 // ******************************** Permutation *******************************
 
@@ -141,6 +156,16 @@ void cmodel_yuv411p(PERMUTATION_ARGS);
 void cmodel_yuv444p(PERMUTATION_ARGS);
 void cmodel_yuv422(PERMUTATION_ARGS);
 void cmodel_default(PERMUTATION_ARGS);
+
+/* colr.c */
+
+void quicktime_colr_init(quicktime_colr_t *colr);
+void quicktime_colr_delete(quicktime_colr_t *colr);
+void quicktime_colr_dump(quicktime_colr_t *colr);
+void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr);
+void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr);
+int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 
 /* ctab.c */
 
@@ -217,12 +242,29 @@ void quicktime_write_gmin(quicktime_t *file, quicktime_gmin_t *gmin);
 void quicktime_hdlr_init(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr);
+void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type);
 void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_data(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_delete(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_dump(quicktime_hdlr_t *hdlr);
 void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr);
 void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr);
+
+/* imgp.c */
+
+int quicktime_imgp_init(quicktime_imgp_t *imgp);
+int quicktime_imgp_delete(quicktime_imgp_t *imgp);
+void quicktime_imgp_dump(quicktime_imgp_t *imgp);
+int quicktime_read_imgp(quicktime_t *file, quicktime_imgp_t *imgp, quicktime_qtatom_t *imgp_atom);
+void quicktime_write_imgp(quicktime_t *file, quicktime_imgp_t *imgp);
+
+/* impn.c */
+
+int quicktime_impn_init(quicktime_impn_t *impn);
+int quicktime_impn_delete(quicktime_impn_t *impn);
+void quicktime_impn_dump(quicktime_impn_t *impn);
+int quicktime_read_impn(quicktime_t *file, quicktime_impn_t *impn, quicktime_qtatom_t *impn_atom);
+void quicktime_write_impn(quicktime_t *file, quicktime_impn_t *impn);
 
 /* matrix.c */
 
@@ -253,10 +295,7 @@ void quicktime_mdhd_init_audio(quicktime_mdhd_t *mdhd,
 void quicktime_mdhd_init_video(quicktime_t *file, 
                                quicktime_mdhd_t *mdhd,
                                int timescale);
-			       
-void quicktime_mdhd_init_panorama(quicktime_t *file, 
-                               quicktime_mdhd_t *mdhd,
-                               int timescale);
+
 /* mdia.c */
 
 void quicktime_mdia_init(quicktime_mdia_t *mdia);
@@ -286,7 +325,14 @@ void quicktime_mdia_init_panorama(quicktime_t *file,
 				  int height,
 				  int frame_duration,
 				  int timescale);
-			       
+
+void quicktime_mdia_init_qtvr(quicktime_t *file,
+				  quicktime_mdia_t *mdia,
+				  int track_type,
+				  int width,
+				  int height,
+				  int frame_duration,
+				  int timescale);
 /* minf.c */
 
 void quicktime_minf_init(quicktime_minf_t *minf);
@@ -317,6 +363,13 @@ void quicktime_minf_init_panorama(quicktime_t *file,
 				  int height,
 				  int frame_duration);
 
+void quicktime_minf_init_qtvr(quicktime_t *file,
+				  quicktime_minf_t *minf,
+				  int frame_type,
+				  int width,
+				  int height,
+				  int frame_duration);
+
 /* moov.c */
 
 int quicktime_moov_init(quicktime_moov_t *moov);
@@ -337,7 +390,7 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, int time_scale);
 void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd);
 
-/* navg */
+/* navg.c */
 
 int quicktime_navg_init(quicktime_navg_t *navg);
 int quicktime_navg_delete(quicktime_navg_t *navg);
@@ -345,25 +398,31 @@ void quicktime_navg_dump(quicktime_navg_t *navg);
 int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_atom_t *navg_atom);
 void quicktime_write_navg(quicktime_t *file, quicktime_navg_t *navg);
 
-/* colr.c */
-void quicktime_colr_init(quicktime_colr_t *colr);
-void quicktime_colr_delete(quicktime_colr_t *colr);
-void quicktime_colr_dump(quicktime_colr_t *colr);
-void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr);
-void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr);
-int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
-int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+/* ndhd */
 
-/* clap.c */
-void quicktime_clap_init(quicktime_clap_t *clap);
-void quicktime_clap_delete(quicktime_clap_t *clap);
-void quicktime_clap_dump(quicktime_clap_t *clap);
-void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap);
-void quicktime_write_clap(quicktime_t *file, quicktime_clap_t *clap);
-int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
-int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+int quicktime_ndhd_init(quicktime_ndhd_t *ndhd);  
+int quicktime_ndhd_delete(quicktime_ndhd_t *ndhd);
+void quicktime_ndhd_dump(quicktime_ndhd_t *ndhd);
+int quicktime_read_ndhd(quicktime_t *file, quicktime_ndhd_t *ndhd);
+void quicktime_write_ndhd(quicktime_t *file, quicktime_ndhd_t *ndhd);
 
-/* pano */
+/* nloc.c */
+
+int quicktime_nloc_init(quicktime_nloc_t *nloc);
+int quicktime_nloc_delete(quicktime_nloc_t *nloc);
+void quicktime_nloc_dump(quicktime_nloc_t *nloc);
+int quicktime_read_nloc(quicktime_t *file, quicktime_nloc_t *nloc, quicktime_qtatom_t *nloc_atom);
+void quicktime_write_nloc(quicktime_t *file, quicktime_nloc_t *nloc);
+
+/* obji.c */
+
+int quicktime_obji_init(quicktime_obji_t *obji);  
+int quicktime_obji_delete(quicktime_obji_t *obji);
+void quicktime_obji_dump(quicktime_obji_t *obji);
+int quicktime_read_obji(quicktime_t *file, quicktime_obji_t *obji);
+void quicktime_write_obji(quicktime_t *file, quicktime_obji_t *obji);
+
+/* pano.c */
 
 int quicktime_pano_init(quicktime_pano_t *pano);  
 int quicktime_pano_delete(quicktime_pano_t *pano);
@@ -372,6 +431,7 @@ int quicktime_read_pano(quicktime_t *file, quicktime_pano_t *navg, quicktime_ato
 void quicktime_write_pano(quicktime_t *file, quicktime_pano_t *pano);
 
 /* pasp.c */
+
 void quicktime_pasp_init(quicktime_pasp_t *pasp);
 void quicktime_pasp_delete(quicktime_pasp_t *pasp);
 void quicktime_pasp_dump(quicktime_pasp_t *pasp);
@@ -380,10 +440,27 @@ void quicktime_write_pasp(quicktime_t *file, quicktime_pasp_t *pasp);
 int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
-
 /* pHdr */
 
 int quicktime_pHdr_init(quicktime_pHdr_t *pHdr);
+
+/* qtatom.c */
+
+int quicktime_qtatom_read_header(quicktime_t *file, quicktime_qtatom_t *atom);
+int quicktime_qtatom_write_header(quicktime_t *file, quicktime_qtatom_t *atom, char *text, long ID);
+void quicktime_qtatom_write_footer(quicktime_t *file, quicktime_qtatom_t *atom);
+int quicktime_qtatom_is(quicktime_qtatom_t *atom, char *type);
+int quicktime_qtatom_skip(quicktime_t *file, quicktime_qtatom_t *atom);
+void quicktime_qtatom_read_container_header(quicktime_t *file);
+void quicktime_qtatom_write_container_header(quicktime_t *file);
+
+/* qtvr.c */
+
+int quicktime_qtvr_init(quicktime_qtvr_t *qtvr);
+int quicktime_qtvr_delete(quicktime_qtvr_t *qtvr);
+void quicktime_qtvr_dump(quicktime_qtvr_t *qtvr);
+int quicktime_read_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr, quicktime_atom_t *qtvr_atom);
+void quicktime_write_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr);
 
 /* smhd.c */
 
@@ -425,7 +502,12 @@ void quicktime_stbl_init_panorama(quicktime_t *file,
 				  int height,
 				  int frame_duration);
 
-			     
+void quicktime_stbl_init_qtvr(quicktime_t *file,
+				  quicktime_stbl_t *stbl,
+				  int track_type,
+				  int width,
+				  int height,
+				  int frame_duration);			     
 /* stco.c */
 
 void quicktime_stco_init(quicktime_stco_t *stco);
@@ -475,7 +557,12 @@ void quicktime_stsd_init_panorama(quicktime_t *file,
 				  quicktime_stsd_t *stsd,
 				  int width,
 				  int height);
-			       
+
+void quicktime_stsd_init_qtvr(quicktime_t *file,
+				  quicktime_stsd_t *stsd,
+				  int track_type,
+				  int width,
+				  int height);
 /* stsdtable.c */
 
 void quicktime_mjqt_init(quicktime_mjqt_t *mjqt);
@@ -580,6 +667,14 @@ int quicktime_trak_init_audio(quicktime_t *file,
                               int bits, 
                               char *compressor);
 			      
+int quicktime_trak_init_qtvr(quicktime_t *file,
+				 quicktime_trak_t *trak,
+				 int track_type,
+				 int width,
+				 int height,
+				 int timescale,
+				 int frame_duration);
+
 int quicktime_trak_init_panorama(quicktime_t *file,
 				 quicktime_trak_t *trak,
 				 int width,
@@ -632,6 +727,16 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
 
+
+/* tref.c */
+
+int quicktime_tref_init(quicktime_tref_t *tref);
+int quicktime_tref_delete(quicktime_tref_t *tref);
+void quicktime_tref_dump(quicktime_tref_t *tref);
+int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref);
+void quicktime_write_tref(quicktime_t *file, quicktime_tref_t *tref);
+int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type);
+
 /* udta.c */
 
 int quicktime_udta_init(quicktime_udta_t *udta);
@@ -658,7 +763,29 @@ void quicktime_vmhd_dump(quicktime_vmhd_t *vmhd);
 void quicktime_read_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 void quicktime_write_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd);
 
+/* vrni.c */
 
+int quicktime_vrni_init(quicktime_vrni_t *vrni);
+int quicktime_vrni_delete(quicktime_vrni_t *vrni);
+void quicktime_vrni_dump(quicktime_vrni_t *vrni);
+int quicktime_read_vrni(quicktime_t *file, quicktime_vrni_t *vrni, quicktime_qtatom_t *vrni_atom);
+void quicktime_write_vrni(quicktime_t *file, quicktime_vrni_t *vrni);
+
+/* vrnp.c */
+
+int quicktime_vrnp_init(quicktime_vrnp_t *vrnp);
+int quicktime_vrnp_delete(quicktime_vrnp_t *vrnp);
+void quicktime_vrnp_dump(quicktime_vrnp_t *vrnp);
+int quicktime_read_vrnp(quicktime_t *file, quicktime_vrnp_t *vrnp, quicktime_qtatom_t *vrnp_atom);
+void quicktime_write_vrnp(quicktime_t *file, quicktime_vrnp_t *vrnp);
+
+/* vrsc.c */
+
+int quicktime_vrsc_init(quicktime_vrsc_t *vrsc);
+int quicktime_vrsc_delete(quicktime_vrsc_t *vrsc);
+void quicktime_vrsc_dump(quicktime_vrsc_t *vrsc);
+int quicktime_read_vrsc(quicktime_t *file, quicktime_vrsc_t *vrsc, quicktime_qtatom_t *vrsc_atom);
+void quicktime_write_vrsc(quicktime_t *file, quicktime_vrsc_t *vrsc);
 
 /* util.c */
 
@@ -675,6 +802,8 @@ void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);
 float quicktime_read_fixed32(quicktime_t *file);
 int quicktime_write_fixed32(quicktime_t *file, float number);
+float quicktime_read_float(quicktime_t *file);
+int quicktime_write_float(quicktime_t *file, float value);
 int quicktime_write_int64(quicktime_t *file, int64_t value);
 int quicktime_write_int64_le(quicktime_t *file, int64_t value);
 int quicktime_write_int32(quicktime_t *file, long value);

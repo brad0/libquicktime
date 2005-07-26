@@ -319,6 +319,20 @@ float quicktime_read_fixed32(quicktime_t *file)
 		return a;
 }
 
+int quicktime_write_float(quicktime_t *file, float value)
+{
+	unsigned char data[4];
+	unsigned long * longval;
+
+	//longval = *(long *)&value;
+	data[0] = (*(long *)&value & 0xff000000) >> 24;
+	data[1] = (*(long *)&value & 0xff0000) >> 16;
+	data[2] = (*(long *)&value & 0xff00) >> 8;
+	data[3] = (*(long *)&value & 0xff);
+
+	return quicktime_write_data(file, data, 4);
+}
+
 int quicktime_write_fixed32(quicktime_t *file, float number)
 {
 	unsigned char data[4];
@@ -333,6 +347,23 @@ int quicktime_write_fixed32(quicktime_t *file, float number)
 
 	return quicktime_write_data(file, data, 4);
 }
+
+float quicktime_read_float(quicktime_t *file)
+{
+	unsigned long result;
+	unsigned long a, b, c, d;
+	uint8_t data[4];
+	
+	quicktime_read_data(file, data, 4);
+	a = data[0];
+	b = data[1];
+	c = data[2];
+	d = data[3];
+
+	result = ((a << 24) | (b << 16) | (c << 8) | d);
+	return *(float *)&result;
+}
+
 
 int quicktime_write_int64(quicktime_t *file, int64_t value)
 {
