@@ -27,7 +27,7 @@ void quicktime_nloc_dump(quicktime_nloc_t *nloc)
 	printf("           version %i\n",  nloc->version);
 	printf("           revision %i\n",  nloc->revision);
 	printf("           node type %c%c%c%c\n",  nloc->nodeType[0], nloc->nodeType[1], nloc->nodeType[2], nloc->nodeType[3]);
-	printf("           location flags %i\n",  nloc->locationFlags);
+	printf("           location flags %ld\n",  nloc->locationFlags);
 	printf("           location data %ld\n", nloc->locationData);
 }
 

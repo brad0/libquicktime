@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
@@ -179,7 +180,6 @@ int quicktime_qtatom_write_header(quicktime_t *file,
 void quicktime_qtatom_write_footer(quicktime_t *file, quicktime_qtatom_t *atom)
 {
 	atom->end = quicktime_position(file);
-	uint8_t header[4];
 	
 	if(atom->use_64)
 	{

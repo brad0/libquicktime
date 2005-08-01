@@ -62,33 +62,6 @@ static int64_t read_size64(uint8_t *data)
 	return (int64_t)result;
 }
 
-static unsigned long read_ID(uint8_t *data)
-{
-	unsigned long result;
-	unsigned long a, b, c, d;
-	
-	a = data[0];
-	b = data[1];
-	c = data[2];
-	d = data[3];
-
-	result = (a << 24) | (b << 16) | (c << 8) | d;
-	
-	return result;
-}
-
-static uint16_t read_childcount(uint8_t *data)
-{
-	uint16_t result, a, b;
-
-	a = data[0];
-	b = data[1];
-
-	result = (a << 8) | b;
-	
-	return (uint16_t)result;
-}
-
 static int reset(quicktime_atom_t *atom)
 {
 	atom->end = 0;

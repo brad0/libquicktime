@@ -56,7 +56,6 @@ int quicktime_read_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr, quicktime_ato
 
 void quicktime_write_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr )
 {
-	quicktime_atom_t atom;
 	quicktime_qtatom_t subatom;
 
 	quicktime_qtatom_write_container_header(file);

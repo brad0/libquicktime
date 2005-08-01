@@ -21,7 +21,7 @@ void quicktime_vrsc_dump(quicktime_vrsc_t *vrsc)
 	printf("        world header (vrsc)\n");
 	printf("         version %i\n",  vrsc->version);
 	printf("         revision %i\n",  vrsc->revision);
-	printf("         name atom id %i\n",  vrsc->NameAtomID);
+	printf("         name atom id %ld\n",  vrsc->NameAtomID);
 	printf("         default node %ld\n", vrsc->DefaultNodeID);
 	printf("         world flags %ld\n", vrsc->flags);
 }
