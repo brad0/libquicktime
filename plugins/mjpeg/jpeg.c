@@ -5,6 +5,7 @@
 #include "funcprotos.h"
 #include <string.h>
 #include <quicktime.h>
+#include <lqt.h>
 
 #include "libmjpeg.h"
 
@@ -203,7 +204,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
           jpeg_type = JPEG_MJPA;
           }
 /* Init public items */
-	((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_jpeg_codec_t));
+	((quicktime_codec_t*)vtrack->codec)->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
 	((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
 	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;

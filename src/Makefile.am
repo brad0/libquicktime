@@ -84,6 +84,7 @@ vrsc.c \
 vrnp.c \
 vrni.c \
 workarounds.c \
+lqt_bufalloc.c \
 lqt_codecfile.c \
 lqt_color.c \
 lqt_codecinfo.c \

@@ -119,7 +119,7 @@ METHODDEF(void) init_destination(j_compress_ptr cinfo)
   /* Set the pointer to the preallocated buffer */
   if(!dest->engine->output_buffer)
     {
-    dest->engine->output_buffer = calloc(1, 65536);
+    dest->engine->output_buffer = lqt_bufalloc(65536);
     dest->engine->output_allocated = 65536;
     }
   dest->buffer = dest->engine->output_buffer;
@@ -302,7 +302,7 @@ static void append_buffer(unsigned char **buffer,
   {
   if(!*buffer)
     {
-    *buffer = calloc(1, 65536);
+    *buffer = lqt_bufalloc(65536);
     *size = 0;
     *allocated = 65536;
     }
@@ -326,10 +326,10 @@ static void allocate_temps(mjpeg_t *mjpeg)
     switch(mjpeg->jpeg_color_model)
       {
       case BC_YUVJ422P:
-        mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h * 2);
-        mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        mjpeg->temp_rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_data = lqt_bufalloc(mjpeg->coded_w * mjpeg->coded_h * 2);
+        mjpeg->temp_rows[0] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_rows[1] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_rows[2] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
         for(i = 0; i < mjpeg->coded_h; i++)
           {
           mjpeg->temp_rows[0][i] = mjpeg->temp_data + i * mjpeg->coded_w;
@@ -339,10 +339,10 @@ static void allocate_temps(mjpeg_t *mjpeg)
         break;
         
       case BC_YUVJ444P:
-        mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h * 3);
-        mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        mjpeg->temp_rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_data = lqt_bufalloc(mjpeg->coded_w * mjpeg->coded_h * 3);
+        mjpeg->temp_rows[0] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_rows[1] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_rows[2] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
         for(i = 0; i < mjpeg->coded_h; i++)
           {
           mjpeg->temp_rows[0][i] = mjpeg->temp_data + i * mjpeg->coded_w;
@@ -352,10 +352,10 @@ static void allocate_temps(mjpeg_t *mjpeg)
         break;
         
       case BC_YUVJ420P:
-        mjpeg->temp_data = calloc(1, mjpeg->coded_w * mjpeg->coded_h + mjpeg->coded_w * mjpeg->coded_h / 2);
-        mjpeg->temp_rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        mjpeg->temp_rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
-        mjpeg->temp_rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
+        mjpeg->temp_data = lqt_bufalloc(mjpeg->coded_w * mjpeg->coded_h + mjpeg->coded_w * mjpeg->coded_h / 2);
+        mjpeg->temp_rows[0] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        mjpeg->temp_rows[1] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h / 2);
+        mjpeg->temp_rows[2] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h / 2);
         for(i = 0; i < mjpeg->coded_h; i++)
           {
           mjpeg->temp_rows[0][i] = mjpeg->temp_data + i * mjpeg->coded_w;
@@ -391,9 +391,9 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
       {
       if(!compressor->rows[0])
         {
-        compressor->rows[0] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-        compressor->rows[1] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-        compressor->rows[2] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[0] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[1] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[2] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
         }
 
       for(i = 0; i < compressor->field_h; i++)
@@ -410,9 +410,9 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
       {
       if(!compressor->rows[0])
         {
-        compressor->rows[0] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-        compressor->rows[1] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
-        compressor->rows[2] = calloc(1, sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[0] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[1] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
+        compressor->rows[2] = lqt_bufalloc(sizeof(unsigned char*) * compressor->field_h);
         }
 
       for(i = 0; i < compressor->field_h; i++)
@@ -429,9 +429,9 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
       {
       if(!compressor->rows[0])
         {
-        compressor->rows[0] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h);
-        compressor->rows[1] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
-        compressor->rows[2] = calloc(1, sizeof(unsigned char*) * mjpeg->coded_h / 2);
+        compressor->rows[0] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h);
+        compressor->rows[1] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h / 2);
+        compressor->rows[2] = lqt_bufalloc(sizeof(unsigned char*) * mjpeg->coded_h / 2);
         }
 
       for(i = 0; i < compressor->field_h; i++)
@@ -607,16 +607,16 @@ static void delete_temps(mjpeg_t *mjpeg)
 
 mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
   {
-  mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
+  mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
   result->mjpeg = mjpeg;
   result->instance = instance;
   new_jpeg_objects(result);
   result->field_h = mjpeg->coded_h / mjpeg->fields;
 
-  result->mcu_rows[0] = malloc(16 * sizeof(unsigned char*));
-  result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
-  result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[0] = lqt_bufalloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[1] = lqt_bufalloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[2] = lqt_bufalloc(16 * sizeof(unsigned char*));
 
   return result;
   }
@@ -638,7 +638,7 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
 
 mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
   {
-  mjpeg_compressor *result = calloc(1, sizeof(mjpeg_compressor));
+  mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
   result->field_h = mjpeg->coded_h / mjpeg->fields;
   result->mjpeg = mjpeg;
@@ -684,9 +684,9 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
     }
   allocate_temps(mjpeg);
 
-  result->mcu_rows[0] = malloc(16 * sizeof(unsigned char*));
-  result->mcu_rows[1] = malloc(16 * sizeof(unsigned char*));
-  result->mcu_rows[2] = malloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[0] = lqt_bufalloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[1] = lqt_bufalloc(16 * sizeof(unsigned char*));
+  result->mcu_rows[2] = lqt_bufalloc(16 * sizeof(unsigned char*));
 
   return result;
   }
@@ -859,7 +859,7 @@ mjpeg_t* mjpeg_new(int w,
                    int h, 
                    int fields)
   {
-  mjpeg_t *result = calloc(1, sizeof(mjpeg_t));
+  mjpeg_t *result = lqt_bufalloc(sizeof(mjpeg_t));
 
   result->output_w = w;
   result->output_h = h;

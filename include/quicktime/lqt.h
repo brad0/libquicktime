@@ -9,6 +9,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+void *lqt_bufalloc(size_t size);
 
 /* Call quicktime_set_parameter with our codec info */
 
