@@ -27,7 +27,7 @@ static char * fourccs_2vuy[] = { QUICKTIME_2VUY ,         (char*)0 };
 
 static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
 
-static char * fourccs_yv12[] = { QUICKTIME_YUV420 ,       (char*)0 };
+static char * fourccs_yv12[] = { QUICKTIME_YUV420 , "I420", (char*)0 };
 
 // if DUMMY_PARAMETERS is defined it will cause segfaults
 #undef DUMMY_PARAMETERS

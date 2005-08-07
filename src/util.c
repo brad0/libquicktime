@@ -324,15 +324,25 @@ int quicktime_write_float(quicktime_t *file, float value)
 	union {
 	       float f;
 	       unsigned char b[4];
-	} dat1, dat2;
+	} dat1;
 	
-	dat1.f = value;
-	dat2.b[3] = dat1.b[0];
+#ifdef WORDS_BIGENDIAN
+        dat1.f = value;
+	return quicktime_write_data(file, dat1.b, 4);
+#else
+        union {
+		float f;
+		unsigned char b[4];
+        } dat2;
+
+        dat1.f = value;
+        dat2.b[3] = dat1.b[0];
 	dat2.b[2] = dat1.b[1];
 	dat2.b[1] = dat1.b[2];
 	dat2.b[0] = dat1.b[3];
 
 	return quicktime_write_data(file, dat2.b, 4);
+#endif
 }
 
 int quicktime_write_fixed32(quicktime_t *file, float number)
@@ -345,6 +355,7 @@ int quicktime_write_fixed32(quicktime_t *file, float number)
 	data[0] = a >> 8;
 	data[1] = a & 0xff;
 	data[2] = b >> 8;
+	
 	data[3] = b & 0xff;
 
 	return quicktime_write_data(file, data, 4);
@@ -353,17 +364,27 @@ int quicktime_write_fixed32(quicktime_t *file, float number)
 float quicktime_read_float(quicktime_t *file)
 {
 	union {
-	       float f;
-	       unsigned char b[4];
-	} dat1, dat2;
-
+		float f;
+		unsigned char b[4];
+	} dat1;
+	
+#ifdef WORDS_BIGENDIAN
+        quicktime_read_data(file, dat1.b, 4);
+        return dat1.f; 
+#else
+        union {
+		float f;
+		unsigned char b[4];
+        } dat2;
+	
 	quicktime_read_data(file, dat1.b, 4);
 	dat2.b[3] = dat1.b[0];
 	dat2.b[2] = dat1.b[1];
 	dat2.b[1] = dat1.b[2];
 	dat2.b[0] = dat1.b[3];
-
+                                        
 	return dat2.f;
+#endif
 }
 
 
