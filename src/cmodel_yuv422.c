@@ -39,13 +39,13 @@
 	switch(out_colormodel) \
 	{ \
 		case BC_BGR565: \
-			TRANSFER_FRAME_HEAD \
-                          transfer_YUV422_to_BGR565((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+                          transfer_YUV422_to_BGR565((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_RGB565: \
-			TRANSFER_FRAME_HEAD \
-                          transfer_YUV422_to_RGB565((uint16_t**)(output), (input), (input_column)); \
+			TRANSFER_FRAME_HEAD_16 \
+                          transfer_YUV422_to_RGB565((output), (input), (input_column)); \
 			TRANSFER_FRAME_TAIL \
 			break; \
 		case BC_RGB888:      \

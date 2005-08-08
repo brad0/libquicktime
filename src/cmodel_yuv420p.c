@@ -43,16 +43,16 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_YUV420P_IN_HEAD \
-                                          transfer_YUV422P_to_BGR565((uint16_t**)(output), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+                                          transfer_YUV422P_to_BGR565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_YUV420P_IN_HEAD \
-					transfer_YUV422P_to_RGB565((uint16_t**)(output), \
+					TRANSFER_YUV420P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGB565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -320,16 +320,16 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_BGR565((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+					transfer_YUV422P_to_BGR565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_YUV422P_IN_HEAD \
-					transfer_YUV422P_to_RGB565((uint16_t**)(output), \
+					TRANSFER_YUV422P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGB565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -538,16 +538,16 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_BGR565((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_BGR565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-					TRANSFER_YUV444P_IN_HEAD \
-					transfer_YUV422P_to_RGB565((uint16_t**)(output), \
+					TRANSFER_YUV444P_IN_HEAD_16 \
+					transfer_YUV422P_to_RGB565((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
