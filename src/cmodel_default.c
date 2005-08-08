@@ -14,6 +14,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
  * USA
  */
+
+#define HAVE_RGB_16_TO_RGB_24
+#define HAVE_RGB_TO_YUV
+#define HAVE_RGB_TO_YUVJ
+#define HAVE_YUV_TO_RGB
+#define HAVE_YUV_8_TO_YUVJ
+#define HAVE_YUVJ_TO_YUV_8
+
 #include <inttypes.h>
 #include <cmodel_permutation.h>
 #include <lqt.h>

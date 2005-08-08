@@ -150,29 +150,29 @@
 
 /* 48 -> 8 */
 
-static int64_t r_16_to_y = (int64_t)((0.29900*219.0/255.0)*0x10000);
-static int64_t g_16_to_y = (int64_t)((0.58700*219.0/255.0)*0x10000);
-static int64_t b_16_to_y = (int64_t)((0.11400*219.0/255.0)*0x10000);
+#define r_16_to_y (int64_t)((0.29900*219.0/255.0)*0x10000)
+#define g_16_to_y (int64_t)((0.58700*219.0/255.0)*0x10000)
+#define b_16_to_y (int64_t)((0.11400*219.0/255.0)*0x10000)
 
-static int64_t r_16_to_u = (int64_t)(-(0.16874*224.0/255.0)*0x10000);
-static int64_t g_16_to_u = (int64_t)(-(0.33126*224.0/255.0)*0x10000);
-static int64_t b_16_to_u = (int64_t)( (0.50000*224.0/255.0)*0x10000);
+#define r_16_to_u (int64_t)(-(0.16874*224.0/255.0)*0x10000)
+#define g_16_to_u (int64_t)(-(0.33126*224.0/255.0)*0x10000)
+#define b_16_to_u (int64_t)( (0.50000*224.0/255.0)*0x10000)
 
-static int64_t r_16_to_v = (int64_t)( (0.50000*224.0/255.0)*0x10000);
-static int64_t g_16_to_v = (int64_t)(-(0.41869*224.0/255.0)*0x10000);
-static int64_t b_16_to_v = (int64_t)(-(0.08131*224.0/255.0)*0x10000);
+#define r_16_to_v (int64_t)( (0.50000*224.0/255.0)*0x10000)
+#define g_16_to_v (int64_t)(-(0.41869*224.0/255.0)*0x10000)
+#define b_16_to_v (int64_t)(-(0.08131*224.0/255.0)*0x10000)
 
-static int64_t r_16_to_yj = (int64_t)((0.29900)*0x10000);
-static int64_t g_16_to_yj = (int64_t)((0.58700)*0x10000);
-static int64_t b_16_to_yj = (int64_t)((0.11400)*0x10000);
+#define r_16_to_yj (int64_t)((0.29900)*0x10000)
+#define g_16_to_yj (int64_t)((0.58700)*0x10000)
+#define b_16_to_yj (int64_t)((0.11400)*0x10000)
 
-static int64_t r_16_to_uj = (int64_t)(-(0.16874)*0x10000);
-static int64_t g_16_to_uj = (int64_t)(-(0.33126)*0x10000);
-static int64_t b_16_to_uj = (int64_t)( (0.50000)*0x10000);
+#define r_16_to_uj (int64_t)(-(0.16874)*0x10000)
+#define g_16_to_uj (int64_t)(-(0.33126)*0x10000)
+#define b_16_to_uj (int64_t)( (0.50000)*0x10000)
 
-static int64_t r_16_to_vj = (int64_t)( (0.50000)*0x10000);
-static int64_t g_16_to_vj = (int64_t)(-(0.41869)*0x10000);
-static int64_t b_16_to_vj = (int64_t)(-(0.08131)*0x10000);
+#define r_16_to_vj (int64_t)( (0.50000)*0x10000)
+#define g_16_to_vj (int64_t)(-(0.41869)*0x10000)
+#define b_16_to_vj (int64_t)(-(0.08131)*0x10000)
 
 #define RGB_48_TO_Y_8(r,g,b,y) \
   y=(r_16_to_y * r + g_16_to_y * g + b_16_to_y * b + 16 * 0x1000000LL)>>24;
@@ -202,17 +202,17 @@ static int64_t b_16_to_vj = (int64_t)(-(0.08131)*0x10000);
 
 /* RGB Float -> YUV */
 
-static float r_float_to_y = 0.29900;
-static float g_float_to_y = 0.58700;
-static float b_float_to_y = 0.11400;
+#define r_float_to_y 0.29900
+#define g_float_to_y 0.58700
+#define b_float_to_y 0.11400
 
-static float r_float_to_u = -0.16874;
-static float g_float_to_u = -0.33126;
-static float b_float_to_u =  0.50000;
+#define r_float_to_u -0.16874
+#define g_float_to_u -0.33126
+#define b_float_to_u  0.50000
 
-static float r_float_to_v =  0.50000;
-static float g_float_to_v = -0.41869;
-static float b_float_to_v = -0.08131;
+#define r_float_to_v  0.50000
+#define g_float_to_v -0.41869
+#define b_float_to_v -0.08131
 
 #define INIT_RGB_FLOAT_TO_YUV \
   float y_tmp, u_tmp, v_tmp;
@@ -303,11 +303,11 @@ static float b_float_to_v = -0.08131;
 
 /* YUV (16 bit) -> 8 */
 
-static int64_t y_16_to_rgb  = (int)(255.0/219.0 * 0x10000);
-static int64_t v_16_to_r = (int)( 1.40200*255.0/224.0 * 0x10000);
-static int64_t u_16_to_g = (int)(-0.34414*255.0/224.0 * 0x10000);
-static int64_t v_16_to_g = (int)(-0.71414*255.0/224.0 * 0x10000);
-static int64_t u_16_to_b = (int)( 1.77200*255.0/224.0 * 0x10000);
+#define y_16_to_rgb  (int)(255.0/219.0 * 0x10000)
+#define v_16_to_r (int)( 1.40200*255.0/224.0 * 0x10000)
+#define u_16_to_g (int)(-0.34414*255.0/224.0 * 0x10000)
+#define v_16_to_g (int)(-0.71414*255.0/224.0 * 0x10000)
+#define u_16_to_b (int)( 1.77200*255.0/224.0 * 0x10000)
 
 #define YUV_16_TO_RGB_24(y,u,v,r,g,b) \
   i_tmp=(y_16_to_rgb * (y-0x1000) + v_16_to_r * (v-0x8000))>>24;        \
@@ -330,11 +330,11 @@ static int64_t u_16_to_b = (int)( 1.77200*255.0/224.0 * 0x10000);
 
 /* YUV (16 bit) -> float */
 
-static float y_16_to_rgb_float = 255.0/219.0/65535.0;
-static float v_16_to_r_float =  1.40200*255.0/224.0/65535.0;
-static float u_16_to_g_float = -0.34414*255.0/224.0/65535.0;
-static float v_16_to_g_float = -0.71414*255.0/224.0/65535.0;
-static float u_16_to_b_float =  1.77200*255.0/224.0/65535.0;
+#define y_16_to_rgb_float (255.0/219.0/65535.0)
+#define v_16_to_r_float   (1.40200*255.0/224.0/65535.0)
+#define u_16_to_g_float   (-0.34414*255.0/224.0/65535.0)
+#define v_16_to_g_float   (-0.71414*255.0/224.0/65535.0)
+#define u_16_to_b_float   (1.77200*255.0/224.0/65535.0)
 
 #define YUV_16_TO_RGB_FLOAT(y,u,v,r,g,b) \
   i_tmp=(y_16_to_rgb_float * (y-0x1000) + v_16_to_r_float * (v-0x8000));        \

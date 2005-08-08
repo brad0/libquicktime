@@ -21,53 +21,6 @@
 #include <quicktime/colormodels.h>
 #include <inttypes.h>
 
-#if 0
-
-#define RGB_TO_YUV(y, u, v, r, g, b) \
-{ \
-	y = ((yuv_table->rtoy_tab[r] + yuv_table->gtoy_tab[g] + yuv_table->btoy_tab[b]) >> 16); \
-	u = ((yuv_table->rtou_tab[r] + yuv_table->gtou_tab[g] + yuv_table->btou_tab[b]) >> 16); \
-	v = ((yuv_table->rtov_tab[r] + yuv_table->gtov_tab[g] + yuv_table->btov_tab[b]) >> 16); \
-	RECLIP(y, 0, 0xff); \
-	RECLIP(u, 0, 0xff); \
-	RECLIP(v, 0, 0xff); \
-}
-
-// y -> 24 bits u, v, -> 8 bits r, g, b -> 8 bits
-#define YUV_TO_RGB(y, u, v, r, g, b) \
-{ \
-	(r) = ((y + yuv_table->vtor_tab[v]) >> 16); \
-	(g) = ((y + yuv_table->utog_tab[u] + yuv_table->vtog_tab[v]) >> 16); \
-	(b) = ((y + yuv_table->utob_tab[u]) >> 16); \
-	RECLIP(r, 0, 0xff); \
-	RECLIP(g, 0, 0xff); \
-	RECLIP(b, 0, 0xff); \
-}
-
-// r, g, b -> 16 bits
-#define RGB_TO_YUV16(y, u, v, r, g, b) \
-{ \
-	y = ((yuv_table->rtoy_tab16[r] + yuv_table->gtoy_tab16[g] + yuv_table->btoy_tab16[b]) >> 8); \
-	u = ((yuv_table->rtou_tab16[r] + yuv_table->gtou_tab16[g] + yuv_table->btou_tab16[b]) >> 8); \
-	v = ((yuv_table->rtov_tab16[r] + yuv_table->gtov_tab16[g] + yuv_table->btov_tab16[b]) >> 8); \
-	RECLIP(y, 0, 0xffff); \
-	RECLIP(u, 0, 0xffff); \
-	RECLIP(v, 0, 0xffff); \
-}
-
-// y -> 24 bits   u, v-> 16 bits
-#define YUV_TO_RGB16(y, u, v, r, g, b) \
-{ \
-	(r) = ((y + yuv_table->vtor_tab16[v]) >> 8); \
-	(g) = ((y + yuv_table->utog_tab16[u] + yuv_table->vtog_tab16[v]) >> 8); \
-	(b) = ((y + yuv_table->utob_tab16[u]) >> 8); \
-	RECLIP(r, 0, 0xffff); \
-	RECLIP(g, 0, 0xffff); \
-	RECLIP(b, 0, 0xffff); \
-}
-
-#endif
-
 // ****************************** Pixel transfers *****************************
 
 // *************************** RGB565 -> ************************************
