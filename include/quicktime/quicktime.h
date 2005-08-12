@@ -57,8 +57,12 @@ extern "C" {
 #define QUICKTIME_YUV444  "v308"
 /* 8 bit Planar YUVA 4:4:4:4 */
 #define QUICKTIME_YUVA4444 "v408"
-/* 10 bit Planar YUV 4:4:4 */
+/* 10 bit Packed YUV 4:2:2 */
+#define QUICKTIME_YUV422_10bit "v210"
+#define QUICKTIME_V210 "v210"
+/* 10 bit Packed YUV 4:4:4 */
 #define QUICKTIME_YUV444_10bit  "v410"
+#define QUICKTIME_V410 "v410"
 
 /* ======== Studies in different algorithms =============== */
 
