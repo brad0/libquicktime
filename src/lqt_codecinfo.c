@@ -1757,15 +1757,13 @@ void lqt_reorder_video_codecs(lqt_codec_info_t ** info)
  * should work everywhere now)
  ***************************************************************/
 
-#if defined(__GNUC__) && defined(__ELF__)
+#if defined(__GNUC__)
 
 static void __lqt_cleanup_codecinfo() __attribute__ ((destructor));
 
 static void __lqt_cleanup_codecinfo()
   {
-#ifndef NDEBUG
-  //  fprintf(stderr, "Deleting quicktime codecs\n");
-#endif
+  fprintf(stderr, "Deleting quicktime codecs\n");
   lqt_registry_destroy();
   }
 

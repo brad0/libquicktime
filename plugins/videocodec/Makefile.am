@@ -3,6 +3,7 @@ pkglib_LTLIBRARIES = lqt_videocodec.la
 
 lqt_videocodec_la_SOURCES = \
 raw.c \
+v210.c \
 v308.c \
 v408.c \
 v410.c \
@@ -16,6 +17,7 @@ lqt_videocodec_la_LIBADD = @MODULE_LIBADD@
 
 noinst_HEADERS = \
 raw.h \
+v210.h \
 v308.h \
 v408.h \
 v410.h \

@@ -5,6 +5,7 @@
 
 #include <quicktime/colormodels.h>
 
+void quicktime_init_codec_v210(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v408(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v410(quicktime_video_map_t *vtrack);
@@ -14,6 +15,8 @@ void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
 static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3",   (char*)0 };
+
+static char * fourccs_v210[] = { QUICKTIME_YUV422_10bit,  (char *)0};
 
 static char * fourccs_v308[] = { QUICKTIME_YUV444,        (char*)0 };
 
@@ -84,6 +87,18 @@ static lqt_codec_info_static_t codec_info_raw =
 #endif
   };
 
+static lqt_codec_info_static_t codec_info_v210 =
+  {
+  name:        "v210",
+  long_name:   "10 bit Packed YUV 4:2:2 (v210)",
+  description: "10 bit Packed YUV 4:2:2 (v210)",
+  fourccs:     fourccs_v210,
+  type:        LQT_CODEC_VIDEO,
+  direction:   LQT_DIRECTION_BOTH,
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  };
+
 static lqt_codec_info_static_t codec_info_v308 =
   {
   name:        "v308",
@@ -112,8 +127,8 @@ static lqt_codec_info_static_t codec_info_v408 =
 static lqt_codec_info_static_t codec_info_v410 =
   {
   name:        "v410",
-  long_name:   "10 bit Planar YUV 4:4:4 (v410)",
-  description: "10 bit Planar YUV 4:4:4 (v410)",
+  long_name:   "10 bit Packed YUV 4:4:4 (v410)",
+  description: "10 bit Packed YUV 4:4:4 (v410)",
   fourccs:     fourccs_v410,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -175,7 +190,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 8; }
+extern int get_num_codecs() { return 9; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -183,28 +198,22 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
     {
     case 0: /* raw */
       return &codec_info_raw;
-      break;
     case 1: /* v308 */
       return &codec_info_v308;
-      break;
     case 2: /* v408 */
       return &codec_info_v408;
-      break;
     case 3: /* v410 */
       return &codec_info_v410;
-      break;
     case 4: /* yuv2 */
       return &codec_info_yuv2;
-      break;
     case 5: /* yuv4 */
       return &codec_info_yuv4;
-      break;
     case 6: /* vy12 */
       return &codec_info_yv12;
-      break;
     case 7: /* 2vuy */
       return &codec_info_2vuy;
-      break;
+    case 8: /* v210 */
+      return &codec_info_v210;
     }
   return (lqt_codec_info_static_t*)0;
   }
@@ -215,28 +224,22 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
     {
     case 0: /* raw */
       return quicktime_init_codec_raw;
-      break;
     case 1: /* v308 */
       return quicktime_init_codec_v308;
-      break;
     case 2: /* v408 */
       return quicktime_init_codec_v408;
-      break;
     case 3: /* v410 */
-    return quicktime_init_codec_v410;
-      break;
+      return quicktime_init_codec_v410;
     case 4: /* yuv2 */
       return quicktime_init_codec_yuv2;
-      break;
     case 5: /* yuv4 */
       return quicktime_init_codec_yuv4;
-      break;
     case 6: /* vy12 */
       return quicktime_init_codec_yv12;
-      break;
     case 7: /* 2vuy */
       return quicktime_init_codec_2vuy;
-      break;
+    case 8: /* v210 */
+      return quicktime_init_codec_v210;
     }
   return (lqt_init_video_codec_func_t)0;
   }
