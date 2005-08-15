@@ -512,7 +512,7 @@ static void decompress_field(mjpeg_compressor *engine)
     buffer_size = mjpeg->input_size - buffer_offset;
 
   mjpeg->error = 0;
-
+#if 1 
   if(setjmp(engine->jpeg_error.setjmp_buffer))
     {
     /* If we get here, the JPEG code has signaled an error. */
@@ -521,7 +521,7 @@ static void decompress_field(mjpeg_compressor *engine)
     mjpeg->error = 1;
     goto finish;
     }
-
+#endif
   jpeg_buffer_src(&engine->jpeg_decompress, 
                   buffer, 
                   buffer_size);

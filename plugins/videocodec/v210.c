@@ -38,7 +38,7 @@ static void initialize(quicktime_video_map_t *vtrack,
 
     if  (codec->initialized != 0)
         return;
-    codec->bytes_per_line = (((width + 47) / 48) * 48 * 8 / 3);;
+    codec->bytes_per_line = ((((width + 47) / 48) * 48 * 8) / 3);;
     if  (!codec->work_buffer)
         codec->work_buffer = malloc(codec->bytes_per_line * 
                                     vtrack->track->tkhd.track_height);
@@ -95,20 +95,20 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
             i3 = iptr[8] | (iptr[9] << 8) | (iptr[10] << 16) | (iptr[11] << 24);
             i4 = iptr[12] | (iptr[13] << 8) | (iptr[14] << 16) | (iptr[15] << 24);
 /* These are grouped to show the "pixel pairs" of  4:2:2 */
-            *(out_u++) = (i1 & 0x3ff);            /* Cb0 */
-            *(out_y++) = (i1 & 0xffc00) >> 10;    /* Y0 */
-            *(out_v++) = (i1 & 0x3ff00000) >> 20; /* Cr0 */
-            *(out_y++) = (i2 & 0x3ff);            /* Y1 */
+            *(out_u++) = (i1 & 0x3ff) << 6;       /* Cb0 */
+            *(out_y++) = (i1 & 0xffc00) >> 4;     /* Y0 */
+            *(out_v++) = (i1 & 0x3ff00000) >> 14; /* Cr0 */
+            *(out_y++) = (i2 & 0x3ff) << 6;       /* Y1 */
 
-            *(out_u++) = (i2 & 0xffc00) >> 10;    /* Cb1 */
-            *(out_y++) = (i2 & 0x3ff00000) >> 20; /* Y2 */
-            *(out_v++) = (i3 & 0x3ff);            /* Cr1 */
-            *(out_y++) = (i3 & 0xffc00) >> 10;    /* Y3 */
+            *(out_u++) = (i2 & 0xffc00) >> 4;     /* Cb1 */
+            *(out_y++) = (i2 & 0x3ff00000) >> 14; /* Y2 */
+            *(out_v++) = (i3 & 0x3ff) << 6;       /* Cr1 */
+            *(out_y++) = (i3 & 0xffc00) >> 4;     /* Y3 */
 
-            *(out_u++) = (i3 & 0x3ff00000) >> 20; /* Cb2 */
-            *(out_v++) = (i4 & 0x3ff);            /* Y4 */
-            *(out_y++) = (i4 & 0xffc00) >> 10;    /* Cr2 */
-            *(out_u++) = (i4 & 0x3ff00000) >> 20; /* Y5 */
+            *(out_u++) = (i3 & 0x3ff00000) >> 14; /* Cb2 */
+            *(out_y++) = (i4 & 0x3ff) << 6;       /* Y4 */
+            *(out_v++) = (i4 & 0xffc00) >> 4;     /* Cr2 */
+            *(out_y++) = (i4 & 0x3ff00000) >> 14; /* Y5 */
             }
 /* Handle the 2 or 4 pixels possibly remaining */
          j = (width - ((width / 6) * 6));
@@ -118,16 +118,16 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
             i2 = iptr[4] | (iptr[5] << 8) | (iptr[6] << 16) | (iptr[7] << 24);
             i3 = iptr[8] | (iptr[9] << 8) | (iptr[10] << 16) | (iptr[11] << 24);
             i4 = iptr[12] | (iptr[13] << 8) | (iptr[14] << 16) | (iptr[15] << 24);
-            *(out_u++) = (i1 & 0x3ff);            /* Cb0 */
-            *(out_y++) = (i1 & 0xffc00) >> 10;    /* Y0 */
-            *(out_v++) = (i1 & 0x3ff00000) >> 20; /* Cr0 */
-            *(out_y++) = (i2 & 0x3ff);            /* Y1 */
+            *(out_u++) = (i1 & 0x3ff) << 6;       /* Cb0 */
+            *(out_y++) = (i1 & 0xffc00) >> 4;     /* Y0 */
+            *(out_v++) = (i1 & 0x3ff00000) >> 14; /* Cr0 */
+            *(out_y++) = (i2 & 0x3ff) << 6;       /* Y1 */
 	    if (j == 4)
 	       {
-               *(out_u++) = (i2 & 0xffc00) >> 10;    /* Cb1 */
-               *(out_y++) = (i2 & 0x3ff00000) >> 20; /* Y2 */
-               *(out_v++) = (i3 & 0x3ff);            /* Cr1 */
-               *(out_y++) = (i3 & 0xffc00) >> 10;    /* Y3 */
+               *(out_u++) = (i2 & 0xffc00) >> 4;     /* Cb1 */
+               *(out_y++) = (i2 & 0x3ff00000) >> 14; /* Y2 */
+               *(out_v++) = (i3 & 0x3ff) << 6;       /* Cr1 */
+               *(out_y++) = (i3 & 0xffc00) >> 4;     /* Y3 */
 	       }
 	   }
 	}
