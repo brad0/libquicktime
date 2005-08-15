@@ -1,10 +1,16 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
+if test -d "/usr/local/share/aclocal"; then
+  ACLOCAL_FLAGS="-I /usr/local/share/aclocal"
+else
+  ACLOCAL_FLAGS=""
+fi
+
 do_autogen () {
     echo "Doing autogen in $PWD... "
     echo -n "aclocal..."
-    aclocal -I m4 -I /usr/local/share/aclocal $ACLOCAL_FLAGS
+    aclocal -I m4 $ACLOCAL_FLAGS
     echo "done"
     echo -n "libtoolize..."
     libtoolize --automake --copy --force
