@@ -259,7 +259,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
  * no padding will be performed.
 */
 	j = optr - out_ptr;
-fprintf(stderr, "padding = %d\n", j);
+        //        fprintf(stderr, "padding = %d\n", (int)(codec->bytes_per_line - j));
 	while (j++ < codec->bytes_per_line)
 	      *(optr++) = '\0';
         }
