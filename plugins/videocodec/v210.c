@@ -190,25 +190,25 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                  ((in_y[0] & 0xffc0) >> 6);         /* Y4 */
 	    in_y++; in_v++; in_y++;
 
-            *optr++ = (o1 & 0xff);
-            *optr++ = (o1 & 0xff00) >> 8;
-            *optr++ = (o1 & 0xff0000) >> 16;
-            *optr++ = (o1 & 0xff000000) >> 24;
+            *(optr++) = (o1 & 0xff);
+            *(optr++) = (o1 & 0xff00) >> 8;
+            *(optr++) = (o1 & 0xff0000) >> 16;
+            *(optr++) = (o1 & 0xff000000) >> 24;
 
-            *optr++ = (o2 & 0xff);
-            *optr++ = (o2 & 0xff00) >> 8;
-            *optr++ = (o2 & 0xff0000) >> 16;
-            *optr++ = (o2 & 0xff000000) >> 24;
+            *(optr++) = (o2 & 0xff);
+            *(optr++) = (o2 & 0xff00) >> 8;
+            *(optr++) = (o2 & 0xff0000) >> 16;
+            *(optr++) = (o2 & 0xff000000) >> 24;
 
-            *optr++ = (o3 & 0xff);
-            *optr++ = (o3 & 0xff00) >> 8;
-            *optr++ = (o3 & 0xff0000) >> 16;
-            *optr++ = (o3 & 0xff000000) >> 24;
+            *(optr++) = (o3 & 0xff);
+            *(optr++) = (o3 & 0xff00) >> 8;
+            *(optr++) = (o3 & 0xff0000) >> 16;
+            *(optr++) = (o3 & 0xff000000) >> 24;
 
-            *optr++ = (o4 & 0xff);
-            *optr++ = (o4 & 0xff00) >> 8;
-            *optr++ = (o4 & 0xff0000) >> 16;
-            *optr++ = (o4 & 0xff000000) >> 24;
+            *(optr++) = (o4 & 0xff);
+            *(optr++) = (o4 & 0xff00) >> 8;
+            *(optr++) = (o4 & 0xff0000) >> 16;
+            *(optr++) = (o4 & 0xff000000) >> 24;
             }
 /* Handle the 2 or 4 pixels remaining before the padding */
         j = (width - ((width / 6) * 6));
@@ -231,20 +231,20 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                      ((*in_v & 0xffc0) >> 6);         /* Cr1 */
 	        in_y++; in_v++;
 		}
-            *optr++ = (o1 & 0xff);
-            *optr++ = (o1 & 0xff00) >> 8;
-            *optr++ = (o1 & 0xff0000) >> 16;
-            *optr++ = (o1 & 0xff000000) >> 24;
+            *(optr++) = (o1 & 0xff);
+            *(optr++) = (o1 & 0xff00) >> 8;
+            *(optr++) = (o1 & 0xff0000) >> 16;
+            *(optr++) = (o1 & 0xff000000) >> 24;
 
-            *optr++ = (o2 & 0xff);
-            *optr++ = (o2 & 0xff00) >> 8;
-            *optr++ = (o2 & 0xff0000) >> 16;
-            *optr++ = (o2 & 0xff000000) >> 24;
+            *(optr++) = (o2 & 0xff);
+            *(optr++) = (o2 & 0xff00) >> 8;
+            *(optr++) = (o2 & 0xff0000) >> 16;
+            *(optr++) = (o2 & 0xff000000) >> 24;
 	    
-            *optr++ = (o3 & 0xff);
-            *optr++ = (o3 & 0xff00) >> 8;
-            *optr++ = (o3 & 0xff0000) >> 16;
-            *optr++ = (o3 & 0xff000000) >> 24;
+            *(optr++) = (o3 & 0xff);
+            *(optr++) = (o3 & 0xff00) >> 8;
+            *(optr++) = (o3 & 0xff0000) >> 16;
+            *(optr++) = (o3 & 0xff000000) >> 24;
 /*
  * The above are sufficient for 2 or 4 pixels, the 4th word (which would be o4)
  * contains the two Y' samples (Y4 and Y5) and the Cr (Cr2) for pixels 5 and 6.
@@ -258,10 +258,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
  * 720xN) then the number of bytes used will be equal to bytes_per_line and
  * no padding will be performed.
 */
-	j = out_ptr - optr;
+	j = optr - out_ptr;
 fprintf(stderr, "padding = %d\n", j);
 	while (j++ < codec->bytes_per_line)
-	      *optr++ = '\0';
+	      *(optr++) = '\0';
         }
 
     quicktime_write_chunk_header(file, trak, &chunk_atom);
