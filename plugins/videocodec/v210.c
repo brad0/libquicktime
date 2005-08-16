@@ -60,7 +60,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
     if  (!row_pointers)
         {
-        vtrack->stream_cmodel = BC_YUV444P16;
+        vtrack->stream_cmodel = BC_YUV422P16;
         return 0;
         }
 
@@ -150,7 +150,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         
     if  (!row_pointers)
         {
-        vtrack->stream_cmodel = BC_YUV444P16;
+        vtrack->stream_cmodel = BC_YUV422P16;
         return 0;
         }
 
