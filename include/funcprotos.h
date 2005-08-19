@@ -3,10 +3,9 @@
 
 #include "config.h"
 #include <graphics.h>
-#include <quicktime/qtprivate.h>
-#include <quicktime/lqt_codecinfo.h>
 
 #include <lqt_funcprotos.h>
+#include <quicktime/lqt_codecinfo.h>
 // #include <cmodel_permutation.h>
 
 

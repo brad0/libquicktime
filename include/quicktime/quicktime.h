@@ -8,6 +8,32 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+/* Some public enums needed by most subsequent headers */
+  
+typedef enum 
+  {
+    LQT_INTERLACE_NONE = 0,
+    LQT_INTERLACE_TOP_FIRST,
+    LQT_INTERLACE_BOTTOM_FIRST 
+  } lqt_interlace_mode_t;
+
+typedef enum 
+  {
+    LQT_CHROMA_PLACEMENT_DEFAULT = 0, /* MPEG-1, JPEG or non 4:2:0 */
+    LQT_CHROMA_PLACEMENT_MPEG2,
+    LQT_CHROMA_PLACEMENT_DVPAL,
+  } lqt_chroma_placement_t;
+
+typedef enum 
+  {
+    LQT_SAMPLE_INT8,
+    LQT_SAMPLE_UINT8,
+    LQT_SAMPLE_INT16,
+    LQT_SAMPLE_INT32,
+    LQT_SAMPLE_FLOAT /* Float is ALWAYS machine native */
+  } lqt_sample_format_t;
+
+  
 #include "qtprivate.h"
 
 /* This is the reference for all your library entry points. */

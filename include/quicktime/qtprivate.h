@@ -858,7 +858,7 @@ typedef struct
 	void *codec;
 
         int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
-
+//        lqt_sample_format_t sample_format; /* Set by the codec */
 } quicktime_audio_map_t;
 
 typedef struct
@@ -881,7 +881,8 @@ typedef struct
 
         /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
         uint8_t ** temp_frame;
-
+        lqt_chroma_placement_t chroma_placement;
+        lqt_interlace_mode_t interlace_mode;
 } quicktime_video_map_t;
 
 /* obji */
@@ -1042,14 +1043,14 @@ typedef struct
 				int track);
         /* API Change: Return value is the number of samples */
         int (*decode_audio)(quicktime_t *file, 
-                            int16_t ** output_i, 
-                            float ** output_f,
+                            int16_t **output_i, 
+                            float **output_f,
                             long samples, 
                             int track);
 	int (*encode_audio)(quicktime_t *file, 
-				int16_t **input_i, 
-				float **input_f, 
-				int track, 
+                            int16_t **output_i, 
+                            float **output_f,
+                            int track, 
                             long samples);
 	int (*set_parameter)(quicktime_t *file, 
 		int track, 

@@ -8,10 +8,14 @@
 #ifndef _LQT_CODEC_INFO_H_
 #define _LQT_CODEC_INFO_H_
 
+#include <inttypes.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+  
+  
 /* 
  * Compatibility flags for encoders
  */

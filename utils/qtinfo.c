@@ -2,6 +2,7 @@
 
 #include <quicktime/quicktime.h>
 #include <quicktime/lqt.h>
+#include <quicktime/colormodels.h>
 
 static void file_info(char *filename);
 
@@ -24,7 +25,8 @@ int main(int argc, char *argv[])
 static void
 file_info(char *filename)
 {
-	quicktime_t* qtfile;
+        int cmodel;
+        quicktime_t* qtfile;
 	int i, n;
 
 	qtfile = quicktime_open(filename, 1, 0);
@@ -67,8 +69,12 @@ file_info(char *filename)
 			 quicktime_frame_rate(qtfile, i),
 			 quicktime_video_length(qtfile, i),
 			 quicktime_video_compressor(qtfile, i));
-          printf("    Native colormodel: %s\n", lqt_colormodel_to_string(lqt_get_cmodel(qtfile, i)));
-	  printf("    %ssupported.\n",
+          cmodel = lqt_get_cmodel(qtfile, i);
+          printf("    Native colormodel:  %s\n", lqt_colormodel_to_string(cmodel));
+          printf("    Interlace mode:     %s\n", lqt_interlace_mode_to_string(lqt_get_interlace_mode(qtfile, i)));
+          if(cmodel == BC_YUV420P)
+            printf("    Chroma placement: %s\n", lqt_chroma_placement_to_string(lqt_get_chroma_placement(qtfile, i)));
+          printf("    %ssupported.\n",
 			 quicktime_supported_video(qtfile, i)?"":"NOT ");
 	}
         quicktime_close(qtfile);

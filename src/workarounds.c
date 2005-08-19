@@ -4,6 +4,7 @@
 /* #include "libdv/vlc.h" */
 /* #include "libdv/mmx.h" */
 
+#include <quicktime/quicktime.h>
 #include <quicktime/qtprivate.h>
 #include <workarounds.h>
 

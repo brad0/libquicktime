@@ -1320,14 +1320,25 @@ void quicktime_init_maps(quicktime_t * file)
       /* Get decoder colormodel */
       ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, i);
       file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
-
+      
       lqt_get_default_rowspan(file->vtracks[i].io_cmodel,
                               quicktime_video_width(file, i),
                               &(file->vtracks[i].io_row_span),
                               &(file->vtracks[i].io_row_span_uv));
-      
       file->vtracks[i].stream_row_span = file->vtracks[i].io_row_span;
       file->vtracks[i].stream_row_span_uv = file->vtracks[i].io_row_span_uv;
+
+      /* Get interlace mode */
+      if(file->vtracks[i].interlace_mode == LQT_INTERLACE_NONE)
+        {
+        if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fields == 2)
+          {
+          if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance == 14)
+            file->vtracks[i].interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
+          else if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance == 9)
+            file->vtracks[i].interlace_mode = LQT_INTERLACE_TOP_FIRST;
+          }
+        }
       
       }
     }
@@ -2089,4 +2100,72 @@ int lqt_read_video_frame(quicktime_t * file, int track,
 int64_t lqt_last_audio_position(quicktime_t * file, int track)
   {
   return file->atracks[track].last_position;
+  }
+
+/* Interlace mode */
+
+static struct
+  {
+  lqt_interlace_mode_t mode;
+  const char * name;
+  }
+interlace_modes[] =
+  {
+    { LQT_INTERLACE_NONE,         "None (Progressive)" },
+    { LQT_INTERLACE_TOP_FIRST,    "Top field first"    },
+    { LQT_INTERLACE_BOTTOM_FIRST, "Bottom field first" },
+    {  /* End of array */ }
+  };
+  
+lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track)
+  {
+  if(track < 0 || track > file->total_vtracks)
+    return LQT_INTERLACE_NONE;
+  return file->vtracks[track].interlace_mode;
+  }
+
+const char * lqt_interlace_mode_to_string(lqt_interlace_mode_t mode)
+  {
+  int i = 0;
+  while(interlace_modes[i].name)
+    {
+    if(interlace_modes[i].mode == mode)
+      return interlace_modes[i].name;
+    i++;
+    }
+  return (const char*)0;
+  }
+
+/* Chroma placement */
+
+static struct
+  {
+  lqt_chroma_placement_t placement;
+  const char * name;
+  }
+chroma_placements[] =
+  {
+    { LQT_CHROMA_PLACEMENT_DEFAULT,  "MPEG-1/JPEG" },
+    { LQT_CHROMA_PLACEMENT_MPEG2,    "MPEG-1" },
+    { LQT_CHROMA_PLACEMENT_DVPAL,    "PAL DV" },
+    {  /* End of array */ }
+  };
+
+const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t p)
+  {
+  int i = 0;
+  while(chroma_placements[i].name)
+    {
+    if(chroma_placements[i].placement == p)
+      return chroma_placements[i].name;
+    i++;
+    }
+  return (const char*)0;
+  }
+
+lqt_chroma_placement_t lqt_get_chroma_placement(quicktime_t * file, int track)
+  {
+  if(track < 0 || track > file->total_vtracks)
+    return LQT_INTERLACE_NONE;
+  return file->vtracks[track].chroma_placement;
   }

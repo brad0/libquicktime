@@ -1,3 +1,4 @@
+#include "lqt.h"
 
 /* atom.c */
 

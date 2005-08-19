@@ -92,6 +92,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = BC_YUV422;
+          vtrack->interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
           return 0;
           }
         

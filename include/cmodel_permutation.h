@@ -1578,15 +1578,6 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 // ******************************** Loops *************************************
 // 
 
-#define TRANSFER_FRAME_HEAD_BITCOUNTER \
-	for(i = 0; i < out_h; i++) \
-	{ \
-		unsigned char *output_row = output_rows[i]; \
-		unsigned char *input_row = input_rows[row_table[i]]; \
-                int bit_counter = 7; \
-		for(j = 0; j < out_w; j++) \
-		{
-
 #define TRANSFER_FRAME_HEAD \
 	for(i = 0; i < out_h; i++) \
 	{ \
@@ -1675,8 +1666,8 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 	{ \
 		unsigned char *output_row = output_rows[i]; \
 		unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
-		unsigned char *input_u = input_rows[1] + (row_table[i] / 2) * in_rowspan_uv; \
-		unsigned char *input_v = input_rows[2] + (row_table[i] / 2) * in_rowspan_uv; \
+		unsigned char *input_u = input_rows[1] + row_table[i] * in_rowspan_uv; \
+		unsigned char *input_v = input_rows[2] + row_table[i] * in_rowspan_uv; \
 		for(j = 0; j < out_w; j++) \
 		{
 
@@ -1707,8 +1698,8 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 		uint8_t * output_row = output_rows[i]; \
 		uint16_t * input_y = (uint16_t *)(input_rows[0] + row_table[i] * in_rowspan); \
 		uint16_t * input_u = (uint16_t *)(input_rows[1] + row_table[i] * in_rowspan_uv); \
-		uint16_t *input_v =  (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
-		for(j = 0; j < out_w; j++) \
+		uint16_t * input_v = (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
+                for(j = 0; j < out_w; j++)                        \
 		{
 
 #define TRANSFER_YUV422P_IN_HEAD_16   \

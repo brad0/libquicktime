@@ -464,6 +464,14 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     //    fprintf(stderr, "Detected stream colormodel: %s %s %d\n",
     //            lqt_colormodel_to_string(codec->lqt_colormodel),
     //            avcodec_get_pix_fmt_name(codec->com.ffcodec_dec->pix_fmt), exact);
+
+    if(codec->com.ffc_dec->id == CODEC_ID_DVVIDEO)
+      {
+      if(vtrack->stream_cmodel == BC_YUV420P)
+        vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
+      vtrack->interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
+      }
+    
     }
   
   /*

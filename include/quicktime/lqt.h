@@ -18,11 +18,21 @@ void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value
 
 int lqt_set_fiel(quicktime_t *, int, int, int);
 int lqt_get_fiel(quicktime_t *, int, int *, int *);
-
+  
 int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
                          int * pixel_height);
 int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
                          int pixel_height);
+
+
+lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track);
+const char * lqt_interlace_mode_to_string(lqt_interlace_mode_t);
+  
+
+  
+lqt_chroma_placement_t lqt_get_chroma_placement(quicktime_t * file, int track);
+const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t);
+
   
 int lqt_get_codec_api_version();
 
@@ -237,6 +247,34 @@ int lqt_decode_audio_track(quicktime_t *file,
                            long samples,
                            int track);
 
+/*
+ *  Support for "raw" audio en-/decoding: This bypasses all
+ *  internal sampleformat conversions, and allows access to audio
+ *  samples in a format, which is closest to the internal representation.
+ *
+ *  BIG NOTE: These are NOT implemented for now
+ */
+
+/* Enum for the sampleformat */
+
+
+/*
+ *  Query the internal sample format. Works for decoding (call after quicktime_open)
+ *  and encoding (call after lqt_add_audio_track, lqt_set_audio or quicktime_set_audio).
+ */
+
+lqt_sample_format_t lqt_get_sample_format(quicktime_t *, int track);
+
+int lqt_decode_audio_raw(quicktime_t *file, 
+                         void * output, 
+                         long samples,
+                         int track);
+
+int lqt_encode_audio_raw(quicktime_t *file, 
+                         void * input, 
+                         long samples,
+                         int track);
+  
 /*
  *  Seek to a specified time. Use this instead of quicktime_set_video_position
  *  for streams with nonconstant framerate

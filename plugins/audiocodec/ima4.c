@@ -400,59 +400,6 @@ static int decode(quicktime_t *file,
         
         file->atracks[track].last_position = file->atracks[track].current_position + samples_decoded;
         return samples_decoded;
-#if 0 /* Old version, hopefully obsolete */
-        
-/* Get the first chunk with this routine and then increase the chunk number. */
-	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, file->atracks[track].current_position);
-
-/* Read chunks and extract ranges of samples until the output is full. */
-	for(i = 0; i < samples && !result; )
-	{
-/* Get chunk we're on. */
-		chunk_samples = quicktime_chunk_samples(trak, chunk);
-
-		if(!codec->work_buffer ||
-			codec->chunk != chunk ||
-			codec->buffer_channel != channel)
-		{
-/* read a new chunk if necessary */
-			result = ima4_decode_chunk(file, track, chunk, channel);
-		}
-
-/* Get boundaries from the chunk */
-		chunk_start = 0;
-		if(chunk_sample < file->atracks[track].current_position)
-			chunk_start = file->atracks[track].current_position - chunk_sample;
-
-		chunk_end = chunk_samples;
-		if(chunk_sample + chunk_end > file->atracks[track].current_position + samples)
-			chunk_end = file->atracks[track].current_position + samples - chunk_sample;
-
-/* Read from the chunk */
-		if(output_i)
-		{
-/*printf("decode_ima4 1 chunk %ld %ld-%ld output %ld\n", chunk, chunk_start + chunk_sample, chunk_end + chunk_sample, i); */
-			while(chunk_start < chunk_end)
-			{
-				output_i[i++] = codec->work_buffer[chunk_start++];
-			}
-/*printf("decode_ima4 2\n"); */
-		}
-		else
-		if(output_f)
-		{
-			while(chunk_start < chunk_end)
-			{
-				output_f[i++] = (float)codec->work_buffer[chunk_start++] / 32767;
-			}
-		}
-
-		chunk++;
-		chunk_sample += chunk_samples;
-	}
-
-	return result;
-#endif
 }
 
 static int encode(quicktime_t *file, 

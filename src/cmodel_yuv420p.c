@@ -29,7 +29,6 @@
 
 
 #define TRANSFER_FRAME_DEFAULT(output, \
-	input, \
 	y_in_offset, \
 	u_in_offset, \
 	v_in_offset, \
@@ -691,7 +690,6 @@ void cmodel_yuv420p(PERMUTATION_ARGS)
 	if(scale)
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + column_table[j] * in_pixelsize,
 			column_table[j],
 			column_table[j] / 2,
 			column_table[j] / 2,
@@ -700,7 +698,6 @@ void cmodel_yuv420p(PERMUTATION_ARGS)
 	else
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + j * in_pixelsize,
 			j,
 			j / 2,
 			j / 2,
@@ -713,7 +710,6 @@ void cmodel_yuv411p(PERMUTATION_ARGS)
 	if(scale)
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + column_table[j] * in_pixelsize,
 			column_table[j],
 			column_table[j] / 4,
 			column_table[j] / 4,
@@ -722,7 +718,6 @@ void cmodel_yuv411p(PERMUTATION_ARGS)
 	else
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + j * in_pixelsize,
 			j,
 			j / 4,
 			j / 4,
@@ -736,7 +731,6 @@ void cmodel_yuv444p(PERMUTATION_ARGS)
 	if(scale)
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + column_table[j] * in_pixelsize,
 			column_table[j],
 			column_table[j],
 			column_table[j],
@@ -745,7 +739,6 @@ void cmodel_yuv444p(PERMUTATION_ARGS)
 	else
 	{
 		TRANSFER_FRAME_DEFAULT(&output_row, 
-			input_row + j * in_pixelsize,
 			j,
 			j,
 			j,
