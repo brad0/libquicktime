@@ -62,8 +62,8 @@ int lqt_num_video_codecs = 0;
 lqt_codec_info_t * lqt_audio_codecs = (lqt_codec_info_t*)0;
 lqt_codec_info_t * lqt_video_codecs = (lqt_codec_info_t*)0;
 
-static int mutex_initialized = 0;
-pthread_mutex_t codecs_mutex;
+static int registry_init_done = 0;
+pthread_mutex_t codecs_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /*
  *  Lock and unlock the codec registry
@@ -71,21 +71,23 @@ pthread_mutex_t codecs_mutex;
 
 void lqt_registry_lock()
   {
-  if(!mutex_initialized)
-    {
-    pthread_mutex_init(&codecs_mutex, (pthread_mutexattr_t *)0);
-    mutex_initialized = 1;
-
-    /* We initialize the registry also */
-    
-    lqt_registry_init();
-    }
   pthread_mutex_lock(&codecs_mutex);
   }
 
 void lqt_registry_unlock()
   {
   pthread_mutex_unlock(&codecs_mutex);
+  }
+
+int lqt_registry_initialized()
+  {
+  int ret;
+  
+  lqt_registry_lock();
+  ret = registry_init_done;
+  lqt_registry_unlock();
+  
+  return ret;
   }
 
 /* Free memory of parameter info */
@@ -407,8 +409,8 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
 #ifndef NDEBUG  
     //    fprintf(stderr, "\n");
 #endif
-    //    fprintf(stderr, "dlopen failed for %s: %s\n",
-    //            plugin_filename, dlerror());
+    fprintf(stderr, "load_codec_info_from_plugin: dlopen failed for %s: %s\n",
+             plugin_filename, dlerror());
     return ret;
     }
 #ifndef NDEBUG  
@@ -696,6 +698,8 @@ void lqt_registry_init()
 
   lqt_registry_lock();
   
+  registry_init_done = 1;
+  
   if(lqt_audio_codecs || lqt_video_codecs)
     {
     lqt_registry_unlock();
@@ -803,6 +807,9 @@ lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
   const lqt_codec_info_t * info;
   lqt_codec_info_t * ret;
 
+  if (!lqt_registry_initialized()) /* also init registry */
+  	lqt_registry_init();
+	
   lqt_registry_lock();
 
   info = lqt_get_audio_codec_info(index);
@@ -819,6 +826,9 @@ lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
   {
   const lqt_codec_info_t * info;
   lqt_codec_info_t * ret;
+
+  if (!lqt_registry_initialized()) /* also init registry */
+  	lqt_registry_init();
 
   lqt_registry_lock();
 
@@ -1155,7 +1165,13 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
   lqt_codec_info_t * ptr;
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
+
+  if (!lqt_registry_initialized()) /* also init registry */
+  	lqt_registry_init();
   
+  if (!lqt_registry_initialized()) /* also init registry */
+     lqt_registry_init();
+
   lqt_registry_lock();
   
   ptr = lqt_audio_codecs;
@@ -1195,6 +1211,9 @@ lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
   lqt_codec_info_t * ptr;
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
+  
+  if (!lqt_registry_initialized()) /* also init registry */
+     lqt_registry_init();
   
   lqt_registry_lock();
   
@@ -1238,6 +1257,10 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
   lqt_codec_info_t ** ret;
   const lqt_codec_info_t * info;
   int num_codecs = 0, num_added = 0, i;
+
+  if (!lqt_registry_initialized()) /* also init registry */
+    lqt_registry_init();
+
   lqt_registry_lock();
 
   if(audio)
@@ -1306,6 +1329,9 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
   if(!name)
     return ret;
   
+  if (!lqt_registry_initialized()) /* also init registry */
+     lqt_registry_init();
+
   lqt_registry_lock();
 
   info = lqt_get_audio_codec_info(0);
@@ -1343,6 +1369,9 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
 
   if(!name)
     return ret;
+  
+  if (!lqt_registry_initialized()) /* also init registry */
+     lqt_registry_init();
   
   lqt_registry_lock();
 
@@ -1421,6 +1450,9 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
   lqt_codec_info_t * codec_info;
   lqt_parameter_info_t * parameter_info;
   
+  if (!lqt_registry_initialized()) /* also init registry */
+     lqt_registry_init();
+
   lqt_registry_lock();
 
   if(type == LQT_CODEC_AUDIO)
@@ -1538,7 +1570,11 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   
   module = dlopen(codec_info->module_filename, RTLD_NOW);
   if(!module)
+    {
+    fprintf(stderr, "lqt_restore_default_parameters: dlopen failed for %s: %s\n",
+             codec_info->module_filename, dlerror());
     return;
+    }
   
   get_codec_info = (lqt_codec_info_static_t*(*)(int))(dlsym(module, "get_codec_info"));
   if(!get_codec_info)

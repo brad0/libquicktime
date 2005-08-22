@@ -454,7 +454,6 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
  
   if(!input)
     {
-    lqt_registry_unlock();
 
 #ifndef NDEBUG
     //    fprintf(stderr, "failed\n");
