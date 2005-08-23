@@ -22,9 +22,11 @@ int lqt_qtvr_add_node(quicktime_t *file)
 {
     quicktime_atom_t chunk_atom;
     quicktime_qtatom_t root_atom, leaf_atom/*, imtr_atom*/;
+    quicktime_trak_t *trak;
     
     quicktime_ndhd_init(&(file->qtvr_node[0].ndhd));
-    quicktime_trak_t *trak = file->moov.trak[lqt_qtvr_get_qtvr_track(file)];
+    trak = file->moov.trak[lqt_qtvr_get_qtvr_track(file)];
+
     if (quicktime_track_samples(file, trak) > 0) 
     {
 	fprintf(stderr,"lqt_qtvr_add_node only single node movies supported! aborting...\n");

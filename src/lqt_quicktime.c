@@ -1286,7 +1286,7 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 
 void quicktime_init_maps(quicktime_t * file)
   {
-  int i, track;
+  int i, dom, track;
   /* get tables for all the different tracks */
   file->total_atracks = quicktime_audio_tracks(file);
 
@@ -1331,15 +1331,15 @@ void quicktime_init_maps(quicktime_t * file)
       /* Get interlace mode */
       if(file->vtracks[i].interlace_mode == LQT_INTERLACE_NONE)
         {
-        if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fields == 2)
+        dom = file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance;
+        if (file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fields == 2)
           {
-          if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance == 14)
+          if (dom == 14 || dom == 6)
             file->vtracks[i].interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
-          else if(file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance == 9)
+          else if (dom == 9 || dom == 1)
             file->vtracks[i].interlace_mode = LQT_INTERLACE_TOP_FIRST;
           }
         }
-      
       }
     }
   }
