@@ -59,6 +59,6 @@ lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
 
 INCLUDES = -I$(top_srcdir)/include @X_CFLAGS@ @ALSA_CFLAGS@
 
-EXTRA_DIST=lqtplay.1
+EXTRA_DIST=lqtplay.1 cpuinfo.c
 
 #CFLAGS += -g3 -Werror
