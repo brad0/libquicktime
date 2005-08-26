@@ -17,7 +17,7 @@ else
 FSEEKO_SRC = lqt_fseeko.c
 endif
 
-lqt_sources = lqt_codecs.c  lqt_plugin.c lqt_quicktime.c $(FSEEKO_SRC)
+lqt_sources = lqt_codecs.c lqt_quicktime.c $(FSEEKO_SRC)
 
 # lqt_sources = codecs.c  plugin.c quicktime.c
 
