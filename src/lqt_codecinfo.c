@@ -1126,7 +1126,10 @@ lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
   lqt_codec_info_t * ptr;
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
-  
+
+  if (!lqt_registry_initialized()) /* also init registry */
+    lqt_registry_init();
+    
   lqt_registry_lock();
   
   ptr = lqt_audio_codecs;
@@ -1169,9 +1172,6 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
   if (!lqt_registry_initialized()) /* also init registry */
   	lqt_registry_init();
   
-  if (!lqt_registry_initialized()) /* also init registry */
-     lqt_registry_init();
-
   lqt_registry_lock();
   
   ptr = lqt_audio_codecs;

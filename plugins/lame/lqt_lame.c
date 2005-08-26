@@ -28,7 +28,7 @@ static lqt_parameter_info_static_t encode_parameters_lame[] =
      { /* End of paramaters */ }
   };
 
-static lqt_codec_info_static_t codec_info_vorbis =
+static lqt_codec_info_static_t codec_info_lame =
   {
     name:                "lame",
     long_name:           "Lame mp3 encoder",
@@ -46,7 +46,7 @@ extern int get_num_codecs() { return 1; }
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(!index)
-    return &codec_info_vorbis;
+    return &codec_info_lame;
   
   return (lqt_codec_info_static_t*)0;
   }

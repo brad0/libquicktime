@@ -1608,11 +1608,15 @@ void quicktime_set_asf(quicktime_t *file, int value)
 quicktime_t* quicktime_open(const char *filename, int rd, int wr)
 {
         int i;
-	quicktime_t *new_file = calloc(1, sizeof(quicktime_t));
+	quicktime_t *new_file;;
 	int result = 0;
+
+        new_file = calloc(1, sizeof(*new_file));
+
         if(rd && wr)
           {
 	  fprintf(stderr, "read/write mode is not supported\n");
+          free(new_file);
           return (quicktime_t*)0;
           }
 	
