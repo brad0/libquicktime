@@ -254,10 +254,7 @@ int lqt_decode_audio_track(quicktime_t *file,
  *
  *  BIG NOTE: These are NOT implemented for now
  */
-
-/* Enum for the sampleformat */
-
-
+  
 /*
  *  Query the internal sample format. Works for decoding (call after quicktime_open)
  *  and encoding (call after lqt_add_audio_track, lqt_set_audio or quicktime_set_audio).
