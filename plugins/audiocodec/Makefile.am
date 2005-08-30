@@ -11,6 +11,7 @@ lqt_audiocodec_la_LIBADD = @MODULE_LIBADD@
 
 noinst_HEADERS = \
 ima4.h \
-pcm.h
+pcm.h \
+ulaw_tables.h
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
