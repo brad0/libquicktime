@@ -116,46 +116,59 @@ void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
 	quicktime_stco_dump(&(stbl->stco));
 }
 
-int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_stbl_t *stbl, quicktime_atom_t *parent_atom)
-{
-	quicktime_atom_t leaf_atom;
+int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
+                        quicktime_stbl_t *stbl, quicktime_atom_t *parent_atom)
+  {
+  quicktime_atom_t leaf_atom;
+  
+  do
+    {
+    quicktime_atom_read_header(file, &leaf_atom);
 
-	do
-	{
-		quicktime_atom_read_header(file, &leaf_atom);
+    //printf("quicktime_read_stbl 1\n");
+    /* mandatory */
+    if(quicktime_atom_is(&leaf_atom, "stsd"))
+      { 
+      quicktime_read_stsd(file, minf, &(stbl->stsd)); 
+      /* Some codecs store extra information at the end of this */
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "stts"))
+      {
+      quicktime_read_stts(file, &(stbl->stts));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "stss"))
+      {
+      quicktime_read_stss(file, &(stbl->stss));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "stsc"))
+      {
+      quicktime_read_stsc(file, &(stbl->stsc));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "stsz"))
+      {
+      quicktime_read_stsz(file, &(stbl->stsz));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "co64"))
+      {
+      quicktime_read_stco64(file, &(stbl->stco));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "stco"))
+      {
+      quicktime_read_stco(file, &(stbl->stco));
+      quicktime_atom_skip(file, &leaf_atom);
+      }
+    else
+      quicktime_atom_skip(file, &leaf_atom);
+    }while(quicktime_position(file) < parent_atom->end);
 
-//printf("quicktime_read_stbl 1\n");
-/* mandatory */
-		if(quicktime_atom_is(&leaf_atom, "stsd"))
-		{ 
-			quicktime_read_stsd(file, minf, &(stbl->stsd)); 
-/* Some codecs store extra information at the end of this */
-			quicktime_atom_skip(file, &leaf_atom);
-		}
-		else
-		if(quicktime_atom_is(&leaf_atom, "stts"))
-			{ quicktime_read_stts(file, &(stbl->stts)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "stss"))
-			{ quicktime_read_stss(file, &(stbl->stss)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "stsc"))
-			{ quicktime_read_stsc(file, &(stbl->stsc)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "stsz"))
-			{ quicktime_read_stsz(file, &(stbl->stsz)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "co64"))
-			{ quicktime_read_stco64(file, &(stbl->stco)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "stco"))
-			{ quicktime_read_stco(file, &(stbl->stco)); }
-		else
-			quicktime_atom_skip(file, &leaf_atom);
-	}while(quicktime_position(file) < parent_atom->end);
-
-	return 0;
-}
+  return 0;
+  }
 
 void quicktime_write_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_stbl_t *stbl)
 {
