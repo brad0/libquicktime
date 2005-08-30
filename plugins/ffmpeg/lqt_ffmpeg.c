@@ -656,7 +656,7 @@ struct CODECIDMAP codecidmap_a[] = {
           decode_parameters: decode_parameters_audio,
 	  short_name: "mp2",
 	  name: "Mpeg Layer 2 Audio",
-	  fourccs: {".mp2", (char *)0 },
+	  fourccs: {".mp2", ".MP2", (char *)0 },
           wav_ids: { 0x55, LQT_WAV_ID_NONE },
           do_encode: 1,
         },

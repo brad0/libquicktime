@@ -239,7 +239,6 @@ typedef struct
   lame_global_flags *lame_global;
   //        mpeg3_layer_t *encoded_header;
   int encode_initialized;
-  float **input;
   int input_size;
   int input_allocated;
   int bitrate;
@@ -252,9 +251,7 @@ typedef struct
   int samples_per_frame;
   int stereo;
 
-  /* Floating point input must be scaled to +/- 32768 */
-  
-  float * input_buffer[2];
+  int16_t * input_buffer[2];
   int input_buffer_alloc;
   
   } quicktime_mp3_codec_t;
@@ -278,16 +275,6 @@ static int delete_codec(quicktime_audio_map_t *atrack)
     {
     lame_close(codec->lame_global);
     }
-  if(codec->input)
-    {
-    int i;
-    for(i = 0; i < atrack->channels; i++)
-      {
-      free(codec->input[i]);
-      }
-    free(codec->input);
-    }
-
   if(codec->input_buffer[0])
     free(codec->input_buffer[0]);
   if(codec->input_buffer[1])
@@ -365,12 +352,11 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
 
 
 static int encode(quicktime_t *file, 
-                  int16_t **input_i, 
-                  float **input_f, 
-                  int track, 
-                  long samples)
+                  void * _input, 
+                  long samples,
+                  int track)
   {
-
+  int16_t * input;
   int result = 0;
   int encoded_size;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -430,45 +416,41 @@ static int encode(quicktime_t *file,
     codec->encoder_output_alloc = encoded_size + codec->encoder_output_size + 16;
     codec->encoder_output       = realloc(codec->encoder_output, codec->encoder_output_alloc);
     }
-  if(input_f)
+
+  if(codec->input_buffer_alloc < samples)
     {
-    if(codec->input_buffer_alloc < samples)
-      {
-      codec->input_buffer_alloc = samples + 16;
-      codec->input_buffer[0] =
-        realloc(codec->input_buffer[0], codec->input_buffer_alloc * sizeof(float));
-      
-      if(codec->stereo)
-        codec->input_buffer[1] =
-          realloc(codec->input_buffer[1], codec->input_buffer_alloc * sizeof(float));
-      }
-
-    for(i = 0; i < samples; i++)
-      codec->input_buffer[0][i] = input_f[0][i] * 32767.0;
-
+    codec->input_buffer_alloc = samples + 16;
+    codec->input_buffer[0] =
+      realloc(codec->input_buffer[0], codec->input_buffer_alloc * sizeof(*codec->input_buffer[0]));
+    
     if(codec->stereo)
-      {
-      for(i = 0; i < samples; i++)
-        codec->input_buffer[1][i] = input_f[1][i] * 32767.0;
-      }
-
-    result = lame_encode_buffer_float(codec->lame_global,
-                                      codec->input_buffer[0],
-                                      codec->stereo ? codec->input_buffer[1] : codec->input_buffer[0],
-                                      samples,
-                                      codec->encoder_output + codec->encoder_output_size,
-                                      codec->encoder_output_alloc - codec->encoder_output_size);
+      codec->input_buffer[1] =
+        realloc(codec->input_buffer[1], codec->input_buffer_alloc * sizeof(*codec->input_buffer[1]));
     }
-  else if(input_i)
+
+  input = (int16_t*)_input;
+    
+  if(codec->stereo)
     {
-    result = lame_encode_buffer(codec->lame_global,
-                                input_i[0],
-                                codec->stereo ? input_i[1] : input_i[0],
-                                samples,
-                                codec->encoder_output + codec->encoder_output_size,
-                                codec->encoder_output_alloc - codec->encoder_output_size);
+    for(i = 0; i < samples; i++)
+      {
+      codec->input_buffer[0][i] = *(input++);
+      codec->input_buffer[1][i] = *(input++);
+      }
     }
-
+  else
+    {
+    for(i = 0; i < samples; i++)
+      codec->input_buffer[0][i] = *(input++);
+    }
+  
+  result = lame_encode_buffer(codec->lame_global,
+                              codec->input_buffer[0],
+                              codec->stereo ? codec->input_buffer[1] : codec->input_buffer[0],
+                              samples,
+                              codec->encoder_output + codec->encoder_output_size,
+                              codec->encoder_output_alloc - codec->encoder_output_size);
+  
   if(result > 0)
     {
     codec->encoder_output_size += result;
@@ -533,4 +515,5 @@ void quicktime_init_codec_lame(quicktime_audio_map_t *atrack)
   codec = ((quicktime_codec_t*)atrack->codec)->priv;
   codec->bitrate = 256000;
   codec->quality = 0;
+  atrack->sample_format = LQT_SAMPLE_INT16;
   }

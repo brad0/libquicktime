@@ -328,7 +328,7 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	if(decoder)
           ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
 	((quicktime_codec_t*)atrack->codec)->set_parameter = lqt_ffmpeg_set_parameter_audio;
-
+        atrack->sample_format = LQT_SAMPLE_INT16;
 }
 
 int lqt_ffmpeg_set_parameter_audio(quicktime_t *file, 
@@ -347,7 +347,7 @@ int lqt_ffmpeg_set_parameter_audio(quicktime_t *file,
           return -1;
 }
 
-
+#if 0
 static void deinterleave(int16_t ** dst_i, float ** dst_f, int16_t * src,
                          int channels, int samples)
   {
@@ -380,7 +380,7 @@ static void deinterleave(int16_t ** dst_i, float ** dst_f, int16_t * src,
 
     }
   }
-
+#endif
 /* Decode the current chunk into the sample buffer */
 
 static int decode_chunk(quicktime_t * file, int track)
@@ -644,9 +644,7 @@ static int decode_chunk(quicktime_t * file, int track)
   return samples_decoded;
   }
 
-int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
-                            float **output_f, long samples,
-                            int track)
+int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
   {
   int samples_decoded;
   //  int result = 0;
@@ -754,8 +752,12 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
   //  fprintf(stderr, "Samples_decoded: %d\n", samples_decoded);
   /* Deinterleave into the buffer */
   
-  deinterleave(output_i, output_f, codec->sample_buffer + (track_map->channels * samples_to_skip),
-               channels, samples_decoded);
+  
+  //  deinterleave(output_i, output_f, codec->sample_buffer + (track_map->channels * samples_to_skip),
+  //               channels, samples_decoded);
+
+  memcpy(output, codec->sample_buffer + (channels * samples_to_skip),
+         channels * samples_decoded * 2);
   
   track_map->last_position = track_map->current_position + samples_decoded;
 
@@ -766,7 +768,7 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, int16_t **output_i,
 /*
  *   Encoding part
  */
-        
+#if 0        
 static void interleave(int16_t * sample_buffer, int16_t ** input_i, float ** input_f,
                        int num_samples, int channels)
   {
@@ -788,14 +790,14 @@ static void interleave(int16_t * sample_buffer, int16_t ** input_i, float ** inp
       }
     }
   }
-
+#endif
 
 /*
   Untested, but it should work...   
 */
 
-int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f,
-                            int track, long samples)
+int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
+                            long samples, int track)
   {
   int result = -1;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -850,9 +852,12 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i, float **input_
 
   /* Interleave */
 
-  interleave(&(codec->sample_buffer[codec->samples_in_buffer * channels]),
-             input_i, input_f, samples, channels);
+  //  interleave(&(codec->sample_buffer[codec->samples_in_buffer * channels]),
+  //             input_i, input_f, samples, channels);
 
+  memcpy(codec->sample_buffer + codec->samples_in_buffer * channels,
+         input, samples * channels * 2);
+  
   codec->samples_in_buffer += samples;
   
   /* Encode */

@@ -22,6 +22,7 @@ lqt_sources = lqt_codecs.c lqt_quicktime.c $(FSEEKO_SRC)
 # lqt_sources = codecs.c  plugin.c quicktime.c
 
 libquicktime_la_SOURCES= \
+audio.c \
 $(lqt_sources) \
 atom.c \
 avi_hdrl.c \

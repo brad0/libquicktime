@@ -260,6 +260,8 @@ int lqt_decode_audio_track(quicktime_t *file,
  *  and encoding (call after lqt_add_audio_track, lqt_set_audio or quicktime_set_audio).
  */
 
+const char * lqt_sample_format_to_string(lqt_sample_format_t);
+  
 lqt_sample_format_t lqt_get_sample_format(quicktime_t *, int track);
 
 int lqt_decode_audio_raw(quicktime_t *file, 

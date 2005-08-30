@@ -40,8 +40,7 @@ static int quicktime_encode_video_stub(quicktime_t *file,
 }
 
 static int quicktime_decode_audio_stub(quicktime_t *file, 
-                                       int16_t ** output_i, 
-                                       float ** output_f, 
+                                       void * output,
                                        long samples,
                                        int track)
 {
@@ -50,10 +49,9 @@ static int quicktime_decode_audio_stub(quicktime_t *file,
 }
 
 static int quicktime_encode_audio_stub(quicktime_t *file, 
-				int16_t **input_i, 
-				float **input_f, 
-				int track, 
-				long samples)
+                                       void * input,
+                                       long samples,
+                                       int track)
 {
 	printf("quicktime_encode_audio_stub called\n");
 	return 1;
@@ -107,50 +105,6 @@ int quicktime_codec_defaults(quicktime_codec_t *codec)
 	codec->flush = quicktime_flush_codec_stub;
 	return 0;
 }
-#if 0 /* Not needed in libquicktime */
-static int get_vcodec_index(char *compressor)
-{
-	int index;
-/* Initialize internal codecs on the first call */
-	if(quicktime_vcodec_size() == 0)
-		quicktime_register_internal_vcodec();
-
-/* Try internal codec */
-	index = quicktime_find_vcodec(compressor);
-
-//printf("get_vcodec_index %d\n", index);
-/* Try external codec */
-	if(index < 0)
-	{
-		index = quicktime_register_external_vcodec(compressor);
-	}
-
-	if(index < 0)
-		return -1;
-	return index;
-}
-
-static int get_acodec_index(char *compressor)
-{
-	int index;
-/* Initialize internal codecs on the first call */
-	if(quicktime_acodec_size() == 0)
-		quicktime_register_internal_acodec();
-
-/* Try internal codec */
-	index = quicktime_find_acodec(compressor);
-
-/* Try external codec */
-	if(index < 0)
-	{
-		index = quicktime_register_external_acodec(compressor);
-	}
-
-	if(index < 0)
-		return -1;
-	return index;
-}
-#endif /* libquicktime */
 
 /*
  *  Original quicktime4linux function changed for dynamic loading
@@ -676,7 +630,61 @@ int lqt_encode_video(quicktime_t *file,
 	return result;
 }
 
+static int bytes_per_sample(lqt_sample_format_t format)
+  {
+  switch(format)
+    {
+    case LQT_SAMPLE_INT8:
+    case LQT_SAMPLE_UINT8:
+      return 1;
+      break;
+    case LQT_SAMPLE_INT16:
+      return 2;
+      break;
+    case LQT_SAMPLE_INT32:
+      return 4;
+      break;
+    case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
+      return sizeof(float);
+      break;
+    }
+  return 0;
+  }
 
+/* Compatibility function for old decoding API */
+
+static int decode_audio_old(quicktime_t *file, 
+                            int16_t ** output_i, 
+                            float ** output_f, 
+                            long samples, 
+                            int track)
+  {
+  int result;
+  quicktime_audio_map_t * atrack;
+  atrack = &(file->atracks[track]);
+
+  /* (Re)allocate sample buffer */
+
+  if(atrack->sample_buffer_alloc < samples)
+    {
+    atrack->sample_buffer_alloc = samples + 1024;
+    atrack->sample_buffer = realloc(atrack->sample_buffer,
+                                    atrack->sample_buffer_alloc *
+                                    atrack->channels *
+                                    bytes_per_sample(atrack->sample_format));
+    }
+  
+  /* Decode */
+
+  result = ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, atrack->sample_buffer, 
+                                                               samples,
+                                                               track);
+  
+  /* Convert */
+  lqt_convert_audio_decode(atrack->sample_buffer, output_i, output_f, atrack->channels, samples,
+                           atrack->sample_format);
+  return result;
+  }
 
 int quicktime_decode_audio(quicktime_t *file, 
                            int16_t *output_i, 
@@ -712,11 +720,7 @@ int quicktime_decode_audio(quicktime_t *file,
         else
           channels_f = (float**)0;
         
-	result = ((quicktime_codec_t*)file->atracks[quicktime_track].codec)->decode_audio(file, 
-                                                                                          channels_i, 
-                                                                                          channels_f, 
-                                                                                          samples,
-                                                                                          quicktime_track);
+	result = decode_audio_old(file, channels_i, channels_f, samples, quicktime_track);
 	file->atracks[quicktime_track].current_position += result;
 
         if(channels_i)
@@ -774,12 +778,7 @@ int lqt_decode_audio(quicktime_t *file,
           if(file->atracks[i].eof)
             return 1;
                     
-          result = ((quicktime_codec_t*)file->atracks[i].codec)->decode_audio(
-                                                                              file, 
-                                                                              output_i, 
-                                                                              output_f, 
-                                                                              samples, 
-                                                                              i);
+          result = decode_audio_old(file, output_i, output_f, samples, i);
           if(output_f)
             output_f += track_channels;
           if(output_i)
@@ -805,16 +804,43 @@ int lqt_decode_audio_track(quicktime_t *file,
     return 1;
           
   
-  result = !(((quicktime_codec_t*)file->atracks[track].codec)->decode_audio(
-                                                                           file, 
-                                                                           poutput_i, 
-                                                                           poutput_f, 
-                                                                           samples, 
-                                                                           track));
+  result = !decode_audio_old(file, poutput_i, poutput_f, samples, track);
   
   file->atracks[track].current_position += samples;
   
   return result;
+  }
+
+static int encode_audio_old(quicktime_t *file, 
+                     int16_t **input_i, 
+                     float **input_f, 
+                     long samples,
+                     int track)
+  {
+  quicktime_audio_map_t * atrack;
+  atrack = &(file->atracks[track]);
+
+  /* (Re)allocate sample buffer */
+
+  if(atrack->sample_buffer_alloc < samples)
+    {
+    atrack->sample_buffer_alloc = samples + 1024;
+    atrack->sample_buffer = realloc(atrack->sample_buffer,
+                                    atrack->sample_buffer_alloc *
+                                    atrack->channels *
+                                    bytes_per_sample(atrack->sample_format));
+    }
+
+  /* Convert */
+
+  lqt_convert_audio_encode(input_i, input_f, atrack->sample_buffer, atrack->channels, samples,
+                           atrack->sample_format);
+
+  /* Encode */
+
+  return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, atrack->sample_buffer,
+                                                             samples, track);
+  
   }
 
 int lqt_encode_audio_track(quicktime_t *file, 
@@ -825,8 +851,7 @@ int lqt_encode_audio_track(quicktime_t *file,
   {
 	int result = 1;
 
-	result = ((quicktime_codec_t*)file->atracks[track].codec)->encode_audio(file, input_i, 
-                                                                            input_f, track, samples);
+	result = encode_audio_old(file, input_i, input_f, samples, track);
 	file->atracks[track].current_position += samples;
 
 	return result;
@@ -866,22 +891,6 @@ void quicktime_flush_vcodec(quicktime_t *file, int track)
 	((quicktime_codec_t*)file->vtracks[track].codec)->flush(file, track);
 }
 
-#if 0
-int64_t quicktime_samples_to_bytes(quicktime_trak_t *track, long samples)
-{
-	char *compressor = track->mdia.minf.stbl.stsd.table[0].format;
-	int channels = track->mdia.minf.stbl.stsd.table[0].channels;
-
-	if(quicktime_match_32(compressor, QUICKTIME_IMA4)) 
-		return samples * channels;
-
-	if(quicktime_match_32(compressor, QUICKTIME_ULAW)) 
-		return samples * channels;
-
-/* Default use the sample size specification for TWOS and RAW */
-	return samples * channels * track->mdia.minf.stbl.stsd.table[0].sample_size / 8;
-}
-#endif
 int quicktime_codecs_flush(quicktime_t *file)
 {
 	int result = 0;
@@ -965,3 +974,4 @@ int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
     }
   return samples_to_copy;
   }
+

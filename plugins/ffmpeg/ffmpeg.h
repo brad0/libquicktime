@@ -94,13 +94,9 @@ int lqt_ffmpeg_encode_video(quicktime_t *file,
                             unsigned char **row_pointers,
                             int track);
 
-int lqt_ffmpeg_encode_audio(quicktime_t *file, int16_t **input_i,
-                            float **input_f, int track,
-                            long samples);
+int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input, long samples, int track);
 
-int lqt_ffmpeg_decode_audio(quicktime_t * file, int16_t ** output_i,
-                            float ** output_f, long samples,
-                            int track);
+int lqt_ffmpeg_decode_audio(quicktime_t * file, void * output, long samples, int track);
 
 int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *atrack);
 int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack);

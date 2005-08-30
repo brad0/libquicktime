@@ -26,6 +26,7 @@ typedef enum
 
 typedef enum 
   {
+    LQT_SAMPLE_UNDEFINED, /* If this is returned, we have an error */
     LQT_SAMPLE_INT8,
     LQT_SAMPLE_UINT8,
     LQT_SAMPLE_INT16,

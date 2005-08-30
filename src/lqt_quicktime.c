@@ -2173,3 +2173,40 @@ lqt_chroma_placement_t lqt_get_chroma_placement(quicktime_t * file, int track)
     return LQT_INTERLACE_NONE;
   return file->vtracks[track].chroma_placement;
   }
+
+/* Sample format */
+
+static struct
+  {
+  lqt_sample_format_t format;
+  const char * name;
+  }
+sample_formats[] =
+  {
+    { LQT_SAMPLE_UNDEFINED, "Undefined" }, /* If this is returned, we have an error */
+    { LQT_SAMPLE_INT8, "8 bit signed" },
+    { LQT_SAMPLE_UINT8, "8 bit unsigned" },
+    { LQT_SAMPLE_INT16, "16 bit signed" },
+    { LQT_SAMPLE_INT32, "32 bit signed" },
+    { LQT_SAMPLE_FLOAT, "Floating point" }, /* Float is ALWAYS machine native */
+    {  /* End of array */ }
+  };
+
+const char * lqt_sample_format_to_string(lqt_sample_format_t s)
+  {
+  int i = 0;
+  while(sample_formats[i].name)
+    {
+    if(sample_formats[i].format == s)
+      return sample_formats[i].name;
+    i++;
+    }
+  return (const char*)0;
+  }
+
+lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
+  {
+  if(track < 0 || track > file->total_atracks)
+    return LQT_SAMPLE_UNDEFINED;
+  return file->atracks[track].sample_format;
+  }

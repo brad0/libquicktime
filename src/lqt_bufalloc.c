@@ -8,7 +8,7 @@
  * buffers be aligned on a 16 byte boundary (SSE/SSE2 require 64 byte 
  * alignment).
  *
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.4 2005/08/08 19:02:12 gmerlin Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.5 2005/08/30 22:50:04 gmerlin Exp $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,8 @@
 #include <errno.h>
 
 #include <string.h> /* Memset */
+
+
 
 
 /*

@@ -9,6 +9,17 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom);
 int quicktime_atom_is(quicktime_atom_t *atom, char *type);
 int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom);
 
+/* audio.c */
+
+void lqt_convert_audio_encode(int16_t ** in_int, float ** in_float,
+                              void * out, int num_channels, int num_samples,
+                              lqt_sample_format_t stream_format);
+
+void lqt_convert_audio_decode(void * in, int16_t ** out_int,
+                              float ** out_float, int num_channels, int num_samples,
+                              lqt_sample_format_t stream_format);
+ 
+
 /* avi_hdrl.c */
 
 void quicktime_read_hdrl(quicktime_t *file, 

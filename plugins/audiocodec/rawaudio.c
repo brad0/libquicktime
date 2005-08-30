@@ -386,112 +386,112 @@ static int quicktime_decode_rawaudio(quicktime_t *file,
 #define CLAMP(x, y, z) ((x) = ((x) <  (y) ? (y) : ((x) > (z) ? (z) : (x))))
 
 static int quicktime_encode_rawaudio(quicktime_t *file, 
-							int16_t **input_i, 
-							float **input_f, 
-							int track, 
-							long samples)
-{
-	int result = 0;
-	long i, j;
-	quicktime_audio_map_t *track_map = &(file->atracks[track]);
-	quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
-	int sample;
-	float sample_f;
+                                     int16_t **input_i, 
+                                     float **input_f, 
+                                     int track, 
+                                     long samples)
+  {
+  int result = 0;
+  long i, j;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_rawaudio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  int step = file->atracks[track].channels * quicktime_audio_bits(file, track) / 8;
+  int sample;
+  float sample_f;
 
-	get_work_buffer(file, track, samples * step);
+  get_work_buffer(file, track, samples * step);
 
-	if(input_i)
-	{
-		for(i = 0; i < track_map->channels; i++)
-		{
-			switch(quicktime_audio_bits(file, track))
-			{
-				case 8:
-					for(j = 0; j < samples; j++)
-					{
-						sample = input_i[i][j] >> 8;
-						sample += 0x80;
-						codec->work_buffer[j * step + i] = sample;
-					}
-					break;
-				case 16:
-					for(j = 0; j < samples; j++)
-					{
-						sample = input_i[i][j];
-//						sample += 0x8000;
-						codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
-						codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
-					}
-					break;
-				case 24:
-					for(j = 0; j < samples; j++)
-					{
-						sample = input_i[i][j];
-						sample += 0x8000;
-						codec->work_buffer[j * step + i * 3] = ((unsigned int)sample & 0xff00) >> 8;
-						codec->work_buffer[j * step + i * 3 + 1] = ((unsigned int)sample & 0xff);
-						codec->work_buffer[j * step + i * 3 + 2] = 0;
-					}
-					break;
-			}
-		}
-	}
-	else
-	{
-		for(i = 0; i < track_map->channels; i++)
-		{
-			switch(quicktime_audio_bits(file, track))
-			{
-				case 8:
-					for(j = 0; j < samples; j++)
-					{
-						sample_f = input_f[i][j];
-						if(sample_f < 0)
-							sample = (int)(sample_f * 0x7f - 0.5);
-						else
-							sample = (int)(sample_f * 0x7f + 0.5);
-						CLAMP(sample, -0x7f, 0x7f);
-						sample += 0x80;
-						codec->work_buffer[j * step + i] = sample;
-					}
-					break;
-				case 16:
-					for(j = 0; j < samples; j++)
-					{
-						sample_f = input_f[i][j];
-						if(sample_f < 0)
-							sample = (int)(sample_f * 0x7fff - 0.5);
-						else
-							sample = (int)(sample_f * 0x7fff + 0.5);
-						CLAMP(sample, -0x7fff, 0x7fff);
-//						sample += 0x8000;
-						codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
-						codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
-					}
-					break;
-				case 24:
-					for(j = 0; j < samples; j++)
-					{
-						sample_f = input_f[i][j];
-						if(sample_f < 0)
-							sample = (int)(sample_f * 0x7fffff - 0.5);
-						else
-							sample = (int)(sample_f * 0x7fffff + 0.5);
-						CLAMP(sample, -0x7fffff, 0x7fffff);
-						sample += 0x800000;
-						codec->work_buffer[j * step + i * 3] = ((unsigned int)sample & 0xff0000) >> 16;
-						codec->work_buffer[j * step + i * 3 + 1] = ((unsigned int)sample & 0xff00) >> 8;
-						codec->work_buffer[j * step + i * 3 + 2] = ((unsigned int)sample) & 0xff;
-					}
-					break;
-			}
-		}
-	}
+  if(input_i)
+    {
+    for(i = 0; i < track_map->channels; i++)
+      {
+      switch(quicktime_audio_bits(file, track))
+        {
+        case 8:
+          for(j = 0; j < samples; j++)
+            {
+            sample = input_i[i][j] >> 8;
+            sample += 0x80;
+            codec->work_buffer[j * step + i] = sample;
+            }
+          break;
+        case 16:
+          for(j = 0; j < samples; j++)
+            {
+            sample = input_i[i][j];
+            //						sample += 0x8000;
+            codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
+            codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
+            }
+          break;
+        case 24:
+          for(j = 0; j < samples; j++)
+            {
+            sample = input_i[i][j];
+            sample += 0x8000;
+            codec->work_buffer[j * step + i * 3] = ((unsigned int)sample & 0xff00) >> 8;
+            codec->work_buffer[j * step + i * 3 + 1] = ((unsigned int)sample & 0xff);
+            codec->work_buffer[j * step + i * 3 + 2] = 0;
+            }
+          break;
+        }
+      }
+    }
+  else
+    {
+    for(i = 0; i < track_map->channels; i++)
+      {
+      switch(quicktime_audio_bits(file, track))
+        {
+        case 8:
+          for(j = 0; j < samples; j++)
+            {
+            sample_f = input_f[i][j];
+            if(sample_f < 0)
+              sample = (int)(sample_f * 0x7f - 0.5);
+            else
+              sample = (int)(sample_f * 0x7f + 0.5);
+            CLAMP(sample, -0x7f, 0x7f);
+            sample += 0x80;
+            codec->work_buffer[j * step + i] = sample;
+            }
+          break;
+        case 16:
+          for(j = 0; j < samples; j++)
+            {
+            sample_f = input_f[i][j];
+            if(sample_f < 0)
+              sample = (int)(sample_f * 0x7fff - 0.5);
+            else
+              sample = (int)(sample_f * 0x7fff + 0.5);
+            CLAMP(sample, -0x7fff, 0x7fff);
+            //						sample += 0x8000;
+            codec->work_buffer[j * step + i * 2] = ((unsigned int)sample & 0xff00) >> 8;
+            codec->work_buffer[j * step + i * 2 + 1] = ((unsigned int)sample) & 0xff;
+            }
+          break;
+        case 24:
+          for(j = 0; j < samples; j++)
+            {
+            sample_f = input_f[i][j];
+            if(sample_f < 0)
+              sample = (int)(sample_f * 0x7fffff - 0.5);
+            else
+              sample = (int)(sample_f * 0x7fffff + 0.5);
+            CLAMP(sample, -0x7fffff, 0x7fffff);
+            sample += 0x800000;
+            codec->work_buffer[j * step + i * 3] = ((unsigned int)sample & 0xff0000) >> 16;
+            codec->work_buffer[j * step + i * 3 + 1] = ((unsigned int)sample & 0xff00) >> 8;
+            codec->work_buffer[j * step + i * 3 + 2] = ((unsigned int)sample) & 0xff;
+            }
+          break;
+        }
+      }
+    }
 
-	result = quicktime_write_audio(file, codec->work_buffer, samples, track);
-	return result;
-}
+  result = quicktime_write_audio(file, codec->work_buffer, samples, track);
+  return result;
+  }
 
 
 void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)

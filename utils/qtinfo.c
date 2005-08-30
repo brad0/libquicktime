@@ -53,10 +53,11 @@ file_info(char *filename)
         else
           {
           printf("compressor %s.\n", quicktime_audio_compressor(qtfile, i));
-
           }
-	  printf("    %ssupported.\n",
-		 quicktime_supported_audio(qtfile, i)?"":"NOT ");
+        printf("    Sample format: %s.\n",
+               lqt_sample_format_to_string(lqt_get_sample_format(qtfile, i)));
+        printf("    %ssupported.\n",
+               quicktime_supported_audio(qtfile, i)?"":"NOT ");
 	}
 
 	n = quicktime_video_tracks(qtfile);

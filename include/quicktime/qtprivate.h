@@ -508,7 +508,7 @@ typedef struct
 	long flags;
 	char component_type[4];
 	char component_subtype[4];
-	long component_manufacturer;
+long component_manufacturer;
 	long component_flags;
 	long component_flag_mask;
 	char component_name[256];
@@ -858,7 +858,15 @@ typedef struct
 	void *codec;
 
         int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
-//        lqt_sample_format_t sample_format; /* Set by the codec */
+
+/* Another API enhancement: Codecs only deliver samples in the format specified by
+   sample_format. The usual decode() functions will convert them to int16_t or float */
+   
+        lqt_sample_format_t sample_format; /* Set by the codec */
+
+        uint8_t * sample_buffer;
+        int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
+        
 } quicktime_audio_map_t;
 
 typedef struct
@@ -1043,15 +1051,13 @@ typedef struct
 				int track);
         /* API Change: Return value is the number of samples */
         int (*decode_audio)(quicktime_t *file, 
-                            int16_t **output_i, 
-                            float **output_f,
+                            void * output,
                             long samples, 
                             int track);
 	int (*encode_audio)(quicktime_t *file, 
-                            int16_t **output_i, 
-                            float **output_f,
-                            int track, 
-                            long samples);
+                            void * input,
+                            long samples,
+                            int track);
 	int (*set_parameter)(quicktime_t *file, 
 		int track, 
 		char *key, 

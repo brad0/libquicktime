@@ -285,12 +285,11 @@ static int decode_frame(quicktime_t * file, int track)
   }
 
 static int decode(quicktime_t *file, 
-					int16_t **output_i, 
-					float **output_f, 
-					long samples, 
-					int track) 
+                  void * _output,
+                  long samples, 
+                  int track) 
   {
-  int i;
+  int i, j;
   int64_t chunk_sample; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
@@ -299,6 +298,7 @@ static int decode(quicktime_t *file,
   int samples_to_skip;
   int samples_to_move;
   int samples_copied;
+  float * output;
   //  fprintf(stderr, "decode audio vorbis %lld\n", track_map->current_position);
   
   /* Initialize codec */
@@ -466,16 +466,19 @@ static int decode(quicktime_t *file,
     }
   samples_decoded = (codec->sample_buffer_end - codec->sample_buffer_start) < samples ?
     (codec->sample_buffer_end - codec->sample_buffer_start) : samples;
-  
-  samples_copied = lqt_copy_audio(output_i,                // int16_t ** dst_i
-                                  output_f,                // float ** dst_f
-                                  (int16_t**)0,            // int16_t ** src_i
-                                  codec->sample_buffer,    // float ** src_f
-                                  0,                       // int dst_pos
-                                  0,                       // int src_pos
-                                  samples,                 // int dst_size
-                                  samples_decoded,         // int src_size
-                                  file->atracks[track].channels); // int num_channels
+
+  samples_copied = samples;
+  if(samples_copied > samples_decoded)
+    samples_copied = samples_decoded;
+
+  output = (float*)_output;
+  for(i = 0; i < samples_copied; i++)
+    {
+    for(j = 0; j < track_map->channels; j++)
+      {
+      *(output++) = codec->sample_buffer[j][i];
+      }
+    }
   
   file->atracks[track].last_position = file->atracks[track].current_position + samples_copied;
   
@@ -602,144 +605,129 @@ static void flush_audio(quicktime_t * file, int track)
   }
 
 static int encode(quicktime_t *file, 
-							int16_t **input_i, 
-							float **input_f, 
-							int track, 
-							long samples)
-{
-        int i, j;
-        int samples_copied, samples_to_copy;
-        int result = 0;
-	quicktime_audio_map_t *track_map = &(file->atracks[track]);
-	quicktime_trak_t *trak = track_map->track;
-	quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-	int samplerate = trak->mdia.minf.stbl.stsd.table[0].sample_rate;
+                  void *_input,
+                  long samples,
+                  int track)
+  {
+  int i, j;
+  int samples_copied, samples_to_copy;
+  int result = 0;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_trak_t *trak = track_map->track;
+  quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  int samplerate = trak->mdia.minf.stbl.stsd.table[0].sample_rate;
+  float * input;
+  
+  //        fprintf(stderr, "Encode vorbis %ld\n", samples);
         
-        //        fprintf(stderr, "Encode vorbis %ld\n", samples);
-        
-	if(!codec->encode_initialized)
-	{
-    	ogg_packet header;
-    	ogg_packet header_comm;
-    	ogg_packet header_code;
+  if(!codec->encode_initialized)
+    {
+    ogg_packet header;
+    ogg_packet header_comm;
+    ogg_packet header_code;
 
  
-        codec->encode_initialized = 1;
-        if(file->use_avi)
-          trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
-        vorbis_info_init(&codec->enc_vi);
+    codec->encode_initialized = 1;
+    if(file->use_avi)
+      trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
+    vorbis_info_init(&codec->enc_vi);
 
-        if(codec->use_vbr)
-          {
-          result = vorbis_encode_setup_managed(&codec->enc_vi,
-                                               track_map->channels, 
-                                               samplerate, 
-                                               codec->max_bitrate, 
-                                               codec->nominal_bitrate, 
-                                               codec->min_bitrate);
-          result |= vorbis_encode_ctl(&codec->enc_vi, OV_ECTL_RATEMANAGE_AVG, NULL);
-          result |= vorbis_encode_setup_init(&codec->enc_vi);
-          }
-        else
-          {
-          vorbis_encode_init(&codec->enc_vi,
-                             track_map->channels,
-                             samplerate, 
-                             codec->max_bitrate, 
-                             codec->nominal_bitrate, 
-                             codec->min_bitrate);
-          }
-
-
-        vorbis_comment_init(&codec->enc_vc);
-        vorbis_analysis_init(&codec->enc_vd, &codec->enc_vi);
-        vorbis_block_init(&codec->enc_vd, &codec->enc_vb);
-        //    	srand(time(NULL));
-        ogg_stream_init(&codec->enc_os, rand());
-
-    	vorbis_analysis_headerout(&codec->enc_vd, 
-                                  &codec->enc_vc,
-                                  &header,
-                                  &header_comm,
-                                  &header_code);
-
-    	ogg_stream_packetin(&codec->enc_os, &header); 
-    	ogg_stream_packetin(&codec->enc_os, &header_comm);
-    	ogg_stream_packetin(&codec->enc_os, &header_code);
-
-        //        FLUSH_OGG1
-        flush_header(file, track);
-
-        codec->sample_buffer = alloc_sample_buffer(codec->sample_buffer, track_map->channels,
-                                                   ENCODE_SAMPLES,
-                                                   &codec->sample_buffer_alloc);
-        }
-        
-    samples_copied = 0;
-
-    while(samples_copied < samples)
+    if(codec->use_vbr)
       {
-      samples_to_copy = samples - samples_copied;
-      if(samples_to_copy > ENCODE_SAMPLES - codec->enc_samples_in_buffer)
-        samples_to_copy = ENCODE_SAMPLES - codec->enc_samples_in_buffer;
-
-      if(input_i)
-	{
-        for(i = 0; i < track_map->channels; i++)
-          {
-          for(j = 0; j < samples_to_copy; j++)
-            {
-            codec->sample_buffer[i][codec->enc_samples_in_buffer + j] =
-              (float)input_i[i][samples_copied + j] / (float)32768;
-            }
-          }
-	}
-      else
-	if(input_f)
-          {
-          int i;
-          for(i = 0; i < track_map->channels; i++)
-            {
-            memcpy(codec->sample_buffer[i] + codec->enc_samples_in_buffer,
-                   input_f[i] + samples_copied,
-                   sizeof(float) * samples_to_copy);
-            }
-          }
-      samples_copied += samples_to_copy;
-      codec->enc_samples_in_buffer += samples_to_copy;
-
-      if(codec->enc_samples_in_buffer >= ENCODE_SAMPLES)
-        flush_audio(file, track);
+      result = vorbis_encode_setup_managed(&codec->enc_vi,
+                                           track_map->channels, 
+                                           samplerate, 
+                                           codec->max_bitrate, 
+                                           codec->nominal_bitrate, 
+                                           codec->min_bitrate);
+      result |= vorbis_encode_ctl(&codec->enc_vi, OV_ECTL_RATEMANAGE_AVG, NULL);
+      result |= vorbis_encode_setup_init(&codec->enc_vi);
       }
-    
-    result = 0;
+    else
+      {
+      vorbis_encode_init(&codec->enc_vi,
+                         track_map->channels,
+                         samplerate, 
+                         codec->max_bitrate, 
+                         codec->nominal_bitrate, 
+                         codec->min_bitrate);
+      }
 
-    // FLUSH_OGG2
-    //    flush_data(file, track);
-    //    fprintf(stderr, "Encoded %lld samples\n",
-    //            codec->enc_os.granulepos - codec->encoded_samples);
+
+    vorbis_comment_init(&codec->enc_vc);
+    vorbis_analysis_init(&codec->enc_vd, &codec->enc_vi);
+    vorbis_block_init(&codec->enc_vd, &codec->enc_vb);
+    //    	srand(time(NULL));
+    ogg_stream_init(&codec->enc_os, rand());
+
+    vorbis_analysis_headerout(&codec->enc_vd, 
+                              &codec->enc_vc,
+                              &header,
+                              &header_comm,
+                              &header_code);
+
+    ogg_stream_packetin(&codec->enc_os, &header); 
+    ogg_stream_packetin(&codec->enc_os, &header_comm);
+    ogg_stream_packetin(&codec->enc_os, &header_code);
+
+    //        FLUSH_OGG1
+    flush_header(file, track);
+
+    codec->sample_buffer = alloc_sample_buffer(codec->sample_buffer, track_map->channels,
+                                               ENCODE_SAMPLES,
+                                               &codec->sample_buffer_alloc);
+    }
+        
+  samples_copied = 0;
+
+  while(samples_copied < samples)
+    {
+    samples_to_copy = samples - samples_copied;
+    if(samples_to_copy > ENCODE_SAMPLES - codec->enc_samples_in_buffer)
+      samples_to_copy = ENCODE_SAMPLES - codec->enc_samples_in_buffer;
+    input = ((float*)_input + samples_copied * track_map->channels);
+    
+    for(j = 0; j < samples_to_copy; j++)
+      {
+      for(i = 0; i < track_map->channels; i++)
+        codec->sample_buffer[i][codec->enc_samples_in_buffer + j] = *(input++);
+      
+      }
+    samples_copied += samples_to_copy;
+    codec->enc_samples_in_buffer += samples_to_copy;
+    
+    if(codec->enc_samples_in_buffer >= ENCODE_SAMPLES)
+      flush_audio(file, track);
+    }
+    
+  result = 0;
+
+  // FLUSH_OGG2
+  //    flush_data(file, track);
+  //    fprintf(stderr, "Encoded %lld samples\n",
+  //            codec->enc_os.granulepos - codec->encoded_samples);
     
 
-// Wrote a chunk.
-	if(codec->chunk_started)
-	{
-		int new_encoded_samples = codec->enc_os.granulepos;
+  // Wrote a chunk.
+  if(codec->chunk_started)
+    {
+    int new_encoded_samples = codec->enc_os.granulepos;
 #if 0
-                fprintf(stderr, "WRITING CHUNK: %lld %lld\n",
-                        codec->enc_os.granulepos, codec->enc_vd.granulepos);
+    fprintf(stderr, "WRITING CHUNK: %lld %lld\n",
+            codec->enc_os.granulepos, codec->enc_vd.granulepos);
 #endif           
-		quicktime_write_chunk_footer(file, 
-						trak,
-						track_map->current_chunk,
-						&codec->chunk_atom, 
-						new_encoded_samples - codec->encoded_samples);
-		track_map->current_chunk++;
-		codec->encoded_samples = new_encoded_samples;
-                codec->chunk_started = 0;
-	}
+    quicktime_write_chunk_footer(file, 
+                                 trak,
+                                 track_map->current_chunk,
+                                 &codec->chunk_atom, 
+                                 new_encoded_samples - codec->encoded_samples);
+    track_map->current_chunk++;
+    codec->encoded_samples = new_encoded_samples;
+    codec->chunk_started = 0;
+    }
 
-	return result;
-}
+  return result;
+  }
 
 
 
@@ -820,4 +808,6 @@ void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
 	codec->nominal_bitrate = 128000;
 	codec->max_bitrate = -1;
 	codec->min_bitrate = -1;
+        atrack->sample_format = LQT_SAMPLE_FLOAT;
+        
 }
