@@ -64,7 +64,7 @@ extern "C" {
   typedef struct
     {
     void *mjpeg;
-    int instance;
+    //    int instance;
     unsigned char *output_buffer;    /* Buffer for MJPEG output */
     long output_size;     /* Size of image stored in buffer */
     long output_allocated;    /* Allocated size of output buffer */
@@ -97,8 +97,8 @@ extern "C" {
     // Error in compression process
     int error;
 
-    mjpeg_compressor *compressors[MAXFIELDS];
-    mjpeg_compressor *decompressors[MAXFIELDS];
+    mjpeg_compressor * compressor;
+    mjpeg_compressor * decompressor;
 
     // Temp frame for interlacing
     // [3 planes][downsampled rows][downsampled pixels]
@@ -138,19 +138,6 @@ extern "C" {
 
   int mjpeg_get_fields(mjpeg_t *mjpeg);
 
-#if 0
-
-  int mjpeg_decompress(mjpeg_t *mjpeg, 
-                       unsigned char *buffer, 
-                       long buffer_len,
-                       long input_field2,  
-                       unsigned char **row_pointers, 
-                       unsigned char *y_plane, 
-                       unsigned char *u_plane, 
-                       unsigned char *v_plane,
-                       int color_model);
-
-#else
   int mjpeg_decompress(mjpeg_t *mjpeg, 
                        unsigned char *buffer, 
                        long buffer_len,
@@ -158,7 +145,6 @@ extern "C" {
 
   void mjpeg_get_frame(mjpeg_t * mjpeg, uint8_t ** row_pointers);
 
-#endif
 
   int mjpeg_compress(mjpeg_t *mjpeg, 
                      unsigned char **row_pointers);
@@ -167,13 +153,6 @@ extern "C" {
   unsigned char* mjpeg_output_buffer(mjpeg_t *mjpeg);
   long mjpeg_output_field2(mjpeg_t *mjpeg);
   long mjpeg_output_size(mjpeg_t *mjpeg);
-
-#if 0 // Unused
-
-  // Retrieve width and height from a buffer of JPEG data
-  void mjpeg_video_size(unsigned char *data, long data_size, int *w, int *h);
-#endif
-
 
   // Calculate marker contents and insert them into a buffer.
   // Reallocates the buffer if it isn't big enough so make sure it's big enough

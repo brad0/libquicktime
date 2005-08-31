@@ -370,11 +370,11 @@ static void allocate_temps(mjpeg_t *mjpeg)
     }
   }
 
-static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i)
+static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i, int field)
   {
   int input_row;
   if(mjpeg->fields > 1) 
-    input_row = i * 2 + compressor->instance;
+    input_row = i * 2 + field;
   else
     input_row = i;
   if(input_row >= mjpeg->coded_h) input_row = mjpeg->coded_h - 1;
@@ -382,7 +382,7 @@ static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i)
   }
 
 // Get pointers to rows for the JPEG compressor
-static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
+static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int field)
   {
   int i;
   switch(mjpeg->jpeg_color_model)
@@ -398,7 +398,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i);
+        int input_row = get_input_row(mjpeg, compressor, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
         compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
@@ -417,7 +417,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i);
+        int input_row = get_input_row(mjpeg, compressor, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
         compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
@@ -436,7 +436,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i);
+        int input_row = get_input_row(mjpeg, compressor, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         if(i < compressor->field_h / 2)
           {
@@ -497,16 +497,16 @@ static void get_mcu_rows(mjpeg_t *mjpeg,
     }
   }
 
-static void decompress_field(mjpeg_compressor *engine)
+static void decompress_field(mjpeg_compressor *engine, int field)
   {
   mjpeg_t *mjpeg = engine->mjpeg;
-  long buffer_offset = engine->instance * mjpeg->input_field2;
+  long buffer_offset = field * mjpeg->input_field2;
   unsigned char *buffer = mjpeg->input_data + buffer_offset;
   long buffer_size;
 
   //  fprintf(stderr, "** DECOMPRESS_FIELD\n");
   
-  if(engine->instance == 0 && mjpeg->fields > 1)
+  if(field && mjpeg->fields > 1)
     buffer_size = mjpeg->input_field2 - buffer_offset;
   else
     buffer_size = mjpeg->input_size - buffer_offset;
@@ -525,8 +525,10 @@ static void decompress_field(mjpeg_compressor *engine)
   jpeg_buffer_src(&engine->jpeg_decompress, 
                   buffer, 
                   buffer_size);
+  fprintf(stderr, "Read header %d...\n", field);
   jpeg_read_header(&engine->jpeg_decompress, TRUE);
-
+  fprintf(stderr, "Read header done\n");
+  
   // Reset by jpeg_read_header
   engine->jpeg_decompress.raw_data_out = TRUE;
   jpeg_start_decompress(&engine->jpeg_decompress);
@@ -551,7 +553,7 @@ static void decompress_field(mjpeg_compressor *engine)
     }
   // Must be here because the color model isn't known until now
   allocate_temps(mjpeg);
-  get_rows(mjpeg, engine);
+  get_rows(mjpeg, engine, field);
 
   while(engine->jpeg_decompress.output_scanline < engine->jpeg_decompress.output_height)
     {
@@ -567,12 +569,12 @@ static void decompress_field(mjpeg_compressor *engine)
   ;
   }
 
-static void compress_field(mjpeg_compressor *engine)
+static void compress_field(mjpeg_compressor *engine, int field)
   {
   mjpeg_t *mjpeg = engine->mjpeg;
 
   //printf("compress_field 1\n");
-  get_rows(engine->mjpeg, engine);
+  get_rows(engine->mjpeg, engine, field);
   reset_buffer(&engine->output_buffer, &engine->output_size, &engine->output_allocated);
   jpeg_buffer_dest(&engine->jpeg_compress, engine);
 
@@ -605,12 +607,11 @@ static void delete_temps(mjpeg_t *mjpeg)
     }
   }
 
-mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg, int instance)
+mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg)
   {
   mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
   result->mjpeg = mjpeg;
-  result->instance = instance;
   new_jpeg_objects(result);
   result->field_h = mjpeg->coded_h / mjpeg->fields;
 
@@ -636,13 +637,12 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
   free(engine);
   }
 
-mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg, int instance)
+mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   {
   mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
   result->field_h = mjpeg->coded_h / mjpeg->fields;
   result->mjpeg = mjpeg;
-  result->instance = instance;
   result->jpeg_compress.err = jpeg_std_error(&(result->jpeg_error.pub));
   jpeg_create_compress(&(result->jpeg_compress));
   result->jpeg_compress.image_width = mjpeg->coded_w;
@@ -727,7 +727,6 @@ int mjpeg_compress(mjpeg_t *mjpeg,
   {
   uint8_t * cpy_rows[3];
   int i;
-  mjpeg_compressor *engine;
 
   //printf("mjpeg_compress 1 %d\n", color_model);
   /* Reset output buffer */
@@ -736,14 +735,11 @@ int mjpeg_compress(mjpeg_t *mjpeg,
                &mjpeg->output_allocated);
 
   /* Create compression engines as needed */
-  for(i = 0; i < mjpeg->fields; i++)
+  if(!mjpeg->compressor)
     {
-    if(!mjpeg->compressors[i])
-      {
-      mjpeg->compressors[i] = mjpeg_new_compressor(mjpeg, i);
-      }
+    mjpeg->compressor = mjpeg_new_compressor(mjpeg);
     }
-
+  
   // Copy to buffer first
 
   cpy_rows[0] = mjpeg->temp_rows[0][0];
@@ -759,13 +755,12 @@ int mjpeg_compress(mjpeg_t *mjpeg,
 
   for(i = 0; i < mjpeg->fields; i++)
     {
-    engine = mjpeg->compressors[i];
-    compress_field(engine);
+    compress_field(mjpeg->compressor, i);
     append_buffer(&mjpeg->output_data, 
                   &mjpeg->output_size, 
                   &mjpeg->output_allocated,
-                  mjpeg->compressors[i]->output_buffer, 
-                  mjpeg->compressors[i]->output_size);
+                  mjpeg->compressor->output_buffer, 
+                  mjpeg->compressor->output_size);
     if(i == 0) mjpeg->output_field2 = mjpeg->output_size;
     }	
 
@@ -779,7 +774,6 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
                      long buffer_len,
                      long input_field2)
   {
-  mjpeg_compressor *engine;
   int i;
 
   //printf("mjpeg_decompress 1 %ld %ld\n", buffer_len, input_field2);
@@ -788,14 +782,11 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 
   //printf("mjpeg_decompress 2\n");
   /* Create decompression engines as needed */
-  for(i = 0; i < mjpeg->fields; i++)
+  if(!mjpeg->decompressor)
     {
-    if(!mjpeg->decompressors[i])
-      {
-      mjpeg->decompressors[i] = mjpeg_new_decompressor(mjpeg, i);
-      }
+    mjpeg->decompressor = mjpeg_new_decompressor(mjpeg);
     }
-
+  
   //printf("mjpeg_decompress 3\n");
   /* Arm YUV buffers */
   //	mjpeg->y_argument = y_plane;
@@ -810,9 +801,7 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
 
   for(i = 0; i < mjpeg->fields; i++)
     {
-    engine = mjpeg->decompressors[i];
-    decompress_field(engine);
-
+    decompress_field(mjpeg->decompressor, i);
     }
   return 0;
   }
@@ -879,12 +868,8 @@ mjpeg_t* mjpeg_new(int w,
 
 void mjpeg_delete(mjpeg_t *mjpeg)
   {
-  int i;
-  for(i = 0; i < mjpeg->fields; i++)
-    {
-    if(mjpeg->compressors[i]) mjpeg_delete_compressor(mjpeg->compressors[i]);
-    if(mjpeg->decompressors[i]) mjpeg_delete_decompressor(mjpeg->decompressors[i]);
-    }
+  if(mjpeg->compressor) mjpeg_delete_compressor(mjpeg->compressor);
+  if(mjpeg->decompressor) mjpeg_delete_decompressor(mjpeg->decompressor);
   delete_temps(mjpeg);
   delete_buffer(&mjpeg->output_data, &mjpeg->output_size, &mjpeg->output_allocated);
   free(mjpeg);
@@ -1310,15 +1295,3 @@ long mjpeg_get_field2(unsigned char *buffer, long buffer_size)
   return field2_offset;
   }
 
-#if 0 // Unused
-void mjpeg_video_size(unsigned char *data, long data_size, int *w, int *h)
-  {
-  long offset = 0;
-  find_marker(data, 
-              &offset, 
-              data_size,
-              M_SOF0);
-  *h = (data[offset + 3] << 8) | (data[offset + 4]);
-  *w = (data[offset + 5] << 8) | (data[offset + 6]);
-  }
-#endif
