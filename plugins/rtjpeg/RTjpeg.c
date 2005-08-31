@@ -2488,7 +2488,7 @@ void RTjpeg_close(RTjpeg_t *rtj)
  free(rtj);
 }
 
-inline int RTjpeg_compressYUV420(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
+static inline int RTjpeg_compressYUV420(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
 {
  uint8_t * sb;
  register uint8_t * bp = planes[0];
@@ -2543,7 +2543,7 @@ inline int RTjpeg_compressYUV420(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
  return (sp-sb);
 }
 
-inline int RTjpeg_compressYUV422(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
+static inline int RTjpeg_compressYUV422(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
 {
  uint8_t * sb;
  register uint8_t * bp = planes[0];
