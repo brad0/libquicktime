@@ -647,8 +647,30 @@ static int bytes_per_sample(lqt_sample_format_t format)
     case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
       return sizeof(float);
       break;
+    case LQT_SAMPLE_UNDEFINED:
+      return 0;
     }
   return 0;
+  }
+
+/* Decode raw samples */
+
+int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int track)
+  {
+  quicktime_audio_map_t * atrack;
+  atrack = &(file->atracks[track]);
+  return ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, output, 
+                                                             samples,
+                                                             track);
+  }
+
+int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int track)
+  {
+  quicktime_audio_map_t * atrack;
+  atrack = &(file->atracks[track]);
+  return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, input, 
+                                                             samples,
+                                                             track);
   }
 
 /* Compatibility function for old decoding API */

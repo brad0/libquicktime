@@ -251,8 +251,6 @@ int lqt_decode_audio_track(quicktime_t *file,
  *  Support for "raw" audio en-/decoding: This bypasses all
  *  internal sampleformat conversions, and allows access to audio
  *  samples in a format, which is closest to the internal representation.
- *
- *  BIG NOTE: These are NOT implemented for now
  */
   
 /*
@@ -264,6 +262,8 @@ const char * lqt_sample_format_to_string(lqt_sample_format_t);
   
 lqt_sample_format_t lqt_get_sample_format(quicktime_t *, int track);
 
+/* The following return the actual number of en-/decoded frames */
+  
 int lqt_decode_audio_raw(quicktime_t *file, 
                          void * output, 
                          long samples,

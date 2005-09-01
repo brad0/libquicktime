@@ -253,6 +253,9 @@ typedef struct
 
   int16_t * input_buffer[2];
   int input_buffer_alloc;
+
+  int64_t samples_read;    /* samples passed to lame_encode_buffer */
+  int64_t samples_written; /* samples written to the file          */
   
   } quicktime_mp3_codec_t;
 
@@ -288,8 +291,9 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   return 0;
   }
 
+
 static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
-                       quicktime_mp3_codec_t *codec)
+                      quicktime_mp3_codec_t *codec, int samples)
   {
   mpeg_header h;
   quicktime_atom_t chunk_atom;
@@ -300,8 +304,6 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
 
   memset(&h, 0, sizeof(h));
   
-  /* We write each mp3 frame into an own chunk. This increases the chance,
-     that M$ software will be able to play our files */
   chunk_ptr = codec->encoder_output;
   while(codec->encoder_output_size > 4)
     {
@@ -325,11 +327,26 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
     {
     quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
     result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-    quicktime_write_chunk_footer(file, 
-                                 track_map->track, 
-                                 track_map->current_chunk,
-                                 &chunk_atom,
-                                 chunk_samples);
+
+    if(samples < 0)
+      {
+      quicktime_write_chunk_footer(file, 
+                                   track_map->track, 
+                                   track_map->current_chunk,
+                                   &chunk_atom,
+                                   chunk_samples);
+      codec->samples_written += chunk_samples;
+      }
+    else
+      {
+      quicktime_write_chunk_footer(file, 
+                                   track_map->track, 
+                                   track_map->current_chunk,
+                                   &chunk_atom,
+                                   samples);
+      codec->samples_written += samples;
+      }
+    
     track_map->current_chunk++;
 
     /* Adjust mp3 buffer */
@@ -338,11 +355,9 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
       memmove(codec->encoder_output, chunk_ptr, codec->encoder_output_size);
     
 #if 0
-    fprintf(stderr, "Encoded %d samples, %d bytes %d remaining\n",
+    fprintf(stderr, "Encoded %d samples %d bytes %d remaining\n",
             chunk_samples, chunk_bytes, codec->encoder_output_size);
 #endif   
-
-
     }
   
   
@@ -450,11 +465,12 @@ static int encode(quicktime_t *file,
                               samples,
                               codec->encoder_output + codec->encoder_output_size,
                               codec->encoder_output_alloc - codec->encoder_output_size);
-  
+  codec->samples_read += samples;
+    
   if(result > 0)
     {
     codec->encoder_output_size += result;
-    result = write_data(file, track_map, codec);
+    result = write_data(file, track_map, codec, -1);
     }
   
   return result;
@@ -487,17 +503,19 @@ static void flush(quicktime_t *file, int track)
     {
     //    samples_left = lame_get_mf_samples_to_encode(codec->lame_global);
     
-    result = lame_encode_flush_nogap(codec->lame_global,
-                                     codec->encoder_output + codec->encoder_output_size, 
-                                     codec->encoder_output_alloc);
+    result = lame_encode_flush(codec->lame_global,
+                               codec->encoder_output + codec->encoder_output_size, 
+                               codec->encoder_output_alloc);
     /* Check if more frames arrived */
 
     if(result > 0)
       {
+      //      fprintf(stderr, "Flush: %d\n", result);
       codec->encoder_output_size += result;
-      write_data(file, track_map, codec);
+      write_data(file, track_map, codec, codec->samples_read - codec->samples_written);
       }
     }
+  //  fprintf(stderr, "Samples read: %lld, Samples written: %lld\n", codec->samples_read, codec->samples_written);
   }
 
 void quicktime_init_codec_lame(quicktime_audio_map_t *atrack)

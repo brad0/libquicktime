@@ -698,6 +698,7 @@ struct CODECIDMAP codecidmap_a[] = {
           
         },
 #endif
+#if 0 /* Not needed anymore, we have a native codec */
 	{
           id: CODEC_ID_PCM_ALAW,
 	  index: -1,
@@ -708,6 +709,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  fourccs: { "alaw", (char*)0},
           wav_ids: { 0x06, LQT_WAV_ID_NONE },
         },
+#endif
 };
 
 

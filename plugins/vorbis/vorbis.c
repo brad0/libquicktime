@@ -702,12 +702,9 @@ static int encode(quicktime_t *file,
     
   result = 0;
 
-  // FLUSH_OGG2
-  //    flush_data(file, track);
   //    fprintf(stderr, "Encoded %lld samples\n",
   //            codec->enc_os.granulepos - codec->encoded_samples);
-    
-
+  
   // Wrote a chunk.
   if(codec->chunk_started)
     {
@@ -762,9 +759,10 @@ static void flush(quicktime_t *file, int track)
 	quicktime_trak_t *trak = track_map->track;
 
 //printf("flush 1\n");
+        flush_audio(file, track);
 	vorbis_analysis_wrote(&codec->enc_vd,0);
 
-        flush_audio(file, track);
+        flush_data(file, track);
         
         //	FLUSH_OGG2
 	

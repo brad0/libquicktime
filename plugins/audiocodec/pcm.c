@@ -11,6 +11,7 @@
 #include "pcm.h"
 
 #include "ulaw_tables.h"
+#include "alaw_tables.h"
 
 typedef struct quicktime_pcm_codec_s
   {
@@ -26,6 +27,8 @@ typedef struct quicktime_pcm_codec_s
 
   void (*encode)(struct quicktime_pcm_codec_s*, int num_samples, void * input);
   void (*decode)(struct quicktime_pcm_codec_s*, int num_samples, void ** output);
+
+  int initialized;
   } quicktime_pcm_codec_t;
 
 /* 8 bit per sample, signedness and endian neutral */
@@ -202,6 +205,43 @@ static void decode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
   *_output = output;
   }
 
+
+/* alaw */
+
+/* See alaw_tables.h for the tables references here */
+
+#define ENCODE_ALAW(src, dst) if(src >= 0) dst = alaw_encode[src / 16]; else dst = 0x7F & alaw_encode[src / -16] 
+#define DECODE_ALAW(src, dst) dst = alaw_decode [src]
+
+static void encode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  int16_t * input = (uint16_t*)_input;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    ENCODE_ALAW(input[0], codec->chunk_buffer_ptr[0]);
+    codec->chunk_buffer_ptr++;
+    input++;
+    }
+  }
+
+static void decode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  /* The uint32_t is intentional: Interpreting integers as unsigned has less pitfalls */
+  int16_t * output = (uint16_t*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    DECODE_ALAW(codec->chunk_buffer_ptr[0], output[0]);
+    codec->chunk_buffer_ptr++;
+    output++;
+    }
+  *_output = output;
+  }
+
+
 /* Generic decode function */
 
 static int read_audio_chunk(quicktime_t * file, int track,
@@ -213,6 +253,7 @@ static int read_audio_chunk(quicktime_t * file, int track,
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
+  //  fprintf(stderr, "Chunk: %d, samples: %d %d\n", chunk, samples, bytes);
   bytes_from_samples = samples * codec->block_align;
   if(bytes > bytes_from_samples)
     return bytes_from_samples;
@@ -229,6 +270,20 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   int64_t samples_to_skip = 0;
   int samples_in_chunk;
   int samples_decoded, samples_to_decode;
+
+  if(!codec->initialized)
+    {
+    /* Read the first audio chunk */
+
+    codec->chunk_buffer_size = read_audio_chunk(file,
+                                                track, file->atracks[track].current_chunk,
+                                                &(codec->chunk_buffer),
+                                                &(codec->chunk_buffer_alloc));
+    if(codec->chunk_buffer_size <= 0)
+      return 0;
+    codec->chunk_buffer_ptr = codec->chunk_buffer;
+    codec->initialized = 1;
+    }
   
   if(file->atracks[track].current_position != file->atracks[track].last_position)
     {
@@ -327,13 +382,14 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   quicktime_write_chunk_header(file, trak, &chunk_atom);
   result = quicktime_write_data(file, codec->chunk_buffer, samples * codec->block_align);
   quicktime_write_chunk_footer(file, trak, track_map->current_chunk, &chunk_atom, samples);
+  file->atracks[track].current_chunk++;		
+  
   /* defeat fwrite's return */
   if(result) 
     result = 0; 
   else 
     result = 1; 
   
-  file->atracks[track].current_chunk++;		
   
   return result;
   }
@@ -513,5 +569,31 @@ void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack)
   codec->block_align = atrack->channels;
   codec->encode = encode_ulaw;
   codec->decode = decode_ulaw;
+  atrack->sample_format = LQT_SAMPLE_INT16;
+  }
+
+void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack)
+  {
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_pcm_codec_t *codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->decode_video = 0;
+  codec_base->encode_video = 0;
+  codec_base->decode_audio = decode_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "alaw";
+  codec_base->title = "aLaw";
+  codec_base->desc = "aLaw";
+  codec_base->wav_id = 0x06;
+  
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+  
+  codec->block_align = atrack->channels;
+  codec->encode = encode_alaw;
+  codec->decode = decode_alaw;
   atrack->sample_format = LQT_SAMPLE_INT16;
   }

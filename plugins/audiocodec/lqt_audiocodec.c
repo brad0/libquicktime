@@ -8,6 +8,7 @@ void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_twos(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack);
 
 static char * fourccs_ima4[]  = { QUICKTIME_IMA4, (char*)0 };
@@ -15,6 +16,8 @@ static char * fourccs_raw[]   = { QUICKTIME_RAW,  (char*)0 };
 static char * fourccs_twos[]  = { QUICKTIME_TWOS, (char*)0 };
 static char * fourccs_ulaw[]  = { QUICKTIME_ULAW, (char*)0 };
 static char * fourccs_sowt[]  = { "sowt",         (char*)0 };
+
+static char * fourccs_alaw[]  = { "alaw", (char*)0 };
 
 static lqt_codec_info_static_t codec_info_ima4 =
   {
@@ -68,6 +71,20 @@ static lqt_codec_info_static_t codec_info_ulaw =
     decoding_parameters: (lqt_parameter_info_static_t*)0
   };
 
+static lqt_codec_info_static_t codec_info_alaw =
+  {
+    name:         "alaw",
+    long_name:    "Alaw",     /* Long name of the codec */
+    description:  "Alaw",      /* Description            */
+    fourccs:      fourccs_alaw,
+    wav_ids:      (int[]){ 0x06, LQT_WAV_ID_NONE },
+    type:         LQT_CODEC_AUDIO,
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    decoding_parameters: (lqt_parameter_info_static_t*)0
+  };
+
+
 static lqt_codec_info_static_t codec_info_sowt =
   {
     name:         "sowt",
@@ -83,7 +100,7 @@ static lqt_codec_info_static_t codec_info_sowt =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 5; }
+extern int get_num_codecs() { return 6; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -103,6 +120,9 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
       break;
     case 4: /* Sowt */
       return &codec_info_sowt;
+      break;
+    case 5: /* alaw */
+      return &codec_info_alaw;
       break;
     }
   
@@ -127,6 +147,9 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
       break;
     case 4: /* Sowt */
       return quicktime_init_codec_sowt;
+      break;
+    case 5: /* Alaw */
+      return quicktime_init_codec_alaw;
       break;
     }
   return (lqt_init_audio_codec_func_t)0;

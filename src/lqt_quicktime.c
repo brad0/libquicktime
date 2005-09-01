@@ -1281,6 +1281,8 @@ int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *tr
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 {
 	quicktime_delete_acodec(atrack);
+        if(atrack->sample_buffer)
+          free(atrack->sample_buffer);
         return 0;
 }
 

@@ -33,7 +33,7 @@ typedef enum
     LQT_SAMPLE_INT32,
     LQT_SAMPLE_FLOAT /* Float is ALWAYS machine native */
   } lqt_sample_format_t;
-
+  
   
 #include "qtprivate.h"
 
