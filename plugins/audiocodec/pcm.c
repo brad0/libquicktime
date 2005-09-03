@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 #include "pcm.h"
@@ -169,6 +170,457 @@ static void decode_s24_le(quicktime_pcm_codec_t*codec, int num_samples, void ** 
     }
   *_output = output;
   }
+
+
+/* 32 bit per sample, without swapping */
+
+static void encode_s32(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  memcpy(codec->chunk_buffer_ptr, _input, 4 * num_samples);
+  }
+
+static void decode_s32(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  uint8_t * output = (uint8_t *)(*_output);
+
+  memcpy(output, codec->chunk_buffer_ptr, 4 * num_samples);
+  codec->chunk_buffer_ptr += 4 * num_samples;
+  
+  output += 4 * num_samples;
+  *_output = output;
+  }
+
+/* 32 bit per sample with swapping */
+
+static void encode_s32_swap(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  uint8_t * input = (uint8_t*)_input;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    codec->chunk_buffer_ptr[0] = input[3];
+    codec->chunk_buffer_ptr[1] = input[2];
+    codec->chunk_buffer_ptr[2] = input[1];
+    codec->chunk_buffer_ptr[3] = input[0];
+    codec->chunk_buffer_ptr+=4;
+    input+=4;
+    }
+  }
+
+static void decode_s32_swap(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  uint8_t * output = (uint8_t*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    output[0] = codec->chunk_buffer_ptr[3];
+    output[1] = codec->chunk_buffer_ptr[2];
+    output[2] = codec->chunk_buffer_ptr[1];
+    output[3] = codec->chunk_buffer_ptr[0];
+    codec->chunk_buffer_ptr+=4;
+    output+=4;
+    }
+  *_output = output;
+  }
+
+/* Floating point formats */
+
+/* Sample read/write functions, taken from libsndfile */
+
+static float
+float32_be_read (unsigned char *cptr)
+{       int             exponent, mantissa, negative ;
+        float   fvalue ;
+
+        negative = cptr [0] & 0x80 ;
+        exponent = ((cptr [0] & 0x7F) << 1) | ((cptr [1] & 0x80) ? 1 : 0) ;
+        mantissa = ((cptr [1] & 0x7F) << 16) | (cptr [2] << 8) | (cptr [3]) ;
+
+        if (! (exponent || mantissa))
+                return 0.0 ;
+
+        mantissa |= 0x800000 ;
+        exponent = exponent ? exponent - 127 : 0 ;
+
+        fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
+
+        if (negative)
+                fvalue *= -1 ;
+
+        if (exponent > 0)
+                fvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                fvalue /= (1 << abs (exponent)) ;
+
+        return fvalue ;
+} /* float32_be_read */
+
+static float
+float32_le_read (unsigned char *cptr)
+{       int             exponent, mantissa, negative ;
+        float   fvalue ;
+
+        negative = cptr [3] & 0x80 ;
+        exponent = ((cptr [3] & 0x7F) << 1) | ((cptr [2] & 0x80) ? 1 : 0) ;
+        mantissa = ((cptr [2] & 0x7F) << 16) | (cptr [1] << 8) | (cptr [0]) ;
+
+        if (! (exponent || mantissa))
+                return 0.0 ;
+
+        mantissa |= 0x800000 ;
+        exponent = exponent ? exponent - 127 : 0 ;
+
+        fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
+
+        if (negative)
+                fvalue *= -1 ;
+
+        if (exponent > 0)
+                fvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                fvalue /= (1 << abs (exponent)) ;
+
+        return fvalue ;
+} /* float32_le_read */
+
+static double
+double64_be_read (unsigned char *cptr)
+{       int             exponent, negative ;
+        double  dvalue ;
+
+        negative = (cptr [0] & 0x80) ? 1 : 0 ;
+        exponent = ((cptr [0] & 0x7F) << 4) | ((cptr [1] >> 4) & 0xF) ;
+
+        /* Might not have a 64 bit long, so load the mantissa into a double. */
+        dvalue = (((cptr [1] & 0xF) << 24) | (cptr [2] << 16) | (cptr [3] << 8) | cptr [4]) ;
+        dvalue += ((cptr [5] << 16) | (cptr [6] << 8) | cptr [7]) / ((double) 0x1000000) ;
+
+        if (exponent == 0 && dvalue == 0.0)
+                return 0.0 ;
+
+        dvalue += 0x10000000 ;
+
+        exponent = exponent - 0x3FF ;
+
+        dvalue = dvalue / ((double) 0x10000000) ;
+
+        if (negative)
+                dvalue *= -1 ;
+
+        if (exponent > 0)
+                dvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                dvalue /= (1 << abs (exponent)) ;
+
+        return dvalue ;
+} /* double64_be_read */
+
+static double
+double64_le_read (unsigned char *cptr)
+{       int             exponent, negative ;
+        double  dvalue ;
+
+        negative = (cptr [7] & 0x80) ? 1 : 0 ;
+        exponent = ((cptr [7] & 0x7F) << 4) | ((cptr [6] >> 4) & 0xF) ;
+
+        /* Might not have a 64 bit long, so load the mantissa into a double. */
+        dvalue = (((cptr [6] & 0xF) << 24) | (cptr [5] << 16) | (cptr [4] << 8) | cptr [3]) ;
+        dvalue += ((cptr [2] << 16) | (cptr [1] << 8) | cptr [0]) / ((double) 0x1000000) ;
+
+        if (exponent == 0 && dvalue == 0.0)
+                return 0.0 ;
+
+        dvalue += 0x10000000 ;
+
+        exponent = exponent - 0x3FF ;
+
+        dvalue = dvalue / ((double) 0x10000000) ;
+
+        if (negative)
+                dvalue *= -1 ;
+
+        if (exponent > 0)
+                dvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                dvalue /= (1 << abs (exponent)) ;
+
+        return dvalue ;
+} /* double64_le_read */
+
+void
+float32_le_write (float in, unsigned char *out)
+{       int             exponent, mantissa, negative = 0 ;
+
+        memset (out, 0, sizeof (int)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                negative = 1 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 126 ;
+
+        in *= (float) 0x1000000 ;
+        mantissa = (((int) in) & 0x7FFFFF) ;
+
+        if (negative)
+                out [3] |= 0x80 ;
+
+        if (exponent & 0x01)
+                out [2] |= 0x80 ;
+
+        out [0] = mantissa & 0xFF ;
+        out [1] = (mantissa >> 8) & 0xFF ;
+        out [2] |= (mantissa >> 16) & 0x7F ;
+        out [3] |= (exponent >> 1) & 0x7F ;
+
+        return ;
+} /* float32_le_write */
+
+void
+float32_be_write (float in, unsigned char *out)
+{       int             exponent, mantissa, negative = 0 ;
+
+        memset (out, 0, sizeof (int)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                negative = 1 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 126 ;
+
+        in *= (float) 0x1000000 ;
+        mantissa = (((int) in) & 0x7FFFFF) ;
+
+        if (negative)
+                out [0] |= 0x80 ;
+
+        if (exponent & 0x01)
+                out [1] |= 0x80 ;
+
+        out [3] = mantissa & 0xFF ;
+        out [2] = (mantissa >> 8) & 0xFF ;
+        out [1] |= (mantissa >> 16) & 0x7F ;
+        out [0] |= (exponent >> 1) & 0x7F ;
+
+        return ;
+} /* float32_be_write */
+
+
+void
+double64_be_write (double in, unsigned char *out)
+{       int             exponent, mantissa ;
+
+        memset (out, 0, sizeof (double)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                out [0] |= 0x80 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 1022 ;
+
+        out [0] |= (exponent >> 4) & 0x7F ;
+        out [1] |= (exponent << 4) & 0xF0 ;
+
+        in *= 0x20000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [1] |= (mantissa >> 24) & 0xF ;
+        out [2] = (mantissa >> 16) & 0xFF ;
+        out [3] = (mantissa >> 8) & 0xFF ;
+        out [4] = mantissa & 0xFF ;
+
+        in = fmod (in, 1.0) ;
+        in *= 0x1000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [5] = (mantissa >> 16) & 0xFF ;
+        out [6] = (mantissa >> 8) & 0xFF ;
+        out [7] = mantissa & 0xFF ;
+
+        return ;
+} /* double64_be_write */
+
+void
+double64_le_write (double in, unsigned char *out)
+{       int             exponent, mantissa ;
+
+        memset (out, 0, sizeof (double)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                out [7] |= 0x80 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 1022 ;
+
+        out [7] |= (exponent >> 4) & 0x7F ;
+        out [6] |= (exponent << 4) & 0xF0 ;
+
+        in *= 0x20000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [6] |= (mantissa >> 24) & 0xF ;
+        out [5] = (mantissa >> 16) & 0xFF ;
+        out [4] = (mantissa >> 8) & 0xFF ;
+        out [3] = mantissa & 0xFF ;
+
+        in = fmod (in, 1.0) ;
+        in *= 0x1000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [2] = (mantissa >> 16) & 0xFF ;
+        out [1] = (mantissa >> 8) & 0xFF ;
+        out [0] = mantissa & 0xFF ;
+
+        return ;
+} /* double64_le_write */
+
+/* 32 bit float (Big Endian) */
+
+static void encode_fl32_be(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  float * input = (float*)_input;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    float32_be_write(*input, codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=4;
+    input++;
+    }
+  
+  }
+
+static void decode_fl32_be(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  float * output = (float*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    *output = float32_be_read(codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=4;
+    output++;
+    }
+  *_output = output;
+  }
+
+/* 32 bit float (Little Endian) */
+
+static void encode_fl32_le(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  float * input = (float*)_input;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    float32_le_write(*input, codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=4;
+    input++;
+    }
+
+  }
+
+static void decode_fl32_le(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  float * output = (float*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    *output = float32_le_read(codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=4;
+    output++;
+    }
+  *_output = output;
+  }
+
+/* 64 bit float (Big Endian) */
+
+static void encode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  float * input = (float*)_input;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    double64_be_write(*input, codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=8;
+    input++;
+    }
+  
+  }
+
+static void decode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  float * output = (float*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    *output = double64_be_read(codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=8;
+    output++;
+    }
+  *_output = output;
+  }
+
+/* 64 bit float (Little Endian) */
+
+static void encode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
+  {
+  int i;
+  float * input = (float*)_input;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    double64_le_write(*input, codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=8;
+    input++;
+    }
+
+  }
+
+static void decode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
+  {
+  int i;
+  float * output = (float*)(*_output);
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    *output = double64_le_read(codec->chunk_buffer_ptr);
+    codec->chunk_buffer_ptr+=8;
+    output++;
+    }
+  *_output = output;
+  }
+
+
 
 /* ulaw */
 
@@ -499,6 +951,320 @@ void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack)
       break;
     }
   }
+
+/* The following ones are for ENCODING */
+
+void quicktime_init_codec_in24_little(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "in24";
+  codec_base->title = "24 bit PCM (Little endian)";
+  codec_base->desc = "24 bit PCM (Little endian)";
+  codec_base->wav_id = 0x01;
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+  quicktime_set_enda(atrack->track, 1);
+  
+  codec->block_align = 3 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+  codec->encode = encode_s24_le;
+  }
+
+void quicktime_init_codec_in24_big(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "in24";
+  codec_base->title = "24 bit PCM (Big endian)";
+  codec_base->desc = "24 bit PCM (Big endian)";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 3 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+  codec->encode = encode_s24_be;
+  }
+
+/* The following one is for DECODING */
+
+void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->decode_audio = decode_pcm;
+  codec_base->fourcc = "in24";
+  codec_base->title = "24 bit PCM";
+  codec_base->desc = "24 bit PCM";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 3 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+
+  if(quicktime_get_enda(atrack->track))
+    codec->decode = decode_s24_le;
+  else
+    codec->decode = decode_s24_be;
+  }
+
+/* The following ones are for ENCODING */
+
+void quicktime_init_codec_in32_little(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "in32";
+  codec_base->title = "32 bit PCM (Little endian)";
+  codec_base->desc = "32 bit PCM (Little endian)";
+  codec_base->wav_id = 0x01;
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+  quicktime_set_enda(atrack->track, 1);
+  
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+#ifdef WORDS_BIGENDIAN
+  codec->encode = encode_s32_swap;
+#else
+  codec->encode = encode_s32;
+#endif
+  }
+
+void quicktime_init_codec_in32_big(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "in32";
+  codec_base->title = "32 bit PCM (Big endian)";
+  codec_base->desc = "32 bit PCM (Big endian)";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+#ifdef WORDS_BIGENDIAN
+  codec->encode = encode_s32;
+#else
+  codec->encode = encode_s32_swap;
+#endif
+  }
+
+/* The following one is for ENCODING */
+
+void quicktime_init_codec_in32(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->decode_audio = decode_pcm;
+  codec_base->fourcc = "in32";
+  codec_base->title = "32 bit PCM";
+  codec_base->desc = "32 bit PCM";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_INT32;
+
+#ifdef WORDS_BIGENDIAN
+  if(quicktime_get_enda(atrack->track))
+    codec->decode = decode_s32_swap;
+  else
+    codec->decode = decode_s32;
+#else
+  if(quicktime_get_enda(atrack->track))
+    codec->decode = decode_s32;
+  else
+    codec->decode = decode_s32_swap;
+#endif
+  }
+
+/* Floating point */
+
+/* The following ones are for ENCODING */
+
+void quicktime_init_codec_fl32_little(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "fl32";
+  codec_base->title = "32 bit float (Little endian)";
+  codec_base->desc = "32 bit float (Little endian)";
+  codec_base->wav_id = 0x01;
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+  quicktime_set_enda(atrack->track, 1);
+  
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+  codec->encode = encode_fl32_le;
+  }
+
+void quicktime_init_codec_fl32_big(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "fl32";
+  codec_base->title = "32 bit float (Big endian)";
+  codec_base->desc = "32 bit float (Big endian)";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+
+  codec->encode = encode_fl32_be;
+  }
+
+/* The following one is for DECODING */
+
+void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->decode_audio = decode_pcm;
+  codec_base->fourcc = "fl32";
+  codec_base->title = "32 bit float";
+  codec_base->desc = "32 bit float";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 4 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+
+  if(quicktime_get_enda(atrack->track))
+    codec->decode = decode_fl32_le;
+  else
+    codec->decode = decode_fl32_be;
+  }
+
+/* The following ones are for ENCODING */
+
+void quicktime_init_codec_fl64_little(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "fl64";
+  codec_base->title = "64 bit float (Little endian)";
+  codec_base->desc = "64 bit float (Little endian)";
+  codec_base->wav_id = 0x01;
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+  quicktime_set_enda(atrack->track, 1);
+  
+  codec->block_align = 8 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+  codec->encode = encode_fl64_le;
+  }
+
+void quicktime_init_codec_fl64_big(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->encode_audio = encode_pcm;
+  codec_base->fourcc = "fl64";
+  codec_base->title = "64 bit float (Big endian)";
+  codec_base->desc = "64 bit float (Big endian)";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 8 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+
+  codec->encode = encode_fl64_be;
+  }
+
+/* The following one is for DECODING */
+
+void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
+  {
+  quicktime_pcm_codec_t *codec;
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  
+  /* Init public items */
+  codec_base->delete_acodec = delete_pcm;
+  codec_base->decode_audio = decode_pcm;
+  codec_base->fourcc = "fl64";
+  codec_base->title = "64 bit float";
+  codec_base->desc = "64 bit float";
+
+  /* Init private items */
+  codec = calloc(1, sizeof(*codec));
+  codec_base->priv = codec;
+
+  codec->block_align = 8 * atrack->channels;
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+
+  if(quicktime_get_enda(atrack->track))
+    codec->decode = decode_fl64_le;
+  else
+    codec->decode = decode_fl64_be;
+  }
+
+
+/* raw */
 
 void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)
   {

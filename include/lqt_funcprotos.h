@@ -219,6 +219,18 @@ void quicktime_read_edts(quicktime_t *file, quicktime_edts_t *edts, quicktime_at
 void quicktime_edts_dump(quicktime_edts_t *edts);
 void quicktime_write_edts(quicktime_t *file, quicktime_edts_t *edts, long duration);
 
+/* enda.c */
+
+void quicktime_read_enda(quicktime_t *file, quicktime_enda_t *enda,
+                         quicktime_atom_t *enda_atom);
+void quicktime_write_enda(quicktime_t *file, quicktime_enda_t *enda);
+void quicktime_enda_dump(quicktime_enda_t *enda);
+
+void quicktime_set_enda(quicktime_trak_t * trak, int little_endian);
+
+/* Returns TRUE if little endian */
+int quicktime_get_enda(quicktime_trak_t * trak);
+
 /* elst.c */
 
 void quicktime_elst_table_init(quicktime_elst_table_t *table);
@@ -232,6 +244,17 @@ void quicktime_elst_delete(quicktime_elst_t *elst);
 void quicktime_elst_dump(quicktime_elst_t *elst);
 void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst);
 void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst, long duration);
+
+/* frma.c */
+
+void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,
+                         quicktime_atom_t *frma_atom);
+
+void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma);
+void quicktime_frma_dump(quicktime_frma_t *frma);
+
+
+
 
 /* gmhd.c */
 
@@ -798,6 +821,16 @@ int quicktime_vrsc_delete(quicktime_vrsc_t *vrsc);
 void quicktime_vrsc_dump(quicktime_vrsc_t *vrsc);
 int quicktime_read_vrsc(quicktime_t *file, quicktime_vrsc_t *vrsc, quicktime_qtatom_t *vrsc_atom);
 void quicktime_write_vrsc(quicktime_t *file, quicktime_vrsc_t *vrsc);
+
+/* wave.c */
+
+void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
+                         quicktime_atom_t *wave_atom);
+
+void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave);
+void quicktime_wave_dump(quicktime_wave_t *wave);
+
+
 
 /* util.c */
 

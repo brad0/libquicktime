@@ -44,6 +44,8 @@ dinf.c \
 dref.c \
 edts.c \
 elst.c \
+enda.c \
+frma.c \
 gmhd.c \
 gmin.c \
 graphics.c \
@@ -84,6 +86,7 @@ vmhd.c \
 vrsc.c \
 vrnp.c \
 vrni.c \
+wave.c \
 workarounds.c \
 lqt_bufalloc.c \
 lqt_codecfile.c \

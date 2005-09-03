@@ -262,6 +262,27 @@ typedef struct
 	quicktime_vrnp_t vrnp;
 } quicktime_qtvr_t;
 
+/* wave atom and subatoms */
+
+typedef struct
+  {
+  char codec[4];
+  /* Remainder could be a WAVEFORMATEX structure */
+  } quicktime_frma_t;
+
+typedef struct
+  {
+  int16_t littleEndian;
+  } quicktime_enda_t;
+
+typedef struct
+  {
+  quicktime_frma_t frma;
+  int has_frma;
+  quicktime_enda_t enda;
+  int has_enda;
+  } quicktime_wave_t;
+
 typedef struct
 {
 	char format[4];
@@ -297,6 +318,7 @@ typedef struct
 	quicktime_pano_t pano;
 	quicktime_qtvr_t qtvr;
 
+        quicktime_wave_t wave;
 /* audio description */
 	int channels;
 	int sample_size;
@@ -306,7 +328,14 @@ typedef struct
 	int packet_size;
 	float sample_rate;
 
-/* LQT: We store the complete atom (starting witht he fourcc)
+/* Audio extension for version == 1 */
+
+        uint32_t audio_samples_per_packet;
+        uint32_t audio_bytes_per_packet;
+        uint32_t audio_bytes_per_frame;
+        uint32_t audio_bytes_per_sample;
+
+/* LQT: We store the complete atom (starting with the fourcc)
    here, because this must be passed to the Sorenson 3 decoder */
 
         unsigned char * extradata;

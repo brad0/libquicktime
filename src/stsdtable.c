@@ -30,6 +30,7 @@ void quicktime_mjht_dump(quicktime_mjht_t *mjht)
 
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
 {
+  quicktime_atom_t leaf_atom;
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, (uint8_t*)(table->vendor), 4);
@@ -39,9 +40,30 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->packet_size = quicktime_read_int16(file);
 	table->sample_rate = quicktime_read_fixed32(file);
 // Kluge for fixed32 limitation
-if(table->sample_rate + 65536 == 96000 ||
-   table->sample_rate + 65536 == 88200) table->sample_rate += 65536;
+        if(table->sample_rate + 65536 == 96000 ||
+           table->sample_rate + 65536 == 88200) table->sample_rate += 65536;
 
+        if(table->version == 1)
+          {
+          table->audio_samples_per_packet = quicktime_read_int32(file);
+          table->audio_bytes_per_packet = quicktime_read_int32(file);
+          table->audio_bytes_per_frame  = quicktime_read_int32(file);
+          table->audio_bytes_per_sample  = quicktime_read_int32(file);
+          }
+        
+/* Read additional atoms */
+        while(quicktime_position(file) < parent_atom->end)
+          {
+          quicktime_atom_read_header(file, &leaf_atom);
+          if(quicktime_atom_is(&leaf_atom, "wave"))
+            {
+            quicktime_read_wave(file, &(table->wave), &leaf_atom);
+            }
+          else
+            {
+            quicktime_atom_skip(file, &leaf_atom);
+            }
+          } 
 }
 
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table)
@@ -335,6 +357,15 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
 	printf("       compression_id %d\n", table->compression_id);
 	printf("       packet_size %d\n", table->packet_size);
 	printf("       sample_rate %f\n", table->sample_rate);
+
+        if(table->version == 1)
+          {
+          printf("       samples_per_packet: %d\n", table->audio_samples_per_packet);
+          printf("       bytes_per_packet:   %d\n", table->audio_bytes_per_packet);
+          printf("       bytes_per_frame:    %d\n", table->audio_bytes_per_frame);
+          printf("       bytes_per_samples:  %d\n", table->audio_bytes_per_sample);
+          }
+        quicktime_wave_dump(&table->wave);
 }
 
 
