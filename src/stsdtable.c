@@ -58,6 +58,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
           if(quicktime_atom_is(&leaf_atom, "wave"))
             {
             quicktime_read_wave(file, &(table->wave), &leaf_atom);
+            table->has_wave = 1;
             }
           else
             {
@@ -310,6 +311,7 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
         quicktime_ctab_delete(&(table->ctab));
 	quicktime_mjqt_delete(&(table->mjqt));
 	quicktime_mjht_delete(&(table->mjht));
+	quicktime_wave_delete(&(table->wave));
 }
 
 void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)

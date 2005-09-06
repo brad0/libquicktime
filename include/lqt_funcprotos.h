@@ -829,6 +829,10 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
 
 void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave);
 void quicktime_wave_dump(quicktime_wave_t *wave);
+void quicktime_wave_delete(quicktime_wave_t *wave);
+
+uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
+void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t * data,  uint32_t len);
 
 
 

@@ -85,6 +85,8 @@ ogg_packet enc_op;
 // Number of samples decoded in the current chunk
 	int chunk_samples;
 
+        int header_read;
+
   } quicktime_vorbis_codec_t;
 
 
@@ -158,9 +160,26 @@ static int next_chunk(quicktime_t * file, int track)
 
 static int next_page(quicktime_t * file, int track)
   {
+  char * buffer;
+  uint8_t * header;
+  uint32_t header_len;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   int result = 0;
+
+  
+  if(!codec->header_read) /* Try OVHS atom */
+    {
+    header = quicktime_wave_get_user_atom(track_map->track, "OVHS", &header_len);
+    if(header)
+      {
+      fprintf(stderr, "Using OVHS Atom, %d bytes\n", header_len-8);
+      buffer = ogg_sync_buffer(&codec->dec_oy, header_len-8);
+      memcpy(buffer, header + 8, header_len-8);
+      ogg_sync_wrote(&codec->dec_oy, header_len-8);
+      }
+    }
+
   while(result < 1)
     {
     result = ogg_sync_pageout(&codec->dec_oy, &codec->dec_og);
@@ -347,7 +366,7 @@ static int decode(quicktime_t *file,
       fprintf(stderr, "decode: vorbis_synthesis_headerin: not a vorbis header\n");
       return 0;
       }
-    
+    codec->header_read = 1;
     vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
     vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
     //    fprintf(stderr, "Initialized decoder\n");

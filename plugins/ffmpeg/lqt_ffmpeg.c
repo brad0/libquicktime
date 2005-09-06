@@ -710,6 +710,16 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x06, LQT_WAV_ID_NONE },
         },
 #endif
+	{
+          id: CODEC_ID_ALAC,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          short_name: "alac",
+	  name: "Apple lossless",
+	  fourccs: { "alac", (char*)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 };
 
 
@@ -866,7 +876,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 	struct CODECIDMAP * map;
         ffmpeg_map_init();
 	map = find_codec(index);
-
+        //        memset(&codec_info_ffmpeg, 0, sizeof(codec_info_ffmpeg));
         if(map)
           {
           set_codec_info(map);

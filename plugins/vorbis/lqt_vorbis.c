@@ -2,7 +2,7 @@
 #include <quicktime/lqt_codecapi.h>
 #include "qtvorbis.h"
 
-static char * fourccs_vorbis[]  = { QUICKTIME_VORBIS, (char*)0 };
+static char * fourccs_vorbis[]  = { QUICKTIME_VORBIS, "OggV", (char*)0 };
 
 static lqt_parameter_info_static_t encode_parameters_vorbis[] =
   {

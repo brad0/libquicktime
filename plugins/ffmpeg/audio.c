@@ -646,6 +646,9 @@ static int decode_chunk(quicktime_t * file, int track)
 
 int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
   {
+  uint8_t * header;
+  uint32_t header_len;
+  
   int samples_decoded;
   //  int result = 0;
   int64_t chunk_sample; /* For seeking only */
@@ -663,6 +666,27 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
   if(!codec->com.init_dec)
     {
     codec->com.ffcodec_dec = avcodec_alloc_context();
+
+    /* Set some mandatory variables */
+    codec->com.ffcodec_dec->channels        = quicktime_track_channels(file, track);
+    codec->com.ffcodec_dec->sample_rate     = quicktime_sample_rate(file, track);
+    //    priv->ctx->block_align     = s->data.audio.block_align;
+    //    priv->ctx->bit_rate        = s->codec_bitrate;
+
+    codec->com.ffcodec_dec->bits_per_sample = quicktime_audio_bits(file, track);
+
+    /* Some codecs need extra stuff */
+
+    if(codec->com.ffc_dec->id == CODEC_ID_ALAC)
+      {
+      header = quicktime_wave_get_user_atom(track_map->track, "alac", &header_len);
+      if(header)
+        {
+        codec->com.ffcodec_dec->extradata = header;
+        codec->com.ffcodec_dec->extradata_size = header_len;
+        }
+      }
+
     //    memcpy(&(codec->com.ffcodec_enc), &(codec->com.params), sizeof(AVCodecContext));
     
     if(avcodec_open(codec->com.ffcodec_dec, codec->com.ffc_dec) != 0)

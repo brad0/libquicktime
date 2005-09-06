@@ -281,6 +281,9 @@ typedef struct
   int has_frma;
   quicktime_enda_t enda;
   int has_enda;
+
+  int num_user_atoms;
+  uint8_t ** user_atoms;
   } quicktime_wave_t;
 
 typedef struct
@@ -318,6 +321,7 @@ typedef struct
 	quicktime_pano_t pano;
 	quicktime_qtvr_t qtvr;
 
+        int has_wave;
         quicktime_wave_t wave;
 /* audio description */
 	int channels;
