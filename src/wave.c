@@ -109,12 +109,25 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
 
 void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave)
   {
+  int i;
+  uint32_t len;
   quicktime_atom_t atom;
   quicktime_atom_write_header(file, &atom, "wave");
 
-  quicktime_write_frma(file, &wave->frma);
+  if(wave->has_frma)
+    quicktime_write_frma(file, &wave->frma);
   if(wave->has_enda)
     quicktime_write_enda(file, &wave->enda);
+
+  for(i = 0; i < wave->num_user_atoms; i++)
+    {
+    len =
+      ((uint32_t)wave->user_atoms[i][0] << 24) |
+      ((uint32_t)wave->user_atoms[i][1] << 16) |
+      ((uint32_t)wave->user_atoms[i][2] <<  8) |
+      wave->user_atoms[i][3];
+    quicktime_write_data(file, wave->user_atoms[i], len);
+    }
   
   quicktime_atom_write_footer(file, &atom);
   }

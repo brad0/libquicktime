@@ -20,7 +20,8 @@ typedef struct
 	int nominal_bitrate;
 	int min_bitrate;
 	int use_vbr;
-	int encode_initialized;
+        int write_OVHS;
+        int encode_initialized;
 	ogg_stream_state enc_os;
 	ogg_page enc_og;
         uint8_t * enc_header;
@@ -518,7 +519,6 @@ static int flush_header(quicktime_t * file, int track)
     {
     //    fprintf(stderr, "Got header page %ld + %ld bytes\n",
     //            codec->enc_og.header_len, codec->enc_og.body_len);
-
     codec->enc_header = realloc(codec->enc_header, codec->enc_header_len +
                                 codec->enc_og.header_len + codec->enc_og.body_len);
     
@@ -530,7 +530,14 @@ static int flush_header(quicktime_t * file, int track)
     
     codec->enc_header_len += codec->enc_og.header_len + codec->enc_og.body_len;
     }
-  
+
+  if(codec->write_OVHS)
+    {
+    quicktime_wave_set_user_atom(track_map->track, "OVHS",
+                                 codec->enc_header, codec->enc_header_len);
+    
+    codec->header_written = 1;
+    }
   return 0;
   }
 
@@ -776,7 +783,7 @@ static int set_parameter(quicktime_t *file,
 	else
 	if(!strcasecmp(key, "vorbis_min_bitrate"))
 		codec->min_bitrate = *(int*)value;
-	return 0;
+        return 0;
 }
 
 
@@ -817,6 +824,7 @@ void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
 {
 	quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
 	quicktime_vorbis_codec_t *codec;
+	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
 
 /* Init public items */
 	codec_base->priv = calloc(1, sizeof(quicktime_vorbis_codec_t));
@@ -828,11 +836,15 @@ void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
 	codec_base->fourcc = QUICKTIME_VORBIS;
 	codec_base->title = "OGG Vorbis";
 	codec_base->desc = "OGG Vorbis for video. (Not standardized)";
-
+        
 	codec = codec_base->priv;
 	codec->nominal_bitrate = 128000;
 	codec->max_bitrate = -1;
 	codec->min_bitrate = -1;
         atrack->sample_format = LQT_SAMPLE_FLOAT;
-        
+        if(quicktime_match_32(compressor, "OggV"))
+          {
+          codec->write_OVHS = 1;
+          }
+
 }
