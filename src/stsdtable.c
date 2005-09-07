@@ -77,6 +77,17 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
 	quicktime_write_int16(file, table->compression_id);
 	quicktime_write_int16(file, table->packet_size);
 	quicktime_write_fixed32(file, table->sample_rate);
+        if(table->version == 1)
+          {
+          quicktime_write_int32(file, table->audio_samples_per_packet);
+          quicktime_write_int32(file, table->audio_bytes_per_packet);
+          quicktime_write_int32(file, table->audio_bytes_per_frame);
+          quicktime_write_int32(file, table->audio_bytes_per_sample);
+          }
+        if(table->has_wave)
+          {
+          quicktime_write_wave(file, &table->wave);
+          }
 }
 
 /* LQT: This reads the extradata */
@@ -367,7 +378,8 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
           printf("       bytes_per_frame:    %d\n", table->audio_bytes_per_frame);
           printf("       bytes_per_samples:  %d\n", table->audio_bytes_per_sample);
           }
-        quicktime_wave_dump(&table->wave);
+        if(table->has_wave)
+          quicktime_wave_dump(&table->wave);
 }
 
 
@@ -402,3 +414,16 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 
 	quicktime_atom_write_footer(file, &atom);
 }
+
+void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
+                                 uint32_t samples_per_packet,
+                                 uint32_t bytes_per_packet,
+                                 uint32_t bytes_per_frame,
+                                 uint32_t bytes_per_sample)
+  {
+  table->version = 1;
+  table->audio_samples_per_packet = samples_per_packet;
+  table->audio_bytes_per_packet = bytes_per_packet;
+  table->audio_bytes_per_frame = bytes_per_frame;
+  table->audio_bytes_per_sample = bytes_per_sample;
+  }

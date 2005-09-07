@@ -608,38 +608,11 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		current_chunk - 1, 
 		sample_size);
 	}
-	
-	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
-		current_chunk, 
-		samples);
+        quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
+                              current_chunk, 
+                              samples);
+        
 }
-
-
-/*
- * int quicktime_update_tables(quicktime_t *file, 
- * 							quicktime_trak_t *trak, 
- * 							int64_t offset, 
- * 							int64_t chunk, 
- * 							int64_t sample, 
- * 							int64_t samples, 
- * 							int64_t sample_size)
- * {
- * //if(file->use_avi)
- * printf("quicktime_update_tables: replaced by quicktime_write_chunk_header and quicktime_write_chunk_footer\n");
- * 
- * 	if(offset + sample_size > file->mdat.atom.size) 
- * 		file->mdat.atom.size = offset + sample_size;
- * 
- * 	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), chunk, offset);
- * 
- * 	if(trak->mdia.minf.is_video)
- * 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), sample, sample_size);
- * 
- * 
- * 	quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), chunk, samples);
- * 	return 0;
- * }
- */
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
 	long *duration, 
@@ -669,9 +642,13 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
           if(trak->mdia.minf.stbl.stts.total_entries == 1)
             trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
           }
+        else if(trak->mdia.minf.is_audio_vbr)
+          {
+          quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+          }
         else
           trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
-
+        
         if(!trak->mdia.minf.stbl.stsz.total_entries)
 	{
 		trak->mdia.minf.stbl.stsz.sample_size = 1;

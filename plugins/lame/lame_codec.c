@@ -98,7 +98,12 @@ typedef struct
   {
   mpeg_version_t version;
   int layer;
-  int bitrate;    /* -1: VBR */
+
+  int bitrate_mode;
+  int bitrate;
+  
+  int min_bitrate; /* ABR only */
+  int max_bitrate; /* ABR only  */
   int samplerate;
   int frame_bytes;
   int channel_mode;
@@ -241,8 +246,6 @@ typedef struct
   int encode_initialized;
   int input_size;
   int input_allocated;
-  int bitrate;
-  int quality;
   
   unsigned char *encoder_output;
   int encoder_output_alloc;
@@ -256,6 +259,14 @@ typedef struct
 
   int64_t samples_read;    /* samples passed to lame_encode_buffer */
   int64_t samples_written; /* samples written to the file          */
+
+  /* Configuration stuff */
+  int bitrate_mode;
+  int bitrate;
+  int bitrate_min;
+  int bitrate_max;
+  int quality;
+  int quality_vbr;
   
   } quicktime_mp3_codec_t;
 
@@ -292,16 +303,18 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   }
 
 
-static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
+static int write_data(quicktime_t *file, int track,
                       quicktime_mp3_codec_t *codec, int samples)
   {
   mpeg_header h;
   quicktime_atom_t chunk_atom;
   int result = 0;
   int chunk_bytes = 0, chunk_samples = 0;
-
+  quicktime_audio_map_t *track_map;
   uint8_t * chunk_ptr;
 
+  track_map = &file->atracks[track];
+  
   memset(&h, 0, sizeof(h));
   
   chunk_ptr = codec->encoder_output;
@@ -318,6 +331,7 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
       chunk_ptr += h.frame_bytes;
       chunk_bytes += h.frame_bytes;
       chunk_samples += h.samples_per_frame;
+      //      fprintf(stderr, "Created frame %d bytes\n", h.frame_bytes);
       }
     else
       break;
@@ -325,25 +339,31 @@ static int write_data(quicktime_t *file, quicktime_audio_map_t *track_map,
 
   if(chunk_ptr > codec->encoder_output)
     {
+    lqt_start_audio_vbr_chunk(file, track);
     quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
+
+    lqt_start_audio_vbr_frame(file, track);
     result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
 
+    
     if(samples < 0)
       {
+      lqt_finish_audio_vbr_frame(file, track, chunk_samples);
       quicktime_write_chunk_footer(file, 
                                    track_map->track, 
                                    track_map->current_chunk,
                                    &chunk_atom,
-                                   chunk_samples);
+                                   track_map->vbr_num_frames);
       codec->samples_written += chunk_samples;
       }
     else
       {
+      lqt_finish_audio_vbr_frame(file, track, samples);
       quicktime_write_chunk_footer(file, 
                                    track_map->track, 
                                    track_map->current_chunk,
                                    &chunk_atom,
-                                   samples);
+                                   track_map->vbr_num_frames);
       codec->samples_written += samples;
       }
     
@@ -381,16 +401,33 @@ static int encode(quicktime_t *file,
 
   if(!codec->encode_initialized)
     {
+    lqt_init_vbr_audio(file, track);
     codec->encode_initialized = 1;
     codec->lame_global = lame_init();
-    lame_set_brate(codec->lame_global, codec->bitrate / 1000);
-    lame_set_VBR(codec->lame_global, vbr_off);
+
+    if(trak->strl || (codec->bitrate_mode == vbr_off))
+      {
+      lame_set_VBR(codec->lame_global, vbr_off);
+      lame_set_brate(codec->lame_global, codec->bitrate / 1000);
+      }
+    else if(codec->bitrate_mode == vbr_default)
+      {
+      lame_set_VBR(codec->lame_global, vbr_default);
+      lame_set_VBR_q(codec->lame_global, codec->quality_vbr);
+      }
+    else if(codec->bitrate_mode == vbr_abr)
+      {
+      lame_set_VBR(codec->lame_global, vbr_abr);
+      lame_set_VBR_min_bitrate_kbps(codec->lame_global, codec->bitrate_min/1000);
+      lame_set_VBR_max_bitrate_kbps(codec->lame_global, codec->bitrate_max/1000);
+      }
+    
     lame_set_quality(codec->lame_global, codec->quality);
     lame_set_in_samplerate(codec->lame_global, 
                            trak->mdia.minf.stbl.stsd.table[0].sample_rate);
     lame_set_out_samplerate(codec->lame_global, 
                             trak->mdia.minf.stbl.stsd.table[0].sample_rate);
-
+    
     lame_set_bWriteVbrTag(codec->lame_global, 0);
     
     /* Also support Mono streams */
@@ -470,7 +507,7 @@ static int encode(quicktime_t *file,
   if(result > 0)
     {
     codec->encoder_output_size += result;
-    result = write_data(file, track_map, codec, -1);
+    result = write_data(file, track, codec, -1);
     }
   
   return result;
@@ -484,12 +521,29 @@ static int set_parameter(quicktime_t *file, int track,
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
   quicktime_mp3_codec_t *codec =
     ((quicktime_codec_t*)atrack->codec)->priv;
-
-  if(!strcasecmp(key, "mp3_bitrate"))
+  
+  if(!strcasecmp(key, "mp3_bitrate_mode"))
+    {
+    if(!strcmp((char*)value, "CBR"))
+      codec->bitrate_mode = vbr_off;
+    else if(strcmp((char*)value, "ABR"))
+      codec->bitrate_mode = vbr_abr;
+    else if(strcmp((char*)value, "VBR"))
+      codec->bitrate_mode = vbr_default;
+    }
+  else if(!strcasecmp(key, "mp3_bitrate"))
     codec->bitrate = *(int*)value;
+  else if(!strcasecmp(key, "mp3_bitrate_min"))
+    codec->bitrate_min = *(int*)value;
+  else if(!strcasecmp(key, "mp3_bitrate_max"))
+    codec->bitrate_max = *(int*)value;
   else if(!strcasecmp(key, "mp3_quality"))
     codec->quality = *(int*)value;
-
+  else if(!strcasecmp(key, "mp3_quality_vbr"))
+    codec->quality_vbr = *(int*)value;
+  else
+    fprintf(stderr, "set_parameter: %s\n", key);
+  
   return 0;
   }
 
@@ -512,7 +566,7 @@ static void flush(quicktime_t *file, int track)
       {
       //      fprintf(stderr, "Flush: %d\n", result);
       codec->encoder_output_size += result;
-      write_data(file, track_map, codec, codec->samples_read - codec->samples_written);
+      write_data(file, track, codec, codec->samples_read - codec->samples_written);
       }
     }
   //  fprintf(stderr, "Samples read: %lld, Samples written: %lld\n", codec->samples_read, codec->samples_written);

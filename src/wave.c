@@ -121,8 +121,23 @@ void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave)
 
 void quicktime_wave_dump(quicktime_wave_t *wave)
   {
+  int i;
+  uint32_t len;
   printf("       wave: \n");
-  quicktime_frma_dump(&wave->frma);
-  quicktime_enda_dump(&wave->enda);
-  
+  if(wave->has_frma)
+    quicktime_frma_dump(&wave->frma);
+  if(wave->has_enda)
+    quicktime_enda_dump(&wave->enda);
+
+  for(i = 0; i < wave->num_user_atoms; i++)
+    {
+    len =
+      ((uint32_t)wave->user_atoms[i][0] << 24) |
+      ((uint32_t)wave->user_atoms[i][1] << 16) |
+      ((uint32_t)wave->user_atoms[i][2] <<  8) |
+      wave->user_atoms[i][3];
+    printf("         User atom %.4s (%d bytes)\n",
+           wave->user_atoms[i] + 4,
+           len);
+    }
   }

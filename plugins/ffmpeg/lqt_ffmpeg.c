@@ -673,7 +673,7 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
           do_encode: 1,
         },
-#if 0 /* Sounds ugly */
+#if 1 /* Sounds ugly */
 	{
           id: CODEC_ID_ADPCM_MS,
 	  index: -1,
@@ -685,7 +685,7 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x02, LQT_WAV_ID_NONE },
         },
 #endif
-#if 0 /* Sounds ugly */
+#if 1 /* Sounds ugly */
         {
           id: CODEC_ID_ADPCM_IMA_WAV,
 	  index: -1,
@@ -710,6 +710,7 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x06, LQT_WAV_ID_NONE },
         },
 #endif
+#if 0 /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
 	{
           id: CODEC_ID_ALAC,
 	  index: -1,
@@ -720,6 +721,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  fourccs: { "alac", (char*)0},
           wav_ids: { LQT_WAV_ID_NONE },
         },
+#endif
 };
 
 

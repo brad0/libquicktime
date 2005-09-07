@@ -536,6 +536,7 @@ static int flush_header(quicktime_t * file, int track)
 
 static int flush_data(quicktime_t * file, int track)
   {
+  int64_t new_encoded_samples;
   int result = 0;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_trak_t *trak = track_map->track;
@@ -558,7 +559,6 @@ static int flush_data(quicktime_t * file, int track)
       
       }
     }
-  
   while(!result)
     {
     //        ogg_stream_flush(&codec->enc_os, &codec->enc_og);
@@ -575,24 +575,31 @@ static int flush_data(quicktime_t * file, int track)
     if(!codec->chunk_started)
       {
       codec->chunk_started = 1;
+      lqt_start_audio_vbr_chunk(file, track);
       quicktime_write_chunk_header(file, trak, &codec->chunk_atom);
       //      fprintf(stderr, "Starting chunk\n");
-
-      if(!codec->header_written)
-        {
-        codec->header_written = 1;
-        result = !quicktime_write_data(file, codec->enc_header, codec->enc_header_len);
-        }
-
+      
       }
-    result = !quicktime_write_data(file, codec->enc_og.header, codec->enc_og.header_len);
+    lqt_start_audio_vbr_frame(file, track);
+    if(!codec->header_written)
+      {
+      codec->header_written = 1;
+      result = !quicktime_write_data(file, codec->enc_header, codec->enc_header_len);
+      }
     
+    result = !quicktime_write_data(file, codec->enc_og.header, codec->enc_og.header_len);
     if(!result)
       {
       result = !quicktime_write_data(file, codec->enc_og.body, codec->enc_og.body_len);
       }
     // fprintf(stderr, "Granulepos: %lld\n", ogg_page_granulepos(&(codec->enc_og)));
 
+    new_encoded_samples = codec->enc_os.granulepos;
+
+    lqt_finish_audio_vbr_frame(file, track, new_encoded_samples - codec->encoded_samples);
+    codec->encoded_samples = new_encoded_samples;
+    
+    
 #if 0
     fprintf(stderr, "Wrote page %ld + %ld bytes\n",
             codec->enc_og.header_len, codec->enc_og.body_len);
@@ -647,6 +654,10 @@ static int encode(quicktime_t *file,
 
  
     codec->encode_initialized = 1;
+
+    lqt_init_vbr_audio(file, track);
+
+
     if(file->use_avi)
       trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
     vorbis_info_init(&codec->enc_vi);
@@ -727,7 +738,6 @@ static int encode(quicktime_t *file,
   // Wrote a chunk.
   if(codec->chunk_started)
     {
-    int new_encoded_samples = codec->enc_os.granulepos;
 #if 0
     fprintf(stderr, "WRITING CHUNK: %lld %lld\n",
             codec->enc_os.granulepos, codec->enc_vd.granulepos);
@@ -736,9 +746,8 @@ static int encode(quicktime_t *file,
                                  trak,
                                  track_map->current_chunk,
                                  &codec->chunk_atom, 
-                                 new_encoded_samples - codec->encoded_samples);
+                                 track_map->vbr_num_frames);
     track_map->current_chunk++;
-    codec->encoded_samples = new_encoded_samples;
     codec->chunk_started = 0;
     }
 
@@ -788,17 +797,16 @@ static void flush(quicktime_t *file, int track)
 //printf("flush 2 %d\n", size);
 	if(codec->chunk_started)
 	{
-		int new_encoded_samples = codec->enc_os.granulepos;
 #if 0
                 fprintf(stderr, "WRITING CHUNK: %lld %lld\n",
                         (long long)codec->enc_os.granulepos,
                         (long long)codec->enc_vd.granulepos);
 #endif
                 quicktime_write_chunk_footer(file, 
-						trak,
-						track_map->current_chunk,
-						&codec->chunk_atom, 
-						new_encoded_samples - codec->encoded_samples);
+                                             trak,
+                                             track_map->current_chunk,
+                                             &codec->chunk_atom, 
+                                             track_map->vbr_num_frames);
 		track_map->current_chunk++;
                 codec->chunk_started = 0;
 

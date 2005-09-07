@@ -135,7 +135,7 @@ int quicktime_read_minf(quicktime_t *file, quicktime_minf_t *minf, quicktime_ato
 		else
 			quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < parent_atom->end);
-
+        
 	return 0;
 }
 

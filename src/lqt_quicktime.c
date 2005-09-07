@@ -2212,3 +2212,47 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
     return LQT_SAMPLE_UNDEFINED;
   return file->atracks[track].sample_format;
   }
+
+void lqt_init_vbr_audio(quicktime_t * file, int track)
+  {
+  quicktime_trak_t * trak = file->atracks[track].track;
+  trak->mdia.minf.stbl.stsd.table[0].compression_id = -2;
+  trak->mdia.minf.is_audio_vbr = 1;
+  }
+
+void lqt_start_audio_vbr_chunk(quicktime_t * file, int track)
+  {
+  file->atracks[track].vbr_num_frames = 0;
+  }
+
+void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  atrack->vbr_frame_start = quicktime_position(file);
+  //  fprintf(stderr, "lqt_start_audio_vbr_frame\n");
+  }
+
+void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
+  {
+  quicktime_stsz_t * stsz;
+  quicktime_stts_t * stts;
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  
+  stsz = &(file->atracks[track].track->mdia.minf.stbl.stsz);
+  stts = &(file->atracks[track].track->mdia.minf.stbl.stts);
+  
+  /* Update stsz */
+
+  quicktime_update_stsz(stsz, file->atracks[track].vbr_frames_written, 
+                        quicktime_position(file) - file->atracks[track].vbr_frame_start);
+  /* Update stts */
+  
+  quicktime_update_stts(stts, file->atracks[track].vbr_frames_written, num_samples);
+
+  atrack->vbr_num_frames++;
+  atrack->vbr_frames_written++;
+
+  //  fprintf(stderr, "lqt_finish_audio_vbr_frame (total_frames: %lld, samples: %d)\n",
+  //          atrack->vbr_frames_written, num_samples);
+  
+  }

@@ -553,6 +553,7 @@ typedef struct
 {
 	int is_video;
 	int is_audio;
+        int is_audio_vbr;   /* Special flag indicating VBR audio */
 	int has_baseheader;
 	int is_panorama;
 	int is_qtvr;
@@ -899,6 +900,11 @@ typedef struct
 
         uint8_t * sample_buffer;
         int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
+
+/* VBR stuff */
+        int vbr_num_frames; /* Frames written since start of chunk */
+        int64_t vbr_frame_start;
+        int64_t vbr_frames_written;
         
 } quicktime_audio_map_t;
 

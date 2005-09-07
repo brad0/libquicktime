@@ -9,17 +9,48 @@ static char * fourccs_mp3[]  = { QUICKTIME_MP3, (char*)0 };
 
 static lqt_parameter_info_static_t encode_parameters_lame[] =
   {
-     { 
+    {
+       name:               "mp3_bitrate_mode",
+       real_name:          "Bitrate mode",
+       type:               LQT_PARAMETER_STRINGLIST,
+       val_default:        { val_string: "CBR" },
+       stringlist_options: (char*[]){ "CBR", "ABR", "VBR", (char*)0 }
+    },
+    { 
        name:               "mp3_bitrate",
-       real_name:          "Nominal Bitrate",
+       real_name:          "Nominal Bitrate (ABR/CBR)",
        type:               LQT_PARAMETER_INT,
        val_default:        { 256000 },
+       val_min:            0,
+       val_max:            0,
+     },
+     { 
+       name:               "mp3_bitrate_min",
+       real_name:          "Minimum Bitrate (ABR)",
+       type:               LQT_PARAMETER_INT,
+       val_default:        { 64000 },
+       val_min:            0,
+       val_max:            0,
+     },
+     { 
+       name:               "mp3_bitrate_max",
+       real_name:          "Maximum Bitrate (ABR)",
+       type:               LQT_PARAMETER_INT,
+       val_default:        { 320000 },
        val_min:            0,
        val_max:            0,
      },
      {
        name:               "mp3_quality",
        real_name:          "Quality (0 = best)",
+       type:               LQT_PARAMETER_INT,
+       val_default:        { 0 },
+       val_min:            0,
+       val_max:            9,
+     },
+     {
+       name:               "mp3_quality_vbr",
+       real_name:          "VBR Quality (0 = best)",
        type:               LQT_PARAMETER_INT,
        val_default:        { 0 },
        val_min:            0,

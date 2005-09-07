@@ -347,40 +347,6 @@ int lqt_ffmpeg_set_parameter_audio(quicktime_t *file,
           return -1;
 }
 
-#if 0
-static void deinterleave(int16_t ** dst_i, float ** dst_f, int16_t * src,
-                         int channels, int samples)
-  {
-  int i, j;
-  if(dst_f)
-    {
-    for(i = 0; i < channels; i++)
-      {
-      if(dst_f[i])
-        {
-        for(j = 0; j < samples; j++)
-          {
-          dst_f[i][j] = (float)src[j*channels + i]/32767.0;
-          }
-        }
-      }
-    }
-  if(dst_i)
-    {
-    for(i = 0; i < channels; i++)
-      {
-      if(dst_i[i])
-        {
-        for(j = 0; j < samples; j++)
-          {
-          dst_i[i][j] = src[j*channels + i];
-          }
-        }
-      }
-
-    }
-  }
-#endif
 /* Decode the current chunk into the sample buffer */
 
 static int decode_chunk(quicktime_t * file, int track)
@@ -670,8 +636,16 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
     /* Set some mandatory variables */
     codec->com.ffcodec_dec->channels        = quicktime_track_channels(file, track);
     codec->com.ffcodec_dec->sample_rate     = quicktime_sample_rate(file, track);
-    //    priv->ctx->block_align     = s->data.audio.block_align;
-    //    priv->ctx->bit_rate        = s->codec_bitrate;
+
+    if(track_map->track->mdia.minf.stbl.stsd.table[0].version == 1)
+      {
+      if(track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame)
+        codec->com.ffcodec_dec->block_align =
+          track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame;
+      }
+    
+    //  priv->ctx->block_align     = s->data.audio.block_align;
+    //  priv->ctx->bit_rate        = s->codec_bitrate;
 
     codec->com.ffcodec_dec->bits_per_sample = quicktime_audio_bits(file, track);
 

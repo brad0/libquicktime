@@ -252,6 +252,7 @@ void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,
 
 void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma);
 void quicktime_frma_dump(quicktime_frma_t *frma);
+void quicktime_set_frma(quicktime_trak_t * trak, char * codec);
 
 
 
@@ -612,6 +613,13 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table);
 void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom);
+
+void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
+                                 uint32_t samples_per_packet,
+                                 uint32_t bytes_per_packet,
+                                 uint32_t bytes_per_frame,
+                                 uint32_t bytes_per_sample);
+
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table);
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);
 void quicktime_stsd_table_init(quicktime_stsd_table_t *table);
@@ -903,6 +911,15 @@ int quicktime_update_positions(quicktime_t *file);
 
 void quicktime_init_maps(quicktime_t * file);
 void lqt_update_frame_position(quicktime_video_map_t * track);
+
+void lqt_start_audio_vbr_chunk(quicktime_t * file, int track);
+void lqt_init_vbr_audio(quicktime_t * file, int track);
+
+/* Before and after writing subsequent frames, we must call
+   quicktime_write_chunk_[header|footer] */
+
+void lqt_start_audio_vbr_frame(quicktime_t * file, int track);
+void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples);
 
 /*
  *  Convenience function: Returns an array of chunk sizes
