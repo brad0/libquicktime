@@ -671,7 +671,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "AC3 Audio",
 	  fourccs: {".ac3", ".AC3", (char *)0},
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
-          do_encode: 1,
+          //          do_encode: 1,
         },
 #if 1 /* Sounds ugly */
 	{
