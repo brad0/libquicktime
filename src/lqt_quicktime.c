@@ -25,6 +25,14 @@ static int64_t get_file_length(quicktime_t *file)
         return total_bytes;
 }
 
+int lqt_fileno(quicktime_t *file)
+  {
+  FILE *fp;
+
+  fp = file->stream;
+  return(fileno(fp));
+  }
+
 int quicktime_make_streamable(char *in_path, char *out_path)
 {
 	quicktime_t file, *old_file, new_file;
