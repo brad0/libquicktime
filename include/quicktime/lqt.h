@@ -11,6 +11,8 @@ extern "C" {
 
 void *lqt_bufalloc(size_t size);
 
+int lqt_fileno(quicktime_t *file);
+
 /* Call quicktime_set_parameter with our codec info */
 
 void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value);

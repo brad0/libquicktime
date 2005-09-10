@@ -932,8 +932,6 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples);
 
 int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak);
 
-int lqt_fileno(quicktime_t *file);
-
 /* lqt_codecs.c */
 
 int quicktime_delete_vcodec(quicktime_video_map_t *vtrack);
