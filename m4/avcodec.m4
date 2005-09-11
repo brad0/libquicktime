@@ -11,8 +11,8 @@ CFLAGS="$CFLAGS $AVCODEC_CFLAGS"
 LIBS="$LIBS $AVCODEC_LIBS"
 avcodec_ok="false"
 AC_TRY_RUN([
-    #include <ffmpeg/avcodec.h>
     #include <stdio.h>
+    #include <ffmpeg/avcodec.h>
     int main()
     {
     FILE * output;
