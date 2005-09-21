@@ -42,7 +42,7 @@
 #define BC_YUVJ420P     18
 #define BC_YUVJ422P     19
 #define BC_YUVJ444P     20
-/* 16 bit per component plana formats */
+/* 16 bit per component planar formats */
 #define BC_YUV422P16    21
 #define BC_YUV444P16    22
 
