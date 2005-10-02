@@ -73,6 +73,10 @@ install: build
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
 
 	dh_install
+	-test -e debian/tmp/usr/bin/libquicktime_config && \
+		mkdir -p debian/libquicktime-plugin-configurator/usr/bin && \
+		cp debian/tmp/usr/bin/libquicktime_config debian/libquicktime-plugin-configurator/usr/bin
+
 # Build architecture-independent files here.
 binary-indep: build install
 # We have nothing to do by default.
