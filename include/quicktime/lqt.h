@@ -21,6 +21,9 @@ void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value
 int lqt_set_fiel(quicktime_t *, int, int, int);
 int lqt_get_fiel(quicktime_t *, int, int *, int *);
   
+int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
+int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
+
 int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
                          int * pixel_height);
 int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,

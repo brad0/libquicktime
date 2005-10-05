@@ -473,8 +473,6 @@ void quicktime_pasp_delete(quicktime_pasp_t *pasp);
 void quicktime_pasp_dump(quicktime_pasp_t *pasp);
 void quicktime_read_pasp(quicktime_t *file, quicktime_pasp_t *pasp);
 void quicktime_write_pasp(quicktime_t *file, quicktime_pasp_t *pasp);
-int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
-int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
 /* pHdr */
 
