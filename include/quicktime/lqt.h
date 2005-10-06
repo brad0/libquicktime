@@ -24,6 +24,12 @@ int lqt_get_fiel(quicktime_t *, int, int *, int *);
 int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
+int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+
+int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+
 int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
                          int * pixel_height);
 int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
@@ -32,13 +38,10 @@ int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
 
 lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track);
 const char * lqt_interlace_mode_to_string(lqt_interlace_mode_t);
-  
 
-  
 lqt_chroma_placement_t lqt_get_chroma_placement(quicktime_t * file, int track);
 const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t);
 
-  
 int lqt_get_codec_api_version();
 
 /***********************************************

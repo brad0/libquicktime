@@ -131,9 +131,6 @@ void quicktime_clap_delete(quicktime_clap_t *clap);
 void quicktime_clap_dump(quicktime_clap_t *clap);
 void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap);
 void quicktime_write_clap(quicktime_t *file, quicktime_clap_t *clap);
-int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
-int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
-
 
 // ******************************** Permutation *******************************
 
@@ -176,8 +173,6 @@ void quicktime_colr_delete(quicktime_colr_t *colr);
 void quicktime_colr_dump(quicktime_colr_t *colr);
 void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr);
 void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr);
-int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
-int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 
 /* ctab.c */
 
