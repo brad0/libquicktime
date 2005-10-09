@@ -275,51 +275,13 @@ dnl
 dnl Check for libjpeg
 dnl
 
-AH_TEMPLATE([HAVE_LIBJPEG], [Do we have libjpeg installed?])
-JPEG_REQUIRED="6b"
-have_libjpeg=false
-
-OLD_CFLAGS=$CFLAGS
-OLD_LIBS=$LIBS
-
-LIBS=-ljpeg-mmx
-CFLAGS=""
-
-AC_MSG_CHECKING(for jpeg-mmx)
-AC_TRY_LINK([#include <stdio.h>
-             #include <jpeglib.h>],
-            [struct jpeg_decompress_struct cinfo;
-             jpeg_create_decompress(&cinfo);],
-	    [have_libjpeg=true])
-
-if test x$have_libjpeg = xfalse; then
-  AC_MSG_RESULT(no);
-  LIBS=-ljpeg
-  CFLAGS=""
-  AC_MSG_CHECKING(for libjpeg)
-  AC_TRY_LINK([#include <stdio.h>
-               #include <jpeglib.h>],
-              [struct jpeg_decompress_struct cinfo;
-	       jpeg_create_decompress(&cinfo);],
-	      [have_libjpeg=true])
-fi
-
-case $have_libjpeg in
-  true) AC_DEFINE(HAVE_LIBJPEG)
-        AC_MSG_RESULT(yes)
-	JPEG_LIBS=$LIBS;
-	JPEG_CFLAGS=$CFLAGS;;
-  false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
-  * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
-esac
-
-CFLAGS=$OLD_CFLAGS
-LIBS=$OLD_LIBS
+AC_CHECK_LIB(jpeg, jpeg_start_compress,
+	    [ JPEG_LIBS="-ljpeg"
+	      JPEG_CFLAGS=""
+	    have_libjpeg=true ],,)
 
 AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
-AC_SUBST(JPEG_REQUIRED)
-
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
 
 dnl
