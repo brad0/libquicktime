@@ -274,6 +274,7 @@ dnl
 dnl Check for libjpeg
 dnl
 
+JPEG_REQUIRED="6b"
 AC_CHECK_LIB(jpeg, jpeg_start_compress,
 	    [ JPEG_LIBS="-ljpeg"
 	      JPEG_CFLAGS=""
@@ -281,6 +282,7 @@ AC_CHECK_LIB(jpeg, jpeg_start_compress,
 
 AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
+AC_SUBST(JPEG_REQUIRED)
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
 
 dnl

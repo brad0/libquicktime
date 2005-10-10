@@ -22,8 +22,6 @@ BuildRequires:	libvorbis-devel >=  @VORBIS_REQUIRED@
 BuildRequires:	libdv-devel >=      @LIBDV_REQUIRED@
 BuildRequires:  gtk+-devel >=       @GTK_REQUIRED@
 BuildRequires:  lame-devel >=       @LAME_REQUIRED@
-BuildRequires:	libraw1394-devel >= @LIBRAW1394_REQUIRED@
-BuildRequires:	libavc1394-devel >= @LIBAVC1394_REQUIRED@
 BuildRequires:	ffmpeg-devel =      @AVCODEC_REQUIRED@
 
 BuildRoot:	/tmp/libquicktime
@@ -37,31 +35,6 @@ audio CODECs are Ogg Vorbis, IMA4, ulaw, and any linear PCM format.
 Libquicktime is based on the quicktime4linux library.  Libquicktime add
 features such as a GNU build tools-based build process and dynamically
 loadable CODECs.
-
-%package firewire
-Summary:	Firewire Support for libquicktime
-Group:		Applications/Graphics
-Group(de):	Applikationen/Grafik
-Group(pl):	Aplikacje/Grafika
-Group(pt):	Aplicações/Gráficos
-Requires:	%{name} = %{version}
-Requires:	libraw1394 >= @LIBRAW1394_REQUIRED@
-Requires:	libavc1394 >= @LIBAVC1394_REQUIRED@
-Requires:       libdv >=      @LIBDV_REQUIRED@
-
-%description firewire
-Firewire Support for libquicktime
-
-%package firewire-devel
-Summary:	Header files for libquicktime firewire support 
-Group:		Applications/Graphics
-Group(de):	Applikationen/Grafik
-Group(pl):	Aplikacje/Grafika
-Group(pt):	Aplicações/Gráficos
-Requires:	%{name} = %{version}
-
-%description firewire-devel
-Header files for libquicktime firewire support
 
 %package devel
 Summary:	Header files and development documentation for libquicktime
@@ -119,7 +92,6 @@ Summary:	Libquicktime plugin supporting the DV codec
 Group:		Applications/Graphics
 Requires:	%{name} = %{version}
 Requires:	libdv >= @LIBDV_REQUIRED@
-Requires:	libraw1394
 
 %description dv
 Libquicktime plugin supporting the DV codec
@@ -223,13 +195,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_videocodec.la
 %attr(755,root,root) %{_libdir}/libquicktime/lqt_rtjpeg.so
 %attr(644,root,root) %{_libdir}/libquicktime/lqt_rtjpeg.la
-
-%files firewire
-%attr(755,root,root) %{_libdir}/libquicktime1394.so*
-%attr(644,root,root) %{_libdir}/libquicktime1394.la
-
-%files firewire-devel
-%attr(644,root,root) %{_includedir}/quicktime/libdv.h
 
 %files devel
 %doc doc/*.html
