@@ -212,7 +212,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/qt* 
 %attr(755,root,root) %{_bindir}/lqt_transcode
 %attr(755,root,root) %{_bindir}/lqtplay
-%attr(755,root,root) %{_bindir}/lqtvrplay
 %attr(644,root,root) %{_datadir}/man/man1/lqtplay.1.gz
 
 %files jpeg
