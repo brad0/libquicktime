@@ -8,7 +8,6 @@ lqt.h  \
 lqt_codecinfo.h \
 lqt_codecapi.h \
 lqt_version.h \
-lqt1394_config.h \
 lqt_qtvr.h
 
-EXTRA_DIST=lqt_version.h.in lqt1394_config.h.in
+EXTRA_DIST=lqt_version.h.in

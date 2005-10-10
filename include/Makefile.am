@@ -4,7 +4,6 @@ noinst_HEADERS = \
 cmodel_permutation.h \
 colorspace_tables.h \
 colorspace_macros.h \
-colormodels.h \
 funcprotos.h \
 graphics.h \
 lqt_codecfile.h \

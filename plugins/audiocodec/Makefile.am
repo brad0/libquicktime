@@ -15,4 +15,4 @@ pcm.h \
 alaw_tables.h \
 ulaw_tables.h
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

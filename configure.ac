@@ -1,7 +1,6 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.8pre1)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.8pre2)
 AM_CONFIG_HEADER(config.h)
-AM_CONFIG_HEADER(include/quicktime/lqt1394_config.h)
 
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
@@ -285,109 +284,6 @@ AC_SUBST(JPEG_CFLAGS)
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
 
 dnl
-dnl Check for quicktime1394 junk
-dnl
-
-CINELERRA_FIREWIRE_LIBS=""
-
-AH_TEMPLATE([HAVE_FIREWIRE],
-            [tell libdv.c to support firewire])
-AH_TEMPLATE([HAVE_LIBRAW1394],
-            [Define if you have libraw1394 (-lraw1394).])
-AH_TEMPLATE([HAVE_LIBROM1394],
-            [Define if you have librom1394 (-lrom1394).])
-AH_TEMPLATE([HAVE_LIBAVC1394],
-            [Define if you have the `avc1394` library (-lavc1394).])
-
-AC_MSG_CHECKING(whether to enable firewire support)
-
-AC_ARG_ENABLE(firewire,
- [  --disable-firewire      disable ieee1394 (firewire) in the library. This prevents 
-			  Broadcast 2000 and Cinelerra from building. This code will 
-			  not work with recent versions of the linux ieee1394 driver. ],
- [case "${enableval}" in
-       yes) enable_firewire=yes ;;
-       no) enable_firewire=no ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-firewire) ;;
- esac], [enable_firewire=yes])
-
-if test x$have_libdv != xtrue; then
-  enable_firewire="no (I need libdv)"
-fi
-
-AC_MSG_RESULT($enable_firewire)
-
-LIBAVC1394_REQUIRED="0.3.1"
-LIBRAW1394_REQUIRED="0.9.0"
-
-AC_SUBST(LIBAVC1394_REQUIRED)
-AC_SUBST(LIBRAW1394_REQUIRED)
-
-have_libavc1394=false
-have_librom1394=false
-
-if test "x$enable_firewire" = xyes; then
-
-	FIREWIRE_LIBS="$GLIB_LIBS $LIBDV_LIBS"
-	FIREWIRE_CFLAGS="$GLIB_CFLAGS $LIBDV_CFLAGS"
-
-	AC_LIB_RAW1394([0.9], 
-			 [ FIREWIRE_CFLAGS="$FIREWIRE_CFLAGS $LIBRAW1394_CPPFLAGS $LIBRAW1394_CFLAGS"; 
-			 FIREWIRE_LIBS="$FIREWIRE_LIBS $LIBRAW1394_LIBS"
-			 AC_DEFINE(HAVE_LIBRAW1394, 1)
-			 have_libraw1394=true ],
-			[ have_libraw1394=false ])
-
-	if test "x$have_libraw1394" != "xtrue"; then
-	  enable_firewire=no
-	  AC_MSG_WARN([libraw1394 is not available, so firewire support will be disabled.])
-        else
-	  CINELERRA_FIREWIRE_LIBS="$FIREWIRE_LIBS"
-	fi
-
-	OLD_LIBS=$LIBS
-	OLD_CFLAGS=$CFLAGS
-	LIBS=$FIREWIRE_LIBS
-	CFLAGS=$FIREWIRE_CFLAGS
-
-	if test "x$enable_firewire" = xyes; then
-	  AC_CHECK_LIB(avc1394, avc1394_send_command, 
-			[LIBS="-lavc1394 $LIBS"; have_libavc1394=true; AC_DEFINE(HAVE_LIBAVC1394, 1) ], 
-			[AC_MSG_WARN([libavc1394 is not available, so firewire support will be disabled.])
-			enable_firewire=no])
-	fi
-
-	if test "x$enable_firewire" = xyes; then
-	  AC_CHECK_LIB(rom1394, main, 
-			[LIBS="-lrom1394 $LIBS"; have_librom1394=true; AC_DEFINE(HAVE_LIBROM1394, 1)], 
-			[AC_MSG_WARN([librom1394 is not available, so firewire support will be disabled.])
-			enable_firewire=no])
-	fi
-
-	FIREWIRE_LIBS=$LIBS
-	FIREWIRE_CFLAGS=$CFLAGS
-
-	LIBS=$OLD_LIBS
-	CFLAGS=$OLD_CFLAGS
-
-	if test "x$enable_firewire" = xyes; then
-	  AC_DEFINE(HAVE_FIREWIRE, 1)
-	fi
-fi
-
-AM_CONDITIONAL(HAVE_FIREWIRE, test "x$enable_firewire" = xyes)
-
-HAVE_FIREWIRE=0
-if test "x$enable_firewire" = xyes; then
-	HAVE_FIREWIRE=1
-fi
-AC_SUBST(HAVE_FIREWIRE)
-
-AC_SUBST(FIREWIRE_LIBS)
-AC_SUBST(FIREWIRE_CFLAGS)
-AC_SUBST(FIREWIRE_SUBDIRS)
-
-dnl
 dnl Check for libavcodec (ffmpeg)
 dnl
 
@@ -497,8 +393,6 @@ fi
 
 AC_SUBST(RTJPEG_CFLAGS)
 
-dnl jpeg/Makefile
-
 if test "x$prefix" = xNONE; then
    prefix="${ac_default_prefix}"
 fi
@@ -558,13 +452,6 @@ LQT_LIBS="-lquicktime $LIBS"
 AC_SUBST(LQT_CFLAGS)
 AC_SUBST(LQT_LIBS)
 
-LQT1394_CFLAGS="$FIREWIRE_CFLAGS"
-LQT1394_LIBS="$FIREWIRE_LIBS -lquicktime1394"
-
-AC_SUBST(LQT1394_CFLAGS)
-AC_SUBST(LQT1394_LIBS)
-AC_SUBST(CINELERRA_FIREWIRE_LIBS)
-
 dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile \
@@ -573,7 +460,6 @@ libquicktime.pc \
 doc/Makefile \
 debian/Makefile \
 src/Makefile \
-quicktime1394/Makefile \
 include/Makefile \
 include/quicktime/Makefile \
 include/quicktime/lqt_version.h \
@@ -639,35 +525,6 @@ else
 echo "Missing"
 fi
 
-echo -n "libraw1394: "
-if test x$have_libraw1394 = "xtrue"; then
-echo "Yes"
-else
-echo "Missing"
-fi
-
-echo -n "libavc1394: "
-if test x$have_libavc1394 = "xtrue"; then
-echo "Yes"
-else
-echo "Missing"
-fi
-
-echo -n "librom1394: "
-if test x$have_librom1394 = "xtrue"; then
-echo "Yes"
-else
-echo "Missing"
-fi
-
-echo -n "Firewire:   "
-if test "x$enable_firewire" = xyes; then
-echo "Enabled"
-else
-echo "Disabled"
-fi
-
-
 echo -n "gtk >= 2.4.0: "
 if test x$have_gtk = "xtrue"; then
 echo "Yes"
@@ -681,4 +538,3 @@ echo "Yes"
 else
 echo "Missing"
 fi  
-

@@ -8,4 +8,4 @@ lqt_ffmpeg_la_LIBADD = @MODULE_LIBADD@ @AVCODEC_LIBS@
 
 noinst_HEADERS = ffmpeg.h
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

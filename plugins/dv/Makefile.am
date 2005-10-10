@@ -1,4 +1,4 @@
-AM_CFLAGS = @LIBDV_CFLAGS@ @FIREWIRE_CFLAGS@
+AM_CFLAGS = @LIBDV_CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_dv.la
 
@@ -9,4 +9,4 @@ lqt_dv_la_LIBADD = @LIBDV_LIBS@ @MODULE_LIBADD@
 
 noinst_HEADERS = dv.h
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

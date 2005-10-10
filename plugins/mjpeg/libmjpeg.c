@@ -20,8 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>	/* for memcpy & bzero prototypes */
-#include <colormodels.h>
-#include <lqt.h>
+#include "funcprotos.h"
+#include "colormodels.h"
+#include "lqt.h"
 #include "libmjpeg.h"
 
 /* JPEG MARKERS */

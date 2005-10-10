@@ -96,4 +96,4 @@ lqt_divx.c \
 lqt_loader.c \
 lqt_qtvr.c
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

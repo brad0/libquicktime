@@ -25,4 +25,4 @@ yuv2.h \
 yuv4.h \
 yv12.h
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

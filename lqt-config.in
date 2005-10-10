@@ -4,16 +4,13 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 exec_prefix_set=no
 
-old_include_names=yes
-
 usage()
 {
   cat <<EOF 1>&2
-Usage: lqt-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--use-lqt-includes] 
+Usage: lqt-config [--prefix[=DIR]] [--exec-prefix[=DIR]]
                   [--plugin-dir] [--version] [--libs | --plugin-libs] 
-                  [--cflags | --plugin-cflags] [modules...]
+                  [--cflags | --plugin-cflags]
 
-Available modules are: quicktime1394 cinelerra (prints libs for cinelerra)
 EOF
   exit 1
 }
@@ -35,17 +32,6 @@ while test $# -gt 0; do
   esac
 
   case $1 in
-# modules
-    quicktime1394)
-      the_libs="$the_libs @LQT1394_LIBS@"
-      the_cflags="$the_cflags @LQT1394_CFLAGS@"
-      ;;
-# cinelerra
-    cinelerra)
-      the_libs="$the_libs -lquicktime_mjpeg @JPEG_LIBS@ @CINELERRA_FIREWIRE_LIBS@ @VORBISFILE_LIBS@ @VORBISENC_LIBS@ @VORBIS_LIBS@ @LQT1394_LIBS@"
-      the_cflags="$the_cflags @LQT1394_CFLAGS@"
-      ;;
-# options
     --prefix=*)
       prefix=$optarg
       if test $exec_prefix_set = no ; then
@@ -62,9 +48,6 @@ while test $# -gt 0; do
     --exec-prefix)
       echo $exec_prefix
       ;;
-    --use-lqt-includes)
-      old_include_names=no
-      ;;
     --version)
       echo @LQT_VERSION@
       ;;
@@ -72,17 +55,6 @@ while test $# -gt 0; do
       echo @PLUGIN_DIR@
       ;;
     --cflags|--plugin-cflags)
-      if test @includedir@ != /usr/include ; then
-          # Handle oddities in Win32 path handling (assumes prefix)
-          prefix=`echo ${prefix} | sed 's,^//\([A-Z]\),\1:,'`
-
-          includes=-I@includedir@
-      fi
-      if test x$old_include_names = xyes; then
-	the_cflags="$includes -I@includedir@/lqt $the_cflags"
-      else
-	the_cflags="$includes $the_cflags"
-      fi
       echo_cflags=yes
       ;;
     --libs|--plugin-libs)
