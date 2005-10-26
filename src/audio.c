@@ -42,7 +42,7 @@ typedef enum
 
 #define INT16_TO_INT32(src, dst) dst = src * 0x00010001
 
-#define INT16_TO_FLOAT(src, dst) dst = (float)src / 32767.0 - 0.5
+#define INT16_TO_FLOAT(src, dst) dst = (float)src / 32767.0
 
 /* int32 -> */
 
