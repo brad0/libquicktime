@@ -287,6 +287,8 @@ typedef struct
 
   mpeg_header mph;
   int have_mpeg_header;
+
+  uint8_t * extradata;
     
   } quicktime_ffmpeg_audio_codec_t;
 
@@ -302,7 +304,7 @@ int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   
   if(codec->sample_buffer) free(codec->sample_buffer);
   if(codec->chunk_buffer)  free(codec->chunk_buffer);
-  
+  if(codec->extradata) free(codec->extradata); 
   free(codec);
   return 0;
   }
@@ -659,6 +661,25 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
         codec->com.ffcodec_dec->extradata = header;
         codec->com.ffcodec_dec->extradata_size = header_len;
         }
+      }
+    if(codec->com.ffc_dec->id == CODEC_ID_QDM2)
+      {
+      header = quicktime_wave_get_user_atom(track_map->track, "QDCA", &header_len);
+      if(header)
+        {
+        codec->extradata = malloc(header_len + 12);
+        /* frma atom */
+        codec->extradata[0] = 0x00;
+        codec->extradata[1] = 0x00;
+        codec->extradata[2] = 0x00;
+        codec->extradata[3] = 0x0C;
+        memcpy(codec->extradata + 4, "frmaQDM2", 8);
+        /* QDCA atom */
+        memcpy(codec->extradata + 12, header, header_len);
+        codec->com.ffcodec_dec->extradata = codec->extradata;
+        codec->com.ffcodec_dec->extradata_size = header_len + 12;
+        }
+
       }
 
     //    memcpy(&(codec->com.ffcodec_enc), &(codec->com.params), sizeof(AVCodecContext));
