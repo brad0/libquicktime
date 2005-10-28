@@ -673,6 +673,19 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
           //          do_encode: 1,
         },
+        {
+          id: CODEC_ID_QDM2,
+          index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_audio,
+          decode_parameters: decode_parameters_audio,
+          short_name: "qdm2",
+          name: "QDM2 Audio",
+          fourccs: {"QDM2", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+          //          do_encode: 1,
+        },
 #if 1 /* Sounds ugly */
 	{
           id: CODEC_ID_ADPCM_MS,

@@ -294,7 +294,7 @@ AH_TEMPLATE([HAVE_LIBAVCODEC],
 
 have_libavcodec=false
 
-AVCODEC_BUILD="4734"
+AVCODEC_BUILD="3277056"
 
 dnl PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
 ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
