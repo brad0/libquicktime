@@ -4,9 +4,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
+  
 /* QTVR stuff */
 
+#define QTVR_OBJ 2
+#define QTVR_PAN 3
+#define QTVR_QTVR 1
+  
 /* check if the file is a qtvr file */
 /* return values:                                                             */
 /* QTVR_OBJ  = file is object movie                                           */

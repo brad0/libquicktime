@@ -1,6 +1,10 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
+#include <inttypes.h>
+#include <lqt_atoms.h>
+#include <stdio.h>
+
 /* ================================= structures */
 
 
@@ -29,20 +33,12 @@
 #define AVI_FRAME_RATE_BASE 10000
 #define MAX_RIFFS  0x100
 
-#define QTVR_OBJ 2
-#define QTVR_PAN 3
-#define QTVR_QTVR 1
 
 #define QTVR_GRABBER_SCROLLER_UI 1
 #define QTVR_OLD_JOYSTICK_UI 2 
 #define QTVR_JOYSTICK_UI 3
 #define QTVR_GRABBER_UI 4
 #define QTVR_ABSOLUTE_UI 5
-
-
-//#include "codecs.h"
-#include <stdio.h>
-#include <inttypes.h>
 
 /* Forward declarations */
 
@@ -127,31 +123,6 @@ typedef struct
 	int motion_jpeg_huffman_table;
 } quicktime_mjht_t;
 
-typedef struct
-{
-	int32_t hSpacing;
-	int32_t vSpacing;
-} quicktime_pasp_t;
-
-typedef struct
-{
-	int32_t colorParamType;
-	int16_t primaries;
-	int16_t transferFunction;
-	int16_t matrix;
-} quicktime_colr_t;
-
-typedef struct
-{
-	int32_t cleanApertureWidthN;
-	int32_t cleanApertureWidthD;
-	int32_t cleanApertureHeightN;
-	int32_t cleanApertureHeightD;
-	int32_t horizOffN;
-	int32_t horizOffD;
-	int32_t vertOffN;
-	int32_t vertOffD;
-} quicktime_clap_t;
 
 typedef struct
 {
@@ -999,7 +970,7 @@ typedef struct
 
 /* file descriptor passed to all routines */
 
-typedef struct
+struct quicktime_s
 {
 	FILE *stream;
 	int64_t total_length;
@@ -1076,7 +1047,7 @@ typedef struct
 /*	int color_model, row_span; */
 
 	quicktime_qtvr_node_t qtvr_node[MAXNODES];
-} quicktime_t;
+};
 
 typedef struct
 {

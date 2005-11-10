@@ -1,5 +1,5 @@
-#include "lqt.h"
-
+#include <lqt.h>
+#include <qtprivate.h>
 /* atom.c */
 
 int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom);

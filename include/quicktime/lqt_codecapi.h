@@ -1,4 +1,5 @@
 #include <quicktime/lqt_version.h>
+#include <quicktime/qtprivate.h>
 
 /*
  *  Return the codec api version. This function will be defined in every

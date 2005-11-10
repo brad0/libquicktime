@@ -1,4 +1,6 @@
 #include <quicktime/lqt.h>
+#include <qtprivate.h>
+
 #include <quicktime/colormodels.h>
 #include <string.h>
 #include <dlfcn.h>

@@ -1,3 +1,5 @@
+#include <qtprivate.h>
+
 int quicktime_init_audio_map(quicktime_audio_map_t *atrack,
                              quicktime_trak_t *trak, int encode,
                              lqt_codec_info_t * info);

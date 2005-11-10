@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 /* Some public enums needed by most subsequent headers */
   
@@ -35,8 +36,10 @@ typedef enum
   } lqt_sample_format_t;
   
   
-#include "qtprivate.h"
+// #include "qtprivate.h"
 
+typedef struct quicktime_s quicktime_t;
+  
 /* This is the reference for all your library entry points. */
 
 /* ===== compression formats for which codecs exist ====== */

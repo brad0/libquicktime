@@ -347,6 +347,132 @@ AC_SUBST(PNG_REQUIRED)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
+dnl
+dnl Option for conversion to GPL
+dnl
+
+have_gpl="false"
+AC_ARG_ENABLE(gpl, "Change license to GPL. This enables some extra plugins",
+              have_gpl="true")
+
+dnl
+dnl faac
+dnl
+
+have_faac="false"
+FAAC_REQUIRED="1.24"
+AH_TEMPLATE([HAVE_FAAC], [Enable faac])
+
+if test $have_gpl = "true"; then
+
+LIBS="$GMERLIN_DEP_LIBS -lfaac -lm"
+CFLAGS="$GMERLIN_DEP_CFLAGS"
+
+AC_MSG_CHECKING(for faac)
+AC_TRY_RUN([
+    #include <inttypes.h>
+    #include <faac.h>
+    main()
+    {
+    int samplerate, num_channels;
+    unsigned long input_samples, output_bytes;
+    faacEncHandle enc;
+    enc = faacEncOpen(samplerate,
+                      num_channels,
+                      &input_samples,
+                      &output_bytes);
+
+    return 0;
+    }
+  ],
+  [
+    # program could be run
+    have_faac="true"
+    AC_MSG_RESULT(yes)
+    FAAC_CFLAGS=$CFLAGS
+    FAAC_LIBS=$LIBS
+
+  ],
+    # program could not be run
+    AC_MSG_RESULT(no)
+)
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+fi
+
+AC_SUBST(FAAC_CFLAGS)
+AC_SUBST(FAAC_LIBS)
+AC_SUBST(FAAC_REQUIRED)
+
+AM_CONDITIONAL(HAVE_FAAC, test x$have_faac = xtrue)
+
+if test x$have_faac = xtrue; then
+AC_DEFINE(HAVE_FAAC)
+fi
+
+
+dnl
+dnl FAAD2
+dnl
+FAAD2_REQUIRED="2.0"
+AH_TEMPLATE([HAVE_FAAD2], [Enable FAAD2])
+have_faad2="false"
+
+if test $have_gpl = "true"; then
+
+AC_MSG_CHECKING(for faad2)
+
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
+
+CFLAGS=""
+LIBS="-lfaad -lm"
+
+  AC_TRY_RUN([
+    #include "faad.h"
+    #include <stdio.h>
+    main()
+    {
+    int faad_major;
+    int faad_minor;
+    faacDecHandle dec;
+
+    if(sscanf(FAAD2_VERSION, "%d.%d", &faad_major, &faad_minor) < 2)
+      return -1;
+    dec = faacDecOpen();
+    if(!dec)
+      return -1;
+    return 0;
+    }
+  ],
+  [
+    # program could be run
+    have_faad2="true"
+    AC_MSG_RESULT(yes)
+    FAAD2_CFLAGS=$CFLAGS
+    FAAD2_LIBS=$LIBS
+
+  ],
+    # program could not be run
+    AC_MSG_RESULT(no)
+)
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+fi
+
+AC_SUBST(FAAD2_CFLAGS)
+AC_SUBST(FAAD2_LIBS)
+AC_SUBST(FAAD2_REQUIRED)
+AM_CONDITIONAL(HAVE_FAAD2, test x$have_faad2 = xtrue)
+
+if test x$have_faad2 = xtrue; then
+AC_DEFINE(HAVE_FAAD2)
+fi
+
+
 #CPU Optimisation added by Justin Schoeman (justin@suntiger.ee.up.ac.za)
 
 AC_MSG_WARN(Doing a few not well tested checks for CPU optimisations.)
@@ -540,3 +666,28 @@ echo "Yes"
 else
 echo "Missing"
 fi  
+
+echo -n "GPL plugins "
+if test x$have_gpl = "xtrue"; then
+echo "Enabled"
+else
+echo "Disabled"
+fi  
+
+if test x$have_gpl = "xtrue"; then
+
+echo -n "faac        "
+if test x$have_faac = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi  
+
+echo -n "faad2       "
+if test x$have_faad2 = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi  
+
+fi
