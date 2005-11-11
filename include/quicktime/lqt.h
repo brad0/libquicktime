@@ -2,6 +2,7 @@
 #define _LQT_H_
 
 #include "quicktime.h"
+#include "lqt_atoms.h"
 #include "lqt_codecinfo.h"
 #include "lqt_qtvr.h"
 
