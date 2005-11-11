@@ -1,3 +1,6 @@
+#ifndef	_LQT_ATOMS_H_
+#define _LQT_ATOMS_H_
+
 /* Fine tuning of quicktime atoms. Use with caution */
 
 int lqt_set_fiel(quicktime_t *, int, int, int);
@@ -44,3 +47,5 @@ typedef struct
 
 int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+
+#endif /* _LQT_ATOMS_H_ */
