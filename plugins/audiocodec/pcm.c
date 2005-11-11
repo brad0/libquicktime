@@ -14,6 +14,10 @@
 #include "ulaw_tables.h"
 #include "alaw_tables.h"
 
+#ifndef HAVE_LRINT
+#define lrint(x) ((long int)(x))
+#endif
+
 typedef struct quicktime_pcm_codec_s
   {
   uint8_t * chunk_buffer;
