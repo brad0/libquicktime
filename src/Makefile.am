@@ -81,6 +81,7 @@ tkhd.c \
 trak.c \
 tref.c \
 udta.c \
+useratoms.c \
 util.c \
 vmhd.c \
 vrsc.c \

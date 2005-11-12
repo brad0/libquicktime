@@ -105,7 +105,7 @@ void quicktime_stsd_init_audio(quicktime_t *file,
 	table->channels = channels;
 	table->sample_size = bits;
 	table->sample_rate = sample_rate;
-        fprintf(stderr, "stsd_init_audio: %d\n", bits);
+        //        fprintf(stderr, "stsd_init_audio: %d\n", bits);
 }
 
 void quicktime_stsd_delete(quicktime_stsd_t *stsd)

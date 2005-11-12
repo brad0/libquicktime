@@ -233,6 +233,15 @@ typedef struct
 	quicktime_vrnp_t vrnp;
 } quicktime_qtvr_t;
 
+/* User atoms: These can be either inside a wave atom (for audio) or
+   in the sample description (for video) */
+
+typedef struct
+  {
+  int num_atoms;
+  uint8_t ** atoms;
+  } quicktime_user_atoms_t;
+
 /* wave atom and subatoms */
 
 typedef struct
@@ -253,8 +262,7 @@ typedef struct
   quicktime_enda_t enda;
   int has_enda;
 
-  int num_user_atoms;
-  uint8_t ** user_atoms;
+  quicktime_user_atoms_t user_atoms;
   } quicktime_wave_t;
 
 typedef struct

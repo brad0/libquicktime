@@ -727,6 +727,30 @@ int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak, long moov_ti
 int64_t quicktime_track_end(quicktime_trak_t *trak);
 long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
+
+/* useratoms.c */
+
+uint8_t * quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u, char * name, uint32_t * len);
+
+void quicktime_user_atoms_add_atom(quicktime_user_atoms_t * u,
+                                   char * name, uint8_t * data,
+                                   uint32_t len);
+
+void quicktime_user_atoms_read_atom(quicktime_t * file,
+                                    quicktime_user_atoms_t * u,
+                                    quicktime_atom_t * leaf_atom);
+
+void quicktime_user_atoms_free(quicktime_user_atoms_t * u);
+
+void quicktime_write_user_atoms(quicktime_t * file,
+                                quicktime_user_atoms_t * u);
+void quicktime_user_atoms_dump(quicktime_user_atoms_t * u);
+
+
+
+
+
+
 /* For AVI */
 int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak);
 int quicktime_chunk_of_sample(int64_t *chunk_sample, 
