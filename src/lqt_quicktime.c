@@ -2264,3 +2264,104 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   //          atrack->vbr_frames_written, num_samples);
   
   }
+
+/* VBR Reading support */
+
+/* Check if VBR reading should be enabled */
+
+int lqt_audio_is_vbr(quicktime_t * file, int track)
+  {
+  return file->atracks[track].track->mdia.minf.is_audio_vbr;
+  }
+
+/* Determine the number of VBR packets (=samples) in one chunk */
+
+int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk)
+  {
+  quicktime_trak_t * trak;
+  long result, current_chunk;
+  quicktime_stsc_t *stsc;
+  long i;
+
+  
+  trak = file->atracks[track].track;
+    
+  stsc = &(trak->mdia.minf.stbl.stsc);
+
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
+    return 0;
+  
+  i = stsc->total_entries - 1;
+  
+  if(!stsc->total_entries)
+    return 0;
+  //        fprintf(stderr, "quicktime_chunk_samples: total_entries: %ld\n", stsc->total_entries);
+  do
+    {
+    current_chunk = stsc->table[i].chunk;
+    result = stsc->table[i].samples;
+    i--;
+    }while(i >= 0 && current_chunk > chunk);
+  return result;
+  }
+
+/* Read one VBR packet */
+int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int packet,
+                              uint8_t ** buffer, int * buffer_alloc, int * samples)
+  {
+  int64_t offset;
+  long i, stsc_index;
+  quicktime_trak_t * trak;
+  quicktime_stsc_t *stsc;
+  int packet_size;
+  long count;
+  long first_chunk_packet; /* Index of first packet in the chunk */
+  
+  trak = file->atracks[track].track;
+  stsc = &(trak->mdia.minf.stbl.stsc);
+
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
+    return 0;
+    
+  i = 0;
+  stsc_index = 0;
+  first_chunk_packet = 0;
+
+  for(i = 0; i < chunk-1; i++)
+    {
+    if((stsc_index < stsc->total_entries-1) && (stsc->table[stsc_index+1].chunk-1 == i))
+      stsc_index++;
+    first_chunk_packet += stsc->table[stsc_index].samples;
+    }
+
+  /* Get offset */
+  offset = trak->mdia.minf.stbl.stco.table[chunk-1].offset;
+  for(i = 0; i < packet; i++)
+    offset += trak->mdia.minf.stbl.stsz.table[first_chunk_packet+i].size;
+
+  /* Get packet size */
+  packet_size = trak->mdia.minf.stbl.stsz.table[first_chunk_packet+packet].size;
+
+  /* Get number of audio samples */
+  count = 0;
+  for(i = 0; i < trak->mdia.minf.stbl.stts.total_entries; i++)
+    {
+    if(count + trak->mdia.minf.stbl.stts.table[i].sample_count > first_chunk_packet+packet)
+      break;
+    count += trak->mdia.minf.stbl.stts.table[i].sample_count;
+    }
+  
+  *samples = trak->mdia.minf.stbl.stts.table[i].sample_duration;
+
+  /* Read the data */
+  if(*buffer_alloc < packet_size+16)
+    {
+    *buffer_alloc = packet_size + 128;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+  //  fprintf(stderr, "Read VBR packet, offset: %llx, size: %x, samples: %d\n", offset, packet_size, *samples);
+  quicktime_set_position(file, offset);
+  quicktime_read_data(file, *buffer, packet_size);
+  return packet_size;
+  }
+

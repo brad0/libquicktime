@@ -697,6 +697,18 @@ struct CODECIDMAP codecidmap_a[] = {
           wav_ids: { LQT_WAV_ID_NONE },
           //          do_encode: 1,
         },
+#if 1 /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
+	{
+          id: CODEC_ID_ALAC,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          short_name: "alac",
+	  name: "Apple lossless",
+	  fourccs: { "alac", (char*)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+#endif
 #if 1 /* Sounds ugly */
 	{
           id: CODEC_ID_ADPCM_MS,
@@ -720,30 +732,6 @@ struct CODECIDMAP codecidmap_a[] = {
 	  fourccs: {"ms\0\x11", "MS\0\x11", (char*)0},
           wav_ids: { 0x11, LQT_WAV_ID_NONE },
           
-        },
-#endif
-#if 0 /* Not needed anymore, we have a native codec */
-	{
-          id: CODEC_ID_PCM_ALAW,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          short_name: "alaw",
-	  name: "Alaw",
-	  fourccs: { "alaw", (char*)0},
-          wav_ids: { 0x06, LQT_WAV_ID_NONE },
-        },
-#endif
-#if 0 /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
-	{
-          id: CODEC_ID_ALAC,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          short_name: "alac",
-	  name: "Apple lossless",
-	  fourccs: { "alac", (char*)0},
-          wav_ids: { LQT_WAV_ID_NONE },
         },
 #endif
 };
@@ -797,7 +785,7 @@ static void ffmpeg_map_init(void)
     if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
       {
       codecidmap_a[i].index = ffmpeg_num_audio_codecs++ + ffmpeg_num_video_codecs;
-#if 0
+#if 1
       fprintf(stderr, "Found audio codec %s %p %p %d %s\n",
               codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder,
               codecidmap_a[i].index,

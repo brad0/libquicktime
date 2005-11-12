@@ -91,8 +91,9 @@ void quicktime_minf_delete(quicktime_minf_t *minf)
 void quicktime_minf_dump(quicktime_minf_t *minf)
 {
 	printf("   media info\n");
-	printf("    is_audio %d\n", minf->is_audio);
-	printf("    is_video %d\n", minf->is_video);
+	printf("    is_audio     %d\n", minf->is_audio);
+	printf("    is_audio_vbr %d\n", minf->is_audio_vbr);
+	printf("    is_video     %d\n", minf->is_video);
 	if(minf->is_audio) quicktime_smhd_dump(&(minf->smhd));
 	if(minf->is_video) quicktime_vmhd_dump(&(minf->vmhd));
 	if(minf->has_baseheader) quicktime_gmhd_dump(&(minf->gmhd));
@@ -135,7 +136,8 @@ int quicktime_read_minf(quicktime_t *file, quicktime_minf_t *minf, quicktime_ato
 		else
 			quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < parent_atom->end);
-        
+        if(minf->is_audio && (minf->stbl.stsd.table[0].compression_id == -2))
+          minf->is_audio_vbr = 1;
 	return 0;
 }
 
