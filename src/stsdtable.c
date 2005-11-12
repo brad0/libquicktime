@@ -173,17 +173,12 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 			quicktime_read_colr(file, &(table->colr));
 		}
 		else
-/* 		if(quicktime_atom_is(&leaf_atom, "mjqt")) */
-/* 		{ */
-/* 			quicktime_read_mjqt(file, &(table->mjqt)); */
-/* 		} */
-/* 		else */
-/* 		if(quicktime_atom_is(&leaf_atom, "mjht")) */
-/* 		{ */
-/* 			quicktime_read_mjht(file, &(table->mjht)); */
-/* 		} */
-/* 		else */
-		quicktime_atom_skip(file, &leaf_atom);
+                {
+                quicktime_user_atoms_read_atom(file,
+                                               &table->user_atoms,
+                                               &leaf_atom);
+                }
+                quicktime_atom_skip(file, &leaf_atom);
 	}
 //printf("quicktime_read_stsd_video 2\n");
 }
@@ -223,6 +218,10 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 		quicktime_write_char(file, table->field_dominance);
 		quicktime_atom_write_footer(file, &atom);
 	}
+        quicktime_write_user_atoms(file,
+                                   &table->user_atoms);
+        
+        
 }
 
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table)
@@ -323,6 +322,7 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
 	quicktime_mjqt_delete(&(table->mjqt));
 	quicktime_mjht_delete(&(table->mjht));
 	quicktime_wave_delete(&(table->wave));
+        quicktime_user_atoms_delete(&(table->user_atoms));
 }
 
 void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
@@ -358,6 +358,7 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 	if(!table->ctab_id) quicktime_ctab_dump(&(table->ctab));
 	quicktime_mjqt_dump(&(table->mjqt));
 	quicktime_mjht_dump(&(table->mjht));
+	quicktime_user_atoms_dump(&(table->user_atoms));
 }
 
 void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
@@ -426,4 +427,19 @@ void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
   table->audio_bytes_per_packet = bytes_per_packet;
   table->audio_bytes_per_frame = bytes_per_frame;
   table->audio_bytes_per_sample = bytes_per_sample;
+  }
+
+uint8_t * quicktime_stsd_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len)
+  {
+  quicktime_stsd_table_t *table = &(trak->mdia.minf.stbl.stsd.table[0]);
+  return(quicktime_user_atoms_get_atom(&table->user_atoms, name, len));
+  }
+
+void quicktime_stsd_set_user_atom(quicktime_trak_t * trak, char * name,
+                                  uint8_t * data, uint32_t len)
+  {
+  quicktime_stsd_table_t *table = &(trak->mdia.minf.stbl.stsd.table[0]);
+  quicktime_user_atoms_add_atom(&table->user_atoms,
+                                name, data, len);
+  
   }

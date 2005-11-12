@@ -324,6 +324,8 @@ typedef struct
         unsigned char * extradata;
         int extradata_size;
 
+        quicktime_user_atoms_t user_atoms;
+
 } quicktime_stsd_table_t;
 
 

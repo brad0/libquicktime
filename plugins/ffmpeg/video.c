@@ -325,6 +325,8 @@ static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
 int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
                             int track)
   {
+  uint8_t * user_atom;
+  uint32_t user_atom_len;
   int i, imax;
   int result = 0;
   int buffer_size;
@@ -353,9 +355,27 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     codec->com.ffcodec_dec->width           = width;
     codec->com.ffcodec_dec->height          = height;
     codec->com.ffcodec_dec->bits_per_sample = quicktime_video_depth(file, track);
-    codec->com.ffcodec_dec->extradata       = trak->mdia.minf.stbl.stsd.table[0].extradata;
-    codec->com.ffcodec_dec->extradata_size  = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
 
+    /* Set extradata: It's done differently for each codec */
+
+    if(codec->com.ffc_dec->id == CODEC_ID_SVQ3)
+      {
+      codec->com.ffcodec_dec->extradata       = trak->mdia.minf.stbl.stsd.table[0].extradata;
+      codec->com.ffcodec_dec->extradata_size  = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
+      }
+    else if(codec->com.ffc_dec->id == CODEC_ID_H264)
+      {
+      user_atom = quicktime_stsd_get_user_atom(trak, "avcC", &user_atom_len);
+
+      if(!user_atom)
+        fprintf(stderr, "No avcC atom present, decoding is likely to fail\n");
+      else
+        {
+        codec->com.ffcodec_dec->extradata = user_atom + 8;
+        codec->com.ffcodec_dec->extradata_size = user_atom_len - 8;
+        }
+      
+      }
     /* Add palette info */
     
     ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);

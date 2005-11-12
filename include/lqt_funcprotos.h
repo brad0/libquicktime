@@ -623,6 +623,12 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table);
 void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table);
 void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);
 
+uint8_t * quicktime_stsd_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
+void quicktime_stsd_set_user_atom(quicktime_trak_t * trak, char * name,
+                                  uint8_t * data, uint32_t len);
+
+
+
 /* stss.c */
 
 void quicktime_stss_init(quicktime_stss_t *stss);
@@ -740,7 +746,7 @@ void quicktime_user_atoms_read_atom(quicktime_t * file,
                                     quicktime_user_atoms_t * u,
                                     quicktime_atom_t * leaf_atom);
 
-void quicktime_user_atoms_free(quicktime_user_atoms_t * u);
+void quicktime_user_atoms_delete(quicktime_user_atoms_t * u);
 
 void quicktime_write_user_atoms(quicktime_t * file,
                                 quicktime_user_atoms_t * u);

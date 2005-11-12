@@ -20,7 +20,7 @@ void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t 
   
 void quicktime_wave_delete(quicktime_wave_t *wave)
   {
-  quicktime_user_atoms_free(&wave->user_atoms);
+  quicktime_user_atoms_delete(&wave->user_atoms);
   }
 
 void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,

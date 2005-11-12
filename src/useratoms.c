@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
@@ -71,7 +73,7 @@ void quicktime_user_atoms_read_atom(quicktime_t * file,
   u->num_atoms++;
   }
 
-void quicktime_user_atoms_free(quicktime_user_atoms_t * u)
+void quicktime_user_atoms_delete(quicktime_user_atoms_t * u)
   {
   int i;
   if(u->atoms)

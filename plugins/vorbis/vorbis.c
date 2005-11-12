@@ -533,6 +533,7 @@ static int flush_header(quicktime_t * file, int track)
 
   if(codec->write_OVHS)
     {
+    fprintf(stderr, "Writing Vorbis header %d bytes\n", codec->enc_header_len);
     quicktime_wave_set_user_atom(track_map->track, "OVHS",
                                  codec->enc_header, codec->enc_header_len);
     
