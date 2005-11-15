@@ -785,7 +785,7 @@ static void ffmpeg_map_init(void)
     if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
       {
       codecidmap_a[i].index = ffmpeg_num_audio_codecs++ + ffmpeg_num_video_codecs;
-#if 1
+#if 0
       fprintf(stderr, "Found audio codec %s %p %p %d %s\n",
               codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder,
               codecidmap_a[i].index,

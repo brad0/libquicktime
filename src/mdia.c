@@ -91,7 +91,8 @@ void quicktime_mdia_dump(quicktime_mdia_t *mdia)
 	quicktime_minf_dump(&(mdia->minf));
 }
 
-int quicktime_read_mdia(quicktime_t *file, quicktime_mdia_t *mdia, quicktime_atom_t *trak_atom)
+int quicktime_read_mdia(quicktime_t *file, quicktime_trak_t *trak,
+                        quicktime_mdia_t *mdia, quicktime_atom_t *trak_atom)
 {
 	quicktime_atom_t leaf_atom;
 
@@ -112,7 +113,7 @@ int quicktime_read_mdia(quicktime_t *file, quicktime_mdia_t *mdia, quicktime_ato
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "minf"))
-			{ quicktime_read_minf(file, &(mdia->minf), &leaf_atom); }
+                  { quicktime_read_minf(file, trak, &(mdia->minf), &leaf_atom); }
 		else
 			quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < trak_atom->end);

@@ -102,7 +102,8 @@ void quicktime_minf_dump(quicktime_minf_t *minf)
 	quicktime_stbl_dump(minf, &(minf->stbl));
 }
 
-int quicktime_read_minf(quicktime_t *file, quicktime_minf_t *minf, quicktime_atom_t *parent_atom)
+int quicktime_read_minf(quicktime_t *file, quicktime_trak_t *trak,
+                        quicktime_minf_t *minf, quicktime_atom_t *parent_atom)
 {
 	quicktime_atom_t leaf_atom;
 	do
@@ -136,6 +137,11 @@ int quicktime_read_minf(quicktime_t *file, quicktime_minf_t *minf, quicktime_ato
 		else
 			quicktime_atom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < parent_atom->end);
+
+        /* Finalize stsd */
+        quicktime_finalize_stsd(file, trak, &(minf->stbl.stsd));
+          
+        
         if(minf->is_audio && (minf->stbl.stsd.table[0].compression_id == -2))
           minf->is_audio_vbr = 1;
 	return 0;

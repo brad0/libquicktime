@@ -129,7 +129,7 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
     /* mandatory */
     if(quicktime_atom_is(&leaf_atom, "stsd"))
       { 
-      quicktime_read_stsd(file, minf, &(stbl->stsd)); 
+      quicktime_read_stsd(file, &(stbl->stsd)); 
       /* Some codecs store extra information at the end of this */
       quicktime_atom_skip(file, &leaf_atom);
       }

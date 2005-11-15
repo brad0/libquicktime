@@ -21,6 +21,7 @@ void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t 
 void quicktime_wave_delete(quicktime_wave_t *wave)
   {
   quicktime_user_atoms_delete(&wave->user_atoms);
+  quicktime_esds_delete(&wave->esds);
   }
 
 void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
@@ -39,6 +40,12 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
       {
       quicktime_read_enda(file, &(wave->enda), &leaf_atom);
       wave->has_enda = 1;
+      }
+    else if(quicktime_atom_is(&leaf_atom, "esds"))
+      {
+      quicktime_read_esds(file, &(wave->esds));
+      wave->has_esds = 1;
+      quicktime_atom_skip(file, &leaf_atom);
       }
     else if(quicktime_atom_is(&leaf_atom, (char[]){ 0x00, 0x00, 0x00, 0x00 }))
       {
@@ -77,6 +84,8 @@ void quicktime_wave_dump(quicktime_wave_t *wave)
     quicktime_frma_dump(&wave->frma);
   if(wave->has_enda)
     quicktime_enda_dump(&wave->enda);
+  if(wave->has_esds)
+    quicktime_esds_dump(&wave->esds);
 
   quicktime_user_atoms_dump(&wave->user_atoms);
   

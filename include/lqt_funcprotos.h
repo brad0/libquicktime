@@ -240,6 +240,13 @@ void quicktime_elst_dump(quicktime_elst_t *elst);
 void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst);
 void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst, long duration);
 
+/* esds.c */
+
+void quicktime_read_esds(quicktime_t * file, quicktime_esds_t * esds);
+void quicktime_write_esds(quicktime_t * file, quicktime_esds_t * esds);
+void quicktime_esds_dump(quicktime_esds_t * esds);
+void quicktime_esds_delete(quicktime_esds_t * esds);
+
 /* frma.c */
 
 void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,
@@ -332,7 +339,8 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 void quicktime_mdia_init(quicktime_mdia_t *mdia);
 void quicktime_mdia_delete(quicktime_mdia_t *mdia);
 void quicktime_mdia_dump(quicktime_mdia_t *mdia);
-int quicktime_read_mdia(quicktime_t *file, quicktime_mdia_t *mdia, quicktime_atom_t *trak_atom);
+int quicktime_read_mdia(quicktime_t *file, quicktime_trak_t *trak,
+                        quicktime_mdia_t *mdia, quicktime_atom_t *trak_atom);
 void quicktime_write_mdia(quicktime_t *file, quicktime_mdia_t *mdia);
 
 void quicktime_mdia_init_audio(quicktime_t *file, 
@@ -369,7 +377,8 @@ void quicktime_mdia_init_qtvr(quicktime_t *file,
 void quicktime_minf_init(quicktime_minf_t *minf);
 
 void quicktime_minf_dump(quicktime_minf_t *minf);
-int quicktime_read_minf(quicktime_t *file, quicktime_minf_t *minf, quicktime_atom_t *parent_atom);
+int quicktime_read_minf(quicktime_t *file, quicktime_trak_t *trak,
+                        quicktime_minf_t *minf, quicktime_atom_t *parent_atom);
 void quicktime_write_minf(quicktime_t *file, quicktime_minf_t *minf);
 void quicktime_minf_delete(quicktime_minf_t *minf);
 
@@ -566,8 +575,16 @@ void quicktime_stsd_init(quicktime_stsd_t *stsd);
 void quicktime_stsd_init_table(quicktime_stsd_t *stsd);
 void quicktime_stsd_delete(quicktime_stsd_t *stsd);
 void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd);
-void quicktime_read_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd);
+void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd);
 void quicktime_write_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd);
+
+
+/* This function is called by the decoder after the complete minf atom is read (i.e. if we know
+   for sure, what kind of stream it is. */
+
+void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak, quicktime_stsd_t * stsd);
+
+
 
 void quicktime_stsd_init_video(quicktime_t *file, 
                                quicktime_stsd_t *stsd, 
@@ -615,6 +632,9 @@ void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
 
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table);
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);
+
+void quicktime_read_stsd_table_raw(quicktime_t *file, quicktime_stsd_table_t *table);
+
 void quicktime_stsd_table_init(quicktime_stsd_table_t *table);
   
 void quicktime_stsd_table_delete(quicktime_stsd_table_t *table);
@@ -912,6 +932,8 @@ void quicktime_print_chars(char *desc, uint8_t *input, int len);
 unsigned long quicktime_current_time(void);
 int quicktime_match_32(void *input, void *output);
 int quicktime_match_24(char *input, char *output);
+
+void lqt_hexdump(uint8_t * data, int len, int linebreak);
 
 /* lqt_quicktime.c */
 

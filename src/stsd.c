@@ -135,7 +135,7 @@ void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd)
 	}
 }
 
-void quicktime_read_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd)
+void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd)
 {
 	int i;
 
@@ -145,9 +145,61 @@ void quicktime_read_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_st
 	stsd->table = calloc(stsd->total_entries, sizeof(quicktime_stsd_table_t));
 	for(i = 0; i < stsd->total_entries; i++)
 	{
-		quicktime_stsd_table_init(&(stsd->table[i]));
-		quicktime_read_stsd_table(file, minf, &(stsd->table[i]));
+		quicktime_read_stsd_table_raw(file, &(stsd->table[i]));
+                fprintf(stderr, "Read table raw: %d bytes\n", stsd->table[i].table_raw_size);
 	}
+}
+
+void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak, quicktime_stsd_t * stsd)
+{
+
+        int64_t old_preload_size;
+        uint8_t *old_preload_buffer;
+        int64_t old_preload_start;
+        int64_t old_preload_end;
+        int64_t old_preload_ptr;
+        int64_t old_position;
+        int i;
+
+        /* Save old buffers from the file */
+        old_preload_size = file->preload_size;
+        old_preload_buffer = file->preload_buffer;
+        old_preload_start = file->preload_start;
+        old_preload_end = file->preload_end;
+        old_preload_ptr = file->preload_ptr;
+        old_position = quicktime_position(file);
+        
+	for(i = 0; i < stsd->total_entries; i++)
+	{
+		quicktime_stsd_table_init(&(stsd->table[i]));
+                
+                
+                quicktime_set_position(file, 0);
+#if 0
+                fprintf(stderr, "reading final stsd table (%d bytes), file pos: %lld\n",
+                        stsd->table[i].table_raw_size, quicktime_position(file));
+                lqt_hexdump(stsd->table[i].table_raw, stsd->table[i].table_raw_size, 16);
+#endif
+
+                file->preload_size = stsd->table[i].table_raw_size;
+                file->preload_buffer = stsd->table[i].table_raw;
+                file->preload_start = 0;
+                file->preload_end = file->preload_start + stsd->table[i].table_raw_size;
+                file->preload_ptr = 0;
+                
+		quicktime_read_stsd_table(file, &(trak->mdia.minf), &(stsd->table[i]));
+                if(trak->mdia.minf.is_video && !stsd->table[i].width && !stsd->table[i].height)
+                  {
+                  stsd->table[i].width =  (int)(trak->tkhd.track_width);
+                  stsd->table[i].height = (int)(trak->tkhd.track_height);
+                  }
+	}
+        file->preload_size = old_preload_size;
+        file->preload_buffer = old_preload_buffer;
+        file->preload_start = old_preload_start;
+        file->preload_end = old_preload_end;
+        file->preload_ptr = old_preload_ptr;
+        quicktime_set_position(file, old_position);
 }
 
 void quicktime_write_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd)

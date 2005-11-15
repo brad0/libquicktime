@@ -150,7 +150,7 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 			{ quicktime_read_tkhd(file, &(trak->tkhd)); }
 		else
 		if(quicktime_atom_is(&leaf_atom, "mdia"))
-			{ quicktime_read_mdia(file, &(trak->mdia), &leaf_atom); }
+                  { quicktime_read_mdia(file, trak, &(trak->mdia), &leaf_atom); }
 		else
 /* optional */
 		if(quicktime_atom_is(&leaf_atom, "clip"))

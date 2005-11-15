@@ -49,6 +49,12 @@ static int read_cmov(quicktime_t *file,
         quicktime_atom_t *parent_atom,
         quicktime_atom_t *moov_atom)
 {
+        int64_t old_preload_size;
+        uint8_t *old_preload_buffer;
+        int64_t old_preload_start;
+        int64_t old_preload_end;
+        int64_t old_preload_ptr;
+
         quicktime_atom_t leaf_atom;
         unsigned char *data_in, *data_out;
         z_stream zlib;
@@ -123,11 +129,11 @@ static int read_cmov(quicktime_t *file,
                         file->moov_size = moov_atom->size;
                         moov_atom->end = moov_atom->start + uncompressed_size;
                         moov_atom->size = uncompressed_size;
-                        file->old_preload_size = file->preload_size;
-                        file->old_preload_buffer = file->preload_buffer;
-                        file->old_preload_start = file->preload_start;
-                        file->old_preload_end = file->preload_end;
-                        file->old_preload_ptr = file->preload_ptr;
+                        old_preload_size = file->preload_size;
+                        old_preload_buffer = file->preload_buffer;
+                        old_preload_start = file->preload_start;
+                        old_preload_end = file->preload_end;
+                        old_preload_ptr = file->preload_ptr;
                         file->preload_size = uncompressed_size;
                         file->preload_buffer = data_out;
                         file->preload_start = moov_atom->start;
@@ -142,11 +148,11 @@ static int read_cmov(quicktime_t *file,
 /* Exit the compressed state */
                         moov_atom->size = file->moov_size;
                         moov_atom->end = file->moov_end;
-                        file->preload_size = file->old_preload_size;
-                        file->preload_buffer = file->old_preload_buffer;
-                        file->preload_start = file->old_preload_start;
-                        file->preload_end = file->old_preload_end;
-                        file->preload_ptr = file->old_preload_ptr;
+                        file->preload_size = old_preload_size;
+                        file->preload_buffer = old_preload_buffer;
+                        file->preload_start = old_preload_start;
+                        file->preload_end = old_preload_end;
+                        file->preload_ptr = old_preload_ptr;
                         quicktime_set_position(file, moov_atom->end);
                 }
                 else

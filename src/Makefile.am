@@ -45,6 +45,7 @@ dref.c \
 edts.c \
 elst.c \
 enda.c \
+esds.c \
 frma.c \
 gmhd.c \
 gmin.c \

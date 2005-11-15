@@ -18,7 +18,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="6"
+LQT_CODEC_API_VERSION="7"
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
@@ -234,9 +234,9 @@ fi
 ALSA_CFLAGS="$ALSA_CFLAGS"
 AC_SUBST(ALSA_CFLAGS)
 
-# NetBSD 2.0 (for whatever reason) moved the audio routines to a new place
-AH_TEMPLATE([HAVE_LIBOSSAUDIO], [Have -lossaudio for NetBSD 2.x?])
-AC_CHECK_LIB(ossaudio, _oss_ioctl)
+# NetBSD and OpenBSD have an OSS audio compatability library 
+AH_TEMPLATE([HAVE_LIBOSSAUDIO], [Have libossaudio, for NetBSD and OpenBSD])
+AC_CHECK_LIB(ossaudio, _oss_ioctl, have_libossaudio=true)
 if test x$have_libossaudio = xtrue; then
 AC_DEFINE(HAVE_LIBOSSAUDIO,1)
 OSSAUDIO_LIBS=-lossaudio

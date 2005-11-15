@@ -60,6 +60,12 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_wave(file, &(table->wave), &leaf_atom);
             table->has_wave = 1;
             }
+          else if(quicktime_atom_is(&leaf_atom, "esds"))
+            {
+            quicktime_read_esds(file, &(table->esds));
+            table->has_esds = 1;
+            quicktime_atom_skip(file, &leaf_atom);
+            }
           else
             {
             quicktime_atom_skip(file, &leaf_atom);
@@ -90,28 +96,33 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
           }
 }
 
-/* LQT: This reads the extradata */
 
-static void read_extradata(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
+void quicktime_read_stsd_table_raw(quicktime_t *file, quicktime_stsd_table_t *table)
   {
+  quicktime_atom_t leaf_atom;
   int64_t old_position;
-
   old_position = quicktime_position(file);
 
-  table->extradata_size = parent_atom->end - (parent_atom->start+4);
-  table->extradata = malloc(parent_atom->size);
-  quicktime_set_position(file, parent_atom->start+4);
-  quicktime_read_data(file, table->extradata, table->extradata_size);
-  quicktime_set_position(file, old_position);
+  quicktime_atom_read_header(file, &leaf_atom);
+
+  /* We write the raw atom verbatim into the raw table */
+  table->table_raw_size = leaf_atom.size;
+
+  table->table_raw = malloc(table->table_raw_size);
+  quicktime_set_position(file, leaf_atom.start);
+  quicktime_read_data(file, table->table_raw, table->table_raw_size);
+  
+
   }
 
-void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
+
+void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
+                               quicktime_atom_t *parent_atom)
 {
 	quicktime_atom_t leaf_atom;
-	int len;
-
-        read_extradata(file, table, parent_atom);
+	int len, bits_per_pixel;
         
+        fprintf(stderr, "quicktime_read_stsd_video 1 %lld\n", quicktime_position(file));
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, (uint8_t*)table->vendor, 4);
@@ -127,20 +138,38 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	quicktime_read_data(file, (uint8_t*)table->compressor_name, 31);
 	table->depth = quicktime_read_int16(file);
 	table->ctab_id = quicktime_read_int16(file);
-
+        
+        //  fprintf(stderr, "quicktime_read_stsd_video 2 %lld\n", quicktime_position(file));
+        
         /*  If ctab_id is zero, the colortable follows immediately
          *  after the ctab ID
          */
-
-        if(!table->ctab_id)
+        bits_per_pixel = table->depth & 0x1f;
+        if(!table->ctab_id &&
+           ((bits_per_pixel == 1) ||
+            (bits_per_pixel == 2) ||
+            (bits_per_pixel == 4) ||
+            (bits_per_pixel == 8)))
+          {
+          fprintf(stderr, "Reading color table, depth: %d\n", table->depth);
           quicktime_read_ctab(file, &(table->ctab));
+          }
         else
           quicktime_default_ctab(&(table->ctab), table->depth);
         
-	while(quicktime_position(file) < parent_atom->end)
+        //        fprintf(stderr, "quicktime_read_stsd_video 3 %lld\n",
+        //                quicktime_position(file));
+	while(quicktime_position(file) + 8 < parent_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
-//printf("quicktime_read_stsd_video 1 %llx %llx %llx\n", leaf_atom.start, leaf_atom.end, quicktime_position(file));
+                fprintf(stderr, "quicktime_read_stsd_video 1 %c%c%c%c, pos: %lld, end: %lld\n",
+                        leaf_atom.type[0],
+                        leaf_atom.type[1],
+                        leaf_atom.type[2],
+                        leaf_atom.type[3],
+                        quicktime_position(file),
+                        parent_atom->end
+                       );
 		
 		if(quicktime_atom_is(&leaf_atom, "ctab"))
 		{
@@ -173,12 +202,30 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 			quicktime_read_colr(file, &(table->colr));
 		}
 		else
+		if (quicktime_atom_is(&leaf_atom, "esds"))
+		{
+                fprintf(stderr, "*** GOT ESDS ATOM\n");
+			quicktime_read_esds(file, &(table->esds));
+                        table->has_esds = 1;
+                        quicktime_atom_skip(file, &leaf_atom);
+
+		}
+		else
                 {
                 quicktime_user_atoms_read_atom(file,
                                                &table->user_atoms,
                                                &leaf_atom);
                 }
                 quicktime_atom_skip(file, &leaf_atom);
+        fprintf(stderr, "quicktime_read_stsd_video 2 %c%c%c%c, pos: %lld, end: %lld\n",
+                leaf_atom.type[0],
+                leaf_atom.type[1],
+                leaf_atom.type[2],
+                leaf_atom.type[3],
+                quicktime_position(file),
+                parent_atom->end
+                );
+
 	}
 //printf("quicktime_read_stsd_video 2\n");
 }
@@ -230,9 +277,6 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quickt
 
 	quicktime_atom_read_header(file, &leaf_atom);
 
-        /* LQT: Initialize these */
-        table->extradata = (unsigned char*)0;
-        table->extradata_size = 0;
 	table->format[0] = leaf_atom.type[0];
 	table->format[1] = leaf_atom.type[1];
 	table->format[2] = leaf_atom.type[2];
@@ -309,19 +353,18 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->compression_id = 0;
 	table->packet_size = 0;
 	table->sample_rate = 0;
-        table->extradata = NULL;
-        table->extradata_size = 0;
 }
 
 void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
 {
-        /* LQT: Delete extradata as well */
-        if(table->extradata)
-          free(table->extradata);
+        /* LQT: Delete table_raw as well */
+        if(table->table_raw)
+          free(table->table_raw);
         quicktime_ctab_delete(&(table->ctab));
 	quicktime_mjqt_delete(&(table->mjqt));
 	quicktime_mjht_delete(&(table->mjht));
 	quicktime_wave_delete(&(table->wave));
+	quicktime_esds_delete(&(table->esds));
         quicktime_user_atoms_delete(&(table->user_atoms));
 }
 
@@ -356,6 +399,7 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 		printf("     field dominance %d\n", table->field_dominance);
 	}
 	if(!table->ctab_id) quicktime_ctab_dump(&(table->ctab));
+	if(table->has_esds) quicktime_esds_dump(&(table->esds));
 	quicktime_mjqt_dump(&(table->mjqt));
 	quicktime_mjht_dump(&(table->mjht));
 	quicktime_user_atoms_dump(&(table->user_atoms));
@@ -381,13 +425,18 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
           }
         if(table->has_wave)
           quicktime_wave_dump(&table->wave);
+        if(table->has_esds)
+          quicktime_esds_dump(&table->esds);
 }
 
 
 void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 {
 	quicktime_minf_t *minf = minf_ptr;
-	printf("       format %c%c%c%c\n", table->format[0], table->format[1], table->format[2], table->format[3]);
+	printf("       format %c%c%c%c\n",
+               table->format[0], table->format[1],
+               table->format[2], table->format[3]);
+
 	quicktime_print_chars("       reserved ", table->reserved, 6);
 	printf("       data_reference %d\n", table->data_reference);
 

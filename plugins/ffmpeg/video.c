@@ -360,8 +360,10 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 
     if(codec->com.ffc_dec->id == CODEC_ID_SVQ3)
       {
-      codec->com.ffcodec_dec->extradata       = trak->mdia.minf.stbl.stsd.table[0].extradata;
-      codec->com.ffcodec_dec->extradata_size  = trak->mdia.minf.stbl.stsd.table[0].extradata_size;
+      codec->com.ffcodec_dec->extradata       = trak->mdia.minf.stbl.stsd.table[0].table_raw + 4;
+      codec->com.ffcodec_dec->extradata_size  = trak->mdia.minf.stbl.stsd.table[0].table_raw_size - 4;
+      fprintf(stderr, "Extradata: %d bytes\n", codec->com.ffcodec_dec->extradata_size);
+      lqt_hexdump(codec->com.ffcodec_dec->extradata, codec->com.ffcodec_dec->extradata_size, 16);
       }
     else if(codec->com.ffc_dec->id == CODEC_ID_H264)
       {
@@ -376,6 +378,24 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         }
       
       }
+    else if(codec->com.ffc_dec->id == CODEC_ID_MPEG4)
+      {
+      if(trak->mdia.minf.stbl.stsd.table[0].has_esds)
+        {
+        fprintf(stderr, "Setting MPEG-4 extradata %d bytes\n", 
+                trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen);
+        
+        codec->com.ffcodec_dec->extradata =
+          trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfig;
+        codec->com.ffcodec_dec->extradata_size =
+          trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen;
+        }
+      else
+        {
+        fprintf(stderr, "No MPEG-4 extradata!!\n");
+        }
+      }
+    
     /* Add palette info */
     
     ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);

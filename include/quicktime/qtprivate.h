@@ -233,6 +233,25 @@ typedef struct
 	quicktime_vrnp_t vrnp;
 } quicktime_qtvr_t;
 
+
+/* MPEG-4 esds (elementary stream descriptor) */
+
+typedef struct
+  {
+  int version;
+  long flags;
+    
+  uint8_t  objectTypeId;
+  uint8_t  streamType;
+  uint32_t bufferSizeDB;
+  uint32_t maxBitrate;
+  uint32_t avgBitrate;
+
+  int      decoderConfigLen;
+  uint8_t* decoderConfig;
+
+  } quicktime_esds_t;
+
 /* User atoms: These can be either inside a wave atom (for audio) or
    in the sample description (for video) */
 
@@ -262,6 +281,9 @@ typedef struct
   quicktime_enda_t enda;
   int has_enda;
 
+  quicktime_esds_t esds;
+  int has_esds;
+  
   quicktime_user_atoms_t user_atoms;
   } quicktime_wave_t;
 
@@ -318,13 +340,18 @@ typedef struct
         uint32_t audio_bytes_per_frame;
         uint32_t audio_bytes_per_sample;
 
+
+        quicktime_esds_t esds;
+        int has_esds;
+
+        quicktime_user_atoms_t user_atoms;
+
 /* LQT: We store the complete atom (starting with the fourcc)
    here, because this must be passed to the Sorenson 3 decoder */
 
-        unsigned char * extradata;
-        int extradata_size;
+        unsigned char * table_raw;
+        int table_raw_size;
 
-        quicktime_user_atoms_t user_atoms;
 
 } quicktime_stsd_table_t;
 
@@ -998,12 +1025,13 @@ struct quicktime_s
  */
         int64_t moov_end;
         int64_t moov_size;
+#if 0
         int64_t old_preload_size;
         uint8_t *old_preload_buffer;
         int64_t old_preload_start;
         int64_t old_preload_end;
         int64_t old_preload_ptr;
-
+#endif
 /* ASF section */
         int use_asf;
 
