@@ -91,9 +91,9 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
           quicktime_write_int32(file, table->audio_bytes_per_sample);
           }
         if(table->has_wave)
-          {
           quicktime_write_wave(file, &table->wave);
-          }
+        if(table->has_esds)
+          quicktime_write_esds(file, &table->esds);
 }
 
 
@@ -269,6 +269,8 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
 	}
         quicktime_write_user_atoms(file,
                                    &table->user_atoms);
+        if(table->has_esds)
+          quicktime_write_esds(file, &table->esds);
         
         
 }

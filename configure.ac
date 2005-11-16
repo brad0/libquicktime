@@ -594,6 +594,7 @@ include/quicktime/lqt_version.h \
 plugins/Makefile \
 plugins/dv/Makefile \
 plugins/faad2/Makefile \
+plugins/faac/Makefile \
 plugins/lame/Makefile \
 plugins/mjpeg/Makefile \
 plugins/audiocodec/Makefile \

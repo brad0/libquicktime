@@ -247,6 +247,14 @@ void quicktime_write_esds(quicktime_t * file, quicktime_esds_t * esds);
 void quicktime_esds_dump(quicktime_esds_t * esds);
 void quicktime_esds_delete(quicktime_esds_t * esds);
 
+/* Set up an esds atom for encoding. Arguments are  decoderConfig
+   and decoderConfigLen. The esds atom will be returned so the
+   other parameters can be set by the encoder */
+
+quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
+                                      uint8_t * decoderConfig,
+                                      int decoderConfigLen);
+
 /* frma.c */
 
 void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,

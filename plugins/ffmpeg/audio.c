@@ -855,33 +855,6 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
 /*
  *   Encoding part
  */
-#if 0        
-static void interleave(int16_t * sample_buffer, int16_t ** input_i, float ** input_f,
-                       int num_samples, int channels)
-  {
-  int i, j;
-  if(input_i)
-    {
-    for(i = 0; i < num_samples; i++)
-      {
-      for(j = 0; j < channels; j++)
-        *(sample_buffer++) = input_i[j][i];
-      }
-    }
-  else if(input_f)
-    {
-    for(i = 0; i < num_samples; i++)
-      {
-      for(j = 0; j < channels; j++)
-        *(sample_buffer++) = (int16_t)(input_f[j][i] * 16383.0);
-      }
-    }
-  }
-#endif
-
-/*
-  Untested, but it should work...   
-*/
 
 int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
                             long samples, int track)

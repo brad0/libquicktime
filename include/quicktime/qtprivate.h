@@ -240,7 +240,10 @@ typedef struct
   {
   int version;
   long flags;
-    
+
+  uint16_t esid;
+  uint8_t stream_priority;
+  
   uint8_t  objectTypeId;
   uint8_t  streamType;
   uint32_t bufferSizeDB;

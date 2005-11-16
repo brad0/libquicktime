@@ -76,6 +76,9 @@ typedef struct
   int have_frame;
 
   int encode_colormodel;
+
+  int write_global_header;
+  int global_header_written;
   
   } quicktime_ffmpeg_video_codec_t;
 

@@ -576,7 +576,8 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                         int track)
 {
-	int result = 0;
+        quicktime_esds_t * esds;
+        int result = 0;
 	int bytes_encoded;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
@@ -607,7 +608,8 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
 		codec->com.ffcodec_enc->height = height;
                 
                 codec->com.ffcodec_enc->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
-                
+
+                                
 #define SP(x) codec->com.ffcodec_enc->x = codec->com.params.x
 
                 /* General options */
@@ -641,9 +643,17 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                 SP(mb_decision);
                 
 #undef SP
-
+                /* Use global headers for mp4v */
+                if(codec->com.ffc_enc->id == CODEC_ID_MPEG4)
+                  {
+                  codec->com.ffcodec_enc->flags |= CODEC_FLAG_GLOBAL_HEADER;
+                  codec->write_global_header = 1;
+                  }
                 if(codec->com.ffcodec_enc->rc_max_rate)
                   codec->com.ffcodec_enc->rc_buffer_size = 128 * 1024;
+
+                
+
                 if(avcodec_open(codec->com.ffcodec_enc, codec->com.ffc_enc) != 0)
 			return -1;
                 codec->com.init_enc = 1;
@@ -684,6 +694,234 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
 	vtrack->current_chunk++;
         if(codec->com.ffcodec_enc->coded_frame->key_frame)
           quicktime_insert_keyframe(file, vtrack->current_position, track);
+
+        /* Check whether to write the global header */
+        
+        if(codec->write_global_header && !codec->global_header_written)
+          {
+          esds = quicktime_set_esds(trak,
+                                    codec->com.ffcodec_enc->extradata,
+                                    codec->com.ffcodec_enc->extradata_size);
+          fprintf(stderr, "Setting MPEG-4 extradata\n");
+          lqt_hexdump(codec->com.ffcodec_enc->extradata, codec->com.ffcodec_enc->extradata_size,
+                      16);
+          
+          esds->version         = 0;
+          esds->flags           = 0;
+          
+          esds->esid            = 0;
+          esds->stream_priority = 0;
+          
+          esds->objectTypeId    = 32; /* MPEG-4 video */
+          esds->streamType      = 0x11; /* from qt4l and CDR_Dinner_350k-994.mp4 */
+          esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
+          
+          /* Maybe correct these later? */
+          esds->maxBitrate      = 200000;
+          esds->avgBitrate      = 200000;
+          codec->global_header_written = 1;
+          }
+
         return result;
+}
+
+static int set_parameter_video(quicktime_t *file, 
+                               int track, 
+                               char *key, 
+                               void *value)
+{
+	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+        //        fprintf(stderr, "set_parameter_video %s\n", key);
+        
+#define INTPARM(x, y) \
+	if(!strcasecmp(key, #x)) { \
+          codec->com.params.x = (*(int *)value) * y; \
+          return 0; \
+	}
+
+#define FLOATPARM(x, y) \
+	if(!strcasecmp(key, #x)) { \
+          codec->com.params.x = (float)(*(int *)value) * y; \
+          return 0; \
+	}
+
+#define FLAGPARM(x, y) \
+        if(!strcasecmp(key, x)) { \
+          if(*(int *)value == 1) \
+            codec->com.params.flags |= y; \
+          else \
+            codec->com.params.flags &= ~y; \
+          return 0; \
+        }
+        
+        /********************
+          General Options
+        *********************/
+
+	FLAGPARM("flags_gray", CODEC_FLAG_GRAY)
+	INTPARM(strict_std_compliance, 1)
+
+	if(!strcasecmp(key, "aspect_ratio_info")) {
+		if(!strcasecmp((char *)value, "Square")) {
+			codec->com.params.sample_aspect_ratio.num = 1;
+			codec->com.params.sample_aspect_ratio.den = 1;
+		} else if(!strcasecmp((char *)value, "4:3")) {
+                        codec->com.params.sample_aspect_ratio.num = 4;
+                        codec->com.params.sample_aspect_ratio.den = 3;
+		} else if(!strcasecmp((char *)value, "16:9")) {
+                        codec->com.params.sample_aspect_ratio.num = 16;
+                        codec->com.params.sample_aspect_ratio.den = 9;
+		}
+        return 0;
+	}
+
+          
+        /********************
+          Bitrate options
+        *********************/
+
+        if(!strcasecmp(key, "bit_rate_video")) 
+          { 
+          codec->com.params.bit_rate = (*(int *)value) * 1000;
+          return 0;
+          }
+
+        INTPARM(rc_min_rate, 1000) 
+        INTPARM(rc_max_rate, 1000)
+	INTPARM(bit_rate_tolerance, 1)
+	FLOATPARM(qcompress, 0.01)
+	FLOATPARM(qblur, 0.01)
+        
+        /********************
+             VBR Options
+        *********************/
+
+        if(!strcasecmp(key, "qscale"))
+          {
+          if(*(int *)value)
+            {
+            codec->com.params.flags |= CODEC_FLAG_QSCALE;
+            codec->qscale = *(int *)value;
+            }
+          else
+            codec->com.params.flags &= ~CODEC_FLAG_QSCALE;
+          return 0;
+          }
+        INTPARM(qmin, 1)
+	INTPARM(qmax, 1)
+        INTPARM(mb_qmin, 1)
+	INTPARM(mb_qmax, 1)
+	INTPARM(max_qdiff, 1)
+
+        /************************
+           Temporal compression
+        *************************/
+        
+	INTPARM(gop_size, 1)
+
+        if(!strcasecmp(key, "me_method")) {
+          if(!strcasecmp((char *)value, "Zero")) {
+            codec->com.params.me_method = ME_ZERO;
+            } else if(!strcasecmp((char *)value, "Full")) {
+            codec->com.params.me_method = ME_FULL;
+            } else if(!strcasecmp((char *)value, "Log")) {
+            codec->com.params.me_method = ME_LOG;
+            } else if(!strcasecmp((char *)value, "Phods")) {
+            codec->com.params.me_method = ME_PHODS;
+            } else if(!strcasecmp((char *)value, "Epzs")) {
+            codec->com.params.me_method = ME_EPZS;
+            } else if(!strcasecmp((char *)value, "X1")) {
+            codec->com.params.me_method = ME_X1;
+            }
+          return 0;
+	}
+
+        if(!strcasecmp(key, "mb_decision")) {
+          if(!strcasecmp((char *)value, "Simple")) {
+            codec->com.params.mb_decision = FF_MB_DECISION_SIMPLE;
+            } else if(!strcasecmp((char *)value, "Fewest bits")) {
+            codec->com.params.mb_decision = FF_MB_DECISION_BITS;
+            } else if(!strcasecmp((char *)value, "Rate distoration")) {
+            codec->com.params.mb_decision = FF_MB_DECISION_RD;
+            }
+          return 0;
+        } 
+
+        /********************
+              MPEG-4
+        *********************/
+
+        FLAGPARM("flags_4mv", CODEC_FLAG_4MV)
+        FLAGPARM("flags_part", CODEC_FLAG_PART)
+          
+        /*********************
+                H263+
+        **********************/
+
+        FLAGPARM("flags_h263p_aic", CODEC_FLAG_H263P_AIC)
+        FLAGPARM("flags_h263p_umv", CODEC_FLAG_H263P_UMV)
+        
+        /**********************
+               Decoding
+        ***********************/
+                
+	INTPARM(workaround_bugs, 1)
+          //	INTPARM(luma_elim_threshold, 1)
+          //	INTPARM(chroma_elim_threshold, 1)
+
+        INTPARM(error_resilience, 1)
+          //	if(!strcasecmp(key, "flags_pass")) {
+          //		codec->com.params.flags &= ~(CODEC_FLAG_PASS1 | CODEC_FLAG_PASS2);
+          //		if(*(int *)value == 1) {
+          //			codec->com.params.flags |= CODEC_FLAG_PASS1;
+          //		} else if(*(int *)value == 2) {
+          //			codec->com.params.flags |= CODEC_FLAG_PASS1;
+          //		}
+          //	}
+          else
+            {
+            //            fprintf(stderr, "Unknown key: %s\n", key);
+		return -1;
+            }
+	return 0;
+#undef INTPARM
+}
+
+
+
+void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
+                                       AVCodec *decoder)
+{
+	quicktime_ffmpeg_video_codec_t *codec;
+
+	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+        
+	avcodec_init();
+
+	codec = calloc(1, sizeof(quicktime_ffmpeg_video_codec_t));
+	if(!codec)
+	  return;
+
+	if(quicktime_match_32(compressor, "dvc "))
+	  codec->encode_colormodel = BC_YUV411P;
+        else if(quicktime_match_32(compressor, "MJPG"))
+          codec->encode_colormodel = BC_YUVJ420P;
+        //        else if(quicktime_match_32(compressor, "dvcp"))
+        //          codec->encode_colormodel = BC_YUV411P;
+        else
+          codec->encode_colormodel = BC_YUV420P;
+        
+	codec->com.ffc_enc = encoder;
+	codec->com.ffc_dec = decoder;
+        
+	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
+	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_ffmpeg_delete_video;
+
+        if(encoder)
+          ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_ffmpeg_encode_video;
+	if(decoder)
+          ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_ffmpeg_decode_video;
+
+        ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_video;
 }
 

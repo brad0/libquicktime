@@ -47,8 +47,13 @@ else
 faad2_subdirs=
 endif
 
+if HAVE_FAAC
+faac_subdirs=faac
+else
+faac_subdirs=
+endif
 
 SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
 	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs) \
-        $(lame_subdirs) $(faad2_subdirs)
+        $(lame_subdirs) $(faad2_subdirs) $(faac_subdirs)
 
