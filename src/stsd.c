@@ -146,7 +146,7 @@ void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd)
 	for(i = 0; i < stsd->total_entries; i++)
 	{
 		quicktime_read_stsd_table_raw(file, &(stsd->table[i]));
-                fprintf(stderr, "Read table raw: %d bytes\n", stsd->table[i].table_raw_size);
+                //                fprintf(stderr, "Read table raw: %d bytes\n", stsd->table[i].table_raw_size);
 	}
 }
 

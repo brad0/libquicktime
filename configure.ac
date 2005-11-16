@@ -352,7 +352,7 @@ dnl Option for conversion to GPL
 dnl
 
 have_gpl="false"
-AC_ARG_ENABLE(gpl, "Change license to GPL. This enables some extra plugins",
+AC_ARG_ENABLE(gpl, [  --enable-gpl            Change license to GPL. This enables some extra plugins],
               have_gpl="true")
 
 dnl
@@ -593,6 +593,7 @@ include/quicktime/Makefile \
 include/quicktime/lqt_version.h \
 plugins/Makefile \
 plugins/dv/Makefile \
+plugins/faad2/Makefile \
 plugins/lame/Makefile \
 plugins/mjpeg/Makefile \
 plugins/audiocodec/Makefile \

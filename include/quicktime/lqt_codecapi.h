@@ -145,7 +145,7 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
 int lqt_audio_is_vbr(quicktime_t * file, int track);
 
 /* Determine the number of VBR packets (=samples) in one chunk */
-int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk);
+int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * samples);
 
 /* Read one VBR packet */
 int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int packet,

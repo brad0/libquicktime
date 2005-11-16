@@ -133,22 +133,66 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 
 static int next_chunk(quicktime_t * file, int track)
   {
+  int i;
+  int num_packets;
+  int samples;
   int chunk_size;
   char * buffer;
+  uint8_t * header;
+  uint32_t header_len;
+
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
+  if(!codec->header_read) /* Try OVHS atom */
+    {
+    header = quicktime_wave_get_user_atom(track_map->track, "OVHS", &header_len);
+    if(header)
+      {
+      fprintf(stderr, "Using OVHS Atom, %d bytes\n", header_len-8);
+      buffer = ogg_sync_buffer(&codec->dec_oy, header_len-8);
+      memcpy(buffer, header + 8, header_len-8);
+      ogg_sync_wrote(&codec->dec_oy, header_len-8);
+      return 1;
+      }
+    }
+  
   //  fprintf(stderr, "Next chunk %lld\n", track_map->current_chunk);
 
-  chunk_size = lqt_read_audio_chunk(file,
-                                    track, track_map->current_chunk,
-                                    &(codec->chunk_buffer),
-                                    &(codec->chunk_buffer_alloc), (int*)0);
-  if(chunk_size <= 0)
+  if(lqt_audio_is_vbr(file, track))
     {
-    //    fprintf(stderr, "Shit\n");
-    return 0;
+    num_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk, &samples);
+    if(!num_packets)
+      return 0;
+
+    //    fprintf(stderr, "VBR Chunk: packets: %d, samples: %d\n", num_packets, samples);
+    
+    for(i = 0; i < num_packets; i++)
+      {
+      chunk_size = lqt_audio_read_vbr_packet(file, track, track_map->current_chunk, i,
+                                             &(codec->chunk_buffer),
+                                             &(codec->chunk_buffer_alloc), &samples);
+      //      fprintf(stderr, "Read VBR packet, chunk: %lld, packet: %d, bytes: %d, samples: %d\n",
+      //              track_map->current_chunk, i, chunk_size, samples);
+      buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
+      memcpy(buffer, codec->chunk_buffer, chunk_size);
+      ogg_sync_wrote(&codec->dec_oy, chunk_size);
+      }
     }
+  else
+    {
+    chunk_size = lqt_read_audio_chunk(file,
+                                      track, track_map->current_chunk,
+                                      &(codec->chunk_buffer),
+                                      &(codec->chunk_buffer_alloc), (int*)0);
+    if(chunk_size <= 0)
+      {
+      //    fprintf(stderr, "Shit\n");
+      return 0;
+      }
+    
+    }
+  
   
   track_map->current_chunk++;
   
@@ -161,26 +205,10 @@ static int next_chunk(quicktime_t * file, int track)
 
 static int next_page(quicktime_t * file, int track)
   {
-  char * buffer;
-  uint8_t * header;
-  uint32_t header_len;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   int result = 0;
-
   
-  if(!codec->header_read) /* Try OVHS atom */
-    {
-    header = quicktime_wave_get_user_atom(track_map->track, "OVHS", &header_len);
-    if(header)
-      {
-      fprintf(stderr, "Using OVHS Atom, %d bytes\n", header_len-8);
-      buffer = ogg_sync_buffer(&codec->dec_oy, header_len-8);
-      memcpy(buffer, header + 8, header_len-8);
-      ogg_sync_wrote(&codec->dec_oy, header_len-8);
-      }
-    }
-
   while(result < 1)
     {
     result = ogg_sync_pageout(&codec->dec_oy, &codec->dec_og);

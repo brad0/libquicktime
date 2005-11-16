@@ -122,7 +122,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	quicktime_atom_t leaf_atom;
 	int len, bits_per_pixel;
         
-        fprintf(stderr, "quicktime_read_stsd_video 1 %lld\n", quicktime_position(file));
+        //        fprintf(stderr, "quicktime_read_stsd_video 1 %lld\n", quicktime_position(file));
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, (uint8_t*)table->vendor, 4);
@@ -151,7 +151,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
             (bits_per_pixel == 4) ||
             (bits_per_pixel == 8)))
           {
-          fprintf(stderr, "Reading color table, depth: %d\n", table->depth);
+          //          fprintf(stderr, "Reading color table, depth: %d\n", table->depth);
           quicktime_read_ctab(file, &(table->ctab));
           }
         else
@@ -162,6 +162,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	while(quicktime_position(file) + 8 < parent_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
+#if 0
                 fprintf(stderr, "quicktime_read_stsd_video 1 %c%c%c%c, pos: %lld, end: %lld\n",
                         leaf_atom.type[0],
                         leaf_atom.type[1],
@@ -170,7 +171,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                         quicktime_position(file),
                         parent_atom->end
                        );
-		
+#endif		
 		if(quicktime_atom_is(&leaf_atom, "ctab"))
 		{
 			quicktime_read_ctab(file, &(table->ctab));
@@ -204,7 +205,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		else
 		if (quicktime_atom_is(&leaf_atom, "esds"))
 		{
-                fprintf(stderr, "*** GOT ESDS ATOM\n");
+                //                fprintf(stderr, "*** GOT ESDS ATOM\n");
 			quicktime_read_esds(file, &(table->esds));
                         table->has_esds = 1;
                         quicktime_atom_skip(file, &leaf_atom);
@@ -217,7 +218,8 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                                                &leaf_atom);
                 }
                 quicktime_atom_skip(file, &leaf_atom);
-        fprintf(stderr, "quicktime_read_stsd_video 2 %c%c%c%c, pos: %lld, end: %lld\n",
+#if 0
+                fprintf(stderr, "quicktime_read_stsd_video 2 %c%c%c%c, pos: %lld, end: %lld\n",
                 leaf_atom.type[0],
                 leaf_atom.type[1],
                 leaf_atom.type[2],
@@ -225,7 +227,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                 quicktime_position(file),
                 parent_atom->end
                 );
-
+#endif
 	}
 //printf("quicktime_read_stsd_video 2\n");
 }

@@ -359,13 +359,11 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
-  chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk);
+  chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk, &num_samples);
 
   if(!chunk_packets)
     return 0;
-
-  num_samples = quicktime_chunk_samples(track_map->track, track_map->current_chunk);
-
+  
   if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
     {
     

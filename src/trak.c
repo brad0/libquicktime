@@ -285,7 +285,7 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
                 //                  total = 
                 //                  }
                 /* LQT: Make this correct for VBR files */
-                if(trak->mdia.minf.stbl.stsd.table[0].compression_id == -2)
+                if(trak->mdia.minf.is_audio)
                   {
                   for(i = 0; i < stts->total_entries; i++)
                     {
@@ -489,7 +489,8 @@ int64_t i, total;
 	return total;
 }
 
-int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample)
+int64_t quicktime_sample_to_offset(quicktime_t *file,
+                                   quicktime_trak_t *trak, long sample)
 {
 	int64_t chunk, chunk_sample, chunk_offset1, chunk_offset2;
 

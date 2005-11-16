@@ -41,7 +41,14 @@ else
 libavcodec=
 endif
 
+if HAVE_FAAD2
+faad2_subdirs=faad2
+else
+faad2_subdirs=
+endif
+
+
 SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
 	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs) \
-        $(lame_subdirs)
+        $(lame_subdirs) $(faad2_subdirs)
 
