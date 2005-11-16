@@ -1,0 +1,6 @@
+.deps
+Makefile
+Makefile.in
+stamp-h2
+lqt1394_config.h
+lqt_version.h
