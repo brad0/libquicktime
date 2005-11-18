@@ -649,7 +649,8 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                   codec->com.ffcodec_enc->flags |= CODEC_FLAG_GLOBAL_HEADER;
                   codec->write_global_header = 1;
                   }
-                if(codec->com.ffcodec_enc->rc_max_rate)
+                
+                if(!(codec->com.ffcodec_enc->flags & CODEC_FLAG_QSCALE))
                   codec->com.ffcodec_enc->rc_buffer_size = 128 * 1024;
 
                 

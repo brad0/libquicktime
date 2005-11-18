@@ -65,7 +65,7 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 
 static int decode_chunk(quicktime_t *file, int track)
   {
-  int i, num_packets, num_samples, packet_size;
+  int i, j, num_packets, num_samples, packet_size;
   float * samples;
   faacDecFrameInfo frame_info;
 
@@ -105,11 +105,28 @@ static int decode_chunk(quicktime_t *file, int track)
 
     samples = faacDecDecode(codec->dec, &frame_info,
                             codec->data, packet_size);
-#if 0
-    fprintf(stderr, "Decoded: samples: %p, bytes_used: %d/%ld, samples: %ld/%d\n",
-            samples, packet_size, frame_info.bytesconsumed, frame_info.samples / track_map->channels,
-            num_samples);
+    if(!samples)
+      {
+      fprintf(stderr, "faad2: faacDecDecode failed %s\n",
+                faacDecGetErrorMessage(frame_info.error));
+      
+      return 0;
+      }
+    
+#if 1
+    fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
+            samples, frame_info.bytesconsumed, packet_size, frame_info.samples / track_map->channels,
+            num_samples, frame_info.sbr, frame_info.channels, frame_info.samplerate);
 #endif
+    
+    if((track_map->channels == 1) && (frame_info.channels == 2))
+      {
+            
+      for(j = 0; j < frame_info.samples/2; j++)
+        samples[j] = samples[2*j];
+      frame_info.samples/=2;
+      }
+    
     memcpy(&(codec->sample_buffer[(codec->sample_buffer_end -
                                    codec->sample_buffer_start)*track_map->channels]),
            samples, frame_info.samples * sizeof(float));
@@ -239,6 +256,12 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     fprintf(stderr, "No extradata found, decoding is likely to fail\n");
     }
 
+  cfg = faacDecGetCurrentConfiguration(codec->dec);
+  cfg->outputFormat = FAAD_FMT_FLOAT;
+  
+  faacDecSetConfiguration(codec->dec, cfg);
+
+  
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);
 
@@ -251,8 +274,5 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   
   stsd->table[0].channels = channels;
   
-  cfg = faacDecGetCurrentConfiguration(codec->dec);
-  cfg->outputFormat = FAAD_FMT_FLOAT;
-  faacDecSetConfiguration(codec->dec, cfg);
 
   }

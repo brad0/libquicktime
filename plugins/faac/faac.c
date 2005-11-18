@@ -50,7 +50,13 @@ typedef struct
 
 static int delete_codec(quicktime_audio_map_t *track_map)
   {
-  
+  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  if(codec->sample_buffer)
+    free(codec->sample_buffer);
+  if(codec->chunk_buffer)
+    free(codec->chunk_buffer);
+  if(codec->enc)
+    faacEncClose(codec->enc);
   return 0;
   }
 
@@ -80,9 +86,11 @@ static int encode_frame(quicktime_t *file,
   
   if(bytes_encoded <= 0)
     {
-    fprintf(stderr, "Warning: Encoded %d bytes\n", bytes_encoded);
-    return 1;
+    fprintf(stderr, "Encoded %d bytes\n", bytes_encoded);
+    return 0;
     }
+  
+
   /* Write these data */
 
   if(!codec->chunk_started)
@@ -96,10 +104,10 @@ static int encode_frame(quicktime_t *file,
   result = !quicktime_write_data(file, codec->chunk_buffer,
                                  bytes_encoded);
   
-  lqt_finish_audio_vbr_frame(file, track, codec->sample_buffer_size);
+  lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame);
   codec->sample_buffer_size = 0;
   
-  return result;
+  return 1;
   }
 
 static int encode(quicktime_t *file, 
@@ -126,20 +134,25 @@ static int encode(quicktime_t *file,
   if(!codec->initialized)
     {
     lqt_init_vbr_audio(file, track);
-
+#if 0
+    fprintf(stderr, "Initialized, channels: %d, rate: %d\n", 
+            trak->mdia.minf.stbl.stsd.table[0].sample_rate,
+            track_map->channels);
+#endif
     /* Create encoder */
+    
     codec->enc = faacEncOpen(trak->mdia.minf.stbl.stsd.table[0].sample_rate,
                              track_map->channels,
                              &input_samples,
                              &output_bytes);
-
+    
     /* Set things up */
     enc_config = faacEncGetCurrentConfiguration(codec->enc);
     enc_config->inputFormat = FAAC_INPUT_FLOAT;
     enc_config->bitRate = (codec->bitrate * 1000) / track_map->channels;
     enc_config->quantqual = codec->quality;
     enc_config->outputFormat = 0; /* Raw */
-    
+    enc_config->aacObjectType = LOW; /* LOW, LTP... */
     
     if(!faacEncSetConfiguration(codec->enc, enc_config))
       {
@@ -229,7 +242,7 @@ static int set_parameter(quicktime_t *file,
   {
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-  
+    
   if(!strcasecmp(key, "faac_bitrate"))
     codec->bitrate = *(int*)value;
   else if(!strcasecmp(key, "faac_quality"))
@@ -239,7 +252,37 @@ static int set_parameter(quicktime_t *file,
 
 static void flush(quicktime_t *file, int track)
   {
+  int i;
+  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_trak_t * trak = track_map->track;
 
+  /* Mute the rest of the sample buffer */
+  if(codec->sample_buffer_size)
+    {
+    for(i = codec->sample_buffer_size * track_map->channels;
+        i < codec->samples_per_frame * track_map->channels; i++)
+      {
+      codec->sample_buffer[i] = 0.0;
+      }
+    codec->sample_buffer_size = codec->samples_per_frame;
+    }
+
+  while(encode_frame(file, track))
+   fprintf(stderr, "Flush: wrote frame\n");
+  
+  /* Finalize audio chunk */
+  if(codec->chunk_started)
+    {
+    quicktime_write_chunk_footer(file,
+                                 trak,
+                                 track_map->current_chunk,
+                                 &codec->chunk_atom,
+                                 track_map->vbr_num_frames);
+    track_map->current_chunk++;
+    codec->chunk_started = 0;
+    }
+  
   }
 
 void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)
