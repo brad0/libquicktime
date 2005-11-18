@@ -692,26 +692,18 @@ int quicktime_update_positions(quicktime_t *file)
 }
 
 int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
-{
-	if(track < file->total_atracks)
-	{
-#if 0 /* Old version (hopefully obsolete) */
-		trak = file->atracks[track].track;
-                file->atracks->current_position = sample;
-                quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
-		file->atracks[track].current_chunk = chunk;
-		offset = quicktime_sample_to_offset(file, trak, sample);
-		quicktime_set_position(file, offset);
-#else
-                file->atracks[track].current_position = sample;
-                file->atracks[track].eof = 0;
-                /* Codec will do the rest */
-#endif
-	}
-	else
-		fprintf(stderr, "quicktime_set_audio_position: track >= file->total_atracks\n");
-        return 0;
-}
+  {
+  if((track >= 0) && (track < file->total_atracks))
+    {
+    /* We just set the current position, Codec will do the rest */
+    
+    file->atracks[track].current_position = sample;
+    file->atracks[track].eof = 0;
+    }
+  else
+    fprintf(stderr, "quicktime_set_audio_position: track >= file->total_atracks\n");
+  return 0;
+  }
 
 int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
 {
@@ -762,17 +754,17 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
   }
 
 int quicktime_has_audio(quicktime_t *file)
-{
-	if(quicktime_audio_tracks(file)) return 1;
-	return 0;
-}
+  {
+  if(quicktime_audio_tracks(file)) return 1;
+  return 0;
+  }
 
 long quicktime_sample_rate(quicktime_t *file, int track)
-{
-	if(file->total_atracks)
-		return file->atracks[track].track->mdia.minf.stbl.stsd.table[0].sample_rate;
-	return 0;
-}
+  {
+  if(file->total_atracks)
+    return file->atracks[track].track->mdia.minf.stbl.stsd.table[0].sample_rate;
+  return 0;
+  }
 
 int quicktime_audio_bits(quicktime_t *file, int track)
 {
@@ -2231,15 +2223,39 @@ int lqt_audio_is_vbr(quicktime_t * file, int track)
   return file->atracks[track].track->mdia.minf.is_audio_vbr;
   }
 
+/* Get the index of the VBR packet (== sample) containing a specified
+   uncompressed sample */
+
+static uint64_t packet_of_sample(quicktime_stts_t * stts, int64_t sample)
+  {
+  uint32_t i;
+  int64_t packet_count = 0; 
+  int64_t sample_count = 0; 
+  
+  for(i = 0; i < stts->total_entries; i++)
+    {
+    if(sample_count + stts->table[i].sample_count * stts->table[i].sample_duration > sample)
+      {
+      return packet_count + (sample - sample_count) / stts->table[i].sample_duration;
+      }
+    sample_count += stts->table[i].sample_count * stts->table[i].sample_duration;
+    packet_count += stts->table[i].sample_count;
+    }
+  return -1;
+  }
+
 /*
  *  Helper function: Get the "durarion of a sample range" (which means the
  *  uncompressed samples in a range of VBR packets)
  */
 
-static int get_uncompressed_samples(quicktime_stts_t * stts, long start_sample, long end_sample)
+static int64_t get_uncompressed_samples(quicktime_stts_t * stts, long start_sample,
+                                    long end_sample)
   {
-  long count, i, stts_index, stts_count, ret;
+  long count, i, stts_index, stts_count;
 
+  int64_t ret;
+  
   count = 0;
   ret = 0;
   
@@ -2267,6 +2283,36 @@ static int get_uncompressed_samples(quicktime_stts_t * stts, long start_sample, 
     }
   return ret;
   }
+
+/* Analog for quicktime_chunk_samples for VBR files */
+
+int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 
+                            int64_t *chunk, 
+                            quicktime_trak_t *trak, 
+                            int64_t sample)
+  {
+  int64_t packet;
+  int64_t chunk_packet;
+  
+  /* Get the index of the packet containing the uncompressed sample */
+  packet = packet_of_sample(&trak->mdia.minf.stbl.stts, sample);
+
+  /* Get the chunk of the packet */
+  
+  quicktime_chunk_of_sample(&chunk_packet, 
+                            chunk, 
+                            trak, 
+                            packet);
+
+  /* Get the first uncompressed sample of the first packet of
+     this chunk */
+  
+  *chunk_sample =
+    get_uncompressed_samples(&trak->mdia.minf.stbl.stts, 0,
+                             chunk_packet);
+  return 0;
+  }
+
 
 /* Determine the number of VBR packets (=samples) in one chunk */
 

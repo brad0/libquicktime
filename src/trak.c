@@ -356,52 +356,52 @@ int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak)
 }
 
 int quicktime_chunk_of_sample(int64_t *chunk_sample, 
-	int64_t *chunk, 
-	quicktime_trak_t *trak, 
-	long sample)
-{
-	quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
-	long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
-	long chunk2entry;
-	long chunk1, chunk2, chunk1samples, range_samples, total = 0;
+                              int64_t *chunk, 
+                              quicktime_trak_t *trak, 
+                              int64_t sample)
+  {
+  quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
+  long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
+  long chunk2entry;
+  long chunk1, chunk2, chunk1samples, range_samples, total = 0;
+  
+  chunk1 = 1;
+  chunk1samples = 0;
+  chunk2entry = 0;
+  
+  if(!total_entries)
+    {
+    *chunk_sample = 0;
+    *chunk = 0;
+    return 0;
+    }
 
-	chunk1 = 1;
-	chunk1samples = 0;
-	chunk2entry = 0;
+  do
+    {
+    chunk2 = table[chunk2entry].chunk;
+    *chunk = chunk2 - chunk1;
+    range_samples = *chunk * chunk1samples;
 
-	if(!total_entries)
-	{
-		*chunk_sample = 0;
-		*chunk = 0;
-		return 0;
-	}
+    if(sample < total + range_samples) break;
 
-	do
-	{
-		chunk2 = table[chunk2entry].chunk;
-		*chunk = chunk2 - chunk1;
-		range_samples = *chunk * chunk1samples;
+    chunk1samples = table[chunk2entry].samples;
+    chunk1 = chunk2;
 
-		if(sample < total + range_samples) break;
+    if(chunk2entry < total_entries)
+      {
+      chunk2entry++;
+      total += range_samples;
+      }
+    }while(chunk2entry < total_entries);
 
-		chunk1samples = table[chunk2entry].samples;
-		chunk1 = chunk2;
+  if(chunk1samples)
+    *chunk = (sample - total) / chunk1samples + chunk1;
+  else
+    *chunk = 1;
 
-		if(chunk2entry < total_entries)
-		{
-			chunk2entry++;
-			total += range_samples;
-		}
-	}while(chunk2entry < total_entries);
-
-	if(chunk1samples)
-		*chunk = (sample - total) / chunk1samples + chunk1;
-	else
-		*chunk = 1;
-
-	*chunk_sample = total + (*chunk - chunk1) * chunk1samples;
-	return 0;
-}
+  *chunk_sample = total + (*chunk - chunk1) * chunk1samples;
+  return 0;
+  }
 
 int64_t quicktime_chunk_to_offset(quicktime_t *file,
                                   quicktime_trak_t *trak, long chunk)

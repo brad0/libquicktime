@@ -787,10 +787,14 @@ void quicktime_user_atoms_dump(quicktime_user_atoms_t * u);
 
 /* For AVI */
 int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak);
+
+/* For seeking in CBR audio files: Get the chunk index for a specified sample.
+   On return, chunk_sample will contain the first sample of the returned chunk */
+
 int quicktime_chunk_of_sample(int64_t *chunk_sample, 
                               int64_t *chunk, 
                               quicktime_trak_t *trak, 
-                              long sample);
+                              int64_t sample);
 
 int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
 
@@ -967,6 +971,12 @@ void lqt_update_frame_position(quicktime_video_map_t * track);
 
 void lqt_start_audio_vbr_chunk(quicktime_t * file, int track);
 void lqt_init_vbr_audio(quicktime_t * file, int track);
+
+int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 
+                            int64_t *chunk, 
+                            quicktime_trak_t *trak, 
+                            int64_t sample);
+
 
 /* Before and after writing subsequent frames, we must call
    quicktime_write_chunk_[header|footer] */

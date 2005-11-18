@@ -410,10 +410,16 @@ static int decode(quicktime_t *file,
       {
       /* Get the next chunk */
 
-      quicktime_chunk_of_sample(&chunk_sample,
+      if(lqt_audio_is_vbr(file, track))
+        lqt_chunk_of_sample_vbr(&chunk_sample,
                                 &(track_map->current_chunk),
                                 track_map->track,
                                 track_map->current_position);
+      else
+        quicktime_chunk_of_sample(&chunk_sample,
+                                  &(track_map->current_chunk),
+                                  track_map->track,
+                                  track_map->current_position);
       
       if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
         {

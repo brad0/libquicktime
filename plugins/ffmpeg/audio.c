@@ -758,10 +758,16 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
     if((track_map->current_position < codec->sample_buffer_start) || 
        (track_map->current_position + samples >= codec->sample_buffer_end))
       {
-      quicktime_chunk_of_sample(&chunk_sample,
+      if(lqt_audio_is_vbr(file, track))
+        lqt_chunk_of_sample_vbr(&chunk_sample,
                                 &(track_map->current_chunk),
                                 track_map->track,
                                 track_map->current_position);
+      else
+        quicktime_chunk_of_sample(&chunk_sample,
+                                  &(track_map->current_chunk),
+                                  track_map->track,
+                                  track_map->current_position);
 #if 0
       fprintf(stderr, "Seek: last_pos: %ld, pos: %lld, chunk: %lld, chunk_sample: %lld\n",
               track_map->last_position,

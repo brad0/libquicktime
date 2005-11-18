@@ -768,7 +768,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
       }
     
     /* Skip samples */
-          
+    
     samples_to_skip = file->atracks[track].current_position - chunk_sample;
     if(samples_to_skip < 0)
       {
