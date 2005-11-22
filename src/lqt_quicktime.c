@@ -2252,7 +2252,7 @@ static uint64_t packet_of_sample(quicktime_stts_t * stts, int64_t sample)
 static int64_t get_uncompressed_samples(quicktime_stts_t * stts, long start_sample,
                                     long end_sample)
   {
-  long count, i, stts_index, stts_count;
+  long count, i, stts_index = 0, stts_count = 0;
 
   int64_t ret;
   
@@ -2321,7 +2321,7 @@ int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * s
   int64_t start_sample;
   
   quicktime_trak_t * trak;
-  long result;
+  long result = 0;
   quicktime_stsc_t *stsc;
   long i;
 

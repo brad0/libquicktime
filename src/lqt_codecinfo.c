@@ -695,7 +695,14 @@ void lqt_registry_init()
   
   lqt_codec_info_t * file_codecs;
   lqt_codec_info_t * tmp_file_codecs;
+  const char* plugin_dir = PLUGIN_DIR;
 
+  /* Check for environment variable for plugin dir */
+  if(getenv("LIBQUICKTIME_PLUGIN_DIR"))
+    {
+    plugin_dir = getenv("LIBQUICKTIME_PLUGIN_DIR");
+    }
+  
   lqt_registry_lock();
   
   registry_init_done = 1;
@@ -710,7 +717,7 @@ void lqt_registry_init()
 
   /* Scan for the plugins, use cached values if possible */
 
-  if(scan_for_plugins(PLUGIN_DIR, &file_codecs))
+  if(scan_for_plugins(plugin_dir, &file_codecs))
     do_write = 1;
 
   /*
