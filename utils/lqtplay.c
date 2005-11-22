@@ -5,7 +5,7 @@
  *
  */
 
-#define USE_GL
+// #define USE_GL
 
 #include "config.h"
 
@@ -43,7 +43,7 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
-#ifdef USE_GL
+#ifdef HAVE_GL
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -86,7 +86,7 @@ static int no_mitshm    = 0;
 static int pixmap_bytes = 0;
 static int x11_byteswap = 0;
 
-#ifdef USE_GL
+#ifdef HAVE_GL
 static int use_gl       = 0;
 #endif
 
@@ -454,7 +454,7 @@ static void xv_blit(Window win, GC gc, XvImage *xi,
 
 /* ------------------------------------------------------------------------ */
 /* OpenGL code                                                              */
-#ifdef USE_GL
+#ifdef HAVE_GL
 static int gl_texture_width,gl_texture_height;
 static GLuint gl_texture;
 static int gl_attrib[] = { GLX_RGBA,
@@ -559,7 +559,7 @@ static void gl_init(Widget widget, int iw, int ih)
     use_gl = 1;
 }
 
-#endif // USE_GL
+#endif // HAVE_GL
 
 static int oss_sr,oss_hr;
 
@@ -987,7 +987,7 @@ static int qt_init_video(void)
 	qt_gc = XCreateGC(dpy,XtWindow(simple),0,NULL);
 	switch (qt_cmodel) {
 	case BC_RGB888:
-#ifdef USE_GL
+#ifdef HAVE_GL
           fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
 		    use_gl ? "OpenGL" : "plain X11");
 #else
@@ -1138,13 +1138,13 @@ static int qt_frame_blit(void)
 
     switch (qt_cmodel) {
     case BC_RGB888:
-#ifdef USE_GL
+#ifdef HAVE_GL
       if (use_gl) {
 	  if (qt_isqtvr == QTVR_PAN) {
 	    gl_blit(simple,qt_frame,qtvr_dwidth,qtvr_dheight,swidth,sheight);
 	  } else gl_blit(simple,qt_frame,qt_width,qt_height,swidth,sheight);
 	} else
-#endif // USE_GL
+#endif // HAVE_GL
 
         {
 	    switch (pixmap_bytes) {
@@ -1446,7 +1446,7 @@ static void resize_ev(Widget widget, XtPointer client_data,
     case ConfigureNotify:
 	XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
 	fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
-#ifdef USE_GL
+#ifdef HAVE_GL
 	if (use_gl)
 	    gl_resize(widget,swidth,sheight);
 #endif
@@ -1644,7 +1644,7 @@ int main(int argc, char *argv[])
     }
     /* use OpenGL? */
     XtRealizeWidget(app_shell);
-#ifdef USE_GL
+#ifdef HAVE_GL
     if (BC_RGB888 == qt_cmodel && args.gl && qt_hasvideo) {
     	if (qt_isqtvr == QTVR_PAN) {
 	    gl_init(simple,qtvr_dwidth,qtvr_dheight);

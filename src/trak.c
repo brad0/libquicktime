@@ -252,7 +252,7 @@ int64_t quicktime_track_end(quicktime_trak_t *trak)
 	return size;
 }
 
-long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
+int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 {
 /*printf("file->rd %d file->wr %d\n", file->rd, file->wr); */
 	if(file->wr)
@@ -261,7 +261,7 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
  		quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
 		long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
 		long chunk = trak->mdia.minf.stbl.stco.total_entries;
-		long sample;
+		int64_t sample;
 
 		if(chunk)
 		{
@@ -278,7 +278,7 @@ long quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 /* get the sample count when reading only */
 		quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
 		int i;
-		long total = 0;
+		int64_t total = 0;
                 /* Get this from the AVI header */
                 //                if(trak->strl)
                 //                  {

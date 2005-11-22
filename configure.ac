@@ -207,13 +207,47 @@ AC_SUBST(LAME_REQUIRED)
 
 AM_CONDITIONAL(HAVE_LAME, test x$have_lame = xtrue)
 
+dnl
 dnl Check for X11
+dnl
+
 AC_PATH_XTRA
 AC_SUBST(X_CFLAGS)
 AC_SUBST(X_PRE_LIBS)
 AC_SUBST(X_EXTRA_LIBS)
 AC_SUBST(X_LIBS)
+
+dnl
+dnl Check for other headers which might be missing
+dnl
+
+if test "$no_x" != "yes"; then
+AC_CHECK_HEADER([X11/Xaw/Simple.h],[],no_x="yes")
+fi
+
 AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
+
+dnl
+dnl OpenGL headers
+dnl
+
+AH_TEMPLATE([HAVE_GL], [Do we have OpenGL?])
+
+have_gl="yes"
+
+AC_CHECK_HEADER([GL/gl.h],[],have_gl="no")
+
+if test "$have_gl" = "yes"; then
+AC_CHECK_HEADER([GL/glu.h],[],have_gl="no")
+fi
+
+if test "$have_gl" = "yes"; then
+AC_CHECK_HEADER([GL/glx.h],[],have_gl="no")
+fi
+
+if test "x$have_gl" = "xyes"; then
+AC_DEFINE(HAVE_GL,1)
+fi
 
 dnl
 dnl Check for Alsa
