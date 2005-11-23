@@ -2310,6 +2310,11 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
   *chunk_sample =
     get_uncompressed_samples(&trak->mdia.minf.stbl.stts, 0,
                              chunk_packet);
+#if 0
+  fprintf(stderr,
+          "lqt_chunk_of_sample_vbr, chunk_sample: %lld, chunk: %lld, sample: %lld\n",
+          *chunk_sample, *chunk, sample);
+#endif     
   return 0;
   }
 
@@ -2405,7 +2410,9 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
     *buffer_alloc = packet_size + 128;
     *buffer = realloc(*buffer, *buffer_alloc);
     }
-  //  fprintf(stderr, "Read VBR packet, offset: %llx, size: %x, samples: %d\n", offset, packet_size, *samples);
+#if 0
+  fprintf(stderr, "Read VBR packet, offset: %llx, size: %x, samples: %d\n", offset, packet_size, *samples);
+#endif
   quicktime_set_position(file, offset);
   quicktime_read_data(file, *buffer, packet_size);
   return packet_size;

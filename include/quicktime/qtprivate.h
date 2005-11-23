@@ -899,7 +899,7 @@ typedef struct
 
         /* Last position if set by the codec. If last position and current position
            differ, the codec knows, that a seek happened since the last decode call */
-        long last_position;
+        int64_t last_position;
 	void *codec;
 
         int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
@@ -941,7 +941,12 @@ typedef struct
         uint8_t ** temp_frame;
         lqt_chroma_placement_t chroma_placement;
         lqt_interlace_mode_t interlace_mode;
-} quicktime_video_map_t;
+
+        /* The total samples are calculated while initializing, but they MIGHT
+           be changed by the faad decoder, in the case resampling happens. */
+        int64_t total_samples;
+
+  } quicktime_video_map_t;
 
 /* obji */
 

@@ -113,7 +113,7 @@ static int decode_chunk(quicktime_t *file, int track)
       return 0;
       }
     
-#if 1
+#if 0
     fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
             samples, frame_info.bytesconsumed, packet_size, frame_info.samples / track_map->channels,
             num_samples, frame_info.sbr, frame_info.channels, frame_info.samplerate);
@@ -142,6 +142,7 @@ static int decode(quicktime_t *file,
                   long samples, 
                   int track) 
   {
+  int64_t chunk_sample;
   int samples_copied = 0;
   int samples_to_skip;
   int samples_to_move;
@@ -151,7 +152,56 @@ static int decode(quicktime_t *file,
   quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   /* TODO Check whether seeking happened */
+#if 0
+  fprintf(stderr, "Decode: %lld, %lld\n", track_map->current_position,
+          track_map->last_position);
+#endif
+  if(track_map->last_position != track_map->current_position)
+    {
+    /* Get the next chunk */
     
+    if(codec->upsample)
+      {
+      lqt_chunk_of_sample_vbr(&chunk_sample,
+                              &(track_map->current_chunk),
+                              track_map->track,
+                              track_map->current_position / 2);
+      chunk_sample *= 2;
+      }
+    else
+      lqt_chunk_of_sample_vbr(&chunk_sample,
+                              &(track_map->current_chunk),
+                              track_map->track,
+                              track_map->current_position);
+    
+    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
+      {
+#if 0
+      fprintf(stderr, "Detected EOF %lld %ld\n",
+              track_map->current_chunk,
+              track_map->track->mdia.minf.stbl.stco.total_entries);
+#endif
+      return 0;
+      }
+#if 1
+    fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
+            track_map->current_position,
+            track_map->current_chunk, chunk_sample);
+#endif
+    
+    codec->sample_buffer_start = chunk_sample;
+    codec->sample_buffer_end   = chunk_sample;
+
+    /* Decode frames until we have enough */
+
+    while(codec->sample_buffer_end < track_map->current_position + samples)
+      {
+      if(!decode_chunk(file, track))
+        break;
+      //    fprintf(stderr, "Decoded frame\n");
+      }
+    }
+  
   /* Flush unneeded samples */
   
   if(track_map->current_position > codec->sample_buffer_start)
@@ -192,7 +242,7 @@ static int decode(quicktime_t *file,
   
   memcpy(output, codec->sample_buffer, samples_copied * track_map->channels * sizeof(float));
 
-  file->atracks[track].last_position = file->atracks[track].current_position + samples_copied;
+  track_map->last_position = track_map->current_position + samples_copied;
   
   return samples_copied;
   }
@@ -261,6 +311,8 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   
   faacDecSetConfiguration(codec->dec, cfg);
 
+  fprintf(stderr, "faad2 init\n");
+  lqt_hexdump(extradata, extradata_size, 16);
   
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);

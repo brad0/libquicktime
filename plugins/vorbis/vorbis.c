@@ -191,14 +191,12 @@ static int next_chunk(quicktime_t * file, int track)
       return 0;
       }
     
+    buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
+    memcpy(buffer, codec->chunk_buffer, chunk_size);
+    ogg_sync_wrote(&codec->dec_oy, chunk_size);
     }
   
-  
   track_map->current_chunk++;
-  
-  buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
-  memcpy(buffer, codec->chunk_buffer, chunk_size);
-  ogg_sync_wrote(&codec->dec_oy, chunk_size);
   
   return 1;
   }
@@ -405,74 +403,71 @@ static int decode(quicktime_t *file,
   
   if(file->atracks[track].last_position != file->atracks[track].current_position)
     {
-    if((file->atracks[track].current_position < codec->sample_buffer_start) || 
-       (file->atracks[track].current_position + samples > codec->sample_buffer_end))
-      {
-      /* Get the next chunk */
+    /* Get the next chunk */
 
-      if(lqt_audio_is_vbr(file, track))
-        lqt_chunk_of_sample_vbr(&chunk_sample,
+    if(lqt_audio_is_vbr(file, track))
+      lqt_chunk_of_sample_vbr(&chunk_sample,
+                              &(track_map->current_chunk),
+                              track_map->track,
+                              track_map->current_position);
+    else
+      quicktime_chunk_of_sample(&chunk_sample,
                                 &(track_map->current_chunk),
                                 track_map->track,
                                 track_map->current_position);
-      else
-        quicktime_chunk_of_sample(&chunk_sample,
-                                  &(track_map->current_chunk),
-                                  track_map->track,
-                                  track_map->current_position);
       
-      if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
-        {
+    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+      {
 #if 0
-        fprintf(stderr, "Detected EOF %lld %ld\n",
-                track_map->current_chunk,
-                file->atracks[track].track->mdia.minf.stbl.stco.total_entries);
+      fprintf(stderr, "Detected EOF %lld %ld\n",
+              track_map->current_chunk,
+              file->atracks[track].track->mdia.minf.stbl.stco.total_entries);
 #endif
-        return 0;
-        }
-#if 0
-      fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
-              file->atracks[track].current_position,
-              file->atracks[track].current_chunk, chunk_sample);
-#endif
-      
-      
-      /* Reset everything */
-      
-      vorbis_dsp_clear(&codec->dec_vd);
-      vorbis_block_clear(&codec->dec_vb);
-      
-      ogg_stream_clear(&codec->dec_os);
-      ogg_sync_reset(&codec->dec_oy);
-      codec->stream_initialized = 0;
-      if(!next_page(file, track))
-        return 0;
-
-      /* Initialize again */
-      
-      ogg_sync_init(&codec->dec_oy);
-      ogg_stream_init(&codec->dec_os, ogg_page_serialno(&codec->dec_og));
-      vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
-      vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
-
-      /* Reset sample buffer */
-            
-      codec->sample_buffer_start = chunk_sample;
-      codec->sample_buffer_end   = chunk_sample;
-
-      /* Decode frames until we have enough */
-      
-      while(track_map->current_position + samples > codec->sample_buffer_end)
-        {
-        if(!decode_frame(file, track))
-          break;
-        }
-#if 0
-      fprintf(stderr, "Cur: %lld, start: %lld end: %lld\n", track_map->current_position,
-              codec->sample_buffer_start, codec->sample_buffer_end);
-#endif
+      return 0;
       }
+#if 1
+    fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
+            file->atracks[track].current_position,
+            file->atracks[track].current_chunk, chunk_sample);
+#endif
+      
+      
+    /* Reset everything */
+      
+    vorbis_dsp_clear(&codec->dec_vd);
+    vorbis_block_clear(&codec->dec_vb);
+      
+    ogg_stream_clear(&codec->dec_os);
+    ogg_sync_reset(&codec->dec_oy);
+    codec->stream_initialized = 0;
+
+    /* Initialize again */
+    ogg_sync_init(&codec->dec_oy);
+    // ogg_stream_init(&codec->dec_os, ogg_page_serialno(&codec->dec_og));
+    vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
+    vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
+
+    if(!next_page(file, track))
+      return 0;
+      
+    /* Reset sample buffer */
+      
+    codec->sample_buffer_start = chunk_sample;
+    codec->sample_buffer_end   = chunk_sample;
+
+    /* Decode frames until we have enough */
+      
+    while(track_map->current_position + samples > codec->sample_buffer_end)
+      {
+      if(!decode_frame(file, track))
+        break;
+      }
+#if 0
+    fprintf(stderr, "Cur: %lld, start: %lld end: %lld\n", track_map->current_position,
+            codec->sample_buffer_start, codec->sample_buffer_end);
+#endif
     }
+  
 
   /* Flush unneeded samples */
   
