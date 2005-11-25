@@ -81,12 +81,15 @@ typedef struct quicktime_s quicktime_t;
 #define QUICKTIME_YUV411  "y411"
 /* 8 bit Packed full-range (not video) YUV 4:2:2 */
 #define QUICKTIME_YUV422 "yuv2"
+#define QUICKTIME_YUV2 "yuv2"
 /* 8 bit Packed YUV (video range) 4:2:2 */
 #define QUICKTIME_2VUY "2vuy"
 /* 8 bit Planar YUV 4:4:4 */
 #define QUICKTIME_YUV444  "v308"
+#define QUICKTIME_V308  "v308"
 /* 8 bit Planar YUVA 4:4:4:4 */
 #define QUICKTIME_YUVA4444 "v408"
+#define QUICKTIME_V408 "v408"
 /* 10 bit Packed YUV 4:2:2 */
 #define QUICKTIME_YUV422_10bit "v210"
 #define QUICKTIME_V210 "v210"
