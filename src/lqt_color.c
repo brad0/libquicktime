@@ -885,7 +885,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_YUV444P:      return 1; break;
         case BC_YUV411P:      return 0; break;
         case BC_YUVJ420P:     return 0; break;
-        case BC_YUVJ422P:     return 0; break;
+        case BC_YUVJ422P:     return 1; break;
         case BC_YUVJ444P:     return 0; break;
         case BC_YUV422P16:    return 0; break;
         case BC_YUV444P16:    return 0; break;
@@ -973,7 +973,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_RGBA16161616: return 0; break;
         case BC_YUVA8888:     return 0; break;
         case BC_YUV422:       return 1; break;
-        case BC_YUV420P:      return 0; break;
+        case BC_YUV420P:      return 1; break;
         case BC_YUV422P:      return 0; break;
         case BC_YUV444P:      return 0; break;
         case BC_YUV411P:      return 0; break;

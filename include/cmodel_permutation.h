@@ -1166,6 +1166,32 @@ static inline void transfer_YUV422P_to_YUV444P(unsigned char *input_y,
 	output_v[j] = *input_v;
 }
 
+static inline void transfer_YUV422P_to_YUVJ420P(unsigned char *input_y,
+	unsigned char *input_u,
+	unsigned char *input_v,
+	unsigned char *output_y,
+	unsigned char *output_u,
+	unsigned char *output_v,
+	int j)
+{
+	output_y[j] = Y_8_TO_YJ_8(*input_y);
+	output_u[j / 2] = UV_8_TO_UVJ_8(*input_u);
+	output_v[j / 2] = UV_8_TO_UVJ_8(*input_v);
+}
+
+static inline void transfer_YUV422P_to_YUVJ422P(unsigned char *input_y,
+	unsigned char *input_u,
+	unsigned char *input_v,
+	unsigned char *output_y,
+	unsigned char *output_u,
+	unsigned char *output_v,
+	int j)
+{
+	output_y[j] = Y_8_TO_YJ_8(*input_y);
+	output_u[j] = UV_8_TO_UVJ_8(*input_u);
+	output_v[j] = UV_8_TO_UVJ_8(*input_v);
+}
+
 static inline void transfer_YUV422P_to_YUV422(unsigned char *(*output), 
 	unsigned char *input_y,
 	unsigned char *input_u,
@@ -1309,9 +1335,9 @@ static inline void transfer_YUVJ422P_to_YUV422(unsigned char *(*output),
 // Store U and V for even pixels only
 	if(!(j & 1))
 	{
-		(*output)[1] = YJ_8_TO_Y_8(*input_u);
+		(*output)[1] = UVJ_8_TO_UV_8(*input_u);
 		(*output)[3] = UVJ_8_TO_UV_8(*input_v);
-		(*output)[0] = UVJ_8_TO_UV_8(*input_y);
+		(*output)[0] = YJ_8_TO_Y_8(*input_y);
 	}
 	else
 // Store Y and advance output for odd pixels only
@@ -1319,6 +1345,19 @@ static inline void transfer_YUVJ422P_to_YUV422(unsigned char *(*output),
 		(*output)[2] = YJ_8_TO_Y_8(*input_y);
 		(*output) += 4;
 	}
+}
+
+static inline void transfer_YUVJ422P_to_YUV420P(unsigned char *input_y,
+       unsigned char *input_u,
+       unsigned char *input_v,
+       unsigned char *output_y,
+       unsigned char *output_u,
+       unsigned char *output_v,
+       int j)
+{
+       output_y[j] = YJ_8_TO_Y_8(*input_y);
+       output_u[j / 2] = UVJ_8_TO_UV_8(*input_u);
+       output_v[j / 2] = UVJ_8_TO_UV_8(*input_v);
 }
 
 // ******************************** YUVJ420P -> ********************************
