@@ -8,7 +8,6 @@
 #include <quicktime/lqt_codecapi.h>
 #include <lqt_codecinfo_private.h>
 
-#include <lqt_private.h>
 #include <funcprotos.h>
 #include <lqt_fseek.h>
 #include <sys/stat.h>
@@ -387,7 +386,8 @@ int lqt_add_audio_track(quicktime_t *file,
   quicktime_trak_init_audio(file, trak, channels,
                             sample_rate, bits, compressor);
   
-  quicktime_init_audio_map(&(file->atracks[0]), trak, file->wr,
+  quicktime_init_audio_map(file, &(file->atracks[file->total_atracks]),
+                           trak, file->wr,
                            codec_info);
   file->atracks[file->total_atracks].track = trak;
   file->atracks[file->total_atracks].channels = channels;
@@ -633,7 +633,7 @@ int quicktime_seek_start(quicktime_t *file)
 long quicktime_audio_length(quicktime_t *file, int track)
 {
 	if(file->total_atracks > 0) 
-		return quicktime_track_samples(file, file->atracks[track].track);
+		return file->atracks[track].total_samples;
 
 	return 0;
 }
@@ -1225,15 +1225,18 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 	return 0;
 }
 
-int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *trak, int encode, lqt_codec_info_t * info)
-{
-	atrack->track = trak;
-	atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
-	atrack->current_position = 0;
-	atrack->current_chunk = 1;
-	quicktime_init_acodec(atrack, encode, info);
-	return 0;
-}
+int quicktime_init_audio_map(quicktime_t * file,
+                             quicktime_audio_map_t *atrack, quicktime_trak_t *trak, int encode, lqt_codec_info_t * info)
+  {
+  if(!encode)
+    atrack->total_samples = quicktime_track_samples(file, trak);
+  atrack->track = trak;
+  atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
+  atrack->current_position = 0;
+  atrack->current_chunk = 1;
+  quicktime_init_acodec(atrack, encode, info);
+  return 0;
+  }
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 {
@@ -1256,7 +1259,7 @@ void quicktime_init_maps(quicktime_t * file)
       {
       while(!file->moov.trak[track]->mdia.minf.is_audio)
         track++;
-      quicktime_init_audio_map(&(file->atracks[i]), file->moov.trak[track],
+      quicktime_init_audio_map(file, &(file->atracks[i]), file->moov.trak[track],
                                file->wr,
                                (lqt_codec_info_t*)0);
       }

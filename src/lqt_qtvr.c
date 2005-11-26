@@ -6,7 +6,6 @@
 #include <quicktime/lqt.h>
 #include <lqt_codecinfo_private.h>
 
-#include <lqt_private.h>
 #include <funcprotos.h>
 #include <lqt_fseek.h>
 #include <sys/stat.h>

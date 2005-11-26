@@ -12,19 +12,71 @@ extern "C" {
 
 void *lqt_bufalloc(size_t size);
 
+/** \ingroup general
+ *
+ * \brief Return the raw filedescriptor associated with the file
+ * \param file A quicktime handle
+ * \retrurns The filesecriptor
+ *
+ * Use this of you want to call some low-level functions of the file.
+ * Note, that this routine should be used with care, since it's easy
+ * to screw things up.
+ */
+  
 int lqt_fileno(quicktime_t *file);
 
-/* Call quicktime_set_parameter with our codec info */
-
-void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value);
-void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value);
-
+/** \ingroup audio
+ *  \brief Set a codec parameter for an audio track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param key Short name of the parameter
+ *  \param value Parameter value.
+ *
+ *  For integer parameters, value must be of the type int*. For string parameters,
+ *  use char*.
+ */
   
+void lqt_set_audio_parameter(quicktime_t *file,int track, char *key,void *value);
+
+/** \ingroup video
+ *  \brief Set a codec parameter for a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param key Short name of the parameter
+ *  \param value Parameter value.
+ *
+ *  For integer parameters, value must be of the type int*. For string parameters,
+ *  use char*.
+ */
+
+void lqt_set_video_parameter(quicktime_t *file,int track, char *key,void *value);
+
+/** \ingroup video_decode
+ *  \brief Get the pixel aspect ratio of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param pixel_width returns the pixel width
+ *  \param pixel_height returns the pixel height
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ */
+
 
 int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
                          int * pixel_height);
+
+/** \ingroup video_encode
+ *  \brief Set the pixel aspect ratio of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param pixel_width Pixel width
+ *  \param pixel_height Pixel height
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ */
+
 int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
                          int pixel_height);
+
 
 
 lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track);
@@ -296,18 +348,98 @@ int lqt_total_channels(quicktime_t *file);
 
 /* Extended metadata support */
 
+/** \ingroup metadata
+    \brief Set the album for the file
+    \param file A quicktime handle
+    \param string The album
+*/
+  
 void lqt_set_album(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the artist for the file
+    \param file A quicktime handle
+    \param string The artist
+*/
+  
 void lqt_set_artist(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the genre for the file
+    \param file A quicktime handle
+    \param string The genre
+*/
+
 void lqt_set_genre(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the track number for the file
+    \param file A quicktime handle
+    \param string The track number (as string)
+*/
+  
+
 void lqt_set_track(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the comment for the file
+    \param file A quicktime handle
+    \param string The comment
+*/
+
 void lqt_set_comment(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the author for the file
+    \param file A quicktime handle
+    \param string The author
+*/
+
 void lqt_set_author(quicktime_t *file, char *string);
 
+/** \ingroup metadata
+    \brief Get the album from the file
+    \param file A quicktime handle
+    \returns The album or NULL
+*/
+
 char * lqt_get_album(quicktime_t * file);
+
+/** \ingroup metadata
+    \brief Get the artist from the file
+    \param file A quicktime handle
+    \returns The artist or NULL
+*/
 char * lqt_get_artist(quicktime_t * file);
+
+/** \ingroup metadata
+    \brief Get the genre from the file
+    \param file A quicktime handle
+    \returns The genre or NULL
+*/
+
 char * lqt_get_genre(quicktime_t * file);
+
+/** \ingroup metadata
+    \brief Get the track number from the file
+    \param file A quicktime handle
+    \returns The track number (as string) or NULL
+*/
 char * lqt_get_track(quicktime_t * file);
+
+/** \ingroup metadata
+    \brief Get the comment from the file
+    \param file A quicktime handle
+    \returns The comment or NULL
+*/
+
 char * lqt_get_comment(quicktime_t *file);
+
+/** \ingroup metadata
+    \brief Get the author from the file
+    \param file A quicktime handle
+    \returns The author or NULL
+*/
 char * lqt_get_author(quicktime_t *file);
 
 /* get track number from track id */

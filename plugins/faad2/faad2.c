@@ -322,6 +322,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", (int)stsd->table[0].sample_rate, (int)samplerate);
     stsd->table[0].sample_rate = samplerate;
     codec->upsample = 1;
+    atrack->total_samples *= 2;
     }
   
   stsd->table[0].channels = channels;

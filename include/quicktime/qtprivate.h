@@ -916,6 +916,10 @@ typedef struct
         int vbr_num_frames; /* Frames written since start of chunk */
         int64_t vbr_frame_start;
         int64_t vbr_frames_written;
+
+        /* The total samples are calculated while initializing, but they MIGHT
+           be changed by the faad decoder, in the case resampling happens. */
+        int64_t total_samples;
         
 } quicktime_audio_map_t;
 
@@ -941,10 +945,6 @@ typedef struct
         uint8_t ** temp_frame;
         lqt_chroma_placement_t chroma_placement;
         lqt_interlace_mode_t interlace_mode;
-
-        /* The total samples are calculated while initializing, but they MIGHT
-           be changed by the faad decoder, in the case resampling happens. */
-        int64_t total_samples;
 
   } quicktime_video_map_t;
 

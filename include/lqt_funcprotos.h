@@ -953,7 +953,8 @@ int quicktime_init(quicktime_t *file);
 quicktime_trak_t* quicktime_add_track(quicktime_t *);
 int quicktime_get_timescale(double frame_rate);
 
-int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *trak,
+int quicktime_init_audio_map(quicktime_t * file,
+                             quicktime_audio_map_t *atrack, quicktime_trak_t *trak,
                              int encode, lqt_codec_info_t * info);
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack);
@@ -977,6 +978,13 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
                             quicktime_trak_t *trak, 
                             int64_t sample);
 
+/*
+ *  Set the default codec parameters from the registry
+ *  Works for reading and writing
+ */
+
+void lqt_set_default_video_parameters(quicktime_t * file, int track);
+void lqt_set_default_audio_parameters(quicktime_t * file, int track);
 
 /* Before and after writing subsequent frames, we must call
    quicktime_write_chunk_[header|footer] */
@@ -996,6 +1004,11 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples);
 int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak);
 
 /* lqt_codecs.c */
+
+int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
+                          lqt_codec_info_t * info);
+int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
+                          lqt_codec_info_t * info);
 
 int quicktime_delete_vcodec(quicktime_video_map_t *vtrack);
 int quicktime_delete_acodec(quicktime_audio_map_t *vtrack);

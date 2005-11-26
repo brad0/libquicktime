@@ -10,34 +10,106 @@ extern "C" {
 #include <inttypes.h>
 
 /* Some public enums needed by most subsequent headers */
+
+/**
+ * @file quicktime.h
+ * Public api header.
+ */
+
+/** \defgroup general
+    \brief General structures and functions
+ */
+
+/** \defgroup audio
+    \brief Audio related definitions and functions
+ */
+
+/** \defgroup audio_decode Audio decoding
+    \ingroup audio
+    \brief Audio related definitions and functions (reading)
+ */
+
+/** \defgroup audio_encode Audio encoding
+    \ingroup audio
+    \brief Audio related definitions and functions (writing)
+ */
+
+/** \defgroup video
+    \brief Video related definitions and functions
+ */
+
+/** \defgroup video_decode Video decoding
+    \ingroup video
+    \brief Video related definitions and functions (reading)
+ */
+
+/** \defgroup video_encode Video encoding
+    \ingroup video
+    \brief Video related definitions and functions (writing)
+ */
+
+/** \ingroup video
+ * \brief interlace modes
+ *
+ * This is the interlace mode of a video track. Read it with
+ * \ref lqt_get_interlace_mode .
+ */
+ 
+typedef enum 
+  {
+    LQT_INTERLACE_NONE = 0, /*!< No interlacing (= progressive) */
+    LQT_INTERLACE_TOP_FIRST, /*!< Top field first */
+    LQT_INTERLACE_BOTTOM_FIRST  /*!< Bottom field first */
+  } lqt_interlace_mode_t;
+
+/** \ingroup video
+ * \brief Chroma placement
+ *
+ * This describes the chroma placement of a video track. Read it with
+ * \ref lqt_get_chroma_placement . Chroma placement makes only sense for
+ * YUV420 formats. For other pixelformats, it is set implicitely to
+ * LQT_CHROMA_PLACEMENT_DEFAULT.
+ */
   
 typedef enum 
   {
-    LQT_INTERLACE_NONE = 0,
-    LQT_INTERLACE_TOP_FIRST,
-    LQT_INTERLACE_BOTTOM_FIRST 
-  } lqt_interlace_mode_t;
-
-typedef enum 
-  {
-    LQT_CHROMA_PLACEMENT_DEFAULT = 0, /* MPEG-1, JPEG or non 4:2:0 */
-    LQT_CHROMA_PLACEMENT_MPEG2,
-    LQT_CHROMA_PLACEMENT_DVPAL,
+    LQT_CHROMA_PLACEMENT_DEFAULT = 0, /*!< MPEG-1, JPEG or non 4:2:0 */
+    LQT_CHROMA_PLACEMENT_MPEG2,       /*!< MPEG-2 */
+    LQT_CHROMA_PLACEMENT_DVPAL,       /*!< DV PAL */
   } lqt_chroma_placement_t;
 
+/** \ingroup audio
+ * \brief Sample format definitions for audio
+ *
+ * This defines the datatype for audio samples, which will be used by a
+ * particular codec. You'll need this, if you want to use \ref lqt_decode_audio_raw
+ * or \ref lqt_encode_audio_raw . Byte order of the data is always machine native.
+ * Endianess conversion is responsibility of the codec.
+ */
+  
 typedef enum 
   {
-    LQT_SAMPLE_UNDEFINED, /* If this is returned, we have an error */
-    LQT_SAMPLE_INT8,
-    LQT_SAMPLE_UINT8,
-    LQT_SAMPLE_INT16,
-    LQT_SAMPLE_INT32,
-    LQT_SAMPLE_FLOAT /* Float is ALWAYS machine native */
+    LQT_SAMPLE_UNDEFINED, /*!< If this is returned, we have an error */
+    LQT_SAMPLE_INT8,      /*!< int8_t */
+    LQT_SAMPLE_UINT8,     /*!< uint8_t */
+    LQT_SAMPLE_INT16,     /*!< int16_t */
+    LQT_SAMPLE_INT32,     /*!< int32_t */
+    LQT_SAMPLE_FLOAT      /*!< Float (machine native) */
   } lqt_sample_format_t;
   
   
 // #include "qtprivate.h"
 
+
+  
+/** \ingroup general
+    \brief Quicktime handle
+
+    Opaque file handle used both for reading and writing. In quicktime4linux, this structure is
+    public, resulting in programmers doing wrong things with it. In libquicktime, this is
+    a private structure, which is accessed exclusively by functions.
+ */
+  
 typedef struct quicktime_s quicktime_t;
   
 /* This is the reference for all your library entry points. */
@@ -133,21 +205,100 @@ int quicktime_major();
 int quicktime_minor();
 int quicktime_release();
 
-/* return 1 if the file is a quicktime file */
+/** \ingroup general
+    \brief Test file compatibility
+    \param path A path to a regular file
+    \returns 1 if the file is decodable by libquicktime.
+    
+    Check the signature of a path and return 1 is the file is likely to ba
+    decodable by libquicktime. This check might return false positives or false
+    negatives. In general it's better (although slower) to check, if \ref quicktime_open
+    return NULL or not.
+ */
+  
 int quicktime_check_sig(char *path);
 
-/* call this first to open the file and create all the objects */
+/** \ingroup general
+    \brief Open a file
+    \param filename A path to a regular file
+    \param rd 1 for open readonly, 0 else
+    \param wr 1 for open writeonly, 0 else
+    \returns An initialized file handle or NULL if opening failed.
+    
+    Note, that files can never be opened read/write mode.
+*/
+  
 quicktime_t* quicktime_open(const char *filename, int rd, int wr);
 
-/* make the quicktime file streamable */
+/** \ingroup general
+    \brief Make a file streamable 
+    \param in_path Existing non streamable file
+    \param out_path Output file
+    \returns 1 if an error occurred, 0 else
+
+    This function makes a file streamable by placing the moov header at the beginning of the file.
+    Note that you need approximately the twice the disk-space of the file. It is recommended, that
+    this function is called only for files, which are encoded by libquicktime. Other files might not
+    be correctly written.
+*/
+  
 int quicktime_make_streamable(char *in_path, char *out_path);
 
-/* Set various options in the file. */
+/** \defgroup metadata
+    \brief Metadata support
+
+    These functions allow you to read/write the metadata of the file. Currently, only the
+    metadata in the udta atom are supported
+*/
+
+/** \ingroup metadata
+    \brief Set the copyright info for the file
+    \param file A quicktime handle
+    \param string The copyright info
+*/
+  
 void quicktime_set_copyright(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set the name for the file
+    \param file A quicktime handle
+    \param string The name
+*/
+
 void quicktime_set_name(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Set info for the file
+    \param file A quicktime handle
+    \param string An info string
+*/
+
 void quicktime_set_info(quicktime_t *file, char *string);
+
+/** \ingroup metadata
+    \brief Get the copyright info from the file
+    \param file A quicktime handle
+    \returns The copyright info or NULL
+*/
+  
+
 char* quicktime_get_copyright(quicktime_t *file);
+
+/** \ingroup metadata
+    \brief Get the name from the file
+    \param file A quicktime handle
+    \returns The name or NULL
+*/
+  
+
 char* quicktime_get_name(quicktime_t *file);
+
+/** \ingroup metadata
+    \brief Get the info string from the file
+    \param file A quicktime handle
+    \returns The info string or NULL
+*/
+  
 char* quicktime_get_info(quicktime_t *file);
 
 /* Read all the information about the file. */
@@ -155,18 +306,50 @@ char* quicktime_get_info(quicktime_t *file);
 /* If no MOOV atom exists return 1 else return 0. */
 int quicktime_read_info(quicktime_t *file);
 
-/* set up tracks in a new file after opening and before writing */
-/* returns the number of quicktime tracks allocated */
-/* audio is stored two channels per quicktime track */
+/** \ingroup audio_encode
+    \brief Set up tracks in a new file after opening and before writing
+    \param file A quicktime handle
+    \param channels Number of channels
+    \param sample_rate Samplerate
+    \param bits Bits per sample
+    \param compressor Compressor to use
+
+    Returns the number of quicktime tracks allocated. Audio is stored two channels
+    per quicktime track.
+
+    This function is depracated and should not be used in newly written code. It won't let you
+    add individual tracks with different codecs, samplerates etc. Use \ref lqt_add_audio_track instread.
+*/
+  
 int quicktime_set_audio(quicktime_t *file, 
 	int channels, 
 	long sample_rate, 
 	int bits, 
 	char *compressor);
-/* Samplerate can be set after file is created */
+
+/** \ingroup video_encode
+    \brief Set the framerate for encoding
+    \param file A quicktime handle
+    \param framerate framerate
+
+    Sets the framerate for encoding.
+
+    This function is depracated and should not be used in newly written code.
+*/
+
 void quicktime_set_framerate(quicktime_t *file, double framerate);
 
-/* video is stored one layer per quicktime track */
+/** \ingroup video_encode
+    \brief Set up video tracks for encoding
+    \param file A quicktime handle
+    \param tracks Number of tracks
+    \param frame_w Frame width
+    \param frame_h Frame height
+    \param frame_rate Frame rate (in frames per second)
+
+    This function is depracated and should not be used in newly written code. Use \lqt_add_video_track instead.
+*/
+  
 int quicktime_set_video(quicktime_t *file, 
 	int tracks, 
 	int frame_w, 
@@ -174,17 +357,47 @@ int quicktime_set_video(quicktime_t *file,
 	double frame_rate, 
 	char *compressor);
 
-/* routines for setting various video parameters */
-/* should be called after set_video */
+/** \ingroup video_encode
+    \brief Set jpeg encoding quality
+    \param file A quicktime handle
+    \param quality Quality (0..100)
+    \param use_float Use floating point routines
+    
+    Set the jpeg encoding quality and whether to use floating point routines.
+    This should be called after creating the video track(s).
+    
+    This function is depracated and should not be used in newly written code.
+    Use \ref lqt_set_video_parameter instead.
+*/
+  
 void quicktime_set_jpeg(quicktime_t *file, int quality, int use_float);
 
-/* Configure codec parameters with this */
-/* It iterates through every track and sets the key in that codec to */
-/* the value.  The value can be any data type and the key must be a */
-/* string which the codec understands. */
+/** \ingroup video_encode
+ * \brief Set a codec parameter
+ *  \param file A quicktime handle
+ *  \param key Short name of the parameter
+ *  \param value Parameter value.
+ *
+ *  For integer parameters, value must be of the type int*. For string parameters,
+ *  use char*.
+ *
+ *  This function sets the same parameter for all video AND audio streams, which is quite
+ *  idiotic. Use \ref lqt_set_audio_parameter and \ref lqt_set_video_parameter to set
+ *  codec parameters on a per stream basis.
+ */
+
 void quicktime_set_parameter(quicktime_t *file, char *key, void *value);
 
-/* Set the depth of the track. */
+/** \ingroup video_encode
+ *  \brief Set the depth of a video track.
+ *  \param file A quicktime handle
+ *  \param depth The depth (bits per pixel)
+ *  \param Track index (starting with 0)
+ *
+ *  This function is deprecated and should never be called.
+ *  Use the depth argument of 
+ *  
+ */
 void quicktime_set_depth(quicktime_t *file, 
 	int depth, 
 	int track);
