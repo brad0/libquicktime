@@ -3,9 +3,40 @@
 
 /* Fine tuning of quicktime atoms. Use with caution */
 
-int lqt_set_fiel(quicktime_t *, int, int, int);
-int lqt_get_fiel(quicktime_t *, int, int *, int *);
+/** \ingroup video_encode
+ *  \brief Set the field attributes of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param nfields number of fields (1 = progressive, 2 = interlaced)
+ *  \param dominance field order/dominance (9 = top first, 14 = bottom first)
+ *  \returns 1 if the call was successful, 0 if there is no such track or invalid number of fields or invalid dominance
+ *
+ *  The dominance parameter may also have the values 0, 1 and 6 but those are
+ *  rarely used.  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#fiel
+ *
+ *  has more detailed information about the 'fiel' atom.
+ */
 
+int lqt_set_fiel(quicktime_t *, int, int, int);
+
+/** \ingroup video_encode
+ *  \brief Get the field attributes of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param nfields number of fields
+ *  \param dominance field order/dominance
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#fiel
+ *
+ *  has more detailed information about the 'fiel' atom.
+ */
+
+int lqt_get_fiel(quicktime_t *, int, int *, int *);
 
 /* pasp atom */
 
