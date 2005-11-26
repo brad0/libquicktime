@@ -45,13 +45,28 @@ int lqt_get_fiel(quicktime_t *file, int track, int *nfields, int *dominance);
 */
 typedef struct
 {
-	/*! horizontal spacing */
+	/*! Horizontal spacing */
 	int32_t hSpacing;
 	/*! Vertical spacing */
 	int32_t vSpacing;
 } quicktime_pasp_t;
 
+/** \ingroup video_encode
+ *  \brief Set the pixel aspect atom of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param pasp Pixel aspect atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ */
 int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
+
+/** \ingroup video_encode
+ *  \brief Get the pixel aspect atom of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param pasp Pixel aspect atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ */
 int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
 /* clap atom */
