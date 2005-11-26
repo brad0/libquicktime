@@ -40,9 +40,14 @@ int lqt_get_fiel(quicktime_t *file, int track, int *nfields, int *dominance);
 
 /* pasp atom */
 
+/*! \struct quicktime_pasp_t
+ *  \brief Pixel Aspect atom structure
+*/
 typedef struct
 {
+	/*! horizontal spacing */
 	int32_t hSpacing;
+	/*! Vertical spacing */
 	int32_t vSpacing;
 } quicktime_pasp_t;
 
