@@ -19,7 +19,7 @@
  *  has more detailed information about the 'fiel' atom.
  */
 
-int lqt_set_fiel(quicktime_t *, int, int, int);
+int lqt_set_fiel(quicktime_t *file, int track, int nfields, int dominance);
 
 /** \ingroup video_encode
  *  \brief Get the field attributes of a video track
@@ -36,7 +36,7 @@ int lqt_set_fiel(quicktime_t *, int, int, int);
  *  has more detailed information about the 'fiel' atom.
  */
 
-int lqt_get_fiel(quicktime_t *, int, int *, int *);
+int lqt_get_fiel(quicktime_t *file, int track, int *nfields, int *dominance);
 
 /* pasp atom */
 
