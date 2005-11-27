@@ -69,34 +69,103 @@ int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
  */
 int  lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
-/* clap atom */
-
+/*! \struct quicktime_clap_t
+ *  \brief Clean Aperture atom structure
+*/
 typedef struct
 {
+	/*! width of clean aperture numerator, in pixels */
 	int32_t cleanApertureWidthN;
+	/*! width of clean aperture denominator, in pixels */
 	int32_t cleanApertureWidthD;
+	/*! height of clean aperture numerator, in pixels */
 	int32_t cleanApertureHeightN;
+	/*! height of clean aperture denominator, in pixels */
 	int32_t cleanApertureHeightD;
+	/*! horzontal offset of clean aperture (numerator) center minus (width-1)/2. Typically 0 */
 	int32_t horizOffN;
+	/*! horzontal offset of clean aperture (denominator) center minus (width-1)/2. Typically 0 */
 	int32_t horizOffD;
+	/*! vertical offset of clean aperture (numerator) center minus (width-1)/2. Typically 0 */
 	int32_t vertOffN;
+	/*! vertical offset of clean aperture (denominator) center minus (width-1)/2. Typically 0 */
 	int32_t vertOffD;
 } quicktime_clap_t;
 
+/** \ingroup video_encode
+ *  \brief Set the clean aperture attributes of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param clap Clean aperture atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#clap
+ *
+ *  has more detailed information about the 'clap' atom.
+ */
 int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
+
+/** \ingroup video_encode
+ *  \brief Get the clean aperture attributes of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param clap Clean aperture atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#clap
+ *
+ *  has more detailed information about the 'clap' atom.
+ */
+
 int  lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
 
-/* colr atom */
-
+/*! \struct quicktime_colr_t
+ *  \brief 'colr' ImageDescription Extension structure
+*/
 typedef struct
 {
+	/*! OSType = 'nclc' for video, 'prof' for print */
 	int32_t colorParamType;
+	/*! CIE 1931 xy chromaticity coordinates of red, green, blue primaries and white point */
 	int16_t primaries;
+	/*! Nonlinear transfer function from RGB to Er/Eg/Eb */
 	int16_t transferFunction;
+	/*! Matrix from ErEgEb to Ey/Ecb/Ecr */
 	int16_t matrix;
 } quicktime_colr_t;
 
+/** \ingroup video_encode
+ *  \brief Set the 'colr' ImageDescription Extension of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param colr Colr atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#colr
+ *
+ *  has more detailed information about the 'colr' atom.
+ */
 int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+
+/** \ingroup video_encode
+ *  \brief Get the 'colr' ImageDescription Extension of a video track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param colr Colr atom
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  The Apple documentation at
+ *
+ *     http://developer.apple.com/quicktime/icefloe/dispatch019.html#colr
+ *
+ *  has more detailed information about the 'colr' atom.
+ */
 int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 
 #endif /* _LQT_ATOMS_H_ */
