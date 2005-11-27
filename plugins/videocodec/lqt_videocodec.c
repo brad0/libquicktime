@@ -1,9 +1,11 @@
 #include "config.h"
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
-#include "raw.h"
 
 #include <quicktime/colormodels.h>
+
+void quicktime_init_codec_raw(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack);
 
 void quicktime_init_codec_v210(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
@@ -74,7 +76,7 @@ static lqt_codec_info_static_t codec_info_raw =
   {
   name:        "raw",
   long_name:   "RGB uncompressed",
-  description: "RGB uncompressed. Allows alpha",
+  description: "RGB uncompressed.",
   fourccs:     fourccs_raw,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -86,6 +88,24 @@ static lqt_codec_info_static_t codec_info_raw =
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
   };
+
+static lqt_codec_info_static_t codec_info_rawalpha =
+  {
+  name:        "rawalpha",
+  long_name:   "RGBA uncompressed",
+  description: "RGBA uncompressed",
+  fourccs:     fourccs_raw,
+  type:        LQT_CODEC_VIDEO,
+  direction:   LQT_DIRECTION_ENCODE,
+#ifdef DUMMY_PARAMETERS
+  encoding_parameters: dummy_parameters,
+  decoding_parameters: dummy_parameters,
+#else
+  encoding_parameters: (lqt_parameter_info_static_t*)0,
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+#endif
+  };
+
 
 static lqt_codec_info_static_t codec_info_v210 =
   {
@@ -198,21 +218,23 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
     {
     case 0: /* raw */
       return &codec_info_raw;
-    case 1: /* v308 */
+    case 1: /* raw (with alpha) */
+      return &codec_info_rawalpha;
+    case 2: /* v308 */
       return &codec_info_v308;
-    case 2: /* v408 */
+    case 3: /* v408 */
       return &codec_info_v408;
-    case 3: /* v410 */
+    case 4: /* v410 */
       return &codec_info_v410;
-    case 4: /* yuv2 */
+    case 5: /* yuv2 */
       return &codec_info_yuv2;
-    case 5: /* yuv4 */
+    case 6: /* yuv4 */
       return &codec_info_yuv4;
-    case 6: /* vy12 */
+    case 7: /* vy12 */
       return &codec_info_yv12;
-    case 7: /* 2vuy */
+    case 8: /* 2vuy */
       return &codec_info_2vuy;
-    case 8: /* v210 */
+    case 9: /* v210 */
       return &codec_info_v210;
     }
   return (lqt_codec_info_static_t*)0;
@@ -224,43 +246,25 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
     {
     case 0: /* raw */
       return quicktime_init_codec_raw;
-    case 1: /* v308 */
+    case 1: /* raw (with alpha) */
+      return quicktime_init_codec_rawalpha;
+    case 2: /* v308 */
       return quicktime_init_codec_v308;
-    case 2: /* v408 */
+    case 3: /* v408 */
       return quicktime_init_codec_v408;
-    case 3: /* v410 */
+    case 4: /* v410 */
       return quicktime_init_codec_v410;
-    case 4: /* yuv2 */
+    case 5: /* yuv2 */
       return quicktime_init_codec_yuv2;
-    case 5: /* yuv4 */
+    case 6: /* yuv4 */
       return quicktime_init_codec_yuv4;
-    case 6: /* vy12 */
+    case 7: /* vy12 */
       return quicktime_init_codec_yv12;
-    case 7: /* 2vuy */
+    case 8: /* 2vuy */
       return quicktime_init_codec_2vuy;
-    case 8: /* v210 */
+    case 9: /* v210 */
       return quicktime_init_codec_v210;
     }
   return (lqt_init_video_codec_func_t)0;
   }
 
-int get_stream_colormodel(quicktime_t * file, int track,
-                          int codec_index)
-  {
-  int depth;
-  
-  if(codec_index == 0)
-    {
-    depth = quicktime_video_depth(file, track);
-    switch(depth)
-      {
-      case 32:
-        return BC_RGBA8888;
-        break;
-      default:
-        return BC_RGB888;
-        break;
-      }
-    }
-  return LQT_COLORMODEL_NONE;
-  }

@@ -80,8 +80,8 @@ typedef enum
 
 typedef union
   {
-  int val_int;
-  char * val_string;
+  int val_int; /*!< For integer parameters */
+  char * val_string; /*!< For string parameters */
   } lqt_parameter_value_t;
 
 /** \ingroup codec_parameters
@@ -267,7 +267,7 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index);
  *  \param audio Set this to 1 if you want audio codecs to be returned
  *  \param video Set this to 1 if you want video codecs to be returned
  *  \param encode Set this to 1 if you want encoders to be returned
- *  \param encode Set this to 1 if you want decoders to be returned
+ *  \param decode Set this to 1 if you want decoders to be returned
  *  \returns A NULL terminated array of codec infos.
  *
  *  This function copies the codec infos. Use \ref lqt_destroy_codec_info
@@ -364,6 +364,8 @@ void lqt_reorder_video_codecs(lqt_codec_info_t ** codec_info);
 /** \ingroup codec_registry
  *  \brief Change a default value for a codec parameter
  *  \param type The type of the codec (audio or video)
+ *  \param encode 1 for encode parameter, 0 for decode parameter
+ *  \param codec_name The short name of the codec
  *  \param parameter_name The short name of the parameter to change
  *  \param val The new value for the parameter
  *
@@ -379,9 +381,9 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
 
 /** \ingroup codec_registry
  *  \brief Restore a default parameter from the codec module
- *  \param info A codec info referring to the codec
- *  \param encode Set this to 1 to restore encoding parameter, 0 else
- *  \param decode Set this to 1 to restore decoding parameter, 0 else
+ *  \param codec_info A codec info referring to the codec
+ *  \param encode Set this to 1 to restore encoding parameters, 0 else
+ *  \param decode Set this to 1 to restore decoding parameters, 0 else
  *
  *  This will revert previous calls to \ref lqt_set_default_parameter by
  *  loading the module and getting the hardcoded values.

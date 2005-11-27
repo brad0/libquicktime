@@ -2,10 +2,10 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
-#include "qtpng.h"
+
+void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
 
 static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
-
 
 static lqt_parameter_info_static_t encode_parameters_png[] =
   {
@@ -21,11 +21,26 @@ static lqt_parameter_info_static_t encode_parameters_png[] =
      { /* End of parameters */ }
   };
 
+/* RGBA png is supported as a special codec, which supports encoding only.
+   The normal png codec can decode both RGB and RGBA */
+
+static lqt_codec_info_static_t codec_info_pngalpha =
+  {
+  name:        "pngalpha",
+  long_name:   "PNG (with alpha)",
+  description: "Lossless video codec (RGBA mode)",
+  fourccs:     fourccs_png,
+  type:        LQT_CODEC_VIDEO,
+  direction:   LQT_DIRECTION_ENCODE,
+  encoding_parameters: encode_parameters_png,
+  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  };
+
 static lqt_codec_info_static_t codec_info_png =
   {
   name:        "png",
   long_name:   "PNG",
-  description: "Lossless compressing video codec, Allows alpha",
+  description: "Lossless video codec (RGB mode)",
   fourccs:     fourccs_png,
   type:        LQT_CODEC_VIDEO,
   direction:   LQT_DIRECTION_BOTH,
@@ -35,12 +50,17 @@ static lqt_codec_info_static_t codec_info_png =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 1; }
+extern int get_num_codecs() { return 2; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
-  if(!index)
-    return &codec_info_png;
+  switch(index)
+    {
+    case 0:
+      return &codec_info_png;
+    case 1:
+      return &codec_info_pngalpha;
+    }
   return (lqt_codec_info_static_t*)0;
   }
 
@@ -50,8 +70,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  */
 
 void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
-
-
+void quicktime_init_codec_pngalpha(quicktime_video_map_t *vtrack);
 
 /*
  *   Return the actual codec constructor
@@ -59,35 +78,14 @@ void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
 
 extern lqt_init_video_codec_func_t get_video_codec(int index)
   {
-  if(index == 0)
-    return quicktime_init_codec_png;
-  return (lqt_init_video_codec_func_t)0;
-  }
-
-
-/* 
- *  Return internal colormodel of the stream
- */
-
-extern int get_stream_colormodel(quicktime_t * file, int track, int codec_index)
-  {
-  int depth;
-
-  if(codec_index == 0)
+  switch(index)
     {
-    depth = quicktime_video_depth(file, track);
-    switch(depth)
-      {
-      case 24:
-        return BC_RGB888;
-        break;
-      case 32:
-        return BC_RGBA8888;
-        break;
-      default:
-        return LQT_COLORMODEL_NONE; /* This should never happen... */
-        break;
-      }
+    case 0:
+      return quicktime_init_codec_png;
+      break;
+    case 1:
+      return quicktime_init_codec_pngalpha;
+      break;
     }
-  return LQT_COLORMODEL_NONE; /* And this neither */
+  return (lqt_init_video_codec_func_t)0;
   }

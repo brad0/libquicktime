@@ -16,11 +16,11 @@ extern "C" {
  * Public api header.
  */
 
-/** \defgroup general
+/** \defgroup general General
     \brief General structures and functions
  */
 
-/** \defgroup audio
+/** \defgroup audio Audio
     \brief Audio related definitions and functions
  */
 
@@ -34,7 +34,7 @@ extern "C" {
     \brief Audio related definitions and functions (writing)
  */
 
-/** \defgroup video
+/** \defgroup video Video
     \brief Video related definitions and functions
  */
 
@@ -346,8 +346,12 @@ void quicktime_set_framerate(quicktime_t *file, double framerate);
     \param frame_w Frame width
     \param frame_h Frame height
     \param frame_rate Frame rate (in frames per second)
+    \param compressor Four character code of the compressor
 
-    This function is depracated and should not be used in newly written code. Use \lqt_add_video_track instead.
+    This function is depracated and should not be used in newly written code.
+    It won't allow you to set multiple video streams with different formats,
+    and passing a double framerate causes rounding errors.
+    Use \ref lqt_add_video_track instead.
 */
   
 int quicktime_set_video(quicktime_t *file, 
@@ -392,22 +396,44 @@ void quicktime_set_parameter(quicktime_t *file, char *key, void *value);
  *  \brief Set the depth of a video track.
  *  \param file A quicktime handle
  *  \param depth The depth (bits per pixel)
- *  \param Track index (starting with 0)
+ *  \param track index (starting with 0)
  *
  *  This function is deprecated and should never be called.
- *  Use the depth argument of 
+ *  The depth is set by the codecs and there is no reason to change this.
  *  
  */
 void quicktime_set_depth(quicktime_t *file, 
 	int depth, 
 	int track);
 
-/* Set the colormodel for encoder input */
+/** \ingroup video
+ * \brief Set the colormodel for en-/decoding
+ * \param file A quicktime handle
+ * \param colormodel The colormodel to use.
+ *
+ * This sets the colormodels for all video tracks at once.
+ * It's a better idea to use \ref lqt_set_cmodel instead.
+ */
+
 void quicktime_set_cmodel(quicktime_t *file, int colormodel);
-/* Set row span for decoder output */
+
+/** \ingroup video
+ * \brief Set the row_span for en-/decoding
+ * \param file A quicktime handle
+ * \param row_span The rowspan to use.
+ *
+ * This sets the rowspans for all video tracks at once.
+ * It's a better idea to use \ref lqt_set_row_span and
+ * \ref lqt_set_row_span_uv instead.
+ */
+
 void quicktime_set_row_span(quicktime_t *file, int row_span);
 
-/* close the file and delete all the objects */
+/** \ingroup general
+ * \brief Close a quicktime handle and free all associated memory
+ * \param file A quicktime handle
+ */
+  
 int quicktime_close(quicktime_t *file);
 
 /* get length information */
@@ -478,12 +504,32 @@ int quicktime_has_keyframes(quicktime_t *file, int track);
 int quicktime_supported_video(quicktime_t *file, int track);
 int quicktime_supported_audio(quicktime_t *file, int track);
 
-/* The codec can generate the color model with no downsampling */
+/** \ingroup video_decode
+ * \brief Check if a colormodel is supported for decoding
+ * \param file A quicktime handle
+ * \param colormodel A colormodel (see \ref color)
+ * \param track index (starting with 0)
+ * \returns 1 if the colormodel can be used for decoding calls, 0 if it can't.
+ *
+ * To let libquicktime get the best colormodel out of a list of colormodels your application
+ * supports, use \ref lqt_get_best_colormodel instead.
+ */
+  
 int quicktime_reads_cmodel(quicktime_t *file, 
 		int colormodel, 
 		int track);
 
-/* The codec can write the color model with no upsampling */
+/** \ingroup video_encode
+ * \brief Check if a colormodel is supported for encoding
+ * \param file A quicktime handle
+ * \param colormodel A colormodel (see \ref color)
+ * \param track index (starting with 0)
+ * \returns 1 if the colormodel can be used for encoding calls, 0 if it can't.
+ *
+ * To let libquicktime get the best colormodel out of a list of colormodels your application
+ * supports, use \ref lqt_get_best_colormodel instead.
+ */
+
 int quicktime_writes_cmodel(quicktime_t *file, 
 		int colormodel, 
 		int track);

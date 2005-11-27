@@ -2,7 +2,22 @@
 
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
-#include "qtpng.h"
+
+#include <png.h>
+
+typedef struct
+{
+	int compression_level;
+	unsigned char *buffer;
+// Read position
+	long buffer_position;
+// Frame size
+	long buffer_size;
+// Buffer allocation
+	long buffer_allocated;
+	unsigned char *temp_frame;
+} quicktime_png_codec_t;
+
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
@@ -208,3 +223,11 @@ void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	codec->compression_level = 9;
 }
+
+void quicktime_init_codec_pngalpha(quicktime_video_map_t *vtrack)
+  {
+  /* Set depth to 32 */
+  vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
+  /* Proceed as normal */
+  quicktime_init_codec_png(vtrack);
+  }

@@ -19,33 +19,156 @@
 #ifndef COLORMODELS_H
 #define COLORMODELS_H
 
+/** \defgroup color Color handling
+
+   Libquicktime has a built in colormodel converter, which can do implicit colormodel
+   conversions while en-/decoding. It is, however, far from perfect: It is incomplete
+   (i.e. not all conversions are present), slow and sometimes inaccurate. Therefore,
+   there is a possibility to bypass internal colormodel conversions.
+*/
+
 // Colormodels
 #define BC_COMPRESSED   1
 
+/** \ingroup Color
+
+    16 bit RGB. Each pixel is a uint16_t in native byte order. Color masks are:
+    for red: 0xf800, for green: 0x07e0, for blue: 0x001f
+*/
+
 #define BC_RGB565       2
+
+/** \ingroup Color
+
+    16 bit BGR. Each pixel is a uint16_t in native byte order. Color masks are:
+    for red: 0x001f, for green: 0x07e0, for blue: 0xf800
+*/
+
 #define BC_BGR565       3
+
+/** \ingroup color
+
+    24 bit BGR. Each color is an uint8_t. Color order is BGR
+*/
+
 #define BC_BGR888       4
+
+/** \ingroup color
+
+ 32 bit BGR. Each color is an uint8_t. Color order is BGRXBGRX, where X is unused
+*/
+
 #define BC_BGR8888      5
-// Working bitmaps are packed to simplify processing
+
+/** \ingroup color
+
+    24 bit RGB. Each color is an uint8_t. Color order is RGB
+*/
+
+
 #define BC_RGB888       6
+
+/** \ingroup color
+
+    32 bit RGBA. Each color is an uint8_t. Color order is RGBARGBA
+*/
+
 #define BC_RGBA8888     7
+
+/** \ingroup color
+
+    48 bit RGB. Each color is an uint16_t in native byte order. Color order is RGB
+*/
+
 #define BC_RGB161616    8
+
+/** \ingroup color
+
+    64 bit RGBA. Each color is an uint16_t in native byte order. Color order is RGBA
+*/
+
 #define BC_RGBA16161616 9
+
+/** \ingroup color
+
+    Packed YCbCrA 4:4:4:4. Each component is an uint8_t. Component order is YUVA
+*/
+
 #define BC_YUVA8888     10
+
+/** \ingroup color
+
+    Packed YCbCr 4:2:2. Each component is an uint8_t. Component order is Y1 U1 Y2 V1
+*/
+
 #define BC_YUV422       13
 // Planar
+
+/** \ingroup color
+
+    Planar YCbCr 4:2:0. Each component is an uint8_t. Chroma placement is defined by
+    \ref lqt_chroma_placement_t
+*/
+
 #define BC_YUV420P      14
+
+/** \ingroup color
+
+    Planar YCbCr 4:2:2. Each component is an uint8_t
+*/
+
 #define BC_YUV422P      15
+
+/** \ingroup color
+
+    Planar YCbCr 4:4:4. Each component is an uint8_t
+*/
+
 #define BC_YUV444P      16
+
+/** \ingroup color
+
+    Planar YCbCr 4:1:1. Each component is an uint8_t
+*/
+
 #define BC_YUV411P      17
 /* JPEG scaled colormodels */
+
+/** \ingroup color
+
+    Planar YCbCr 4:2:0. Each component is an uint8_t, luma and chroma values are full range (0x00 .. 0xff)
+*/
+
 #define BC_YUVJ420P     18
+
+/** \ingroup color
+
+    Planar YCbCr 4:2:2. Each component is an uint8_t, luma and chroma values are full range (0x00 .. 0xff)
+*/
+
 #define BC_YUVJ422P     19
+
+/** \ingroup color
+
+    Planar YCbCr 4:4:4. Each component is an uint8_t, luma and chroma values are full range (0x00 .. 0xff)
+*/
+
 #define BC_YUVJ444P     20
 /* 16 bit per component planar formats */
-#define BC_YUV422P16    21
-#define BC_YUV444P16    22
 
+/** \ingroup color
+
+    16 bit Planar YCbCr 4:2:2. Each component is an uint16_t in native byte order.
+*/
+
+#define BC_YUV422P16    21
+
+/** \ingroup color
+
+    16 bit Planar YCbCr 4:4:4. Each component is an uint16_t in native byte order.
+*/
+
+#define BC_YUV444P16    22
 
 // Colormodels purely used by Quicktime are done in Quicktime.
 

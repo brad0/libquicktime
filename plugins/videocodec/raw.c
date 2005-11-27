@@ -346,26 +346,19 @@ static int quicktime_encode_raw(quicktime_t *file,
         if(!row_pointers)
           {
           if(depth == 32)
-            {
             vtrack->stream_cmodel = BC_RGBA8888;
-            }
           else
-            {
             vtrack->stream_cmodel = BC_RGB888;
-            }
           return 0;
           }
 
-        if(codec->bytes_per_line)
+        if(!codec->bytes_per_line)
           {
           if(depth == 32)
-            {
             codec->bytes_per_line = width * 4;
-            }
           else
-            {
             codec->bytes_per_line = width * 3;
-            }
+
           if(codec->bytes_per_line & 1)
             codec->bytes_per_line++;
           }
@@ -427,3 +420,9 @@ void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
         codec_base->title = "RGB uncompressed";
         codec_base->desc = "RGB uncompressed";
 }
+
+void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack)
+  {
+  vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
+  quicktime_init_codec_raw(vtrack);
+  }

@@ -1,7 +1,6 @@
 #include "funcprotos.h"
 #include <quicktime/colormodels.h>
 #include "quicktime.h"
-#include "yuv2.h"
 
 /* U V values are signed but Y R G B values are unsigned! */
 /*
