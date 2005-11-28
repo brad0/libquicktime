@@ -296,9 +296,6 @@ void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)
   codec_base->encode_audio = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->flush = flush;
-  codec_base->fourcc = "mp4a";
-  codec_base->title = "AAC encoder";
-  codec_base->desc = "AAC encoder (based on faac)";
   
   codec = codec_base->priv;
 

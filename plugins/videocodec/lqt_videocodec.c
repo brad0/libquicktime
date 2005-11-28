@@ -18,15 +18,15 @@ void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
 static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3",   (char*)0 };
 
-static char * fourccs_v210[] = { QUICKTIME_YUV422_10bit,  (char *)0};
+static char * fourccs_v210[] = { QUICKTIME_V410,  (char *)0};
 
-static char * fourccs_v308[] = { QUICKTIME_YUV444,        (char*)0 };
+static char * fourccs_v308[] = { QUICKTIME_V308,        (char*)0 };
 
-static char * fourccs_v408[] = { QUICKTIME_YUVA4444 ,     (char*)0 };
+static char * fourccs_v408[] = { QUICKTIME_V408,     (char*)0 };
 
-static char * fourccs_v410[] = { QUICKTIME_YUV444_10bit , (char*)0 };
+static char * fourccs_v410[] = { QUICKTIME_V410 , (char*)0 };
 
-static char * fourccs_yuv2[] = { QUICKTIME_YUV422 ,       (char*)0 };
+static char * fourccs_yuv2[] = { QUICKTIME_YUV2 ,       (char*)0 };
 
 static char * fourccs_2vuy[] = { QUICKTIME_2VUY ,         (char*)0 };
 

@@ -18,194 +18,193 @@ quicktime_strl_t* quicktime_new_strl()
 
 
 void quicktime_init_strl(quicktime_t *file, 
-	quicktime_audio_map_t *atrack,
-	quicktime_video_map_t *vtrack,
-	quicktime_trak_t *trak,
-	quicktime_strl_t *strl)
-{
-	quicktime_atom_t list_atom, strh_atom, strf_atom;
-	quicktime_atom_t junk_atom;
-	int i;
-        trak->strl = strl;
-/* Construct tag */
-	if(vtrack)
-	{
-		strl->tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
-		strl->tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
-		strl->tag[2] = 'd';
-		strl->tag[3] = 'c';
-	}
-	else
-	if(atrack)
-	{
-		strl->tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
-		strl->tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
-		strl->tag[2] = 'w';
-		strl->tag[3] = 'b';
-	}
+                         quicktime_audio_map_t *atrack,
+                         quicktime_video_map_t *vtrack,
+                         quicktime_trak_t *trak,
+                         quicktime_strl_t *strl)
+  {
+  quicktime_atom_t list_atom, strh_atom, strf_atom;
+  quicktime_atom_t junk_atom;
+  int i;
+  trak->strl = strl;
+  /* Construct tag */
+  if(vtrack)
+    {
+    strl->tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
+    strl->tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
+    strl->tag[2] = 'd';
+    strl->tag[3] = 'c';
+    }
+  else
+    if(atrack)
+      {
+      strl->tag[0] = '0' + (trak->tkhd.track_id - 1) / 10;
+      strl->tag[1] = '0' + (trak->tkhd.track_id - 1) % 10;
+      strl->tag[2] = 'w';
+      strl->tag[3] = 'b';
+      }
 
 
-/* LIST 'strl' */
-	quicktime_atom_write_header(file, &list_atom, "LIST");
-	quicktime_write_char32(file, "strl");
+  /* LIST 'strl' */
+  quicktime_atom_write_header(file, &list_atom, "LIST");
+  quicktime_write_char32(file, "strl");
 
-/* 'strh' */
-	quicktime_atom_write_header(file, &strh_atom, "strh");
-
-
-
-/* vids */
-	if(vtrack)
-	{
-        quicktime_write_char32(file, "vids");                                         // fccType
-        quicktime_write_char32(file, 
-                               trak->mdia.minf.stbl.stsd.table[0].format);            // fccHandler
-/* flags */
-        quicktime_write_int32_le(file, 0);                                            // dwFlags
-/* priority */
-        quicktime_write_int16_le(file, 0);                                            // dwReserved1
-/* language */
-        quicktime_write_int16_le(file, 0);                                            // dwReserved1 (32 bit)
-/* initial frame */
-        quicktime_write_int32_le(file, 0);                                            // dwInitialFrames
-
-/* framerate denominator */
-        quicktime_write_int32_le(file, 
-                                 trak->mdia.minf.stbl.stts.table[0].sample_duration); // dwScale
-/* framerate numerator */
-        quicktime_write_int32_le(file, 
-                                 trak->mdia.mdhd.time_scale);                         // dwRate
-
-/* start */
-        quicktime_write_int32_le(file, 0);                                            // dwStart
-        strl->dwLengthOffset = quicktime_position(file);
-/* length: fill later */
-        quicktime_write_int32_le(file, 0);                                            // dwLength
-/* suggested buffer size */
-        quicktime_write_int32_le(file, 1024 * 1024);                                  // dwSuggestedBufferSize
-/* quality */
-        quicktime_write_int32_le(file, -1);                                           // dwQuality
-/* sample size */
-        quicktime_write_int32_le(file, (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3); // dwSampleSize
-        quicktime_write_int16_le(file, 0);                                            // ??
-        quicktime_write_int16_le(file, 0);                                            // ??
-        quicktime_write_int16_le(file, trak->tkhd.track_width);                       // ??
-        quicktime_write_int16_le(file, trak->tkhd.track_height);                      // ??
-	}
-	else
-/* auds */
-	if(atrack)
-	{
-        quicktime_write_char32(file, "auds"); // fccType
-        quicktime_write_int32_le(file, 0);    // fccHandler
-/* flags */
-        quicktime_write_int32_le(file, 0);    // dwFlags
-/* priority */
-        quicktime_write_int16_le(file, 0);    // dwReserved1
-/* language */
-        quicktime_write_int16_le(file, 0);    // dwReserved1 (32 bit)
-/* initial frame */
-        quicktime_write_int32_le(file, 0);    // dwInitialFrames
-	strl->dwScaleOffset = quicktime_position(file);
-/* samples per chunk */
-        quicktime_write_int32_le(file, 0);    // dwScale
-/* sample rate * samples per chunk  if uncompressed */
-/* sample rate if compressed */
-        quicktime_write_int32_le(file, 0);    // dwRate
-/* start */
-        quicktime_write_int32_le(file, 0);    // dwStart
-		strl->dwLengthOffset = quicktime_position(file);
-/* length, XXX: filled later */
-        quicktime_write_int32_le(file, 0);    // dwLength
-/* suggested buffer size */
-        quicktime_write_int32_le(file, 0);    // dwSuggestedBufferSize
-/* quality */
-        quicktime_write_int32_le(file, -1);   // dwQuality
-/* sample size: 0 for compressed and number of bytes for uncompressed */
-		strl->dwSampleSizeOffset = quicktime_position(file);
-        quicktime_write_int32_le(file, 0);    // dwSampleSize
-        quicktime_write_int32_le(file, 0);    // ??
-        quicktime_write_int32_le(file, 0);    // ??
-	}
-	quicktime_atom_write_footer(file, &strh_atom);
+  /* 'strh' */
+  quicktime_atom_write_header(file, &strh_atom, "strh");
 
 
 
+  /* vids */
+  if(vtrack)
+    {
+    quicktime_write_char32(file, "vids");                                         // fccType
+    quicktime_write_char32(file, 
+                           trak->mdia.minf.stbl.stsd.table[0].format);            // fccHandler
+    /* flags */
+    quicktime_write_int32_le(file, 0);                                            // dwFlags
+    /* priority */
+    quicktime_write_int16_le(file, 0);                                            // dwReserved1
+    /* language */
+    quicktime_write_int16_le(file, 0);                                            // dwReserved1 (32 bit)
+    /* initial frame */
+    quicktime_write_int32_le(file, 0);                                            // dwInitialFrames
+
+    /* framerate denominator */
+    quicktime_write_int32_le(file, 
+                             trak->mdia.minf.stbl.stts.table[0].sample_duration); // dwScale
+    /* framerate numerator */
+    quicktime_write_int32_le(file, 
+                             trak->mdia.mdhd.time_scale);                         // dwRate
+
+    /* start */
+    quicktime_write_int32_le(file, 0);                                            // dwStart
+    strl->dwLengthOffset = quicktime_position(file);
+    /* length: fill later */
+    quicktime_write_int32_le(file, 0);                                            // dwLength
+    /* suggested buffer size */
+    quicktime_write_int32_le(file, 1024 * 1024);                                  // dwSuggestedBufferSize
+    /* quality */
+    quicktime_write_int32_le(file, -1);                                           // dwQuality
+    /* sample size */
+    quicktime_write_int32_le(file, (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3); // dwSampleSize
+    quicktime_write_int16_le(file, 0);                                            // ??
+    quicktime_write_int16_le(file, 0);                                            // ??
+    quicktime_write_int16_le(file, trak->tkhd.track_width);                       // ??
+    quicktime_write_int16_le(file, trak->tkhd.track_height);                      // ??
+    }
+  else
+    /* auds */
+    if(atrack)
+      {
+      quicktime_write_char32(file, "auds"); // fccType
+      quicktime_write_int32_le(file, 0);    // fccHandler
+      /* flags */
+      quicktime_write_int32_le(file, 0);    // dwFlags
+      /* priority */
+      quicktime_write_int16_le(file, 0);    // dwReserved1
+      /* language */
+      quicktime_write_int16_le(file, 0);    // dwReserved1 (32 bit)
+      /* initial frame */
+      quicktime_write_int32_le(file, 0);    // dwInitialFrames
+      strl->dwScaleOffset = quicktime_position(file);
+      /* samples per chunk */
+      quicktime_write_int32_le(file, 0);    // dwScale
+      /* sample rate * samples per chunk  if uncompressed */
+      /* sample rate if compressed */
+      quicktime_write_int32_le(file, 0);    // dwRate
+      /* start */
+      quicktime_write_int32_le(file, 0);    // dwStart
+      strl->dwLengthOffset = quicktime_position(file);
+      /* length, XXX: filled later */
+      quicktime_write_int32_le(file, 0);    // dwLength
+      /* suggested buffer size */
+      quicktime_write_int32_le(file, 0);    // dwSuggestedBufferSize
+      /* quality */
+      quicktime_write_int32_le(file, -1);   // dwQuality
+      /* sample size: 0 for compressed and number of bytes for uncompressed */
+      strl->dwSampleSizeOffset = quicktime_position(file);
+      quicktime_write_int32_le(file, 0);    // dwSampleSize
+      quicktime_write_int32_le(file, 0);    // ??
+      quicktime_write_int32_le(file, 0);    // ??
+      }
+  quicktime_atom_write_footer(file, &strh_atom);
 
 
 
 
-/* strf */
-	quicktime_atom_write_header(file, &strf_atom, "strf");
-
-	if(vtrack)
-	{
-/* atom size repeated */
-                quicktime_write_int32_le(file, 40); //                            biSize
-		quicktime_write_int32_le(file, trak->tkhd.track_width); //        biWidth
-		quicktime_write_int32_le(file, trak->tkhd.track_height); //       biHeight
-/* planes */
-		quicktime_write_int16_le(file, 1); //                             biPlanes
-/* depth */
-		quicktime_write_int16_le(file, 24); //                            biBitCount
-		quicktime_write_char32(file, 
-			trak->mdia.minf.stbl.stsd.table[0].format); //            biCompression
-		quicktime_write_int32_le(file, 
-			trak->tkhd.track_width * trak->tkhd.track_height * 3); // biSizeImage
-		quicktime_write_int32_le(file, 0); //                             biXPelsPerMeter
-		quicktime_write_int32_le(file, 0); //                             biYPelsPerMeter
-		quicktime_write_int32_le(file, 0); //                             biClrUsed
-		quicktime_write_int32_le(file, 0); //                             biClrImportant
-	}
-	else
-	if(atrack)
-	{
-/* By now the codec is instantiated so the WAV ID is available. */
-		int wav_id = 0x0;
-		quicktime_codec_t *codec_base = atrack->codec;
-
-		if(codec_base->wav_id)
-			wav_id = codec_base->wav_id;
-		quicktime_write_int16_le(file, //                                 wFormatTag
-			wav_id);
-		quicktime_write_int16_le(file, 
-                        trak->mdia.minf.stbl.stsd.table[0].channels); //          nChannels
-		quicktime_write_int32_le(file, 
-			trak->mdia.minf.stbl.stsd.table[0].sample_rate); //       nSamplesPerSec
-                strl->nAvgBytesPerSecOffset = quicktime_position(file);
-                /* bitrate in bytes */
-		quicktime_write_int32_le(file, 0); //                             nAvgBytesPerSec
-/* block align */
-		quicktime_write_int16_le(file, 0); //                             nBlockAlign
-/* bits per sample */
-		quicktime_write_int16_le(file, 0); //                             wBitsPerSample;
-		quicktime_write_int16_le(file, 0); //                             cbSize
-	}
-
-	quicktime_atom_write_footer(file, &strf_atom);
 
 
 
+  /* strf */
+  quicktime_atom_write_header(file, &strf_atom, "strf");
 
-/* Junk is required in Windows. */
-/* In Heroine Kernel it's padding for the super index */
-	strl->indx_offset = quicktime_position(file);
-	strl->padding_size = JUNK_SIZE;
+  if(vtrack)
+    {
+    /* atom size repeated */
+    quicktime_write_int32_le(file, 40); //                            biSize
+    quicktime_write_int32_le(file, trak->tkhd.track_width); //        biWidth
+    quicktime_write_int32_le(file, trak->tkhd.track_height); //       biHeight
+    /* planes */
+    quicktime_write_int16_le(file, 1); //                             biPlanes
+    /* depth */
+    quicktime_write_int16_le(file, 24); //                            biBitCount
+    quicktime_write_char32(file, 
+                           trak->mdia.minf.stbl.stsd.table[0].format); //            biCompression
+    quicktime_write_int32_le(file, 
+                             trak->tkhd.track_width * trak->tkhd.track_height * 3); // biSizeImage
+    quicktime_write_int32_le(file, 0); //                             biXPelsPerMeter
+    quicktime_write_int32_le(file, 0); //                             biYPelsPerMeter
+    quicktime_write_int32_le(file, 0); //                             biClrUsed
+    quicktime_write_int32_le(file, 0); //                             biClrImportant
+    }
+  else
+    if(atrack)
+      {
+      /* By now the codec is instantiated so the WAV ID is available. */
+      int wav_id = 0x0;
+
+      if(atrack->wav_id)
+        wav_id = atrack->wav_id;
+      quicktime_write_int16_le(file, //                                 wFormatTag
+                               wav_id);
+      quicktime_write_int16_le(file, 
+                               trak->mdia.minf.stbl.stsd.table[0].channels); //          nChannels
+      quicktime_write_int32_le(file, 
+                               trak->mdia.minf.stbl.stsd.table[0].sample_rate); //       nSamplesPerSec
+      strl->nAvgBytesPerSecOffset = quicktime_position(file);
+      /* bitrate in bytes */
+      quicktime_write_int32_le(file, 0); //                             nAvgBytesPerSec
+      /* block align */
+      quicktime_write_int16_le(file, 0); //                             nBlockAlign
+      /* bits per sample */
+      quicktime_write_int16_le(file, 0); //                             wBitsPerSample;
+      quicktime_write_int16_le(file, 0); //                             cbSize
+      }
+
+  quicktime_atom_write_footer(file, &strf_atom);
 
 
 
-	quicktime_atom_write_header(file, &junk_atom, "JUNK");
-	for(i = 0; i < JUNK_SIZE; i += 4)
-		quicktime_write_int32_le(file, 0);
-	quicktime_atom_write_footer(file, &junk_atom);
+
+  /* Junk is required in Windows. */
+  /* In Heroine Kernel it's padding for the super index */
+  strl->indx_offset = quicktime_position(file);
+  strl->padding_size = JUNK_SIZE;
 
 
-/* Initialize super index */
-	quicktime_init_indx(file, &strl->indx, strl);
+
+  quicktime_atom_write_header(file, &junk_atom, "JUNK");
+  for(i = 0; i < JUNK_SIZE; i += 4)
+    quicktime_write_int32_le(file, 0);
+  quicktime_atom_write_footer(file, &junk_atom);
 
 
-	quicktime_atom_write_footer(file, &list_atom);
-}
+  /* Initialize super index */
+  quicktime_init_indx(file, &strl->indx, strl);
+
+
+  quicktime_atom_write_footer(file, &list_atom);
+  }
 
 
 

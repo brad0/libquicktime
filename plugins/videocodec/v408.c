@@ -200,8 +200,5 @@ void quicktime_init_codec_v408(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->fourcc = QUICKTIME_YUVA4444;
-	codec_base->title = "Component Y'CbCrA 8-bit 4:4:4:4";
-	codec_base->desc = "Component Y'CbCrA 8-bit 4:4:4:4";
 }
 

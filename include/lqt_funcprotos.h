@@ -1013,8 +1013,6 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
 int quicktime_delete_vcodec(quicktime_video_map_t *vtrack);
 int quicktime_delete_acodec(quicktime_audio_map_t *vtrack);
 int quicktime_codecs_flush(quicktime_t *file);
-void quicktime_id_to_codec(char *result, int id);
-int quicktime_codec_to_id(char *codec);
 
 /* workarounds.c */
 

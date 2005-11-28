@@ -552,7 +552,7 @@ static void register_codecs(lqt_codec_info_t * list,
     }
   }
 
-static int scan_for_plugins(char * plugin_dir, lqt_codec_info_t ** database)
+static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** database)
   {
   char * pos;
   int ret;

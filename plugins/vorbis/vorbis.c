@@ -863,9 +863,6 @@ void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
 	codec_base->encode_audio = encode;
 	codec_base->set_parameter = set_parameter;
 	codec_base->flush = flush;
-	codec_base->fourcc = QUICKTIME_VORBIS;
-	codec_base->title = "OGG Vorbis";
-	codec_base->desc = "OGG Vorbis for video. (Not standardized)";
         
 	codec = codec_base->priv;
 	codec->nominal_bitrate = 128000;

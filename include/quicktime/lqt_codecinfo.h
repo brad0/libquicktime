@@ -16,7 +16,7 @@ extern "C" {
 
 /**
    \defgroup codec_registry Codec registry
-   \brief Informations about installing codecs
+   \brief Informations about installed codecs
 
    One of the goals when forking libquicktime was to have a modular structure.
    Codecs were moved to plugins and were compiled according to the dependencies
@@ -195,8 +195,8 @@ void lqt_registry_init();
  *  \brief Destroy the codec registry
  *
  *  
- *   This frees memory for the whole codec database
- *   Is is normally called automatically, but you will need to call
+ *   This frees memory for the whole codec database.
+ *   It is normally called automatically, but you will need to call
  *   it exclicitely, if you want to reinitialize the codec registry at runtime
  */
 

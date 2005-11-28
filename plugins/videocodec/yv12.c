@@ -120,8 +120,5 @@ void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->fourcc = QUICKTIME_YUV420;
-	codec_base->title = "YUV 4:2:0 Planar";
-	codec_base->desc = "YUV 4:2:0 Planar";
 }
 

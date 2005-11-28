@@ -873,10 +873,7 @@ void quicktime_init_codec_twos(quicktime_audio_map_t *atrack)
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = QUICKTIME_TWOS;
-  codec_base->title = "Twos complement";
-  codec_base->desc = "Twos complement";
-
+  
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
@@ -919,10 +916,7 @@ void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack)
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "SOWT";
-  codec_base->title = "Twos complement (Little endian)";
-  codec_base->desc = "Twos complement (Little endian)";
-  codec_base->wav_id = 0x01;
+  //  codec_base->wav_id = 0x01;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -967,10 +961,6 @@ void quicktime_init_codec_in24_little(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "in24";
-  codec_base->title = "24 bit PCM (Little endian)";
-  codec_base->desc = "24 bit PCM (Little endian)";
-  codec_base->wav_id = 0x01;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -998,9 +988,6 @@ void quicktime_init_codec_in24_big(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "in24";
-  codec_base->title = "24 bit PCM (Big endian)";
-  codec_base->desc = "24 bit PCM (Big endian)";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1023,9 +1010,6 @@ void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->fourcc = "in24";
-  codec_base->title = "24 bit PCM";
-  codec_base->desc = "24 bit PCM";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1051,10 +1035,6 @@ void quicktime_init_codec_in32_little(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "in32";
-  codec_base->title = "32 bit PCM (Little endian)";
-  codec_base->desc = "32 bit PCM (Little endian)";
-  codec_base->wav_id = 0x01;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1085,9 +1065,6 @@ void quicktime_init_codec_in32_big(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "in32";
-  codec_base->title = "32 bit PCM (Big endian)";
-  codec_base->desc = "32 bit PCM (Big endian)";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1114,9 +1091,6 @@ void quicktime_init_codec_in32(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->fourcc = "in32";
-  codec_base->title = "32 bit PCM";
-  codec_base->desc = "32 bit PCM";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1151,10 +1125,6 @@ void quicktime_init_codec_fl32_little(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "fl32";
-  codec_base->title = "32 bit float (Little endian)";
-  codec_base->desc = "32 bit float (Little endian)";
-  codec_base->wav_id = 0x01;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1182,9 +1152,6 @@ void quicktime_init_codec_fl32_big(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "fl32";
-  codec_base->title = "32 bit float (Big endian)";
-  codec_base->desc = "32 bit float (Big endian)";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1208,9 +1175,6 @@ void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->fourcc = "fl32";
-  codec_base->title = "32 bit float";
-  codec_base->desc = "32 bit float";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1236,10 +1200,6 @@ void quicktime_init_codec_fl64_little(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "fl64";
-  codec_base->title = "64 bit float (Little endian)";
-  codec_base->desc = "64 bit float (Little endian)";
-  codec_base->wav_id = 0x01;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1267,9 +1227,6 @@ void quicktime_init_codec_fl64_big(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "fl64";
-  codec_base->title = "64 bit float (Big endian)";
-  codec_base->desc = "64 bit float (Big endian)";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1295,9 +1252,6 @@ void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->fourcc = "fl64";
-  codec_base->title = "64 bit float";
-  codec_base->desc = "64 bit float";
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1324,10 +1278,6 @@ void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = QUICKTIME_RAW;
-  codec_base->title = "8 bit unsigned";
-  codec_base->desc = "8 bit unsigned for video";
-  codec_base->wav_id = 0x01;
   
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1372,10 +1322,6 @@ void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack)
   codec_base->encode_video = 0;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = QUICKTIME_ULAW;
-  codec_base->title = "uLaw";
-  codec_base->desc = "uLaw";
-  codec_base->wav_id = 0x07;
   
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1398,10 +1344,6 @@ void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack)
   codec_base->encode_video = 0;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  codec_base->fourcc = "alaw";
-  codec_base->title = "aLaw";
-  codec_base->desc = "aLaw";
-  codec_base->wav_id = 0x06;
   
   /* Init private items */
   codec = calloc(1, sizeof(*codec));

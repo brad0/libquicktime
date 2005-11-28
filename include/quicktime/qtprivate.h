@@ -920,7 +920,10 @@ typedef struct
         /* The total samples are calculated while initializing, but they MIGHT
            be changed by the faad decoder, in the case resampling happens. */
         int64_t total_samples;
-        
+
+/* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
+        int wav_id;
+
 } quicktime_audio_map_t;
 
 typedef struct
@@ -1120,18 +1123,6 @@ typedef struct
 		void *value);
 	void (*flush)(quicktime_t *file, 
 		int track);
-
-        /* AVI codec ID for audio.  AVI codec ID's are based on WAV files, by the way. */
-        int wav_id;
-                                                                                   
-/* Pointer to static character code for identifying the codec. */
-        char *fourcc;
-                                                                                   
-/* English title of codec.  Optional. */
-        char *title;
-                                                                                   
-/* English description of codec.  Optional. */
-        char *desc;
 
 	void *priv;
 

@@ -563,10 +563,10 @@ void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack)
 	codec_base->decode_audio = decode;
 	codec_base->encode_audio = encode;
 	codec_base->flush = flush;
-	codec_base->fourcc = QUICKTIME_IMA4;
-	codec_base->title = "IMA 4";
-	codec_base->desc = "IMA 4";
-	codec_base->wav_id = 0x11;
+        //	codec_base->fourcc = QUICKTIME_IMA4;
+        //	codec_base->title = "IMA 4";
+        //	codec_base->desc = "IMA 4";
+        //	codec_base->wav_id = 0x11;
 
 /* Init private items */
 	codec = codec_base->priv;

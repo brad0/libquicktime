@@ -231,23 +231,6 @@ void quicktime_set_jpeg(quicktime_t *file, int quality, int use_float)
 {
 	quicktime_set_parameter( file, "jpeg_quality", &quality );
 	quicktime_set_parameter( file, "jpeg_usefloat", &use_float );
-
-	/*
-	  int i;
-	  char *compressor;
-
-	  for(i = 0; i < file->total_vtracks; i++)
-	  {
-	  if(quicktime_match_32(quicktime_video_compressor(file, i), QUICKTIME_JPEG) ||
-	  quicktime_match_32(quicktime_video_compressor(file, i), QUICKTIME_MJPA) ||
-	  quicktime_match_32(quicktime_video_compressor(file, i), QUICKTIME_RTJ0))
-	  {
-	  //quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[i].codec)->priv;
-	  //mjpeg_set_quality(codec->mjpeg, quality);
-	  //mjpeg_set_float(codec->mjpeg, use_float);
-	  }
-	  }
-	*/
 }
 
 

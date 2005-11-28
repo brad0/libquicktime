@@ -3,7 +3,18 @@
 
 /* Fine tuning of quicktime atoms. Use with caution */
 
-/** \ingroup video_encode
+/** \defgroup atoms Fine tuning of quicktime atoms
+ *
+ * Libquicktime tries it's best to produce proper files, with all the
+ * information neccesary for decoding the file with the right parameters.
+ * In some cases however, it might be useful to tweak the corresponding atoms
+ * individually. Please note that the functions described here, allow you full
+ * control over the atoms. But they also allow you to create horribly
+ * incompatible and undecodable files. Don't say you haven't been warned.
+ */
+ 
+
+/** \ingroup atoms
  *  \brief Set the field attributes of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -21,7 +32,7 @@
 
 int lqt_set_fiel(quicktime_t *file, int track, int nfields, int dominance);
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Get the field attributes of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -51,7 +62,7 @@ typedef struct
 	int32_t vSpacing;
 } quicktime_pasp_t;
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Set the pixel aspect atom of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -60,7 +71,7 @@ typedef struct
  */
 int  lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp);
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Get the pixel aspect atom of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -92,7 +103,7 @@ typedef struct
 	int32_t vertOffD;
 } quicktime_clap_t;
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Set the clean aperture attributes of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -107,7 +118,7 @@ typedef struct
  */
 int  lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap);
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Get the clean aperture attributes of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -138,7 +149,7 @@ typedef struct
 	int16_t matrix;
 } quicktime_colr_t;
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Set the 'colr' ImageDescription Extension of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -153,7 +164,7 @@ typedef struct
  */
 int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 
-/** \ingroup video_encode
+/** \ingroup atoms
  *  \brief Get the 'colr' ImageDescription Extension of a video track
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)

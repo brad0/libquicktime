@@ -416,9 +416,6 @@ void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
         codec_base->encode_video = quicktime_encode_raw;
         codec_base->decode_audio = 0;
         codec_base->encode_audio = 0;
-        codec_base->fourcc = QUICKTIME_RAW;
-        codec_base->title = "RGB uncompressed";
-        codec_base->desc = "RGB uncompressed";
 }
 
 void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack)

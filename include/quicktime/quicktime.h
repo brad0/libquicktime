@@ -13,13 +13,15 @@ extern "C" {
 
 /**
  * @file quicktime.h
- * Public api header.
+ * Public api header for the quicktime4linux compatibility layer.
  */
 
 /** \defgroup general General
     \brief General structures and functions
  */
 
+
+  
 /** \defgroup audio Audio
     \brief Audio related definitions and functions
  */
@@ -116,93 +118,260 @@ typedef struct quicktime_s quicktime_t;
 
 /* ===== compression formats for which codecs exist ====== */
 
+/** \defgroup video_codecs Video codec identifiers
+ *  \brief Video codec identifiers
+ *
+ *  These definintions are for some more commonly used codecs.
+ *  They can be used as the compressor argument for \ref quicktime_set_video .
+ *  There is, however, no way to check, if a
+ *  codec is accually present on the system.
+ *  It should also be noted, that libquicktime supports more codecs, than
+ *  are listed here. For these reasons, it's strongly recommended
+ *  to use the more sophisticated codec selection mechanism via the
+ *  \ref codec_registry .
+ */
+
+/** \ingroup video_codecs
+ * \brief Non compatible divx
+ *
+ * Never hardcode this in an application!
+ */
+
 #define QUICKTIME_DIVX "DIVX"
 
+/** \ingroup video_codecs
+ * \brief Divx for AVI files
+ *
+ * Never hardcode this in an application!
+ */
+
 #define QUICKTIME_DIV3 "DIV3"
+
+/** \ingroup video_codecs
+ * \brief DV
+ *
+ * Never hardcode this in an application!
+ */
   
 #define QUICKTIME_DV "dvc "
 /* AVID DV codec can be processed with libdv as well */
+
+/** \ingroup video_codecs
+ * \brief DV
+ *
+ * Never hardcode this in an application!
+ */
+
 #define QUICKTIME_DV_AVID "AVdv"
+
+/** \ingroup video_codecs
+ * \brief DV
+ *
+ * Never hardcode this in an application!
+ */
+
 #define QUICKTIME_DV_AVID_A "dvcp"
 
+/** \ingroup video_codecs
+ * \brief Uncompressed RGB.
+ *
+ * Never hardcode this in an application. There are 2 encoders with
+ * this fourcc, one for RGB and one for RGBA.
+ */
+  
 /* RGB uncompressed.  Allows alpha */
 #define QUICKTIME_RAW  "raw "
 
+/** \ingroup video_codecs
+ * \brief JPEG-Photo
+ *
+ * Might be missing if libjpeg headers aren't there during compilation.
+ */
+  
 /* Jpeg Photo */
 #define QUICKTIME_JPEG "jpeg"
 
 /* Concatenated png images.  Allows alpha */
+
+/** \ingroup video_codecs
+ * \brief JPEG-Photo
+ *
+ * Might be missing if libjpeg headers aren't there during compilation.
+ * There are 2 encoders, one for RGB, the other for RGBA.
+ */
+
 #define QUICKTIME_PNG "png "
 
-/* Motion JPEG-A. */
+/** \ingroup video_codecs
+ * \brief Motion JPEG-A
+ *
+ * Might be missing if libjpeg headers aren't there during compilation.
+ * A good choice for high quality interlaced storage.
+ */
+
 #define QUICKTIME_MJPA "mjpa"
 
-/* YUV 4:2:2 */
+/** \ingroup video_codecs
+ * \brief 8 bit Packed full-range (not video) YUV 4:2:2
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_YUV2 "yuv2"
 
-/* YUV 4:2:0  NOT COMPATIBLE WITH STANDARD QUICKTIME */
+/** \ingroup video_codecs
+ * \brief YUV 4:2:0
+ *
+ * Not compatible with standard quicktime.
+ */
+  
 #define QUICKTIME_YUV4 "yuv4"
 
-
-/* ======== compression for which no codec exists ========== */
-/* These are traditionally converted in hardware or not at all */
-
-/* 8 bit Planar YUV 4:2:0 */
+/** \ingroup video_codecs
+ * \brief 8 bit planar YUV 4:2:0
+ *
+ * Practically no external information about this codec exists. It should
+ * always be available, but nevertheless not used.
+ */
+  
 #define QUICKTIME_YUV420  "yv12"
-/* 8 bit Planar YUV 4:1:1 */
-#define QUICKTIME_YUV411  "y411"
-/* 8 bit Packed full-range (not video) YUV 4:2:2 */
-#define QUICKTIME_YUV422 "yuv2"
-#define QUICKTIME_YUV2 "yuv2"
-/* 8 bit Packed YUV (video range) 4:2:2 */
+
+/** \ingroup video_codecs
+ * \brief 8 bit Packed YUV (video range) 4:2:2
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_2VUY "2vuy"
-/* 8 bit Planar YUV 4:4:4 */
-#define QUICKTIME_YUV444  "v308"
+
+/** \ingroup video_codecs
+ * \brief 8 bit Packed YUV 4:4:4
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_V308  "v308"
-/* 8 bit Planar YUVA 4:4:4:4 */
-#define QUICKTIME_YUVA4444 "v408"
+
+/** \ingroup video_codecs
+ * \brief 8 bit Packed YUVA 4:4:4:4
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+
 #define QUICKTIME_V408 "v408"
-/* 10 bit Packed YUV 4:2:2 */
-#define QUICKTIME_YUV422_10bit "v210"
+
+/** \ingroup video_codecs
+ * \brief 10 bit Packed YUV 4:2:2
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_V210 "v210"
-/* 10 bit Packed YUV 4:4:4 */
-#define QUICKTIME_YUV444_10bit  "v410"
+
+/** \ingroup video_codecs
+ * \brief 10 bit Packed YUV 4:4:4
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+
 #define QUICKTIME_V410 "v410"
-
-/* ======== Studies in different algorithms =============== */
-
-/* YUV9.  What on earth for? */
-#define QUICKTIME_YUV9 "YVU9"
-
-/* RTjpeg, proprietary but fast? */
-#define QUICKTIME_RTJ0 "RTJ0"
 
 /* =================== Audio formats ======================= */
 
-/* Unsigned 8 bit */
-#ifndef QUICKTIME_RAW
-#define QUICKTIME_RAW "raw "
-#endif
+/** \defgroup audio_codecs Audio codec identifiers
+ *  \brief Audio codec identifiers
+ *
+ *  These definintions are for some more commonly used codecs.
+ *  They can be used as the compressor argument for \ref quicktime_set_audio .
+ *  There is, however, no way to check, if a
+ *  codec is accually present on the system.
+ *  It should also be noted, that libquicktime supports more codecs, than
+ *  are listed here. For these reasons, it's strongly recommended
+ *  to use the more sophisticated codec selection mechanism via the
+ *  \ref codec_registry .
+ */
 
-/* IMA4 */
+/** \ingroup audio_codecs
+ * \brief Unsigned 8 bit
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+ 
+#define QUICKTIME_RAWAUDIO "raw "
+
+/** \ingroup audio_codecs
+ * \brief IMA4
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+
 #define QUICKTIME_IMA4 "ima4"
 
-/* Twos compliment 8, 16, 24 */
+/** \ingroup audio_codecs
+ * \brief Twos compliment 16 bit
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_TWOS "twos"
 
-/* ulaw */
+/** \ingroup audio_codecs
+ * \brief mu-law 2:1
+ *
+ * Should always be there, can savely be hardcoded.
+ */
+  
 #define QUICKTIME_ULAW "ulaw"
+
+/** \ingroup audio_codecs
+ * \brief Ogg Vorbis
+ *
+ *  This depends on libvorbis and creates incompatible streams,
+ *  which won't play anywhere except libquicktime and perhaps
+ *  quicktime4linux. Never hardcode this.
+ */
 
 #define QUICKTIME_VORBIS "OggS"
 
+/** \ingroup audio_codecs
+ * \brief MP3
+ *
+ *  This depends on lame, which might or might not be there.
+ *  Never hardcode this.
+ */
+
 #define QUICKTIME_MP3 ".mp3"
-#define QUICKTIME_WMA "WMA "
   
 /* =========================== public interface ========================= // */
 
-/* Get version information */
+/** \ingroup general
+ *  \brief Get the quicktime4linux major version
+ *
+ * This returns the major quicktime4linux version. The complete version is 2.0.0, which
+ * was the last qt4l version from which we ported code. It's not usable for detecting the
+ * libquicktime version.
+ */
+  
+  /* Get version information */
 int quicktime_major();
+
+/** \ingroup general
+ *  \brief Get the quicktime4linux minor version
+ *
+ * This returns the minor quicktime4linux version. The complete version is 2.0.0, which
+ * was the last qt4l version from which we ported code. It's not usable for detecting the
+ * libquicktime version.
+ */
 int quicktime_minor();
+
+/** \ingroup general
+ *  \brief Get the quicktime4linux release number
+ *
+ * This returns the release number of quicktime4linux. The complete version is 2.0.0, which
+ * was the last qt4l version from which we ported code. It's not usable for detecting the
+ * libquicktime version.
+ */
+
 int quicktime_release();
 
 /** \ingroup general
@@ -244,11 +413,11 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr);
   
 int quicktime_make_streamable(char *in_path, char *out_path);
 
-/** \defgroup metadata
+/** \defgroup metadata Metadata support
     \brief Metadata support
 
     These functions allow you to read/write the metadata of the file. Currently, only the
-    metadata in the udta atom are supported
+    metadata in the udta atom are supported.
 */
 
 /** \ingroup metadata
@@ -438,28 +607,192 @@ int quicktime_close(quicktime_t *file);
 
 /* get length information */
 /* channel numbers start on 1 for audio and video */
+
+/** \ingroup audio_decode
+ *  \brief Get the audio length
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The total number of uncompressed audio samples in the track
+ */
+    
+
 long quicktime_audio_length(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ *  \brief Get the video length
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The total number of video frames in the track
+ *
+ * Note that for tracks with nonconstant framerate, you won't be able to obtain the
+ * track duration from the number of frame. If you are interested in the total playing time,
+ * use \ref lqt_video_duration
+ */
+
 long quicktime_video_length(quicktime_t *file, int track);
 
-/* get position information */
+/** \ingroup audio_decode
+ *  \brief Get the audio position
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The number (starting with 0) of the next sample to be decoded.
+ */
+
+  /* get position information */
 long quicktime_audio_position(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ *  \brief Get the video position
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The number (starting with 0) of the next frame to be decoded.
+ *
+ *  To get timestamps for tracks with nonconstant framerate, use \ref lqt_frame_time
+ */
+
 long quicktime_video_position(quicktime_t *file, int track);
 
+/** \ingroup video_decode
+ * \brief Get the number of video tracks
+ * \param file A quicktime handle
+ * \returns The number of video tracks
+ */
+  
 /* get file information */
 int quicktime_video_tracks(quicktime_t *file);
+
+/** \ingroup audio_decode
+ * \brief Get the number of audio tracks
+ * \param file A quicktime handle
+ * \returns The number of audio tracks
+ */
+
 int quicktime_audio_tracks(quicktime_t *file);
 
+/** \ingroup audio_decode
+ * \brief Check if a file has at least one audio track
+ * \param file A quicktime handle
+ * \returns 1 if the file has audio tracks, 0 else
+ */
+  
 int quicktime_has_audio(quicktime_t *file);
+
+/** \ingroup audio_decode
+ * \brief Get the samplerate of an audio track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The samplerate in Hz
+ */
+
 long quicktime_sample_rate(quicktime_t *file, int track);
+
+/** \ingroup audio_decode
+ * \brief Get the bits per sample of an audio track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The bits per sample (typically 16)
+ *
+ * Don't use this function for anything else than for informational
+ * purposes. Bits per sample is meaningless for compressed codecs, and
+ * sometimes plain wrong even for uncompressed ones.
+ *
+ * To get some better informations about the resolution, a codec will
+ * deliver, use \ref lqt_get_sample_format
+ */
+
 int quicktime_audio_bits(quicktime_t *file, int track);
+
+/** \ingroup audio_decode
+ * \brief Get the number of channels of an audio track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The the number of channels
+ */
+
 int quicktime_track_channels(quicktime_t *file, int track);
+
+/** \ingroup audio_decode
+ * \brief Get the four character code of an audio track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The four character code (fourcc) of the track.
+ *
+ * Note, that this function might return nothing meaningful for AVI files,
+ * since AVI doesn't use four character codes for audio streams.
+ * To get more save information about the codec responsible for the stream,
+ * use \ref lqt_audio_codec_from_file .
+ */
+
 char* quicktime_audio_compressor(quicktime_t *file, int track);
 
+/** \ingroup video_decode
+ * \brief Check if a file has at least one video track
+ * \param file A quicktime handle
+ * \returns 1 if the file has video tracks, 0 else
+ */
+
 int quicktime_has_video(quicktime_t *file);
+
+/** \ingroup video_decode
+ * \brief Get the width of a video track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The image width in pixels
+ */
+
 int quicktime_video_width(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ * \brief Get the height of a video track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The image height in pixels
+ */
+
 int quicktime_video_height(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ * \brief Get the depth of a video track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The image depth in pixels
+ *
+ * Don't use this function for anything else than for informational
+ * purposes. Depth is meaningless for compressed codecs and
+ * sometimes plain wrong even for uncompressed ones.
+ *
+ * To get some better informations about the pixel format, a codec will
+ * deliver, use \ref lqt_get_cmodel or (better) \ref lqt_get_decoder_colormodel .
+ * 
+ */
 int quicktime_video_depth(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ * \brief Get the framerate of a video track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The framerate in frames per second.
+ *
+ * Don't use this unless A/V sync is nor important. The return value is practically
+ * random for tracks with nonconstant framerate. Even for constant framerate, the return
+ * value can never correctly resemble e.g. the NTSC framerate (30000/1001).
+ *
+ * To get the framerate as a rational number (and check if it's constant), use \ref lqt_frame_duration
+ * and \ref lqt_video_time_scale .
+ */
+  
 double quicktime_frame_rate(quicktime_t *file, int track);
+
+/** \ingroup video_decode
+ * \brief Get the four character code of a video track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The four character code (fourcc) of the track.
+ *
+ * To get more save information about the codec responsible for the stream,
+ * use \ref lqt_video_codec_from_file .
+ */
+
 char* quicktime_video_compressor(quicktime_t *file, int track);
 
 /* number of bytes of raw data in this frame */
@@ -474,7 +807,27 @@ int quicktime_seek_end(quicktime_t *file);
 int quicktime_seek_start(quicktime_t *file);
 
 /* set position of file descriptor relative to a track */
+
+/** \ingroup audio_decode
+ *  \brief Seek to a specific audio position
+ * \param file A quicktime handle
+ * \param sample The sample position (starting with 0)
+ * \param track index (starting with 0)
+ *
+ * Use this for seeking. During sequential decode calls, the position will be updated automatically
+ */
 int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track);
+
+/** \ingroup video_decode
+ *  \brief Seek to a specific video frame
+ * \param file A quicktime handle
+ * \param frame The frame position (starting with 0)
+ * \param track index (starting with 0)
+ *
+ * Use this for seeking. During sequential decode calls, the position will be updated automatically.
+ * If you want to support tracks with nonconmstant framerate, you should use \ref lqt_seek_video .
+ */
+
 int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track);
 
 /* ========================== Access to raw data follows. */
@@ -484,7 +837,6 @@ int quicktime_write_audio(quicktime_t *file, uint8_t *audio_buffer, long samples
 int quicktime_write_frame(quicktime_t *file, uint8_t *video_buffer, int64_t bytes, int track);
 
 /* read raw data */
-long quicktime_read_audio(quicktime_t *file, char *audio_buffer, long samples, int track);
 long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track);
 
 /* for reading frame using a library that needs a file descriptor */
@@ -501,7 +853,23 @@ int quicktime_has_keyframes(quicktime_t *file, int track);
 /* ===================== Access to built in codecs follows. */
 
 /* If the codec for this track is supported in the library return 1. */
+
+/** \ingroup video_decode
+ * \brief Check if a video track is supported by libquicktime
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns 1 if a codec for this track is available, 0 else
+ */
+
 int quicktime_supported_video(quicktime_t *file, int track);
+
+/** \ingroup audio_decode
+ * \brief Check if an audio track is supported by libquicktime
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns 1 if a codec for this track is available, 0 else
+ */
+
 int quicktime_supported_audio(quicktime_t *file, int track);
 
 /** \ingroup video_decode
@@ -546,18 +914,54 @@ int quicktime_divx_has_vol(unsigned char *data);
 
 int quicktime_div3_is_key(unsigned char *data, long size);
 
-/* Decode or encode the frame into a frame buffer. */
-/* All the frame buffers passed to these functions are unsigned char */
-/* rows with 3 bytes per pixel.  The byte order per 3 byte pixel is */
-/* RGB. */
+/** \ingroup video_encode
+ * \brief Encode a video frame
+ * \param file A quicktime handle
+ * \param row_pointers Frame buffer (see \ref lqt_rows_alloc )
+ * \param track index (starting with 0)
+ *
+ * Encode one video frame. This works only for constant framerate streams. For nonconstant framerates,
+ * you'll want to use \ref lqt_encode_video instead.
+ */
+  
 int quicktime_encode_video(quicktime_t *file, 
 	unsigned char **row_pointers, 
 	int track);
 
-// Decodes RGB only
+/** \ingroup video_decode
+ * \brief Decode a video frame in \ref BC_RGB888
+ * \param file A quicktime handle
+ * \param row_pointers Frame buffer (see \ref lqt_rows_alloc )
+ * \param track index (starting with 0)
+ *
+ * Decode one video frame. All colormodels are converted to \ref BC_RGB888 automatically probably
+ * causing lots of overhead. To decode frames in other colormodels, use \ref lqt_decode_video .
+ */
+
 int quicktime_decode_video(quicktime_t *file, 
 	unsigned char **row_pointers, 
 	int track);
+
+/** \ingroup video_decode
+ * \brief Decode aand optionally scale a video frame
+ * \param file A quicktime handle
+ * \param in_x Horizontal offset of the image relative to the source image
+ * \param in_y Vertical offset of the image relative to the source image
+ * \param in_w Image width in the source image
+ * \param in_h Image height in the source image
+ * \param out_w Width of output frame
+ * \param out_h Height of output frame
+ * \param color_model Colormodel of the output frame
+ * \param row_pointers Frame buffer (see \ref lqt_rows_alloc )
+ * \param track index (starting with 0)
+ *
+ * This function takes a subwindow of the source image (specified by in_x, in_y, in_w, in_h)
+ * and scales it to the dimensions (out_w, out_h) of the output frame given by row_pointers. Colormodel
+ * conversion from the stream colormodel to the color_model you pass is also done. Scaling is done
+ * by a not very optimized nearest neighbor algorithm. To do high quality video scaling, you should use
+ * something else.
+ */
+
 long quicktime_decode_scaled(quicktime_t *file, 
 	int in_x,                    /* Location of input frame to take picture */
 	int in_y,
@@ -572,7 +976,35 @@ long quicktime_decode_scaled(quicktime_t *file,
 /* Decode or encode audio for a single channel into the buffer. */
 /* Pass a buffer for the _i or the _f argument if you want int16 or float data. */
 /* Notice that encoding requires an array of pointers to each channel. */
+
+/** \ingroup audio_decode
+ *  \brief Decode a number of audio samples of a single channel
+ *  \param file A quicktime handle
+ *  \param output_i 16 bit integer output buffer (or NULL)
+ *  \param output_f floating point output buffer (or NULL)
+ *  \param samples Number of samples to decode
+ *  \param channel Channel to decode
+ *
+ * Never use this function: Decoding only one channel at once causes lots of internal overhead
+ * if you need all channels anyway. In this case, \ref lqt_decode_audio_track is the better choice.
+ * Furthermore, you won't be able to decode the full resolution
+ * for 24 and 32 bit codecs. To decode the maximum resolution, use \ref lqt_decode_audio_raw.
+ */
+ 
 int quicktime_decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, long samples, int channel);
+
+/** \ingroup audio_encode
+ *  \brief Encode a number of audio samples for the first track
+ *  \param file A quicktime handle
+ *  \param input_i 16 bit integer output buffer (or NULL)
+ *  \param input_f floating point output buffer (or NULL)
+ *  \param samples Number of samples to decode
+ *
+ * Never use this function: It won't let you encode more than one audio track. To encode
+ * audio for multiple tracks, use \ref lqt_encode_audio_track . If you want to pass the full
+ * resolution even for 24/32 bit audio, use \ref lqt_encode_audio_raw .
+ */
+
 int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, long samples);
 
 /* Dump the file structures for the currently opened file. */

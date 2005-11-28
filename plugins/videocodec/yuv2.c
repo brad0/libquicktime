@@ -233,9 +233,6 @@ void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->fourcc = QUICKTIME_YUV2;
-	codec_base->title = "Component Video";
-	codec_base->desc = "YUV 4:2:2 (yuv2)";
 }
 
 void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack)
@@ -249,9 +246,6 @@ void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack)
 	codec_base->encode_video = encode;
 	codec_base->decode_audio = 0;
 	codec_base->encode_audio = 0;
-	codec_base->fourcc = QUICKTIME_2VUY;
-	codec_base->title = "Component Video";
-	codec_base->desc = "YUV 4:2:2 (2vuy)";
         codec = (quicktime_yuv2_codec_t *)(codec_base->priv);
         codec->is_2vuy = 1;
 }

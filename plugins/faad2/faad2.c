@@ -273,9 +273,6 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   codec_base->delete_acodec = delete_codec;
   codec_base->decode_audio = decode;
   codec_base->set_parameter = set_parameter;
-  codec_base->fourcc = "mp4a";
-  codec_base->title = "AAC decoder";
-  codec_base->desc = "MPEG-2/4 AAC decoder (faad2 based)";
   
   codec = codec_base->priv;
 

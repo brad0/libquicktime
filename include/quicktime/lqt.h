@@ -10,6 +10,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @file lqt.h
+ * Public api header for libquicktime extensions.
+ */
+  
 void *lqt_bufalloc(size_t size);
 
 /** \ingroup general
@@ -162,7 +167,7 @@ int lqt_string_to_colormodel(const char * str);
 
 /* Query information about the colormodel */
 
-/* \ingropup color
+/** \ingroup color
    \brief Check if a colormodel is planar
    \param colormodel A colormodel
    \returns 1 if the colormodel is planar, 0 else
@@ -170,7 +175,7 @@ int lqt_string_to_colormodel(const char * str);
 
 int lqt_colormodel_is_planar(int colormodel);
 
-/* \ingropup color
+  /** \ingroup color
    \brief Check if a colormodel has an alpha (transperency) channel
    \param colormodel A colormodel
    \returns 1 if the colormodel has an alpha channel, 0 else
@@ -542,25 +547,32 @@ void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv);
 /*
  * Same as quicktime_decode_audio, but it grabs all channels at
  * once. Or if you want only some channels you can leave the channels
- * you don't want = NULL in the poutput array. The poutput arrays
+ * you don't want = NULL in the output array. The output arrays
  * must contain at least lqt_total_channels(file) elements.
  */
 
 int lqt_decode_audio(quicktime_t *file, 
-					 int16_t **output_i, 
-					 float **output_f, 
-					 long samples);
-
+                     int16_t **output_i, 
+                     float **output_f, 
+                     long samples);
+  
 /*
  * Returns the position of the last decoded sample. If it is smaller than you expected, EOF is reached.
  */
   
-  
 int64_t lqt_last_audio_position(quicktime_t * file, int track);
   
-/*
- * Same as quicktime_encode_audio but with an additional track argument
- * for encoding files with more than one audio track
+/** \ingroup audio_encode
+ *  \brief Encode a number of audio samples for the first track
+ *  \param file A quicktime handle
+ *  \param output_i 16 bit integer output buffer (or NULL)
+ *  \param output_f floating point output buffer (or NULL)
+ *  \param samples Number of samples to decode
+ *  \param track index (starting with 0)
+ *
+ * Same as \ref quicktime_encode_audio but with an additional track argument
+ * for encoding files with more than one audio track. If you want to pass the full
+ * resolution even for 24/32 bit audio, use \ref lqt_encode_audio_raw .
  */
   
 int lqt_encode_audio_track(quicktime_t *file, 
@@ -569,12 +581,19 @@ int lqt_encode_audio_track(quicktime_t *file,
                            long samples,
                            int track);
   
-/*
- * This decodes all channels from one track
- * (Was there a reason to hide the difference between tracks and
- * channels from the user?)
+/** \ingroup audio_decode
+ *  \brief Decode a number of audio samples
+ *  \param file A quicktime handle
+ *  \param output_i 16 bit integer output buffer (or NULL)
+ *  \param output_f floating point output buffer (or NULL)
+ *  \param samples Number of samples to decode
+ *  \param track index (starting with 0)
+ *
+ * Decode a number of samples from an audio track. All channels are decoded at once.
+ * output_i and output_f point to noninterleaved arrays for each channel. Depending
+ * on what you need, set either output_i or output_f to NULL. If you want the full resolution
+ * also for 24/32 bits, use \ref lqt_decode_audio_raw .
  */
-  
   
 int lqt_decode_audio_track(quicktime_t *file, 
                            int16_t **output_i, 
@@ -593,7 +612,13 @@ int lqt_decode_audio_track(quicktime_t *file,
  *  and encoding (call after lqt_add_audio_track, lqt_set_audio or quicktime_set_audio).
  */
 
-const char * lqt_sample_format_to_string(lqt_sample_format_t);
+/** \ingroup audio
+ * \brief Get a human readable description for a sample format
+ * \param sampleformat A sampleformat
+ * \returns The description or NULL
+ */
+  
+const char * lqt_sample_format_to_string(lqt_sample_format_t sampleformat);
 
 /** \ingroup audio
  * \brief Return the sample format used natively by the codec.
@@ -643,12 +668,18 @@ int lqt_encode_audio_raw(quicktime_t *file,
                          void * input, 
                          long samples,
                          int track);
-  
-/*
- *  Seek to a specified time. Use this instead of quicktime_set_video_position
- *  for streams with nonconstant framerate
+
+/** \ingroup video_decode
+ *  \brief Seek to a specific video time
+ * \param file A quicktime handle
+ * \param time The desired time of the next frame in timescale tics (starting with 0)
+ * \param track index (starting with 0)
+ *
+ * Use this for seeking. During sequential decode calls, the position will be updated automatically.
+ * Replacement of \ref quicktime_set_video_position
+ * which also works for streams with nonconstant framerate
  */
-  
+
 void lqt_seek_video(quicktime_t * file, int track,
                     int64_t time);
   
