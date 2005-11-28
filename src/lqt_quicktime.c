@@ -2095,7 +2095,7 @@ static struct
 chroma_placements[] =
   {
     { LQT_CHROMA_PLACEMENT_DEFAULT,  "MPEG-1/JPEG" },
-    { LQT_CHROMA_PLACEMENT_MPEG2,    "MPEG-1" },
+    { LQT_CHROMA_PLACEMENT_MPEG1,    "MPEG-1" },
     { LQT_CHROMA_PLACEMENT_DVPAL,    "PAL DV" },
     {  /* End of array */ }
   };

@@ -76,7 +76,7 @@ typedef enum
 typedef enum 
   {
     LQT_CHROMA_PLACEMENT_DEFAULT = 0, /*!< MPEG-1, JPEG or non 4:2:0 */
-    LQT_CHROMA_PLACEMENT_MPEG2,       /*!< MPEG-2 */
+    LQT_CHROMA_PLACEMENT_MPEG1,       /*!< MPEG-2 */
     LQT_CHROMA_PLACEMENT_DVPAL,       /*!< DV PAL */
   } lqt_chroma_placement_t;
 
