@@ -384,6 +384,19 @@ void lqt_update_frame_position(quicktime_video_map_t * track)
   track->current_position++;
   }
 
+/* Set the io_rowspan for the case the user didn't. */
+
+static void set_default_rowspan(quicktime_t *file, int track)
+  {
+  if(file->vtracks[track].io_row_span)
+    return;
+
+  lqt_get_default_rowspan(file->vtracks[track].io_cmodel,
+                          quicktime_video_width(file, track),
+                          &(file->vtracks[track].io_row_span),
+                          &(file->vtracks[track].io_row_span_uv));
+  }
+
 /*
  *  Same as quicktime_decode_video but doesn't force BC_RGB888
  */
@@ -400,8 +413,12 @@ int lqt_decode_video(quicktime_t *file,
                 lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
                 file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
                 file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
-#endif   
-	height = quicktime_video_height(file, track);
+#endif
+        fprintf(stderr, "Rowspan: [%d,%d]/", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
+        set_default_rowspan(file, track);
+        fprintf(stderr, "[%d,%d]\n", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
+        
+        height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
         
         if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
@@ -474,6 +491,7 @@ long quicktime_decode_scaled(quicktime_t *file,
         int height;
 	int width;
         
+        set_default_rowspan(file, track);
 	height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
 
@@ -519,6 +537,7 @@ static int do_encode_video(quicktime_t *file,
   int height;
   int width;
   
+  set_default_rowspan(file, track);
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
 

@@ -129,6 +129,7 @@ void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v)
       *sub_h = 2;
       *sub_v = 2;
       break;
+    case BC_YUV422:
     case BC_YUV422P:
     case BC_YUVJ422P:
     case BC_YUV422P16:
@@ -541,7 +542,11 @@ void lqt_get_default_rowspan(int colormodel, int width, int * rowspan, int * row
   lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
 
   *rowspan = bytes_per_line;
-  *rowspan_uv = bytes_per_line / sub_h;
+
+  if(lqt_colormodel_is_planar(colormodel))
+    {
+    *rowspan_uv = bytes_per_line / sub_h;
+    }
   }
 
 void lqt_rows_free(uint8_t ** rows)
