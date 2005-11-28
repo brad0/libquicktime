@@ -193,8 +193,7 @@ void lqt_registry_init();
 
 /** \ingroup codec_registry
  *  \brief Destroy the codec registry
- *
- *  
+ * 
  *   This frees memory for the whole codec database.
  *   It is normally called automatically, but you will need to call
  *   it exclicitely, if you want to reinitialize the codec registry at runtime
