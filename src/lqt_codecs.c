@@ -414,9 +414,9 @@ int lqt_decode_video(quicktime_t *file,
                 file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
                 file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
 #endif
-        fprintf(stderr, "Rowspan: [%d,%d]/", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
+        //        fprintf(stderr, "Rowspan: [%d,%d]/", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
         set_default_rowspan(file, track);
-        fprintf(stderr, "[%d,%d]\n", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
+        //        fprintf(stderr, "[%d,%d]\n", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
         
         height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
