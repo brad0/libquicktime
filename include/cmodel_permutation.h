@@ -1238,6 +1238,19 @@ static inline void transfer_YUV422P16_to_YUV420P16(uint16_t *input_y,
 	output_v[j / 2] = *input_v;
 }
 
+static inline void transfer_YUV422P16_to_YUV420P(uint16_t *input_y,
+                                                   uint16_t *input_u,
+                                                   uint16_t *input_v,
+                                                   uint8_t *output_y,
+                                                   uint8_t *output_u,
+                                                   uint8_t *output_v,
+                                                   int j)
+{
+	output_y[j] = Y_16_TO_Y_8(*input_y + 0x40);
+	output_u[j / 2] = UV_16_TO_UV_8(*input_u + 0x40);
+	output_v[j / 2] = UV_16_TO_UV_8(*input_v + 0x40);
+}
+
 // ******************************** YUV444P16 -> ********************************
 
 static inline void transfer_YUV444P16_to_RGB888(unsigned char *(*output), 
