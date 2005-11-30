@@ -19,21 +19,46 @@ extern "C" {
 /** \defgroup general General
     \brief General structures and functions
  */
-
-
   
 /** \defgroup audio Audio
     \brief Audio related definitions and functions
  */
 
 /** \defgroup audio_decode Audio decoding
-    \ingroup audio
-    \brief Audio related definitions and functions (reading)
+ *  \ingroup audio
+ *  \brief Audio related definitions and functions (reading)
+ *
+ * The audio API changed a lot during the last years (causing lot of confusion), so here is the
+ * preferred way: First get the number of audio tracks with \ref quicktime_audio_tracks. Then
+ * for each track you want to decode, use \ref quicktime_supported_audio to verify that a codec
+ * is available. Then get the audio format with \ref quicktime_track_channels and \ref quicktime_sample_rate .
+ * Then use \ref lqt_decode_audio_track to decode noninterleaved channels in either 16bit integer
+ * or floating point [-1.0..1.0] format. This method will convert all internally used formats to the datatypes
+ * you want, but won't output the full precision for 24/32 bit formats. If you want the samples as raw as possible
+ * (bypassing all internal sample format conversions), use \ref lqt_get_sample_format to get the sampleformat
+ * natively used by the codec and \ref lqt_decode_audio_raw to decode it.
  */
 
 /** \defgroup audio_encode Audio encoding
-    \ingroup audio
-    \brief Audio related definitions and functions (writing)
+ *  \ingroup audio
+ *  \brief Audio related definitions and functions (writing)
+ *
+ * The audio API changed a lot during the last years (causing lot of confusion), so here is the
+ * preferred way: Use the \ref codec_registry functions to get all supported audio encoders.
+ * Once you found a codec (i.e. a \ref lqt_codec_info_t ), call \ref lqt_add_audio_track to
+ * add the track to the file. You can repeat this procedure to add as many tracks as you like
+ * with different formats and/or codecs.
+ *
+ * Next you might want to set some compression parameters. This is done by calling \ref lqt_set_audio_parameter.
+ * Supported parameters and valid ranges are in the \ref lqt_codec_info_t.
+ *
+ * For each track, encode noninterleaved samples (either in 16bit integer
+ * or floating point [-1.0..1.0] format) with \ref lqt_encode_audio_track . In this case, libquicktime
+ * will convert your samples to the format used by the codec. This won't give the
+ * full precision when using 24/32 bit formats. If you want to pass the samples as raw as possible
+ * (bypassing all internal sample format conversions), use \ref lqt_get_sample_format to get the sampleformat
+ * natively used by the codec and \ref lqt_encode_audio_raw to encode it.
+ * 
  */
 
 /** \defgroup video Video
@@ -41,13 +66,55 @@ extern "C" {
  */
 
 /** \defgroup video_decode Video decoding
-    \ingroup video
-    \brief Video related definitions and functions (reading)
+ * \ingroup video
+ * \brief Video related definitions and functions (reading)
+ *
+ * The video API changed a lot during the last years (causing lot of confusion), so here is the
+ * preferred way: First get the number of video tracks with \ref quicktime_video_tracks. Then
+ * for each track you want to decode, use \ref quicktime_supported_video to verify that a codec
+ * is available. Then for each track, get the frame size with \ref quicktime_video_width and
+ * \ref quicktime_video_height . The framerate is only exact when handled as a rational number.
+ * Thus, you'll need 2 functions \ref lqt_video_time_scale and \ref lqt_frame_duration .
+ * The framerate in frames/sec becomes time_scale/frame_duration. Further format information can
+ * be obtained with \ref lqt_get_pixel_aspect, \ref lqt_get_interlace_mode and \ref lqt_get_chroma_placement.
+ *
+ * A very important thing is the colormodel (see \ref color): First obtain the colormodel used natively
+ * by the codec with \ref lqt_get_cmodel. Your application might or might not support all colormodels,
+ * which exist in libquicktime. The more colormodels you can handle yourself, the better, since libquicktimes
+ * built in colormodel converter is not the best. Thus, it's the best idea to pack all colormodels you
+ * can handle yourself into an array, and call \ref lqt_get_best_colormodel to get the best colormodel. After you
+ * figured out, which colormodel you use, tell this to libquicktime with \ref lqt_set_cmodel.
+ *
+ * When decoding frames, libquicktime by default assumes, that the frames you pass to it have no padding bytes
+ * between the scanlines. Some APIs however padd scanlines to certain boundaries. If this is the case, you must
+ * tell this to libquicktime by calling \ref lqt_set_row_span and \ref lqt_set_row_span_uv (for planar formats).
+ *
+ * Then, for each frame, it's wise to get the timestamp with \ref lqt_frame_time before decoding it. This will
+ * make sure, that you'll support tracks with nonconstant framerates. The actual decoding then should happen with
+ * \ref lqt_decode_video.
  */
 
 /** \defgroup video_encode Video encoding
-    \ingroup video
-    \brief Video related definitions and functions (writing)
+ *  \ingroup video
+ *  \brief Video related definitions and functions (writing)
+ *
+ * The video API changed a lot during the last years (causing lot of confusion), so here is the
+ * preferred way: Use the \ref codec_registry functions to get all supported video encoders.
+ * Once you found a codec (i.e. a \ref lqt_codec_info_t ), call \ref lqt_add_video_track to
+ * add the track to the file. You can repeat this procedure to add as many tracks as you like
+ * with different formats and/or codecs. You can pass further format parameters with \ref lqt_set_pixel_aspect.
+ *
+ * A very important thing is the colormodel (see \ref color): First obtain the colormodel used natively
+ * by the codec with \ref lqt_get_cmodel. Your application might or might not support all colormodels,
+ * which exist in libquicktime. The more colormodels you can handle yourself, the better, since libquicktimes
+ * built in colormodel converter is not the best. Thus, it's the best idea to pack all colormodels you
+ * can handle yourself into an array, and call \ref lqt_get_best_colormodel to get the best colormodel. After you
+ * figured out, which colormodel you use, tell this to libquicktime with \ref lqt_set_cmodel.
+ *
+ * Next you might want to set some compression parameters. This is done by calling \ref lqt_set_video_parameter.
+ * Supported parameters and valid ranges are in the \ref lqt_codec_info_t.
+ * 
+ * Actual encoding should happen with \ref lqt_encode_video.
  */
 
 /** \ingroup video

@@ -1,0 +1,42 @@
+/*! \mainpage
+
+ \section intro Introduction
+   This is the API documentation for Libquicktime.
+
+  Click Modules (on top of the page) to get to the main API index.
+  Here, you find just some general blabla :)
+
+  \section history History
+  Libquicktime started as a patch for quicktime4linux to add support
+  for the GNU build tools. Due to the high interest in an easily installable,
+  general purpose, the patch (which was done by Arthur Peters) soon gained
+  attention. Other possible improvements were discussed, most notably
+  a more modular structure (i.e. dynamic loading of codec plugins). This
+  required some changes in the internal architecture, which could no longer
+  maintained as a patch, so the sourcecode was forked and the libquicktime
+  project was created.
+
+  The following years brought no revolution but lots of evolution. Some
+  features, most notably AVI support could be ported from quicktime4linux.
+  Other things, like support for nonconstant framerates, QTVR and some more
+  codecs are exclusive to libquicktime.
+
+  While libquicktime was initially meant to be a 100% compatible replacement for
+  quicktime4linux, this goal was given up due to the increasing differences
+  in the 2 libraries. But since libquicktime still has a more or less compatible
+  compatibility layer, porting quicktime4linux applications should still be
+  easy.
+
+  Today, libquicktime focuses mostly on the professional sector. Sample accurate
+  seeking and high resolution audio and video codecs are things you really need
+  when you take multimedia processing seriously.
+
+  \section api_conventions API conventions
+  All quicktime4linux functions, which could be used without change, are sill prefixed with
+  quicktime_. Some of these functions have flaws, and it was decided to write replacements.
+  These new functions (API extensions) are prefixed with lqt_.
+
+  \section usage Usage
+  The easiest way is to use pkg-config to get the compiler flags necessaty for libquicktime.
+  In each sourcefile, which uses libquicktime functions, you simply need to include <lqt.h>.
+*/

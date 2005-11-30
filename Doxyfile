@@ -423,7 +423,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/quicktime/quicktime.h include/quicktime/colormodels.h include/quicktime/lqt.h include/quicktime/lqt_codecinfo.h include/quicktime/lqt_atoms.h
+INPUT                  = doc/mainpage.incl include/quicktime/quicktime.h include/quicktime/colormodels.h include/quicktime/lqt.h include/quicktime/lqt_codecinfo.h include/quicktime/lqt_atoms.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -999,7 +999,7 @@ TAGFILES               =
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads.
 
-GENERATE_TAGFILE       = gavl.tags
+GENERATE_TAGFILE       = libquicktime.tags
 
 # If the ALLEXTERNALS tag is set to YES all external classes will be listed 
 # in the class index. If set to NO only the inherited external classes 
