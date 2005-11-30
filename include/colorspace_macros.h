@@ -100,11 +100,11 @@
 
 /* Conversion from YUV 16 */
 
-#define Y_16_TO_Y_8(val) ((val)>>8)
-#define UV_16_TO_UV_8(val) ((val)>>8)
+#define Y_16_TO_Y_8(val) ((val + 0x40)>>8)
+#define UV_16_TO_UV_8(val) ((val + 0x40)>>8)
 
-#define Y_16_TO_YJ_8(val)   ((((RECLIP(val, 0x1000, 0xEB00)-0x1000)*255)/219)>>8)
-#define UV_16_TO_UVJ_8(val) ((((RECLIP(val, 0x1000, 0xF000)-0x1000)*255)/224)>>8)
+#define Y_16_TO_YJ_8(val)   (((((RECLIP(val, 0x1000, 0xEB00)-0x1000)*255)/219) + 0x40) >>8)
+#define UV_16_TO_UVJ_8(val) (((((RECLIP(val, 0x1000, 0xF000)-0x1000)*255)/224) + 0x40) >>8)
 
 /* Conversion from YUV 8 */
 

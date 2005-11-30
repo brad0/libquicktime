@@ -1246,9 +1246,9 @@ static inline void transfer_YUV422P16_to_YUV420P(uint16_t *input_y,
                                                    uint8_t *output_v,
                                                    int j)
 {
-	output_y[j] = Y_16_TO_Y_8(*input_y + 0x40);
-	output_u[j / 2] = UV_16_TO_UV_8(*input_u + 0x40);
-	output_v[j / 2] = UV_16_TO_UV_8(*input_v + 0x40);
+	output_y[j] = Y_16_TO_Y_8(*input_y);
+	output_u[j / 2] = UV_16_TO_UV_8(*input_u);
+	output_v[j / 2] = UV_16_TO_UV_8(*input_v);
 }
 
 // ******************************** YUV444P16 -> ********************************
@@ -1276,7 +1276,18 @@ static inline void transfer_YUV444P16_to_YUV444P16(uint16_t *input_y,
 	output_v[j] = *input_v;
 }
 
-
+static inline void transfer_YUV444P16_to_YUV444P(uint16_t *input_y,
+	uint16_t *input_u,
+	uint16_t *input_v,
+	uint8_t *output_y,
+	uint8_t *output_u,
+	uint8_t *output_v,
+	int j)
+{
+	output_y[j] = Y_16_TO_Y_8(*input_y);
+	output_u[j] = UV_16_TO_UV_8(*input_u);
+	output_v[j] = UV_16_TO_UV_8(*input_v);
+}
 
 // ******************************** YUV411P -> ********************************
 
@@ -1290,14 +1301,6 @@ static inline void transfer_YUV411P_to_RGB888(unsigned char *(*output),
 	YUV_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
 	(*output) += 3;
 }
-
-
-
-
-
-
-
-
 
 
 // ******************************** YUV444P -> ********************************
