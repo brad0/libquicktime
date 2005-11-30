@@ -12,7 +12,7 @@ extern "C" {
 
 /**
  * @file lqt.h
- * Public api header for libquicktime extensions.
+ * Public api header for libquicktime.
  */
   
 void *lqt_bufalloc(size_t size);
