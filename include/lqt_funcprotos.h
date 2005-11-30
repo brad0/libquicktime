@@ -978,6 +978,12 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
                             quicktime_trak_t *trak, 
                             int64_t sample);
 
+/* Read all the information about the file. */
+/* Requires a MOOV atom be present in the file. */
+/* If no MOOV atom exists return 1 else return 0. */
+int quicktime_read_info(quicktime_t *file);
+
+
 /*
  *  Set the default codec parameters from the registry
  *  Works for reading and writing

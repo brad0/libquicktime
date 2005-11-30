@@ -544,11 +544,28 @@ void lqt_set_row_span(quicktime_t *file, int track, int row_span);
 
 void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv);
   
-/*
- * Same as quicktime_decode_audio, but it grabs all channels at
- * once. Or if you want only some channels you can leave the channels
- * you don't want = NULL in the output array. The output arrays
- * must contain at least lqt_total_channels(file) elements.
+/** \ingroup audio_decode
+ * \brief Decode all channels from all tracks at once
+ * \param file A quicktime handle
+ * \param output_i 16 bit integer output buffer (or NULL)
+ * \param output_f floating point output buffer (or NULL)
+ * \param samples How many samples to decode
+ *
+ * quicktime4linux hides the concept of multiple audio tracks from the user.
+ * The idea was probably to put an arbitrary number of channels into a file
+ * regardless of the codec (some codecs don't support more than 2 channels).
+ * So in principle, this function does the same as \ref quicktime_decode_audio,
+ * but it grabs all channels at once. Or if you want only some channels you can
+ * leave the channels you don't want = NULL in the output array. The output
+ * arrays must contain at least lqt_total_channels(file) elements.
+ *
+ * Libquicktime supports an arbitrary number of audio tracks, which can even have
+ * completely different formats and codecs. Therefore you should always use
+ * \ref lqt_decode_audio_track or \ref lqt_decode_audio_raw to decode audio from a
+ * particular track.
+ *
+ * The number of actually decoded samples (and EOF) can be obtained with
+ * \ref lqt_last_audio_position
  */
 
 int lqt_decode_audio(quicktime_t *file, 
@@ -556,8 +573,16 @@ int lqt_decode_audio(quicktime_t *file,
                      float **output_f, 
                      long samples);
   
-/*
- * Returns the position of the last decoded sample. If it is smaller than you expected, EOF is reached.
+/** \ingroup audio_decode
+ *  \brief Get the position of the last decoded sample.
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The position of the last decoded sample.
+ * 
+ * Returns the position of the last decoded sample. It is updated by the codec in each decode
+ * call and resembles the true position of the stream. Therefore, after each decode call,
+ * the last position should increment by the number of samples you decoded. If it's smaller,
+ * it means, that no more samples are available and that the end of the track is reached.
  */
   
 int64_t lqt_last_audio_position(quicktime_t * file, int track);
@@ -593,6 +618,9 @@ int lqt_encode_audio_track(quicktime_t *file,
  * output_i and output_f point to noninterleaved arrays for each channel. Depending
  * on what you need, set either output_i or output_f to NULL. If you want the full resolution
  * also for 24/32 bits, use \ref lqt_decode_audio_raw .
+ *
+ * The number of actually decoded samples (and EOF) can be obtained with
+ * \ref lqt_last_audio_position
  */
   
 int lqt_decode_audio_track(quicktime_t *file, 
@@ -645,6 +673,9 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track);
  * This function bypasses all internal sampleformat conversion and allows
  * full resolution output for up to 32 bit integer and 32 bit float.
  * To check, which dataformat the samples will have, use \ref lqt_get_sample_format .
+ *
+ * The number of actually decoded samples (and EOF) can be obtained with
+ * \ref lqt_last_audio_position
  */
 
 int lqt_decode_audio_raw(quicktime_t *file, 
@@ -687,13 +718,36 @@ void lqt_seek_video(quicktime_t * file, int track,
  *  AVI Specific stuff
  */
 
+/** \ingroup general
+ * \brief Query if the function is an AVI
+ * \param file A quicktime handle
+ * \returns 1 if the file is an AVI, 0 else
+ */
+  
 int lqt_is_avi(quicktime_t *file);
+
+/** \ingroup general
+ * \brief Get the WAVE id of an audio track
+ * \param file A quicktime handle
+ * \param track index (starting with 0)
+ * \returns The WAVE id of the file.
+ *
+ * This is the counterpart of \ref quicktime_audio_compressor for AVI files.
+ * It returns the 16 bit compression ID of the track.
+ */
+
 int lqt_get_wav_id(quicktime_t *file, int track);
   
-/*
- * Returns the total number of audio channels across all tracks.
+/** \ingroup audio_decode
+ *  \brief Get the total number of audio channels across all tracks
+ *  \param file A quicktime handle
+ *  \returns The total channel count
+ *
+ * The result of this function is only meaningful in conjunction with
+ * \ref lqt_decode_audio . In the general case, you should expect the audio tracks
+ * in the file as completely independent. Use \ref quicktime_track_channels instead.
  */
-	
+  
 int lqt_total_channels(quicktime_t *file);
 
 /* Extended metadata support */

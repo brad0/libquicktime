@@ -470,10 +470,6 @@ char* quicktime_get_name(quicktime_t *file);
   
 char* quicktime_get_info(quicktime_t *file);
 
-/* Read all the information about the file. */
-/* Requires a MOOV atom be present in the file. */
-/* If no MOOV atom exists return 1 else return 0. */
-int quicktime_read_info(quicktime_t *file);
 
 /** \ingroup audio_encode
     \brief Set up tracks in a new file after opening and before writing
@@ -796,14 +792,44 @@ double quicktime_frame_rate(quicktime_t *file, int track);
 char* quicktime_video_compressor(quicktime_t *file, int track);
 
 /* number of bytes of raw data in this frame */
+
+/** \ingroup video_decode
+ * \brief Get the compressed size of frame in a video track
+ * \param file A quicktime handle
+ * \param frame Frame index (starting with 0)
+ * \param track index (starting with 0)
+ * \returns The size in bytes of the frame
+ *
+ * Use this if you want to read compressed frames with \ref quicktime_read_frame
+ */
+ 
+
 long quicktime_frame_size(quicktime_t *file, long frame, int track);
 
-/* get the quicktime track and channel that the audio channel belongs to */
-/* channels and tracks start on 0 */
+/** \ingroup audio_decode
+ *  \param file A quicktime handle
+ *  \param quicktime_track Returns the index of the quicktime track
+ *  \param quicktime_channel Returns the channel index inside the quicktime track
+ *  \param channel The channel to query
+ *
+ * Don't use this function (see \ref lqt_decode_audio )
+ */
+  
 int quicktime_channel_location(quicktime_t *file, int *quicktime_track, int *quicktime_channel, int channel);
 
 /* file positioning */
-int quicktime_seek_end(quicktime_t *file);
+/* Remove these and see what happens :) */
+
+// int quicktime_seek_end(quicktime_t *file);
+
+/** \ingroup General
+ *  \brief Reposition all tracks to the very beginning
+ *  \param file A quicktime handle
+ *  \returns Always 0
+ *
+ * Works (of course) only for decoding
+ */
+
 int quicktime_seek_start(quicktime_t *file);
 
 /* set position of file descriptor relative to a track */
@@ -834,9 +860,35 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track);
 /* write data for one quicktime track */
 /* the user must handle conversion to the channels in this track */
 int quicktime_write_audio(quicktime_t *file, uint8_t *audio_buffer, long samples, int track);
+
+/** \ingroup video_encode
+ *  \brief Write a compressed video frame
+ *  \param file A quicktime handle
+ *  \param video_buffer The compressed frame
+ *  \param bytes Bytes of the compressed frame
+ *  \param track index (starting with 0)
+ *
+ *  If you get compressed video frames (e.g. from a firewire port),
+ *  use this function to write them into a quicktime container. Before,
+ *  you must set up the track with \ref lqt_add_video_track or, if no
+ *  software codec is present, with \ref quicktime_set_video .
+ */
+     
+
 int quicktime_write_frame(quicktime_t *file, uint8_t *video_buffer, int64_t bytes, int track);
 
-/* read raw data */
+/** \ingroup video_decode
+ *  \brief Read a compressed video frame
+ *  \param file A quicktime handle
+ *  \param video_buffer The compressed frame
+ *  \param track index (starting with 0)
+ *
+ *  Read a compressed video frame. The size of the frame can be obtained with
+ *  \ref quicktime_frame_size . This function increments all pointers in the
+ *  track, so you can sequentially read all frames without setting the position
+ *  in between.
+ */
+  
 long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track);
 
 /* for reading frame using a library that needs a file descriptor */
@@ -989,6 +1041,9 @@ long quicktime_decode_scaled(quicktime_t *file,
  * if you need all channels anyway. In this case, \ref lqt_decode_audio_track is the better choice.
  * Furthermore, you won't be able to decode the full resolution
  * for 24 and 32 bit codecs. To decode the maximum resolution, use \ref lqt_decode_audio_raw.
+ *
+ * The number of actually decoded samples (and EOF) can be obtained with
+ * \ref lqt_last_audio_position
  */
  
 int quicktime_decode_audio(quicktime_t *file, int16_t *output_i, float *output_f, long samples, int channel);
@@ -1007,10 +1062,27 @@ int quicktime_decode_audio(quicktime_t *file, int16_t *output_i, float *output_f
 
 int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, long samples);
 
-/* Dump the file structures for the currently opened file. */
+/** \ingroup general
+ *  \brief Dump the file structures to stdout
+ *  \param file A quicktime handle
+ *
+ * This is used for debugging or by the qtdump utility
+ */
+   
 int quicktime_dump(quicktime_t *file);
 
 /* Specify the number of cpus to utilize. */
+
+/** \ingroup general
+ *  \brief Set the number of CPUs
+ *  \param file A quicktime handle
+ *  \param cpus Number of CPUs to use
+ *
+ *  Libquicktime no longer does multithreaded en-/decoding. Therefore you
+ *  can call this function if you like, but it will have no effect :)
+ */
+  
+
 int quicktime_set_cpus(quicktime_t *file, int cpus);
 
 /* Specify whether to read contiguously or not. */
@@ -1021,6 +1093,14 @@ void quicktime_set_preload(quicktime_t *file, int64_t preload);
 
 int64_t quicktime_byte_position(quicktime_t *file);
 
+/** \ingroup general
+ *  \brief Write an AVI file instead of quicktime
+ *  \param file A quicktime handle
+ *  \param value Set this to 1. If you want quicktime, simply don't call this function.
+ *
+ * This function must be called AFTER all tracks are set up and BEFORE anything is encoded.
+ */
+  
 void quicktime_set_avi(quicktime_t *file, int value);
 
   

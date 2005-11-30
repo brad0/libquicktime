@@ -127,7 +127,6 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 /* set up some flags */
 				new_file.wr = 1;
 				new_file.rd = 0;
-				new_file.cpus = 1;
 		      	new_file.presave_buffer = calloc(1, QUICKTIME_PRESAVE);
 
 				quicktime_write_moov(&new_file, &(old_file->moov));
@@ -517,7 +516,6 @@ int quicktime_init(quicktime_t *file)
 	bzero(file, sizeof(quicktime_t));
 //	quicktime_atom_write_header64(new_file, &file->mdat.atom, "mdat");
 	quicktime_moov_init(&(file->moov));
-	file->cpus = 1;
         //	file->color_model = BC_RGB888;
 	return 0;
 }
@@ -566,7 +564,6 @@ int quicktime_delete(quicktime_t *file)
 
 int quicktime_set_cpus(quicktime_t *file, int cpus)
 {
-	if(cpus > 0) file->cpus = cpus;
 	return 0;
 }
 
@@ -596,6 +593,7 @@ int quicktime_get_timescale(double frame_rate)
 	return timescale;
 }
 
+#if 0
 int quicktime_seek_end(quicktime_t *file)
 {
 	quicktime_set_position(file, file->mdat.atom.size + file->mdat.atom.start + HEADER_LENGTH * 2);
@@ -603,12 +601,18 @@ int quicktime_seek_end(quicktime_t *file)
 	quicktime_update_positions(file);
 	return 0;
 }
+#endif
 
 int quicktime_seek_start(quicktime_t *file)
 {
-	quicktime_set_position(file, file->mdat.atom.start + HEADER_LENGTH * 2);
-	quicktime_update_positions(file);
-	return 0;
+        int i;
+        for(i = 0; i < file->total_atracks; i++)
+          quicktime_set_audio_position(file, 0, i);
+        for(i = 0; i < file->total_vtracks; i++)
+          quicktime_set_video_position(file, 0, i);
+        
+        
+        return 0;
 }
 
 long quicktime_audio_length(quicktime_t *file, int track)

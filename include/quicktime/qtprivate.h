@@ -1087,9 +1087,6 @@ struct quicktime_s
 	int total_vtracks;
 	quicktime_video_map_t *vtracks;
 
-/* Number of processors at our disposal */
-	int cpus;
-
 /* Parameters for frame currently being decoded */
 	int in_x, in_y, in_w, in_h, out_w, out_h;
 /*      Libquicktime change: color_model and row_span are now saved per track */
