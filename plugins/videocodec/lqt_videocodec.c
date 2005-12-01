@@ -210,7 +210,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 9; }
+extern int get_num_codecs() { return 10; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
