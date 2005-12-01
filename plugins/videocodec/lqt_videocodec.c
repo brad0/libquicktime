@@ -18,7 +18,7 @@ void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
 static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3",   (char*)0 };
 
-static char * fourccs_v210[] = { QUICKTIME_V410,  (char *)0};
+static char * fourccs_v210[] = { QUICKTIME_V210,  (char *)0};
 
 static char * fourccs_v308[] = { QUICKTIME_V308,        (char*)0 };
 
