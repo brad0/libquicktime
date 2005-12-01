@@ -394,7 +394,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "mpg1",
 	  name: "Mpeg 1 Video",
-	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0} },
+	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE }
+        },
         {
           id: CODEC_ID_MPEG4,
 	  index: -1,
@@ -407,7 +409,9 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
                     "MP4V", (char *)0 },
-          do_encode: 1 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          do_encode: 1
+        },
 	{
           id: CODEC_ID_MSMPEG4V1,
 	  index: -1,
@@ -417,7 +421,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_mpeg4,
 	  short_name: "msmpeg4v1",
 	  name: "MSMpeg 4v1",
-	  fourccs: {"DIV1", "div1", "MPG4", "mpg4", (char *)0} },
+	  fourccs: {"DIV1", "div1", "MPG4", "mpg4", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_MSMPEG4V2,
 	  index: -1,
@@ -427,7 +433,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_mpeg4,
 	  short_name: "msmpeg4v2",
 	  name: "MSMpeg 4v2",
-	  fourccs: {"DIV2", "div2", "MP42", "mp42", (char *)0} },
+	  fourccs: {"DIV2", "div2", "MP42", "mp42", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_MSMPEG4V3,
 	  index: -1,
@@ -440,6 +448,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                     (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
           do_encode: 1,
         },
 #if 0
@@ -452,7 +461,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "wmv1",
 	  name: "WMV1",
-	  fourccs: {"WMV1", "wmv1", (char *)0} },
+	  fourccs: {"WMV1", "wmv1", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 #endif
 	{
           id: CODEC_ID_H263,
@@ -464,6 +475,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "h263",
 	  name: "H263",
 	  fourccs: {"H263", "h263", "U263", "u263", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
           do_encode: 1,
         },
 	{
@@ -475,6 +487,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "h264",
 	  name: "H264",
 	  fourccs: {"avc1", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
         },
         {
           id: CODEC_ID_H263P,
@@ -486,7 +499,9 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "h263p",
 	  name: "H263+",
 	  fourccs: {"U263", "u263", (char *)0},
-          do_encode: 1, },
+          wav_ids: { LQT_WAV_ID_NONE },
+          do_encode: 1,
+        },
 	{
           id: CODEC_ID_H263I,
 	  index: -1,
@@ -497,6 +512,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "i263",
 	  name: "I263",
 	  fourccs: {"I263", "i263", "viv1", "VIV1", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
         },
 #if 0
 	{
@@ -508,7 +524,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "rv10",
 	  name: "Real Video 10",
-	  fourccs: {"RV10", "rv10", "RV13", "rv13", (char *)0} },
+	  fourccs: {"RV10", "rv10", "RV13", "rv13", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 #endif
 	{
           id: CODEC_ID_SVQ1,
@@ -519,7 +537,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "svq1",
 	  name: "Sorenson Video 1",
-	  fourccs: {"SVQ1", (char *)0} },
+	  fourccs: {"SVQ1", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_SVQ3,
 	  index: -1,
@@ -529,7 +549,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "svq3",
 	  name: "Sorenson Video 3",
-	  fourccs: {"SVQ3", (char *)0} },
+	  fourccs: {"SVQ3", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_MJPEG,
 	  index: -1,
@@ -540,7 +562,9 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "mjpg",
 	  name: "MJPEG",
 	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0},
-          do_encode: 1, },
+          wav_ids: { LQT_WAV_ID_NONE },
+          do_encode: 1,
+        },
 	{
           id: CODEC_ID_8BPS,
 	  index: -1,
@@ -550,8 +574,10 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "8BPS",
 	  name: "Quicktime Planar RGB (8BPS)",
-	  fourccs: {"8BPS", (char *)0} },
-	{
+	  fourccs: {"8BPS", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+        {
           id: CODEC_ID_INDEO3,
 	  index: -1,
           encoder: NULL,
@@ -560,8 +586,10 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "indeo",
 	  name: "Intel Indeo 3",
-	  fourccs: {"IV31", "IV32", (char *)0} },
-	{
+	  fourccs: {"IV31", "IV32", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+        {
           id: CODEC_ID_RPZA,
 	  index: -1,
           encoder: NULL,
@@ -570,7 +598,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "rpza",
 	  name: "Apple Video",
-	  fourccs: {"rpza", (char *)0} },
+	  fourccs: {"rpza", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_SMC,
 	  index: -1,
@@ -580,8 +610,10 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "smc",
 	  name: "Apple Graphics",
-	  fourccs: {"smc ", (char *)0} },
-	{
+	  fourccs: {"smc ", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+        {
           id: CODEC_ID_CINEPAK,
 	  index: -1,
           encoder: NULL,
@@ -590,7 +622,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "cinepak",
 	  name: "Cinepak",
-	  fourccs: {"cvid", (char *)0} },
+	  fourccs: {"cvid", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_CYUV,
 	  index: -1,
@@ -600,7 +634,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "cyuv",
 	  name: "Creative YUV",
-	  fourccs: {"CYUV", (char *)0} },
+	  fourccs: {"CYUV", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
 	{
           id: CODEC_ID_QTRLE,
 	  index: -1,
@@ -610,7 +646,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "rle",
 	  name: "RLE",
-	  fourccs: {"rle ", (char *)0} },
+	  fourccs: {"rle ", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
         {
           id: CODEC_ID_MSRLE,
 	  index: -1,
@@ -620,7 +658,9 @@ struct CODECIDMAP codecidmap_v[] = {
           decode_parameters: decode_parameters_video,
 	  short_name: "wrle",
 	  name: "Microsoft RLE",
-	  fourccs: {"WRLE", (char *)0} },
+	  fourccs: {"WRLE", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
         {
           id: CODEC_ID_DVVIDEO,
 	  index: -1,
@@ -631,6 +671,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "dv_ntsc",
 	  name: "DV (NTSC)",
 	  fourccs: {"dvc ", (char *)0 },
+          wav_ids: { LQT_WAV_ID_NONE },
           do_encode: 1 },
         {
           id: CODEC_ID_DVVIDEO,
@@ -642,7 +683,9 @@ struct CODECIDMAP codecidmap_v[] = {
 	  short_name: "dv_pal",
 	  name: "DV (PAL)",
 	  fourccs: {"dvcp", "dvpp", (char *)0 },
-          do_encode: 1 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          do_encode: 1
+        },
 };
 
 struct CODECIDMAP codecidmap_a[] = {
@@ -828,7 +871,7 @@ static void set_codec_info(struct CODECIDMAP * map)
 
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
-
+  fprintf(stderr, "Short name: %s, wav_ids: %p\n", map->short_name, map->wav_ids);
   if(map->encoder && map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
