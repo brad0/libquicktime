@@ -644,11 +644,15 @@ static int bytes_per_sample(lqt_sample_format_t format)
 
 int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int track)
   {
+  int result;
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
-  return ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, output, 
-                                                             samples,
-                                                             track);
+  result = ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, output, 
+                                                               samples,
+                                                               track);
+
+  file->atracks[track].current_position += samples;
+  return result;
   }
 
 int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int track)

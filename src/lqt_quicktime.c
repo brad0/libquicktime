@@ -452,16 +452,11 @@ int lqt_add_video_track(quicktime_t *file,
         quicktime_trak_init_video(file, trak, frame_w, frame_h, frame_duration, timescale, compressor);
 	quicktime_init_video_map(&(file->vtracks[file->total_vtracks-1]), trak, file->wr, info);
         lqt_set_default_video_parameters(file, file->total_vtracks-1);
-
+        
         /* Get encoding colormodel */
         ((quicktime_codec_t*)(file->vtracks[file->total_vtracks-1].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
         file->vtracks[file->total_vtracks-1].io_cmodel = file->vtracks[file->total_vtracks-1].stream_cmodel;
-        
-        lqt_get_default_rowspan(file->vtracks[file->total_vtracks-1].stream_cmodel,
-                                quicktime_video_width(file, file->total_vtracks-1),
-                                &(file->vtracks[file->total_vtracks-1].stream_row_span),
-                                &(file->vtracks[file->total_vtracks-1].stream_row_span_uv));
-        
+        //        fprintf(stderr, "*** Got encoding colormodel %s\n", lqt_colormodel_to_string(file->vtracks[file->total_vtracks-1].stream_cmodel));
         return 0;
   }
 

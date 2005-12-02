@@ -30,7 +30,7 @@
 // Colormodels
 #define BC_COMPRESSED   1
 
-/** \ingroup Color
+/** \ingroup color
 
     16 bit RGB. Each pixel is a uint16_t in native byte order. Color masks are:
     for red: 0xf800, for green: 0x07e0, for blue: 0x001f
@@ -38,7 +38,7 @@
 
 #define BC_RGB565       2
 
-/** \ingroup Color
+/** \ingroup color
 
     16 bit BGR. Each pixel is a uint16_t in native byte order. Color masks are:
     for red: 0x001f, for green: 0x07e0, for blue: 0xf800
