@@ -218,17 +218,17 @@ if(atom->type[0] == (uint8_t)type[0] &&
 
 void quicktime_qtatom_read_container_header(quicktime_t *file)
 {
-	char data[12];
-	quicktime_read_data(file, (char *)data, 12);
+        uint8_t data[12];
+	quicktime_read_data(file, data, 12);
 
 	return;
 }
 
 void quicktime_qtatom_write_container_header(quicktime_t *file)
 {
-	char data[12];
+        uint8_t data[12];
 	memset(data, 0, sizeof(data));
-	quicktime_write_data(file, (char *)data, 12);
+	quicktime_write_data(file, data, 12);
 
 	return;
 }

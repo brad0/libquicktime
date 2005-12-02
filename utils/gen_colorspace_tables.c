@@ -684,5 +684,5 @@ int main(int argc, char ** argv)
   printf("};\n\n");
 
   printf("#endif // HAVE_YUVJ_TO_RGB_FLOAT\n\n");
-    
+  return 0;
   }

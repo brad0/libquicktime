@@ -636,7 +636,7 @@ static void decode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void **
 static void encode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
   int i;
-  int16_t * input = (uint16_t*)_input;
+  int16_t * input = (int16_t*)_input;
   
   for(i = 0; i < num_samples; i++)
     {
@@ -650,7 +650,7 @@ static void decode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
   {
   int i;
   /* The uint32_t is intentional: Interpreting integers as unsigned has less pitfalls */
-  int16_t * output = (uint16_t*)(*_output);
+  int16_t * output = (int16_t*)(*_output);
   
   for(i = 0; i < num_samples; i++)
     {
@@ -672,7 +672,7 @@ static void decode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
 static void encode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
   int i;
-  int16_t * input = (uint16_t*)_input;
+  int16_t * input = (int16_t*)_input;
   
   for(i = 0; i < num_samples; i++)
     {
@@ -686,7 +686,7 @@ static void decode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
   {
   int i;
   /* The uint32_t is intentional: Interpreting integers as unsigned has less pitfalls */
-  int16_t * output = (uint16_t*)(*_output);
+  int16_t * output = (int16_t*)(*_output);
   
   for(i = 0; i < num_samples; i++)
     {

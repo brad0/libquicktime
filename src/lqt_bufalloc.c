@@ -8,7 +8,7 @@
  * buffers be aligned on a 16 byte boundary (SSE/SSE2 require 64 byte 
  * alignment).
  *
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.5 2005/08/30 22:50:04 gmerlin Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.6 2005/12/02 23:02:39 gmerlin Exp $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -20,7 +20,6 @@
 #include <errno.h>
 
 #include <string.h> /* Memset */
-
 
 
 
@@ -61,6 +60,9 @@ memalign(size_t alignment, size_t size)
 		}
 	return(malloc((size + alignment - 1) & ~(alignment - 1)));
 	}
+#else
+/* some systems have memalign() but no declaration for it */
+void * memalign (size_t align, size_t size);
 #endif
 
 void *lqt_bufalloc(size_t size)
