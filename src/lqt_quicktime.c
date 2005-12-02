@@ -1607,7 +1607,14 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr)
           }
         else
           {
-          quicktime_close(new_file);
+          /* If the open failed due to permission or path errors then there
+           * may not be a file pointer allocated and attempting to close will
+           * coredump due to a NULL pointer dereference.
+         */
+          if (new_file->stream)
+             quicktime_close(new_file);
+          else
+             free(new_file);
           new_file = 0;
           }
         
