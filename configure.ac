@@ -399,8 +399,8 @@ AH_TEMPLATE([HAVE_FAAC], [Enable faac])
 
 if test $have_gpl = "true"; then
 
-LIBS="$GMERLIN_DEP_LIBS -lfaac -lm"
-CFLAGS="$GMERLIN_DEP_CFLAGS"
+LIBS="$LIBS -lfaac -lm"
+CFLAGS="$CFLAGS"
 
 AC_MSG_CHECKING(for faac)
 AC_TRY_RUN([
@@ -461,8 +461,8 @@ AC_MSG_CHECKING(for faad2)
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
 
-CFLAGS=""
-LIBS="-lfaad -lm"
+CFLAGS="$CFLAGS"
+LIBS="$LIBS -lfaad -lm"
 
   AC_TRY_RUN([
     #include "faad.h"
