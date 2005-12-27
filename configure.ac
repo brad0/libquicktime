@@ -408,7 +408,7 @@ AC_TRY_RUN([
     #include <faac.h>
     main()
     {
-    int samplerate = 48000, num_channels = 2;
+    int samplerate = 44100, num_channels = 2;
     unsigned long input_samples, output_bytes;
     faacEncHandle enc;
     enc = faacEncOpen(samplerate,
@@ -650,21 +650,21 @@ echo -n "libdv:      "
 if test x$have_libdv = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://libdv.sourceforge.net)"
 fi
 
 echo -n "vorbis:     "
 if test x$have_vorbis = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.vorbis.com/)"
 fi
 
 echo -n "lame:       "
 if test x$have_lame = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.mp3dev.org/)"
 fi
 
 
@@ -672,35 +672,35 @@ echo -n "libjpeg:    "
 if test x$have_libjpeg = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.ijg.org/)"
 fi
 
 echo -n "libpng:     "
 if test x$have_libpng = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.libpng.org/pub/png/libpng.html)"
 fi
 
 echo -n "libavcodec: "
 if test x$have_libavcodec = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.ffmpeg.org/)"
 fi
 
 echo -n "gtk >= 2.4.0: "
 if test x$have_gtk = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.gtk.org/)"
 fi
 
 echo -n "Alsa        "
 if test x$have_alsa = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.alsa-project.org/)"
 fi  
 
 echo -n "GPL plugins "
@@ -716,14 +716,14 @@ echo -n "faac        "
 if test x$have_faac = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.audiocoding.com/)"
 fi  
 
 echo -n "faad2       "
 if test x$have_faad2 = "xtrue"; then
 echo "Yes"
 else
-echo "Missing"
+echo "Missing (Go to http://www.audiocoding.com/)"
 fi  
 
 fi
