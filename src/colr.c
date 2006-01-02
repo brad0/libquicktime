@@ -1,5 +1,5 @@
 /*
- * $Id: colr.c,v 1.2 2004/11/29 00:41:22 gmerlin Exp $
+ * $Id: colr.c,v 1.3 2006/01/02 06:13:04 sms00 Exp $
  *
  * init, read, write handler for the "colr" (Clean Aperture) atom
 */
@@ -28,9 +28,9 @@ void quicktime_colr_dump(quicktime_colr_t *colr)
 void quicktime_read_colr(quicktime_t *file, quicktime_colr_t *colr)
 {
 	colr->colorParamType = quicktime_read_int32(file);
-	colr->primaries = quicktime_read_int32(file);
-	colr->transferFunction = quicktime_read_int32(file);
-	colr->matrix = quicktime_read_int32(file);
+	colr->primaries = quicktime_read_int16(file);
+	colr->transferFunction = quicktime_read_int16(file);
+	colr->matrix = quicktime_read_int16(file);
 }
 
 void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr)
@@ -39,9 +39,9 @@ void quicktime_write_colr(quicktime_t *file, quicktime_colr_t *colr)
 
 	quicktime_atom_write_header(file, &atom, "colr");
 	quicktime_write_int32(file, colr->colorParamType);
-	quicktime_write_int32(file, colr->primaries);
-	quicktime_write_int32(file, colr->transferFunction);
-	quicktime_write_int32(file, colr->matrix);
+	quicktime_write_int16(file, colr->primaries);
+	quicktime_write_int16(file, colr->transferFunction);
+	quicktime_write_int16(file, colr->matrix);
 	quicktime_atom_write_footer(file, &atom);
 }
 
