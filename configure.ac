@@ -597,7 +597,7 @@ CFLAGS="$OPT_CFLAGS $COMMON_CFLAGS"
 # libtool version does not support linking libraries with uninstalled
 # libraries as occurs when Debian packages are created for the 1st time.
 # Linking against old libraries may not be desirable!
-MODULE_LIBADD= 
+MODULE_LIBADD=../../src/libquicktime.la 
 AC_SUBST(MODULE_LIBADD)
 
 UTIL_LIBADD=../src/libquicktime.la
