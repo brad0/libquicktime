@@ -5,6 +5,7 @@
 #include <quicktime/colormodels.h>
 #include <quicktime/quicktime.h>
 #include <quicktime/lqt.h>
+#define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
 #include <lqt_codecinfo_private.h>
 

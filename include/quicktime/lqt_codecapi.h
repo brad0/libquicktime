@@ -9,7 +9,7 @@
  */
 
 #ifndef LQT_LIBQUICKTIME
-static inline int get_codec_api_version(void) { return LQT_CODEC_API_VERSION; }
+int get_codec_api_version(void) { return LQT_CODEC_API_VERSION; }
 #endif
 
 #define LQT_WAV_ID_NONE -1

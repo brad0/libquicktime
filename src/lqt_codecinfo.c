@@ -426,7 +426,7 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
 
   if(!get_codec_api_version)
     {
-    fprintf(stderr, "module %s has to API version and is thus terribly old\n",
+    fprintf(stderr, "module %s has no API version and is thus terribly old\n",
             plugin_filename);
     dlclose(module);
     return ret;
