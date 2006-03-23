@@ -66,8 +66,17 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             table->has_esds = 1;
             quicktime_atom_skip(file, &leaf_atom);
             }
+          else if(quicktime_atom_is(&leaf_atom, "chan"))
+            {
+            fprintf(stderr, "Got chan atom\n");
+            quicktime_read_chan(file, &(table->chan));
+            table->has_chan = 1;
+            quicktime_atom_skip(file, &leaf_atom);
+            }
           else
             {
+            fprintf(stderr, "Skipping unknown atom \"%4s\" inside stsd\n",
+                    leaf_atom.type);
             quicktime_atom_skip(file, &leaf_atom);
             }
           } 
@@ -94,6 +103,8 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
           quicktime_write_wave(file, &table->wave);
         if(table->has_esds)
           quicktime_write_esds(file, &table->esds);
+        if(table->has_chan)
+          quicktime_write_chan(file, &table->chan);
 }
 
 
@@ -431,6 +442,9 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
           quicktime_wave_dump(&table->wave);
         if(table->has_esds)
           quicktime_esds_dump(&table->esds);
+        if(table->has_chan)
+          quicktime_chan_dump(&table->chan);
+	quicktime_user_atoms_dump(&(table->user_atoms));
 }
 
 

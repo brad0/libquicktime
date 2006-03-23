@@ -291,6 +291,23 @@ typedef struct
   } quicktime_wave_t;
 
 typedef struct
+  {
+  int version;
+  long flags;
+  
+  uint32_t mChannelLayoutTag;
+  uint32_t mChannelBitmap;
+  uint32_t mNumberChannelDescriptions;
+
+  struct
+    {
+    uint32_t mChannelLabel;
+    uint32_t mChannelFlags;
+    float    mCoordinates[3];
+    } * ChannelDescriptions;
+  } quicktime_chan_t;
+
+typedef struct
 {
 	char format[4];
 	uint8_t reserved[6];
@@ -346,6 +363,9 @@ typedef struct
 
         quicktime_esds_t esds;
         int has_esds;
+
+        quicktime_chan_t chan;
+        int has_chan;
 
         quicktime_user_atoms_t user_atoms;
 

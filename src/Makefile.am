@@ -39,6 +39,7 @@ cmodel_default.c \
 cmodel_yuv420p.c \
 cmodel_yuv422.c \
 colormodels.c \
+chan.c \
 ctab.c \
 dinf.c \
 dref.c \

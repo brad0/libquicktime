@@ -124,6 +124,14 @@ void quicktime_init_strl(quicktime_t *file,
                          quicktime_trak_t *trak,
                          quicktime_strl_t *strl);
 
+/* chan.c */
+
+void quicktime_chan_init(quicktime_chan_t *chan);
+void quicktime_chan_delete(quicktime_chan_t *chan);
+void quicktime_chan_dump(quicktime_chan_t *chan);
+void quicktime_read_chan(quicktime_t *file, quicktime_chan_t *chan);
+void quicktime_write_chan(quicktime_t *file, quicktime_chan_t *chan);
+
 /* clap.c */
 
 void quicktime_clap_init(quicktime_clap_t *clap);
