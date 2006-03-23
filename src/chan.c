@@ -500,41 +500,134 @@ channel_locations[] =
                                                       CHANNEL_LABEL_RightSurround,
                                                       CHANNEL_LABEL_LFEScreen  } },         // C Lc Rc L R Ls Rs LFE
 
-    { CHANNEL_LAYOUT_MPEG_7_1_C, (channel_label_t[]){  } },         // L R C LFE Ls Rs Rls Rrs
-    { CHANNEL_LAYOUT_Emagic_Default_7_1,  (channel_label_t[]){  } },//  L R Ls Rs C LFE Lc Rc
-    { CHANNEL_LAYOUT_SMPTE_DTV,  (channel_label_t[]){  } },         //  L R C LFE Ls Rs Lt Rt
-                                                                    //  (CHANNEL_LAYOUT_ITU_5_1 plus a matrix encoded stereo mix)
+    { CHANNEL_LAYOUT_MPEG_7_1_C, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                      CHANNEL_LABEL_Right,
+                                                      CHANNEL_LABEL_Center,
+                                                      CHANNEL_LABEL_LFEScreen,
+                                                      CHANNEL_LABEL_LeftSurroundDirect,
+                                                      CHANNEL_LABEL_RightSurroundDirect,
+                                                      CHANNEL_LABEL_LeftSurround,
+                                                      CHANNEL_LABEL_RightSurround  } },         // L R C LFE Ls Rs Rls Rrs
+
+    { CHANNEL_LAYOUT_Emagic_Default_7_1,  (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                               CHANNEL_LABEL_Right,
+                                                               CHANNEL_LABEL_LeftSurround,
+                                                               CHANNEL_LABEL_RightSurround,
+                                                               CHANNEL_LABEL_Center,
+                                                               CHANNEL_LABEL_LFEScreen,
+                                                               CHANNEL_LABEL_LeftCenter,
+                                                               CHANNEL_LABEL_RightCenter } },//  L R Ls Rs C LFE Lc Rc
+
+    { CHANNEL_LAYOUT_SMPTE_DTV,  (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                      CHANNEL_LABEL_Right,
+                                                      CHANNEL_LABEL_Center,
+                                                      CHANNEL_LABEL_LFEScreen,
+                                                      CHANNEL_LABEL_LeftSurround,
+                                                      CHANNEL_LABEL_RightSurround,
+                                                      CHANNEL_LABEL_LeftTotal,
+                                                      CHANNEL_LABEL_RightTotal } },         //  L R C LFE Ls Rs Lt Rt
+                                                      //  (CHANNEL_LAYOUT_ITU_5_1 plus a matrix encoded stereo mix)
 
 //  ITU defined layouts
 
-    { CHANNEL_LAYOUT_ITU_2_1, (channel_label_t[]){  } },            // L R Cs
-    { CHANNEL_LAYOUT_ITU_2_2, (channel_label_t[]){  } },            // L R Ls Rs
+    { CHANNEL_LAYOUT_ITU_2_1, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_CenterSurround } },            // L R Cs
+
+    { CHANNEL_LAYOUT_ITU_2_2, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_LeftSurround,
+                                                   CHANNEL_LABEL_RightSurround } },            // L R Ls Rs
 
 // DVD defined layouts
 
-    { CHANNEL_LAYOUT_DVD_4, (channel_label_t[]){  } },              // L R LFE
-    { CHANNEL_LAYOUT_DVD_5, (channel_label_t[]){  } },              // L R LFE Cs
-    { CHANNEL_LAYOUT_DVD_6,  (channel_label_t[]){  } },             // L R LFE Ls Rs
-    { CHANNEL_LAYOUT_DVD_10, (channel_label_t[]){  } },             // L R C LFE
-    { CHANNEL_LAYOUT_DVD_11,  (channel_label_t[]){  } },            // L R C LFE Cs
-
+    { CHANNEL_LAYOUT_DVD_4, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                 CHANNEL_LABEL_Right,
+                                                 CHANNEL_LABEL_LFEScreen } },              // L R LFE
+    { CHANNEL_LAYOUT_DVD_5, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                 CHANNEL_LABEL_Right,
+                                                 CHANNEL_LABEL_LFEScreen,
+                                                 CHANNEL_LABEL_CenterSurround } },              // L R LFE Cs
+    
+    { CHANNEL_LAYOUT_DVD_6,  (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                  CHANNEL_LABEL_Right,
+                                                  CHANNEL_LABEL_LFEScreen,
+                                                  CHANNEL_LABEL_LeftSurround,
+                                                  CHANNEL_LABEL_RightSurround } },             // L R LFE Ls Rs
+    
+    { CHANNEL_LAYOUT_DVD_10, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                  CHANNEL_LABEL_Right,
+                                                  CHANNEL_LABEL_Center,
+                                                  CHANNEL_LABEL_LFEScreen  } },             // L R C LFE
+    
+    { CHANNEL_LAYOUT_DVD_11,  (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_Center,
+                                                   CHANNEL_LABEL_LFEScreen,
+                                                   CHANNEL_LABEL_CenterSurround } },            // L R C LFE Cs
+    
     // 13 through 17 are duplicates of 8 through 12.
 
-    { CHANNEL_LAYOUT_DVD_18, (channel_label_t[]){  } },             // L R Ls Rs LFE
+    { CHANNEL_LAYOUT_DVD_18, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                  CHANNEL_LABEL_Right,
+                                                  CHANNEL_LABEL_LeftSurround,
+                                                  CHANNEL_LABEL_RightSurround,
+                                                  CHANNEL_LABEL_LFEScreen } },             // L R Ls Rs LFE
+    
+    // These are the surround-based layouts
+    
+    { CHANNEL_LAYOUT_AudioUnit_6_0, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                         CHANNEL_LABEL_Right,
+                                                         CHANNEL_LABEL_LeftSurround,
+                                                         CHANNEL_LABEL_RightSurround,
+                                                         CHANNEL_LABEL_Center,
+                                                         CHANNEL_LABEL_CenterSurround   } },      // L R Ls Rs C Cs
 
-// These are the surround-based layouts
-
-    { CHANNEL_LAYOUT_AudioUnit_6_0, (channel_label_t[]){  } },      // L R Ls Rs C Cs
-    { CHANNEL_LAYOUT_AudioUnit_7_0, (channel_label_t[]){  } },      // L R Ls Rs C Rls Rrs
+    { CHANNEL_LAYOUT_AudioUnit_7_0, (channel_label_t[]){ CHANNEL_LABEL_Left,
+                                                         CHANNEL_LABEL_Right,
+                                                         CHANNEL_LABEL_LeftSurroundDirect,
+                                                         CHANNEL_LABEL_RightSurroundDirect,
+                                                         CHANNEL_LABEL_Center,
+                                                         CHANNEL_LABEL_LeftSurround,
+                                                         CHANNEL_LABEL_RightSurround } },      // L R Ls Rs C Rls Rrs
 
 // These layouts are used for AAC Encoding within the MPEG-4 Specification
 
-    { CHANNEL_LAYOUT_AAC_6_0, (channel_label_t[]){  } },            // C L R Ls Rs Cs
-    { CHANNEL_LAYOUT_AAC_6_1, (channel_label_t[]){  } },            // C L R Ls Rs Cs Lfe
-    { CHANNEL_LAYOUT_AAC_7_0, (channel_label_t[]){  } },            // C L R Ls Rs Rls Rrs
-    { CHANNEL_LAYOUT_AAC_Octagonal, (channel_label_t[]){  } },      // C L R Ls Rs Rls Rrs Cs
-    { CHANNEL_LAYOUT_TMH_10_2_std, (channel_label_t[]){  } },       // L R C Vhc Lsd Rsd Ls Rs Vhl Vhr Lw Rw Csd Cs LFE1 LFE2
-    { CHANNEL_LAYOUT_TMH_10_2_full, (channel_label_t[]){  } },      // TMH_10_2_std plus: Lc Rc HI VI Haptic
+    { CHANNEL_LAYOUT_AAC_6_0, (channel_label_t[]){ CHANNEL_LABEL_Center,
+                                                   CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_LeftSurround,
+                                                   CHANNEL_LABEL_RightSurround,
+                                                   CHANNEL_LABEL_CenterSurround  } },            // C L R Ls Rs Cs
+
+    { CHANNEL_LAYOUT_AAC_6_1, (channel_label_t[]){ CHANNEL_LABEL_Center,
+                                                   CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_LeftSurround,
+                                                   CHANNEL_LABEL_RightSurround,
+                                                   CHANNEL_LABEL_CenterSurround,
+                                                   CHANNEL_LABEL_LFEScreen  } },            // C L R Ls Rs Cs Lfe
+
+    { CHANNEL_LAYOUT_AAC_7_0, (channel_label_t[]){ CHANNEL_LABEL_Center,
+                                                   CHANNEL_LABEL_Left,
+                                                   CHANNEL_LABEL_Right,
+                                                   CHANNEL_LABEL_LeftSurroundDirect,
+                                                   CHANNEL_LABEL_RightSurroundDirect,
+                                                   CHANNEL_LABEL_LeftSurround,
+                                                   CHANNEL_LABEL_RightSurround  } },            // C L R Ls Rs Rls Rrs
+    
+    { CHANNEL_LAYOUT_AAC_Octagonal, (channel_label_t[]){ CHANNEL_LABEL_Center,
+                                                         CHANNEL_LABEL_Left,
+                                                         CHANNEL_LABEL_Right,
+                                                         CHANNEL_LABEL_LeftSurroundDirect,
+                                                         CHANNEL_LABEL_RightSurroundDirect,
+                                                         CHANNEL_LABEL_LeftSurround,
+                                                         CHANNEL_LABEL_RightSurround,
+                                                         CHANNEL_LABEL_CenterSurround  } },      // C L R Ls Rs Rls Rrs Cs
+    
+    /* No, sorry the following 2 a to weird. The one who has such files, can program it */
+    //    { CHANNEL_LAYOUT_TMH_10_2_std, (channel_label_t[]){  } },       // L R C Vhc Lsd Rsd Ls Rs Vhl Vhr Lw Rw Csd Cs LFE1 LFE2
+    //    { CHANNEL_LAYOUT_TMH_10_2_full, (channel_label_t[]){  } },      // TMH_10_2_std plus: Lc Rc HI VI Haptic
       
   };
 
