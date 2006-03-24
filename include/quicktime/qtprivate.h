@@ -914,7 +914,8 @@ typedef struct
 {
 	quicktime_trak_t *track; /* real quicktime track corresponding to this table */
 	int channels;            /* number of audio channels in the track */
-	int64_t current_position;   /* current sample in output file */
+        lqt_channel_t * channel_setup;
+        int64_t current_position;   /* current sample in output file */
 	int64_t current_chunk;      /* current chunk in output file */
 
         /* Last position if set by the codec. If last position and current position

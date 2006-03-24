@@ -248,7 +248,12 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
         int samples_decoded, samples_copied;
 	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
         int samples_to_skip = 0;
-        
+
+        if(!_output) /* Global initialization */
+          {
+          return 0;
+          }
+
         if(!codec->decode_initialized)
           {
           codec->decode_initialized = 1;

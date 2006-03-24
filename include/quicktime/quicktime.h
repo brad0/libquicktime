@@ -61,6 +61,47 @@ extern "C" {
  * 
  */
 
+/** \defgroup multichannel Multichannel support
+ *  \ingroup audio
+ *
+ * This is an optional API extension, which allows multichannel
+ * configuration to be saved into a file. The mechanisms used are the
+ * quicktime chan atom as well as some codec specific multichannel
+ * setups.
+ */
+
+/** \ingroup multichannel
+ *  \brief Channel definitions
+ *
+ *  These are the channel types defined in the public API. They should
+ *  enable to support most channel configurations. Internally,
+ *  many more channel types exist. They can be added to the public part
+ *  on demand.
+ */
+
+typedef enum 
+  {
+    LQT_CHANNEL_UNKNOWN,
+    LQT_CHANNEL_FRONT_LEFT,
+    LQT_CHANNEL_FRONT_RIGHT,
+    LQT_CHANNEL_FRONT_CENTER,
+    LQT_CHANNEL_FRONT_CENTER_LEFT,
+    LQT_CHANNEL_FRONT_CENTER_RIGHT,
+    LQT_CHANNEL_BACK_CENTER,
+    LQT_CHANNEL_BACK_LEFT,
+    LQT_CHANNEL_BACK_RIGHT,
+    LQT_CHANNEL_SIDE_LEFT,
+    LQT_CHANNEL_SIDE_RIGHT,
+    LQT_CHANNEL_TOP_FRONT_LEFT,
+    LQT_CHANNEL_TOP_FRONT_RIGHT,
+    LQT_CHANNEL_TOP_FRONT_CENTER,
+    LQT_CHANNEL_TOP_BACK_LEFT,
+    LQT_CHANNEL_TOP_BACK_RIGHT,
+    LQT_CHANNEL_TOP_BACK_CENTER,
+    LQT_CHANNEL_LFE,
+  } lqt_channel_t;
+
+  
 /** \defgroup video Video
     \brief Video related definitions and functions
  */
@@ -166,6 +207,8 @@ typedef enum
     LQT_SAMPLE_FLOAT      /*!< Float (machine native) */
   } lqt_sample_format_t;
   
+
+
   
 // #include "qtprivate.h"
 

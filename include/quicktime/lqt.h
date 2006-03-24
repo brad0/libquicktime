@@ -135,6 +135,43 @@ const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t chroma_placem
   
 int lqt_get_codec_api_version();
 
+/** \ingroup multichannel
+ *  \brief Convert a channel identifier to a human readnable string
+ *  \param ch A channel
+ *  \returns A string describing the channel.
+ */
+  
+const char * lqt_channel_to_string(lqt_channel_t ch);
+
+/** \ingroup multichannel
+ *  \brief Set a channel setup for a file
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \param ch Channel array
+ *
+ *  Set the desired channel setup for a file. The best time to call this function is
+ *  right after \ref quicktime_set_audio, \ref lqt_set_audio or \ref lqt_add_audio_track.
+ *  ch is the array of channels you want to pass. Note, that libquicktime might change
+ *  the channel order. To make things worse,
+ *  it won't reorder the channels for you. You must call \ref lqt_get_channel_setup
+ *  to get the order, in which you must pass the channels.
+ */
+
+void lqt_set_channel_setup(quicktime_t * file, int track, lqt_channel_t * ch);
+
+/** \ingroup multichannel
+ *  \brief Get a channel setup from a file
+ *  \param file A quicktime handle
+ *  \param track index (starting with 0)
+ *  \returns The channel array
+ *
+ *  Get the channel setup from a quicktime file. Works for en- and decoding.
+ *  The return value is owned by libquicktime and must not be freed.
+ */
+  
+const lqt_channel_t * lqt_get_channel_setup(quicktime_t * file, int track);
+
+  
 /***********************************************
  * Advanced colormodel handling.
  * (defined in lqt_color.c)

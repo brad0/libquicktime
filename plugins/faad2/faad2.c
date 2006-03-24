@@ -63,6 +63,39 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   return 0;
   }
 
+/* Channel IDs */
+
+static struct
+  {
+  int faad_ch;
+  lqt_channel_t lqt_ch;
+  }
+channels[] = 
+  {
+    { FRONT_CHANNEL_CENTER, LQT_CHANNEL_FRONT_CENTER },
+    { FRONT_CHANNEL_LEFT,   LQT_CHANNEL_FRONT_LEFT },
+    { FRONT_CHANNEL_RIGHT,  LQT_CHANNEL_FRONT_RIGHT },
+    { SIDE_CHANNEL_LEFT,    LQT_CHANNEL_SIDE_LEFT },
+    { SIDE_CHANNEL_RIGHT,   LQT_CHANNEL_SIDE_RIGHT },
+    { BACK_CHANNEL_LEFT,    LQT_CHANNEL_BACK_LEFT },
+    { BACK_CHANNEL_RIGHT,   LQT_CHANNEL_BACK_RIGHT },
+    { BACK_CHANNEL_CENTER,  LQT_CHANNEL_BACK_CENTER },
+    { LFE_CHANNEL,          LQT_CHANNEL_LFE },
+    { UNKNOWN_CHANNEL,      LQT_CHANNEL_UNKNOWN }
+  };
+
+  
+static lqt_channel_t get_channel(int channel)
+  {
+  int i;
+  for(i = 0; i < sizeof(channels)/sizeof(channels[0]); i++)
+    {
+    if(channels[i].faad_ch == channel)
+      return channels[i].lqt_ch;
+    }
+  return LQT_CHANNEL_UNKNOWN;
+  }
+  
 static int decode_chunk(quicktime_t *file, int track)
   {
   int i, j, num_packets, num_samples, packet_size;
@@ -112,6 +145,14 @@ static int decode_chunk(quicktime_t *file, int track)
       
       return 0;
       }
+
+    /* Set up channel map */
+    if(!track_map->channel_setup)
+      {
+      track_map->channel_setup = calloc(track_map->channels, sizeof(track_map->channel_setup));
+      for(i = 0; i < track_map->channels; i++)
+        track_map->channel_setup[i] = get_channel(frame_info.channel_position[i]);
+      }
     
 #if 0
     fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
@@ -152,10 +193,17 @@ static int decode(quicktime_t *file,
   quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   /* TODO Check whether seeking happened */
-#if 0
+#if 1
   fprintf(stderr, "Decode: %lld, %lld\n", track_map->current_position,
           track_map->last_position);
 #endif
+
+  if(!output)
+    {
+    /* Set channel setup */
+    decode_chunk(file, track);
+    }
+  
   if(track_map->last_position != track_map->current_position)
     {
     /* Get the next chunk */
@@ -257,8 +305,8 @@ static int set_parameter(quicktime_t *file,
 
 void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   {
-  uint8_t * extradata;
-  int extradata_size;
+  uint8_t * extradata = (char*)0;
+  int extradata_size = 0;
   quicktime_stsd_t * stsd;
   unsigned long samplerate;
   unsigned char channels;
@@ -300,7 +348,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     }
   else
     {
-    fprintf(stderr, "No extradata found, decoding is likely to fail\n");
+    fprintf(stderr, "No extradata found, decoding is doomed to failure\n");
     }
 
   cfg = faacDecGetCurrentConfiguration(codec->dec);
@@ -323,6 +371,6 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     }
   
   stsd->table[0].channels = channels;
-  
 
+  
   }

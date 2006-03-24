@@ -346,6 +346,11 @@ static int decode(quicktime_t *file,
   int samples_copied;
   float * output;
   //  fprintf(stderr, "decode audio vorbis %lld\n", track_map->current_position);
+
+  if(!_output) /* Global initialization */
+    {
+    return 0;
+    }
   
   /* Initialize codec */
   if(!codec->decode_initialized)

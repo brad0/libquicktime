@@ -727,6 +727,11 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   int samples_in_chunk;
   int samples_decoded, samples_to_decode;
 
+  if(!_output) /* Global initialization */
+    {
+    return 0;
+    }
+  
   if(!codec->initialized)
     {
     /* Read the first audio chunk */

@@ -685,6 +685,11 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
   int samples_to_move;
 
   //  fprintf(stderr, "ffmpeg decode audio %lld\n", track_map->current_position);
+
+  if(!output) /* Global initialization */
+    {
+    return 0;
+    }
   
   /* Initialize codec */
   if(!codec->com.init_dec)

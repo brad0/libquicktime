@@ -61,6 +61,7 @@ mdia.c \
 minf.c \
 moov.c \
 mvhd.c \
+multichannel.c \
 ndhd.c \
 nloc.c \
 navg.c \

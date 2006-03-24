@@ -25,9 +25,10 @@ int main(int argc, char *argv[])
 static void
 file_info(char *filename)
 {
-        int cmodel;
+        const lqt_channel_t * channel_setup;
+        int cmodel, channels;
         quicktime_t* qtfile;
-	int i, n;
+	int i, j, n;
 
 	qtfile = quicktime_open(filename, 1, 0);
 
@@ -40,9 +41,10 @@ file_info(char *filename)
 	n = quicktime_audio_tracks(qtfile);
 	printf("  %d audio tracks.\n", n);
 	for(i = 0; i < n; i++) {
-
+        channels = quicktime_track_channels(qtfile, i);
+        channel_setup = lqt_get_channel_setup(qtfile, i);
         printf("    %d channels, %d bits, sample rate %ld, length %ld samples, ",
-		 quicktime_track_channels(qtfile, i),
+		 channels,
 		 quicktime_audio_bits(qtfile, i),
 		 quicktime_sample_rate(qtfile, i),
 		 quicktime_audio_length(qtfile, i));
@@ -58,8 +60,21 @@ file_info(char *filename)
                lqt_sample_format_to_string(lqt_get_sample_format(qtfile, i)));
         printf("    %ssupported.\n",
                quicktime_supported_audio(qtfile, i)?"":"NOT ");
-	}
-
+        printf("    Channel setup: ");
+        if(channel_setup)
+          {
+          for(j = 0; j < channels; j++)
+            {
+            printf(lqt_channel_to_string(channel_setup[j]));
+            if(i < channels-1)
+              printf(",");
+            }
+          printf("\n");
+          }
+        else
+          printf("Not available\n");
+        }
+        
 	n = quicktime_video_tracks(qtfile);
 	printf("  %d video tracks.\n", n);
 	for(i = 0; i < n; i++) {

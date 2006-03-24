@@ -1224,6 +1224,8 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 	quicktime_delete_acodec(atrack);
         if(atrack->sample_buffer)
           free(atrack->sample_buffer);
+        if(atrack->channel_setup)
+          free(atrack->channel_setup);
         return 0;
 }
 
@@ -1243,6 +1245,8 @@ void quicktime_init_maps(quicktime_t * file)
       quicktime_init_audio_map(file, &(file->atracks[i]), file->moov.trak[track],
                                file->wr,
                                (lqt_codec_info_t*)0);
+      /* Some codecs set the channel setup */
+      ((quicktime_codec_t*)file->atracks[i].codec)->decode_audio(file, (void*)0, 0, i);
       }
     }
 
