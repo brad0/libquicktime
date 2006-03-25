@@ -151,7 +151,18 @@ channel_label_names[] =
     { CHANNEL_LABEL_ForeignLanguage,  "Foreign Language" },
     
   };
-  
+
+static const char * get_channel_name(channel_label_t label)
+  {
+  int i;
+  for(i = 0; i < sizeof(channel_label_names)/sizeof(channel_label_names[0]); i++)
+    {
+    if(channel_label_names[i].label == label)
+      return channel_label_names[i].name;
+    }
+  return (char*)0;
+  }
+
 typedef enum
   {
     CHANNEL_BIT_Left                 = (1<<0),
@@ -631,6 +642,21 @@ channel_locations[] =
       
   };
 
+static channel_label_t * get_channel_locations(uint32_t layout, int * num_channels)
+  {
+  int i;
+  for(i = 0; i < sizeof(channel_locations)/sizeof(channel_locations[0]); i++)
+    {
+    if(channel_locations[i].layout == layout)
+      {
+      *num_channels = layout & 0xffff;
+      return channel_locations[i].channels;
+      }
+    }
+  *num_channels = 0;
+  return (channel_label_t*)0;
+  }
+
 void quicktime_chan_init(quicktime_chan_t *chan)
   {
 
@@ -644,17 +670,43 @@ void quicktime_chan_delete(quicktime_chan_t *chan)
 
 void quicktime_chan_dump(quicktime_chan_t *chan)
   {
+  channel_label_t * channel_labels;
+  int num_channels;
   int i;
   printf("       channel description\n");
   printf("        version                     %d\n", chan->version);
   printf("        flags                       %ld\n", chan->flags);
-  printf("        mChannelLayoutTag:          0x%08x\n", chan->mChannelLayoutTag);
+  printf("        mChannelLayoutTag:          0x%08x", chan->mChannelLayoutTag);
+
+  if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelDescriptions)
+    {
+    printf(" [Use channel decriptions]\n");
+    }
+  else if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelBitmap)
+    {
+    printf(" [Use channel bitmap]\n");
+    }
+  else
+    {
+    channel_labels = get_channel_locations(chan->mChannelLayoutTag, &num_channels);
+
+    printf(" [");
+
+    for(i = 0; i < num_channels; i++)
+      {
+      printf("%s", get_channel_name(channel_labels[i]));
+      if(i < num_channels-1)
+        printf(", ");
+      }
+    printf("]\n");
+    }
+  
   printf("        mChannelBitmap:             0x%08x\n", chan->mChannelBitmap);
   printf("        mNumberChannelDescriptions: %d\n", chan->mNumberChannelDescriptions);
   for(i = 0; i < chan->mNumberChannelDescriptions; i++)
     {
-    printf("         mChannelLabel[%d]: 0x%08x\n", i,
-           chan->ChannelDescriptions[i].mChannelLabel);
+    printf("         mChannelLabel[%d]: 0x%08x [%s]\n", i,
+           chan->ChannelDescriptions[i].mChannelLabel, get_channel_name(chan->ChannelDescriptions[i].mChannelLabel));
     printf("         mChannelFlags[%d]: 0x%08x\n", i,
            chan->ChannelDescriptions[i].mChannelFlags);
     printf("         mCoordinates[%d]: [%f %f %f]\n", i,

@@ -43,12 +43,18 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
         if(table->sample_rate + 65536 == 96000 ||
            table->sample_rate + 65536 == 88200) table->sample_rate += 65536;
 
-        if(table->version == 1)
+        fprintf(stderr, "stsd version: %d\n", table->version);
+        
+        if(table->version > 0)
           {
           table->audio_samples_per_packet = quicktime_read_int32(file);
           table->audio_bytes_per_packet = quicktime_read_int32(file);
           table->audio_bytes_per_frame  = quicktime_read_int32(file);
           table->audio_bytes_per_sample  = quicktime_read_int32(file);
+
+          if(table->version == 2) // Skip another 20 bytes
+            quicktime_set_position(file, quicktime_position(file) + 20);
+          
           }
         
 /* Read additional atoms */
@@ -65,6 +71,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_esds(file, &(table->esds));
             table->has_esds = 1;
             quicktime_atom_skip(file, &leaf_atom);
+            fprintf(stderr, "Got esds\n");
             }
           else if(quicktime_atom_is(&leaf_atom, "chan"))
             {
@@ -72,10 +79,11 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_chan(file, &(table->chan));
             table->has_chan = 1;
             quicktime_atom_skip(file, &leaf_atom);
+            fprintf(stderr, "Got chan\n");
             }
           else
             {
-            fprintf(stderr, "Skipping unknown atom \"%4s\" inside stsd\n",
+            fprintf(stderr, "Skipping unknown atom \"%4s\" inside audio stsd\n",
                     leaf_atom.type);
             quicktime_atom_skip(file, &leaf_atom);
             }

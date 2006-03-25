@@ -193,7 +193,7 @@ static int decode(quicktime_t *file,
   quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   /* TODO Check whether seeking happened */
-#if 1
+#if 0
   fprintf(stderr, "Decode: %lld, %lld\n", track_map->current_position,
           track_map->last_position);
 #endif
@@ -202,6 +202,7 @@ static int decode(quicktime_t *file,
     {
     /* Set channel setup */
     decode_chunk(file, track);
+    return 0;
     }
   
   if(track_map->last_position != track_map->current_position)
@@ -369,8 +370,8 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     codec->upsample = 1;
     atrack->total_samples *= 2;
     }
-  
+  //  fprintf(stderr, "Channels: %d %d\n", stsd->table[0].channels, channels);
   stsd->table[0].channels = channels;
-
+  atrack->channels = channels;
   
   }
