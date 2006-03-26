@@ -141,7 +141,7 @@ static int encode(quicktime_t *file,
 #endif
     /* Create encoder */
     
-    codec->enc = faacEncOpen(trak->mdia.minf.stbl.stsd.table[0].sample_rate,
+    codec->enc = faacEncOpen(track_map->samplerate,
                              track_map->channels,
                              &input_samples,
                              &output_bytes);

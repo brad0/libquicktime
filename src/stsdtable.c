@@ -38,10 +38,10 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->sample_size = quicktime_read_int16(file);
 	table->compression_id = quicktime_read_int16(file);
 	table->packet_size = quicktime_read_int16(file);
-	table->sample_rate = quicktime_read_fixed32(file);
+	table->samplerate = quicktime_read_fixed32(file);
 // Kluge for fixed32 limitation
-        if(table->sample_rate + 65536 == 96000 ||
-           table->sample_rate + 65536 == 88200) table->sample_rate += 65536;
+        if(table->samplerate + 65536 == 96000 ||
+           table->samplerate + 65536 == 88200) table->samplerate += 65536;
 
         fprintf(stderr, "stsd version: %d\n", table->version);
         
@@ -99,7 +99,7 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
 	quicktime_write_int16(file, table->sample_size);
 	quicktime_write_int16(file, table->compression_id);
 	quicktime_write_int16(file, table->packet_size);
-	quicktime_write_fixed32(file, table->sample_rate);
+	quicktime_write_fixed32(file, table->samplerate);
         if(table->version == 1)
           {
           quicktime_write_int32(file, table->audio_samples_per_packet);
@@ -370,12 +370,13 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	quicktime_mjht_init(&(table->mjht));
 	quicktime_pano_init(&(table->pano));
 	quicktime_qtvr_init(&(table->qtvr));
+	quicktime_chan_init(&(table->chan));
 	
 	table->channels = 0;
 	table->sample_size = 0;
 	table->compression_id = 0;
 	table->packet_size = 0;
-	table->sample_rate = 0;
+	table->samplerate = 0.0;
 }
 
 void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
@@ -437,7 +438,7 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
 	printf("       sample_size %d\n", table->sample_size);
 	printf("       compression_id %d\n", table->compression_id);
 	printf("       packet_size %d\n", table->packet_size);
-	printf("       sample_rate %f\n", table->sample_rate);
+	printf("       samplerate %f\n",  table->samplerate);
 
         if(table->version == 1)
           {

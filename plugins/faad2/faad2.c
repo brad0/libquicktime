@@ -149,7 +149,8 @@ static int decode_chunk(quicktime_t *file, int track)
     /* Set up channel map */
     if(!track_map->channel_setup)
       {
-      track_map->channel_setup = calloc(track_map->channels, sizeof(track_map->channel_setup));
+      track_map->channel_setup = calloc(track_map->channels,
+                                        sizeof(*(track_map->channel_setup)));
       for(i = 0; i < track_map->channels; i++)
         track_map->channel_setup[i] = get_channel(frame_info.channel_position[i]);
       }
@@ -363,10 +364,11 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);
 
-  if((int)stsd->table[0].sample_rate != (int)samplerate)
+  if(atrack->samplerate != samplerate)
     {
-    fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", (int)stsd->table[0].sample_rate, (int)samplerate);
-    stsd->table[0].sample_rate = samplerate;
+    fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", atrack->samplerate,
+            (int)samplerate);
+    atrack->samplerate = samplerate;
     codec->upsample = 1;
     atrack->total_samples *= 2;
     }

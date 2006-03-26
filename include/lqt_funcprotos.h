@@ -132,6 +132,12 @@ void quicktime_chan_dump(quicktime_chan_t *chan);
 void quicktime_read_chan(quicktime_t *file, quicktime_chan_t *chan);
 void quicktime_write_chan(quicktime_t *file, quicktime_chan_t *chan);
 
+/* Update an atrack from a chan atom */
+void quicktime_get_chan(quicktime_audio_map_t * atrack);
+
+/* Set the chan atom of an atrack */
+void quicktime_set_chan(quicktime_audio_map_t * atrack);
+
 /* clap.c */
 
 void quicktime_clap_init(quicktime_clap_t *clap);

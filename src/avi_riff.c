@@ -247,7 +247,7 @@ static void insert_audio_packet(quicktime_trak_t * trak,
 
   /* Update stsc */
   
-  num_samples = bytes_to_samples(trak->strl, size, trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+  num_samples = bytes_to_samples(trak->strl, size, trak->mdia.minf.stbl.stsd.table[0].samplerate);
   
   stsc = &trak->mdia.minf.stbl.stsc;
 

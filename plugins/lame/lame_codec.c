@@ -423,10 +423,8 @@ static int encode(quicktime_t *file,
       }
     
     lame_set_quality(codec->lame_global, codec->quality);
-    lame_set_in_samplerate(codec->lame_global, 
-                           trak->mdia.minf.stbl.stsd.table[0].sample_rate);
-    lame_set_out_samplerate(codec->lame_global, 
-                            trak->mdia.minf.stbl.stsd.table[0].sample_rate);
+    lame_set_in_samplerate(codec->lame_global, track_map->samplerate);
+    lame_set_out_samplerate(codec->lame_global, track_map->samplerate);
     
     lame_set_bWriteVbrTag(codec->lame_global, 0);
     

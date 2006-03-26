@@ -683,7 +683,7 @@ static int encode(quicktime_t *file,
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_trak_t *trak = track_map->track;
   quicktime_vorbis_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-  int samplerate = trak->mdia.minf.stbl.stsd.table[0].sample_rate;
+  int samplerate = track_map->samplerate;
   float * input;
   
   //        fprintf(stderr, "Encode vorbis %ld\n", samples);

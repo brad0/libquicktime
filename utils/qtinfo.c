@@ -58,8 +58,6 @@ file_info(char *filename)
           }
         printf("    Sample format: %s.\n",
                lqt_sample_format_to_string(lqt_get_sample_format(qtfile, i)));
-        printf("    %ssupported.\n",
-               quicktime_supported_audio(qtfile, i)?"":"NOT ");
         printf("    Channel setup: ");
         if(channel_setup)
           {
@@ -67,12 +65,14 @@ file_info(char *filename)
             {
             printf(lqt_channel_to_string(channel_setup[j]));
             if(i < channels-1)
-              printf(",");
+              printf(", ");
             }
           printf("\n");
           }
         else
           printf("Not available\n");
+        printf("    %ssupported.\n",
+               quicktime_supported_audio(qtfile, i)?"":"NOT ");
         }
         
 	n = quicktime_video_tracks(qtfile);

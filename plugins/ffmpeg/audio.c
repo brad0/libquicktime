@@ -884,7 +884,7 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   if(!codec->com.init_enc)
     {
     codec->com.ffcodec_enc = avcodec_alloc_context();
-    codec->com.ffcodec_enc->sample_rate = trak->mdia.minf.stbl.stsd.table[0].sample_rate;
+    codec->com.ffcodec_enc->sample_rate = track_map->samplerate;
     codec->com.ffcodec_enc->channels = channels;
 
 #define SP(x) codec->com.ffcodec_enc->x = codec->com.params.x

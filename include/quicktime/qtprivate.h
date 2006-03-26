@@ -351,7 +351,7 @@ typedef struct
    values don't show up correctly */
         int16_t compression_id;
 	int packet_size;
-	float sample_rate;
+	float samplerate;
 
 /* Audio extension for version == 1 */
 
@@ -913,7 +913,11 @@ typedef struct
 typedef struct
 {
 	quicktime_trak_t *track; /* real quicktime track corresponding to this table */
-	int channels;            /* number of audio channels in the track */
+	int channels;
+
+        int samplerate;
+
+        /* number of audio channels in the track */
         lqt_channel_t * channel_setup;
         int64_t current_position;   /* current sample in output file */
 	int64_t current_chunk;      /* current chunk in output file */

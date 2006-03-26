@@ -212,6 +212,49 @@ channel_bits[] =
     { CHANNEL_BIT_TopBackRight,         CHANNEL_LABEL_TopBackRight },
   };
 
+static channel_label_t channel_bit_2_channel_label(uint32_t bit)
+  {
+  int i;
+  for(i = 0; i < sizeof(channel_bits) / sizeof(channel_bits[0]); i++)
+    {
+    if(bit == channel_bits[i].bit)
+      return channel_bits[i].label;
+    }
+  return CHANNEL_LABEL_Unknown;
+  }
+
+static struct
+  {
+  lqt_channel_t lqt_channel;
+  channel_label_t channel_label;
+  }
+lqt_channels[] =
+  {
+    { LQT_CHANNEL_UNKNOWN,            CHANNEL_LABEL_Unknown },
+    { LQT_CHANNEL_FRONT_LEFT,         CHANNEL_LABEL_Left },
+    { LQT_CHANNEL_FRONT_RIGHT,        CHANNEL_LABEL_Right },
+    { LQT_CHANNEL_FRONT_CENTER,       CHANNEL_LABEL_Center },
+    { LQT_CHANNEL_FRONT_CENTER_LEFT,  CHANNEL_LABEL_LeftCenter },
+    { LQT_CHANNEL_FRONT_CENTER_RIGHT, CHANNEL_LABEL_RightCenter },
+    { LQT_CHANNEL_BACK_CENTER,        CHANNEL_LABEL_LeftSurround },
+    { LQT_CHANNEL_BACK_LEFT,          CHANNEL_LABEL_CenterSurround },
+    { LQT_CHANNEL_BACK_RIGHT,         CHANNEL_LABEL_RightSurround },
+    { LQT_CHANNEL_SIDE_LEFT,          CHANNEL_LABEL_LeftSurroundDirect },
+    { LQT_CHANNEL_SIDE_RIGHT,         CHANNEL_LABEL_RightSurroundDirect },
+    { LQT_CHANNEL_LFE,                CHANNEL_LABEL_LFEScreen },
+  };
+  
+static lqt_channel_t channel_label_2_channel(channel_label_t channel_label)
+  {
+  int i;
+  for(i = 0; i < sizeof(lqt_channels)/sizeof(lqt_channels[0]); i++)
+    {
+    if(lqt_channels[i].channel_label == channel_label)
+      return lqt_channels[i].lqt_channel;
+    }
+  return LQT_CHANNEL_UNKNOWN;
+  }
+
 /* Layout tags */
 
 typedef enum
@@ -672,7 +715,8 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
   {
   channel_label_t * channel_labels;
   int num_channels;
-  int i;
+  int i, j;
+  uint32_t mask;
   printf("       channel description\n");
   printf("        version                     %d\n", chan->version);
   printf("        flags                       %ld\n", chan->flags);
@@ -701,7 +745,30 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
     printf("]\n");
     }
   
-  printf("        mChannelBitmap:             0x%08x\n", chan->mChannelBitmap);
+  printf("        mChannelBitmap:             0x%08x", chan->mChannelBitmap);
+
+  if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelBitmap)
+    {
+    printf(" [");
+    j = 0;
+    mask = 1;
+    for(i = 0; i < 32; i++)
+      {
+      if(chan->mChannelBitmap & mask)
+        {
+        if(j)
+          printf(", ");
+        printf("%s", get_channel_name(channel_bit_2_channel_label(mask)));
+        j++;
+        }
+      mask <<= 1;
+      }
+    printf("]\n");
+    }
+  else
+    printf("\n");
+   
+  
   printf("        mNumberChannelDescriptions: %d\n", chan->mNumberChannelDescriptions);
   for(i = 0; i < chan->mNumberChannelDescriptions; i++)
     {
@@ -765,4 +832,71 @@ void quicktime_write_chan(quicktime_t *file, quicktime_chan_t *chan)
     quicktime_write_float(file, chan->ChannelDescriptions[i].mCoordinates[2]);
     }
   quicktime_atom_write_footer(file, &atom);
+  }
+
+/* Update an atrack from a chan atom */
+void quicktime_get_chan(quicktime_audio_map_t * atrack)
+  {
+  int i, num_channels;
+  uint32_t mask;
+  quicktime_chan_t * chan;
+  const channel_label_t * channel_labels;
+  chan = &(atrack->track->mdia.minf.stbl.stsd.table[0].chan);
+
+  if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelDescriptions)
+    {
+    atrack->channel_setup = calloc(chan->mNumberChannelDescriptions,
+                                   sizeof(*atrack->channel_setup));
+    atrack->channels = chan->mNumberChannelDescriptions;
+    for(i = 0; i < chan->mNumberChannelDescriptions; i++)
+      atrack->channel_setup[i] = channel_label_2_channel(chan->ChannelDescriptions[i].mChannelLabel);
+    }
+  else if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelBitmap)
+    {
+    /* Count the channels */
+    mask = 1;
+    num_channels = 0;
+    for(i = 0; i < 32; i++)
+      {
+      if(chan->mChannelBitmap & mask)
+        num_channels++;
+      mask <<= 1;
+      }
+
+    /* Set the channels */
+    atrack->channels = num_channels;
+    atrack->channel_setup = calloc(num_channels,
+                                   sizeof(*atrack->channel_setup));
+    
+    mask = 1;
+    num_channels = 0;
+    for(i = 0; i < 32; i++)
+      {
+      if(chan->mChannelBitmap & mask)
+        {
+        atrack->channel_setup[num_channels] = 
+          channel_label_2_channel(channel_bit_2_channel_label(mask));
+        num_channels++;
+        }
+      mask <<= 1;
+      }
+    }
+  else /* Predefined channel layout */
+    {
+    channel_labels = get_channel_locations(chan->mChannelLayoutTag, &num_channels);
+
+    atrack->channels = num_channels;
+    atrack->channel_setup = calloc(num_channels,
+                                   sizeof(*atrack->channel_setup));
+    
+    for(i = 0; i < num_channels; i++)
+      atrack->channel_setup[i] = channel_label_2_channel(channel_labels[i]);
+    }
+  
+  }
+
+/* Set the chan atom of an atrack */
+void quicktime_set_chan(quicktime_audio_map_t * atrack)
+  {
+  
   }

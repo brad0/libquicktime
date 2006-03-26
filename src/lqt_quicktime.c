@@ -743,7 +743,7 @@ int quicktime_has_audio(quicktime_t *file)
 long quicktime_sample_rate(quicktime_t *file, int track)
   {
   if(file->total_atracks)
-    return file->atracks[track].track->mdia.minf.stbl.stsd.table[0].sample_rate;
+    return file->atracks[track].samplerate;
   return 0;
   }
 
@@ -1213,8 +1213,16 @@ int quicktime_init_audio_map(quicktime_t * file,
     atrack->total_samples = quicktime_track_samples(file, trak);
   atrack->track = trak;
   atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
+  atrack->samplerate = (int)(trak->mdia.minf.stbl.stsd.table[0].samplerate + 0.5);
   atrack->current_position = 0;
   atrack->current_chunk = 1;
+
+  if(!encode) 
+    {
+    /* Set channel setup */
+    if(trak->mdia.minf.stbl.stsd.table[0].has_chan)
+      quicktime_get_chan(atrack);
+    }
   quicktime_init_acodec(atrack, encode, info);
   return 0;
   }

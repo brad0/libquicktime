@@ -170,7 +170,7 @@ void quicktime_init_strl(quicktime_t *file,
       quicktime_write_int16_le(file, 
                                trak->mdia.minf.stbl.stsd.table[0].channels); //          nChannels
       quicktime_write_int32_le(file, 
-                               trak->mdia.minf.stbl.stsd.table[0].sample_rate); //       nSamplesPerSec
+                               atrack->samplerate); //       nSamplesPerSec
       strl->nAvgBytesPerSecOffset = quicktime_position(file);
       /* bitrate in bytes */
       quicktime_write_int32_le(file, 0); //                             nAvgBytesPerSec

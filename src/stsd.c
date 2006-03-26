@@ -104,7 +104,7 @@ void quicktime_stsd_init_audio(quicktime_t *file,
 	quicktime_copy_char32(table->wave.frma.codec, compressor);
 	table->channels = channels;
 	table->sample_size = bits;
-	table->sample_rate = sample_rate;
+	table->samplerate = sample_rate;
         //        fprintf(stderr, "stsd_init_audio: %d\n", bits);
 }
 
