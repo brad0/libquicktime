@@ -27,6 +27,58 @@ void quicktime_mjht_dump(quicktime_mjht_t *mjht)
 {
 }
 
+/* SampleDescription V2 definitions */
+#define kAudioFormatFlagIsFloat          (1L<<0) 
+#define kAudioFormatFlagIsBigEndian      (1L<<1) 
+#define kAudioFormatFlagIsSignedInteger  (1L<<2) 
+#define kAudioFormatFlagIsPacked         (1L<<3) 
+#define kAudioFormatFlagIsAlignedHigh    (1L<<4) 
+#define kAudioFormatFlagIsNonInterleaved (1L<<5) 
+#define kAudioFormatFlagIsNonMixable     (1L<<6) 
+#define kAudioFormatFlagsAreAllClear     (1L<<31)  
+
+/* We hope, we can import the Version 2 SampleDescription into a verison 0 one */
+
+static void import_sampledescription_v2(quicktime_stsd_table_t *table)
+  {
+  if(!strncmp(table->format, "lpcm", 4))
+    {
+    if(table->formatSpecificFlags & kAudioFormatFlagIsFloat)
+      {
+      switch(table->sample_size)
+        {
+        case 32:
+          memcpy(table->format, "fl32", 4);
+          break;
+        case 64:
+          memcpy(table->format, "fl64", 4);
+          break;
+        }
+      if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
+        quicktime_set_enda(table, 1);
+      }
+    else
+      {
+      switch(table->sample_size)
+        {
+        case 16:
+          if(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian)
+            memcpy(table->format, "twos", 4);
+          else
+            memcpy(table->format, "sowt", 4);
+          break;
+        case 24:
+          memcpy(table->format, "in24", 4);
+          if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
+            quicktime_set_enda(table, 1);
+        case 32:
+          memcpy(table->format, "in32", 4);
+          if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
+            quicktime_set_enda(table, 1);
+        }
+      }
+    }
+  }
 
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
 {
@@ -34,27 +86,77 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, (uint8_t*)(table->vendor), 4);
-	table->channels = quicktime_read_int16(file);
-	table->sample_size = quicktime_read_int16(file);
-	table->compression_id = quicktime_read_int16(file);
-	table->packet_size = quicktime_read_int16(file);
-	table->samplerate = quicktime_read_fixed32(file);
-// Kluge for fixed32 limitation
-        if(table->samplerate + 65536 == 96000 ||
-           table->samplerate + 65536 == 88200) table->samplerate += 65536;
 
-        fprintf(stderr, "stsd version: %d\n", table->version);
-        
-        if(table->version > 0)
+        if(table->version < 2)
           {
-          table->audio_samples_per_packet = quicktime_read_int32(file);
-          table->audio_bytes_per_packet = quicktime_read_int32(file);
-          table->audio_bytes_per_frame  = quicktime_read_int32(file);
-          table->audio_bytes_per_sample  = quicktime_read_int32(file);
-
-          if(table->version == 2) // Skip another 20 bytes
-            quicktime_set_position(file, quicktime_position(file) + 20);
+          table->channels = quicktime_read_int16(file);
+          table->sample_size = quicktime_read_int16(file);
+          table->compression_id = quicktime_read_int16(file);
+          table->packet_size = quicktime_read_int16(file);
+          table->samplerate = quicktime_read_fixed32(file);
+          // Kluge for fixed32 limitation
+          if(table->samplerate + 65536 == 96000 ||
+             table->samplerate + 65536 == 88200) table->samplerate += 65536;
           
+          //          fprintf(stderr, "stsd version: %d\n", table->version);
+          
+          if(table->version == 1)
+            {
+            table->audio_samples_per_packet = quicktime_read_int32(file);
+            table->audio_bytes_per_packet = quicktime_read_int32(file);
+            table->audio_bytes_per_frame  = quicktime_read_int32(file);
+            table->audio_bytes_per_sample  = quicktime_read_int32(file);
+            
+            if(table->version == 2) // Skip another 20 bytes
+              quicktime_set_position(file, quicktime_position(file) + 20);
+            
+            }
+          }
+        else /* SoundDescriptionV2 */
+          {
+          /*
+           *  SInt16     always3;
+           *  SInt16     always16;
+           *  SInt16     alwaysMinus2;
+           *  SInt16     always0;
+           *  UInt32     always65536;
+           *  UInt32     sizeOfStructOnly;
+           */
+          quicktime_set_position(file, quicktime_position(file) + 16);
+
+          /*
+           * Float64    audioSampleRate;
+           */
+          table->samplerate = quicktime_read_double64(file);
+
+          /*
+           * UInt32     numAudioChannels;
+           */
+
+          table->channels = quicktime_read_int32(file);
+          
+          /*
+           * SInt32     always7F000000;
+           */
+          
+          quicktime_set_position(file, quicktime_position(file) + 4);
+          //          fprintf(stderr, "always7F000000: %08lx\n", quicktime_read_int32(file));
+
+          
+
+          table->sample_size = quicktime_read_int32(file);
+          //          fprintf(stderr, "constBitsPerChannel: %d\n", table->sample_size);
+          table->formatSpecificFlags = quicktime_read_int32(file);
+          //          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
+
+          /* The following 2 are (hopefully) unused */
+
+          
+          // fprintf(stderr, "constBytesPerAudioPacket: %ld\n", quicktime_read_int32(file));
+          // fprintf(stderr, "constLPCMFramesPerAudioPacket: %ld\n", quicktime_read_int32(file));
+
+          quicktime_set_position(file, quicktime_position(file) + 4);
+
           }
         
 /* Read additional atoms */
@@ -88,6 +190,8 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_atom_skip(file, &leaf_atom);
             }
           } 
+        if(table->version == 2)
+          import_sampledescription_v2(table);
 }
 
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table)

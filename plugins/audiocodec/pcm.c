@@ -970,7 +970,7 @@ void quicktime_init_codec_in24_little(quicktime_audio_map_t *atrack)
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   
   codec->block_align = 3 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT32;
@@ -980,7 +980,7 @@ void quicktime_init_codec_in24_little(quicktime_audio_map_t *atrack)
 
   /* Set frma and enda */
   quicktime_set_frma(atrack->track, "in24");
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   
   }
 
@@ -1023,7 +1023,7 @@ void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
   codec->block_align = 3 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT32;
 
-  if(quicktime_get_enda(atrack->track))
+  if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_s24_le;
   else
     codec->decode = decode_s24_be;
@@ -1044,7 +1044,7 @@ void quicktime_init_codec_in32_little(quicktime_audio_map_t *atrack)
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   
   codec->block_align = 4 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT32;
@@ -1058,7 +1058,7 @@ void quicktime_init_codec_in32_little(quicktime_audio_map_t *atrack)
 
   /* Set frma and enda */
   quicktime_set_frma(atrack->track, "in32");
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   }
 
 void quicktime_init_codec_in32_big(quicktime_audio_map_t *atrack)
@@ -1105,12 +1105,12 @@ void quicktime_init_codec_in32(quicktime_audio_map_t *atrack)
   atrack->sample_format = LQT_SAMPLE_INT32;
 
 #ifdef WORDS_BIGENDIAN
-  if(quicktime_get_enda(atrack->track))
+  if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_s32_swap;
   else
     codec->decode = decode_s32;
 #else
-  if(quicktime_get_enda(atrack->track))
+  if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_s32;
   else
     codec->decode = decode_s32_swap;
@@ -1134,7 +1134,7 @@ void quicktime_init_codec_fl32_little(quicktime_audio_map_t *atrack)
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   
   codec->block_align = 4 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_FLOAT;
@@ -1144,7 +1144,7 @@ void quicktime_init_codec_fl32_little(quicktime_audio_map_t *atrack)
 
   /* Set frma and enda */
   quicktime_set_frma(atrack->track, "fl32");
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
 
   }
 
@@ -1188,7 +1188,7 @@ void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
   codec->block_align = 4 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_FLOAT;
 
-  if(quicktime_get_enda(atrack->track))
+  if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_fl32_le;
   else
     codec->decode = decode_fl32_be;
@@ -1209,7 +1209,7 @@ void quicktime_init_codec_fl64_little(quicktime_audio_map_t *atrack)
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   
   codec->block_align = 8 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_FLOAT;
@@ -1220,7 +1220,7 @@ void quicktime_init_codec_fl64_little(quicktime_audio_map_t *atrack)
 
   /* Set frma and enda */
   quicktime_set_frma(atrack->track, "fl64");
-  quicktime_set_enda(atrack->track, 1);
+  quicktime_set_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0]), 1);
   }
 
 void quicktime_init_codec_fl64_big(quicktime_audio_map_t *atrack)
@@ -1265,7 +1265,7 @@ void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
   codec->block_align = 8 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_FLOAT;
 
-  if(quicktime_get_enda(atrack->track))
+  if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_fl64_le;
   else
     codec->decode = decode_fl64_be;

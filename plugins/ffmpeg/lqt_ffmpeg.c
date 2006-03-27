@@ -871,7 +871,7 @@ static void set_codec_info(struct CODECIDMAP * map)
 
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
-  fprintf(stderr, "Short name: %s, wav_ids: %p\n", map->short_name, map->wav_ids);
+  //  fprintf(stderr, "Short name: %s, wav_ids: %p\n", map->short_name, map->wav_ids);
   if(map->encoder && map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;

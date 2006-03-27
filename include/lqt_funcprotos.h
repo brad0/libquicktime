@@ -235,10 +235,10 @@ void quicktime_read_enda(quicktime_t *file, quicktime_enda_t *enda,
 void quicktime_write_enda(quicktime_t *file, quicktime_enda_t *enda);
 void quicktime_enda_dump(quicktime_enda_t *enda);
 
-void quicktime_set_enda(quicktime_trak_t * trak, int little_endian);
+void quicktime_set_enda(quicktime_stsd_table_t *table, int little_endian);
 
 /* Returns TRUE if little endian */
-int quicktime_get_enda(quicktime_trak_t * trak);
+int quicktime_get_enda(quicktime_stsd_table_t *table);
 
 /* elst.c */
 
@@ -928,8 +928,13 @@ void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);
 float quicktime_read_fixed32(quicktime_t *file);
 int quicktime_write_fixed32(quicktime_t *file, float number);
-float quicktime_read_float(quicktime_t *file);
-int quicktime_write_float(quicktime_t *file, float value);
+
+float quicktime_read_float32(quicktime_t *file);
+double quicktime_read_double64(quicktime_t *file);
+
+int quicktime_write_float32(quicktime_t *file, float value);
+int quicktime_write_double64(quicktime_t *file, double value);
+
 int quicktime_write_int64(quicktime_t *file, int64_t value);
 int quicktime_write_int64_le(quicktime_t *file, int64_t value);
 int quicktime_write_int32(quicktime_t *file, long value);

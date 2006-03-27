@@ -16,12 +16,12 @@ void quicktime_write_enda(quicktime_t *file, quicktime_enda_t *enda)
   quicktime_atom_write_footer(file, &atom);
   }
 
-void quicktime_set_enda(quicktime_trak_t * trak, int little_endian)
+void quicktime_set_enda(quicktime_stsd_table_t *table, int little_endian)
   {
-  quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
+  quicktime_wave_t * wave = &(table->wave);
   wave->enda.littleEndian = little_endian;
   wave->has_enda = 1;
-  trak->mdia.minf.stbl.stsd.table[0].has_wave = 1;
+  table->has_wave = 1;
   }
 
 void quicktime_enda_dump(quicktime_enda_t *enda)
@@ -31,9 +31,9 @@ void quicktime_enda_dump(quicktime_enda_t *enda)
   }
 
 /* Returns TRUE if little endian */
-int quicktime_get_enda(quicktime_trak_t * trak)
+int quicktime_get_enda(quicktime_stsd_table_t *table)
   {
-  quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
+  quicktime_wave_t * wave = &(table->wave);
   if(wave->has_enda)
     {
     return wave->enda.littleEndian;

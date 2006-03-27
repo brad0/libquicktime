@@ -1806,7 +1806,7 @@ static void __lqt_cleanup_codecinfo() __attribute__ ((destructor));
 
 static void __lqt_cleanup_codecinfo()
   {
-  fprintf(stderr, "Deleting quicktime codecs\n");
+  //  fprintf(stderr, "Deleting quicktime codecs\n");
   lqt_registry_destroy();
   }
 

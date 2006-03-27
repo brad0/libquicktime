@@ -345,13 +345,14 @@ typedef struct
         int has_wave;
         quicktime_wave_t wave;
 /* audio description */
-	int channels;
-	int sample_size;
+	uint32_t channels;
+	uint32_t sample_size;
+        uint32_t formatSpecificFlags;
 /* LQT: We have int16_t for the compression_id, because otherwise negative
    values don't show up correctly */
         int16_t compression_id;
 	int packet_size;
-	float samplerate;
+        double samplerate;
 
 /* Audio extension for version == 1 */
 

@@ -1,6 +1,7 @@
 #include "config.h"
 
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -319,31 +320,6 @@ float quicktime_read_fixed32(quicktime_t *file)
 		return a;
 }
 
-int quicktime_write_float(quicktime_t *file, float value)
-{
-	union {
-	       float f;
-	       unsigned char b[4];
-	} dat1;
-	
-#ifdef WORDS_BIGENDIAN
-        dat1.f = value;
-	return quicktime_write_data(file, dat1.b, 4);
-#else
-        union {
-		float f;
-		unsigned char b[4];
-        } dat2;
-
-        dat1.f = value;
-        dat2.b[3] = dat1.b[0];
-	dat2.b[2] = dat1.b[1];
-	dat2.b[1] = dat1.b[2];
-	dat2.b[0] = dat1.b[3];
-
-	return quicktime_write_data(file, dat2.b, 4);
-#endif
-}
 
 int quicktime_write_fixed32(quicktime_t *file, float number)
 {
@@ -361,32 +337,171 @@ int quicktime_write_fixed32(quicktime_t *file, float number)
 	return quicktime_write_data(file, data, 4);
 }
 
-float quicktime_read_float(quicktime_t *file)
-{
-	union {
-		float f;
-		unsigned char b[4];
-	} dat1;
-	
-#ifdef WORDS_BIGENDIAN
-        quicktime_read_data(file, dat1.b, 4);
-        return dat1.f; 
-#else
-        union {
-		float f;
-		unsigned char b[4];
-        } dat2;
-	
-	quicktime_read_data(file, dat1.b, 4);
-	dat2.b[3] = dat1.b[0];
-	dat2.b[2] = dat1.b[1];
-	dat2.b[1] = dat1.b[2];
-	dat2.b[0] = dat1.b[3];
-                                        
-	return dat2.f;
-#endif
-}
+static float
+float32_be_read (unsigned char *cptr)
+{       int             exponent, mantissa, negative ;
+        float   fvalue ;
 
+        negative = cptr [0] & 0x80 ;
+        exponent = ((cptr [0] & 0x7F) << 1) | ((cptr [1] & 0x80) ? 1 : 0) ;
+        mantissa = ((cptr [1] & 0x7F) << 16) | (cptr [2] << 8) | (cptr [3]) ;
+
+        if (! (exponent || mantissa))
+                return 0.0 ;
+
+        mantissa |= 0x800000 ;
+        exponent = exponent ? exponent - 127 : 0 ;
+
+        fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
+
+        if (negative)
+                fvalue *= -1 ;
+
+        if (exponent > 0)
+                fvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                fvalue /= (1 << abs (exponent)) ;
+
+        return fvalue ;
+} /* float32_be_read */
+
+static double
+double64_be_read (unsigned char *cptr)
+{       int             exponent, negative ;
+        double  dvalue ;
+
+        negative = (cptr [0] & 0x80) ? 1 : 0 ;
+        exponent = ((cptr [0] & 0x7F) << 4) | ((cptr [1] >> 4) & 0xF) ;
+
+        /* Might not have a 64 bit long, so load the mantissa into a double. */
+        dvalue = (((cptr [1] & 0xF) << 24) | (cptr [2] << 16) | (cptr [3] << 8) | cptr [4]) ;
+        dvalue += ((cptr [5] << 16) | (cptr [6] << 8) | cptr [7]) / ((double) 0x1000000) ;
+
+        if (exponent == 0 && dvalue == 0.0)
+                return 0.0 ;
+
+        dvalue += 0x10000000 ;
+
+        exponent = exponent - 0x3FF ;
+
+        dvalue = dvalue / ((double) 0x10000000) ;
+
+        if (negative)
+                dvalue *= -1 ;
+
+        if (exponent > 0)
+                dvalue *= (1 << exponent) ;
+        else if (exponent < 0)
+                dvalue /= (1 << abs (exponent)) ;
+
+        return dvalue ;
+} /* double64_be_read */
+
+void
+float32_be_write (float in, unsigned char *out)
+{       int             exponent, mantissa, negative = 0 ;
+
+        memset (out, 0, sizeof (int)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                negative = 1 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 126 ;
+
+        in *= (float) 0x1000000 ;
+        mantissa = (((int) in) & 0x7FFFFF) ;
+
+        if (negative)
+                out [0] |= 0x80 ;
+
+        if (exponent & 0x01)
+                out [1] |= 0x80 ;
+
+        out [3] = mantissa & 0xFF ;
+        out [2] = (mantissa >> 8) & 0xFF ;
+        out [1] |= (mantissa >> 16) & 0x7F ;
+        out [0] |= (exponent >> 1) & 0x7F ;
+
+        return ;
+} /* float32_be_write */
+
+
+void
+double64_be_write (double in, unsigned char *out)
+{       int             exponent, mantissa ;
+
+        memset (out, 0, sizeof (double)) ;
+
+        if (in == 0.0)
+                return ;
+
+        if (in < 0.0)
+        {       in *= -1.0 ;
+                out [0] |= 0x80 ;
+                } ;
+
+        in = frexp (in, &exponent) ;
+
+        exponent += 1022 ;
+
+        out [0] |= (exponent >> 4) & 0x7F ;
+        out [1] |= (exponent << 4) & 0xF0 ;
+
+        in *= 0x20000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [1] |= (mantissa >> 24) & 0xF ;
+        out [2] = (mantissa >> 16) & 0xFF ;
+        out [3] = (mantissa >> 8) & 0xFF ;
+        out [4] = mantissa & 0xFF ;
+
+        in = fmod (in, 1.0) ;
+        in *= 0x1000000 ;
+        mantissa = lrint (floor (in)) ;
+
+        out [5] = (mantissa >> 16) & 0xFF ;
+        out [6] = (mantissa >> 8) & 0xFF ;
+        out [7] = mantissa & 0xFF ;
+
+        return ;
+} /* double64_be_write */
+
+
+float quicktime_read_float32(quicktime_t *file)
+  {
+  unsigned char b[4];
+  quicktime_read_data(file, b, 4);
+  return float32_be_read(b);
+  }
+
+double quicktime_read_double64(quicktime_t *file)
+  {
+  unsigned char b[8];
+  quicktime_read_data(file, b, 8);
+  return double64_be_read(b);
+  }
+
+
+int quicktime_write_float32(quicktime_t *file, float value)
+  {
+  unsigned char b[4];
+  float32_be_write(value, b);
+  return quicktime_write_data(file, b, 4);
+  }
+
+int quicktime_write_double64(quicktime_t *file, double value)
+  {
+  unsigned char b[8];
+  double64_be_write(value, b);
+  return quicktime_write_data(file, b, 8);
+  }
 
 int quicktime_write_int64(quicktime_t *file, int64_t value)
 {

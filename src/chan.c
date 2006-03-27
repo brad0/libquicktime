@@ -783,6 +783,8 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
     }
   }
 
+
+
 void quicktime_read_chan(quicktime_t *file, quicktime_chan_t *chan)
   {
   int i;
@@ -802,9 +804,9 @@ void quicktime_read_chan(quicktime_t *file, quicktime_chan_t *chan)
       {
       chan->ChannelDescriptions[i].mChannelLabel = quicktime_read_int32(file);
       chan->ChannelDescriptions[i].mChannelFlags = quicktime_read_int32(file);
-      chan->ChannelDescriptions[i].mCoordinates[0] = quicktime_read_float(file);
-      chan->ChannelDescriptions[i].mCoordinates[1] = quicktime_read_float(file);
-      chan->ChannelDescriptions[i].mCoordinates[2] = quicktime_read_float(file);
+      chan->ChannelDescriptions[i].mCoordinates[0] = quicktime_read_float32(file);
+      chan->ChannelDescriptions[i].mCoordinates[1] = quicktime_read_float32(file);
+      chan->ChannelDescriptions[i].mCoordinates[2] = quicktime_read_float32(file);
       }
     }
   
@@ -827,9 +829,9 @@ void quicktime_write_chan(quicktime_t *file, quicktime_chan_t *chan)
     {
     quicktime_write_int32(file, chan->ChannelDescriptions[i].mChannelLabel);
     quicktime_write_int32(file, chan->ChannelDescriptions[i].mChannelFlags);
-    quicktime_write_float(file, chan->ChannelDescriptions[i].mCoordinates[0]);
-    quicktime_write_float(file, chan->ChannelDescriptions[i].mCoordinates[1]);
-    quicktime_write_float(file, chan->ChannelDescriptions[i].mCoordinates[2]);
+    quicktime_write_float32(file, chan->ChannelDescriptions[i].mCoordinates[0]);
+    quicktime_write_float32(file, chan->ChannelDescriptions[i].mCoordinates[1]);
+    quicktime_write_float32(file, chan->ChannelDescriptions[i].mCoordinates[2]);
     }
   quicktime_atom_write_footer(file, &atom);
   }
