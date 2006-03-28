@@ -802,10 +802,11 @@ static GC qt_gc;
 static void qt_init(FILE *fp, char *filename)
 {
     char *str;
-    int i;
+    int i, j;
     int ipos;
     float minpan, maxpan;
-    
+    const lqt_channel_t * channel_setup;
+    int num_channels;
     /* audio device */
     char *adev_name;
     
@@ -910,20 +911,36 @@ static void qt_init(FILE *fp, char *filename)
     if (quicktime_has_audio(qt)) {
 	fprintf(fp,"  audio: %d track(s)\n",quicktime_audio_tracks(qt));
 	for (i = 0; i < quicktime_audio_tracks(qt); i++) {
-	    fprintf(fp,
-		    "    track #%d\n"
-		    "      rate  : %ld Hz\n"
-		    "      bits  : %d\n"
-		    "      chans : %d\n"
-		    "      codec : %s\n",
-		    i+1,
-		    quicktime_sample_rate(qt,i),
-		    quicktime_audio_bits(qt,i),
-		    quicktime_track_channels(qt,i),
-		    quicktime_audio_compressor(qt,i));
-	}
+          {
+          num_channels = quicktime_track_channels(qt,i);
+          fprintf(fp,
+                  "    track #%d\n"
+                  "      rate  : %ld Hz\n"
+                  "      bits  : %d\n"
+                  "      chans : %d\n"
+                  "      codec : %s\n",
+                  i+1,
+                  quicktime_sample_rate(qt,i),
+                  quicktime_audio_bits(qt,i),
+                  num_channels,
+                  quicktime_audio_compressor(qt,i));
+          channel_setup = lqt_get_channel_setup(qt, i);
+          fprintf(fp, "    channel_setup : ");
+          if(channel_setup)
+            {
+            for(j = 0; j < num_channels; j++)
+              {
+              fprintf(fp, "%s", lqt_channel_to_string(channel_setup[j]));
+              if(j < num_channels - 1)
+                fprintf(fp, ", ");
+              }
+            fprintf(fp, "\n");
+            }
+          else
+            fprintf(fp, "Not available\n");
+          }
+        }
     }
-
     /* sanity checks */
     if (!quicktime_has_video(qt)) {
 	fprintf(stderr,"WARNING: no video stream\n");
