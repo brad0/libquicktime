@@ -80,7 +80,8 @@ static void import_sampledescription_v2(quicktime_stsd_table_t *table)
     }
   }
 
-void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table, quicktime_atom_t *parent_atom)
+void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
+                               quicktime_atom_t *parent_atom)
 {
   quicktime_atom_t leaf_atom;
 	table->version = quicktime_read_int16(file);

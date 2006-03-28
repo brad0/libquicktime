@@ -397,7 +397,7 @@ double64_be_read (unsigned char *cptr)
         return dvalue ;
 } /* double64_be_read */
 
-void
+static void
 float32_be_write (float in, unsigned char *out)
 {       int             exponent, mantissa, negative = 0 ;
 
@@ -433,7 +433,7 @@ float32_be_write (float in, unsigned char *out)
 } /* float32_be_write */
 
 
-void
+static void
 double64_be_write (double in, unsigned char *out)
 {       int             exponent, mantissa ;
 
