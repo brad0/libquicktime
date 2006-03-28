@@ -71,6 +71,7 @@ static void import_sampledescription_v2(quicktime_stsd_table_t *table)
           memcpy(table->format, "in24", 4);
           if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
             quicktime_set_enda(table, 1);
+          break;
         case 32:
           memcpy(table->format, "in32", 4);
           if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
@@ -148,7 +149,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
           table->sample_size = quicktime_read_int32(file);
           //          fprintf(stderr, "constBitsPerChannel: %d\n", table->sample_size);
           table->formatSpecificFlags = quicktime_read_int32(file);
-          //          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
+          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
 
           /* The following 2 are (hopefully) unused */
 
@@ -156,7 +157,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
           // fprintf(stderr, "constBytesPerAudioPacket: %ld\n", quicktime_read_int32(file));
           // fprintf(stderr, "constLPCMFramesPerAudioPacket: %ld\n", quicktime_read_int32(file));
 
-          quicktime_set_position(file, quicktime_position(file) + 4);
+          quicktime_set_position(file, quicktime_position(file) + 8);
 
           }
         
@@ -182,7 +183,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_chan(file, &(table->chan));
             table->has_chan = 1;
             quicktime_atom_skip(file, &leaf_atom);
-            fprintf(stderr, "Got chan\n");
+            //            fprintf(stderr, "Got chan\n");
             }
           else
             {

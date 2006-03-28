@@ -688,15 +688,15 @@ channel_locations[] =
 static channel_label_t * get_channel_locations(uint32_t layout, int * num_channels)
   {
   int i;
+
+  *num_channels = layout & 0xffff;
   for(i = 0; i < sizeof(channel_locations)/sizeof(channel_locations[0]); i++)
     {
     if(channel_locations[i].layout == layout)
       {
-      *num_channels = layout & 0xffff;
       return channel_locations[i].channels;
       }
     }
-  *num_channels = 0;
   return (channel_label_t*)0;
   }
 
@@ -733,14 +733,21 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
   else
     {
     channel_labels = get_channel_locations(chan->mChannelLayoutTag, &num_channels);
-
+    
     printf(" [");
 
-    for(i = 0; i < num_channels; i++)
+    if(channel_labels)
       {
-      printf("%s", get_channel_name(channel_labels[i]));
-      if(i < num_channels-1)
-        printf(", ");
+      for(i = 0; i < num_channels; i++)
+        {
+        printf("%s", get_channel_name(channel_labels[i]));
+        if(i < num_channels-1)
+          printf(", ");
+        }
+      }
+    else
+      {
+      printf("Not available");
       }
     printf("]\n");
     }
@@ -886,13 +893,16 @@ void quicktime_get_chan(quicktime_audio_map_t * atrack)
   else /* Predefined channel layout */
     {
     channel_labels = get_channel_locations(chan->mChannelLayoutTag, &num_channels);
-
     atrack->channels = num_channels;
-    atrack->channel_setup = calloc(num_channels,
-                                   sizeof(*atrack->channel_setup));
+
+    if(channel_labels)
+      {
+      atrack->channel_setup = calloc(num_channels,
+                                     sizeof(*atrack->channel_setup));
+      for(i = 0; i < num_channels; i++)
+        atrack->channel_setup[i] = channel_label_2_channel(channel_labels[i]);
+      }
     
-    for(i = 0; i < num_channels; i++)
-      atrack->channel_setup[i] = channel_label_2_channel(channel_labels[i]);
     }
   
   }
