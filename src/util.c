@@ -14,6 +14,11 @@
 #include <workarounds.h>
 #include <string.h>
 
+
+#ifndef HAVE_LRINT
+#define lrint(x) ((long int)(x))
+#endif
+
 /* Disk I/O */
 
 int64_t quicktime_get_file_length(const char *path)
