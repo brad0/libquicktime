@@ -926,10 +926,10 @@ static int layout_equal(channel_label_t * labels, lqt_channel_t * channels, int 
 
   for(i = 0; i < num_channels; i++)
     {
-    if(channels[i] == channel_label_2_channel(labels[i]))
-      return 1;
+    if(channels[i] != channel_label_2_channel(labels[i]))
+      return 0;
     }
-  return 0;
+  return 1;
   }
 
 static int layout_similar(channel_label_t * labels, lqt_channel_t * channels, int num_channels)
@@ -973,6 +973,8 @@ void quicktime_set_chan(quicktime_audio_map_t * atrack)
                     atrack->channels))
       {
       chan->mChannelLayoutTag = channel_locations[i].layout;
+      fprintf(stderr, "Got exact layout tag %08x\n",
+              chan->mChannelLayoutTag);
       atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
       return;
       }
