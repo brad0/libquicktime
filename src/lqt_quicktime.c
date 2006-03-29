@@ -331,7 +331,7 @@ char * lqt_get_author(quicktime_t *file)
         return file->moov.udta.author;
 }
 
-unsigned long lqt_get_creation_time(quicktime_t file)
+unsigned long lqt_get_creation_time(quicktime_t * file)
   {
   return file->moov.mvhd.creation_time;
   }

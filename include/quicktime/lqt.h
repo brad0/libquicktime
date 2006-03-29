@@ -894,7 +894,7 @@ char * lqt_get_author(quicktime_t *file);
     \param file A quicktime handle
     \returns The creation time
 */
-unsigned long lqt_get_creation_time(quicktime_t file);
+unsigned long lqt_get_creation_time(quicktime_t * file);
   
 /* get track number from track id */
 int lqt_track_from_id(quicktime_t *file, int track_id);
