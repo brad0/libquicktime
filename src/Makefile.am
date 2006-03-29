@@ -41,6 +41,7 @@ cmodel_yuv422.c \
 colormodels.c \
 chan.c \
 ctab.c \
+ctts.c \
 dinf.c \
 dref.c \
 edts.c \

@@ -114,6 +114,9 @@ void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
 	quicktime_stsc_dump(&(stbl->stsc));
 	quicktime_stsz_dump(&(stbl->stsz));
 	quicktime_stco_dump(&(stbl->stco));
+        if(stbl->has_ctts)
+          quicktime_ctts_dump(&(stbl->ctts));
+        
 }
 
 int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
@@ -137,6 +140,12 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
       {
       quicktime_read_stts(file, &(stbl->stts));
       quicktime_atom_skip(file, &leaf_atom);
+      }
+    else if(quicktime_atom_is(&leaf_atom, "ctts"))
+      {
+      quicktime_read_ctts(file, &(stbl->ctts));
+      quicktime_atom_skip(file, &leaf_atom);
+      stbl->has_ctts = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "stss"))
       {
@@ -181,7 +190,9 @@ void quicktime_write_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_s
 	quicktime_write_stsc(file, &(stbl->stsc));
 	quicktime_write_stsz(file, &(stbl->stsz));
 	quicktime_write_stco(file, &(stbl->stco));
-
+        if(stbl->has_ctts)
+          quicktime_write_ctts(file, &(stbl->ctts));
+        
 	quicktime_atom_write_footer(file, &atom);
 }
 

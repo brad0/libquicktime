@@ -406,6 +406,22 @@ typedef struct
 	quicktime_stts_table_t *table;
 } quicktime_stts_t;
 
+/* Composition time to sample */
+
+typedef struct
+{
+	long sample_count;
+	long sample_duration;
+} quicktime_ctts_table_t;
+
+typedef struct
+{
+	int version;
+	long flags;
+	long total_entries;
+        long entries_allocated;
+	quicktime_ctts_table_t *table;
+} quicktime_ctts_t;
 
 /* sync sample */
 typedef struct
@@ -488,7 +504,9 @@ typedef struct
 	quicktime_stsc_t stsc;
 	quicktime_stsz_t stsz;
 	quicktime_stco_t stco;
-} quicktime_stbl_t;
+	quicktime_ctts_t ctts;
+        int has_ctts;
+  } quicktime_stbl_t;
 
 typedef struct
 {

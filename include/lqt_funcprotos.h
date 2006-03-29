@@ -196,6 +196,15 @@ void quicktime_ctab_dump(quicktime_ctab_t *ctab);
 int quicktime_read_ctab(quicktime_t *file, quicktime_ctab_t *ctab);
 void quicktime_default_ctab(quicktime_ctab_t *ctab, int depth);
 
+/* ctts.c */
+
+void quicktime_ctts_init(quicktime_ctts_t *ctts);
+void quicktime_ctts_delete(quicktime_ctts_t *ctts);
+void quicktime_ctts_dump(quicktime_ctts_t *ctts);
+void quicktime_read_ctts(quicktime_t *file, quicktime_ctts_t *ctts);
+void quicktime_write_ctts(quicktime_t *file, quicktime_ctts_t *ctts);
+
+
 /* dinf.c */
 
 void quicktime_dinf_init(quicktime_dinf_t *dinf);

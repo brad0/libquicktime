@@ -64,7 +64,7 @@ file_info(char *filename)
           for(j = 0; j < channels; j++)
             {
             printf(lqt_channel_to_string(channel_setup[j]));
-            if(i < channels-1)
+            if(j < channels-1)
               printf(", ");
             }
           printf("\n");
