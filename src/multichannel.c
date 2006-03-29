@@ -1,5 +1,7 @@
+#include <string.h>
 #include <lqt.h>
 #include <quicktime/qtprivate.h>
+#include <lqt_funcprotos.h>
 
 /* Multichannel support for libquicktime */
 
@@ -47,7 +49,8 @@ const char * lqt_channel_to_string(lqt_channel_t ch)
 
 void lqt_set_channel_setup(quicktime_t * file, int track, lqt_channel_t * ch)
   {
-  
+  memcpy(file->atracks[track].channel_setup, ch, sizeof(*ch)*file->atracks[track].channels);
+  quicktime_set_chan(&(file->atracks[track]));
   }
 
 const lqt_channel_t * lqt_get_channel_setup(quicktime_t * file, int track)

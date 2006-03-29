@@ -68,7 +68,21 @@ extern "C" {
  * configuration to be saved into a file. The mechanisms used are the
  * quicktime chan atom as well as some codec specific multichannel
  * setups.
- */
+ *
+ *  When decoding, simply get the channel setup with \ref lqt_get_channel_setup.
+ *  It can happen, that this function returns NULL when no specific mapping is known.
+ *
+ *  When encoding, things are more complicated. Some codecs have fixed channel
+ *  setups. After setting up an audio track, call \ref lqt_get_channel_setup to
+ *  check, if there is already a prefefined channel setup. If this is the case (i.e. if non
+ *  NULL is returned), you MUST use this  channel setup.
+ *
+ *  If there is no predefined setup (i.e. \ref lqt_get_channel_setup returns NULL after
+ *  creation of the audio track), call \ref lqt_set_channel_setup to set your desired
+ *  setup. It can happen, that libquicktime will reorder the channel setup. Thus
+ *  you need a final call to \ref lqt_get_channel_setup to know the whole truth.
+
+*/
 
 /** \ingroup multichannel
  *  \brief Channel definitions
@@ -77,6 +91,7 @@ extern "C" {
  *  enable to support most channel configurations. Internally,
  *  many more channel types exist. They can be added to the public part
  *  on demand.
+ *
  */
 
 typedef enum 

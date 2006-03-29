@@ -303,4 +303,49 @@ void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)
   codec->quality = 100;
   
   track_map->sample_format = LQT_SAMPLE_FLOAT;
+
+  if(track_map->channels <= 6)
+    {
+    /* Set default AAC channel setup */
+    track_map->channel_setup = calloc(track_map->channels,
+                                      sizeof(*track_map->channel_setup));
+
+    switch(track_map->channels)
+      {
+      case 1:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        break;
+      case 2:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_LEFT;
+        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_RIGHT;
+        break;
+      case 3:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        break;
+      case 4:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        track_map->channel_setup[3] = LQT_CHANNEL_BACK_CENTER;
+        break;
+      case 5:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        track_map->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
+        track_map->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
+        break;
+      case 6:
+        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        track_map->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
+        track_map->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
+        track_map->channel_setup[5] = LQT_CHANNEL_LFE;
+        break;
+      }
+    quicktime_set_chan(track_map);
+    }
   }

@@ -255,6 +255,18 @@ static lqt_channel_t channel_label_2_channel(channel_label_t channel_label)
   return LQT_CHANNEL_UNKNOWN;
   }
 
+static channel_label_t channel_2_channel_label(lqt_channel_t channel)
+  {
+  int i;
+  for(i = 0; i < sizeof(lqt_channels)/sizeof(lqt_channels[0]); i++)
+    {
+    if(lqt_channels[i].lqt_channel == channel)
+      return lqt_channels[i].channel_label;
+    }
+  return CHANNEL_LABEL_Unknown;
+  }
+
+
 /* Layout tags */
 
 typedef enum
@@ -907,8 +919,92 @@ void quicktime_get_chan(quicktime_audio_map_t * atrack)
   
   }
 
+
+static int layout_equal(channel_label_t * labels, lqt_channel_t * channels, int num_channels)
+  {
+  int i;
+
+  for(i = 0; i < num_channels; i++)
+    {
+    if(channels[i] == channel_label_2_channel(labels[i]))
+      return 1;
+    }
+  return 0;
+  }
+
+static int layout_similar(channel_label_t * labels, lqt_channel_t * channels, int num_channels)
+  {
+  int i, j, found;
+  
+  for(i = 0; i < num_channels; i++)
+    {
+    found = 0;
+    for(j = 0; j < num_channels; j++)
+      {
+      if(channels[i] == channel_label_2_channel(labels[j]))
+        {
+        found = 1;
+        break;
+        }
+      }
+    if(!found)
+      return 0;
+    }
+  return 1;
+  }
+
 /* Set the chan atom of an atrack */
 void quicktime_set_chan(quicktime_audio_map_t * atrack)
   {
+  int i, j;
+  quicktime_chan_t * chan;
   
+  if(!atrack->channel_setup)
+    return;
+
+  chan = &(atrack->track->mdia.minf.stbl.stsd.table[0].chan);
+
+  /* Search for a equal channel setup */
+  for(i = 0; i < sizeof(channel_locations) / sizeof(channel_locations[0]); i++)
+    {
+    if(((channel_locations[i].layout & 0xffff) == atrack->channels) &&
+       layout_equal(channel_locations[i].channels,
+                    atrack->channel_setup,
+                    atrack->channels))
+      {
+      chan->mChannelLayoutTag = channel_locations[i].layout;
+      atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
+      return;
+      }
+    }
+
+  /* Search for a similar channel setup */
+  for(i = 0; i < sizeof(channel_locations) / sizeof(channel_locations[0]); i++)
+    {
+    if(((channel_locations[i].layout & 0xffff) == atrack->channels) &&
+       layout_similar(channel_locations[i].channels,
+                    atrack->channel_setup,
+                    atrack->channels))
+      {
+      chan->mChannelLayoutTag = channel_locations[i].layout;
+      atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
+
+      for(j = 0; j < atrack->channels; j++)
+        atrack->channel_setup[j] = channel_label_2_channel(channel_locations[i].channels[j]);
+      return;
+      }
+    }
+
+  /* Nothing found, create a custom channel setup */
+  chan->ChannelDescriptions =
+    calloc(atrack->channels, sizeof(*(chan->ChannelDescriptions)));
+  chan->mNumberChannelDescriptions = atrack->channels;
+  chan->mChannelLayoutTag = CHANNEL_LAYOUT_UseChannelDescriptions;
+  for(i = 0; i < chan->mNumberChannelDescriptions; i++)
+    {
+    chan->ChannelDescriptions[i].mChannelLabel =
+      channel_2_channel_label(atrack->channel_setup[i]);
+    }
+  atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
+
   }

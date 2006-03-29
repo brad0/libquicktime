@@ -83,7 +83,6 @@ channels[] =
     { LFE_CHANNEL,          LQT_CHANNEL_LFE },
     { UNKNOWN_CHANNEL,      LQT_CHANNEL_UNKNOWN }
   };
-
   
 static lqt_channel_t get_channel(int channel)
   {
@@ -152,8 +151,14 @@ static int decode_chunk(quicktime_t *file, int track)
       track_map->channel_setup = calloc(track_map->channels,
                                         sizeof(*(track_map->channel_setup)));
       for(i = 0; i < track_map->channels; i++)
+        {
         track_map->channel_setup[i] = get_channel(frame_info.channel_position[i]);
+        //        fprintf(stderr, "channel_setup[%d]: %s\n", i, lqt_channel_to_string(track_map->channel_setup[i]));
+        }
+
       }
+    
+      
     
 #if 0
     fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
@@ -358,7 +363,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   
   faacDecSetConfiguration(codec->dec, cfg);
 
-  fprintf(stderr, "faad2 init\n");
+  //  fprintf(stderr, "faad2 init\n");
   lqt_hexdump(extradata, extradata_size, 16);
   
   faacDecInit2(codec->dec, extradata, extradata_size,
@@ -366,8 +371,8 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
 
   if(atrack->samplerate != samplerate)
     {
-    fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", atrack->samplerate,
-            (int)samplerate);
+    //    fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", atrack->samplerate,
+    //            (int)samplerate);
     atrack->samplerate = samplerate;
     codec->upsample = 1;
     atrack->total_samples *= 2;

@@ -878,5 +878,20 @@ void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
           {
           codec->write_OVHS = 1;
           }
+        /* Set Vorbis 5.1 channel mapping */
+        if(atrack->channels == 6)
+          {
+          if(!atrack->channel_setup)
+            {
+            atrack->channel_setup = calloc(6, sizeof(*atrack->channel_setup));
+            atrack->channel_setup[0] =  LQT_CHANNEL_FRONT_LEFT;
+            atrack->channel_setup[1] =  LQT_CHANNEL_FRONT_CENTER;
+            atrack->channel_setup[2] =  LQT_CHANNEL_FRONT_RIGHT;
+            atrack->channel_setup[3] =  LQT_CHANNEL_LFE;
+            atrack->channel_setup[4] =  LQT_CHANNEL_BACK_LEFT;
+            atrack->channel_setup[5] =  LQT_CHANNEL_BACK_RIGHT;
+
+            }
+          }
 
 }

@@ -144,17 +144,14 @@ int lqt_get_codec_api_version();
 const char * lqt_channel_to_string(lqt_channel_t ch);
 
 /** \ingroup multichannel
- *  \brief Set a channel setup for a file
+ *  \brief Set a channel setup for an audio track
  *  \param file A quicktime handle
  *  \param track index (starting with 0)
  *  \param ch Channel array
  *
- *  Set the desired channel setup for a file. The best time to call this function is
- *  right after \ref quicktime_set_audio, \ref lqt_set_audio or \ref lqt_add_audio_track.
- *  ch is the array of channels you want to pass. Note, that libquicktime might change
- *  the channel order. To make things worse,
- *  it won't reorder the channels for you. You must call \ref lqt_get_channel_setup
- *  to get the order, in which you must pass the channels.
+ *  Set the desired channel setup for a file. Note, that libquicktime
+ *  may reorder the channels. It is therefore necessary to call
+ *  \ref lqt_get_channel_setup after to know the final truth.
  */
 
 void lqt_set_channel_setup(quicktime_t * file, int track, lqt_channel_t * ch);
@@ -839,13 +836,22 @@ void lqt_set_comment(quicktime_t *file, char *string);
 void lqt_set_author(quicktime_t *file, char *string);
 
 /** \ingroup metadata
+    \brief Set the creation time for the file
+    \param file A quicktime handle
+    \param time The creation time
+*/
+
+void lqt_set_creation_time(quicktime_t *file, unsigned long time);
+
+  
+/** \ingroup metadata
     \brief Get the album from the file
     \param file A quicktime handle
     \returns The album or NULL
 */
 
 char * lqt_get_album(quicktime_t * file);
-
+  
 /** \ingroup metadata
     \brief Get the artist from the file
     \param file A quicktime handle
@@ -883,6 +889,13 @@ char * lqt_get_comment(quicktime_t *file);
 */
 char * lqt_get_author(quicktime_t *file);
 
+/** \ingroup metadata
+    \brief Get the creation time from the file
+    \param file A quicktime handle
+    \returns The creation time
+*/
+unsigned long lqt_get_creation_time(quicktime_t file);
+  
 /* get track number from track id */
 int lqt_track_from_id(quicktime_t *file, int track_id);
   

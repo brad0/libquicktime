@@ -296,6 +296,11 @@ void lqt_set_author(quicktime_t *file, char *string)
 	quicktime_set_udta_string(&(file->moov.udta.author), &(file->moov.udta.author_len), string);
 }
 
+void lqt_set_creation_time(quicktime_t *file, unsigned long time)
+  {
+  file->moov.mvhd.creation_time = time;
+  }
+
 char * lqt_get_album(quicktime_t * file)
 {
         return file->moov.udta.album;
@@ -325,6 +330,12 @@ char * lqt_get_author(quicktime_t *file)
 {
         return file->moov.udta.author;
 }
+
+unsigned long lqt_get_creation_time(quicktime_t file)
+  {
+  return file->moov.mvhd.creation_time;
+  }
+
 
 int quicktime_video_tracks(quicktime_t *file)
 {
