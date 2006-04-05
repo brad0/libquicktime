@@ -11,36 +11,31 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
        name:               "vorbis_bitrate",
        real_name:          "Nominal Bitrate",
        type:               LQT_PARAMETER_INT,
-       val_default:        { 128000 },
-       val_min:            0,
-       val_max:            0,
-       stringlist_options: (char**)0
+       val_default:        { val_int: 128000 },
      },
      { 
        name:      "vorbis_vbr",
        real_name: "Use variable bitrate",
        type:      LQT_PARAMETER_INT,
-       val_default:        { 1 },
-       val_min:            0,
-       val_max:            1,
-       stringlist_options: (char**)0
+       val_default:        { val_int: 1 },
+       val_min:            { val_int: 0 },
+       val_max:            { val_int: 1 },
      },
      { 
        name:      "vorbis_max_bitrate",
        real_name: "Maximum Bitrate (-1: no limit)",
        type:      LQT_PARAMETER_INT,
-       val_default:        { -1 },
-       val_min:            0,
-       val_max:            0,
-       stringlist_options: (char**)0
+       val_default:        { val_int: -1 },
+       val_min:            { val_int: 0 },
+       val_max:            { val_int: 0 },
      },
      { 
        name:      "vorbis_min_bitrate",
        real_name: "Minimum Bitrate (-1: no limit)",
        type:      LQT_PARAMETER_INT,
-       val_default:        { -1 },
-       val_min:            0,
-       val_max:            0,
+       val_default:        { val_int: -1 },
+       val_min:            { val_int: 0 },
+       val_max:            { val_int: 0 },
        stringlist_options: (char**)0
      },
      { /* End of paramaters */ }

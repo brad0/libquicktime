@@ -16,23 +16,21 @@ static char * fourccs_mjpa[]  = { QUICKTIME_MJPA, (char*)0 };
 
 static lqt_parameter_info_static_t encode_parameters_jpeg[] =
   {
-     { 
-       "jpeg_quality",
-       "Quality",
-       LQT_PARAMETER_INT,
-       {95 },
-       1,
-       100,
-       (char**)0
+    { 
+      name:        "jpeg_quality",
+      real_name:   "Quality",
+      type:        LQT_PARAMETER_INT,
+      val_default: { val_int: 95 },
+      val_min:     { val_int: 1 },
+      val_max:     { val_int: 100 },
      },
      { 
-       "jpeg_usefloat",
-       "Use float",
-       LQT_PARAMETER_INT,
-       { 0 },
-       0,
-       1,
-       (char**)0
+       name:        "jpeg_usefloat",
+       real_name:   "Use float",
+       type:        LQT_PARAMETER_INT,
+       val_default: { val_int: 0 },
+       val_min:     { val_int: 0 },
+       val_max:     { val_int: 1 },
      },
      { /* End of parameters */ }
   };

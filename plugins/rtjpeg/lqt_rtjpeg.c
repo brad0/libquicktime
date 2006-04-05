@@ -29,40 +29,30 @@ static char * fourccs_rtjpeg[]  = { "RTJ0", (char*)0 };
 
 static lqt_parameter_info_static_t encode_parameters_rtjpeg[] = {
 	{
-		"rtjpeg_quality",
-		"Quality setting",
-		LQT_PARAMETER_INT,
-		{ 100 },
-		0,
-		100,
-		(char**)0
+          name:        "rtjpeg_quality",
+          real_name:   "Quality setting",
+	  type:        LQT_PARAMETER_INT,
+	  val_default: { val_int: 100 },
+          val_min: { val_int: 0 },
+	  val_max: { val_int: 100 },
 	},
 	{
-		"rtjpeg_key_rate",
-		"Key frame interval",
-		LQT_PARAMETER_INT,
-		{ 25 },
-		0,
-		0,
-		(char**)0
+          name:        "rtjpeg_key_rate",
+          real_name:   "Key frame interval",
+          type:        LQT_PARAMETER_INT,
+          val_default: { val_int: 25 },
 	},
 	{
-		"rtjpeg_luma_quant",
-		"Luma quantiser",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		0,
-		(char**)0
+          name:        "rtjpeg_luma_quant",
+          real_name:   "Luma quantiser",
+          type:        LQT_PARAMETER_INT,
+          val_default: { val_int: 1 },
 	},
 	{
-		"rtjpeg_chroma_quant",
-		"Chroma quantiser",
-		LQT_PARAMETER_INT,
-		{ 1 },
-		0,
-		0,
-		(char**)0
+          name:        "rtjpeg_chroma_quant",
+          real_name:   "Chroma quantiser",
+          type:        LQT_PARAMETER_INT,
+          val_default: { val_int: 1 },
 	},
 	{ /* End of parameters */ }
 };

@@ -62,47 +62,42 @@ static lqt_parameter_info_static_t encode_parameters_dv[] =
       name:               "dv_anamorphic16x9",
       real_name:          "Is Anamorphic 16x9",
       type:               LQT_PARAMETER_INT,
-      val_default:        {0},
-      val_min:            0,
-      val_max:            1,
-      stringlist_options: (char**)0
+      val_default:        {val_int: 0},
+      val_min:            {val_int: 0},
+      val_max:            {val_int: 1},
     },
     { 
       name:               "dv_vlc_encode_passes",
       real_name:          "VLC Encode Passes",
       type:               LQT_PARAMETER_INT,
-      val_default:        {3},
-      val_min:            1,
-      val_max:            3,
-      stringlist_options: (char**)0
+      val_default:        {val_int: 3},
+      val_min:            {val_int: 1},
+      val_max:            {val_int: 3},
     },
-	{ 
+    { 
       name:               "dv_clamp_luma",
       real_name:          "Clamp Luma Values",
       type:               LQT_PARAMETER_INT,
-      val_default:        {0},
-      val_min:            0,
-      val_max:            1,
-      stringlist_options: (char**)0
-	},
-	{ 
+      val_default:        {val_int: 0},
+      val_min:            {val_int: 0},
+      val_max:            {val_int: 1},
+    },
+    { 
       name:               "dv_clamp_chroma",
       real_name:          "Clamp Chroma Values",
       type:               LQT_PARAMETER_INT,
-      val_default:        {0},
-      val_min:            0,
-      val_max:            1,
-      stringlist_options: (char**)0
-	},
-	{ 
+      val_default:        {val_int: 0},
+      val_min:            {val_int: 0},
+      val_max:            {val_int: 1},
+    },
+    { 
       name:               "dv_rem_ntsc_setup",
       real_name:          "Compensate for 7.5IRE NTSC setup",
       type:               LQT_PARAMETER_INT,
-      val_default:        {0},
-      val_min:            0,
-      val_max:            1,
-      stringlist_options: (char**)0
-	},
+      val_default:        {val_int: 0},
+      val_min:            {val_int: 0},
+      val_max:            {val_int: 1},
+    },
     { /* End of parameters */ }
   };
 

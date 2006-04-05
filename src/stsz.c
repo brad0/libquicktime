@@ -128,21 +128,22 @@ void quicktime_write_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 }
 
 void quicktime_update_stsz(quicktime_stsz_t *stsz, 
-	long sample, 
-	long sample_size)
-{
-
-	if(!stsz->sample_size)
-	{
-		if(sample >= stsz->entries_allocated)
-		{
-			stsz->entries_allocated = sample * 2;
-			stsz->table = (quicktime_stsz_table_t*)realloc(stsz->table, sizeof(quicktime_stsz_table_t) * stsz->entries_allocated);
-		}
-
-		stsz->table[sample].size = sample_size;
-		if(sample >= stsz->total_entries) stsz->total_entries = sample + 1;
-	}
-
-//printf("quicktime_update_stsz %d %d\n", sample, sample_size);
-}
+                           long sample, 
+                           long sample_size)
+  {
+  //  fprintf(stderr, "quicktime_update_stsz %d %d\n", sample, sample_size);
+  if(!stsz->sample_size)
+    {
+    if(sample >= stsz->entries_allocated)
+      {
+      stsz->entries_allocated += 1024;
+      stsz->table =
+        (quicktime_stsz_table_t*)realloc(stsz->table,
+                                         sizeof(quicktime_stsz_table_t) *
+                                         stsz->entries_allocated);
+      }
+    stsz->table[sample].size = sample_size;
+    if(sample >= stsz->total_entries) stsz->total_entries = sample + 1;
+    }
+  
+  }

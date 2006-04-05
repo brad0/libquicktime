@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.8)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.9pre1)
 AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST
@@ -506,6 +506,22 @@ if test x$have_faad2 = xtrue; then
 AC_DEFINE(HAVE_FAAD2)
 fi
 
+dnl
+dnl Check for x264
+dnl
+
+have_x264="false"
+
+if test $have_gpl = "true"; then
+X264_REQUIRED="0.45.x"
+
+PKG_CHECK_MODULES(X264, x264 >= $X264_REQUIRED, have_x264="true", have_x264="false")
+AC_SUBST(X264_REQUIRED)
+AC_SUBST(X264_LIBS)
+AC_SUBST(X264_CFLAGS)
+
+AM_CONDITIONAL(HAVE_X264, test x$have_x264 = xtrue)
+fi
 
 #CPU Optimisation added by Justin Schoeman (justin@suntiger.ee.up.ac.za)
 
@@ -639,6 +655,7 @@ plugins/opendivx/Makefile \
 plugins/opendivx/encore50/Makefile \
 plugins/rtjpeg/Makefile \
 plugins/ffmpeg/Makefile \
+plugins/x264/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
 lqt-config], [chmod a+x lqt-config])
@@ -725,5 +742,13 @@ echo "Yes"
 else
 echo "Missing (Go to http://www.audiocoding.com/)"
 fi  
+
+echo -n "x264        "
+if test x$have_x264 = "xtrue"; then
+echo "Yes"
+else
+echo "Missing (Go to http://developers.videolan.org/x264.html)"
+fi  
+
 
 fi

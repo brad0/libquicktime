@@ -38,7 +38,6 @@ typedef struct
   AVCodecContext * ffcodec_dec;
   AVCodec * ffc_dec;
   int init_dec;
-  int bitrate;
   } quicktime_ffmpeg_codec_common_t;
 
 

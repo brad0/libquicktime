@@ -31,16 +31,14 @@ static lqt_parameter_info_static_t encode_parameters_faac[] =
       name:        "faac_bitrate",
       real_name:   "Bitrate (kbps, 0 = VBR)",
       type:        LQT_PARAMETER_INT,
-      val_min:     0,
-      val_max:     0,
       val_default: { val_int: 0 }
     },
     {
       name:        "quality",
       real_name:   "VBR Quality",
       type:        LQT_PARAMETER_INT,
-      val_min:     10,
-      val_max:     500,
+      val_min:     { val_int: 10 },
+      val_max:     { val_int: 500 },
       val_default: { val_int: 100 },
     },
     { /* End of parameters */ }

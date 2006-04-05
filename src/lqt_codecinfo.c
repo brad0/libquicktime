@@ -99,6 +99,8 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
     free(p->name);
   if(p->real_name)
     free(p->real_name);
+  if(p->help_string)
+    free(p->help_string);
 
   switch(p->type)
     {
@@ -172,6 +174,9 @@ static void copy_parameter_value(lqt_parameter_value_t * dst,
     case LQT_PARAMETER_INT:
       dst->val_int = src->val_int;
       break;
+    case LQT_PARAMETER_FLOAT:
+      dst->val_float = src->val_float;
+      break;
     case LQT_PARAMETER_STRING:
     case LQT_PARAMETER_STRINGLIST: /* String with options */
 
@@ -199,14 +204,21 @@ copy_parameter_info(lqt_parameter_info_t * ret,
     ret->name = __lqt_strdup(info->name);
   if(info->real_name)
     ret->real_name = __lqt_strdup(info->real_name);
+  if(info->help_string)
+    ret->help_string = __lqt_strdup(info->help_string);
 
   ret->type = info->type;
 
   switch(ret->type)
     {
     case LQT_PARAMETER_INT:
-      ret->val_min = info->val_min;
-      ret->val_max = info->val_max;
+      ret->val_min.val_int = info->val_min.val_int;
+      ret->val_max.val_int = info->val_max.val_int;
+      break;
+    case LQT_PARAMETER_FLOAT:
+      ret->val_min.val_float = info->val_min.val_float;
+      ret->val_max.val_float = info->val_max.val_float;
+      ret->num_digits = info->num_digits;
       break;
     case LQT_PARAMETER_STRING:
       break;
@@ -859,14 +871,23 @@ create_parameter_info(lqt_parameter_info_t * ret,
   ret->name = __lqt_strdup(info->name);           /* Parameter name  */
   ret->real_name = __lqt_strdup(info->real_name); /* Parameter name  */
 
+  if(info->help_string)
+    ret->help_string = __lqt_strdup(info->help_string);
+  
   ret->type = info->type;
 
   switch(ret->type)
     {
     case LQT_PARAMETER_INT:
       ret->val_default.val_int = info->val_default.val_int;
-      ret->val_min = info->val_min;
-      ret->val_max = info->val_max;
+      ret->val_min.val_int = info->val_min.val_int;
+      ret->val_max.val_int = info->val_max.val_int;
+      break;
+    case LQT_PARAMETER_FLOAT:
+      ret->val_default.val_float = info->val_default.val_float;
+      ret->val_min.val_float = info->val_min.val_float;
+      ret->val_max.val_float = info->val_max.val_float;
+      ret->num_digits = info->num_digits;
       break;
     case LQT_PARAMETER_STRING:
       ret->val_default.val_string = __lqt_strdup(info->val_default.val_string);
@@ -1040,9 +1061,19 @@ static void dump_codec_parameter(lqt_parameter_info_t * p)
       fprintf(stderr, "Integer, Default Value: %d ",
               p->val_default.val_int);
 
-      if(p->val_min < p->val_max)
+      if(p->val_min.val_int < p->val_max.val_int)
         fprintf(stderr, "(%d..%d)\n",
-                p->val_min, p->val_max);
+                p->val_min.val_int, p->val_max.val_int);
+      else
+        fprintf(stderr, "(unlimited)\n");
+      break;
+    case LQT_PARAMETER_FLOAT:
+      fprintf(stderr, "Float, Default Value: %f ",
+              p->val_default.val_float);
+
+      if(p->val_min.val_float < p->val_max.val_float)
+        fprintf(stderr, "(%f..%f)\n",
+                p->val_min.val_float, p->val_max.val_float);
       else
         fprintf(stderr, "(unlimited)\n");
       break;
@@ -1062,6 +1093,8 @@ static void dump_codec_parameter(lqt_parameter_info_t * p)
     case LQT_PARAMETER_SECTION:
       fprintf(stderr, "Section");
     }
+  if(p->help_string)
+    fprintf(stderr, "Help string: %s\n", p->help_string);
   }
 
 void lqt_dump_codec_info(const lqt_codec_info_t * info)
@@ -1528,6 +1561,16 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
           (encode ? "Encoding" : "Decoding"),
           parameter_name,
           codec_name, parameter_info[i].val_default.val_int);
+#endif
+      break;
+    case LQT_PARAMETER_FLOAT:
+      parameter_info[i].val_default.val_float = val->val_float;
+#ifndef NDEBUG
+  fprintf(stderr,
+          "%s parameter %s for codec %s (value: %f) stored in registry\n",
+          (encode ? "Encoding" : "Decoding"),
+          parameter_name,
+          codec_name, parameter_info[i].val_default.val_float);
 #endif
       break;
     case LQT_PARAMETER_STRING:

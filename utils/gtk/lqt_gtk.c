@@ -47,14 +47,14 @@ static void parameter_widget_apply(LqtGtkParameterWidget * w)
       parameter_set_string(w->parameter_info, ptr);
       break;
     case LQT_PARAMETER_INT:
-      if((w->parameter_info->val_min == 0) &&
-         (w->parameter_info->val_max == 1))
+      if((w->parameter_info->val_min.val_int == 0) &&
+         (w->parameter_info->val_max.val_int == 1))
         {
         w->parameter_info->val_default.val_int =
           gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(w->widget));
         }
-      else if((w->parameter_info->val_min <
-               w->parameter_info->val_max))
+      else if((w->parameter_info->val_min.val_int <
+               w->parameter_info->val_max.val_int))
         {
         w->parameter_info->val_default.val_int =
           (int)(GTK_ADJUSTMENT(w->adjustment)->value);
@@ -63,6 +63,19 @@ static void parameter_widget_apply(LqtGtkParameterWidget * w)
         {
         w->parameter_info->val_default.val_int =
           gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(w->widget));
+        }
+      break;
+    case LQT_PARAMETER_FLOAT:
+      if((w->parameter_info->val_min.val_float <
+          w->parameter_info->val_max.val_float))
+        {
+        w->parameter_info->val_default.val_float =
+          GTK_ADJUSTMENT(w->adjustment)->value;
+        }
+      else
+        {
+        w->parameter_info->val_default.val_float =
+          gtk_spin_button_get_value(GTK_SPIN_BUTTON(w->widget));
         }
     case LQT_PARAMETER_SECTION:
       break;
@@ -82,17 +95,31 @@ static void parameter_widget_update(LqtGtkParameterWidget * pw)
               pw->parameter_info->val_default.val_int);
 #endif
       /* Boolean */
-      if((pw->parameter_info->val_min == 0) && (pw->parameter_info->val_max == 1))
+      if((pw->parameter_info->val_min.val_int == 0) && (pw->parameter_info->val_max.val_int == 1))
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pw->widget),
                                      pw->parameter_info->val_default.val_int);
       /* Integer with limits -> slider */
-      else if(pw->parameter_info->val_min < pw->parameter_info->val_max)
+      else if(pw->parameter_info->val_min.val_int < pw->parameter_info->val_max.val_int)
         gtk_adjustment_set_value(GTK_ADJUSTMENT(pw->adjustment),
                                  pw->parameter_info->val_default.val_int);
       /* Spinbutton */
       else
         gtk_spin_button_set_value(GTK_SPIN_BUTTON(pw->widget),
                                   pw->parameter_info->val_default.val_int);
+      break;
+    case LQT_PARAMETER_FLOAT:
+#ifndef NDEBUG
+      fprintf(stderr, "Parameter: %s: %f\n", pw->parameter_info->name,
+              pw->parameter_info->val_default.val_float);
+#endif
+      /* Float with limits -> slider */
+      if(pw->parameter_info->val_min.val_float < pw->parameter_info->val_max.val_float)
+        gtk_adjustment_set_value(GTK_ADJUSTMENT(pw->adjustment),
+                                 pw->parameter_info->val_default.val_float);
+      /* Spinbutton */
+      else
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(pw->widget),
+                                  pw->parameter_info->val_default.val_float);
       break;
     case LQT_PARAMETER_STRING:
 #ifndef NDEBUG
@@ -121,12 +148,41 @@ static void parameter_widget_update(LqtGtkParameterWidget * pw)
     }
   }
 
+/*
+ *  Really dirty trick to get tooltips for a GtkComboBox working:
+ *  loop through all container children and set the tooltip for
+ *  the child, which is a button
+ */
+
+static void
+set_combo_tooltip(GtkWidget *widget, gpointer   data)
+  {
+  LqtGtkParameterWidget * w = (LqtGtkParameterWidget *)data;
+  //  GtkTooltips *tooltips = (GtkTooltips *)data;
+
+  if(GTK_IS_BUTTON (widget))
+    gtk_tooltips_set_tip(w->tooltips, widget,
+                         w->parameter_info->help_string,
+                         NULL);
+  }
+
+static void
+realize_combo(GtkWidget *combo, gpointer   data)
+  {
+  LqtGtkParameterWidget * w = (LqtGtkParameterWidget *)data;
+
+  gtk_container_forall (GTK_CONTAINER (combo),
+                        set_combo_tooltip,
+                        w);
+  }
+
+
 LqtGtkParameterWidget *
-lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips)
   {
   int i;
   LqtGtkParameterWidget * ret = calloc(1, sizeof(LqtGtkParameterWidget));
-
+  ret->tooltips = tooltips;
   ret->parameter_info = info;
   
   switch(info->type)
@@ -134,18 +190,20 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
     case LQT_PARAMETER_INT:
 
       /* Boolean */
-      if((info->val_min == 0) && (info->val_max == 1))
+      if((info->val_min.val_int == 0) && (info->val_max.val_int == 1))
         {
         ret->widget = gtk_check_button_new_with_label(info->real_name);
+        if(info->help_string)
+          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
         }
       /* Integer with limits -> slider */
-      else if(info->val_min < info->val_max)
+      else if(info->val_min.val_int < info->val_max.val_int)
         {
         ret->label = gtk_label_new(info->real_name);
         gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
-        ret->adjustment = gtk_adjustment_new((gfloat) info->val_min,
-                                             (gfloat) info->val_min,
-                                             (gfloat) info->val_max,
+        ret->adjustment = gtk_adjustment_new((gfloat) info->val_min.val_int,
+                                             (gfloat) info->val_min.val_int,
+                                             (gfloat) info->val_max.val_int,
                                              0.0,
                                              0.0,
                                              0.0);
@@ -154,6 +212,8 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
                                 GTK_POS_LEFT);
         
         gtk_scale_set_digits(GTK_SCALE(ret->widget), 0);
+        if(info->help_string)
+          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
         }
       /* Spinbutton */
       else
@@ -169,12 +229,64 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
         ret->widget = gtk_spin_button_new(GTK_ADJUSTMENT(ret->adjustment),
                                           0.0,
                                           0);
+        if(info->help_string)
+          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+        }
+      break;
+    case LQT_PARAMETER_FLOAT:
+
+      /* Float with limits -> slider */
+      if(info->val_min.val_float < info->val_max.val_float)
+        {
+        ret->label = gtk_label_new(info->real_name);
+        gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
+        ret->adjustment = gtk_adjustment_new(info->val_min.val_float,
+                                             info->val_min.val_float,
+                                             info->val_max.val_float,
+                                             0.0,
+                                             0.0,
+                                             0.0);
+        
+        ret->widget = gtk_hscale_new(GTK_ADJUSTMENT(ret->adjustment));
+
+        gtk_scale_set_digits(GTK_SCALE(ret->widget),
+                             info->num_digits);
+        // fprintf(stderr, "** NUM DIGITS: %d\n", info->num_digits);
+        
+        gtk_scale_set_value_pos(GTK_SCALE(ret->widget),
+                                GTK_POS_LEFT);
+        
+        if(info->help_string)
+          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+        }
+      /* Spinbutton */
+      else
+        {
+        ret->label = gtk_label_new(info->real_name);
+        gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
+        ret->adjustment = gtk_adjustment_new(0.0,
+                                             -1.0e8,
+                                             1.0e8,
+                                             1.0,
+                                             1.0,
+                                             1.0);
+        ret->widget = gtk_spin_button_new(GTK_ADJUSTMENT(ret->adjustment),
+                                          0.0,
+                                          0);
+
+        gtk_spin_button_set_digits(GTK_SPIN_BUTTON(ret->widget),
+                                   info->num_digits);
+
+        if(info->help_string)
+          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
         }
       break;
     case LQT_PARAMETER_STRING:
       ret->label = gtk_label_new(info->real_name);
       gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
       ret->widget = gtk_entry_new();
+      if(info->help_string)
+        gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
       break;
     case LQT_PARAMETER_STRINGLIST:    /* String with options */
       ret->selected = 0;
@@ -191,6 +303,12 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
 		       "changed",
 		       G_CALLBACK(parameter_combobox_callback),
 		       ret);
+
+      if(info->help_string)
+        g_signal_connect (ret->widget, "realize",
+                          G_CALLBACK (realize_combo), ret);
+
+      
       break;
     case LQT_PARAMETER_SECTION:
       break;
@@ -222,7 +340,7 @@ lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget * w)
 
 static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
                                 LqtGtkParameterWidget ** widgets,
-                                int num_parameters)
+                                int num_parameters, GtkTooltips * tooltips)
   {
   int i;
   GtkWidget * ret;
@@ -237,7 +355,7 @@ static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
   for(i = 0; i < num_parameters; i++)
     {
     widgets[i] =
-      lqtgtk_create_parameter_widget(&parameter_info[i]);
+      lqtgtk_create_parameter_widget(&parameter_info[i], tooltips);
 
     /* Bool parameters have no labels */
 
@@ -269,7 +387,11 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
   int num_sections = 0;
   int parameters_in_section;
   LqtGtkCodecConfigWidget * ret = calloc(1, sizeof(LqtGtkCodecConfigWidget));
-  
+
+  ret->tooltips = gtk_tooltips_new();
+  g_object_ref (G_OBJECT (ret->tooltips));
+  gtk_object_sink (GTK_OBJECT (ret->tooltips));
+    
   if(parameter_info[0].type == LQT_PARAMETER_SECTION)
     {
     for(i = 0; i < num_parameters; i++)
@@ -305,7 +427,7 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
       /* Create table */
       table = create_table(&(parameter_info[parameter_index]),
                            &(ret->parameter_widgets[parameter_index - i - 1]),
-                           parameters_in_section);
+                           parameters_in_section, ret->tooltips);
       
       /* Append table */
 
@@ -323,7 +445,7 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
   else
     ret->widget = create_table(parameter_info,
                                ret->parameter_widgets,
-                               num_parameters);
+                               num_parameters, ret->tooltips);
   
   return ret;
   }

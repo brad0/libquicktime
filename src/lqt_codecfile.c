@@ -65,9 +65,14 @@ static const char * module_file_time_key = "FileTime: ";
 /* Types for parameters */
 
 static const char * type_int            = "Integer";
+static const char * type_float          = "Float";
 static const char * type_string         = "String";
 static const char * type_stringlist     = "Stringlist";
 static const char * type_section        = "Section";
+
+static const char * help_string_key     = "HelpString: ";
+static const char * num_digits_key      = "NumDigits";
+
 
 static const char * num_encoding_parameters_key  = "NumEncodingParameters: ";
 static const char * num_decoding_parameters_key  = "NumDecodingParameters: ";
@@ -123,6 +128,9 @@ static void read_parameter_value(char * pos,
     case LQT_PARAMETER_INT:
       ret->val_int = atoi(pos);
       break;
+    case LQT_PARAMETER_FLOAT:
+      ret->val_float = strtod(pos, (char**)0);
+      break;
     case LQT_PARAMETER_STRING:
     case LQT_PARAMETER_STRINGLIST:
       ret->val_string = __lqt_strdup(pos);
@@ -130,6 +138,36 @@ static void read_parameter_value(char * pos,
     case LQT_PARAMETER_SECTION:
       break;
     }
+  }
+
+static char * convert_help_string(char * str)
+  {
+  char * ret;
+  char * src_pos, *dst_pos;
+  
+  ret = malloc(strlen(str)+1);
+  
+  src_pos = str;
+  dst_pos = ret;
+
+  while(*src_pos != '\0')
+    {
+    if((src_pos[0] == '\\') && (src_pos[1] == 'n'))
+      {
+      *dst_pos = '\n';
+      src_pos += 2;
+      dst_pos++;
+      }
+    else
+      {
+      *dst_pos = *src_pos;
+      src_pos++;
+      dst_pos++;
+      }
+    }
+  *dst_pos = '\0';
+  free(str);
+  return ret;
   }
 
 static void read_parameter_info(FILE * input,
@@ -169,8 +207,22 @@ static void read_parameter_info(FILE * input,
          */
 
         info->val_default.val_int = 0;
-        info->val_min = 0;
-        info->val_max = 0;
+        info->val_min.val_int = 0;
+        info->val_max.val_int = 0;
+        }
+      if(!strcmp(pos, type_float))
+        {
+        info->type = LQT_PARAMETER_FLOAT;
+
+        /*
+         *  We set them here for the case, they are not set after
+         *  (which can happen for min and max)
+         */
+
+        info->val_default.val_float = 0;
+        info->val_min.val_float = 0;
+        info->val_max.val_float = 0;
+        info->num_digits = 1;
         }
 
       /*
@@ -209,12 +261,19 @@ static void read_parameter_info(FILE * input,
     else if(CHECK_KEYWORD(min_value_key))
       {
       pos = line + strlen(min_value_key);
-      info->val_min = atoi(pos);
+      if(info->type == LQT_PARAMETER_INT)
+        info->val_min.val_int = atoi(pos);
+      else if(info->type == LQT_PARAMETER_FLOAT)
+        info->val_min.val_float = strtod(pos, (char**)0);
       }
+
     else if(CHECK_KEYWORD(max_value_key))
       {
       pos = line + strlen(max_value_key);
-      info->val_max = atoi(pos);
+      if(info->type == LQT_PARAMETER_INT)
+        info->val_max.val_int = atoi(pos);
+      else if(info->type == LQT_PARAMETER_FLOAT)
+        info->val_max.val_float = strtod(pos, (char**)0);
       }
     else if(CHECK_KEYWORD(num_options_key))
       {
@@ -228,6 +287,17 @@ static void read_parameter_info(FILE * input,
       pos = line + strlen(option_key);
       info->stringlist_options[options_read] = __lqt_strdup(pos);
       options_read++;
+      }
+    else if(CHECK_KEYWORD(help_string_key))
+      {
+      pos = line + strlen(help_string_key);
+      info->help_string = __lqt_strdup(pos);
+      info->help_string = convert_help_string(info->help_string);
+      }
+    else if(CHECK_KEYWORD(num_digits_key))
+      {
+      pos = line + strlen(num_digits_key);
+      info->num_digits = atoi(pos);
       }
     else if(CHECK_KEYWORD(end_parameter_key))
       break;
@@ -386,7 +456,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       codec->num_encoding_parameters = atoi(pos);
       if(codec->num_encoding_parameters)
         codec->encoding_parameters =
-          malloc(codec->num_encoding_parameters *
+          calloc(codec->num_encoding_parameters,
                  sizeof(lqt_parameter_info_t));
       else
         codec->encoding_parameters =
@@ -398,7 +468,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       codec->num_decoding_parameters = atoi(pos);
       if(codec->num_decoding_parameters)
         codec->decoding_parameters =
-          malloc(codec->num_decoding_parameters *
+          calloc(codec->num_decoding_parameters,
                  sizeof(lqt_parameter_info_t));
       else
         codec->decoding_parameters =
@@ -534,6 +604,22 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   return ret;
   }
 
+static void write_help_string(FILE * output, char * help_string)
+  {
+  int i, imax;
+  fprintf(output, "%s", help_string_key);
+
+  imax = strlen(help_string);
+  for(i = 0; i < imax; i++)
+    {
+    if(help_string[i] == '\n')
+      fprintf(output, "\\n");
+    else
+      fprintf(output, "%c", help_string[i]);
+    }
+  fprintf(output, "\n");
+  }
+
 static void write_parameter_info(FILE * output,
                                  const lqt_parameter_info_t * info,
                                  int encode)
@@ -549,6 +635,9 @@ static void write_parameter_info(FILE * output,
     {
     case LQT_PARAMETER_INT:
       tmp = type_int;
+      break;
+    case LQT_PARAMETER_FLOAT:
+      tmp = type_float;
       break;
     case LQT_PARAMETER_STRING:
       tmp = type_string;
@@ -572,12 +661,22 @@ static void write_parameter_info(FILE * output,
     case LQT_PARAMETER_INT:
       fprintf(output, "%s%d\n", value_key, info->val_default.val_int);
 
-      if(info->val_min < info->val_max)
+      if(info->val_min.val_int < info->val_max.val_int)
         {
-        fprintf(output, "%s%d\n", min_value_key, info->val_min);
-        fprintf(output, "%s%d\n", max_value_key, info->val_max);
+        fprintf(output, "%s%d\n", min_value_key, info->val_min.val_int);
+        fprintf(output, "%s%d\n", max_value_key, info->val_max.val_int);
         }
 
+      break;
+    case LQT_PARAMETER_FLOAT:
+      fprintf(output, "%s%f\n", value_key, info->val_default.val_float);
+
+      if(info->val_min.val_float < info->val_max.val_float)
+        {
+        fprintf(output, "%s%f\n", min_value_key, info->val_min.val_float);
+        fprintf(output, "%s%f\n", max_value_key, info->val_max.val_float);
+        }
+      fprintf(output, "%s%d\n", num_digits_key, info->num_digits);
       break;
     case LQT_PARAMETER_STRING:
       fprintf(output, "%s%s\n", value_key, info->val_default.val_string);
@@ -597,6 +696,11 @@ static void write_parameter_info(FILE * output,
       break;
     }
 
+  if(info->help_string)
+    {
+    write_help_string(output, info->help_string);
+    }
+  
   fprintf(output, "%s\n", end_parameter_key);
     
   }

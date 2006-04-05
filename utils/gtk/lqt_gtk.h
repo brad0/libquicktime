@@ -19,11 +19,11 @@ typedef struct
   lqt_parameter_info_t * parameter_info;
 
   int selected;
-  
+  GtkTooltips * tooltips;
   } LqtGtkParameterWidget;
 
 LqtGtkParameterWidget *
-lqtgtk_create_parameter_widget(lqt_parameter_info_t * info);
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips);
 
 void lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget*);
 
@@ -45,7 +45,7 @@ typedef struct
 
   lqt_parameter_info_t * parameter_info;
   int num_parameters;
-  
+  GtkTooltips * tooltips;
   } LqtGtkCodecConfigWidget;
 
 LqtGtkCodecConfigWidget *

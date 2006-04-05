@@ -10,13 +10,12 @@ static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_png[] =
   {
      { 
-       "png_compression_level",
-       "Compression Level",
-       LQT_PARAMETER_INT,
-       { 9 },
-       0,
-       9,
-       (char**)0
+       name: "png_compression_level",
+       real_name: "Compression Level",
+       type: LQT_PARAMETER_INT,
+       val_default: { val_int: 9 },
+       val_min:     { val_int: 0},
+       val_max:     { val_int: 9},
      },
      { /* End of parameters */ }
   };

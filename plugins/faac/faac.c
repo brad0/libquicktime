@@ -69,24 +69,29 @@ static int encode_frame(quicktime_t *file,
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t * trak = track_map->track;
-  
   /* Normalize input to 16 bit int */
 
   imax = codec->sample_buffer_size * track_map->channels;
 
   for(i = 0; i < imax; i++)
+    {
     codec->sample_buffer[i] *= 32767.0;
+    }
   
   /* Encode this frame */
+  //  fprintf(stderr, "Encode frame...%d\n", codec->sample_buffer_size);
   bytes_encoded = faacEncEncode(codec->enc,
                                 (int32_t*)codec->sample_buffer,
                                 codec->sample_buffer_size * track_map->channels,
                                 codec->chunk_buffer,
                                 codec->chunk_buffer_size);
-  
+  //  fprintf(stderr, "Encode frame done\n");
+
+  codec->sample_buffer_size = 0;
+    
   if(bytes_encoded <= 0)
     {
-    fprintf(stderr, "Encoded %d bytes\n", bytes_encoded);
+    //    fprintf(stderr, "Encoded %d bytes\n", bytes_encoded);
     return 0;
     }
   
@@ -105,7 +110,6 @@ static int encode_frame(quicktime_t *file,
                                  bytes_encoded);
   
   lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame);
-  codec->sample_buffer_size = 0;
   
   return 1;
   }
@@ -130,7 +134,8 @@ static int encode(quicktime_t *file,
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t * trak = track_map->track;
-    
+
+  
   if(!codec->initialized)
     {
     lqt_init_vbr_audio(file, track);
@@ -158,13 +163,22 @@ static int encode(quicktime_t *file,
       {
       fprintf(stderr, "Setting encode parameters failed, check settings\n");
       }
-
+    else
+      fprintf(stderr, "faac initialized, input_samples: %ld, output_bytes: %ld\n",
+              input_samples, output_bytes);
+    
     /* Allocate buffers */
 
     codec->samples_per_frame = input_samples / track_map->channels;
+
     codec->sample_buffer =
       malloc(codec->samples_per_frame * track_map->channels * sizeof(float));
-
+#if 0
+    for(samples_read = 0;
+        samples_read < codec->samples_per_frame * track_map->channels;
+        samples_read++)
+      codec->sample_buffer[samples_read] = 1.0;
+#endif
     codec->chunk_buffer_size = output_bytes;
     codec->chunk_buffer = malloc(codec->chunk_buffer_size);
     
@@ -199,6 +213,9 @@ static int encode(quicktime_t *file,
   samples_read = 0;
 
   input = (float*)_input;
+  
+  //  fprintf(stderr, "faac: Encoding %ld samples\n", samples);
+  
   
   while(samples_read < samples)
     {

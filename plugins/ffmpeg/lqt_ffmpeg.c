@@ -36,272 +36,243 @@
 
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
+  
+#define ENCODE_PARAM_AUDIO                     \
+  {                                            \
+    name:      "bit_rate_audio",                 \
+    real_name: "Bit rate (kbps)",                \
+    type:      LQT_PARAMETER_INT,                \
+    val_default: { val_int: 128 },               \
+  }
 
-#define ENCODE_PARAM_AUDIO \
-	{\
-	  "bit_rate_audio",\
-          "Bit rate (kbps)",\
-	  LQT_PARAMETER_INT,\
-          { 128 },\
-          0,\
-          0,\
-          (char**)0\
-	}
 
 #define ENCODE_PARAM_VIDEO_GENERAL \
-        { \
-        "general", \
-        "General", \
-        LQT_PARAMETER_SECTION, \
-        }, \
-        {\
-          "flags_gray",\
-          "Gray scale only mode",\
-          LQT_PARAMETER_INT,\
-          { 0 },\
-          0,\
-          1,\
-          (char**)0\
-        }, \
-	{ \
-	"strict_std_compliance", \
-	"Standard compilance", \
-	LQT_PARAMETER_INT, \
-	{ 0 }, \
-	0, \
-	2, \
-	(char**)0 \
-	}, \
-        {  \
-        "aspect_ratio_info", \
-        "Aspect Ratio", \
-	LQT_PARAMETER_STRINGLIST, \
-        {val_string:  "Square" }, \
-        0, \
-        0, \
-        (char*[]){ "Square", "4:3", "16:9", (char*)0 } \
-        }
-  
+  {                                           \
+    name:      "general",                       \
+    real_name: "General",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+  {                                         \
+    name:      "flags_gray",                      \
+    real_name: "Gray scale only mode",          \
+    type:      LQT_PARAMETER_INT,\
+    val_default:  { val_int: 0 },              \
+    val_min:      { val_int: 0 },                        \
+    val_max:      { val_int: 1 },                      \
+  }, \
+  {                                         \
+    name:      "strict_std_compliance", \
+    real_name: "Standard compilance", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 },         \
+    val_min:     { val_int: 0 },      \
+    val_max:     { val_int: 2 },    \
+  }
+
 #define ENCODE_PARAM_VIDEO_BITRATE \
-        { \
-        "bitrate", \
-        "Bitrate", \
-        LQT_PARAMETER_SECTION, \
-        }, \
-        {\
-	  "bit_rate_video",\
-          "Bit rate (kbps)",\
-	  LQT_PARAMETER_INT,\
-          { 800 },\
-          0,\
-          0,\
-          (char**)0\
-	},\
-        { \
-          "bit_rate_tolerance",\
-          "Bitrate Tolerance (kbps)\n",\
-          LQT_PARAMETER_INT,\
-          { 4000 } \
-        }, \
-        { \
-          "rc_min_rate",\
-          "Minimum bitrate (kbps)\n",\
-          LQT_PARAMETER_INT,\
-          { 0 } \
-        }, \
-        { \
-          "rc_max_rate",\
-          "Maximum bitrate (kbps)\n",\
-          LQT_PARAMETER_INT,\
-          { 0 } \
-        }, \
-        { \
-        "qcompress", \
-        "Qscale change between easy and hard scenes", \
-        LQT_PARAMETER_INT, \
-        { 50 }, \
-        0, \
-        100, \
-        (char**)0 \
-        }, \
-        { \
-        "qblur", \
-        "Qscale smoothing over time", \
-        LQT_PARAMETER_INT, \
-        { 50 }, \
-        0, \
-        100, \
-        (char**)0 \
-        }
+  { \
+    name:      "bitrate", \
+    real_name: "Bitrate", \
+    type:      LQT_PARAMETER_SECTION, \
+  }, \
+  {\
+    name:      "bit_rate_video",\
+    real_name: "Bit rate (kbps)",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 800 },\
+  },                          \
+  { \
+    name:      "bit_rate_tolerance",\
+    real_name: "Bitrate Tolerance (kbps)\n",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 4000 } \
+  }, \
+  { \
+    name:        "rc_min_rate",\
+    real_name:   "Minimum bitrate (kbps)\n",\
+    type:        LQT_PARAMETER_INT,\
+    val_default: { val_int: 0 }   \
+  }, \
+  { \
+    name:      "rc_max_rate",\
+    real_name: "Maximum bitrate (kbps)\n",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 0 } \
+  }, \
+  { \
+    name:      "qcompress", \
+    real_name: "Qscale change between easy and hard scenes", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 50 }, \
+    val_min:     { val_int: 0 },  \
+    val_max:     { val_int: 100 },              \
+  }, \
+  { \
+    name:      "qblur", \
+    real_name: "Qscale smoothing over time", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 50 }, \
+    val_min:     { val_int: 0 },  \
+    val_max:     { val_int: 100 },              \
+  }
   
 #define ENCODE_PARAM_VIDEO_VBR \
-        { \
-        "vbr", \
-        "VBR Options", \
-        LQT_PARAMETER_SECTION, \
-        }, \
-        {\
-          "qscale", \
-          "VBR quantizer scale (0 = CBR)", \
-          LQT_PARAMETER_INT, \
-          { 0 }, \
-          0, \
-          31 \
-        }, \
-        {\
-          "qmin", \
-          "min quantiser scale (VBR)", \
-          LQT_PARAMETER_INT, \
-          { 2 }, \
-          0, \
-          31 \
-        }, \
-        {\
-          "qmax", \
-          "max quantiser scale (VBR)", \
-          LQT_PARAMETER_INT, \
-          { 31 }, \
-          0, \
-          31 \
-        }, \
-        {\
-          "mb_qmin", \
-          "min macroblock quantiser scale (VBR)", \
-          LQT_PARAMETER_INT, \
-          { 2 }, \
-          0, \
-          31 \
-        }, \
-        {\
-          "mb_qmax", \
-          "max macroblock quantiser scale (VBR)", \
-          LQT_PARAMETER_INT, \
-          { 31 }, \
-          0, \
-          31 \
-        }, \
-        {\
-          "max_qdiff", \
-          "max difference between the quantiser scale (VBR)", \
-          LQT_PARAMETER_INT, \
-          { 3 }, \
-          0, \
-          31 \
-        } \
+  { \
+    name:      "vbr", \
+    real_name: "VBR Options", \
+    type:      LQT_PARAMETER_SECTION, \
+  }, \
+  {\
+    name:      "qscale", \
+    real_name: "VBR quantizer scale (0 = CBR)", \
+    type:        LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 31 },               \
+  }, \
+  {\
+    name:      "qmin", \
+    real_name: "min quantiser scale (VBR)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 2 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 31 },               \
+  }, \
+  {\
+    name:      "qmax", \
+    real_name: "max quantiser scale (VBR)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 31 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 31 },               \
+  }, \
+  {\
+    name:      "mb_qmin", \
+    real_name: "min macroblock quantiser scale (VBR)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 2 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 31 },               \
+  }, \
+  {\
+    name:      "mb_qmax", \
+    real_name: "max macroblock quantiser scale (VBR)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 31 }, \
+    val_min:     { val_int: 0 },  \
+    val_max:     { val_int: 31 }, \
+  }, \
+  {\
+    name:      "max_qdiff", \
+    real_name: "max difference between the quantiser scale (VBR)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 3 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 31 },               \
+  } \
 
 #define ENCODE_PARAM_VIDEO_TEMPORAL \
-        { \
-        "temporal_compression", \
-        "Temporal Compression", \
-        LQT_PARAMETER_SECTION \
-        }, \
-	{\
-	"me_method",\
-	"Motion estimation method",\
-	LQT_PARAMETER_STRINGLIST,\
-	{val_string: "Zero"},\
-        0, \
-        0, \
-	((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0})\
-	},\
-	{\
-	"mb_decision",\
-	"MB decision mode",\
-	LQT_PARAMETER_STRINGLIST,\
-	{val_string: "Simple"},\
-        0, \
-        0, \
-	((char *[]){"Simple", "Fewest bits", "Rate distoration", (char *)0})\
-	},\
-        { \
-        "gop_size", \
-        "GOP size (0 = intra only)", \
-        LQT_PARAMETER_INT, \
-        { val_int: 250 }, \
-        0, \
-        300, \
-        (char**)0 \
-        } \
+  { \
+    name:      "temporal_compression", \
+    real_name: "Temporal Compression", \
+    type:      LQT_PARAMETER_SECTION \
+  }, \
+  {\
+    name:      "me_method",\
+    real_name: "Motion estimation method",\
+    type:      LQT_PARAMETER_STRINGLIST,\
+    val_default: {val_string: "Zero"},\
+    stringlist_options: ((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0}) \
+  },                                                                 \
+  {\
+    name:      "mb_decision",\
+    real_name: "MB decision mode",\
+    type:      LQT_PARAMETER_STRINGLIST,\
+    val_default: {val_string: "Simple"},\
+    stringlist_options: ((char *[]){"Simple", "Fewest bits", "Rate distoration", (char *)0})\
+  },\
+  { \
+    name:      "gop_size", \
+    real_name: "GOP size (0 = intra only)", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 250 },   \
+    val_min:     { val_int: 0 },     \
+    val_max:     { val_int: 300 },   \
+  } \
  
 #define ENCODE_PARAM_VIDEO_MPEG4 \
-        { \
-        "mpeg4", \
-        "MPEG-4 Options", \
-        LQT_PARAMETER_SECTION \
-        }, \
-	{\
-	"flags_4mv",\
-	"Use four motion vector by macroblock",\
-	LQT_PARAMETER_INT,\
-	{ 0 },\
-	0,\
-	1,\
-	(char**)0\
-	}, \
-        { \
-        "flags_part", \
-        "Data partitioning mode", \
-        LQT_PARAMETER_INT, \
-        { 0 }, \
-        0, \
-        1, \
-        (char**)0 \
-        }
+  { \
+    name:      "mpeg4", \
+    real_name: "MPEG-4 Options", \
+    type:      LQT_PARAMETER_SECTION \
+  }, \
+  {\
+    name:      "flags_4mv",\
+    real_name: "Use four motion vector by macroblock",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 0 },\
+    val_min:     { val_int: 0 },                \
+    val_max:     { val_int: 1 },                \
+  },                                          \
+  { \
+    name:      "flags_part", \
+    real_name: "Data partitioning mode", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 },      \
+    val_min:     { val_int: 0 },      \
+    val_max:     { val_int: 1 },      \
+  }
 
 
 #define ENCODE_PARAM_VIDEO_H263P \
-        { \
-        "h263p", \
-        "H263+ Options", \
-        LQT_PARAMETER_SECTION \
-        }, \
-        { \
-        "flags_h263p_aic", \
-        "Advanced intra coding", \
-        LQT_PARAMETER_INT, \
-        { 0 }, \
-        0, \
-        1 \
-        }, \
-        { \
-        "flags_h263p_umv", \
-        "Unlimited Motion Vector", \
-        LQT_PARAMETER_INT, \
-        { 0 }, \
-        0, \
-        1 \
-        }
+  { \
+    name:      "h263p", \
+    real_name: "H263+ Options", \
+    type:      LQT_PARAMETER_SECTION \
+  }, \
+  { \
+    name:      "flags_h263p_aic", \
+    real_name: "Advanced intra coding", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 }, \
+    val_min:     { val_int: 0 }, \
+    val_max:     { val_int: 1 }, \
+  }, \
+  { \
+    name:      "flags_h263p_umv", \
+    real_name: "Unlimited Motion Vector", \
+    type:      LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 },      \
+    val_min:     { val_int: 0 },      \
+    val_max:     { val_int: 1 },      \
+  }
 
 #define DECODE_PARAM_AUDIO
 
 #define DECODE_PARAM_VIDEO \
-        {\
-	  "workaround_bugs",\
-	  "Enable bug worarounds",\
-	  LQT_PARAMETER_INT,\
-	  { 1 },\
-	  0,\
-	  1,\
-	  (char**)0\
-	},\
-        {\
-          "flags_gray",\
-          "Gray scale only mode",\
-          LQT_PARAMETER_INT,\
-          { 0 },\
-          0,\
-          1,\
-          (char**)0\
-        }, \
-        { \
-          "error_resilience", \
-          "Error resilience", \
-          LQT_PARAMETER_STRINGLIST, \
-          { val_string: "Careful" }, \
-          0, \
-          0, \
-          (char *[]){"None", "Careful", "Compilant", "Agressive", "Very Agressive", (char *)0 } \
-        }
+  {\
+    name:      "workaround_bugs",\
+    real_name: "Enable bug worarounds",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 1 },\
+    val_min:     { val_int: 0 },                \
+    val_max:     { val_int: 1 },                \
+  },\
+  {\
+    name:      "flags_gray",\
+    real_name: "Gray scale only mode",\
+    type:      LQT_PARAMETER_INT,\
+    val_default: { val_int: 0 },       \
+    val_min:     { val_int: 0 },       \
+    val_max:     { val_int: 1 },       \
+  }, \
+  { \
+    name:      "error_resilience", \
+    real_name: "Error resilience", \
+    type:      LQT_PARAMETER_STRINGLIST, \
+    val_default: { val_string: "Careful" }, \
+    stringlist_options: (char *[]){"None", "Careful", "Compilant", "Agressive", "Very Agressive", (char *)0 } \
+  }
 
 static lqt_parameter_info_static_t encode_parameters_video[] = {
   ENCODE_PARAM_VIDEO_GENERAL,
@@ -390,7 +361,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpegvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "mpg1",
 	  name: "Mpeg 1 Video",

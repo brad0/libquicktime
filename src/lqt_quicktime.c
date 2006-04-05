@@ -1750,6 +1750,15 @@ static void apply_default_parameters(quicktime_t * file,
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_int));
         break;
+      case LQT_PARAMETER_FLOAT:
+#ifndef NDEBUG
+        fprintf(stderr, "Setting Parameter %s to %f\n",
+                parameter_info[j].name,
+                parameter_info[j].val_default.val_float);
+#endif
+        codec->set_parameter(file, track, parameter_info[j].name,
+                             &(parameter_info[j].val_default.val_float));
+        break;
       case LQT_PARAMETER_STRING:
       case LQT_PARAMETER_STRINGLIST:
 #ifndef NDEBUG

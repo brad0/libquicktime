@@ -45,15 +45,19 @@ typedef struct
    *   These are only valid for numeric types and if val_min < val_max
    */
 
-  int val_min;
-  int val_max;
+  lqt_parameter_value_t val_min;
+  lqt_parameter_value_t val_max;
 
+  int num_digits; /*!< Number of digits for floating point parameters */
+    
   /*
    *  Possible options (only valid for LQT_STRINGLIST)
    *  NULL terminated
    */
   
   char ** stringlist_options;
+
+  char * help_string;
   
   } lqt_parameter_info_static_t;
 

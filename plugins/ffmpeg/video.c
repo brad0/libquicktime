@@ -114,12 +114,16 @@ static void delete_rows(unsigned char ** rows)
 int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
 {
 	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	
+          
+        
 	if(codec->com.init_enc)
-		avcodec_close(codec->com.ffcodec_enc);
+          avcodec_close(codec->com.ffcodec_enc);
 	if(codec->com.init_dec)
-		avcodec_close(codec->com.ffcodec_dec);
-
+          {
+          if(codec->com.ffcodec_dec->extradata)
+            free(codec->com.ffcodec_dec->extradata);
+          avcodec_close(codec->com.ffcodec_dec);
+          }
 	if(codec->frame_buffer) free(codec->frame_buffer);
 	if(codec->write_buffer) free(codec->write_buffer);
 	if(codec->read_buffer) free(codec->read_buffer);
@@ -202,8 +206,6 @@ int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
     }
   return LQT_COLORMODEL_NONE;
   }
-
-
 
 static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *codec,
                      int64_t frameno, int track)
@@ -341,6 +343,9 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   quicktime_ctab_t * ctab;
   int exact;
 
+  uint8_t * extradata = (uint8_t*)0;
+  int extradata_size = 0;
+  
   uint8_t * cpy_rows[3];
     
   height = quicktime_video_height(file, track);
@@ -360,8 +365,9 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
 
     if(codec->com.ffc_dec->id == CODEC_ID_SVQ3)
       {
-      codec->com.ffcodec_dec->extradata       = trak->mdia.minf.stbl.stsd.table[0].table_raw + 4;
-      codec->com.ffcodec_dec->extradata_size  = trak->mdia.minf.stbl.stsd.table[0].table_raw_size - 4;
+      extradata       = trak->mdia.minf.stbl.stsd.table[0].table_raw + 4;
+      extradata_size  = trak->mdia.minf.stbl.stsd.table[0].table_raw_size - 4;
+      
       fprintf(stderr, "Extradata: %d bytes\n", codec->com.ffcodec_dec->extradata_size);
       lqt_hexdump(codec->com.ffcodec_dec->extradata, codec->com.ffcodec_dec->extradata_size, 16);
       }
@@ -373,9 +379,12 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         fprintf(stderr, "No avcC atom present, decoding is likely to fail\n");
       else
         {
-        codec->com.ffcodec_dec->extradata = user_atom + 8;
-        codec->com.ffcodec_dec->extradata_size = user_atom_len - 8;
+        extradata = user_atom + 8;
+        extradata_size = user_atom_len - 8;
         }
+      fprintf(stderr, "Got avcc atom\n");
+      lqt_hexdump(codec->com.ffcodec_dec->extradata,
+                  codec->com.ffcodec_dec->extradata_size, 16);
       
       }
     else if(codec->com.ffc_dec->id == CODEC_ID_MPEG4)
@@ -385,17 +394,21 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
         fprintf(stderr, "Setting MPEG-4 extradata %d bytes\n", 
                 trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen);
         
-        codec->com.ffcodec_dec->extradata =
-          trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfig;
-        codec->com.ffcodec_dec->extradata_size =
-          trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen;
+        extradata = trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfig;
+        extradata_size = trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen;
         }
       else
         {
         fprintf(stderr, "No MPEG-4 extradata!!\n");
         }
       }
-    
+
+    if(extradata)
+      {
+      codec->com.ffcodec_dec->extradata = calloc(1, extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+      memcpy(codec->com.ffcodec_dec->extradata, extradata, extradata_size);
+      codec->com.ffcodec_dec->extradata_size = extradata_size;
+      }
     /* Add palette info */
     
     ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
@@ -478,9 +491,10 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
       if(buffer_size <= 0)
         return 0;
 #if 0
-      fprintf(stderr, "Frame size: %d\n", buffer_size);
-
       fprintf(stderr, "Decode video...");
+      fprintf(stderr, "Frame size: %d\n", buffer_size);
+      lqt_hexdump(codec->read_buffer, 16, 16);
+      
 #endif 
       if(avcodec_decode_video(codec->com.ffcodec_dec,
                               codec->frame,
@@ -544,13 +558,6 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     return 1;
     }
   
-#if 0
-  fprintf(stderr, "decode_video: internal %s, in: %s out: %s, row_span: %d\n",
-          avcodec_get_pix_fmt_name(codec->com.ffcodec_dec->pix_fmt),
-          lqt_colormodel_to_string(codec->lqt_colormodel),
-          lqt_colormodel_to_string(file->vtracks[track].color_model),
-          row_span);
-#endif         
   if(!codec->do_imgconvert)
     {
     cpy_rows[0] = codec->frame->data[0];
@@ -558,15 +565,16 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
     cpy_rows[2] = codec->frame->data[2];
 
     lqt_rows_copy(row_pointers, cpy_rows, width, height, codec->frame->linesize[0], codec->frame->linesize[1],
-                  file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv, vtrack->stream_cmodel);
+                  vtrack->stream_row_span, vtrack->stream_row_span_uv,
+                  vtrack->stream_cmodel);
     }
   else
     {
     //    fprintf(stderr, "img_convert %d...", codec->com.ffcodec_dec->pix_fmt);
     convert_image_decode(codec->frame, codec->com.ffcodec_dec->pix_fmt,
                          row_pointers, vtrack->stream_cmodel,
-                         width, height, file->vtracks[track].stream_row_span,
-                         file->vtracks[track].stream_row_span_uv);
+                         width, height, vtrack->stream_row_span,
+                         vtrack->stream_row_span_uv);
     }
   //  fprintf(stderr, "Done\n"); 
   codec->have_frame = 0;
@@ -574,10 +582,11 @@ int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
   }
 
 int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
-                        int track)
+                            int track)
 {
         quicktime_esds_t * esds;
         int result = 0;
+        int pixel_width, pixel_height;
 	int bytes_encoded;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
@@ -609,14 +618,16 @@ int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                 
                 codec->com.ffcodec_enc->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
 
-                                
+
+                lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
+                codec->com.ffcodec_enc->sample_aspect_ratio.num = pixel_width;
+                codec->com.ffcodec_enc->sample_aspect_ratio.den = pixel_height;
+                
 #define SP(x) codec->com.ffcodec_enc->x = codec->com.params.x
 
                 /* General options */
 
                 SP(strict_std_compliance);
-                SP(sample_aspect_ratio.num);
-                SP(sample_aspect_ratio.den);
                 SP(flags);
 		                
                 /* Bitrate options */
@@ -761,22 +772,7 @@ static int set_parameter_video(quicktime_t *file,
 
 	FLAGPARM("flags_gray", CODEC_FLAG_GRAY)
 	INTPARM(strict_std_compliance, 1)
-
-	if(!strcasecmp(key, "aspect_ratio_info")) {
-		if(!strcasecmp((char *)value, "Square")) {
-			codec->com.params.sample_aspect_ratio.num = 1;
-			codec->com.params.sample_aspect_ratio.den = 1;
-		} else if(!strcasecmp((char *)value, "4:3")) {
-                        codec->com.params.sample_aspect_ratio.num = 4;
-                        codec->com.params.sample_aspect_ratio.den = 3;
-		} else if(!strcasecmp((char *)value, "16:9")) {
-                        codec->com.params.sample_aspect_ratio.num = 16;
-                        codec->com.params.sample_aspect_ratio.den = 9;
-		}
-        return 0;
-	}
-
-          
+        
         /********************
           Bitrate options
         *********************/

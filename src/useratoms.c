@@ -121,4 +121,5 @@ void quicktime_write_user_atoms(quicktime_t * file,
     
     quicktime_write_data(file, u->atoms[i], len);
     }
+  
   }

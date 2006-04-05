@@ -1,3 +1,4 @@
+#include <locale.h>
 #include <config.h>
 #include <quicktime/lqt.h>
 
@@ -148,9 +149,12 @@ void destroy_main_window(MainWindow * w)
 int main(int argc, char ** argv)
   {
   MainWindow * main_window;
-
+    
   gtk_init(&argc, &argv);
-  
+
+  /* No, we don't like commas as decimal separators */
+  setlocale(LC_NUMERIC, "C");
+
   main_window = create_main_window();
   update_main_window(main_window);
   

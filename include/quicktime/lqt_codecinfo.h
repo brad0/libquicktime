@@ -66,6 +66,7 @@ extern "C" {
 typedef enum
   {
     LQT_PARAMETER_INT,     /*!< Integer */
+    LQT_PARAMETER_FLOAT,   /*!< FLoat */
     LQT_PARAMETER_STRING,  /*!< String  */
     LQT_PARAMETER_STRINGLIST, /*!< String with fixed set of options */
     /* This dummy type is used to separate sections (real_name will be on tab-label) */
@@ -82,6 +83,7 @@ typedef union
   {
   int val_int; /*!< For integer parameters */
   char * val_string; /*!< For string parameters */
+  float val_float; /*< For floating point parameters */
   } lqt_parameter_value_t;
 
 /** \ingroup codec_parameters
@@ -105,16 +107,20 @@ typedef struct
    *   Minimum and maximum values:
    *   These are only valid for numeric types and if val_min < val_max
    */
+  
+  lqt_parameter_value_t val_min; /*!< Minimum value for integer or float parameter */
+  lqt_parameter_value_t val_max; /*!< Maximum value for integer or float parameter */
 
-  int val_min; /*!< Minimum value for integer parameter */
-  int val_max; /*!< Maximum value for integer parameter */
-
+  int num_digits; /*!< Number of digits for floating point parameters */
+  
   /*
    *  Possible options (only valid for LQT_STRINGLIST)
    */
   
   int num_stringlist_options; /*!< Number of options for \ref LQT_PARAMETER_STRINGLIST */
   char ** stringlist_options; /*!< Options for \ref LQT_PARAMETER_STRINGLIST */
+
+  char * help_string; /*!< Detailed help about the parameter */
   
   } lqt_parameter_info_t;
 
