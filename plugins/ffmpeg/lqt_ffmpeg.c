@@ -30,6 +30,7 @@
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
 #include "ffmpeg.h"
+#include "params.h"
 
 #define MAX_FOURCCS 30
 #define MAX_WAV_IDS 4
@@ -45,268 +46,196 @@ int ffmpeg_num_video_codecs = -1;
     val_default: { val_int: 128 },               \
   }
 
-
-#define ENCODE_PARAM_VIDEO_GENERAL \
+#define ENCODE_PARAM_VIDEO_RATECONTROL \
   {                                           \
-    name:      "general",                       \
-    real_name: "General",                     \
+    name:      "rate_control",                       \
+    real_name: "Rate control",                     \
     type:      LQT_PARAMETER_SECTION,         \
   },                                        \
-  {                                         \
-    name:      "flags_gray",                      \
-    real_name: "Gray scale only mode",          \
-    type:      LQT_PARAMETER_INT,\
-    val_default:  { val_int: 0 },              \
-    val_min:      { val_int: 0 },                        \
-    val_max:      { val_int: 1 },                      \
-  }, \
-  {                                         \
-    name:      "strict_std_compliance", \
-    real_name: "Standard compilance", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 0 },         \
-    val_min:     { val_int: 0 },      \
-    val_max:     { val_int: 2 },    \
-  }
+    PARAM_BITRATE_VIDEO,                    \
+    PARAM_BITRATE_TOLERANCE,                \
+    PARAM_RC_MIN_RATE,                      \
+    PARAM_RC_MAX_RATE,                      \
+    PARAM_RC_BUFFER_SIZE,                   \
+    PARAM_RC_INITIAL_COMPLEX,               \
+    PARAM_RC_INITIAL_BUFFER_OCCUPANCY
 
-#define ENCODE_PARAM_VIDEO_BITRATE \
-  { \
-    name:      "bitrate", \
-    real_name: "Bitrate", \
-    type:      LQT_PARAMETER_SECTION, \
-  }, \
-  {\
-    name:      "bit_rate_video",\
-    real_name: "Bit rate (kbps)",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 800 },\
-  },                          \
-  { \
-    name:      "bit_rate_tolerance",\
-    real_name: "Bitrate Tolerance (kbps)\n",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 4000 } \
-  }, \
-  { \
-    name:        "rc_min_rate",\
-    real_name:   "Minimum bitrate (kbps)\n",\
-    type:        LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 }   \
-  }, \
-  { \
-    name:      "rc_max_rate",\
-    real_name: "Maximum bitrate (kbps)\n",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 } \
-  }, \
-  { \
-    name:      "qcompress", \
-    real_name: "Qscale change between easy and hard scenes", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 50 }, \
-    val_min:     { val_int: 0 },  \
-    val_max:     { val_int: 100 },              \
-  }, \
-  { \
-    name:      "qblur", \
-    real_name: "Qscale smoothing over time", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 50 }, \
-    val_min:     { val_int: 0 },  \
-    val_max:     { val_int: 100 },              \
-  }
-  
-#define ENCODE_PARAM_VIDEO_VBR \
-  { \
-    name:      "vbr", \
-    real_name: "VBR Options", \
-    type:      LQT_PARAMETER_SECTION, \
-  }, \
-  {\
-    name:      "qscale", \
-    real_name: "VBR quantizer scale (0 = CBR)", \
-    type:        LQT_PARAMETER_INT, \
-    val_default: { val_int: 0 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 31 },               \
-  }, \
-  {\
-    name:      "qmin", \
-    real_name: "min quantiser scale (VBR)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 2 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 31 },               \
-  }, \
-  {\
-    name:      "qmax", \
-    real_name: "max quantiser scale (VBR)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 31 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 31 },               \
-  }, \
-  {\
-    name:      "mb_qmin", \
-    real_name: "min macroblock quantiser scale (VBR)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 2 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 31 },               \
-  }, \
-  {\
-    name:      "mb_qmax", \
-    real_name: "max macroblock quantiser scale (VBR)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 31 }, \
-    val_min:     { val_int: 0 },  \
-    val_max:     { val_int: 31 }, \
-  }, \
-  {\
-    name:      "max_qdiff", \
-    real_name: "max difference between the quantiser scale (VBR)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 3 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 31 },               \
-  } \
+#define ENCODE_PARAM_VIDEO_QUANTIZER_I \
+  {                                           \
+    name:      "quantizer",                       \
+    real_name: "Quantizer",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_QMIN,                             \
+    PARAM_QMAX,                             \
+    PARAM_MAX_QDIFF,                        \
+    PARAM_FLAG_QSCALE,                      \
+    PARAM_QCOMPRESS,                        \
+    PARAM_QBLUR,                            \
+    PARAM_QUANTIZER_NOISE_SHAPING,          \
+    PARAM_FLAG_TRELLIS_QUANT
 
-#define ENCODE_PARAM_VIDEO_TEMPORAL \
-  { \
-    name:      "temporal_compression", \
-    real_name: "Temporal Compression", \
-    type:      LQT_PARAMETER_SECTION \
-  }, \
-  {\
-    name:      "me_method",\
-    real_name: "Motion estimation method",\
-    type:      LQT_PARAMETER_STRINGLIST,\
-    val_default: {val_string: "Zero"},\
-    stringlist_options: ((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0}) \
-  },                                                                 \
-  {\
-    name:      "mb_decision",\
-    real_name: "MB decision mode",\
-    type:      LQT_PARAMETER_STRINGLIST,\
-    val_default: {val_string: "Simple"},\
-    stringlist_options: ((char *[]){"Simple", "Fewest bits", "Rate distoration", (char *)0})\
-  },\
-  { \
-    name:      "gop_size", \
-    real_name: "GOP size (0 = intra only)", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 250 },   \
-    val_min:     { val_int: 0 },     \
-    val_max:     { val_int: 300 },   \
-  } \
- 
-#define ENCODE_PARAM_VIDEO_MPEG4 \
-  { \
-    name:      "mpeg4", \
-    real_name: "MPEG-4 Options", \
-    type:      LQT_PARAMETER_SECTION \
-  }, \
-  {\
-    name:      "flags_4mv",\
-    real_name: "Use four motion vector by macroblock",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 },\
-    val_min:     { val_int: 0 },                \
-    val_max:     { val_int: 1 },                \
-  },                                          \
-  { \
-    name:      "flags_part", \
-    real_name: "Data partitioning mode", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 0 },      \
-    val_min:     { val_int: 0 },      \
-    val_max:     { val_int: 1 },      \
-  }
+#define ENCODE_PARAM_VIDEO_QUANTIZER_IP \
+  ENCODE_PARAM_VIDEO_QUANTIZER_I,               \
+  PARAM_I_QUANT_FACTOR,                         \
+  PARAM_I_QUANT_OFFSET
+
+#define ENCODE_PARAM_VIDEO_QUANTIZER_IPB \
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP,        \
+  PARAM_B_QUANT_FACTOR,                   \
+  PARAM_B_QUANT_OFFSET
+
+#define ENCODE_PARAM_VIDEO_FRAMETYPES_IP \
+  {                                           \
+    name:      "frame_types",                       \
+    real_name: "Frame types",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+  PARAM_GOP_SIZE,                      \
+  PARAM_SCENE_CHANGE_THESHOLD,       \
+  PARAM_SCENECHANGE_FACTOR,        \
+  PARAM_FLAG_CLOSED_GOP,         \
+  PARAM_FLAG2_STRICT_GOP
+
+#define ENCODE_PARAM_VIDEO_FRAMETYPES_IPB \
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,        \
+  PARAM_MAX_B_FRAMES,                 \
+  PARAM_B_FRAME_STRATEGY
+
+#define ENCODE_PARAM_VIDEO_ME \
+  {                                           \
+    name:      "motion_estimation",                       \
+    real_name: "Motion estimation",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_ME_METHOD,                        \
+    PARAM_ME_CMP,\
+    PARAM_ME_CMP_CHROMA,\
+    PARAM_ME_RANGE,\
+    PARAM_ME_THRESHOLD,\
+    PARAM_MB_DECISION,\
+    PARAM_DIA_SIZE
+
+#define ENCODE_PARAM_VIDEO_ME_PRE \
+  {                                           \
+    name:      "motion_estimation",                       \
+    real_name: "ME pre-pass",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_PRE_ME,\
+    PARAM_ME_PRE_CMP,\
+    PARAM_ME_PRE_CMP_CHROMA,\
+    PARAM_PRE_DIA_SIZE
+
+#define ENCODE_PARAM_VIDEO_QPEL                 \
+  {                                           \
+    name:      "qpel_motion_estimation",                       \
+    real_name: "Qpel ME",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_FLAG_QPEL, \
+    PARAM_ME_SUB_CMP,\
+    PARAM_ME_SUB_CMP_CHROMA,\
+    PARAM_ME_SUBPEL_QUALITY
 
 
-#define ENCODE_PARAM_VIDEO_H263P \
-  { \
-    name:      "h263p", \
-    real_name: "H263+ Options", \
-    type:      LQT_PARAMETER_SECTION \
-  }, \
-  { \
-    name:      "flags_h263p_aic", \
-    real_name: "Advanced intra coding", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 0 }, \
-    val_min:     { val_int: 0 }, \
-    val_max:     { val_int: 1 }, \
-  }, \
-  { \
-    name:      "flags_h263p_umv", \
-    real_name: "Unlimited Motion Vector", \
-    type:      LQT_PARAMETER_INT, \
-    val_default: { val_int: 0 },      \
-    val_min:     { val_int: 0 },      \
-    val_max:     { val_int: 1 },      \
-  }
+#define ENCODE_PARAM_VIDEO_MASKING \
+  {                                \
+    name:      "masking",                       \
+    real_name: "Masking",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_LUMI_MASKING, \
+    PARAM_DARK_MASKING, \
+    PARAM_TEMPORAL_CPLX_MASKING, \
+    PARAM_SPATIAL_CPLX_MASKING, \
+    PARAM_BORDER_MASKING, \
+    PARAM_P_MASKING,                                       \
+    PARAM_FLAG_NORMALIZE_AQP
+
+#define ENCODE_PARAM_VIDEO_MISC \
+  {                                           \
+    name:      "misc",                       \
+    real_name: "Misc",                     \
+    type:      LQT_PARAMETER_SECTION,         \
+  },                                        \
+    PARAM_STRICT_STANDARD_COMPLIANCE,       \
+    PARAM_NOISE_REDUCTION, \
+    PARAM_FLAG_GRAY, \
+    PARAM_FLAG_BITEXACT
+    
+
 
 #define DECODE_PARAM_AUDIO
 
 #define DECODE_PARAM_VIDEO \
-  {\
-    name:      "workaround_bugs",\
-    real_name: "Enable bug worarounds",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 1 },\
-    val_min:     { val_int: 0 },                \
-    val_max:     { val_int: 1 },                \
-  },\
-  {\
-    name:      "flags_gray",\
-    real_name: "Gray scale only mode",\
-    type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 },       \
-    val_min:     { val_int: 0 },       \
-    val_max:     { val_int: 1 },       \
-  }, \
-  { \
-    name:      "error_resilience", \
-    real_name: "Error resilience", \
-    type:      LQT_PARAMETER_STRINGLIST, \
-    val_default: { val_string: "Careful" }, \
-    stringlist_options: (char *[]){"None", "Careful", "Compilant", "Agressive", "Very Agressive", (char *)0 } \
-  }
-
-static lqt_parameter_info_static_t encode_parameters_video[] = {
-  ENCODE_PARAM_VIDEO_GENERAL,
-  ENCODE_PARAM_VIDEO_BITRATE,
-  ENCODE_PARAM_VIDEO_VBR,
-  { /* End of parameters */ }
-};
-
-static lqt_parameter_info_static_t encode_parameters_mpegvideo[] = {
-  ENCODE_PARAM_VIDEO_GENERAL,
-  ENCODE_PARAM_VIDEO_BITRATE,
-  ENCODE_PARAM_VIDEO_VBR,
-  ENCODE_PARAM_VIDEO_TEMPORAL,
-  { /* End of parameters */ }
-};
+  PARAM_FLAG_GRAY
 
 static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
-  ENCODE_PARAM_VIDEO_GENERAL,
-  ENCODE_PARAM_VIDEO_BITRATE,
-  ENCODE_PARAM_VIDEO_VBR,
-  ENCODE_PARAM_VIDEO_TEMPORAL,
-  ENCODE_PARAM_VIDEO_MPEG4,
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IPB,
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_IPB,
+  ENCODE_PARAM_VIDEO_ME,
+  PARAM_FLAG_GMC,
+  PARAM_FLAG_4MV,
+  ENCODE_PARAM_VIDEO_ME_PRE,
+  ENCODE_PARAM_VIDEO_QPEL,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_h263[] = {
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP,
+  ENCODE_PARAM_VIDEO_ME,
+  PARAM_FLAG_4MV,
+  ENCODE_PARAM_VIDEO_ME_PRE,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  PARAM_FLAG_OBMC,
   { /* End of parameters */ }
 };
 
 static lqt_parameter_info_static_t encode_parameters_h263p[] = {
-  ENCODE_PARAM_VIDEO_GENERAL,
-  ENCODE_PARAM_VIDEO_BITRATE,
-  ENCODE_PARAM_VIDEO_VBR,
-  ENCODE_PARAM_VIDEO_TEMPORAL,
-  ENCODE_PARAM_VIDEO_H263P,
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP,
+  ENCODE_PARAM_VIDEO_ME,
+  PARAM_FLAG_4MV,
+  ENCODE_PARAM_VIDEO_ME_PRE,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  PARAM_FLAG_H263P_AIV,
+  PARAM_FLAG_OBMC,
   { /* End of parameters */ }
 };
 
+static lqt_parameter_info_static_t encode_parameters_msmpeg4v3[] = {
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP,
+  ENCODE_PARAM_VIDEO_ME,
+  ENCODE_PARAM_VIDEO_ME_PRE,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  { /* End of parameters */ }
+};
+
+
+
+static lqt_parameter_info_static_t encode_parameters_dvvideo[] = {
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_mjpeg[] = {
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_I,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  { /* End of parameters */ }
+};
 
 static lqt_parameter_info_static_t encode_parameters_audio[] = {
   ENCODE_PARAM_AUDIO,
@@ -318,19 +247,7 @@ static lqt_parameter_info_static_t decode_parameters_video[] = {
   { /* End of parameters */ }
 };
 
-static lqt_parameter_info_static_t decode_parameters_mpeg4[] = {
-  DECODE_PARAM_VIDEO,
-  { /* End of parameters */ }
-};
-#if 0
-static lqt_parameter_info_static_t decode_parameters_rle[] = {
-  DECODE_PARAM_VIDEO,
-  { /* End of parameters */ }
-};
-#endif
-
 static lqt_parameter_info_static_t decode_parameters_audio[] = {
-  //  DECODE_PARAM_AUDIO,
   { /* End of parameters */ }
 };
 
@@ -373,7 +290,7 @@ struct CODECIDMAP codecidmap_v[] = {
           encoder: NULL,
           decoder: NULL,
           encode_parameters: encode_parameters_mpeg4,
-          decode_parameters: decode_parameters_mpeg4,
+          decode_parameters: decode_parameters_video,
 	  short_name: "mpg4",
 	  name: "Mpeg-4 Video",
 	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
@@ -387,8 +304,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpeg4,
-          decode_parameters: decode_parameters_mpeg4,
+          decode_parameters: decode_parameters_video,
 	  short_name: "msmpeg4v1",
 	  name: "MSMpeg 4v1",
 	  fourccs: {"DIV1", "div1", "MPG4", "mpg4", (char *)0},
@@ -399,8 +315,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpeg4,
-          decode_parameters: decode_parameters_mpeg4,
+          decode_parameters: decode_parameters_video,
 	  short_name: "msmpeg4v2",
 	  name: "MSMpeg 4v2",
 	  fourccs: {"DIV2", "div2", "MP42", "mp42", (char *)0},
@@ -411,8 +326,8 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_mpeg4,
-          decode_parameters: decode_parameters_mpeg4,
+          encode_parameters: encode_parameters_msmpeg4v3,
+          decode_parameters: decode_parameters_video,
 	  short_name: "msmpeg4v3",
 	  name: "MSMpeg 4v3",
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
@@ -440,7 +355,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_mpegvideo,
+          encode_parameters: encode_parameters_h263,
           decode_parameters: decode_parameters_video,
 	  short_name: "h263",
 	  name: "H263",
@@ -477,33 +392,17 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpegvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "i263",
 	  name: "I263",
 	  fourccs: {"I263", "i263", "viv1", "VIV1", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
         },
-#if 0
-	{
-          id: CODEC_ID_RV10,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_mpegvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "rv10",
-	  name: "Real Video 10",
-	  fourccs: {"RV10", "rv10", "RV13", "rv13", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-#endif
 	{
           id: CODEC_ID_SVQ1,
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpegvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "svq1",
 	  name: "Sorenson Video 1",
@@ -515,7 +414,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_mpegvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "svq3",
 	  name: "Sorenson Video 3",
@@ -527,7 +425,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_video,
+          encode_parameters: encode_parameters_mjpeg,
           decode_parameters: decode_parameters_video,
 	  short_name: "mjpg",
 	  name: "MJPEG",
@@ -540,8 +438,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
-          decode_parameters: decode_parameters_video,
 	  short_name: "8BPS",
 	  name: "Quicktime Planar RGB (8BPS)",
 	  fourccs: {"8BPS", (char *)0},
@@ -552,7 +448,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
           decode_parameters: decode_parameters_video,
 	  short_name: "indeo",
 	  name: "Intel Indeo 3",
@@ -564,8 +459,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
-          decode_parameters: decode_parameters_video,
 	  short_name: "rpza",
 	  name: "Apple Video",
 	  fourccs: {"rpza", (char *)0},
@@ -576,8 +469,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
-          decode_parameters: decode_parameters_video,
 	  short_name: "smc",
 	  name: "Apple Graphics",
 	  fourccs: {"smc ", (char *)0},
@@ -588,7 +479,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
           decode_parameters: decode_parameters_video,
 	  short_name: "cinepak",
 	  name: "Cinepak",
@@ -600,7 +490,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
           decode_parameters: decode_parameters_video,
 	  short_name: "cyuv",
 	  name: "Creative YUV",
@@ -612,8 +501,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
-          decode_parameters: decode_parameters_video,
 	  short_name: "rle",
 	  name: "RLE",
 	  fourccs: {"rle ", (char *)0},
@@ -624,8 +511,6 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          //          encode_parameters: encode_parameters_video,
-          decode_parameters: decode_parameters_video,
 	  short_name: "wrle",
 	  name: "Microsoft RLE",
 	  fourccs: {"WRLE", (char *)0},
@@ -636,7 +521,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_video,
+          encode_parameters: encode_parameters_dvvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "dv_ntsc",
 	  name: "DV (NTSC)",
@@ -648,7 +533,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  index: -1,
           encoder: NULL,
           decoder: NULL,
-          encode_parameters: encode_parameters_video,
+          encode_parameters: encode_parameters_dvvideo,
           decode_parameters: decode_parameters_video,
 	  short_name: "dv_pal",
 	  name: "DV (PAL)",

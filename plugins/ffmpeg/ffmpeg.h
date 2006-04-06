@@ -22,94 +22,14 @@
 #define QUICKTIME_FFMPEG_H
 
 #include <ffmpeg/avcodec.h>
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
-
-typedef struct
-  {
-  AVCodecContext params;
-  
-  /* Compression stuff */
-  AVCodecContext * ffcodec_enc;
-  AVCodec * ffc_enc;
-  int init_enc;
-
-  /* DeCompression stuff */
-  AVCodecContext * ffcodec_dec;
-  AVCodec * ffc_dec;
-  int init_dec;
-  } quicktime_ffmpeg_codec_common_t;
-
-
-typedef struct
-  {
-  quicktime_ffmpeg_codec_common_t com;
-
-  unsigned char * encode_buffer;
-  unsigned char * write_buffer;
-  int write_buffer_size;
-  
-  unsigned char * read_buffer;
-  int read_buffer_size;
-  int64_t last_frame;
-
-  AVFrame * frame;
-  uint8_t * frame_buffer;
-
-  /* Colormodel */
-
-  int do_imgconvert;
-    
-  //  unsigned char ** tmp_buffer;
-  unsigned char ** row_pointers;
-    
-  /* Quality must be passed to the individual frame */
-
-  int qscale;
-
-  AVPaletteControl palette;
-
-  /* We decode the first frame during the init() function to
-     obtain the stream colormodel */
-
-  int have_frame;
-
-  int encode_colormodel;
-
-  int write_global_header;
-  int global_header_written;
-  
-  } quicktime_ffmpeg_video_codec_t;
-
-
 
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
 void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
 
-int lqt_ffmpeg_decode_video(quicktime_t *file,
-                            unsigned char **row_pointers,
-                            int track);
+void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, char * key, void * value);
 
-int lqt_ffmpeg_encode_video(quicktime_t *file,
-                            unsigned char **row_pointers,
-                            int track);
-
-int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input, long samples, int track);
-
-int lqt_ffmpeg_decode_audio(quicktime_t * file, void * output, long samples, int track);
-
-int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *atrack);
-int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack);
-
-int lqt_ffmpeg_set_parameter_audio(quicktime_t *file, 
-                                   int track, 
-                                   char *key, 
-                                   void *value);
-
-int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat fmt, int * exact);
-enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int colormodel);
 
 
 #endif

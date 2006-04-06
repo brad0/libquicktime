@@ -1,3 +1,11 @@
+/*
+ *   IMPORTANT: To keep the mess at a reasonable level,
+ *   *all* parameters *must* appear in the same order as in
+ *   the AVCocecContext structure, except the flags, which come at the very end
+ */
+
+
+/** Rate control */
 #define PARAM_BITRATE_AUDIO                     \
   { \
     name:      "ff_bit_rate_audio",                 \
@@ -6,6 +14,7 @@
     val_default: { val_int: 128 },               \
   }
 
+/** Rate control */
 #define PARAM_BITRATE_VIDEO \
   { \
     name:      "ff_bit_rate_video",                 \
@@ -14,6 +23,7 @@
     val_default: { val_int: 800 },               \
   }
 
+/** Rate control */
 #define PARAM_BITRATE_TOLERANCE                 \
   {                                               \
     name:        "ff_bit_rate_tolerance",           \
@@ -24,15 +34,17 @@
  Unused for constant quantizer encoding" \
   }
 
+/** Motion estimation */
 #define PARAM_ME_METHOD                         \
   {\
-    name:      "me_method",\
+    name:      "ff_me_method",\
     real_name: "Motion estimation method",\
     type:      LQT_PARAMETER_STRINGLIST,\
     val_default: {val_string: "Zero"},\
-    stringlist_options: ((char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0}) \
-  },                                                                 \
+    stringlist_options: (char *[]){"Zero", "Phods", "Log", "X1", "Epzs", "Full", (char *)0} \
+  }
 
+/** Frame types */
 #define PARAM_GOP_SIZE                          \
   { \
     name:      "gop_size", \
@@ -43,6 +55,7 @@
     val_max:     { val_int: 300 },   \
   } \
 
+/** Quantizer */
 #define PARAM_QCOMPRESS \
   {                     \
     name:        "ff_qcompress",                   \
@@ -55,6 +68,7 @@
     help_string: "Amount of qscale change between easy & hard scenes" \
   }
 
+/** Quantizer */
 #define PARAM_QBLUR \
   {                 \
     name:        "ff_qblur",                     \
@@ -67,6 +81,7 @@
     help_string: "Amount of qscale smoothing over time",        \
   }
 
+/** Quantizer */
 #define PARAM_QMIN \
   {\
     name:      "ff_qmin", \
@@ -77,6 +92,7 @@
     val_max:     { val_int: 31 },               \
   }
 
+/** Quantizer */
 #define PARAM_QMAX                              \
   {\
     name:      "ff_qmax", \
@@ -87,6 +103,7 @@
     val_max:     { val_int: 31 },               \
   } \
 
+/** Quantizer */
 #define PARAM_MAX_QDIFF \
   {                     \
     name:      "ff_max_qdiff",                                  \
@@ -98,6 +115,7 @@
     help_string: "Maximum quantizer difference between frames"  \
   }
 
+/** Frame types */
 #define PARAM_MAX_B_FRAMES \
   {                                                                     \
     name:      "ff_max_b_frames",                                       \
@@ -109,6 +127,7 @@
     help_string: "Maximum number of B-frames between non B-frames"      \
   }
 
+/** Quantizer */
 #define PARAM_B_QUANT_FACTOR \
   {                                                                     \
     name:      "ff_b_quant_factor",                                     \
@@ -121,6 +140,7 @@
     help_string: "Quantizer factor between B-frames and non-B-frames",  \
   }
 
+/** Frame types */
 #define PARAM_B_FRAME_STRATEGY \
   {                                                             \
     name:        "ff_b_frame_strategy",                         \
@@ -174,6 +194,7 @@ consequences\n\
 -2: Allow non standarized experimental things" \
   }
 
+/** Quantizer */
 #define PARAM_B_QUANT_OFFSET \
   { \
     name:       "ff_b_quant_offset",                    \
@@ -183,37 +204,43 @@ consequences\n\
     val_min:     { val_float: 0.0 },                    \
     val_max:     { val_float: 31.0 },                   \
     num_digits:  2, \
-    help_string: "Quantizer factor between B-frames and non-B-frames",\
+    help_string: "Quantizer offset between B-frames and non-B-frames\n"\
+    "if > 0 then the last p frame quantizer will be used (q= lastp_q*factor+offset)\n"\
+    "if < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"\
   }
 
+/** Rate control */
 #define PARAM_RC_MIN_RATE \
   { \
     name:        "ff_rc_min_rate",\
-    real_name:   "Minimum bitrate (kbps)\n",\
+    real_name:   "Minimum bitrate (kbps)",\
     type:        LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 }   \
+    val_default: { val_int: 0 },                        \
     help_string: "Minimum bitrate (0 means arbitrary)", \
-  },
+  }
 
+/** Rate control */
 #define PARAM_RC_MAX_RATE \
   {                                             \
     name:      "ff_rc_max_rate",\
-    real_name: "Maximum bitrate (kbps)\n",\
+    real_name: "Maximum bitrate (kbps)",\
     type:      LQT_PARAMETER_INT,\
-    val_default: { val_int: 0 } \
+    val_default: { val_int: 0 },                        \
     help_string: "Maximum bitrate (0 means arbitrary)", \
-  },
+  }
 
+/** Rate control */
 #define PARAM_RC_BUFFER_SIZE \
   {                          \
     name:      "ff_rc_buffer_size",        \
     real_name: "RC buffer size",           \
     type:      LQT_PARAMETER_INT,          \
     val_default: { val_int: 0 },           \
-    help_string: "Becoder bitstream buffer size in kbits. When encoding " \
+    help_string: "Decoder bitstream buffer size in kbits. When encoding " \
 "with max and/or min bitrate, this must be specified." \
   }
 
+/** Rate control */
 #define PARAM_RC_BUFFER_AGGRESSIVITY \
   {                                           \
     name:       "ff_rc_buffer_aggressivity",    \
@@ -225,23 +252,25 @@ consequences\n\
     num_digits:  2, \
   }
 
+/** Quantizer */
 #define PARAM_I_QUANT_FACTOR \
   {                                                                     \
-    name:      "ff_I_quant_factor",                                     \
+    name:      "ff_i_quant_factor",                                     \
     real_name: "I quantizer factor",                                    \
     type:        LQT_PARAMETER_FLOAT,                                   \
     val_default: { val_float: -0.8 },                                 \
     val_min:     { val_float: -31.0 },                                \
     val_max:     { val_float: 31.0 },                                 \
     num_digits:  1, \
-    help_string: "Quantizer factor between P-frames and I-frames.\
-If > 0 then the last P frame quantizer will be used (q= lastp_q*factor+offset).\
-If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)",  \
+    help_string: "Quantizer factor between P-frames and I-frames.\n"\
+"If > 0 then the last P frame quantizer will be used (q= lastp_q*factor+offset).\n"\
+"If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n",  \
   }
 
+/** Quantizer */
 #define PARAM_I_QUANT_OFFSET \
   {                                                              \
-    name:      "ff_I_quant_offset",                              \
+    name:      "ff_i_quant_offset",                              \
     real_name: "I quantizer offset",                             \
     type:        LQT_PARAMETER_FLOAT,                            \
     val_default: { val_float:  0.0 },                            \
@@ -251,6 +280,7 @@ If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)",  \
     help_string: "Quantizer offset between P-frames and I-frames",  \
   }
 
+/** Rate control */
 #define PARAM_RC_INITIAL_COMPLEX \
   {                                                          \
     name:      "ff_rc_initial_cplx",                           \
@@ -262,64 +292,74 @@ If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)",  \
     num_digits:  1, \
   }
 
+/** Masking */
 #define PARAM_LUMI_MASKING                      \
   {                                             \
     name:        "ff_lumi_masking",               \
     real_name: "Luminance masking",      \
     type:      LQT_PARAMETER_FLOAT,                              \
     val_default: { val_float:  0.0 },                            \
-    val_min:     { val_float: -1.0 },                            \
+    val_min:     { val_float:  0.0 },                            \
     val_max:     { val_float:  1.0 },                          \
     num_digits:  2, \
-    help_string: "Luminance masking (0 = disabled)",      \
+    help_string: "Encode very bright image parts with reduced quality."\
+    " 0 means disabled, 0-0.3 is a sane range.",      \
   }
 
+/** Masking */
 #define PARAM_TEMPORAL_CPLX_MASKING                      \
   {                                             \
     name:        "ff_temporal_cplx_masking",               \
     real_name: "Temporary complexity masking",      \
     type:      LQT_PARAMETER_FLOAT,                              \
     val_default: { val_float:  0.0 },                            \
-    val_min:     { val_float: -1.0 },                            \
+    val_min:     { val_float:  0.0 },                            \
     val_max:     { val_float:  1.0 },                          \
     num_digits:  2, \
-    real_name: "Temporary complexity masking (0 = disabled)",      \
+    help_string: "Encode very fast moving image parts with reduced quality."\
+    " 0 means disabled.",      \
   }
 
+/** Masking */
 #define PARAM_SPATIAL_CPLX_MASKING             \
   {                                             \
     name:        "ff_spatial_cplx_masking",               \
     real_name: "Spatial complexity masking",      \
     type:      LQT_PARAMETER_FLOAT,                              \
     val_default: { val_float:  0.0 },                            \
-    val_min:     { val_float: -1.0 },                            \
+    val_min:     { val_float:  0.0 },                            \
     val_max:     { val_float:  1.0 },                          \
     num_digits:  2, \
-    real_name: "Spatial complexity masking (0 = disabled)",      \
+    help_string: "Encode very complex image parts with reduced quality."\
+    " 0 means disabled, 0-0.5 is a sane range.",                          \
   }
 
+/** Masking */
 #define PARAM_P_MASKING             \
   {                                             \
     name:        "ff_p_masking",               \
-    real_name: "P-block masking",      \
+    real_name: "Inter block masking",      \
     type:      LQT_PARAMETER_FLOAT,                              \
     val_default: { val_float:  0.0 },                            \
-    val_min:     { val_float: -1.0 },                            \
+    val_min:     { val_float:  0.0 },                            \
     val_max:     { val_float:  1.0 },                          \
     num_digits:  2, \
-    real_name: "P-block masking (0 = disabled)",      \
+    help_string: "Encode inter blocks with reduced quality (increases the quality of intra blocks). "\
+    " 0 means disabled, 1 will double the bits allocated for intra blocks.",      \
   }
 
+/** Masking */
 #define PARAM_DARK_MASKING             \
   {                                             \
     name:        "ff_dark_masking",               \
     real_name: "Darkness masking",      \
     type:      LQT_PARAMETER_FLOAT,                              \
     val_default: { val_float:  0.0 },                            \
-    val_min:     { val_float: -1.0 },                            \
+    val_min:     { val_float:  0.0 },                            \
     val_max:     { val_float:  1.0 },                            \
     num_digits:  2, \
-    real_name: "Darkness masking (0 = disabled)",              \
+    help_string: "Encode very dark image parts with reduced quality." \
+    "0 means disabled, 0-0.3 is a sane range.",                          \
   }
 
 #define PARAM_PREDICTION_METHOD                 \
@@ -331,6 +371,7 @@ If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)",  \
 stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
   }
 
+/** Quantizer */
 #define PARAM_MB_QMIN \
   {                   \
   name:      "ff_mb_qmin", \
@@ -341,6 +382,7 @@ stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
     val_max:     { val_int: 31 },\
   }
 
+/** Quantizer */
 #define PARAM_MB_QMAX \
   {                   \
   name:      "ff_mb_qmax", \
@@ -354,27 +396,30 @@ stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
 #define COMPARE_FUNCS (char*[]){ "SAD", "SSE", "SATD", "DCT", "PSNR", \
                         "BIT", "RD", "ZERO", "VSAD", "VSSE", "NSSE" }
 
-#define COMPARE_FUNCS_HELP "SAD: Sum of absolute differences\n\
-SSE: Sum of squared errors\n\
-SATD: Sum of absolute Hadamard transformed differences\n\
-DCT: Sum of absolute DCT transformed differences\n\
-PSNR: Sum of squared quantization errors (low quality)\n\
-BIT: Number of bits needed for the block\n\
-RD: Rate distortion optimal (slow)\n\
-ZERO: 0\n\
-VSAD: Sum of absolute vertical differences\n\
-VSSE: Sum of squared vertical differences\n\
-NSSE: Noise preserving sum of squared differences"
+#define COMPARE_FUNCS_HELP "SAD: Sum of absolute differences\n"\
+"SSE: Sum of squared errors\n"\
+"SATD: Sum of absolute Hadamard transformed differences\n"\
+"DCT: Sum of absolute DCT transformed differences\n"\
+"PSNR: Sum of squared quantization errors (low quality)\n"\
+"BIT: Number of bits needed for the block\n"\
+"RD: Rate distortion optimal (slow)\n"\
+"ZERO: 0\n"\
+"VSAD: Sum of absolute vertical differences\n"\
+"VSSE: Sum of squared vertical differences\n"\
+"NSSE: Noise preserving sum of squared differences"
 
+/** Motion estimation */
 #define PARAM_ME_CMP \
   {\
     name: "ff_me_cmp",                          \
     real_name: "ME compare function",           \
-    type:  LQT_PARAMETER_STRING,                \
+    type:  LQT_PARAMETER_STRINGLIST,                \
     val_default: { val_string: "SAD" },         \
     stringlist_options: COMPARE_FUNCS,          \
-    help_string: "Motion estimation compare function.\n"COMPARE_FUNCS_HELP
+    help_string: "Motion estimation compare function.\n"COMPARE_FUNCS_HELP \
+  }
 
+/** Motion estimation */
 #define PARAM_ME_CMP_CHROMA \
   { \
     name: "ff_me_cmp_chroma",                 \
@@ -385,16 +430,18 @@ NSSE: Noise preserving sum of squared differences"
     val_max:     { val_int: 1 },              \
   }
 
+/** Motion estimation */
 #define PARAM_ME_SUB_CMP                        \
   {\
     name: "ff_me_sub_cmp",                          \
     real_name: "Subpixel ME compare function",           \
-    type:  LQT_PARAMETER_STRING,                \
+    type:  LQT_PARAMETER_STRINGLIST,                \
     val_default: { val_string: "SAD" },         \
     stringlist_options: COMPARE_FUNCS,          \
     help_string: "Subpixel motion estimation compare function.\n"COMPARE_FUNCS_HELP \
   }
 
+/** Motion estimation */
 #define PARAM_ME_SUB_CMP_CHROMA \
   { \
     name: "ff_me_sub_cmp_chroma",                 \
@@ -410,7 +457,7 @@ NSSE: Noise preserving sum of squared differences"
   {\
     name: "ff_mb_cmp",                          \
     real_name: "MB compare function",           \
-    type:  LQT_PARAMETER_STRING,                \
+    type:  LQT_PARAMETER_STRINGLIST,                \
     val_default: { val_string: "SAD" },         \
     stringlist_options: COMPARE_FUNCS,          \
     help_string: "Macroblock compare function.\n"COMPARE_FUNCS_HELP \
@@ -429,9 +476,9 @@ NSSE: Noise preserving sum of squared differences"
 
 #define PARAM_ILDCT_CMP \
   {\
-    name: "ff_me_cmp",                          \
+    name: "ff_ildct_cmp",                          \
     real_name: "ILDCT compare function",           \
-    type:  LQT_PARAMETER_STRING,                \
+    type:  LQT_PARAMETER_STRINGLIST,                \
     val_default: { val_string: "SAD" },         \
     stringlist_options: COMPARE_FUNCS,          \
     help_string: "Interlaced dct compare function.\n"COMPARE_FUNCS_HELP \
@@ -447,6 +494,7 @@ NSSE: Noise preserving sum of squared differences"
     val_max:     { val_int: 1 },              \
   }
 
+/** Motion estimation */
 #define PARAM_DIA_SIZE \
   { \
     name: "ff_dia_size",                        \
@@ -455,7 +503,7 @@ NSSE: Noise preserving sum of squared differences"
     val_default: { val_int: 0 },              \
     val_min:     { val_int: -9 },              \
     val_max:     { val_int:  9 },              \
-    help_string: "Motion estimation diamond size. Negative means shape adaptive" \
+    help_string: "Motion estimation diamond size. Negative means shape adaptive." \
   }
 
 #define PARAM_LAST_PREDICTOR_COUNT \
@@ -466,35 +514,39 @@ NSSE: Noise preserving sum of squared differences"
     val_default: { val_int: 0 },              \
     val_min:     { val_int: 0 },              \
     val_max:     { val_int: 99 },              \
-    help_string: "Amount of motion predictors from the previous frame.\n\
-0 (default)\n\
-a Will  use 2a+1 x 2a+1 macroblock square of motion vector predictors \n\
-from the previous frame."\
+    help_string: "Amount of motion predictors from the previous frame.\n"\
+"0 (default)\n"\
+"a Will use 2a+1 x 2a+1 macroblock square of motion vector predictors " \
+"from the previous frame."\
   }
 
+/** Motion estimation */
 #define PARAM_PRE_ME \
   { \
     name: "ff_pre_me", \
-    long_name: "ME pre-pass", \
-    type: LQR_PARAMETER_INT,  \
+    real_name: "ME pre-pass", \
+    type: LQT_PARAMETER_INT,  \
     val_default: { val_int: 0 },              \
     val_min:     { val_int: 0 },              \
     val_max:     { val_int: 2 },              \
-    help_string: "Motion estimation pre-pass\n\
-0: disabled\n\
-1: only after I-frames\n\
-2: always" \
+    help_string: "Motion estimation pre-pass\n"\
+"0: disabled\n"\
+"1: only after I-frames\n"\
+"2: always" \
    }
 
+/** Motion estimation */
 #define PARAM_ME_PRE_CMP \
   {\
     name: "ff_me_pre_cmp",                          \
     real_name: "ME pre-pass compare function",           \
-    type:  LQT_PARAMETER_STRING,                \
+    type:  LQT_PARAMETER_STRINGLIST,                \
     val_default: { val_string: "SAD" },         \
     stringlist_options: COMPARE_FUNCS,          \
-    help_string: "Motion estimation pre-pass compare function.\n"COMPARE_FUNCS_HELP
+    help_string: "Motion estimation pre-pass compare function.\n"COMPARE_FUNCS_HELP\
+  }
 
+/** Motion estimation */
 #define PARAM_ME_PRE_CMP_CHROMA \
   { \
     name: "ff_me_pre_cmp_chroma",                 \
@@ -505,18 +557,19 @@ from the previous frame."\
     val_max:     { val_int: 1 },              \
   }
 
+/** Motion estimation */
 #define PARAM_PRE_DIA_SIZE \
   { \
     name: "ff_pre_dia_size",                        \
     real_name: "ME pre-pass diamond size & shape",           \
-,\
     type: LQT_PARAMETER_INT,                  \
     val_default: { val_int: 0 },              \
     val_min:     { val_int: -9 },              \
     val_max:     { val_int:  9 },              \
-    help_string: "Motion estimation pre-pass diamond size. Negative means shape adaptive" \
+    help_string: "Motion estimation pre-pass diamond size. Negative means shape adaptive." \
   }
 
+/** Motion estimation */
 #define PARAM_ME_SUBPEL_QUALITY \
   { \
     name: "ff_me_subpel_quality",                 \
@@ -525,10 +578,11 @@ from the previous frame."\
     val_default: { val_int: 8 },              \
     val_min:     { val_int: 1 },              \
     val_max:     { val_int: 8 },              \
-    help_string: "Subpel refinement quality (for qpel). Higher values\n\
-mean higher quality but slower encoding" \
+    help_string: "Subpel motion estimation refinement quality (for qpel). Higher values "\
+"mean higher quality but slower encoding." \
   }
 
+/** Motion estimation */
 #define PARAM_ME_RANGE \
   {                    \
     name: "ff_me_range",                          \
@@ -540,6 +594,7 @@ mean higher quality but slower encoding" \
     help_string: "Motion estimation search range (0 means unlimited)",  \
   }
 
+/** Motion estimation */
 #define PARAM_MB_DECISION \
   {                       \
     name: "ff_mb_decision",                     \
@@ -550,10 +605,11 @@ mean higher quality but slower encoding" \
                           "Fewest bits", "Rate distoration" },\
   }
 
+/** Frame types */
 #define PARAM_SCENE_CHANGE_THESHOLD \
   {                                 \
     name:      "ff_scenechange_threshold",        \
-    long_name: "Scenechange theshold",            \
+    real_name: "Scenechange theshold",            \
     type: LQT_PARAMETER_INT,             \
     val_default: { val_int: 0 },                \
     val_min: { val_int: -1000000000 },                    \
@@ -562,6 +618,7 @@ mean higher quality but slower encoding" \
 Negative values mean more sensitivity (more keyframes)" \
   }
 
+/** Rate control */
 #define PARAM_LMIN \
   {                \
     name: "ff_lmin", \
@@ -575,6 +632,7 @@ Negative values mean more sensitivity (more keyframes)" \
 "Should possibly be the same as minimum quantizer scale."\
   }
 
+/** Rate control */
 #define PARAM_LMAX \
   {                \
     name: "ff_lmax", \
@@ -598,19 +656,21 @@ Negative values mean more sensitivity (more keyframes)" \
     val_max: { val_int: 2000 },             \
   }
 
+/** Rate control */
 #define PARAM_RC_INITIAL_BUFFER_OCCUPANCY \
   { \
     name: "ff_rc_initial_buffer_occupancy",   \
     real_name: "Initial RC buffer occupancy",   \
     type: LQT_PARAMETER_INT,                \
     val_default: { val_int: 0 },            \
-    help_string: "Number of bits which should be loaded into \
+    help_string: "Number of kilobits which should be loaded into \
 the rc buffer before encoding starts. Must not be larger than \
 RC buffer size" \
   }
 
 
 /* Does nothing */
+/** Frame types */
 #define PARAM_INTER_THRESHOLD \
   { \
     name: "ff_inter_threshold",   \
@@ -619,6 +679,7 @@ RC buffer size" \
     val_default: { val_int: 0 },            \
   }
 
+/** Quantizer */
 #define PARAM_QUANTIZER_NOISE_SHAPING \
   { \
   name: "ff_quantizer_noise_shaping", \
@@ -627,10 +688,11 @@ RC buffer size" \
     val_default: { val_int: 0 },\
     val_min:     { val_int: 0 },\
     val_max:     { val_int: 3 },\
-    help_string: "Choose quantization such that noise will be masked by\
-similar-frequency content in the image" \
+    help_string: "Choose quantization such that noise will be masked by "\
+"similar-frequency content in the image" \
   }
 
+/** Motion estimation */
 #define PARAM_ME_THRESHOLD \
   { \
     name: "ff_me_threshold", \
@@ -645,7 +707,7 @@ similar-frequency content in the image" \
 #define PARAM_MB_THRESHOLD \
   { \
     name: "ff_mb_threshold", \
-    real_name: "MB Theshold",                   \
+    real_name: "MB Theshold",\
     type: LQT_PARAMETER_INT, \
     val_default: { val_int: 0 },\
     val_min:     { val_int: 0 },\
@@ -663,6 +725,7 @@ similar-frequency content in the image" \
 "0 is identical to SSE"\
   }
 
+/** Masking */
 #define PARAM_BORDER_MASKING \
   { \
     name: "ff_border_masking", \
@@ -672,7 +735,8 @@ similar-frequency content in the image" \
     val_min:     { val_float: 0.0 }, \
     val_max:     { val_float: 1.0 }, \
     num_digits:  2, \
-    help_string: "Border processing masking. Raises the quantizer (descreases quality) for macroblocks near the borders of the picture."\
+    help_string: "Encode image parts near the border with reduced quality."\
+    " 0 means disabled"\
   }
 
 #define PARAM_MB_LMIN \
@@ -699,6 +763,7 @@ similar-frequency content in the image" \
     help_string: "Maximum macroblock Lagrange multiplier." \
   }
 
+/** Motion estimation */
 #define PARAM_ME_PENALTY_COMPENSATION  \
   {                \
     name: "ff_me_penalty_compensation", \
@@ -728,17 +793,19 @@ similar-frequency content in the image" \
   }
 
 
+/** Frame types */
 #define PARAM_SCENECHANGE_FACTOR  \
   { \
     name: "ff_scenechange_factor", \
     real_name: "Scenechange factor",    \
     type: LQT_PARAMETER_INT,             \
-    val_default: { val_int: 1 }, \
+    val_default: { val_int: 0 }, \
     help_string: "Multiplied by qscale for each frame and added to scene_change_score" \
-  };
+  }
 
 /* Flags */
 
+/** Quantizer */
 #define PARAM_FLAG_QSCALE \
   {                              \
     name:        "ff_flag_qscale", \
@@ -749,6 +816,7 @@ similar-frequency content in the image" \
     val_max:     { val_int: 1 },    \
   }
 
+/** Motion estimation */
 #define PARAM_FLAG_4MV \
   {                              \
     name:        "ff_flag_4mv", \
@@ -760,6 +828,7 @@ similar-frequency content in the image" \
     help_string: "Allow 4 motion vectors per macroblock (slightly better quality). Works better if MB decision mode is \"Fewest bits\" or \"Rate distoration\"." \
   }
 
+/** Motion estimation */
 #define PARAM_FLAG_QPEL \
   {                              \
     name:        "ff_flag_qpel", \
@@ -768,9 +837,10 @@ similar-frequency content in the image" \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
-    help_string: "Use 1/4 pel motion compensation" \
+    help_string: "Use 1/4 pixel motion compensation.  Warning: QPEL is not supported by all decoders." \
   }
 
+/** Motion estimation */
 #define PARAM_FLAG_GMC \
   {                              \
     name:        "ff_flag_gmc", \
@@ -779,6 +849,7 @@ similar-frequency content in the image" \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
+    help_string: "Warning: GMC is not supported by all decoders" \
   }
 
 #define PARAM_FLAG_PART \
@@ -789,8 +860,19 @@ similar-frequency content in the image" \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
-    help_string: "Use data partitioning for more robustnedd if the video is\
-for transmitting over unreliable channels" \
+    help_string: "Use data partitioning for more robustnedd if the video is "\
+"for transmitting over unreliable channels" \
+  }
+
+
+#define PARAM_FLAG_GRAY \
+  {                              \
+    name:        "ff_flag_gray", \
+    real_name:   "Grayscale mode",      \
+    type:        LQT_PARAMETER_INT, \
+    val_default: { val_int: 0 },    \
+    val_min:     { val_int: 0 },    \
+    val_max:     { val_int: 1 },    \
   }
 
 #define PARAM_FLAG_EMU_EGDE \
@@ -803,6 +885,7 @@ for transmitting over unreliable channels" \
     val_max:     { val_int: 1 },    \
   }
 
+/** Masking */
 #define PARAM_FLAG_NORMALIZE_AQP   \
   {                              \
     name:        "ff_flag_normalize_aqp", \
@@ -811,6 +894,8 @@ for transmitting over unreliable channels" \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
+    help_string: "When using masking, try to adjust the per "\
+    "macroblock quantizers to maintain the desired average" \
   }
 
 #define PARAM_FLAG_ALT_SCAN   \
@@ -823,6 +908,7 @@ for transmitting over unreliable channels" \
     val_max:     { val_int: 1 },    \
   }
 
+/** Quantizer */
 #define PARAM_FLAG_TRELLIS_QUANT   \
   {                              \
     name:        "ff_flag_trellis_quant", \
@@ -899,7 +985,7 @@ for transmitting over unreliable channels" \
 
 #define PARAM_FLAG_H263P_AIV \
   {                      \
-    name: "ff_flag_h264_aiv", \
+    name: "ff_flag_h263p_aiv", \
     real_name: "Alternative inter vlc", \
     type:        LQT_PARAMETER_INT, \
     val_default: { val_int: 0 },    \
@@ -907,7 +993,7 @@ for transmitting over unreliable channels" \
     val_max:     { val_int: 1 },    \
   }
 
-/* (H.263+) */
+/* H.263(+) */
 #define PARAM_FLAG_OBMC \
   { \
     name: "ff_flag_obmc", \
@@ -916,7 +1002,7 @@ for transmitting over unreliable channels" \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
-    help_string: "Overlapped block motion compensation" \
+    help_string: "Overlapped block motion compensation (only supported with with simple MB decision)" \
   }
 
 #define PARAM_FLAG_LOOP_FILTER              \
@@ -939,7 +1025,7 @@ for transmitting over unreliable channels" \
     val_max:     { val_int: 1 },    \
   }
 
-
+/** Frame types */
 #define PARAM_FLAG_CLOSED_GOP \
   { \
     name: "ff_flag_closed_gop", \
@@ -961,6 +1047,7 @@ for transmitting over unreliable channels" \
     help_string: "Allow non spec compliant speedup tricks" \
 }
 
+/** Frame types */
 #define PARAM_FLAG2_STRICT_GOP                     \
   { \
     name: "ff_flag2_strict_gop", \

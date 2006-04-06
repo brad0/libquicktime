@@ -31,6 +31,8 @@
 
 #include "ffmpeg.h"
 
+
+
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
 /* MPEG Audio header parsing code */
@@ -266,8 +268,12 @@ static int decode_header(mpeg_header * h, uint8_t * ptr, const mpeg_header * ref
 
 typedef struct
   {
-  quicktime_ffmpeg_codec_common_t com;
+  AVCodecContext * avctx;
+  AVCodec * encoder;
+  AVCodec * decoder;
 
+  int initialized;
+  
   /* Interleaved samples as avcodec needs them */
     
   int16_t * sample_buffer;
@@ -293,14 +299,12 @@ typedef struct
   } quicktime_ffmpeg_audio_codec_t;
 
 
-int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
+static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   {
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   
-  if(codec->com.init_enc)
-    avcodec_close(codec->com.ffcodec_enc);
-  if(codec->com.init_dec)
-    avcodec_close(codec->com.ffcodec_dec);
+  if(codec->avctx)
+    avcodec_close(codec->avctx);
   
   if(codec->sample_buffer) free(codec->sample_buffer);
   if(codec->chunk_buffer)  free(codec->chunk_buffer);
@@ -309,45 +313,16 @@ int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   return 0;
   }
 
-void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
-                                       AVCodec *decoder)
-{
-	quicktime_ffmpeg_audio_codec_t *codec;
+static int set_parameter(quicktime_t *file, 
+                  int track, 
+                  char *key, 
+                  void *value)
+  {
+  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
+  lqt_ffmpeg_set_parameter(codec->avctx, key, value);
+  return 0;
+  }
 
-	avcodec_init();
-        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg 1\n");
-	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
-	if(!codec)
-          return;
-
-	codec->com.ffc_enc = encoder;
-	codec->com.ffc_dec = decoder;
-	
-	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)atrack->codec)->delete_acodec = lqt_ffmpeg_delete_audio;
-	if(encoder)
-          ((quicktime_codec_t*)atrack->codec)->encode_audio = lqt_ffmpeg_encode_audio;
-	if(decoder)
-          ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
-	((quicktime_codec_t*)atrack->codec)->set_parameter = lqt_ffmpeg_set_parameter_audio;
-        atrack->sample_format = LQT_SAMPLE_INT16;
-}
-
-int lqt_ffmpeg_set_parameter_audio(quicktime_t *file, 
-                               int track, 
-                               char *key, 
-                               void *value)
-{
-	quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
-
-        if(!strcasecmp(key, "bit_rate_audio"))
-          {
-          codec->com.params.bit_rate = (*(int *)value) * 1000;
-          return 0;
-          }
-        //	fprintf(stderr, "Unknown key: %s\n", key);
-          return -1;
-}
 
 /* Decode VBR chunk into the sample buffer */
 
@@ -382,7 +357,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
       return 0;
     
     frame_bytes =
-      avcodec_decode_audio(codec->com.ffcodec_dec,
+      avcodec_decode_audio(codec->avctx,
                            &(codec->sample_buffer[track_map->channels *
                                                   (codec->sample_buffer_end - codec->sample_buffer_start)]),
                            &bytes_decoded,
@@ -432,7 +407,7 @@ static int decode_chunk(quicktime_t * file, int track)
     //    fprintf(stderr, "audio_ffmpeg: EOF 1 (%d bytes left)\n", codec->bytes_in_chunk_buffer);
     /* If the codec is mp3, make sure to decode the very last frame */
 
-    if((codec->com.ffcodec_dec->codec_id == CODEC_ID_MP3) &&
+    if((codec->avctx->codec_id == CODEC_ID_MP3) &&
        (codec->bytes_in_chunk_buffer >= 4))
       {
       if(!decode_header(&mph, codec->chunk_buffer, (const mpeg_header*)0))
@@ -517,7 +492,7 @@ static int decode_chunk(quicktime_t * file, int track)
     
     /* Some really broken mp3 files have the header bytes split across 2 chunks */
 
-    if(codec->com.ffcodec_dec->codec_id == CODEC_ID_MP3)
+    if(codec->avctx->codec_id == CODEC_ID_MP3)
       {
       if(codec->bytes_in_chunk_buffer < 4)
         {
@@ -583,7 +558,7 @@ static int decode_chunk(quicktime_t * file, int track)
      */
     
     frame_bytes =
-      avcodec_decode_audio(codec->com.ffcodec_dec,
+      avcodec_decode_audio(codec->avctx,
                            &(codec->sample_buffer[track_map->channels *
                                                   (codec->sample_buffer_end - codec->sample_buffer_start)]),
                            &bytes_decoded,
@@ -605,7 +580,7 @@ static int decode_chunk(quicktime_t * file, int track)
     
     if(bytes_decoded < 0)
       {
-      if(codec->com.ffcodec_dec->codec_id == CODEC_ID_MP3)
+      if(codec->avctx->codec_id == CODEC_ID_MP3)
         {
         /* For mp3, bytes_decoded < 0 means, that the frame should be muted */
         memset(&(codec->sample_buffer[track_map->channels * (codec->sample_buffer_end - codec->sample_buffer_start)]),
@@ -668,7 +643,7 @@ static int decode_chunk(quicktime_t * file, int track)
   return samples_decoded;
   }
 
-int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
+static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
   {
   uint8_t * header;
   uint32_t header_len;
@@ -692,38 +667,37 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
     }
   
   /* Initialize codec */
-  if(!codec->com.init_dec)
+  if(!codec->initialized)
     {
-    codec->com.ffcodec_dec = avcodec_alloc_context();
 
     /* Set some mandatory variables */
-    codec->com.ffcodec_dec->channels        = quicktime_track_channels(file, track);
-    codec->com.ffcodec_dec->sample_rate     = quicktime_sample_rate(file, track);
+    codec->avctx->channels        = quicktime_track_channels(file, track);
+    codec->avctx->sample_rate     = quicktime_sample_rate(file, track);
 
     if(track_map->track->mdia.minf.stbl.stsd.table[0].version == 1)
       {
       if(track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame)
-        codec->com.ffcodec_dec->block_align =
+        codec->avctx->block_align =
           track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame;
       }
     
     //  priv->ctx->block_align     = s->data.audio.block_align;
     //  priv->ctx->bit_rate        = s->codec_bitrate;
 
-    codec->com.ffcodec_dec->bits_per_sample = quicktime_audio_bits(file, track);
+    codec->avctx->bits_per_sample = quicktime_audio_bits(file, track);
 
     /* Some codecs need extra stuff */
 
-    if(codec->com.ffc_dec->id == CODEC_ID_ALAC)
+    if(codec->decoder->id == CODEC_ID_ALAC)
       {
       header = quicktime_wave_get_user_atom(track_map->track, "alac", &header_len);
       if(header)
         {
-        codec->com.ffcodec_dec->extradata = header;
-        codec->com.ffcodec_dec->extradata_size = header_len;
+        codec->avctx->extradata = header;
+        codec->avctx->extradata_size = header_len;
         }
       }
-    if(codec->com.ffc_dec->id == CODEC_ID_QDM2)
+    if(codec->decoder->id == CODEC_ID_QDM2)
       {
       header = quicktime_wave_get_user_atom(track_map->track, "QDCA", &header_len);
       if(header)
@@ -737,22 +711,22 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
         memcpy(codec->extradata + 4, "frmaQDM2", 8);
         /* QDCA atom */
         memcpy(codec->extradata + 12, header, header_len);
-        codec->com.ffcodec_dec->extradata = codec->extradata;
-        codec->com.ffcodec_dec->extradata_size = header_len + 12;
+        codec->avctx->extradata = codec->extradata;
+        codec->avctx->extradata_size = header_len + 12;
         }
 
       }
 
     //    memcpy(&(codec->com.ffcodec_enc), &(codec->com.params), sizeof(AVCodecContext));
     
-    if(avcodec_open(codec->com.ffcodec_dec, codec->com.ffc_dec) != 0)
+    if(avcodec_open(codec->avctx, codec->decoder) != 0)
       {
       fprintf(stderr, "Avcodec open failed\n");
       return 0;
       }
     
     //    codec->sample_buffer_offset = 0;
-    codec->com.init_dec = 1;
+    codec->initialized = 1;
     }
 
   /* Check if we have to reposition the stream */
@@ -867,7 +841,7 @@ int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int 
  *   Encoding part
  */
 
-int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
+static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
                             long samples, int track)
   {
   int result = -1;
@@ -881,31 +855,27 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   int samples_encoded;
   /* Initialize encoder */
     
-  if(!codec->com.init_enc)
+  if(!codec->initialized)
     {
-    codec->com.ffcodec_enc = avcodec_alloc_context();
-    codec->com.ffcodec_enc->sample_rate = track_map->samplerate;
-    codec->com.ffcodec_enc->channels = channels;
+    codec->avctx->sample_rate = track_map->samplerate;
+    codec->avctx->channels = channels;
 
-#define SP(x) codec->com.ffcodec_enc->x = codec->com.params.x
-    SP(bit_rate);
-#undef SP
-    if(avcodec_open(codec->com.ffcodec_enc, codec->com.ffc_enc) != 0)
+    if(avcodec_open(codec->avctx, codec->encoder) != 0)
       {
       fprintf(stderr, "Avcodec open failed\n");
       return -1;
       }
     
-    codec->com.init_enc = 1;
+    codec->initialized = 1;
 
     /* One frame is: bitrate * frame_samples / (samplerate * 8) + 1024 */
 #if 0		// PATCH 1
-    codec->chunk_buffer_alloc = (codec->com.ffcodec_enc->bit_rate * codec->com.ffcodec_enc->frame_size /
-                                (codec->com.ffcodec_enc->sample_rate * 8)) + 1024;
+    codec->chunk_buffer_alloc = (codec->avctx->bit_rate * codec->avctx->frame_size /
+                                (codec->avctx->sample_rate * 8)) + 1024;
 #else
-    codec->chunk_buffer_alloc = ( codec->com.ffcodec_enc->frame_size
+    codec->chunk_buffer_alloc = ( codec->avctx->frame_size
 									* sizeof( int16_t )
-									* codec->com.ffcodec_enc->channels
+									* codec->avctx->channels
 								);
 #endif
     codec->chunk_buffer = malloc(codec->chunk_buffer_alloc);
@@ -933,24 +903,24 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   
   /* Encode */
   
-  //  fprintf(stderr, "codec->samples_in_buffer: %d, codec->com.ffcodec_enc->frame_size %d\n",
-  //          codec->samples_in_buffer, codec->com.ffcodec_enc->frame_size);
-  while(codec->samples_in_buffer >= codec->com.ffcodec_enc->frame_size)
+  //  fprintf(stderr, "codec->samples_in_buffer: %d, codec->avctx->frame_size %d\n",
+  //          codec->samples_in_buffer, codec->avctx->frame_size);
+  while(codec->samples_in_buffer >= codec->avctx->frame_size)
     {
     //    fprintf(stderr, "avcodec_encode_audio %d...", samples_done);
     
-    frame_bytes = avcodec_encode_audio(codec->com.ffcodec_enc, codec->chunk_buffer,
+    frame_bytes = avcodec_encode_audio(codec->avctx, codec->chunk_buffer,
                                        codec->chunk_buffer_alloc,
                                        &(codec->sample_buffer[samples_done*channels]));
     if(frame_bytes > 0)
       {
       quicktime_write_chunk_header(file, trak, &chunk_atom);
 #if 0    // PATCH 3  
-      if(codec->com.ffcodec_enc->frame_size == 1)
+      if(codec->avctx->frame_size == 1)
         samples_encoded = codec->samples_in_buffer;
       else
 #endif
-        samples_encoded = codec->com.ffcodec_enc->frame_size;
+        samples_encoded = codec->avctx->frame_size;
 
       //      fprintf(stderr, "Done %d->%d\n", samples_encoded, frame_bytes);
 
@@ -971,3 +941,27 @@ int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
             codec->samples_in_buffer * sizeof(int16_t) * channels);
   return result;
   }
+
+void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
+                                       AVCodec *decoder)
+{
+	quicktime_ffmpeg_audio_codec_t *codec;
+
+	avcodec_init();
+        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg 1\n");
+	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
+	if(!codec)
+          return;
+
+	codec->encoder = encoder;
+	codec->decoder = decoder;
+	codec-> avctx = avcodec_alloc_context();
+	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
+	((quicktime_codec_t*)atrack->codec)->delete_acodec = lqt_ffmpeg_delete_audio;
+	if(encoder)
+          ((quicktime_codec_t*)atrack->codec)->encode_audio = lqt_ffmpeg_encode_audio;
+	if(decoder)
+          ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
+	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter;
+        atrack->sample_format = LQT_SAMPLE_INT16;
+}
