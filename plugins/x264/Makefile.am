@@ -1,0 +1,9 @@
+AM_CFLAGS = @X264_CFLAGS@
+
+pkglib_LTLIBRARIES = lqt_x264.la
+
+lqt_x264_la_SOURCES = x264.c lqt_x264.c
+lqt_x264_la_LDFLAGS = -avoid-version -module
+lqt_x264_la_LIBADD = @X264_LIBS@ @MODULE_LIBADD@
+
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime
