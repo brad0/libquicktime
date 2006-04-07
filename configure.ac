@@ -521,8 +521,8 @@ AC_SUBST(X264_REQUIRED)
 AC_SUBST(X264_LIBS)
 AC_SUBST(X264_CFLAGS)
 
-AM_CONDITIONAL(HAVE_X264, test x$have_x264 = xtrue)
 fi
+AM_CONDITIONAL(HAVE_X264, test x$have_x264 = xtrue)
 
 #CPU Optimisation added by Justin Schoeman (justin@suntiger.ee.up.ac.za)
 
