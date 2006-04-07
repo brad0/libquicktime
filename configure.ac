@@ -509,6 +509,7 @@ fi
 dnl
 dnl Check for x264
 dnl
+AH_TEMPLATE([HAVE_X264], [Enable X264])
 
 have_x264="false"
 
