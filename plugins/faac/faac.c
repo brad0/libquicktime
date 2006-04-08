@@ -267,7 +267,7 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-static void flush(quicktime_t *file, int track)
+static int flush(quicktime_t *file, int track)
   {
   int i;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -298,8 +298,9 @@ static void flush(quicktime_t *file, int track)
                                  track_map->vbr_num_frames);
     track_map->current_chunk++;
     codec->chunk_started = 0;
+    return 1;
     }
-  
+  return 0;
   }
 
 void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)

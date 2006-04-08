@@ -15,10 +15,22 @@ AC_DEFINE_UNQUOTED(LQT_VERSION, "$LQT_VERSION")
 AC_SUBST(LQT_VERSION)
 
 dnl
+dnl Option for conversion to GPL
+dnl
+
+have_gpl="false"
+AC_ARG_ENABLE(gpl, [  --enable-gpl            Change license to GPL. This enables some extra plugins],
+              have_gpl="true")
+
+dnl
 dnl Libquicktime codec API version
 dnl 
 
 LQT_CODEC_API_VERSION="7"
+
+if test "x$have_gpl" = "xtrue"; then
+  LQT_CODEC_API_VERSION="($LQT_CODEC_API_VERSION|0x10000)"
+fi
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],
             [Libquicktime codec API version])
@@ -380,14 +392,6 @@ AC_SUBST(PNG_LIBS)
 AC_SUBST(PNG_REQUIRED)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
-
-dnl
-dnl Option for conversion to GPL
-dnl
-
-have_gpl="false"
-AC_ARG_ENABLE(gpl, [  --enable-gpl            Change license to GPL. This enables some extra plugins],
-              have_gpl="true")
 
 dnl
 dnl faac

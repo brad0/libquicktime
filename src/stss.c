@@ -23,7 +23,7 @@ void quicktime_stss_delete(quicktime_stss_t *stss)
 void quicktime_stss_dump(quicktime_stss_t *stss)
 {
 	int i;
-	printf("     sync sample\n");
+	printf("     sync sample (stss)\n");
 	printf("      version %d\n", stss->version);
 	printf("      flags %ld\n", stss->flags);
 	printf("      total_entries %ld\n", stss->total_entries);

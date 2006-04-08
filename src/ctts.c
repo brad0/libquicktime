@@ -1,3 +1,4 @@
+#include <string.h>
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
@@ -58,4 +59,56 @@ void quicktime_write_ctts(quicktime_t *file, quicktime_ctts_t *ctts)
 
   quicktime_atom_write_footer(file, &atom);
 
+  }
+
+void quicktime_update_ctts(quicktime_ctts_t *ctts, long sample, long duration)
+  {
+  //  fprintf(stderr, "quicktime_update_ctts: sample: %ld, duration: %ld\n",
+  //          sample, duration);
+  if(sample >= ctts->entries_allocated)
+    {
+    ctts->entries_allocated = sample + 1024;
+    ctts->table = realloc(ctts->table, ctts->entries_allocated * sizeof(*(ctts->table)));
+    }
+  ctts->table[sample].sample_count = 1;
+  ctts->table[sample].sample_duration = duration;
+  
+  if(sample >= ctts->total_entries)
+    ctts->total_entries = sample + 1;
+  }
+
+void quicktime_compress_ctts(quicktime_ctts_t *ctts)
+  {
+  long sample = 0;
+  long i;
+  
+  while(sample < ctts->total_entries)
+    {
+    i = 1;
+
+    while(sample + i < ctts->total_entries)
+      {
+      if(ctts->table[sample + i].sample_duration ==  ctts->table[sample].sample_duration)
+        {
+        ctts->table[sample].sample_count++;
+        }
+      else
+        {
+        break;
+        }
+      i++;
+      }
+
+    if(ctts->table[sample].sample_count > 1)
+      {
+      /* Compress */
+      if(ctts->total_entries - sample - i)
+        memmove(&ctts->table[sample + 1], &ctts->table[sample + i],
+                sizeof(ctts->table[sample + i]) * (ctts->total_entries - sample - i));
+
+      ctts->total_entries -= ctts->table[sample].sample_count-1;
+      }
+    sample++;
+    }
+  
   }

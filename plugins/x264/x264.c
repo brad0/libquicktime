@@ -7,6 +7,9 @@
 
 #include <x264.h>
 
+// #define DUMP_CONFIG
+#ifdef DUMP_CONFIG
+
 static void dump_params(x264_param_t * params)
   {
   fprintf(stderr, "X264 params:\n");
@@ -97,6 +100,8 @@ static void dump_params(x264_param_t * params)
   fprintf(stderr, "    f_pb_factor:        %f\n", params->rc.f_pb_factor);
   
   }
+
+#endif // DUMP_CONFIG
 
 /*
  *  x264 encoder.
@@ -264,7 +269,7 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
   uint8_t nal_type;
   
   x264_encoder_headers(codec->enc, &nal, &nnal);
-  fprintf(stderr, "Encoded %d header nals\n", nnal);
+  //  fprintf(stderr, "Encoded %d header nals\n", nnal);
 
   tmp_size = 0;
 
@@ -314,8 +319,8 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
     2 +        // pps_size
     pps_size;  // pps
 
-  fprintf(stderr, "ret_size: %d, sps_size: %d, pps_size: %d\n",
-          *ret_size, sps_size, pps_size);
+  //  fprintf(stderr, "ret_size: %d, sps_size: %d, pps_size: %d\n",
+  //          *ret_size, sps_size, pps_size);
   
   ret = malloc(*ret_size);
   ret_ptr = ret;
@@ -356,12 +361,67 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
   return ret;
   }
 
+static int flush_frame(quicktime_t *file, int track,
+                       x264_picture_t * pic_in)
+  {
+  int result;
+  quicktime_atom_t chunk_atom;
+  x264_nal_t *nal;
+  int nnal;
+  x264_picture_t pic_out;
+  int encoded_size;
+
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_trak_t *trak = vtrack->track;
+  pic_out.i_pts = 0;
+  /* Encode frames, get nals */
+  if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out))
+    return 0;
+  
+  /* Encode nals -> get h264 stream */
+  encoded_size = encode_nals(codec->work_buffer,
+                             codec->work_buffer_size, nal, nnal);
+  
+  /* Reformat nals */
+  encoded_size = avc_parse_nal_units(codec->work_buffer,
+                                     encoded_size,
+                                     &codec->work_buffer_1,
+                                     &codec->work_buffer_alloc_1);
+
+
+  if(encoded_size < 0)
+    return 0;
+
+  vtrack->coded_timestamp =   pic_out.i_pts;
+
+  //  fprintf(stderr, "x264: Encoded %d bytes, pts: %lld\n", encoded_size, pic_out.i_pts);
+
+  if(encoded_size)
+    {
+    quicktime_write_chunk_header(file, trak, &chunk_atom);
+  
+    result = !quicktime_write_data(file, 
+                                   codec->work_buffer_1, 
+                                   encoded_size);
+    quicktime_write_chunk_footer(file, 
+                                 trak, 
+                                 vtrack->current_chunk,
+                                 &chunk_atom, 
+                                 1);
+  
+    if(pic_out.i_type == X264_TYPE_IDR)
+      quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
+    vtrack->current_chunk++;
+    return 1;
+    }
+  return 0;
+  }
+
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
-  quicktime_atom_t chunk_atom;
 
-  int encoded_size;
-  x264_picture_t pic_in, pic_out;
+  x264_picture_t pic_in;
 
   int result = 0, pixel_width, pixel_height;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
@@ -372,8 +432,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   uint8_t * avcc;
   int avcc_size;
   
-  x264_nal_t *nal;
-  int nnal;
   
   if(!row_pointers)
     {
@@ -405,7 +463,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->params.vui.i_sar_height = pixel_height;
 
     codec->params.i_fps_num = lqt_video_time_scale(file, track);
-    codec->params.i_fps_num = lqt_frame_duration(file, track, NULL);
+    codec->params.i_fps_den = lqt_frame_duration(file, track, NULL);
 
     /* Open encoder */
 
@@ -416,14 +474,18 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       return result;
       }
 
+    if(codec->params.i_bframe)
+      vtrack->has_b_frames = 1; 
+    
     /* Encode global header */
     avcc = create_avcc_atom(codec, &avcc_size);
     
     quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
                                   "avcC", avcc, avcc_size);
 
+#ifdef DUMP_CONFIG    
     dump_params(&codec->params);
-
+#endif
     codec->initialized = 1;
     
     }
@@ -442,47 +504,19 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   pic_in.img.i_stride[1] = vtrack->stream_row_span_uv;
   pic_in.img.i_stride[2] = vtrack->stream_row_span_uv;
 
-  /* TODO: Set PTS */
-  //  pic_in.i_pts = frame->pts;
+  pic_in.i_pts = vtrack->timestamp;
   pic_in.i_type = X264_TYPE_AUTO;
-
-  /* Encode frames, get nals */
-  if(x264_encoder_encode(codec->enc, &nal, &nnal, &pic_in, &pic_out))
-    return 1;
-
-  /* Encode nals -> get h264 stream */
-  encoded_size = encode_nals(codec->work_buffer,
-                             codec->work_buffer_size, nal, nnal);
   
-  /* Reformat nals */
-  encoded_size = avc_parse_nal_units(codec->work_buffer,
-                                     encoded_size,
-                                     &codec->work_buffer_1,
-                                     &codec->work_buffer_alloc_1);
-
-
-  if(encoded_size < 0)
-    return 1;
-
-  //  fprintf(stderr, "x264: Encoded %d bytes\n", encoded_size);
-  
-  quicktime_write_chunk_header(file, trak, &chunk_atom);
-  
-  result = !quicktime_write_data(file, 
-                                 codec->work_buffer_1, 
-                                 encoded_size);
-  quicktime_write_chunk_footer(file, 
-                               trak, 
-                               vtrack->current_chunk,
-                               &chunk_atom, 
-                               1);
-  
-  vtrack->current_chunk++;
-  if(pic_out.i_type == X264_TYPE_IDR)
-    quicktime_insert_keyframe(file, vtrack->current_position, track);
+  flush_frame(file, track, &pic_in);
   
   return result;
   }
+
+static int flush(quicktime_t *file, int track)
+  {
+  return flush_frame(file, track, (x264_picture_t*)0);
+  }
+  
 
 #define INTPARAM(name, var) \
   if(!strcasecmp(key, name)) \
@@ -684,6 +718,7 @@ void quicktime_init_codec_x264(quicktime_video_map_t *vtrack)
   ((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_x264_codec_t));
   ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
   ((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
+  ((quicktime_codec_t*)vtrack->codec)->flush = flush;
   ((quicktime_codec_t*)vtrack->codec)->decode_video = 0;
   ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
   ((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;

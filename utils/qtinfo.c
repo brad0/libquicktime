@@ -29,8 +29,8 @@ file_info(char *filename)
         int cmodel, channels;
         quicktime_t* qtfile;
 	int i, j, n;
-
-	qtfile = quicktime_open(filename, 1, 0);
+        int frame_duration, framerate_constant;
+        qtfile = quicktime_open(filename, 1, 0);
 
 	if(!qtfile) {
 		printf("Couldn't open %s as a QuickTime file.\n", filename);
@@ -77,22 +77,27 @@ file_info(char *filename)
         
 	n = quicktime_video_tracks(qtfile);
 	printf("  %d video tracks.\n", n);
-	for(i = 0; i < n; i++) {
-	  printf("    %dx%d, depth %d, rate %f, length %ld frames, compressor %s.\n",
-			 quicktime_video_width(qtfile, i),
-			 quicktime_video_height(qtfile, i),
-			 quicktime_video_depth(qtfile, i),
-			 quicktime_frame_rate(qtfile, i),
-			 quicktime_video_length(qtfile, i),
-			 quicktime_video_compressor(qtfile, i));
+	for(i = 0; i < n; i++)
+          {
+          frame_duration = lqt_frame_duration(qtfile, i, &framerate_constant);
+          
+          printf("    %dx%d, depth %d\n    rate %f [%d:%d] %sconstant\n    length %ld frames\n    compressor %s.\n",
+                 quicktime_video_width(qtfile, i),
+                 quicktime_video_height(qtfile, i),
+                 quicktime_video_depth(qtfile, i),
+                 quicktime_frame_rate(qtfile, i),
+                 lqt_video_time_scale(qtfile, i),
+                 frame_duration, (framerate_constant ? "" : "not "),
+                 quicktime_video_length(qtfile, i),
+                 quicktime_video_compressor(qtfile, i));
           cmodel = lqt_get_cmodel(qtfile, i);
           printf("    Native colormodel:  %s\n", lqt_colormodel_to_string(cmodel));
           printf("    Interlace mode:     %s\n", lqt_interlace_mode_to_string(lqt_get_interlace_mode(qtfile, i)));
           if(cmodel == BC_YUV420P)
             printf("    Chroma placement: %s\n", lqt_chroma_placement_to_string(lqt_get_chroma_placement(qtfile, i)));
           printf("    %ssupported.\n",
-			 quicktime_supported_video(qtfile, i)?"":"NOT ");
-	}
+                 quicktime_supported_video(qtfile, i)?"":"NOT ");
+          }
         quicktime_close(qtfile);
 }
 

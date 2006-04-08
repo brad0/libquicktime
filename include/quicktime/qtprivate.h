@@ -980,6 +980,11 @@ typedef struct
 /* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
 /* For Encoding: Timestamp of the LAST encoded frame */
         int64_t timestamp;
+
+/* For codecs with B-frames: Timestamp of the just written frame */
+        int has_b_frames; /* Probably needed for encoding only */
+        int64_t coded_timestamp; /* Set by the codec during encoding */
+
         int64_t stts_index;
         int64_t stts_count;
         int stream_cmodel;  /* Colormodel, which is read/written natively by the codec  */
@@ -1162,8 +1167,8 @@ typedef struct
 		int track, 
 		char *key, 
 		void *value);
-	void (*flush)(quicktime_t *file, 
-		int track);
+	int (*flush)(quicktime_t *file, 
+                     int track);
 
 	void *priv;
 

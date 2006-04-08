@@ -545,7 +545,7 @@ static int set_parameter(quicktime_t *file, int track,
   return 0;
   }
 
-static void flush(quicktime_t *file, int track)
+static int flush(quicktime_t *file, int track)
   {
   int result = 0;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -565,8 +565,10 @@ static void flush(quicktime_t *file, int track)
       //      fprintf(stderr, "Flush: %d\n", result);
       codec->encoder_output_size += result;
       write_data(file, track, codec, codec->samples_read - codec->samples_written);
+      return 1;
       }
     }
+  return 0;
   //  fprintf(stderr, "Samples read: %lld, Samples written: %lld\n", codec->samples_read, codec->samples_written);
   }
 

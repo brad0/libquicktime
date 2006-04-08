@@ -196,7 +196,7 @@ int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
 
 void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration)
   {
-  //  fprintf(stderr, "quicktime_update_stts: sample: %ld, duration: %ld\n",
+  //  fprintf(stderr, "quicktime_update_stts: sample: %ld, duration: %ld",
   //          sample, duration);
   if(sample >= stts->entries_allocated)
     {
@@ -211,12 +211,15 @@ void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration)
   
   if(sample >= stts->total_entries)
     stts->total_entries = sample + 1;
+  //  fprintf(stderr, " total_entries: %ld\n", stts->total_entries);
   }
 
 void quicktime_compress_stts(quicktime_stts_t *stts)
   {
   long sample = 0;
   long i;
+
+  //  fprintf(stderr, "quicktime_compress_stts %ld -> ", stts->total_entries);
   
   while(sample < stts->total_entries)
     {
@@ -246,5 +249,5 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
       }
     sample++;
     }
-  
+  //  fprintf(stderr, "%ld\n", stts->total_entries);
   }

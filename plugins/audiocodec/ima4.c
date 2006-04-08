@@ -510,11 +510,11 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
 
     track_map->current_chunk++;
     }
-  fprintf(stderr, "Keeping %d samples\n", codec->sample_buffer_size);
+  //  fprintf(stderr, "Keeping %d samples\n", codec->sample_buffer_size);
   return result;
   }
 
-static void flush(quicktime_t *file, int track)
+static int flush(quicktime_t *file, int track)
   {
   quicktime_atom_t chunk_atom;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
@@ -526,7 +526,7 @@ static void flush(quicktime_t *file, int track)
   int i;
   unsigned char *output_ptr;
   
-  fprintf(stderr, "quicktime_flush_ima4 %d\n", codec->sample_buffer_size);
+  //  fprintf(stderr, "quicktime_flush_ima4 %d\n", codec->sample_buffer_size);
   if(codec->sample_buffer_size)
     {
     /* Zero out enough to get a block */
@@ -549,8 +549,9 @@ static void flush(quicktime_t *file, int track)
                                  &chunk_atom, 
                                  codec->sample_buffer_size);
     track_map->current_chunk++;
-    
+    return 1;
     }
+  return 0;
   }
 
 void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack)
