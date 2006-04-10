@@ -29,6 +29,7 @@ file_info(char *filename)
         int cmodel, channels;
         quicktime_t* qtfile;
 	int i, j, n;
+        char * str;
         int frame_duration, framerate_constant;
         qtfile = quicktime_open(filename, 1, 0);
 
@@ -38,6 +39,43 @@ file_info(char *filename)
 	}
 
 	printf("\nFile %s:\n", filename);
+
+        str = quicktime_get_copyright(qtfile);
+
+        if (str)
+          printf("    copyright: %s\n",str);
+        str = quicktime_get_name(qtfile);
+        if (str)
+          printf("    name:      %s\n",str);
+        str = quicktime_get_info(qtfile);
+        if (str)
+          printf("    info:      %s\n",str);
+
+        str = lqt_get_author(qtfile);
+        if (str)
+          printf("    author:    %s\n",str);
+
+        str = lqt_get_artist(qtfile);
+        if (str)
+          printf("    artist:    %s\n",str);
+
+        str = lqt_get_album(qtfile);
+        if (str)
+          printf("    album:     %s\n",str);
+
+        str = lqt_get_genre(qtfile);
+        if (str)
+          printf("    genre:     %s\n",str);
+
+        str = lqt_get_track(qtfile);
+        if (str)
+          printf("    track:     %s\n",str);
+
+        str = lqt_get_comment(qtfile);
+        if (str)
+          printf("    comment:   %s\n",str);
+
+        
 	n = quicktime_audio_tracks(qtfile);
 	printf("  %d audio tracks.\n", n);
 	for(i = 0; i < n; i++) {

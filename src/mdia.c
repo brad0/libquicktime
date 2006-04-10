@@ -107,9 +107,7 @@ int quicktime_read_mdia(quicktime_t *file, quicktime_trak_t *trak,
 		else
 		if(quicktime_atom_is(&leaf_atom, "hdlr"))
 		{
-			quicktime_read_hdlr(file, &(mdia->hdlr)); 
-/* Main Actor doesn't write component name */
-			quicktime_atom_skip(file, &leaf_atom);
+                quicktime_read_hdlr(file, &(mdia->hdlr), &leaf_atom); 
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "minf"))

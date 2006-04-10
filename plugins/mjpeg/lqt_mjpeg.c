@@ -47,6 +47,8 @@ static lqt_codec_info_static_t codec_info_jpeg =
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: encode_parameters_jpeg,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+    
   };
 
 static lqt_codec_info_static_t codec_info_mjpa =
@@ -60,6 +62,7 @@ static lqt_codec_info_static_t codec_info_mjpa =
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: encode_parameters_jpeg,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 

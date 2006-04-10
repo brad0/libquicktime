@@ -262,7 +262,7 @@ struct CODECIDMAP {
 	char *name;
 	char *fourccs[MAX_FOURCCS];
         int   wav_ids[MAX_WAV_IDS];
-        int * encoding_colormodels;
+        int compatibility_flags;
 /*
  *  We explicitely allow, if encoding is allowed.
  *  This prevents the spreading of broken files
@@ -283,6 +283,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "Mpeg 1 Video",
 	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE }
+
         },
         {
           id: CODEC_ID_MPEG4,
@@ -297,6 +298,7 @@ struct CODECIDMAP codecidmap_v[] = {
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
                     "MP4V", (char *)0 },
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
           do_encode: 1
         },
 	{
@@ -334,6 +336,7 @@ struct CODECIDMAP codecidmap_v[] = {
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                     (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_AVI,
           do_encode: 1,
         },
 #if 0
@@ -361,6 +364,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "H263",
 	  fourccs: {"H263", "h263", "U263", "u263", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1,
         },
 	{
@@ -385,6 +389,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "H263+",
 	  fourccs: {"U263", "u263", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1,
         },
 	{
@@ -431,6 +436,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "MJPEG",
 	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_AVI,
           do_encode: 1,
         },
 	{
@@ -527,7 +533,10 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "DV (NTSC)",
 	  fourccs: {"dvc ", (char *)0 },
           wav_ids: { LQT_WAV_ID_NONE },
-          do_encode: 1 },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+          do_encode: 1,
+
+        },
         {
           id: CODEC_ID_DVVIDEO,
 	  index: -1,
@@ -539,6 +548,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "DV (PAL)",
 	  fourccs: {"dvcp", "dvpp", (char *)0 },
           wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1
         },
 };
@@ -567,6 +577,7 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "Mpeg Layer 2 Audio",
 	  fourccs: {".mp2", ".MP2", (char *)0 },
           wav_ids: { 0x55, LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
           do_encode: 1,
         },
 	{
@@ -580,7 +591,8 @@ struct CODECIDMAP codecidmap_a[] = {
 	  name: "AC3 Audio",
 	  fourccs: {".ac3", ".AC3", (char *)0},
           wav_ids: { 0x2000, LQT_WAV_ID_NONE },
-          //          do_encode: 1,
+          compatibility_flags: LQT_FILE_AVI,
+          do_encode: 1,
         },
         {
           id: CODEC_ID_QDM2,
@@ -733,13 +745,15 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
     //    capabilities = "Codec";
+    codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
     }
   else if(map->encoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_ENCODE;
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = NULL;
-      
+    codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
+
     //    capabilities = "Encoder";
     }
   else if(map->decoder)

@@ -420,7 +420,7 @@ int64_t quicktime_chunk_to_offset(quicktime_t *file,
 
 // Skip chunk header for AVI.  Skip it here instead of in read_chunk because some
 // codecs can't use read_chunk
-	if(file->use_avi)
+	if(file->file_type == LQT_FILE_AVI)
 	{
 //printf("quicktime_chunk_to_offset 1 %llx %d\n", result, file->mdat.atom.start);
 		result += 8 + file->mdat.atom.start;
@@ -529,7 +529,7 @@ void quicktime_write_chunk_header(quicktime_t *file,
 	quicktime_trak_t *trak, 
 	quicktime_atom_t *chunk)
 {
-	if(file->use_avi)
+	if(file->file_type == LQT_FILE_AVI)
 	{
 /* Get tag from first riff strl */
 		quicktime_riff_t *first_riff = file->riff[0];
@@ -566,7 +566,7 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 	int sample_size = quicktime_position(file) - offset;
 
 // Write AVI footer
-	if(file->use_avi)
+	if(file->file_type == LQT_FILE_AVI)
 	{
 		quicktime_atom_write_footer(file, chunk);
 

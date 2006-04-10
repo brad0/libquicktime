@@ -371,6 +371,7 @@ int quicktime_supported_audio(quicktime_t *file, int track)
 
 void lqt_update_frame_position(quicktime_video_map_t * track)
   {
+  //  fprintf(stderr, "Timestamp: %lld\n", track->timestamp);
   track->timestamp +=
     track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_duration;
 

@@ -49,6 +49,7 @@ elst.c \
 enda.c \
 esds.c \
 frma.c \
+ftyp.c \
 gmhd.c \
 gmin.c \
 graphics.c \

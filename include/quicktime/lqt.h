@@ -898,6 +898,36 @@ unsigned long lqt_get_creation_time(quicktime_t * file);
   
 /* get track number from track id */
 int lqt_track_from_id(quicktime_t *file, int track_id);
+
+/** \ingroup general
+    \brief Get a human readable filetype
+    \param type An lqt filetype
+    \returns A human readable description of the fileformat
+*/
+
+const char * lqt_file_type_to_string(lqt_file_type_t type);
+    
+/** \ingroup general
+    \brief Open a file for reading
+    \param filename A path to a regular file
+    \returns An initialized file handle or NULL if opening failed.
+    
+*/
+
+quicktime_t * lqt_open_read(const char * filename);
+
+/** \ingroup general
+    \brief Open a file for writing
+    \param filename A path to a regular file
+    \param type The type of the file, you want to create
+    \returns An initialized file handle or NULL if opening failed.
+    
+*/
+
+quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type);
+
+
+  
   
 #ifdef __cplusplus
 }

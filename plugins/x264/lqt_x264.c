@@ -397,6 +397,7 @@ static lqt_codec_info_static_t codec_info_x264 =
   direction:   LQT_DIRECTION_ENCODE,
   encoding_parameters: encode_parameters_x264,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
   };
 
 /* These are called from the plugin loader */

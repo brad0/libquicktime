@@ -36,13 +36,13 @@ int lqt_fileno(quicktime_t *file)
 int quicktime_make_streamable(char *in_path, char *out_path)
 {
 	quicktime_t file, *old_file, new_file;
-	int moov_exists = 0, mdat_exists = 0, result, atoms = 1;
+	int moov_exists = 0, mdat_exists = 0, ftyp_exists = 0, result, atoms = 1;
 	int64_t mdat_start = 0, mdat_size = 0;
 	quicktime_atom_t leaf_atom;
-	int64_t moov_length = 0;
-	
-	memset(&new_file,0,sizeof(quicktime_t));
-	
+	int64_t moov_length = 0, moov_start;
+        
+	memset(&new_file,0,sizeof(new_file));
+        
 	quicktime_init(&file);
 
 /* find the moov atom in the old file */
@@ -65,8 +65,14 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 		{
 			if(quicktime_atom_is(&leaf_atom, "moov"))
 			{
+                                fprintf(stderr, "old moov start: %lld\n", leaf_atom.start);
 				moov_exists = atoms;
 				moov_length = leaf_atom.size;
+			}
+			else
+			if(quicktime_atom_is(&leaf_atom, "ftyp"))
+			{
+				ftyp_exists = atoms;
 			}
 			else
 			if(quicktime_atom_is(&leaf_atom, "mdat"))
@@ -99,8 +105,8 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 /* copy the old file to the new file */
 	if(moov_exists && mdat_exists)
 	{
-/* moov wasn't the first atom */
-		if(moov_exists > 1)
+/* moov comes after mdat */
+		if(moov_exists > mdat_exists)
 		{
 			uint8_t *buffer;
 			int64_t buf_size = 1000000;
@@ -129,10 +135,24 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 				new_file.wr = 1;
 				new_file.rd = 0;
 		      	new_file.presave_buffer = calloc(1, QUICKTIME_PRESAVE);
+                        new_file.file_type = old_file->file_type;
+                        if(old_file->has_ftyp)
+                          quicktime_write_ftyp(&new_file, &(old_file->ftyp));
+                        
+                        moov_start = quicktime_position(&new_file);
+			quicktime_write_moov(&new_file, &(old_file->moov));
 
-				quicktime_write_moov(&new_file, &(old_file->moov));
+                        if(moov_length !=
+                           quicktime_position(&new_file) - moov_start)
+                          {
+                          fprintf(stderr,
+                                  "Warning: moov size changed from %lld to %lld (Pos: %lld, start: %lld)\n",
+                                  moov_length, quicktime_position(&new_file) - moov_start,
+                                  quicktime_position(&new_file), moov_start);
+                          quicktime_set_position(&new_file, moov_start + moov_length);
+                          }
+                          
 				
-				quicktime_set_position(&new_file, moov_length);
 
         	    quicktime_atom_write_header64(&new_file, 
                                          
@@ -1118,7 +1138,7 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
 
 // Set keyframe flag in idx1 table.
 // Only possible in the first RIFF.  After that, there's no keyframe support.
-        if(file->use_avi && file->total_riffs == 1)
+        if((file->file_type == LQT_FILE_AVI) && file->total_riffs == 1)
                 quicktime_set_idx1_keyframe(file,
                         trak,
                         frame);
@@ -1315,15 +1335,13 @@ int quicktime_read_info(quicktime_t *file)
         quicktime_atom_t leaf_atom;
         uint8_t avi_avi[4];
         int got_avi = 0;
-        int got_asf = 0;
                                                                                                                   
         quicktime_set_position(file, 0LL);
                                                                                                                   
 /* Test file format */
         do
         {
-                file->use_avi = 1;
-                file->use_asf = 1;
+                file->file_type = LQT_FILE_AVI;
                 result = quicktime_atom_read_header(file, &leaf_atom);
                 if(!result && quicktime_atom_is(&leaf_atom, "RIFF"))
                 {
@@ -1344,13 +1362,12 @@ int quicktime_read_info(quicktime_t *file)
                         break;
                 }
         }while(1);
-        if(!got_avi) file->use_avi = 0;
-        if(!got_asf) file->use_asf = 0;
+        if(!got_avi) file->file_type = LQT_FILE_NONE;
                                                                                                                   
         quicktime_set_position(file, 0LL);
                                                                                                                   
 /* McRoweSoft AVI section */
-        if(file->use_avi)
+        if(file->file_type == LQT_FILE_AVI)
         {
 //printf("quicktime_read_info 1\n");
 /* Import first RIFF */
@@ -1378,7 +1395,7 @@ int quicktime_read_info(quicktime_t *file)
         }
 /* Quicktime section */
         else
-        if(!file->use_avi)
+        if(file->file_type != LQT_FILE_AVI)
         {
                 do
                 {
@@ -1389,6 +1406,12 @@ int quicktime_read_info(quicktime_t *file)
                                 if(quicktime_atom_is(&leaf_atom, "mdat"))
                                 {
                                         quicktime_read_mdat(file, &(file->mdat), &leaf_atom);
+                                }
+                                else
+                                if(quicktime_atom_is(&leaf_atom, "ftyp"))
+                                {
+                                        quicktime_read_ftyp(file, &file->ftyp, &leaf_atom);
+                                        file->has_ftyp = 1;
                                 }
                                 else
                                 if(quicktime_atom_is(&leaf_atom, "moov"))
@@ -1549,27 +1572,20 @@ int quicktime_check_sig(char *path)
 }
 
 void quicktime_set_avi(quicktime_t *file, int value)
-{
-        file->use_avi = value;
-        quicktime_set_position(file, 0);
-                                                                                                                  
-// Write RIFF chunk
-        quicktime_init_riff(file);
-}
+  {
+  file->file_type = LQT_FILE_AVI;
+  quicktime_set_position(file, 0);
+  
+  // Write RIFF chunk
+  quicktime_init_riff(file);
+  }
                                                                                                                   
 int quicktime_is_avi(quicktime_t *file)
 {
-        return file->use_avi;
-}
-                                                                                                                  
-                                                                                                                  
-void quicktime_set_asf(quicktime_t *file, int value)
-{
-        file->use_asf = value;
+return !!(file->file_type == LQT_FILE_AVI);
 }
 
-
-quicktime_t* quicktime_open(const char *filename, int rd, int wr)
+quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
 {
         int i;
 	quicktime_t *new_file;
@@ -1583,22 +1599,18 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr)
           free(new_file);
           return (quicktime_t*)0;
           }
-	
-#ifdef PRINT_BANNER
-	static int have_warned = 0;
-
-	if( ! have_warned )
-	{
-		printf( "WARNING: This program is using a beta version of libquicktime.\n" );
-		have_warned = 1;
-	}
-#endif
 
 	quicktime_init(new_file);
 	new_file->wr = wr;
 	new_file->rd = rd;
 	new_file->mdat.atom.start = 0;
-
+        if(wr)
+          {
+          new_file->file_type = type;
+          quicktime_ftyp_init(&new_file->ftyp, type);
+          if(new_file->ftyp.major_brand)
+            new_file->has_ftyp = 1;
+          }
         result = quicktime_file_open(new_file, filename, rd, wr);
 
         if(!result)
@@ -1612,6 +1624,9 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr)
               new_file = 0;
               }
             //printf("quicktime_open 3\n");
+            /* Set file type */
+            if(new_file->has_ftyp)
+              new_file->file_type = quicktime_ftyp_get_file_type(&(new_file->ftyp));
             }
           
           //printf("quicktime_open 4 %d %d\n", wr, exists);
@@ -1619,6 +1634,8 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr)
           /* also don't want to do this if making a streamable file */
           if(wr)
             {
+            if(new_file->has_ftyp)
+              quicktime_write_ftyp(new_file, &(new_file->ftyp));
             quicktime_atom_write_header64(new_file, 
                                           &new_file->mdat.atom, 
                                           "mdat");
@@ -1653,6 +1670,21 @@ quicktime_t* quicktime_open(const char *filename, int rd, int wr)
 	return new_file;
 }
 
+quicktime_t* quicktime_open(const char *filename, int rd, int wr)
+  {
+  return do_open(filename, rd, wr, LQT_FILE_QT_OLD);
+  }
+
+quicktime_t * lqt_open_read(const char * filename)
+  {
+  return do_open(filename, 1, 0, LQT_FILE_NONE);
+  }
+
+quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type)
+  {
+  return do_open(filename, 0, 1, type);
+  }
+
 int quicktime_close(quicktime_t *file)
 {
         int result = 0;
@@ -1660,7 +1692,7 @@ int quicktime_close(quicktime_t *file)
         {
                 quicktime_codecs_flush(file);
                                                                                                                   
-                if(file->use_avi)
+                if(file->file_type == LQT_FILE_AVI)
                 {
 #if 0
                         quicktime_atom_t junk_atom;
@@ -1695,9 +1727,9 @@ int quicktime_close(quicktime_t *file)
 			    lqt_qtvr_add_node(file);
 			}
 // Atoms are only written here
+                        quicktime_atom_write_footer(file, &file->mdat.atom);
                         quicktime_finalize_moov(file, &(file->moov));
                         quicktime_write_moov(file, &(file->moov));
-                        quicktime_atom_write_footer(file, &file->mdat.atom);
                 }
         }
                                                                                                                   
@@ -1892,7 +1924,7 @@ int quicktime_div3_is_key(unsigned char *data, long size)
 
 int lqt_is_avi(quicktime_t *file)
   {
-  return !!file->use_avi;
+  return (file->file_type == LQT_FILE_AVI);
   }
 
 int lqt_get_wav_id(quicktime_t *file, int track)
@@ -1952,7 +1984,7 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
       {
       ret[i] = next_offset - trak->mdia.minf.stbl.stco.table[i].offset;
 
-      if(file->use_avi)
+      if(file->file_type == LQT_FILE_AVI)
         ret[i] -= 8;
       
       }
@@ -2439,3 +2471,28 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   return packet_size;
   }
 
+static struct
+  {
+  lqt_file_type_t type;
+  char * name;
+  }
+filetypes[] =
+  {
+      { LQT_FILE_NONE, "Unknown/Undefined" },
+      { LQT_FILE_QT_OLD, "Quicktime (old)" },
+      { LQT_FILE_QT,  "Quicktime" },
+      { LQT_FILE_AVI,  "AVI" },
+      { LQT_FILE_MP4,  "MP4" },
+      { LQT_FILE_M4A,  "M4A" },
+  };
+  
+const char * lqt_file_type_to_string(lqt_file_type_t type)
+  {
+  int i;
+  for(i = 0; i < sizeof(filetypes)/sizeof(filetypes[0]); i++)
+    {
+    if(filetypes[i].type == type)
+      return filetypes[i].name;
+    }
+  return filetypes[0].name;
+  }

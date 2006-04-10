@@ -449,9 +449,9 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->version = 0;
 	table->revision = 0;
  	table->vendor[0] = 'l';
- 	table->vendor[1] = 'n';
- 	table->vendor[2] = 'u';
- 	table->vendor[3] = 'x';
+ 	table->vendor[1] = 'q';
+ 	table->vendor[2] = 't';
+ 	table->vendor[3] = ' ';
 
 	table->temporal_quality = 100;
 	table->spatial_quality = 258;
@@ -462,7 +462,7 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->data_size = 0;
 	table->frames_per_sample = 1;
 	for(i = 0; i < 32; i++) table->compressor_name[i] = 0;
-	sprintf(table->compressor_name, "Quicktime for Linux");
+	sprintf(table->compressor_name, "%s-%s", PACKAGE, VERSION);
 	table->depth = 24;
 	table->ctab_id = 65535;
 	quicktime_ctab_init(&(table->ctab));

@@ -53,7 +53,8 @@ static lqt_codec_info_static_t codec_info_faac =
     type:                LQT_CODEC_AUDIO,
     direction:           LQT_DIRECTION_ENCODE,
     encoding_parameters: encode_parameters_faac,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 | LQT_FILE_M4A,
   };
 
 /* These are called from the plugin loader */

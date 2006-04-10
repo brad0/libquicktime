@@ -55,7 +55,8 @@ static lqt_codec_info_static_t codec_info_ima4 =
     type:                LQT_CODEC_AUDIO,
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_AVI | LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_raw =
@@ -68,7 +69,8 @@ quality",
     type:                LQT_CODEC_AUDIO,
     direction:           LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_twos =
@@ -80,7 +82,8 @@ static lqt_codec_info_static_t codec_info_twos =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_in24_little =
@@ -92,7 +95,8 @@ static lqt_codec_info_static_t codec_info_in24_little =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_in24_big =
@@ -104,7 +108,8 @@ static lqt_codec_info_static_t codec_info_in24_big =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_in24 =
@@ -128,7 +133,8 @@ static lqt_codec_info_static_t codec_info_in32_little =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_in32_big =
@@ -140,7 +146,8 @@ static lqt_codec_info_static_t codec_info_in32_big =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_in32 =
@@ -166,7 +173,8 @@ static lqt_codec_info_static_t codec_info_fl32_little =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_fl32_big =
@@ -178,7 +186,8 @@ static lqt_codec_info_static_t codec_info_fl32_big =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_fl32 =
@@ -202,7 +211,8 @@ static lqt_codec_info_static_t codec_info_fl64_little =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_fl64_big =
@@ -214,7 +224,8 @@ static lqt_codec_info_static_t codec_info_fl64_big =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_ENCODE,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_fl64 =
@@ -242,7 +253,8 @@ static lqt_codec_info_static_t codec_info_ulaw =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
   };
 
 static lqt_codec_info_static_t codec_info_alaw =
@@ -255,7 +267,8 @@ static lqt_codec_info_static_t codec_info_alaw =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
   };
 
 
@@ -269,7 +282,8 @@ static lqt_codec_info_static_t codec_info_sowt =
     type:         LQT_CODEC_AUDIO,
     direction:    LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
   };
 
 /* These are called from the plugin loader */

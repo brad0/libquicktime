@@ -700,7 +700,7 @@ static int encode(quicktime_t *file,
     lqt_init_vbr_audio(file, track);
 
 
-    if(file->use_avi)
+    if(file->file_type == LQT_FILE_AVI)
       trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
     vorbis_info_init(&codec->enc_vi);
 

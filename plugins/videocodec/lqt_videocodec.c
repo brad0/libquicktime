@@ -87,6 +87,7 @@ static lqt_codec_info_static_t codec_info_raw =
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_rawalpha =
@@ -104,6 +105,7 @@ static lqt_codec_info_static_t codec_info_rawalpha =
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 #endif
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 
@@ -117,6 +119,7 @@ static lqt_codec_info_static_t codec_info_v210 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
@@ -129,6 +132,7 @@ static lqt_codec_info_static_t codec_info_v308 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v408 =
@@ -141,7 +145,7 @@ static lqt_codec_info_static_t codec_info_v408 =
   direction:         LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
-
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v410 =
@@ -154,6 +158,7 @@ static lqt_codec_info_static_t codec_info_v410 =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_yuv2 =
@@ -167,6 +172,7 @@ static lqt_codec_info_static_t codec_info_yuv2 =
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
 
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_2vuy =
@@ -179,6 +185,7 @@ static lqt_codec_info_static_t codec_info_2vuy =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: (lqt_parameter_info_static_t*)0,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
 
   };
 
@@ -192,6 +199,7 @@ static lqt_codec_info_static_t codec_info_yuv4 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
 
   };
 
@@ -205,6 +213,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
     direction:   LQT_DIRECTION_BOTH,
     encoding_parameters: (lqt_parameter_info_static_t*)0,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
     
   };
 

@@ -32,22 +32,6 @@ extern "C" {
    to see what's inside. The codec registry can be configured with the libquicktime_config
    program.
 */
-  
-/* 
- * Compatibility flags for encoders
- */
-  
-#define LQT_CODEC_COMPATIBILITY_QUICKTIME (1<<0) /* Codec can be used for Quicktime files       */
-#define LQT_CODEC_COMPATIBILITY_AVI       (1<<1) /* Codec can be used for AVI files             */
-#define LQT_CODEC_COMPATIBILITY_HVIRTUAL  (1<<2) /* Codec can be played back by Heroine Virtual */
-
-/*
- *  Note, that additional codecs (e.g. Divx) might be required for the following 
- *  2 Programs
- */
-  
-#define LQT_CODEC_COMPATIBILITY_APPLE     (1<<3) /* Codec can be played back by Apple Quicktime */
-#define LQT_CODEC_COMPATIBILITY_WMP       (1<<4) /* Codec can be played by Windows Media Player */
 
 
 /**

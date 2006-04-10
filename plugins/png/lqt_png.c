@@ -33,6 +33,7 @@ static lqt_codec_info_static_t codec_info_pngalpha =
   direction:   LQT_DIRECTION_ENCODE,
   encoding_parameters: encode_parameters_png,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_png =
@@ -45,6 +46,7 @@ static lqt_codec_info_static_t codec_info_png =
   direction:   LQT_DIRECTION_BOTH,
   encoding_parameters: encode_parameters_png,
   decoding_parameters: (lqt_parameter_info_static_t*)0,
+  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 /* These are called from the plugin loader */

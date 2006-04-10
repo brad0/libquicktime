@@ -289,8 +289,16 @@ void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma);
 void quicktime_frma_dump(quicktime_frma_t *frma);
 void quicktime_set_frma(quicktime_trak_t * trak, char * codec);
 
+/* ftyp.c */
 
 
+void quicktime_ftyp_init(quicktime_ftyp_t * ftyp, lqt_file_type_t type);
+
+lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp);
+
+void quicktime_read_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp,
+                         quicktime_atom_t *parent_atom);
+void quicktime_write_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp);
 
 /* gmhd.c */
 
@@ -316,9 +324,10 @@ void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type);
 void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_data(quicktime_hdlr_t *hdlr);
+void quicktime_hdlr_init_udta(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_delete(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_dump(quicktime_hdlr_t *hdlr);
-void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr);
+void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr, quicktime_atom_t * parent_atom);
 void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr);
 
 /* imgp.c */
@@ -865,8 +874,8 @@ int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type);
 int quicktime_udta_init(quicktime_udta_t *udta);
 int quicktime_udta_delete(quicktime_udta_t *udta);
 void quicktime_udta_dump(quicktime_udta_t *udta);
-int quicktime_read_udta_string(quicktime_t *file, char **string, int *size);
-int quicktime_write_udta_string(quicktime_t *file, char *string, int size);
+int quicktime_read_udta_string(quicktime_t *file, char **string, int *size, int ilst);
+int quicktime_write_udta_string(quicktime_t *file, char *string, int size, int ilst);
 int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_atom_t *udta_atom);
 void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta);
 int quicktime_set_udta_string(char **string, int *size, char *new_string);

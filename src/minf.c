@@ -124,9 +124,7 @@ int quicktime_read_minf(quicktime_t *file, quicktime_trak_t *trak,
 		if(quicktime_atom_is(&leaf_atom, "hdlr"))
 			{ 
 
-				quicktime_read_hdlr(file, &(minf->hdlr));
-				/* Main Actor doesn't write component name */
-				quicktime_atom_skip(file, &leaf_atom);
+				quicktime_read_hdlr(file, &(minf->hdlr), &leaf_atom);
 			}
 		else
 		if(quicktime_atom_is(&leaf_atom, "dinf"))

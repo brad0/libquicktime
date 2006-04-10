@@ -275,8 +275,6 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
 
 	quicktime_atom_write_footer(file, &atom);
-// Rewind to end of mdat
-	quicktime_set_position(file, file->mdat.atom.end);
 }
 
 void quicktime_update_durations(quicktime_moov_t *moov)

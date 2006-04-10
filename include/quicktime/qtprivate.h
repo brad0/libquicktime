@@ -72,6 +72,13 @@ typedef struct
 	float values[9];
 } quicktime_matrix_t;
 
+typedef struct
+  {
+  uint32_t major_brand;
+  uint32_t minor_version;
+  int num_compatible_brands;
+  uint32_t * compatible_brands;
+  } quicktime_ftyp_t;
 
 typedef struct
 {
@@ -591,7 +598,7 @@ typedef struct
 	long flags;
 	char component_type[4];
 	char component_subtype[4];
-long component_manufacturer;
+        char component_manufacturer[4];
 	long component_flags;
 	long component_flag_mask;
 	char component_name[256];
@@ -1073,6 +1080,11 @@ struct quicktime_s
 	int64_t total_length;
 	quicktime_mdat_t mdat;
 	quicktime_moov_t moov;
+        quicktime_ftyp_t ftyp;
+        int has_ftyp;
+
+        lqt_file_type_t file_type;
+
 	int rd;
 	int wr;
 
@@ -1092,10 +1104,8 @@ struct quicktime_s
         int64_t old_preload_end;
         int64_t old_preload_ptr;
 #endif
-/* ASF section */
-        int use_asf;
 
-        int use_avi;
+//        int use_avi;
 /* AVI tree */
         quicktime_riff_t *riff[MAX_RIFFS];
         int total_riffs;

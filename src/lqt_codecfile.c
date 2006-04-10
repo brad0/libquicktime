@@ -56,6 +56,8 @@ static const char * fourccs_key         = "Fourccs: ";
 static const char * num_wav_ids_key     = "NumWavIds: ";
 static const char * wav_ids_key         = "WavIds: ";
 
+static const char * compatibility_key   = "Compatibility: ";
+
 /* Module filename and module index */
 
 static const char * module_filename_key  = "ModuleFilename: ";
@@ -367,6 +369,13 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
         codec->direction = LQT_DIRECTION_DECODE;
       else if(!strcmp(pos, direction_both))
         codec->direction = LQT_DIRECTION_BOTH;
+      }
+
+    /* Compatibility flags */
+    else if(CHECK_KEYWORD(compatibility_key))
+      {
+      pos = line + strlen(compatibility_key);
+      codec->compatibility_flags = strtoul(pos, (char**)0, 16);
       }
     
     /* Module filename */
@@ -751,6 +760,9 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
   if(tmp)
     fprintf(output, "%s%s\n", direction_key, tmp);
 
+  fprintf(output, "%s%08x\n", compatibility_key, info->compatibility_flags);
+  
+  
   if(info->num_fourccs)
     {
     fprintf(output, "%s%d\n", num_fourccs_key, info->num_fourccs);

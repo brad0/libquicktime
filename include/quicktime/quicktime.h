@@ -84,6 +84,23 @@ extern "C" {
 
 */
 
+/** \ingroup General
+ *  \brief File types
+ *
+ * These are bitmasks since codecs need lists of supported file formats
+ */
+
+typedef enum
+  {
+    LQT_FILE_NONE = 0,        /*!< Undefined or not yet set */
+    LQT_FILE_QT_OLD = (1<<0), /*!< Old libquicktime format (without ftyp) */
+    LQT_FILE_QT     = (1<<1), /*!< New libquicktime format (ftyp = "qt  ") */
+    LQT_FILE_AVI    = (1<<2), /*!< AVI */
+    LQT_FILE_MP4    = (1<<3), /*!< .mp4 (ftyp = "mp42") */
+    LQT_FILE_M4A    = (1<<4), /*!< .m4a  (ftyp = "mp42") */
+  } lqt_file_type_t;
+
+  
 /** \ingroup multichannel
  *  \brief Channel definitions
  *
