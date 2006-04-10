@@ -1625,7 +1625,7 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
               }
             //printf("quicktime_open 3\n");
             /* Set file type */
-            if(new_file->has_ftyp)
+            else if(new_file->has_ftyp)
               new_file->file_type = quicktime_ftyp_get_file_type(&(new_file->ftyp));
             }
           
