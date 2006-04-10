@@ -34,10 +34,10 @@ void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 	printf(" movie header\n");
 	printf("  version %d\n", mvhd->version);
 	printf("  flags %ld\n", mvhd->flags);
-	printf("  creation_time %lu\n", mvhd->creation_time);
-	printf("  modification_time %lu\n", mvhd->modification_time);
+	printf("  creation_time %llu\n", mvhd->creation_time);
+	printf("  modification_time %llu\n", mvhd->modification_time);
 	printf("  time_scale %ld\n", mvhd->time_scale);
-	printf("  duration %ld\n", mvhd->duration);
+	printf("  duration %lld\n", mvhd->duration);
 	printf("  preferred_rate %f\n", mvhd->preferred_rate);
 	printf("  preferred_volume %f\n", mvhd->preferred_volume);
 	quicktime_print_chars("  reserved ", mvhd->reserved, 10);
@@ -55,10 +55,22 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 {
 	mvhd->version = quicktime_read_char(file);
 	mvhd->flags = quicktime_read_int24(file);
-	mvhd->creation_time = quicktime_read_int32(file);
-	mvhd->modification_time = quicktime_read_int32(file);
+
+        if(mvhd->version == 0)
+          {
+          mvhd->creation_time = quicktime_read_int32(file);
+          mvhd->modification_time = quicktime_read_int32(file);
+          }
+        else if(mvhd->version == 1)
+          {
+          mvhd->creation_time = quicktime_read_int64(file);
+          mvhd->modification_time = quicktime_read_int64(file);
+          }
 	mvhd->time_scale = quicktime_read_int32(file);
-	mvhd->duration = quicktime_read_int32(file);
+	if(mvhd->version == 0)
+          mvhd->duration = quicktime_read_int32(file);
+        else if(mvhd->version == 1)
+          mvhd->duration = quicktime_read_int64(file);
 	mvhd->preferred_rate = quicktime_read_fixed32(file);
 	mvhd->preferred_volume = quicktime_read_fixed16(file);
 	quicktime_read_data(file, mvhd->reserved, 10);
@@ -84,10 +96,23 @@ void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)
 
 	quicktime_write_char(file, mvhd->version);
 	quicktime_write_int24(file, mvhd->flags);
-	quicktime_write_int32(file, mvhd->creation_time);
-	quicktime_write_int32(file, mvhd->modification_time);
+
+        if(mvhd->version == 0)
+          {
+          quicktime_write_int32(file, mvhd->creation_time);
+          quicktime_write_int32(file, mvhd->modification_time);
+          }
+        else if(mvhd->version == 1)
+          {
+          quicktime_write_int64(file, mvhd->creation_time);
+          quicktime_write_int64(file, mvhd->modification_time);
+          }
 	quicktime_write_int32(file, mvhd->time_scale);
-	quicktime_write_int32(file, mvhd->duration);
+        if(mvhd->version == 0)
+          quicktime_write_int32(file, mvhd->duration);
+        else if(mvhd->version == 1)
+          quicktime_write_int64(file, mvhd->duration);
+        
 	quicktime_write_fixed32(file, mvhd->preferred_rate);
 	quicktime_write_fixed16(file, mvhd->preferred_volume);
 	quicktime_write_data(file, mvhd->reserved, 10);

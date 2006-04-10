@@ -84,12 +84,12 @@ typedef struct
 {
 	int version;
 	long flags;
-	unsigned long creation_time;
-	unsigned long modification_time;
+        uint64_t creation_time;
+	uint64_t modification_time;
 	int track_id;
 	long reserved1;
-	long duration;
-	uint8_t reserved2[8];
+	uint64_t duration;
+        uint8_t reserved2[8];
 	int layer;
 	int alternate_group;
 	float volume;
@@ -718,10 +718,10 @@ typedef struct
 {
 	int version;
 	long flags;
-	unsigned long creation_time;
-	unsigned long modification_time;
+	uint64_t creation_time;
+	uint64_t modification_time;
 	long time_scale;
-	long duration;
+	uint64_t duration;
 	float preferred_rate;
 	float preferred_volume;
 	uint8_t reserved[10];

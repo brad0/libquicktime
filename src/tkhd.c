@@ -6,7 +6,7 @@ int quicktime_tkhd_init(quicktime_tkhd_t *tkhd)
 	int i;
 	tkhd->version = 0;
 	tkhd->flags = 15;
-	tkhd->creation_time = quicktime_current_time();
+        tkhd->creation_time = quicktime_current_time();
 	tkhd->modification_time = quicktime_current_time();
 	tkhd->track_id = 0;
 	tkhd->reserved1 = 0;
@@ -32,11 +32,11 @@ void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd)
 	printf("  track header\n");
 	printf("   version %d\n", tkhd->version);
 	printf("   flags %ld\n", tkhd->flags);
-	printf("   creation_time %lu\n", tkhd->creation_time);
-	printf("   modification_time %lu\n", tkhd->modification_time);
+	printf("   creation_time %llu\n", tkhd->creation_time);
+	printf("   modification_time %llu\n", tkhd->modification_time);
 	printf("   track_id %d\n", tkhd->track_id);
 	printf("   reserved1 %ld\n", tkhd->reserved1);
-	printf("   duration %ld\n", tkhd->duration);
+	printf("   duration %lld\n", tkhd->duration);
 	quicktime_print_chars("   reserved2 ", tkhd->reserved2, 8);
 	printf("   layer %d\n", tkhd->layer);
 	printf("   alternate_group %d\n", tkhd->alternate_group);
@@ -52,11 +52,23 @@ void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 //printf("quicktime_read_tkhd 1 %llx\n", quicktime_position(file));
 	tkhd->version = quicktime_read_char(file);
 	tkhd->flags = quicktime_read_int24(file);
-	tkhd->creation_time = quicktime_read_int32(file);
-	tkhd->modification_time = quicktime_read_int32(file);
+        if(tkhd->version == 0)
+          {
+          tkhd->creation_time = quicktime_read_int32(file);
+          tkhd->modification_time = quicktime_read_int32(file);
+          }
+        else if(tkhd->version == 1)
+          {
+          tkhd->creation_time = quicktime_read_int64(file);
+          tkhd->modification_time = quicktime_read_int64(file);
+          }
 	tkhd->track_id = quicktime_read_int32(file);
 	tkhd->reserved1 = quicktime_read_int32(file);
-	tkhd->duration = quicktime_read_int32(file);
+        if(tkhd->version == 0)
+          tkhd->duration = quicktime_read_int32(file);
+        else if(tkhd->version == 1)
+          tkhd->duration = quicktime_read_int64(file);
+        
 	quicktime_read_data(file, tkhd->reserved2, 8);
 	tkhd->layer = quicktime_read_int16(file);
 	tkhd->alternate_group = quicktime_read_int16(file);
@@ -75,11 +87,22 @@ void quicktime_write_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 	quicktime_atom_write_header(file, &atom, "tkhd");
 	quicktime_write_char(file, tkhd->version);
 	quicktime_write_int24(file, tkhd->flags);
-	quicktime_write_int32(file, tkhd->creation_time);
-	quicktime_write_int32(file, tkhd->modification_time);
+        if(tkhd->version == 0)
+          {
+          quicktime_write_int32(file, tkhd->creation_time);
+          quicktime_write_int32(file, tkhd->modification_time);
+          }
+        else if(tkhd->version == 1)
+          {
+          quicktime_write_int64(file, tkhd->creation_time);
+          quicktime_write_int64(file, tkhd->modification_time);
+          }
 	quicktime_write_int32(file, tkhd->track_id);
 	quicktime_write_int32(file, tkhd->reserved1);
-	quicktime_write_int32(file, tkhd->duration);
+        if(tkhd->version == 0)
+          quicktime_write_int32(file, tkhd->duration);
+        else if(tkhd->version == 1)
+          quicktime_write_int64(file, tkhd->duration);
 	quicktime_write_data(file, tkhd->reserved2, 8);
 	quicktime_write_int16(file, tkhd->layer);
 	quicktime_write_int16(file, tkhd->alternate_group);
