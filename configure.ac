@@ -518,7 +518,7 @@ AH_TEMPLATE([HAVE_X264], [Enable X264])
 have_x264="false"
 
 if test $have_gpl = "true"; then
-X264_REQUIRED="0.45.x"
+X264_REQUIRED="0.45"
 
 PKG_CHECK_MODULES(X264, x264 >= $X264_REQUIRED, have_x264="true", have_x264="false")
 AC_SUBST(X264_REQUIRED)
