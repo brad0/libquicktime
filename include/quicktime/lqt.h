@@ -688,8 +688,13 @@ const char * lqt_sample_format_to_string(lqt_sample_format_t sampleformat);
  * \param track Track index (starting with 0)
  * \returns The sampleformat
  *
- * Use this function if you want to use \ref lqt_decode_audio_raw or \ref lqt_encode_audio_raw
+ * Use this function if you want to use \ref lqt_decode_audio_raw or
+ * \ref lqt_encode_audio_raw
  * to bypass libquicktimes internal sample format conversion routines.
+ *
+ * *Note*
+ * Some codecs call 
+ * 
  */
   
 lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track);

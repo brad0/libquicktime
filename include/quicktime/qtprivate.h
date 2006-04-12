@@ -354,7 +354,10 @@ typedef struct
 /* audio description */
 	uint32_t channels;
 	uint32_t sample_size;
+/* Audio extension for version == 2 */
         uint32_t formatSpecificFlags;
+        uint32_t constBytesPerAudioPacket;
+        uint32_t constLPCMFramesPerAudioPacket;
 /* LQT: We have int16_t for the compression_id, because otherwise negative
    values don't show up correctly */
         int16_t compression_id;
@@ -383,6 +386,7 @@ typedef struct
         unsigned char * table_raw;
         int table_raw_size;
 
+        
 
 } quicktime_stsd_table_t;
 

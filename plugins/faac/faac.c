@@ -134,7 +134,7 @@ static int encode(quicktime_t *file,
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t * trak = track_map->track;
-
+  char mp4a_atom[4];
   
   if(!codec->initialized)
     {
@@ -194,6 +194,15 @@ static int encode(quicktime_t *file,
                               decoderConfigLen);
     free(decoderConfig);
 
+    quicktime_set_frma(trak, "mp4a");
+
+    mp4a_atom[0] = 0x00;
+    mp4a_atom[1] = 0x00;
+    mp4a_atom[2] = 0x00;
+    mp4a_atom[3] = 0x00;
+    
+    quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
+    
     esds->version         = 0;
     esds->flags           = 0;
     

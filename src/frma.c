@@ -19,9 +19,10 @@ void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma)
 void quicktime_frma_dump(quicktime_frma_t *frma)
   {
   printf("         frma: \n");
-  printf("           codec: %4s\n", frma->codec);
+  printf("           codec: %c%c%c%c\n",
+         frma->codec[0], frma->codec[1], frma->codec[2], frma->codec[3]);
   }
-  
+
 void quicktime_set_frma(quicktime_trak_t * trak, char * codec)
   {
   quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);

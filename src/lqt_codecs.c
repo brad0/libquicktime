@@ -713,6 +713,11 @@ static int decode_audio_old(quicktime_t *file,
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
 
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, (void*)0, 
+                                                        0, track);
+  
+  
   /* (Re)allocate sample buffer */
 
   if(atrack->sample_buffer_alloc < samples)
@@ -870,6 +875,11 @@ static int encode_audio_old(quicktime_t *file,
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
 
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, (void*)0, 
+                                                        0, track);
+
+  
   /* (Re)allocate sample buffer */
 
   if(atrack->sample_buffer_alloc < samples)

@@ -653,13 +653,6 @@ void quicktime_stsd_init_qtvr(quicktime_t *file,
 				  int height);
 /* stsdtable.c */
 
-void quicktime_mjqt_init(quicktime_mjqt_t *mjqt);
-void quicktime_mjqt_delete(quicktime_mjqt_t *mjqt);
-void quicktime_mjqt_dump(quicktime_mjqt_t *mjqt);
-void quicktime_mjht_init(quicktime_mjht_t *mjht);
-void quicktime_mjht_delete(quicktime_mjht_t *mjht);
-void quicktime_mjht_dump(quicktime_mjht_t *mjht);
-
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom);
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table);
@@ -671,6 +664,11 @@ void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
                                  uint32_t bytes_per_packet,
                                  uint32_t bytes_per_frame,
                                  uint32_t bytes_per_sample);
+
+void quicktime_set_stsd_audio_v2(quicktime_stsd_table_t *table,
+                                 uint32_t formatSpecificFlags,
+                                 uint32_t constBytesPerAudioPacket,
+                                 uint32_t constLPCMFramesPerAudioPacket);
 
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table);
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);

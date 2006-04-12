@@ -2,6 +2,32 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
 
+/* Encoding parameters */
+
+#define PARAM_ENDIAN \
+  { \
+  name: "pcm_little_endian", \
+    real_name: "Little endian",                 \
+    type: LQT_PARAMETER_INT, \
+    val_min: { val_int: 0 }, \
+    val_max: { val_int: 1 }, \
+    val_default: { val_int: 0 } \
+  }
+
+#define PARAM_FORMAT \
+  {                  \
+    name:        "pcm_format",                    \
+    real_name:   "Format",                      \
+    type:        LQT_PARAMETER_STRINGLIST,              \
+    val_default: { val_string: "Integer (16 bit)" },       \
+    stringlist_options: (char*[]){ "Integer (16 bit)", \
+                                   "Integer (24 bit)", \
+                                   "Integer (32 bit)", \
+                                   "Float (32 bit)", \
+                                   "Float (64 bit)", \
+                                   (char*)0 } \
+  }
+
 /* Let's define prototypes here */
 
 void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack);
@@ -11,22 +37,16 @@ void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack);
 
-void quicktime_init_codec_in24_little(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_in24_big(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_in24(quicktime_audio_map_t *atrack);
 
-void quicktime_init_codec_in32_little(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_in32_big(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_in32(quicktime_audio_map_t *atrack);
 
 
-void quicktime_init_codec_fl32_little(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_fl32_big(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack);
 
-void quicktime_init_codec_fl64_little(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_fl64_big(quicktime_audio_map_t *atrack);
 void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack);
+
+void quicktime_init_codec_lpcm(quicktime_audio_map_t *atrack);
 
 
 static char * fourccs_ima4[]  = { QUICKTIME_IMA4, (char*)0 };
@@ -42,6 +62,22 @@ static char * fourccs_in32[]  = { "in32", (char*)0 };
 
 static char * fourccs_fl32[]  = { "fl32", (char*)0 };
 static char * fourccs_fl64[]  = { "fl64", (char*)0 };
+
+static char * fourccs_lpcm[]  = { "lpcm", (char*)0 };
+
+static lqt_parameter_info_static_t enda_parameters[] =
+  {
+    PARAM_ENDIAN,
+    { /* End of parameters */ },
+  };
+
+static lqt_parameter_info_static_t lpcm_parameters[] =
+  {
+    PARAM_FORMAT,
+    PARAM_ENDIAN,
+    { /* End of parameters */ },
+  };
+
 
 
 static lqt_codec_info_static_t codec_info_ima4 =
@@ -86,32 +122,6 @@ static lqt_codec_info_static_t codec_info_twos =
     compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
-static lqt_codec_info_static_t codec_info_in24_little =
-  {
-    name:         "in24_little",
-    long_name:    "24 bit PCM (little endian)",
-    description:  "24 bit PCM (little endian)",
-    fourccs:      fourccs_in24,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
-
-static lqt_codec_info_static_t codec_info_in24_big =
-  {
-    name:         "in24_big",
-    long_name:    "24 bit PCM (big endian)",
-    description:  "24 bit PCM (big endian)",
-    fourccs:      fourccs_in24,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
-
 static lqt_codec_info_static_t codec_info_in24 =
   {
     name:         "in24",
@@ -119,33 +129,8 @@ static lqt_codec_info_static_t codec_info_in24 =
     description:  "24 bit PCM",
     fourccs:      fourccs_in24,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_DECODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
-  };
-
-static lqt_codec_info_static_t codec_info_in32_little =
-  {
-    name:         "in32_little",
-    long_name:    "32 bit PCM (little endian)",
-    description:  "32 bit PCM (little endian)",
-    fourccs:      fourccs_in32,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
-
-static lqt_codec_info_static_t codec_info_in32_big =
-  {
-    name:         "in32_big",
-    long_name:    "32 bit PCM (big endian)",
-    description:  "32 bit PCM (big endian)",
-    fourccs:      fourccs_in32,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: enda_parameters,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
     compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
@@ -157,38 +142,14 @@ static lqt_codec_info_static_t codec_info_in32 =
     description:  "32 bit PCM",
     fourccs:      fourccs_in32,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_DECODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: enda_parameters,
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 /* Floating point */
 
-static lqt_codec_info_static_t codec_info_fl32_little =
-  {
-    name:         "fl32_little",
-    long_name:    "32 bit float (little endian)",
-    description:  "32 bit float (little endian)",
-    fourccs:      fourccs_fl32,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
-
-static lqt_codec_info_static_t codec_info_fl32_big =
-  {
-    name:         "fl32_big",
-    long_name:    "32 bit float (big endian)",
-    description:  "32 bit float (big endian)",
-    fourccs:      fourccs_fl32,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
 
 static lqt_codec_info_static_t codec_info_fl32 =
   {
@@ -197,33 +158,8 @@ static lqt_codec_info_static_t codec_info_fl32 =
     description:  "32 bit float",
     fourccs:      fourccs_fl32,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_DECODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
-  };
-
-static lqt_codec_info_static_t codec_info_fl64_little =
-  {
-    name:         "fl64_little",
-    long_name:    "64 bit float (little endian)",
-    description:  "64 bit float (little endian)",
-    fourccs:      fourccs_fl64,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-  };
-
-static lqt_codec_info_static_t codec_info_fl64_big =
-  {
-    name:         "fl64_little",
-    long_name:    "64 bit float (big endian)",
-    description:  "64 bit float (big endian)",
-    fourccs:      fourccs_fl64,
-    type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_ENCODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: enda_parameters,
     decoding_parameters: (lqt_parameter_info_static_t*)0,
     compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
@@ -235,13 +171,11 @@ static lqt_codec_info_static_t codec_info_fl64 =
     description:  "64 bit float",
     fourccs:      fourccs_fl64,
     type:         LQT_CODEC_AUDIO,
-    direction:    LQT_DIRECTION_DECODE,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: enda_parameters,
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
-
-
-
 
 static lqt_codec_info_static_t codec_info_ulaw =
   {
@@ -286,9 +220,23 @@ static lqt_codec_info_static_t codec_info_sowt =
     compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
   };
 
+static lqt_codec_info_static_t codec_info_lpcm =
+  {
+    name:         "lpcm",
+    long_name:    "Linear PCM (QT 7)",
+    description:  "Linear PCM encoder",
+    fourccs:      fourccs_lpcm,
+    type:         LQT_CODEC_AUDIO,
+    direction:    LQT_DIRECTION_BOTH,
+    encoding_parameters: lpcm_parameters,
+    decoding_parameters: (lqt_parameter_info_static_t*)0,
+    compatibility_flags: LQT_FILE_QT,
+  };
+
+
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 18; }
+extern int get_num_codecs() { return 11; }
 
 extern lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -312,41 +260,20 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
     case 5: /* alaw */
       return &codec_info_alaw;
       break;
-    case 6: /* in24_little */
-      return &codec_info_in24_little;
-      break;
-    case 7: /* in24_big */
-      return &codec_info_in24_big;
-      break;
-    case 8: /* in24 */
+    case 6: /* in24 */
       return &codec_info_in24;
       break;
-    case 9: /* in32_little */
-      return &codec_info_in32_little;
-      break;
-    case 10: /* in32_big */
-      return &codec_info_in32_big;
-      break;
-    case 11: /* in32 */
+    case 7: /* in32 */
       return &codec_info_in32;
       break;
-    case 12: /* fl32_little */
-      return &codec_info_fl32_little;
-      break;
-    case 13: /* fl32_big */
-      return &codec_info_fl32_big;
-      break;
-    case 14: /* fl32 */
+    case 8: /* fl32 */
       return &codec_info_fl32;
       break;
-    case 15: /* fl64_little */
-      return &codec_info_fl64_little;
-      break;
-    case 16: /* fl64_big */
-      return &codec_info_fl64_big;
-      break;
-    case 17: /* fl64 */
+    case 9: /* fl64 */
       return &codec_info_fl64;
+      break;
+    case 10: /* lpcm */
+      return &codec_info_lpcm;
       break;
     }
   
@@ -375,41 +302,20 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
     case 5: /* Alaw */
       return quicktime_init_codec_alaw;
       break;
-    case 6: /* in24_little */
-      return quicktime_init_codec_in24_little;
-      break;
-    case 7: /* in24_big */
-      return quicktime_init_codec_in24_big;
-      break;
-    case 8: /* in24 */
+    case 6: /* in24 */
       return quicktime_init_codec_in24;
       break;
-    case 9: /* in32_little */
-      return quicktime_init_codec_in32_little;
-      break;
-    case 10: /* in32_big */
-      return quicktime_init_codec_in32_big;
-      break;
-    case 11: /* in32 */
+    case 7: /* in32 */
       return quicktime_init_codec_in32;
       break;
-    case 12: /* fl32_little */
-      return quicktime_init_codec_fl32_little;
-      break;
-    case 13: /* fl32_big */
-      return quicktime_init_codec_fl32_big;
-      break;
-    case 14: /* fl32 */
+    case 8: /* fl32 */
       return quicktime_init_codec_fl32;
       break;
-    case 15: /* fl64_little */
-      return quicktime_init_codec_fl64_little;
-      break;
-    case 16: /* fl64_big */
-      return quicktime_init_codec_fl64_big;
-      break;
-    case 17: /* fl64 */
+    case 9: /* fl64 */
       return quicktime_init_codec_fl64;
+      break;
+    case 10: /* lpcm */
+      return quicktime_init_codec_lpcm;
       break;
     }
   return (lqt_init_audio_codec_func_t)0;

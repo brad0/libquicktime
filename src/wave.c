@@ -9,7 +9,8 @@ uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uin
   }
 
 
-void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t * data, uint32_t len)
+void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name,
+                                  uint8_t * data, uint32_t len)
   {
   quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
 
@@ -35,6 +36,7 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
     if(quicktime_atom_is(&leaf_atom, "frma"))
       {
       quicktime_read_frma(file, &(wave->frma), &leaf_atom);
+      wave->has_frma = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "enda"))
       {
@@ -69,6 +71,8 @@ void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave)
 
   if(wave->has_frma)
     quicktime_write_frma(file, &wave->frma);
+  if(wave->has_esds)
+    quicktime_write_esds(file, &wave->esds);
   if(wave->has_enda)
     quicktime_write_enda(file, &wave->enda);
 

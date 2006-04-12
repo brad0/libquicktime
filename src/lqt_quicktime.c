@@ -2218,9 +2218,33 @@ const char * lqt_sample_format_to_string(lqt_sample_format_t s)
 
 lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
   {
+  quicktime_audio_map_t * atrack;
+
   if(track < 0 || track > file->total_atracks)
     return LQT_SAMPLE_UNDEFINED;
-  return file->atracks[track].sample_format;
+
+  atrack = &(file->atracks[track]);
+
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    {
+    
+    if(file->wr)
+      {
+      ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, (void*)0, 
+                                                          0, track);
+      
+      }
+    else
+      {
+      ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, (void*)0, 
+                                                          0, track);
+
+      }
+    fprintf(stderr, "Obtained sampleformat: %s\n",
+            lqt_sample_format_to_string(atrack->sample_format));
+    }
+  
+  return atrack->sample_format;
   }
 
 void lqt_init_vbr_audio(quicktime_t * file, int track)
