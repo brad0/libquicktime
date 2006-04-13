@@ -2,53 +2,6 @@
 #include <quicktime/quicktime.h>
 #include <string.h>
 
-/* We hope, we can import the Version 2 SampleDescription into a verison 0 one */
-
-#if 0
-static void import_sampledescription_v2(quicktime_stsd_table_t *table)
-  {
-  if(!strncmp(table->format, "lpcm", 4))
-    {
-    if(table->formatSpecificFlags & kAudioFormatFlagIsFloat)
-      {
-      switch(table->sample_size)
-        {
-        case 32:
-          memcpy(table->format, "fl32", 4);
-          break;
-        case 64:
-          memcpy(table->format, "fl64", 4);
-          break;
-        }
-      if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
-        quicktime_set_enda(table, 1);
-      }
-    else
-      {
-      switch(table->sample_size)
-        {
-        case 16:
-          if(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian)
-            memcpy(table->format, "twos", 4);
-          else
-            memcpy(table->format, "sowt", 4);
-          break;
-        case 24:
-          memcpy(table->format, "in24", 4);
-          if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
-            quicktime_set_enda(table, 1);
-          break;
-        case 32:
-          memcpy(table->format, "in32", 4);
-          if(!(table->formatSpecificFlags & kAudioFormatFlagIsBigEndian))
-            quicktime_set_enda(table, 1);
-        }
-      }
-    }
-  }
-#endif
-
-
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom)
 {
@@ -167,18 +120,19 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table)
 {
-	quicktime_write_int16(file, table->version);
+        int tmp_version = file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD) ? table->version : 0;
+	quicktime_write_int16(file, tmp_version);
 	quicktime_write_int16(file, table->revision);
 	quicktime_write_data(file, (uint8_t*)(table->vendor), 4);
 
-        if(table->version < 2)
+        if(tmp_version < 2)
           {
           quicktime_write_int16(file, table->channels);
           quicktime_write_int16(file, table->sample_size);
-          quicktime_write_int16(file, table->compression_id);
+          quicktime_write_int16(file, (file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD)) ? table->compression_id : 0);
           quicktime_write_int16(file, table->packet_size);
           quicktime_write_fixed32(file, table->samplerate);
-          if(table->version == 1)
+          if(tmp_version == 1)
             {
             quicktime_write_int32(file, table->audio_samples_per_packet);
             quicktime_write_int32(file, table->audio_bytes_per_packet);

@@ -202,6 +202,14 @@ static int encode(quicktime_t *file,
     mp4a_atom[3] = 0x00;
     
     quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
+
+    quicktime_set_stsd_audio_v2(&(trak->mdia.minf.stbl.stsd.table[0]),
+                                0x00000002, /* formatSpecificFlags */
+                                0, /* constBytesPerAudioPacket */
+                                codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
+
+    if(file->file_type & (LQT_FILE_QT_OLD | LQT_FILE_QT))
+      trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
     
     esds->version         = 0;
     esds->flags           = 0;
