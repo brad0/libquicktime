@@ -128,7 +128,7 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
         if(tmp_version < 2)
           {
           quicktime_write_int16(file, table->channels);
-          quicktime_write_int16(file, table->sample_size);
+          quicktime_write_int16(file, (file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD)) ? table->sample_size : 16);
           quicktime_write_int16(file, (file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD)) ? table->compression_id : 0);
           quicktime_write_int16(file, table->packet_size);
           quicktime_write_fixed32(file, table->samplerate);
@@ -267,28 +267,32 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		else
 		if(quicktime_atom_is(&leaf_atom, "gama"))
 		{
-			table->gamma = quicktime_read_fixed32(file);
+                        quicktime_read_gama(file, &(table->gama));
+	                table->has_gama = 1;
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "fiel"))
 		{
-			table->fields = quicktime_read_char(file);
-			table->field_dominance = quicktime_read_char(file);
+                        quicktime_read_fiel(file, &(table->fiel));
+	                table->has_fiel = 1;
 		}
 		else
 		if (quicktime_atom_is(&leaf_atom, "pasp"))
 		{
 			quicktime_read_pasp(file, &(table->pasp));
+                        table->has_pasp = 1;
 		}
 		else
 		if (quicktime_atom_is(&leaf_atom, "clap"))
 		{
 			quicktime_read_clap(file, &(table->clap));
+                        table->has_clap = 1;
 		}
 		else
 		if (quicktime_atom_is(&leaf_atom, "colr"))
 		{
 			quicktime_read_colr(file, &(table->colr));
+                        table->has_colr = 1;
 		}
 		else
 		if (quicktime_atom_is(&leaf_atom, "esds"))
@@ -322,48 +326,66 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 
 
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table)
-{
-	quicktime_write_int16(file, table->version);
-	quicktime_write_int16(file, table->revision);
-	quicktime_write_data(file, (uint8_t*)table->vendor, 4);
-	quicktime_write_int32(file, table->temporal_quality);
-	quicktime_write_int32(file, table->spatial_quality);
-	quicktime_write_int16(file, table->width);
-	quicktime_write_int16(file, table->height);
-	quicktime_write_fixed32(file, table->dpi_horizontal);
-	quicktime_write_fixed32(file, table->dpi_vertical);
-	quicktime_write_int32(file, table->data_size);
-	quicktime_write_int16(file, table->frames_per_sample);
-	quicktime_write_char(file, strlen(table->compressor_name));
-	quicktime_write_data(file, (uint8_t*)table->compressor_name, 31);
-	quicktime_write_int16(file, table->depth);
-	quicktime_write_int16(file, table->ctab_id);
+  {
+  int compressor_name_len, i;
+  compressor_name_len = strlen(table->compressor_name);
+  if(file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD))
+    {
+    quicktime_write_int16(file, table->version);
+    quicktime_write_int16(file, table->revision);
+    quicktime_write_data(file, (uint8_t*)table->vendor, 4);
+    quicktime_write_int32(file, table->temporal_quality);
+    quicktime_write_int32(file, table->spatial_quality);
+    quicktime_write_int16(file, table->width);
+    quicktime_write_int16(file, table->height);
+    quicktime_write_fixed32(file, table->dpi_horizontal);
+    quicktime_write_fixed32(file, table->dpi_vertical);
+    quicktime_write_int32(file, table->data_size);
+    quicktime_write_int16(file, table->frames_per_sample);
+    quicktime_write_char(file, compressor_name_len);
+    quicktime_write_data(file, (uint8_t*)table->compressor_name, 31);
+    quicktime_write_int16(file, table->depth);
+    quicktime_write_int16(file, table->ctab_id);
+    }
+  else
+    {
+    quicktime_write_int16(file, 0);
+    quicktime_write_int16(file, 0);
+    quicktime_write_int32(file, 0);
+    quicktime_write_int32(file, 0);
+    quicktime_write_int32(file, 0);
+    quicktime_write_int16(file, table->width);
+    quicktime_write_int16(file, table->height);
+    quicktime_write_fixed32(file, 0x00480000);
+    quicktime_write_fixed32(file, 0x00480000);
+    quicktime_write_int32(file, 0);
+    quicktime_write_int16(file, 1);
+    quicktime_write_data(file, (uint8_t*)table->compressor_name, compressor_name_len);
+    for(i = 0; i < 32 - compressor_name_len; i++)
+      quicktime_write_char(file, 0);
+    
+    quicktime_write_int16(file, 24);
+    quicktime_write_int16(file, -1);
+    if (table->has_pasp)
+      quicktime_write_pasp(file, &(table->pasp));
+    if (table->has_clap)
+      quicktime_write_clap(file, &(table->clap));
+    if (table->has_colr)
+      quicktime_write_colr(file, &(table->colr));
+    if (table->has_fiel)
+      quicktime_write_fiel(file, &(table->fiel));
+    if (table->has_gama)
+      quicktime_write_gama(file, &(table->gama));
+    }
+  
+  quicktime_write_user_atoms(file,
+                             &table->user_atoms);
+  if(table->has_esds)
+    quicktime_write_esds(file, &table->esds);
+  }
 
-	if (table->pasp.hSpacing)
-		quicktime_write_pasp(file, &(table->pasp));
-	if (table->clap.cleanApertureWidthN)
-		quicktime_write_clap(file, &(table->clap));
-	if (table->colr.colorParamType)
-		quicktime_write_colr(file, &(table->colr));
-
-	if(table->fields)
-	{
-		quicktime_atom_t atom;
-
-		quicktime_atom_write_header(file, &atom, "fiel");
-		quicktime_write_char(file, table->fields);
-		quicktime_write_char(file, table->field_dominance);
-		quicktime_atom_write_footer(file, &atom);
-	}
-        quicktime_write_user_atoms(file,
-                                   &table->user_atoms);
-        if(table->has_esds)
-          quicktime_write_esds(file, &table->esds);
-        
-        
-}
-
-void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table)
+void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf,
+                               quicktime_stsd_table_t *table)
 {
 	quicktime_atom_t leaf_atom;
 
@@ -429,10 +451,9 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 	table->depth = 24;
 	table->ctab_id = 65535;
 	quicktime_ctab_init(&(table->ctab));
-	table->gamma = 0;
-	table->fields = 0;
-	table->field_dominance = 1;
 	quicktime_pasp_init(&(table->pasp));
+	quicktime_gama_init(&(table->gama));
+	quicktime_fiel_init(&(table->fiel));
 	quicktime_clap_init(&(table->clap));
 	quicktime_colr_init(&(table->colr));
 	quicktime_pano_init(&(table->pano));
@@ -473,20 +494,18 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 	printf("       compressor_name %s\n", table->compressor_name);
 	printf("       depth %d\n", table->depth);
 	printf("       ctab_id %d\n", table->ctab_id);
-	printf("       gamma %f\n", table->gamma);
 
-	if (table->pasp.hSpacing)
+	if (table->has_pasp)
 		quicktime_pasp_dump(&(table->pasp));
-	if (table->clap.cleanApertureWidthN)
+	if (table->has_clap)
 		quicktime_clap_dump(&(table->clap));
-	if (table->colr.colorParamType)
+	if (table->has_colr)
 		quicktime_colr_dump(&(table->colr));
+	if (table->has_fiel)
+		quicktime_fiel_dump(&(table->fiel));
+	if (table->has_gama)
+		quicktime_gama_dump(&(table->gama));
 
-	if(table->fields)
-	{
-		printf("     fields %d\n", table->fields);
-		printf("     field dominance %d\n", table->field_dominance);
-	}
 	if(!table->ctab_id) quicktime_ctab_dump(&(table->ctab));
 	if(table->has_esds) quicktime_esds_dump(&(table->esds));
 	quicktime_user_atoms_dump(&(table->user_atoms));

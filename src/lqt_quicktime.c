@@ -1313,10 +1313,11 @@ void quicktime_init_maps(quicktime_t * file)
                               &(file->vtracks[i].stream_row_span_uv));
 
       /* Get interlace mode */
-      if(file->vtracks[i].interlace_mode == LQT_INTERLACE_NONE)
+      if((file->vtracks[i].interlace_mode == LQT_INTERLACE_NONE) &&
+         (file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].has_fiel))
         {
-        dom = file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].field_dominance;
-        if (file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fields == 2)
+        dom = file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fiel.dominance;
+        if (file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].fiel.fields == 2)
           {
           if (dom == 14 || dom == 6)
             file->vtracks[i].interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
@@ -1822,57 +1823,7 @@ void lqt_set_default_video_parameters(quicktime_t * file, int track)
     }
   }
 
-int lqt_set_fiel(quicktime_t *file, int track, int nfields, int dominance)
-	{
-	quicktime_stsd_table_t *stsdt_p;
-
-	if	((track < 0) || (track >= file->total_vtracks))
-		return 0;
-
-	if	(nfields !=1 && nfields != 2)
-		return 0;
-
-/*
- * http://developer.apple.com/quicktime/icefloe/dispatch019.html#fiel
- *
- * "dominance" is what Apple calls "detail".  From what I can figure out
- * the term "bottom field first" corresponds to a "detail" setting of 14 and
- * "top field first" is a "detail" setting of 9.
-*/
-	switch	(dominance)
-		{
-		case	0:
-		case	1:
-		case	6:
-		case	9:
-		case	14:
-			break;
-		default:
-			return 0;
-		}
-
-	stsdt_p = file->vtracks[track].track->mdia.minf.stbl.stsd.table;
-	stsdt_p->fields = nfields;
-	stsdt_p->field_dominance = dominance;
-	return 1;
-	}
 	
-int lqt_get_fiel(quicktime_t *file, int track, int *nfields, int *dominance)
-	{
-	quicktime_stsd_table_t *stsdt_p;
-
-	if	((track < 0) || (track >= file->total_vtracks))
-		return 0;
-
-	stsdt_p = file->vtracks[track].track->mdia.minf.stbl.stsd.table;
-
-	if	(nfields != NULL)
-		*nfields = stsdt_p->fields;
-	
-	if	(dominance != NULL)
-		*dominance = stsdt_p->field_dominance;
-	return 1;
-	}
 
 void lqt_set_default_audio_parameters(quicktime_t * file, int track)
   {

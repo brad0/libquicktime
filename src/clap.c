@@ -1,5 +1,5 @@
 /*
- * $Id: clap.c,v 1.2 2004/11/29 00:41:22 gmerlin Exp $
+ * $Id: clap.c,v 1.3 2006/04/13 19:25:48 gmerlin Exp $
  *
  * init, read, write handler for the "clap" (Clean Aperture) atom
 */
@@ -66,6 +66,7 @@ int lqt_set_clap(quicktime_t *file, int track, quicktime_clap_t *clap)
 
 	trk_clap = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->clap;
 	*trk_clap = *clap;
+        file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_clap = 1;
 	return 1;
 }
 
@@ -75,8 +76,10 @@ int lqt_get_clap(quicktime_t *file, int track, quicktime_clap_t *clap)
 
 	if	((track < 0) || (track >= file->total_vtracks))
 		return 0;
+        if	(!file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_clap)
+		return 0;
 
-	trk_clap = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->clap;
+        trk_clap = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->clap;
 	*clap = *trk_clap;
 	return 1;
 }

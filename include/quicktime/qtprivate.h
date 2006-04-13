@@ -315,6 +315,17 @@ typedef struct
   } quicktime_chan_t;
 
 typedef struct
+  {
+  int fields;    /* 0, 1, or 2 */
+  int dominance;   /* 0 - unknown     1 - top first     2 - bottom first */
+  } quicktime_fiel_t;
+
+typedef struct
+  {
+  float gamma;
+  } quicktime_gama_t;
+
+typedef struct
 {
 	char format[4];
 	uint8_t reserved[6];
@@ -338,15 +349,21 @@ typedef struct
 	int depth;
 	int ctab_id;
 	quicktime_ctab_t ctab;
-	float gamma;
-	int fields;    /* 0, 1, or 2 */
-	int field_dominance;   /* 0 - unknown     1 - top first     2 - bottom first */
-	quicktime_mjqt_t mjqt;
-	quicktime_mjht_t mjht;
-	quicktime_pasp_t pasp;
+
+        quicktime_pasp_t pasp;
+        int has_pasp;
 	quicktime_colr_t colr;
+	int has_colr;
 	quicktime_clap_t clap;
-	quicktime_pano_t pano;
+        int has_clap;
+
+        quicktime_fiel_t fiel;
+        int has_fiel;
+
+        quicktime_gama_t gama;
+        int has_gama;
+
+        quicktime_pano_t pano;
 	quicktime_qtvr_t qtvr;
 
         int has_wave;

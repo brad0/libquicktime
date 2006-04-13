@@ -208,8 +208,8 @@ static int encode(quicktime_t *file,
                                 0, /* constBytesPerAudioPacket */
                                 codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
 
-    if(file->file_type & (LQT_FILE_QT_OLD | LQT_FILE_QT))
-      trak->mdia.minf.stbl.stsd.table[0].sample_size = 0;
+    /* Will be switched back to 16 for mp4 by quicktime_write_stsd_audio */
+    trak->mdia.minf.stbl.stsd.table[0].sample_size = 0; 
     
     esds->version         = 0;
     esds->flags           = 0;

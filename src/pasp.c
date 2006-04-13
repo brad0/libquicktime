@@ -1,5 +1,5 @@
 /*
- * $Id: pasp.c,v 1.4 2005/05/05 18:50:37 gmerlin Exp $
+ * $Id: pasp.c,v 1.5 2006/04/13 19:25:48 gmerlin Exp $
  *
  * init, read, write handler for the "pasp" (Pixel Aspect) atom
 */
@@ -10,7 +10,10 @@
 
 void quicktime_pasp_init(quicktime_pasp_t *pasp)
 {
-	memset(pasp, 0, sizeof (*pasp));
+        /* We use this also, if no pasp atom is explicitely present,
+           since some codecs also set the pixel aspect ratio */
+        pasp->hSpacing = 1;
+        pasp->vSpacing = 1;
 }
 
 void quicktime_pasp_delete(quicktime_pasp_t *pasp) { }
@@ -49,6 +52,7 @@ int lqt_set_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp)
 	trk_pasp = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
 	trk_pasp->hSpacing = pasp->hSpacing;
 	trk_pasp->vSpacing = pasp->vSpacing;
+        file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_pasp = 1;
 	return 1;
 }
 
@@ -58,7 +62,8 @@ int lqt_get_pasp(quicktime_t *file, int track, quicktime_pasp_t *pasp)
 
 	if	((track < 0) || (track >= file->total_vtracks))
 		return 0;
-
+        if	(!file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_pasp)
+		return 0;
 	trk_pasp =
           &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
 	pasp->hSpacing = trk_pasp->hSpacing;
@@ -76,16 +81,8 @@ int lqt_get_pixel_aspect(quicktime_t *file, int track, int * pixel_width,
 
 	pasp =
           &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
-        if(pasp->hSpacing)
-          {
-          *pixel_width  = pasp->hSpacing;
-          *pixel_height = pasp->vSpacing;
-          }
-        else /* Assume square pixels */
-          {
-          *pixel_width  = 1;
-          *pixel_height = 1;
-          }
+        *pixel_width  = pasp->hSpacing;
+        *pixel_height = pasp->vSpacing;
         return 1;
 }
 
@@ -101,13 +98,14 @@ int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
           &file->vtracks[track].track->mdia.minf.stbl.stsd.table->pasp;
         if(pixel_width == pixel_height) /* Don't write pasp atom */
           {
-          pasp->hSpacing = 0;
-          pasp->vSpacing = 0;
+          pasp->hSpacing = 1;
+          pasp->vSpacing = 1;
           }
         else
           {
           pasp->hSpacing = pixel_width;
           pasp->vSpacing = pixel_height;
+          file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_pasp = 1;
           }
         
         return 1;

@@ -48,8 +48,10 @@ edts.c \
 elst.c \
 enda.c \
 esds.c \
+fiel.c \
 frma.c \
 ftyp.c \
+gama.c \
 gmhd.c \
 gmin.c \
 graphics.c \

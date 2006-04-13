@@ -280,6 +280,15 @@ quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
                                       uint8_t * decoderConfig,
                                       int decoderConfigLen);
 
+/* fiel.c */
+
+void quicktime_fiel_init(quicktime_fiel_t *fiel);
+void quicktime_fiel_delete(quicktime_fiel_t *fiel);
+void quicktime_fiel_dump(quicktime_fiel_t *fiel);
+void quicktime_read_fiel(quicktime_t *file, quicktime_fiel_t *fiel);
+void quicktime_write_fiel(quicktime_t *file, quicktime_fiel_t *fiel);
+
+
 /* frma.c */
 
 void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,
@@ -299,6 +308,16 @@ lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp);
 void quicktime_read_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp,
                          quicktime_atom_t *parent_atom);
 void quicktime_write_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp);
+
+
+/* gama.c */
+
+void quicktime_gama_init(quicktime_gama_t *gama);
+void quicktime_gama_delete(quicktime_gama_t *gama);
+void quicktime_gama_dump(quicktime_gama_t *gama);
+void quicktime_read_gama(quicktime_t *file, quicktime_gama_t *gama);
+void quicktime_write_gama(quicktime_t *file, quicktime_gama_t *gama);
+
 
 /* gmhd.c */
 

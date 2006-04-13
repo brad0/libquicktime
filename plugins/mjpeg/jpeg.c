@@ -198,7 +198,8 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
                                  vtrack->track->tkhd.track_height, 
                                  num_fields);
 	codec->jpeg_type = jpeg_type;
-        
+
+#if 0
         /* This information must be stored in the initialization routine because of */
         /* direct copy rendering.  Quicktime for Windows must have this information. */
 	if(quicktime_match_32(compressor, QUICKTIME_MJPA) && !vtrack->track->mdia.minf.stbl.stsd.table[0].fields)
@@ -206,4 +207,5 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
           vtrack->track->mdia.minf.stbl.stsd.table[0].fields = 2;
           vtrack->track->mdia.minf.stbl.stsd.table[0].field_dominance = 1;
           }
+#endif
 }

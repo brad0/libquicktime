@@ -1,5 +1,5 @@
 /*
- * $Id: colr.c,v 1.3 2006/01/02 06:13:04 sms00 Exp $
+ * $Id: colr.c,v 1.4 2006/04/13 19:25:48 gmerlin Exp $
  *
  * init, read, write handler for the "colr" (Clean Aperture) atom
 */
@@ -54,6 +54,7 @@ int lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr)
 
 	trk_colr = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->colr;
 	*trk_colr = *colr;
+        file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_colr = 1;
 	return 1;
 }
 
@@ -63,7 +64,8 @@ int lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr)
 
 	if	((track < 0) || (track >= file->total_vtracks))
 		return 0;
-
+        if	(!file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_colr)
+		return 0;
 	trk_colr = &file->vtracks[track].track->mdia.minf.stbl.stsd.table->colr;
 	*colr = *trk_colr;
 	return 1;
