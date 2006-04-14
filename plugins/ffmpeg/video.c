@@ -333,7 +333,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   
   uint8_t * cpy_rows[3];
 
-  fprintf(stderr, "decode video\n");
+  //  fprintf(stderr, "decode video\n");
   
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
@@ -651,14 +651,14 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         codec->frame->pts = vtrack->timestamp;
         if(codec->avctx->flags & CODEC_FLAG_QSCALE)
           codec->frame->quality = codec->qscale;
-        fprintf(stderr, "Encode %p, %d\n", codec->buffer,
-                codec->buffer_size);
+        //        fprintf(stderr, "Encode %p, %d\n", codec->buffer,
+        //                codec->buffer_size);
         
 	bytes_encoded = avcodec_encode_video(codec->avctx,
                                              codec->buffer,
                                              codec->buffer_size,
                                              codec->frame);
-#if 1
+#if 0
         fprintf(stderr, "Encoded %d bytes, ", bytes_encoded);
         switch(codec->avctx->coded_frame->pict_type)
           {
@@ -737,6 +737,7 @@ static int flush(quicktime_t *file, int track)
                                              codec->buffer,
                                              codec->buffer_size,
                                              (AVFrame*)0);
+#if 0
         fprintf(stderr, "Flush: encoded %d bytes, ", bytes_encoded);
         switch(codec->avctx->coded_frame->pict_type)
           {
@@ -751,7 +752,7 @@ static int flush(quicktime_t *file, int track)
             break;
           }
         fprintf(stderr, "PTS: %lld\n", codec->avctx->coded_frame->pts);
-
+#endif
         vtrack->coded_timestamp = codec->avctx->coded_frame->pts;
 
         if(bytes_encoded)

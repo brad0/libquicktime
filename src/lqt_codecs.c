@@ -543,7 +543,7 @@ static int do_encode_video(quicktime_t *file,
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
 
-#if 1
+#if 0
   fprintf(stderr, "lqt_encode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
           lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
           lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
