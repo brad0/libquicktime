@@ -543,7 +543,7 @@ static int do_encode_video(quicktime_t *file,
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
 
-#if 0
+#if 1
   fprintf(stderr, "lqt_encode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
           lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
           lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
@@ -598,7 +598,7 @@ int lqt_encode_video(quicktime_t *file,
   /* B-Frame handling: B-Frame enabled codecs can have a delay */
   /* Here, we use vtrack->current_chunk as index of the actually written
      frame (implicitely assuming, that ther is never more than one frame per chunk),
-     vtrack->current_position is the index of the frames, which came from the user */
+     vtrack->current_position is number of frames, which came from the user */
     
   result = do_encode_video(file, row_pointers, track);
 
@@ -635,9 +635,6 @@ int lqt_encode_video(quicktime_t *file,
       quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                             file->vtracks[track].current_position - 1,
                             time - last_time);
-    else
-      quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
-                            file->vtracks[track].current_position, 0);
     } 
   
   file->vtracks[track].current_position++;

@@ -803,17 +803,30 @@ RC buffer size" \
     help_string: "Multiplied by qscale for each frame and added to scene_change_score" \
   }
 
+/** Quantizer */
+#define PARAM_QSCALE \
+  {                              \
+    name:        "ff_qscale", \
+    real_name:   "Fixed quantizer",              \
+    type:        LQT_PARAMETER_INT, \
+    val_default: { val_int: 10 },    \
+    val_min:     { val_int: 1 },    \
+    val_max:     { val_int: 31 },    \
+    help_string: "Quantizer for fixed quality encoding. Lower means better, 1 is not recommended"\
+  }
+
 /* Flags */
 
 /** Quantizer */
 #define PARAM_FLAG_QSCALE \
   {                              \
     name:        "ff_flag_qscale", \
-    real_name:   "Use fixed qscale",              \
+    real_name:   "Use fixed quantizer",              \
     type:        LQT_PARAMETER_INT, \
     val_default: { val_int: 0 },    \
     val_min:     { val_int: 0 },    \
     val_max:     { val_int: 1 },    \
+    help_string: "Use fixed quality encoding",\
   }
 
 /** Motion estimation */

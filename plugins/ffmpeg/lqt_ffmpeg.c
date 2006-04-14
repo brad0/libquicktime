@@ -70,6 +70,7 @@ int ffmpeg_num_video_codecs = -1;
     PARAM_QMAX,                             \
     PARAM_MAX_QDIFF,                        \
     PARAM_FLAG_QSCALE,                      \
+    PARAM_QSCALE,                      \
     PARAM_QCOMPRESS,                        \
     PARAM_QBLUR,                            \
     PARAM_QUANTIZER_NOISE_SHAPING,          \

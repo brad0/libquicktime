@@ -26,7 +26,7 @@ typedef struct
 #define PARAM_QP2LAMBDA(name, var)   \
   if(!strcasecmp(name, key)) \
     { \
-    ctx->var = (int)((*(float*)value) * FF_QP2LAMBDA);  \
+    ctx->var = (int)((*(float*)value) * FF_QP2LAMBDA+0.5);  \
     found = 1; \
     }
 
@@ -156,13 +156,13 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, char * key, void * value)
   PARAM_INT("ff_luma_elim_threshold",luma_elim_threshold);
   PARAM_INT("ff_chroma_elim_threshold",chroma_elim_threshold);
   PARAM_INT("ff_strict_std_compliance",strict_std_compliance);
-  PARAM_FLOAT("ff_b_quant_offset",b_quant_offset);
+  PARAM_QP2LAMBDA("ff_b_quant_offset",b_quant_offset);
   PARAM_INT("ff_rc_min_rate",rc_min_rate);
   PARAM_INT("ff_rc_max_rate",rc_max_rate);
   PARAM_INT_SCALE("ff_rc_buffer_size",rc_buffer_size,1000);
   PARAM_FLOAT("ff_rc_buffer_aggressivity",rc_buffer_aggressivity);
   PARAM_FLOAT("ff_i_quant_factor",i_quant_factor);
-  PARAM_FLOAT("ff_i_quant_offset",i_quant_offset);
+  PARAM_QP2LAMBDA("ff_i_quant_offset",i_quant_offset);
   PARAM_FLOAT("ff_rc_initial_cplx",rc_initial_cplx);
   PARAM_FLOAT("ff_lumi_masking",lumi_masking);
   PARAM_FLOAT("ff_temporal_cplx_masking",temporal_cplx_masking);

@@ -31,6 +31,7 @@ file_info(char *filename)
 	int i, j, n;
         char * str;
         int frame_duration, framerate_constant;
+        int pixel_width, pixel_height;
         qtfile = quicktime_open(filename, 1, 0);
 
 	if(!qtfile) {
@@ -118,7 +119,7 @@ file_info(char *filename)
 	for(i = 0; i < n; i++)
           {
           frame_duration = lqt_frame_duration(qtfile, i, &framerate_constant);
-          
+          lqt_get_pixel_aspect(qtfile, i, &pixel_width, &pixel_height);
           printf("    %dx%d, depth %d\n    rate %f [%d:%d] %sconstant\n    length %ld frames\n    compressor %s.\n",
                  quicktime_video_width(qtfile, i),
                  quicktime_video_height(qtfile, i),
@@ -133,6 +134,8 @@ file_info(char *filename)
           printf("    Interlace mode:     %s\n", lqt_interlace_mode_to_string(lqt_get_interlace_mode(qtfile, i)));
           if(cmodel == BC_YUV420P)
             printf("    Chroma placement: %s\n", lqt_chroma_placement_to_string(lqt_get_chroma_placement(qtfile, i)));
+          if((pixel_width > 1) || (pixel_height > 1))
+            printf("    Pixel aspect ratio: %d:%d\n", pixel_width, pixel_height);
           printf("    %ssupported.\n",
                  quicktime_supported_video(qtfile, i)?"":"NOT ");
           }
