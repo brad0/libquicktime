@@ -145,7 +145,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     quicktime_atom_t chunk_atom;
     uint16_t * in_y, * in_u, * in_v;
     uint8_t *out_ptr, *optr;
-    uint32_t o1, o2, o3, o4;
+    uint32_t o1, o2, o3 = 0, o4;
         
     if  (!row_pointers)
         {
