@@ -163,10 +163,11 @@ static int encode(quicktime_t *file,
       {
       fprintf(stderr, "Setting encode parameters failed, check settings\n");
       }
+#if 0
     else
       fprintf(stderr, "faac initialized, input_samples: %ld, output_bytes: %ld\n",
               input_samples, output_bytes);
-    
+#endif    
     /* Allocate buffers */
 
     codec->samples_per_frame = input_samples / track_map->channels;
