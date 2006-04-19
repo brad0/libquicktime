@@ -134,7 +134,7 @@ static int encode(quicktime_t *file,
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t * trak = track_map->track;
-  char mp4a_atom[4];
+  uint8_t mp4a_atom[4];
   
   if(!codec->initialized)
     {
