@@ -312,7 +312,7 @@ static int set_parameter(quicktime_t *file,
 
 void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   {
-  uint8_t * extradata = (char*)0;
+  uint8_t * extradata = (uint8_t *)0;
   int extradata_size = 0;
   quicktime_stsd_t * stsd;
   unsigned long samplerate;
