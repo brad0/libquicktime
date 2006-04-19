@@ -326,7 +326,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   int got_pic;
   //  int do_cmodel_transfer;
   quicktime_ctab_t * ctab;
-  int exact;
+  int exact = 0;
   
   uint8_t * extradata = (uint8_t*)0;
   int extradata_size = 0;
