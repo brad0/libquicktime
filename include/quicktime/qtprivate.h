@@ -1198,6 +1198,10 @@ typedef struct
 		int track, 
 		char *key, 
 		void *value);
+        /* Set the encoding pass */
+        int (*set_pass)(quicktime_t *file, 
+		int track, int pass, int total_passes,
+                              const char * stats_file);
 	int (*flush)(quicktime_t *file, 
                      int track);
 

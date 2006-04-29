@@ -514,6 +514,13 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int flush(quicktime_t *file, int track)
   {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  
+  /* Do nothing if we didn't encode anything yet */
+  if(!codec->initialized)
+    return 0;
+  
   return flush_frame(file, track, (x264_picture_t*)0);
   }
   

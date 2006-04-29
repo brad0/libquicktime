@@ -107,9 +107,11 @@ static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
         if(codec->extradata)
           free(codec->extradata);
         
-	if(codec->avctx)
+	if(codec->initialized)
           avcodec_close(codec->avctx);
-
+        else
+          free(codec->avctx);
+        
         if(codec->frame_buffer) free(codec->frame_buffer);
 	if(codec->buffer) free(codec->buffer);
         if(codec->row_pointers) free(codec->row_pointers);
@@ -732,6 +734,10 @@ static int flush(quicktime_t *file, int track)
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
         quicktime_atom_t chunk_atom;
+
+        /* Do nothing if we didn't encode anything yet */
+        if(!codec->initialized)
+          return 0;
         
 	bytes_encoded = avcodec_encode_video(codec->avctx,
                                              codec->buffer,

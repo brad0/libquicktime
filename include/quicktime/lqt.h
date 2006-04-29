@@ -461,7 +461,27 @@ int lqt_add_video_track(quicktime_t *file,
                         int frame_w, int frame_h,
                         int frame_duration, int timescale,
                         lqt_codec_info_t * codec_info);
-  
+
+/** \ingroup video_encode
+ *  \brief Enable multipass encoding
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param pass The number of this pass (starting with 1)
+ *  \param total_passes The total number of passes
+ *  \param stats_file Statistics file
+ *
+ *  This is a purely optional function, which enables multipass encoding.
+ *  Multipass transcoding is done by repeatedly opening a quicktime file,
+ *  encoding video and and closing it again. The stats_file parameter must
+ *  always be the same for all passes.
+ *
+ *  Having more than 2 passes is not always useful. Audio encoding can be
+ *  skipped for all passes until the last one.
+ */
+
+int lqt_set_video_pass(quicktime_t *file,
+                       int pass, int total_passes, 
+                       const char * stats_file, int track);
 
 /** \ingroup video_decode
  *  \brief Get the timestamp of the next frame to be decoded

@@ -530,6 +530,20 @@ long quicktime_decode_scaled(quicktime_t *file,
 	return result;
 }
 
+int lqt_set_video_pass(quicktime_t *file,
+                       int pass, int total_passes, 
+                       const char * stats_file, int track)
+  {
+  if(((quicktime_codec_t*)file->vtracks[track].codec)->set_pass)
+    return ((quicktime_codec_t*)file->vtracks[track].codec)->set_pass(file,
+                                                                      track,
+                                                                      pass,
+                                                                      total_passes,
+                                                                      stats_file);
+  else
+    return 0;
+  }
+
 static int do_encode_video(quicktime_t *file, 
                            unsigned char **row_pointers, 
                            int track)
