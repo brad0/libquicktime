@@ -122,7 +122,11 @@ typedef struct
   /* Reformatted buffer */
   uint8_t * work_buffer_1;
   int work_buffer_alloc_1;
-    
+
+  int total_passes;
+  int pass;
+  char * stats_filename;
+  
   } quicktime_x264_codec_t;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
@@ -130,7 +134,9 @@ static int delete_codec(quicktime_video_map_t *vtrack)
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   if(codec->enc)
     x264_encoder_close(codec->enc);
-  free(codec);
+  if(codec->stats_filename)
+    free(codec->stats_filename);
+         free(codec);
   return 0;
   }
 
@@ -418,6 +424,24 @@ static int flush_frame(quicktime_t *file, int track,
   return 0;
   }
 
+static int set_pass_x264(quicktime_t *file, 
+                           int track, int pass, int total_passes,
+                           const char * stats_file)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_x264_codec_t *codec =
+    ((quicktime_codec_t*)vtrack->codec)->priv;
+
+  codec->total_passes = total_passes;
+  codec->pass = pass;
+  codec->stats_filename = malloc(strlen(stats_file)+1);
+  strcpy(codec->stats_filename, stats_file);
+  
+  fprintf(stderr, "set_pass_x264 %d %d %s\n", pass, total_passes, stats_file);
+  return 1;
+  }
+
+
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
 
@@ -449,11 +473,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     /* We want a global header */
     codec->params.b_repeat_headers = 0;
 
-    /* Don't output statistics */
+    /* Don't output psnr statistics */
     codec->params.analyse.b_psnr = 0;
     
-    /* Set parameters (TODO!!) */
-
     /* Set format */
     codec->params.i_width = width;
     codec->params.i_height = height;
@@ -465,8 +487,23 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->params.i_fps_num = lqt_video_time_scale(file, track);
     codec->params.i_fps_den = lqt_frame_duration(file, track, NULL);
 
+    /* Set multipass control */
+    
     /* Open encoder */
 
+    if(codec->pass == 1)
+      {
+      /* Strings will be made private by x264 */
+      codec->params.rc.psz_stat_out = codec->stats_filename;
+      codec->params.rc.b_stat_write = 1;
+      }
+    else if(codec->pass == codec->total_passes)
+      {
+      /* Strings will be made private by x264 */
+      codec->params.rc.psz_stat_in = codec->stats_filename;
+      codec->params.rc.b_stat_read = 1;
+      }
+    
     codec->enc = x264_encoder_open(&codec->params);
     if(!codec->enc)
       {
@@ -725,6 +762,7 @@ void quicktime_init_codec_x264(quicktime_video_map_t *vtrack)
   ((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_x264_codec_t));
   ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
   ((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
+  ((quicktime_codec_t*)vtrack->codec)->set_pass = set_pass_x264;
   ((quicktime_codec_t*)vtrack->codec)->flush = flush;
   ((quicktime_codec_t*)vtrack->codec)->decode_video = 0;
   ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;

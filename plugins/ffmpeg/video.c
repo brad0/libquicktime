@@ -65,6 +65,12 @@ typedef struct
   int global_header_written;
 
   uint8_t * extradata; /* For decoding only, for encoding extradata is owned by lavc */
+
+  /* Multipass control */
+  int total_passes;
+  int pass;
+  char * stats_filename;
+  FILE * stats_file;
   
   } quicktime_ffmpeg_video_codec_t;
 
@@ -106,9 +112,19 @@ static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
           
         if(codec->extradata)
           free(codec->extradata);
+
+        if(codec->stats_filename)
+          free(codec->stats_filename);
+        
+        if(codec->stats_file)
+          fclose(codec->stats_file);
         
 	if(codec->initialized)
+          {
+          if(codec->avctx->stats_in)
+            free(codec->avctx->stats_in);
           avcodec_close(codec->avctx);
+          }
         else
           free(codec->avctx);
         
@@ -305,6 +321,8 @@ static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
               width, height);
   
   }
+
+
 
 /* Just for the curious: This function can be called with NULL as row_pointers.
    In this case, have_frame is set to 1 and a subsequent call will take the
@@ -572,6 +590,23 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   return result;
   }
 
+static int set_pass_ffmpeg(quicktime_t *file, 
+                           int track, int pass, int total_passes,
+                           const char * stats_file)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_ffmpeg_video_codec_t *codec =
+    ((quicktime_codec_t*)vtrack->codec)->priv;
+
+  codec->total_passes = total_passes;
+  codec->pass = pass;
+  codec->stats_filename = malloc(strlen(stats_file)+1);
+  strcpy(codec->stats_filename, stats_file);
+  
+  fprintf(stderr, "set_pass_ffmpeg %d %d %s\n", pass, total_passes, stats_file);
+  return 1;
+  }
+
 static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                             int track)
 {
@@ -585,7 +620,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 	int height = trak->tkhd.track_height;
 	int width = trak->tkhd.track_width;
         quicktime_atom_t chunk_atom;
-
+        int stats_len;
         if(!row_pointers)
           {
           vtrack->stream_cmodel = codec->encode_colormodel;
@@ -615,7 +650,6 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
                 
           codec->avctx->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
 
-#if 1
           lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
           codec->avctx->sample_aspect_ratio.num = pixel_width;
           codec->avctx->sample_aspect_ratio.den = pixel_height;
@@ -625,7 +659,33 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
             codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
             codec->write_global_header = 1;
             }
-#endif          
+
+          /* Initialize 2-pass */
+          if(codec->total_passes)
+            {
+            if(codec->pass == 1)
+              {
+              codec->stats_file = fopen(codec->stats_filename, "w");
+              codec->avctx->flags |= CODEC_FLAG_PASS1;
+              }
+            else if(codec->pass == codec->total_passes)
+              {
+              codec->stats_file = fopen(codec->stats_filename, "r");
+              fseek(codec->stats_file, 0, SEEK_END);
+              stats_len = ftell(codec->stats_file);
+              fseek(codec->stats_file, 0, SEEK_SET);
+
+              codec->avctx->stats_in = av_malloc(stats_len + 1);
+              fread(codec->avctx->stats_in, stats_len, 1, codec->stats_file);
+              codec->avctx->stats_in[stats_len] = '\0';
+
+              fclose(codec->stats_file);
+              codec->stats_file = (FILE*)0;
+              
+              codec->avctx->flags |= CODEC_FLAG_PASS2;
+              }
+            }
+          /* Open codec */
           if(avcodec_open(codec->avctx, codec->encoder) != 0)
             return -1;
           codec->buffer_size = width * height * 4 + 1024*256;
@@ -694,6 +754,11 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           if(codec->avctx->coded_frame->key_frame)
             quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
           vtrack->current_chunk++;
+
+          /* Write stats */
+          
+          if((codec->pass == 1) && codec->avctx->stats_out && codec->stats_file)
+            fprintf(codec->stats_file, codec->avctx->stats_out);
           }
         
         /* Check whether to write the global header */
@@ -777,6 +842,10 @@ static int flush(quicktime_t *file, int track)
           if(codec->avctx->coded_frame->key_frame)
             quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
           vtrack->current_chunk++;
+
+          if((codec->pass == 1) && codec->avctx->stats_out && codec->stats_file)
+            fprintf(codec->stats_file, codec->avctx->stats_out);
+          
           return 1;
           }
         return 0;
@@ -832,7 +901,10 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	((quicktime_codec_t*)vtrack->codec)->flush = flush;
 
         if(encoder)
+          {
           ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_ffmpeg_encode_video;
+          ((quicktime_codec_t*)vtrack->codec)->set_pass = set_pass_ffmpeg;
+          }
 	if(decoder)
           ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_ffmpeg_decode_video;
 

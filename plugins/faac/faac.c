@@ -292,6 +292,9 @@ static int flush(quicktime_t *file, int track)
   quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t * trak = track_map->track;
 
+  if(!codec->initialized)
+    return 0;
+  
   /* Mute the rest of the sample buffer */
   if(codec->sample_buffer_size)
     {
