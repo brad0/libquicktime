@@ -136,7 +136,7 @@ static int delete_codec(quicktime_video_map_t *vtrack)
     x264_encoder_close(codec->enc);
   if(codec->stats_filename)
     free(codec->stats_filename);
-         free(codec);
+  free(codec);
   return 0;
   }
 
