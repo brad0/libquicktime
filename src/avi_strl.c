@@ -52,8 +52,6 @@ void quicktime_init_strl(quicktime_t *file,
   /* 'strh' */
   quicktime_atom_write_header(file, &strh_atom, "strh");
 
-
-
   /* vids */
   if(vtrack)
     {
@@ -128,12 +126,6 @@ void quicktime_init_strl(quicktime_t *file,
       quicktime_write_int32_le(file, 0);    // ??
       }
   quicktime_atom_write_footer(file, &strh_atom);
-
-
-
-
-
-
 
   /* strf */
   quicktime_atom_write_header(file, &strf_atom, "strf");

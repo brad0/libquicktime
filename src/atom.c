@@ -74,7 +74,7 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 	int result = 0;
 	uint8_t header[10];
 
-	if(file->file_type == LQT_FILE_AVI)
+	if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
 	{
 		reset(atom);
 		atom->start = quicktime_position(file);
@@ -162,7 +162,7 @@ int quicktime_atom_write_header(quicktime_t *file,
 	char *text)
 {
 	int result = 0;
-	if(file->file_type == LQT_FILE_AVI)
+	if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
 	{
 		reset(atom);
 		atom->start = quicktime_position(file) + 8;
@@ -183,7 +183,7 @@ int quicktime_atom_write_header(quicktime_t *file,
 void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 {
 	atom->end = quicktime_position(file);
-	if(file->file_type == LQT_FILE_AVI)
+	if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
 	{
 		quicktime_set_position(file, atom->start - 4);
 		quicktime_write_int32_le(file, atom->end - atom->start);
@@ -192,6 +192,7 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
                   {
                   quicktime_write_char(file, 0x00);
                   }
+                atom->size = atom->end - atom->start + 8;
 	}
 	else
 	{

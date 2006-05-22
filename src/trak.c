@@ -418,13 +418,6 @@ int64_t quicktime_chunk_to_offset(quicktime_t *file,
 	else
 		result = HEADER_LENGTH * 2;
 
-// Skip chunk header for AVI.  Skip it here instead of in read_chunk because some
-// codecs can't use read_chunk
-	if(file->file_type == LQT_FILE_AVI)
-	{
-//printf("quicktime_chunk_to_offset 1 %llx %d\n", result, file->mdat.atom.start);
-		result += 8 + file->mdat.atom.start;
-	}
 	return result;
 }
 
@@ -447,17 +440,6 @@ long quicktime_offset_to_chunk(int64_t *chunk_offset,
 	return 1;
 }
 
-int quicktime_chunk_bytes(quicktime_t *file, 
-	int64_t *chunk_offset,
-	int chunk, 
-	quicktime_trak_t *trak)
-{
-	int result;
-	*chunk_offset = quicktime_chunk_to_offset(file, trak, chunk);
-	quicktime_set_position(file, *chunk_offset - 4);
-	result = quicktime_read_int32_le(file);
-	return result;
-}
 
 int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
 	long chunk_sample, 
@@ -496,7 +478,8 @@ int64_t quicktime_sample_to_offset(quicktime_t *file,
 
 	quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
 	chunk_offset1 = quicktime_chunk_to_offset(file, trak, chunk);
-	chunk_offset2 = chunk_offset1 + quicktime_sample_range_size(trak, chunk_sample, sample);
+	chunk_offset2 = chunk_offset1 +
+          quicktime_sample_range_size(trak, chunk_sample, sample);
 	return chunk_offset2;
 }
 
@@ -528,33 +511,35 @@ long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset)
 void quicktime_write_chunk_header(quicktime_t *file, 
 	quicktime_trak_t *trak, 
 	quicktime_atom_t *chunk)
-{
-	if(file->file_type == LQT_FILE_AVI)
-	{
-/* Get tag from first riff strl */
-		quicktime_riff_t *first_riff = file->riff[0];
-		quicktime_hdrl_t *hdrl = &first_riff->hdrl;
-		quicktime_strl_t *strl = hdrl->strl[trak->tkhd.track_id - 1];
-		char *tag = strl->tag;
+  {
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    /* Get tag from first riff strl */
+    quicktime_riff_t *first_riff = file->riff[0];
+    quicktime_hdrl_t *hdrl = &first_riff->hdrl;
+    quicktime_strl_t *strl = hdrl->strl[trak->tkhd.track_id - 1];
+    char *tag = strl->tag;
+    
+    /* Create new RIFF object at 1 Gig mark */
 
-/* Create new RIFF object at 1 Gig mark */
-		quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
-		if(quicktime_position(file) - riff->atom.start > 0x40000000)
-		{
-			quicktime_finalize_riff(file, riff);
-			quicktime_init_riff(file);
-		}
-
-		
-
-/* Write AVI header */
-		quicktime_atom_write_header(file, chunk, tag);
-	}
-	else
-	{
-		chunk->start = quicktime_position(file);
-	}
-}
+    if(file->file_type == LQT_FILE_AVI_ODML)
+      {
+      quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
+      if(quicktime_position(file) - riff->atom.start > file->max_riff_size)
+        {
+        quicktime_finalize_riff(file, riff);
+        quicktime_init_riff(file);
+        }
+      }
+    
+    /* Write AVI header */
+    quicktime_atom_write_header(file, chunk, tag);
+    }
+  else
+    {
+    chunk->start = quicktime_position(file);
+    }
+  }
 
 void quicktime_write_chunk_footer(quicktime_t *file, 
 	quicktime_trak_t *trak,
@@ -566,26 +551,24 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 	int sample_size = quicktime_position(file) - offset;
 
 // Write AVI footer
-	if(file->file_type == LQT_FILE_AVI)
-	{
-		quicktime_atom_write_footer(file, chunk);
-
-// Save original index entry for first RIFF only
-		if(file->total_riffs < 2)
-		{
-			quicktime_update_idx1table(file, 
-				trak, 
-				offset, 
-				sample_size);
-		}
-
-// Save partial index entry
-		quicktime_update_ixtable(file, 
-			trak, 
-			offset, 
-			sample_size);
-	}
-
+	if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+          {
+          quicktime_atom_write_footer(file, chunk);
+          
+          // Save original index entry for first RIFF only
+          if(file->total_riffs < 2)
+            {
+            quicktime_update_idx1table(file, 
+                                     trak, 
+                                       offset, 
+                                       sample_size);
+          }
+          
+          // Save partial index entry
+          if(file->file_type == LQT_FILE_AVI_ODML)
+            quicktime_update_ixtable(file, trak, offset, sample_size);
+          }
+        
 	if(offset + sample_size > file->mdat.atom.size)
 		file->mdat.atom.size = offset + sample_size;
 

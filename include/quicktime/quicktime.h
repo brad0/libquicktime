@@ -93,11 +93,12 @@ extern "C" {
 typedef enum
   {
     LQT_FILE_NONE = 0,        /*!< Undefined or not yet set */
-    LQT_FILE_QT_OLD = (1<<0), /*!< Old libquicktime format (without ftyp) */
-    LQT_FILE_QT     = (1<<1), /*!< New libquicktime format (ftyp = "qt  ") */
-    LQT_FILE_AVI    = (1<<2), /*!< AVI */
-    LQT_FILE_MP4    = (1<<3), /*!< .mp4 (ftyp = "mp42") */
-    LQT_FILE_M4A    = (1<<4), /*!< .m4a  (ftyp = "mp42") */
+    LQT_FILE_QT_OLD   = (1<<0), /*!< Old libquicktime format (without ftyp) */
+    LQT_FILE_QT       = (1<<1), /*!< New libquicktime format (ftyp = "qt  ") */
+    LQT_FILE_AVI      = (1<<2), /*!< AVI */
+    LQT_FILE_AVI_ODML = (1<<3), /*!< Opendml AVI (> 2G) */
+    LQT_FILE_MP4      = (1<<4), /*!< .mp4 (ftyp = "mp42") */
+    LQT_FILE_M4A      = (1<<5), /*!< .m4a  (ftyp = "mp42") */
   } lqt_file_type_t;
 
   

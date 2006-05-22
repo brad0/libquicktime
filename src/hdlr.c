@@ -149,7 +149,7 @@ void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr, quicktime_at
           component_name_len = parent_atom->end - quicktime_position(file);
           if(component_name_len > 256)
             component_name_len = 256;
-          quicktime_read_data(file, hdlr->component_name, component_name_len);
+          quicktime_read_data(file, (uint8_t*)hdlr->component_name, component_name_len);
           }
         else
           {
@@ -180,7 +180,7 @@ void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	quicktime_write_int32(file, hdlr->component_flag_mask);
 
         if(file->file_type & (LQT_FILE_M4A|LQT_FILE_MP4))
-          quicktime_write_data(file, hdlr->component_name, strlen(hdlr->component_name));
+          quicktime_write_data(file, (uint8_t*)hdlr->component_name, strlen(hdlr->component_name));
         else
           quicktime_write_pascal(file, hdlr->component_name);
         

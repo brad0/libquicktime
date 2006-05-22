@@ -1274,7 +1274,8 @@ static int decode_audio()
   qt_audio_ptr = qt_audio;
   if(samples_decoded < AUDIO_BLOCK_SIZE)
     {
-    fprintf(stderr, "Audio track finished\n");
+    fprintf(stderr, "Audio track finished (got %d samples, wanted %d)\n",
+            samples_decoded, AUDIO_BLOCK_SIZE);
     qt_audio_eof = 1;
     }
   return samples_decoded;

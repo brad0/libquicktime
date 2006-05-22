@@ -931,7 +931,16 @@ int lqt_track_from_id(quicktime_t *file, int track_id);
 */
 
 const char * lqt_file_type_to_string(lqt_file_type_t type);
-    
+
+/** \ingroup general
+    \brief Get the filetype
+    \param file A quicktime handle
+    \returns The file type
+*/
+
+lqt_file_type_t lqt_get_file_type(quicktime_t * file);
+ 
+  
 /** \ingroup general
     \brief Open a file for reading
     \param filename A path to a regular file
@@ -951,7 +960,20 @@ quicktime_t * lqt_open_read(const char * filename);
 
 quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type);
 
+/** \ingroup general
+    \brief Set the segment size for ODML AVIs
+    \param file A quicktime handle
+    \param size Maximum size of one RIFF in megabytes
 
+    The actual sizes of the RIFFs will be slightly larger,
+    therefore, you shouldn't set this to exactly to 2 GB.
+    The default is 1 GB, which is reasonable, so there might
+    be no reason to call this function at all.
+*/
+
+void lqt_set_max_riff_size(quicktime_t * file, int size);
+
+  
   
   
 #ifdef __cplusplus

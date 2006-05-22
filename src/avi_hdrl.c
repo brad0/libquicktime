@@ -66,7 +66,7 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
    		quicktime_write_int32_le(file, 
 			(uint32_t)(1000000 / 
 			quicktime_frame_rate(file, 0)));
-    else
+        else
 		quicktime_write_int32_le(file, 0);
 
 	hdrl->bitrate_offset = quicktime_position(file);
@@ -83,55 +83,55 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
     quicktime_write_int32_le(file, file->moov.total_tracks); /* nb streams */
     quicktime_write_int32_le(file, 1024 * 1024); /* suggested buffer size */
 
-	if(file->total_vtracks)
-    {
-		quicktime_write_int32_le(file, file->vtracks[0].track->tkhd.track_width);
-    	quicktime_write_int32_le(file, file->vtracks[0].track->tkhd.track_height);
-	}
-	else
-    {
-		quicktime_write_int32_le(file, 0);
-    	quicktime_write_int32_le(file, 0);
-	}
+    if(file->total_vtracks)
+      {
+      quicktime_write_int32_le(file, file->vtracks[0].track->tkhd.track_width);
+      quicktime_write_int32_le(file, file->vtracks[0].track->tkhd.track_height);
+      }
+    else
+      {
+      quicktime_write_int32_le(file, 0);
+      quicktime_write_int32_le(file, 0);
+      }
     quicktime_write_int32_le(file, 0); /* reserved */
     quicktime_write_int32_le(file, 0); /* reserved */
     quicktime_write_int32_le(file, 0); /* reserved */
     quicktime_write_int32_le(file, 0); /* reserved */
 
-	quicktime_atom_write_footer(file, &avih_atom);
+    quicktime_atom_write_footer(file, &avih_atom);
 
 
 /* Write stream lists. */
 /* Need the track maps to get the WAV ID for audio. */
-	current_track = 0;
-	for(i = 0; i < file->total_vtracks; i++)
-	{
-		quicktime_video_map_t *video_map = &file->vtracks[i];
-		quicktime_trak_t *trak = video_map->track;
-		quicktime_strl_t *strl = 
-			hdrl->strl[current_track++] = 
-			quicktime_new_strl();
-		quicktime_init_strl(file, 
-			0, 
-			video_map, 
-			trak,
-			strl);
-	}
+    current_track = 0;
+    for(i = 0; i < file->total_vtracks; i++)
+      {
+      quicktime_video_map_t *video_map = &file->vtracks[i];
+      quicktime_trak_t *trak = video_map->track;
+      quicktime_strl_t *strl = 
+        hdrl->strl[current_track++] = 
+        quicktime_new_strl();
+      quicktime_init_strl(file, 
+                          0, 
+                          video_map, 
+                          trak,
+                          strl);
+      }
 
-	for(i = 0; i < file->total_atracks; i++)
-	{
-		quicktime_audio_map_t *audio_map = &file->atracks[i];
-		quicktime_trak_t *trak = audio_map->track;
-		quicktime_strl_t *strl = 
-			hdrl->strl[current_track++] = 
-			quicktime_new_strl();
-		quicktime_init_strl(file, 
-			audio_map,
-			0,
-			trak,
-			strl);
-	}
-
+    for(i = 0; i < file->total_atracks; i++)
+      {
+      quicktime_audio_map_t *audio_map = &file->atracks[i];
+      quicktime_trak_t *trak = audio_map->track;
+      quicktime_strl_t *strl = 
+        hdrl->strl[current_track++] = 
+        quicktime_new_strl();
+      quicktime_init_strl(file, 
+                          audio_map,
+                          0,
+                          trak,
+                          strl);
+      }
+    
 /*
  * for(i = 0; i < file->moov.total_tracks; i++)
  * {
@@ -140,8 +140,9 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
  */
 
 /* ODML header */
-	quicktime_init_odml(file, hdrl);
-	quicktime_atom_write_footer(file, &hdrl->atom);
+
+    quicktime_init_odml(file, hdrl);
+    quicktime_atom_write_footer(file, &hdrl->atom);
 }
 
 

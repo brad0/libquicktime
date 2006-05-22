@@ -40,7 +40,8 @@ file_info(char *filename)
 	}
 
 	printf("\nFile %s:\n", filename);
-
+        printf("\nType: %s\n", lqt_file_type_to_string(lqt_get_file_type(qtfile)));
+        
         str = quicktime_get_copyright(qtfile);
 
         if (str)

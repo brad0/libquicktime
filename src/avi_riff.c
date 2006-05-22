@@ -131,48 +131,72 @@ quicktime_riff_t* quicktime_new_riff(quicktime_t *file)
 
 void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff)
 {
-	quicktime_delete_hdrl(file, &riff->hdrl);
+	if(riff->have_hdrl) quicktime_delete_hdrl(file, &riff->hdrl);
 	quicktime_delete_movi(file, &riff->movi);
 	quicktime_delete_idx1(&riff->idx1);
 	free(riff);
 }
 
 void quicktime_init_riff(quicktime_t *file)
-{
-
-// Create new RIFF
-	quicktime_riff_t *riff = quicktime_new_riff(file);
-
-// Write riff header
-// RIFF 'AVI '
-	quicktime_atom_write_header(file, &riff->atom, "RIFF");
-	quicktime_write_char32(file, "AVI ");
-
-// Write header list in first RIFF only
-	if(file->total_riffs < 2)
-	{
-		quicktime_init_hdrl(file, &riff->hdrl);
-		riff->have_hdrl = 1;
-	}
-
-	quicktime_init_movi(file, riff);
-}
+  {
+  int i;
+  // Create new RIFF
+  quicktime_riff_t *riff = quicktime_new_riff(file);
+  
+  // Write riff header
+  // RIFF 'AVI '
+  quicktime_atom_write_header(file, &riff->atom, "RIFF");
+  
+  // Write header list in first RIFF only
+  if(file->total_riffs < 2)
+    {
+    quicktime_write_char32(file, "AVI ");
+    quicktime_init_hdrl(file, &riff->hdrl);
+    riff->have_hdrl = 1;
+    }
+  else
+    quicktime_write_char32(file, "AVIX");
+    
+  quicktime_init_movi(file, riff);
+  
+  if(file->file_type == LQT_FILE_AVI_ODML)
+    {
+    //    fprintf(stderr, "init_riff (ODML)\n");
+    for(i = 0; i < file->moov.total_tracks; i++)
+      {
+      quicktime_indx_init_riff(file, file->moov.trak[i]);
+      }
+    }
+  //  else
+  //    fprintf(stderr, "init_riff (AVI 1.0)\n");
+  }
 
 void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff)
-{
-// Write partial indexes
-	quicktime_finalize_movi(file, &riff->movi);
-	if(riff->have_hdrl)
-	{
-        printf("quicktime_finalize_riff 1\n");
-		quicktime_finalize_hdrl(file, &riff->hdrl);
-                printf("quicktime_finalize_riff 10\n");
-// Write original index for first RIFF
-		quicktime_write_idx1(file, &riff->idx1);
-                printf("quicktime_finalize_riff 100\n");
-	}
-	quicktime_atom_write_footer(file, &riff->atom);
-}
+  {
+  int i;
+  // Write partial indexes
+  if(file->file_type == LQT_FILE_AVI_ODML)
+    {
+    for(i = 0; i < file->moov.total_tracks; i++)
+      {
+      quicktime_indx_finalize_riff(file, file->moov.trak[i]);
+      }
+    }
+
+  quicktime_finalize_movi(file, &riff->movi);
+  if(riff->have_hdrl)
+    {
+    //    printf("quicktime_finalize_riff 1\n");
+    quicktime_finalize_hdrl(file, &riff->hdrl);
+    //    printf("quicktime_finalize_riff 10\n");
+
+    // Write original index for first RIFF
+    quicktime_write_idx1(file, &riff->idx1);
+    //    printf("quicktime_finalize_riff 100\n");
+    }
+  quicktime_atom_write_footer(file, &riff->atom);
+  //  printf("quicktime_finalize_riff\n");
+  }
 
 
 /*
@@ -332,7 +356,15 @@ static void idx1_build_index(quicktime_t *file)
   quicktime_riff_t *first_riff = file->riff[0];
   quicktime_idx1_t *idx1 = &first_riff->idx1;
   int track_number;
-    
+
+  int64_t base_offset;
+  
+  if(idx1->table[0].offset == 4)
+    base_offset = 8 + first_riff->movi.atom.start;
+  else
+    /* For invalid files, which have the index relative to file start */
+    base_offset = 8 + first_riff->movi.atom.start - (idx1->table[0].offset - 4);
+  
   for(i = 0; i < idx1->table_size; i++)
     {
     idx1table = idx1->table + i;
@@ -344,248 +376,87 @@ static void idx1_build_index(quicktime_t *file)
 
     if(trak->mdia.minf.is_audio)
       insert_audio_packet(trak,
-                          idx1table->offset + first_riff->movi.atom.start,
+                          idx1table->offset + base_offset,
                           idx1table->size);
 
     else if(trak->mdia.minf.is_video)
       insert_video_packet(trak,
-                          idx1table->offset + first_riff->movi.atom.start,
+                          idx1table->offset + base_offset,
                           idx1table->size,
                           !!(idx1table->flags & AVI_KEYFRAME));
     }
   }
 
 /* Build index tables from an indx index */
-#if 0
+
 static void indx_build_index(quicktime_t *file)
   {
+  int i, j, k;
+  quicktime_trak_t * trak;
+  quicktime_indx_t  * indx;
+  quicktime_ix_t *ix;
+
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    trak = file->moov.trak[i];
+    indx = &(trak->strl->indx);
+    
+    for(j = 0; j < indx->table_size; j++)
+      {
+      ix = indx->table[j].ix;
+
+      for(k = 0; k < ix->table_size; k++)
+        {
+        if(trak->mdia.minf.is_audio)
+          insert_audio_packet(trak,
+                              ix->base_offset + ix->table[k].relative_offset,
+                              ix->table[k].size);
+        
+        else if(trak->mdia.minf.is_video)
+          insert_video_packet(trak,
+                              ix->base_offset + ix->table[k].relative_offset,
+                              ix->table[k].size & 0x7FFFFFFF,
+                              !(ix->table[k].size & 0x80000000));
+        
+        }
+      
+      }
+    
+    }
   
   }
-#endif
 /*
- *  Ok, this differs from the qt4l approach:
- *  If indx tables are present for all streams,
- *  we'll use them and forget the idx1. Otherwise,
- *  we build the index from the idx1
+ * Import index tables
  */
 
 int quicktime_import_avi(quicktime_t *file)
   {
-#if 1
   int i;
 
   quicktime_riff_t *first_riff = file->riff[0];
   quicktime_idx1_t *idx1 = &first_riff->idx1;
-  if(!idx1->table_size)
-    return 1;
-  idx1_build_index(file);
 
+  if(file->file_type == LQT_FILE_AVI)
+    {
+    if(!idx1->table_size)
+      return 1;
+    idx1_build_index(file);
+    }
+  else if(file->file_type == LQT_FILE_AVI_ODML)
+    {
+    indx_build_index(file);
+    }
   /* Compress stts */
   for(i = 0; i < file->moov.total_tracks; i++)
     {
     if(file->moov.trak[i]->mdia.minf.is_video)
        quicktime_compress_stts(&(file->moov.trak[i]->mdia.minf.stbl.stts));
     }
+
+  //  quicktime_moov_dump(&file->moov);
   
   return 0;
-  
-#else /* Original version follows */
-	int i, j, k;
-	quicktime_riff_t *first_riff = file->riff[0];
-	quicktime_idx1_t *idx1 = &first_riff->idx1;
-	quicktime_hdrl_t *hdrl = &first_riff->hdrl;
-
-
-
-/* Determine whether to use idx1 or indx indexes for offsets. */
-/* idx1 must always be used for keyframes but it also must be */
-/* ignored for offsets if indx exists. */
-
-
-//printf("quicktime_import_avi 1\n");
-/* Convert idx1 to keyframes and load offsets and sizes */
-	for(i = 0; i < idx1->table_size; i++)
-	{
-		quicktime_idx1table_t *idx1table = idx1->table + i;
-		char *tag = idx1table->tag;
-		int track_number = (tag[0] - '0') * 10 + (tag[1] - '0');
-		if(track_number < file->moov.total_tracks)
-		{
-			quicktime_trak_t *trak = file->moov.trak[track_number];
-			int is_audio = trak->mdia.minf.is_audio;
-			int is_video = trak->mdia.minf.is_video;
-
-
-/* Chunk offset */
-			quicktime_stco_t *stco = &trak->mdia.minf.stbl.stco;
-/* Sample size */
-			quicktime_stsz_t *stsz = &trak->mdia.minf.stbl.stsz;
-/* Samples per chunk */
-			quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
-/* Sample description */
-			quicktime_stsd_t *stsd = &trak->mdia.minf.stbl.stsd;
-
-
-/* Enter the offset and size no matter what so the sample counts */
-/* can be used to set keyframes */
-			quicktime_update_stco(stco, 
-					stco->total_entries + 1, 
-					idx1table->offset + first_riff->movi.atom.start);
-
-			if(is_video)
-			{
-/* Just get the keyframe flag.  don't call quicktime_insert_keyframe because */
-/* that updates idx1 and we don't have a track map. */
-				int is_keyframe = (idx1table->flags & AVI_KEYFRAME) == AVI_KEYFRAME;
-				if(is_keyframe)
-				{
-					quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
-/* This is done before the image size table so this value is right */
-					int frame = stsz->total_entries;
-
-/* Expand table */
-					if(stss->entries_allocated <= stss->total_entries)
-					{
-						stss->entries_allocated *= 2;
-						stss->table = realloc(stss->table, 
-							sizeof(quicktime_stss_table_t) * stss->entries_allocated);
-					}
-					stss->table[stss->total_entries++].sample = frame;
-				}
-
-/* Set image size */
-				quicktime_update_stsz(stsz, 
-							stsz->total_entries, 
-							idx1table->size);
-			}
-			else
-			if(is_audio)
-			{
-/* Set samples per chunk if PCM */
-				if(stsd->table[0].sample_size > 0)
-				{
-					quicktime_update_stsc(stsc, 
-						stsc->total_entries + 1, 
-						idx1table->size * 
-							8 / 
-							stsd->table[0].sample_size / 
-							stsd->table[0].channels);
-				}
-			}
-		}
-	}
-
-//printf("quicktime_import_avi 10\n");
-
-
-/* Convert super indexes into Quicktime indexes. */
-/* Append to existing entries if idx1 exists. */
-/* No keyframes here. */
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_strl_t *strl = first_riff->hdrl.strl[i];
-
-		if(strl->have_indx)
-		{
-			quicktime_indx_t *indx = &strl->indx;
-			quicktime_trak_t *trak = file->moov.trak[i];
-			quicktime_stco_t *stco = &trak->mdia.minf.stbl.stco;
-			quicktime_stsz_t *stsz = &trak->mdia.minf.stbl.stsz;
-			quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
-			quicktime_stsd_t *stsd = &trak->mdia.minf.stbl.stsd;
-/* Get existing chunk count from the idx1 */
-			int existing_chunks = stco->total_entries;
-
-/* Read each indx entry */
-			for(j = 0; j < indx->table_size; j++)
-			{
-				quicktime_indxtable_t *indx_table = &indx->table[j];
-				quicktime_ix_t *ix = indx_table->ix;
-
-				for(k = 0; k < ix->table_size; k++)
-				{
-/* Copy from existing chunk count to end of ix table */
-					if(existing_chunks <= 0)
-					{
-						quicktime_ixtable_t *ixtable = &ix->table[k];
-
-/* Do the same things that idx1 did to the chunk tables */
-/* Subtract the super indexes by size of the header.  McRoweSoft seems to */
-/* want the header before the ix offset but after the idx1 offset. */
-						quicktime_update_stco(stco, 
-							stco->total_entries + 1, 
-							ixtable->relative_offset + ix->base_offset - 8);
-						if(strl->is_video)
-						{
-							quicktime_update_stsz(stsz, 
-								stsz->total_entries, 
-								ixtable->size);
-						}
-						else
-						if(strl->is_audio)
-						{
-							if(stsd->table[0].sample_size > 0)
-							{
-                                                                  quicktime_update_stsc(stsc, 
-									stsc->total_entries + 1, 
-									ixtable->size * 
-									8 / 
-									stsd->table[0].sample_size / 
-									stsd->table[0].channels);
-							}
-						}
-					}
-					else
-						existing_chunks--;
-				}
-			}
-		}
-	}
-
-
-//printf("quicktime_import_avi 20\n");
-
-
-
-
-/* Set total samples, time to sample, for audio */
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_trak_t *trak = file->moov.trak[i];
-		quicktime_stsz_t *stsz = &trak->mdia.minf.stbl.stsz;
-		quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
-		quicktime_stco_t *stco = &trak->mdia.minf.stbl.stco;
-		quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
-
-		if(trak->mdia.minf.is_audio)
-		{
- 			quicktime_stsc_table_t *stsc_table = stsc->table;
-			long total_entries = stsc->total_entries;
-			long chunk = stco->total_entries;
-			long sample = 0;
-
-			if(chunk > 0 && total_entries)
-			{
-				sample = quicktime_sample_of_chunk(trak, chunk) + 
-					stsc_table[total_entries - 1].samples;
-			}
-			stsz->sample_size = 1;
-			stsz->total_entries = sample;
-			stts->table[0].sample_count = sample;
-		}
-		else
-		if(trak->mdia.minf.is_video)
-		{
-			stsc->total_entries = 1;
-/* stts has 1 allocation by default */
-			stts->table[0].sample_count = stco->total_entries;
-		}
-	}
-
-//printf("quicktime_import_avi 30\n");
-#endif
-
-}
+  }
 
 
 

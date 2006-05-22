@@ -2,7 +2,6 @@
 #include <quicktime/quicktime.h>
 #include <string.h> // memcpy
 
-
 void quicktime_delete_indx(quicktime_indx_t *indx)
 {
 	int i;
@@ -27,33 +26,47 @@ void quicktime_init_indx(quicktime_t *file,
 	memcpy(indx->chunk_id, strl->tag, 4);
 }
 
-void quicktime_update_indx(quicktime_t *file, 
-	quicktime_indx_t *indx, 
-	quicktime_ix_t *ix)
-{
-	quicktime_indxtable_t *indx_table;
+void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak)
+  {
+  quicktime_strl_t * strl;
+  quicktime_indx_t * indx;
+  quicktime_indxtable_t *indx_table;
+  
+  strl = trak->strl;
+  indx = &(strl->indx);
 
-/* Allocate */
-	if(indx->table_size >= indx->table_allocation)
-	{
-		quicktime_indxtable_t *old_table = indx->table;
-		int new_allocation = indx->table_allocation * 2;
-		if(new_allocation < 1) new_allocation = 1;
-		indx->table = calloc(1, sizeof(quicktime_indxtable_t) * new_allocation);
-		if(old_table)
-		{
-			memcpy(indx->table, old_table, sizeof(quicktime_indxtable_t) * indx->table_size);
-			free(old_table);
-		}
-		indx->table_allocation = new_allocation;
-	}
+  if(indx->table_size >= indx->table_allocation)
+    {
+    int new_allocation = indx->table_allocation * 2;
+    if(new_allocation < 1) new_allocation = 1;
+    
+    indx->table = realloc(indx->table, new_allocation * sizeof(quicktime_indxtable_t));
+    memset(indx->table + indx->table_size, 0, new_allocation - indx->table_size);
+    indx->table_allocation = new_allocation;
+    }
+  
+  /* Append */
+  indx_table = &indx->table[indx->table_size++];
+  indx_table->ix = quicktime_new_ix(file, trak, strl);
+  }
 
-/* Append */
-	indx_table = &indx->table[indx->table_size++];
-	indx_table->index_offset = ix->atom.start - 8;
-	indx_table->index_size = ix->atom.size;
-	indx_table->duration = ix->table_size;
-}
+void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak)
+  {
+  quicktime_strl_t * strl;
+  quicktime_indx_t * indx;
+  quicktime_indxtable_t *indx_table;
+  
+  strl = trak->strl;
+  indx = &(strl->indx);
+
+  indx_table = &indx->table[indx->table_size-1];
+
+  quicktime_write_ix(file, trak);
+  
+  indx_table->index_offset = indx_table->ix->atom.start - 8;
+  indx_table->index_size   = indx_table->ix->atom.size;
+  indx_table->duration     = indx_table->ix->table_size;
+  }
 
 
 
@@ -67,60 +80,49 @@ void quicktime_finalize_indx(quicktime_t *file)
 	quicktime_atom_t junk_atom;
 	int junk_size;
 
-
 	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		strl = hdrl->strl[i];
-		indx = &strl->indx;
-
-/* Write indx */
-		quicktime_set_position(file, strl->indx_offset);
-		quicktime_atom_write_header(file, &indx->atom, "indx");
-/* longs per entry */
-		quicktime_write_int16_le(file, indx->longs_per_entry);
-/* index sub type */
-		quicktime_write_char(file, indx->index_subtype);
-/* index type */
-		quicktime_write_char(file, indx->index_type);
-/* entries in use */
-		quicktime_write_int32_le(file, indx->table_size);
-/* chunk ID */
-		quicktime_write_char32(file, indx->chunk_id);
-/* reserved */
-		quicktime_write_int32_le(file, 0);
-		quicktime_write_int32_le(file, 0);
-		quicktime_write_int32_le(file, 0);
-
-/* table */
-		for(j = 0; j < indx->table_size; j++)
-		{
-			quicktime_indxtable_t *indx_table = &indx->table[j];
-			quicktime_write_int64_le(file, indx_table->index_offset);
-			quicktime_write_int32_le(file, indx_table->index_size);
-			quicktime_write_int32_le(file, indx_table->duration);
-		}
-
-		quicktime_atom_write_footer(file, &indx->atom);
-
-
-
-/* Rewrite JUNK less indx size and indx header size */
-		junk_size = strl->padding_size - indx->atom.size - 24;
-
-                quicktime_atom_write_header(file, &junk_atom, "JUNK");
- 		for(j = 0; j < junk_size; j += 4)
-                  quicktime_write_int32_le(file, 0);
- 		quicktime_atom_write_footer(file, &junk_atom);
-        }
+          {
+          strl = hdrl->strl[i];
+          indx = &strl->indx;
+          
+          /* Write indx */
+          quicktime_set_position(file, strl->indx_offset);
+          quicktime_atom_write_header(file, &indx->atom, "indx");
+          /* longs per entry */
+          quicktime_write_int16_le(file, indx->longs_per_entry);
+          /* index sub type */
+          quicktime_write_char(file, indx->index_subtype);
+          /* index type */
+          quicktime_write_char(file, indx->index_type);
+          /* entries in use */
+          quicktime_write_int32_le(file, indx->table_size);
+          /* chunk ID */
+          quicktime_write_char32(file, indx->chunk_id);
+          /* reserved */
+          quicktime_write_int32_le(file, 0);
+          quicktime_write_int32_le(file, 0);
+          quicktime_write_int32_le(file, 0);
+          
+          /* table */
+          for(j = 0; j < indx->table_size; j++)
+            {
+            quicktime_indxtable_t *indx_table = &indx->table[j];
+            quicktime_write_int64_le(file, indx_table->index_offset);
+            quicktime_write_int32_le(file, indx_table->index_size);
+            quicktime_write_int32_le(file, indx_table->duration);
+            }
+          
+          quicktime_atom_write_footer(file, &indx->atom);
+          
+          /* Rewrite JUNK less indx size and indx header size */
+          junk_size = strl->padding_size - indx->atom.size - 24;
+          
+          quicktime_atom_write_header(file, &junk_atom, "JUNK");
+          for(j = 0; j < junk_size; j += 4)
+            quicktime_write_int32_le(file, 0);
+          quicktime_atom_write_footer(file, &junk_atom);
+          }
 }
-
-
-
-
-
-
-
-
 
 void quicktime_read_indx(quicktime_t *file, 
 	quicktime_strl_t *strl, 
@@ -132,6 +134,8 @@ void quicktime_read_indx(quicktime_t *file,
 	int i;
 	int64_t offset;
 
+        file->file_type = LQT_FILE_AVI_ODML;
+        
 	indx->longs_per_entry = quicktime_read_int16_le(file);
 	indx->index_subtype = quicktime_read_char(file);
 	indx->index_type = quicktime_read_char(file);
@@ -151,9 +155,7 @@ void quicktime_read_indx(quicktime_t *file,
 		indx_table->index_size = quicktime_read_int32_le(file);
 		indx_table->duration = quicktime_read_int32_le(file);
 		offset = quicktime_position(file);
-
-		indx_table->ix = calloc(indx->table_size, sizeof(quicktime_ix_t*));
-
+                
 /* Now read the partial index */
 		ix = indx_table->ix = calloc(1, sizeof(quicktime_ix_t));
 		quicktime_set_position(file, indx_table->index_offset);

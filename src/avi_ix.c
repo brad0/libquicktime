@@ -38,26 +38,23 @@ void quicktime_update_ixtable(quicktime_t *file,
 	int64_t offset,
 	int size)
 {
-	quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
-	quicktime_movi_t *movi = &riff->movi;
-	quicktime_ix_t *ix = movi->ix[trak->tkhd.track_id - 1];
-	quicktime_ixtable_t *ix_table;
+	quicktime_riff_t *first_riff = file->riff[0];
+        quicktime_indx_t *indx = &(first_riff->hdrl.strl[trak->tkhd.track_id - 1]->indx);
+        
+        quicktime_ix_t *ix = indx->table[indx->table_size-1].ix;
+        quicktime_ixtable_t *ix_table;
 
 /* Allocation */
 	if(ix->table_size >= ix->table_allocation)
 	{
-		quicktime_ixtable_t *old_table = ix->table;
-		int new_allocation = ix->table_allocation * 2;
-		if(new_allocation < 1) new_allocation = 1;
-		ix->table = calloc(1, sizeof(quicktime_ixtable_t) * new_allocation);
-		if(old_table)
-		{
-			memcpy(ix->table, old_table, sizeof(quicktime_ixtable_t) * ix->table_size);
-			free(old_table);
-		}
-		ix->table_allocation = new_allocation;
+        int new_allocation = ix->table_allocation * 2;
+        if(new_allocation < 1) new_allocation = 1;
+        ix->table = realloc(ix->table, sizeof(quicktime_ixtable_t) * new_allocation);
+        memset(ix->table + ix->table_size, 0,
+               sizeof(quicktime_ixtable_t)*(new_allocation - ix->table_size));
+        ix->table_allocation = new_allocation;
 	}
-
+        
 /* Appendage */
 	ix_table = &ix->table[ix->table_size++];
 	ix_table->relative_offset = offset - ix->base_offset;
@@ -66,16 +63,18 @@ void quicktime_update_ixtable(quicktime_t *file,
 
 
 void quicktime_write_ix(quicktime_t *file,
-	quicktime_ix_t *ix,
-	int track)
-{
+                        quicktime_trak_t * trak)
+  {
 	int i;
-        quicktime_riff_t *riff;
-        quicktime_hdrl_t *hdrl;
         quicktime_strl_t *strl;
         quicktime_indx_t *indx;
+        quicktime_ix_t   *ix;
 
-	quicktime_atom_write_header(file, &ix->atom, ix->tag);
+        strl = trak->strl;
+        indx = &(strl->indx);
+        ix = indx->table[indx->table_size-1].ix;
+        
+        quicktime_atom_write_header(file, &ix->atom, ix->tag);
 
 /* longs per entry */
 	quicktime_write_int16_le(file, ix->longs_per_entry);
@@ -103,13 +102,6 @@ void quicktime_write_ix(quicktime_t *file,
 	quicktime_atom_write_footer(file, &ix->atom);
 
 
-/* Update super index */
-	riff = file->riff[0];
-	hdrl = &riff->hdrl;
-	strl = hdrl->strl[track];
-	indx = &strl->indx;
-
-	quicktime_update_indx(file, indx, ix);
 }
 
 void quicktime_read_ix(quicktime_t *file,
@@ -138,10 +130,3 @@ void quicktime_read_ix(quicktime_t *file,
 		ixtable->size = quicktime_read_int32_le(file);
 	}
 }
-
-
-
-
-
-
-

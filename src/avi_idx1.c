@@ -71,7 +71,7 @@ void quicktime_write_idx1(quicktime_t *file,
 	int table_size = idx1->table_size;
 
 
-        fprintf(stderr, "Writing idx1 %llx\n", quicktime_position(file));
+        //        fprintf(stderr, "Writing idx1 %llx\n", quicktime_position(file));
 // Write table
 	quicktime_atom_write_header(file, &idx1->atom, "idx1");
 

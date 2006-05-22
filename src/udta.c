@@ -256,7 +256,7 @@ int quicktime_write_udta_string(quicktime_t *file, char *string, int size, int i
           quicktime_atom_write_header(file, &data_atom, "data");
           quicktime_write_int32(file, 0x0000001); /* Version (0), flags 0x00001 (text) */
           quicktime_write_int32(file, 0); /* Reserved */
-          result = quicktime_write_data(file, string, strlen(string));
+          result = quicktime_write_data(file, (uint8_t*)string, strlen(string));
           quicktime_atom_write_footer(file, &data_atom);
           }
 	return !result;

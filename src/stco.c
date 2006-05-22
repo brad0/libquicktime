@@ -38,7 +38,8 @@ void quicktime_stco_dump(quicktime_stco_t *stco)
 	printf("      total_entries %ld\n", stco->total_entries);
 	for(i = 0; i < stco->total_entries; i++)
 	{
-		printf("       offset %d %llx\n", i, stco->table[i].offset);
+		printf("       offset %d %llx (%lld)\n", i, stco->table[i].offset,
+                       stco->table[i].offset);
 	}
 }
 

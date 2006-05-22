@@ -3,30 +3,15 @@
 
 void quicktime_delete_movi(quicktime_t *file, quicktime_movi_t *movi)
 {
-	int i;
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		if(movi->ix[i]) quicktime_delete_ix(movi->ix[i]);
-	}
 }
 
 void quicktime_init_movi(quicktime_t *file, quicktime_riff_t *riff)
 {
-	int i;
-	quicktime_riff_t *first_riff = file->riff[0];
 	quicktime_movi_t *movi = &riff->movi;
 
 	quicktime_atom_write_header(file, &movi->atom, "LIST");
 	quicktime_write_char32(file, "movi");
 
-// Initialize partial indexes and relative positions for ix entries
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_strl_t *strl = first_riff->hdrl.strl[i];
-		quicktime_trak_t *trak = file->moov.trak[i];
-			movi->ix[i] = 
-			quicktime_new_ix(file, trak, strl);
-	}
 }
 
 void quicktime_read_movi(quicktime_t *file, 
@@ -40,23 +25,9 @@ void quicktime_read_movi(quicktime_t *file,
 }
 
 void quicktime_finalize_movi(quicktime_t *file, quicktime_movi_t *movi)
-{
-//	int i;
-// Pad movi to get an even number of bytes
-	uint8_t temp[2] = { 0, 0 };
-	quicktime_write_data(file, 
-		temp, 
-		(quicktime_position(file) - movi->atom.start) % 2);
-#if 0 /* TODO: Proper implementation of partial (opendml) indices */
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_ix_t *ix = movi->ix[i];
-// Write partial indexes and update super index
-		quicktime_write_ix(file, ix, i);
-	}
-#endif
-	quicktime_atom_write_footer(file, &movi->atom);
-}
+  {
+  quicktime_atom_write_footer(file, &movi->atom);
+  }
 
 
 

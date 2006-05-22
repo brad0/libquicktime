@@ -369,7 +369,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
       break;
       }
 #if 0
-    fprintf(stderr, "decode_chunk: Samples decoded: %d, Bytes used: %d\n",
+    fprintf(stderr, "decode_chunk_vbr: Samples decoded: %d, Bytes used: %d\n",
             bytes_decoded / (track_map->channels * 2),
             frame_bytes);
 #endif
@@ -402,6 +402,10 @@ static int decode_chunk(quicktime_t * file, int track)
                                       &(codec->chunk_buffer),
                                       &(codec->chunk_buffer_alloc),
                                       codec->bytes_in_chunk_buffer);
+
+  //  fprintf(stderr, "Got chunk:\n");
+  //  lqt_hexdump(codec->chunk_buffer, 16, 16);
+  
   if(!chunk_size)
     {
     //    fprintf(stderr, "audio_ffmpeg: EOF 1 (%d bytes left)\n", codec->bytes_in_chunk_buffer);
@@ -411,8 +415,10 @@ static int decode_chunk(quicktime_t * file, int track)
        (codec->bytes_in_chunk_buffer >= 4))
       {
       if(!decode_header(&mph, codec->chunk_buffer, (const mpeg_header*)0))
+        {
+        fprintf(stderr, "Decode header failed\n");
         return 0;
-
+        }
       if(mph.frame_bytes <= codec->bytes_in_chunk_buffer)
         {
         fprintf(stderr, "Huh, frame not decoded?\n");
@@ -615,7 +621,7 @@ static int decode_chunk(quicktime_t * file, int track)
     if(codec->bytes_in_chunk_buffer < 0)
       codec->bytes_in_chunk_buffer = 0;
 
-    if(bytes_decoded <= 0)
+    if(bytes_decoded < 0)
       {
       if(codec->bytes_in_chunk_buffer > 0)
         codec->bytes_in_chunk_buffer = 0;
@@ -659,7 +665,7 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   int samples_to_skip;
   int samples_to_move;
 
-  //  fprintf(stderr, "ffmpeg decode audio %lld\n", track_map->current_position);
+  //  fprintf(stderr, "ffmpeg decode audio %lld %d\n", track_map->current_position, samples);
 
   if(!output) /* Global initialization */
     {

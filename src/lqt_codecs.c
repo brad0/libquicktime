@@ -544,6 +544,22 @@ int lqt_set_video_pass(quicktime_t *file,
     return 0;
   }
 
+static void start_encoding(quicktime_t *file)
+  {
+  if(file->encoding_started)
+    return;
+
+  file->encoding_started = 1;
+
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    quicktime_set_position(file, 0);
+    // Write RIFF chunk
+    quicktime_init_riff(file);
+    }
+  }
+
+
 static int do_encode_video(quicktime_t *file, 
                            unsigned char **row_pointers, 
                            int track)
@@ -552,6 +568,8 @@ static int do_encode_video(quicktime_t *file,
 
   int height;
   int width;
+
+  start_encoding(file);
   
   set_default_rowspan(file, track);
   height = quicktime_video_height(file, track);
@@ -707,6 +725,7 @@ int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int tra
   {
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
+  start_encoding(file);
   return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, input, 
                                                              samples,
                                                              track);
@@ -885,7 +904,8 @@ static int encode_audio_old(quicktime_t *file,
   {
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
-
+  start_encoding(file);
+  
   if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
     ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, (void*)0, 
                                                         0, track);

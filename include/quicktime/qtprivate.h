@@ -827,10 +827,6 @@ typedef struct
 {
         quicktime_atom_t atom;
                                                                                                                      
-/* Partial index */
-/* For writing only, there are multiple movi objects with multiple ix tables. */
-/* This is not used for reading.  Instead an ix_t object in indx_t is used. */
-        quicktime_ix_t *ix[MAXTRACKS];
 } quicktime_movi_t;
                                                                                                                      
 typedef struct
@@ -1099,6 +1095,7 @@ struct quicktime_s
 {
 	FILE *stream;
 	int64_t total_length;
+        int encoding_started;
 	quicktime_mdat_t mdat;
 	quicktime_moov_t moov;
         quicktime_ftyp_t ftyp;
@@ -1118,19 +1115,11 @@ struct quicktime_s
  */
         int64_t moov_end;
         int64_t moov_size;
-#if 0
-        int64_t old_preload_size;
-        uint8_t *old_preload_buffer;
-        int64_t old_preload_start;
-        int64_t old_preload_end;
-        int64_t old_preload_ptr;
-#endif
 
-//        int use_avi;
 /* AVI tree */
         quicktime_riff_t *riff[MAX_RIFFS];
         int total_riffs;
-
+        uint32_t max_riff_size;
 
 /* for begining and ending frame writes where the user wants to write the  */
 /* file descriptor directly */

@@ -543,6 +543,7 @@ int quicktime_init(quicktime_t *file)
 	bzero(file, sizeof(quicktime_t));
 //	quicktime_atom_write_header64(new_file, &file->mdat.atom, "mdat");
 	quicktime_moov_init(&(file->moov));
+        file->max_riff_size = 0x40000000;
         //	file->color_model = BC_RGB888;
 	return 0;
 }
@@ -1138,7 +1139,7 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
 
 // Set keyframe flag in idx1 table.
 // Only possible in the first RIFF.  After that, there's no keyframe support.
-        if((file->file_type == LQT_FILE_AVI) && file->total_riffs == 1)
+        if((file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)) && (file->total_riffs == 1))
                 quicktime_set_idx1_keyframe(file,
                         trak,
                         frame);
@@ -1396,8 +1397,8 @@ int quicktime_read_info(quicktime_t *file)
         }
 /* Quicktime section */
         else
-        if(file->file_type != LQT_FILE_AVI)
-        {
+          if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
+            {
                 do
                 {
                         result = quicktime_atom_read_header(file, &leaf_atom);
@@ -1574,16 +1575,13 @@ int quicktime_check_sig(char *path)
 
 void quicktime_set_avi(quicktime_t *file, int value)
   {
-  file->file_type = LQT_FILE_AVI;
-  quicktime_set_position(file, 0);
-  
-  // Write RIFF chunk
-  quicktime_init_riff(file);
+  if(value)
+    file->file_type = LQT_FILE_AVI_ODML;
   }
                                                                                                                   
 int quicktime_is_avi(quicktime_t *file)
 {
-return !!(file->file_type == LQT_FILE_AVI);
+return !!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML));
 }
 
 quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
@@ -1693,7 +1691,7 @@ int quicktime_close(quicktime_t *file)
         {
                 quicktime_codecs_flush(file);
                                                                                                                   
-                if(file->file_type == LQT_FILE_AVI)
+                if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
                 {
 #if 0
                         quicktime_atom_t junk_atom;
@@ -1706,19 +1704,11 @@ int quicktime_close(quicktime_t *file)
                                                                                                                   
 // Finalize the odml header
                         quicktime_finalize_odml(file, &file->riff[0]->hdrl);
-                                                                                                                  
-// Finalize super indexes
-                        if(file->total_riffs > 1)
+
+                        // Finalize super indexes
+                        if(file->file_type == LQT_FILE_AVI_ODML)
                           quicktime_finalize_indx(file);
                         
-#if 0
-// Pad ending
-                        quicktime_set_position(file, position);
-                        quicktime_atom_write_header(file, &junk_atom, "JUNK");
-                        for(i = 0; i < 0x406; i++)
-                                quicktime_write_int32_le(file, 0);
-                        quicktime_atom_write_footer(file, &junk_atom);
-#endif
                 }
                 else
                 {
@@ -1733,9 +1723,7 @@ int quicktime_close(quicktime_t *file)
                         quicktime_write_moov(file, &(file->moov));
                 }
         }
-                                                                                                                  
         quicktime_file_close(file);
-                                                                                                                  
         quicktime_delete(file);
         free(file);
         return result;
@@ -1875,7 +1863,7 @@ int quicktime_div3_is_key(unsigned char *data, long size)
 
 int lqt_is_avi(quicktime_t *file)
   {
-  return (file->file_type == LQT_FILE_AVI);
+  return (file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML));
   }
 
 int lqt_get_wav_id(quicktime_t *file, int track)
@@ -1934,10 +1922,6 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
     if(next_offset > 0)
       {
       ret[i] = next_offset - trak->mdia.minf.stbl.stco.table[i].offset;
-
-      if(file->file_type == LQT_FILE_AVI)
-        ret[i] -= 8;
-      
       }
     else /* Last chunk: Take the end of the mdat atom */
       {
@@ -2453,12 +2437,13 @@ static struct
   }
 filetypes[] =
   {
-      { LQT_FILE_NONE, "Unknown/Undefined" },
-      { LQT_FILE_QT_OLD, "Quicktime (old)" },
-      { LQT_FILE_QT,  "Quicktime" },
-      { LQT_FILE_AVI,  "AVI" },
-      { LQT_FILE_MP4,  "MP4" },
-      { LQT_FILE_M4A,  "M4A" },
+      { LQT_FILE_NONE,     "Unknown/Undefined" },
+      { LQT_FILE_QT_OLD,   "Quicktime (old)"   },
+      { LQT_FILE_QT,       "Quicktime"         },
+      { LQT_FILE_AVI,      "AVI"               },
+      { LQT_FILE_AVI_ODML, "AVI ODML"          },
+      { LQT_FILE_MP4,      "MP4"               },
+      { LQT_FILE_M4A,      "M4A"               },
   };
   
 const char * lqt_file_type_to_string(lqt_file_type_t type)
@@ -2470,4 +2455,14 @@ const char * lqt_file_type_to_string(lqt_file_type_t type)
       return filetypes[i].name;
     }
   return filetypes[0].name;
+  }
+
+lqt_file_type_t lqt_get_file_type(quicktime_t * file)
+  {
+  return file->file_type;
+  }
+
+void lqt_set_max_riff_size(quicktime_t * file, int size)
+  {
+  file->max_riff_size = size * 1024 * 1024;
   }

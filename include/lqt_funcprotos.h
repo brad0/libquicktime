@@ -60,12 +60,12 @@ void quicktime_init_indx(quicktime_t *file,
                          quicktime_indx_t *indx,
                          quicktime_strl_t *strl);
 
-void quicktime_update_indx(quicktime_t *file,
-                           quicktime_indx_t *indx,
-                           quicktime_ix_t *ix);
 void quicktime_read_indx(quicktime_t *file,
                          quicktime_strl_t *strl,
                          quicktime_atom_t *parent_atom);
+
+void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak);
+void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak);
 
 /* avi_ix.c */
 
@@ -77,9 +77,7 @@ void quicktime_update_ixtable(quicktime_t *file,
                               quicktime_trak_t *trak,
                               int64_t offset,
                               int size);
-void quicktime_write_ix(quicktime_t *file,
-                        quicktime_ix_t *ix,
-                        int track);
+void quicktime_write_ix(quicktime_t *file, quicktime_trak_t *trak);
 
 void quicktime_read_ix(quicktime_t *file,
                        quicktime_ix_t *ix);

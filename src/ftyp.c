@@ -62,6 +62,7 @@ void quicktime_ftyp_init(quicktime_ftyp_t * ftyp, lqt_file_type_t type)
     case LQT_FILE_NONE:
     case LQT_FILE_QT_OLD:
     case LQT_FILE_AVI:
+    case LQT_FILE_AVI_ODML:
       return;
     case LQT_FILE_QT:
       copy_ftyp(ftyp, &ftyp_qt);
