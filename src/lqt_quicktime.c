@@ -1137,18 +1137,20 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
 	quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
 	int i;
 
-// Set keyframe flag in idx1 table.
-// Only possible in the first RIFF.  After that, there's no keyframe support.
-        if((file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)) && (file->total_riffs == 1))
-                quicktime_set_idx1_keyframe(file,
-                        trak,
-                        frame);
-
-
-// Offset 1
+        if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+          {
+          // Set keyframe flag in idx1 table.
+          if(file->total_riffs == 1)
+            quicktime_set_idx1_keyframe(file, trak, frame);
+          // Set keyframe flag in indx table.
+          if(file->file_type == LQT_FILE_AVI_ODML)
+            {
+            quicktime_set_indx_keyframe(file, trak, frame);
+            }
+          }
+        // Offset 1
 	frame++;
-
-
+        
 //printf("quicktime_insert_keyframe 1\n");
 // Get the keyframe greater or equal to new frame
 	for(i = 0; i < stss->total_entries; i++)

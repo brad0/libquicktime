@@ -1,6 +1,7 @@
 SUBDIRS = quicktime
 
 noinst_HEADERS = \
+charset.h \
 cmodel_permutation.h \
 colorspace_tables.h \
 colorspace_macros.h \

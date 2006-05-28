@@ -58,7 +58,14 @@ void quicktime_update_ixtable(quicktime_t *file,
 /* Appendage */
 	ix_table = &ix->table[ix->table_size++];
 	ix_table->relative_offset = offset - ix->base_offset;
-	ix_table->size = size;
+        ix_table->size = size;
+
+        if(!trak->mdia.minf.is_audio &&
+           trak->mdia.minf.stbl.stss.total_entries)
+          {
+          /* If bit 31 of the size is set, we have *no* keyframe */
+          ix_table->size |= 0x80000000;
+          }
 }
 
 

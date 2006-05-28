@@ -4,112 +4,115 @@
 
 
 void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
-{
-	quicktime_riff_t *riff = quicktime_new_riff(file);
-	quicktime_atom_t leaf_atom;
-	int result = 0;
-	uint8_t data[5];
+  {
+  quicktime_riff_t *riff = quicktime_new_riff(file);
+  quicktime_atom_t leaf_atom;
+  int result = 0;
+  uint8_t data[5];
 
-	riff->atom = *parent_atom;
+  riff->atom = *parent_atom;
 
-// AVI
-	quicktime_read_data(file, data, 4);
-//printf("quicktime_read_riff 1 %llx\n", quicktime_position(file));
+  // AVI
+  quicktime_read_data(file, data, 4);
+  //printf("quicktime_read_riff 1 %llx\n", quicktime_position(file));
 
-// Certain AVI parameters must be copied over to quicktime objects:
-// hdrl -> moov
-// movi -> mdat
-// idx1 -> moov
-	do
-	{
-		result = quicktime_atom_read_header(file, &leaf_atom);
+  // Certain AVI parameters must be copied over to quicktime objects:
+  // hdrl -> moov
+  // movi -> mdat
+  // idx1 -> moov
+  do
+    {
+    result = quicktime_atom_read_header(file, &leaf_atom);
 
-/*
- * printf("quicktime_read_riff 1 %llx %llx %c%c%c%c\n", 
- * leaf_atom.start,
- * leaf_atom.size,
- * leaf_atom.type[0], 
- * leaf_atom.type[1], 
- * leaf_atom.type[2], 
- * leaf_atom.type[3]);
- */
-		if(!result)
-		{
-			if(quicktime_atom_is(&leaf_atom, "LIST"))
-			{
-				data[4] = 0;
+    /*
+     * printf("quicktime_read_riff 1 %llx %llx %c%c%c%c\n", 
+     * leaf_atom.start,
+     * leaf_atom.size,
+     * leaf_atom.type[0], 
+     * leaf_atom.type[1], 
+     * leaf_atom.type[2], 
+     * leaf_atom.type[3]);
+     */
+    if(!result)
+      {
+      if(quicktime_atom_is(&leaf_atom, "LIST"))
+        {
+        data[4] = 0;
+        
+        result = !quicktime_read_data(file, data, 4);
+        if(!result)
+          {
+          // Got LIST 'hdrl'
+          if(quicktime_match_32(data, "hdrl"))
+            {
 
+            // No size here.
+            //printf("quicktime_read_riff 10 %llx\n", quicktime_position(file));
+            quicktime_read_hdrl(file, &riff->hdrl, &leaf_atom);
+            //printf("quicktime_read_riff 20 %llx\n", quicktime_position(file));
+            }
+          else if(quicktime_match_32(data, "movi"))  // Got LIST 'movi'
+            {
+            //printf("quicktime_read_riff 30 %llx\n", quicktime_position(file));
+            quicktime_read_movi(file, &leaf_atom, &riff->movi);
+            //printf("quicktime_read_riff 40 %llx\n", quicktime_position(file));
+            }
+          else if(quicktime_match_32(data, "INFO"))
+            {
+            quicktime_read_riffinfo(file, &riff->info, &leaf_atom);
+            riff->have_info = 1;
+            }
+          else
+            // Skip it
+            quicktime_atom_skip(file, &leaf_atom);
+          
+          }
+        }
+      else
+        // Got 'movi'
+        if(quicktime_atom_is(&leaf_atom, "movi"))
+          {
+          quicktime_read_movi(file, &leaf_atom, &riff->movi);
+          
+          }
+      // Got 'idx1' original index
+        else if(quicktime_atom_is(&leaf_atom, "idx1"))
+          {
+          
+          //printf("quicktime_read_riff 50 %llx\n", quicktime_position(file));
+          // Preload idx1 here
+          int64_t start_position = quicktime_position(file);
+          long temp_size = leaf_atom.end - start_position;
+          unsigned char *temp = malloc(temp_size);
+          quicktime_set_preload(file, 
+                                (temp_size < 0x100000) ? 0x100000 : temp_size);
+          quicktime_read_data(file, temp, temp_size);
+          quicktime_set_position(file, start_position);
+          free(temp);
 
-				result = !quicktime_read_data(file, data, 4);
+          // Read idx1
+          quicktime_read_idx1(file, riff, &leaf_atom);
+          //printf("quicktime_read_riff 60 %llx\n", quicktime_position(file));
 
+          }
+        else if(quicktime_atom_is(&leaf_atom, "INFO"))
+          {
+          quicktime_read_riffinfo(file, &riff->info, &leaf_atom);
+          riff->have_info = 1;
+          }
+        else
+          /* Skip it */
+          {
 
-				if(!result)
-				{
-// Got LIST 'hdrl'
-					if(quicktime_match_32(data, "hdrl"))
-					{
+          quicktime_atom_skip(file, &leaf_atom);
 
-// No size here.
-//printf("quicktime_read_riff 10 %llx\n", quicktime_position(file));
-						quicktime_read_hdrl(file, &riff->hdrl, &leaf_atom);
-//printf("quicktime_read_riff 20 %llx\n", quicktime_position(file));
-					}
-					else
-// Got LIST 'movi'
-					if(quicktime_match_32(data, "movi"))
-					{
-//printf("quicktime_read_riff 30 %llx\n", quicktime_position(file));
-						quicktime_read_movi(file, &leaf_atom, &riff->movi);
-//printf("quicktime_read_riff 40 %llx\n", quicktime_position(file));
-					}
-				}
-
-// Skip it
-				quicktime_atom_skip(file, &leaf_atom);
-
-			}
-			else
-// Got 'movi'
-			if(quicktime_atom_is(&leaf_atom, "movi"))
-			{
-				quicktime_read_movi(file, &leaf_atom, &riff->movi);
-
-			}
-			else
-// Got 'idx1' original index
-			if(quicktime_atom_is(&leaf_atom, "idx1"))
-			{
-
-//printf("quicktime_read_riff 50 %llx\n", quicktime_position(file));
-// Preload idx1 here
-				int64_t start_position = quicktime_position(file);
-				long temp_size = leaf_atom.end - start_position;
-				unsigned char *temp = malloc(temp_size);
-				quicktime_set_preload(file, 
-					(temp_size < 0x100000) ? 0x100000 : temp_size);
-				quicktime_read_data(file, temp, temp_size);
-				quicktime_set_position(file, start_position);
-				free(temp);
-
-// Read idx1
-				quicktime_read_idx1(file, riff, &leaf_atom);
-//printf("quicktime_read_riff 60 %llx\n", quicktime_position(file));
-
-			}
-			else
-/* Skip it */
-			{
-
-				quicktime_atom_skip(file, &leaf_atom);
-
-			}
-		}
-	}while(!result && quicktime_position(file) < parent_atom->end);
-
-//printf("quicktime_read_riff 10\n");
-
-
-}
+          }
+      }
+    }while(!result && quicktime_position(file) < parent_atom->end);
+    
+  //printf("quicktime_read_riff 10\n");
+  
+  }
 
 
 quicktime_riff_t* quicktime_new_riff(quicktime_t *file)
@@ -134,6 +137,7 @@ void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff)
 	if(riff->have_hdrl) quicktime_delete_hdrl(file, &riff->hdrl);
 	quicktime_delete_movi(file, &riff->movi);
 	quicktime_delete_idx1(&riff->idx1);
+	quicktime_delete_riffinfo(&riff->info);
 	free(riff);
 }
 
@@ -153,6 +157,11 @@ void quicktime_init_riff(quicktime_t *file)
     quicktime_write_char32(file, "AVI ");
     quicktime_init_hdrl(file, &riff->hdrl);
     riff->have_hdrl = 1;
+    quicktime_init_riffinfo(&riff->info);
+    
+    quicktime_udta_2_riffinfo(&file->moov.udta, &riff->info);
+    quicktime_write_riffinfo(file, &riff->info);
+    riff->have_info = 1;
     }
   else
     quicktime_write_char32(file, "AVIX");
@@ -452,7 +461,10 @@ int quicktime_import_avi(quicktime_t *file)
     if(file->moov.trak[i]->mdia.minf.is_video)
        quicktime_compress_stts(&(file->moov.trak[i]->mdia.minf.stbl.stts));
     }
-
+  if(first_riff->have_info)
+    {
+    quicktime_riffinfo_2_udta(&first_riff->info, &(file->moov.udta));
+    }
   //  quicktime_moov_dump(&file->moov);
   
   return 0;

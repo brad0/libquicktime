@@ -166,6 +166,22 @@ void quicktime_read_indx(quicktime_t *file,
 
 }
 
+void quicktime_set_indx_keyframe(quicktime_t *file, 
+                                 quicktime_trak_t *trak,
+                                 long new_keyframe)
+  {
+  long frame_count;
+  int i;
+  quicktime_indx_t *indx = &trak->strl->indx;
 
+  /* Get the right ix table */
+  frame_count = 0;
+  i = 0;
 
-
+  while(frame_count + indx->table[i].ix->table_size < new_keyframe)
+    {
+    frame_count+= indx->table[i].ix->table_size;
+    i++;
+    }
+  indx->table[i].ix->table[new_keyframe - frame_count].size &= 0x7fffffff;
+  }

@@ -67,6 +67,26 @@ void quicktime_read_indx(quicktime_t *file,
 void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak);
 void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak);
 
+void quicktime_set_indx_keyframe(quicktime_t *file, quicktime_trak_t * trak,
+                                 long frame);
+
+/* avi_info.c */
+
+void quicktime_read_riffinfo(quicktime_t *file,
+                             quicktime_riffinfo_t *info,
+                             quicktime_atom_t *parent_atom);
+
+void quicktime_write_riffinfo(quicktime_t *file,
+                              quicktime_riffinfo_t *info);
+
+void quicktime_riffinfo_2_udta(quicktime_riffinfo_t * riffinfo,
+                               quicktime_udta_t * udta);
+void quicktime_udta_2_riffinfo(quicktime_udta_t * udta,
+                               quicktime_riffinfo_t * riffinfo);
+void quicktime_delete_riffinfo(quicktime_riffinfo_t * riffinfo);
+void quicktime_init_riffinfo(quicktime_riffinfo_t * riffinfo);
+
+
 /* avi_ix.c */
 
 quicktime_ix_t* quicktime_new_ix(quicktime_t *file,
@@ -889,8 +909,6 @@ int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type);
 int quicktime_udta_init(quicktime_udta_t *udta);
 int quicktime_udta_delete(quicktime_udta_t *udta);
 void quicktime_udta_dump(quicktime_udta_t *udta);
-int quicktime_read_udta_string(quicktime_t *file, char **string, int *size, int ilst);
-int quicktime_write_udta_string(quicktime_t *file, char *string, int size, int ilst);
 int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_atom_t *udta_atom);
 void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta);
 int quicktime_set_udta_string(char **string, int *size, char *new_string);

@@ -166,8 +166,14 @@ void quicktime_update_idx1table(quicktime_t *file,
 // Appendage
 	idx1_table = &idx1->table[idx1->table_size];
 	memcpy(idx1_table->tag, tag, 4);
-	idx1_table->flags = (trak->mdia.minf.is_audio) ? AVI_KEYFRAME : 0;
-	idx1_table->offset = offset - 8 - movi->atom.start;
+        
+        if(trak->mdia.minf.is_audio ||
+           !trak->mdia.minf.stbl.stss.total_entries)
+          idx1_table->flags = AVI_KEYFRAME;
+        else
+          idx1_table->flags = 0;
+        
+        idx1_table->offset = offset - 8 - movi->atom.start;
 	idx1_table->size = size;
 	idx1->table_size++;
 }

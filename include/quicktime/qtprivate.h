@@ -805,7 +805,7 @@ typedef struct
 /* Offset of end of 8 byte chunk header relative to ix->base_offset */
         int relative_offset;
 /* size of data without 8 byte header */
-        int size;
+        uint32_t size;
 } quicktime_ixtable_t;
                                                                                                                      
 typedef struct
@@ -931,6 +931,52 @@ typedef struct
 } quicktime_idx1table_t;
 
 typedef struct
+  {
+  char * IARL; // Archival Location. Indicates where the subject of the file is archived.
+  char * IART; // Artist. Lists the artist of the original subject of the file. For example, "Michaelangelo."
+  char * ICMS; // Commissioned. Lists the name of the person or organization that commissioned the subject of
+               // the file. For example, "Pope Julian II."
+  char * ICMT; // Comments. Provides general comments about the file or the subject of the file. If the
+               // comment is several sentences long, end each sentence with a period. Do not include newline
+               // characters.
+  char * ICOP; // Copyright. Records the copyright information for the file. For example,
+               // "Copyright Encyclopedia International 1991." If there are multiple copyrights, separate them
+               // by a semicolon followed by a space.
+  char * ICRD; // Creation date. Specifies the date the subject of the file was created. List dates in
+               // year-month-day format, padding one-digit months and days with a zero on the left. For example,
+               // "1553-05-03" for May 3, 1553.
+  char * ICRP; // Cropped. Describes whether an image has been cropped and, if so, how it was cropped. For example,
+               // "lower right corner."
+  char * IDIM; // Dimensions. Specifies the size of the original subject of the file. For example,
+               // "8.5 in h, 11 in w."
+  char * IDPI; // Dots Per Inch. Stores dots per inch setting of the digitizer used to produce the file, such as
+               // "300."
+  char * IENG; // Engineer. Stores the name of the engineer who worked on the file. If there are multiple engineers,
+               // separate the names by a semicolon and a blank. For example, "Smith, John; Adams, Joe."
+  char * IGNR; // Genre. Describes the original work, such as, "landscape," "portrait," "still life," etc.
+  char * IKEY; // Keywords. Provides a list of keywords that refer to the file or subject of the file. Separate
+               // multiple keywords with a semicolon and a blank. For example, "Seattle; aerial view; scenery."
+  char * ILGT; // Lightness. Describes the changes in lightness settings on the digitizer required to produce the
+               // file. Note that the format of this information depends on hardware used.
+  char * IMED; // Medium. Describes the original subject of the file, such as, "computer image," "drawing,"
+               // "lithograph," and so forth.
+  char * INAM; // Name. Stores the title of the subject of the file, such as, "Seattle From Above."
+  char * IPLT; // Palette Setting. Specifies the number of colors requested when digitizing an image, such as "256."
+  char * IPRD; // Product. Specifies the name of the title the file was originally intended for, such as
+               // "Encyclopedia of Pacific Northwest Geography."
+  char * ISBJ; // Subject. Describes the conbittents of the file, such as "Aerial view of Seattle."
+  char * ISFT; // Software. Identifies the name of the software package used to create the file, such as
+               // "Microsoft WaveEdit."
+  char * ISHP; // Sharpness. Identifies the changes in sharpness for the digitizer required to produce the file
+               // (the format depends on the hardware used).
+  char * ISRC; // Source. Identifies the name of the person or organization who supplied the original subject of the
+               // file. For example, "Trey Research."
+  char * ISRF; // Source Form. Identifies the original form of the material that was digitized, such as "slide,"
+               // "paper," "map," and so forth. This is not necessarily the same as IMED.
+  char * ITCH; // Technician. Identifies the technician who digitized the subject file. For example, "Smith, John."
+  } quicktime_riffinfo_t;
+
+typedef struct
 {
         quicktime_atom_t atom;
         quicktime_idx1table_t *table;
@@ -943,12 +989,13 @@ typedef struct
         quicktime_atom_t atom;
         quicktime_movi_t movi;
         quicktime_hdrl_t hdrl;
-                                                                                                                     
+        quicktime_riffinfo_t info;
 /* Full index */
         quicktime_idx1_t idx1;
 /* Notify reader the idx1 table is valid */
         int have_idx1;
         int have_hdrl;
+        int have_info;
 } quicktime_riff_t;
 
 

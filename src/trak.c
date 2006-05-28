@@ -559,10 +559,10 @@ void quicktime_write_chunk_footer(quicktime_t *file,
           if(file->total_riffs < 2)
             {
             quicktime_update_idx1table(file, 
-                                     trak, 
+                                       trak, 
                                        offset, 
                                        sample_size);
-          }
+            }
           
           // Save partial index entry
           if(file->file_type == LQT_FILE_AVI_ODML)
