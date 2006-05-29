@@ -552,6 +552,36 @@ struct CODECIDMAP codecidmap_v[] = {
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1
         },
+#if DVCPRO50
+        {
+          id: CODEC_ID_DVVIDEO,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_dvvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "dv50_pal",
+	  name: "DVCPRO50 (PAL)",
+	  fourccs: {"dv5p", (char *)0 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+          do_encode: 1
+        },
+        {
+          id: CODEC_ID_DVVIDEO,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_dvvideo,
+          decode_parameters: decode_parameters_video,
+	  short_name: "dv50_ntsc",
+	  name: "DVCPRO50 (NTSC)",
+	  fourccs: {"dv5n", (char *)0 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+          do_encode: 1
+        },
+#endif
 };
 
 struct CODECIDMAP codecidmap_a[] = {
