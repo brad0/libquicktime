@@ -552,7 +552,6 @@ struct CODECIDMAP codecidmap_v[] = {
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1
         },
-#if DVCPRO50
         {
           id: CODEC_ID_DVVIDEO,
 	  index: -1,
@@ -581,7 +580,6 @@ struct CODECIDMAP codecidmap_v[] = {
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
           do_encode: 1
         },
-#endif
 };
 
 struct CODECIDMAP codecidmap_a[] = {

@@ -115,6 +115,10 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(z, inflateEnd)
 AC_CHECK_LIB(m, cos)
 
+ICONV_LIBS=
+AC_CHECK_LIB(iconv, libiconv_close, ICONV_LIBS="-liconv")
+AC_SUBST(ICONV_LIBS)
+
 AC_SEARCH_LIBS(pthread_create, [gthread pthread c_r])
 
 AC_SUBST(LIBS)

@@ -1,9 +1,10 @@
 lib_LTLIBRARIES= libquicktime.la
 
 #
-# Library dependencies are emtpy no
+# Library dependencies
 # Maybe we need zlib to read compressed quicktime headers
 #
+libquicktime_la_LIBADD = @ICONV_LIBS@
 
 libquicktime_la_LDFLAGS = -export-dynamic
 
