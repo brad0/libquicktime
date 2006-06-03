@@ -266,7 +266,47 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index);
 lqt_codec_info_t ** lqt_query_registry(int audio, int video,
                                        int encode, int decode);
 
+/** \ingroup codec_registry
+ *  \brief Find an audio codec for a given fourcc
+ *  \param fourcc A four character code
+ *  \param encode Set to 1 to return encoders, 0 to return decoders
+ *  \returns A NULL terminated array containing one codec info if the codec was found
+ *
+ *  This function copies the codec info. Use \ref lqt_destroy_codec_info
+ *  to free the returned array.
+ */
+  
+lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode);
 
+/** \ingroup codec_registry
+ *  \brief Find an audio codec for a given WAV ID
+ *  \param wav_id A 16 bit audio codec ID as found in WAV and AVI files
+ *  \param encode Set to 1 to return encoders, 0 to return decoders
+ *  \returns A NULL terminated array containing one codec info if the codec was found
+ *
+ *  This function copies the codec info. Use \ref lqt_destroy_codec_info
+ *  to free the returned array.
+ */
+  
+lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode);
+  
+/** \ingroup codec_registry
+ *  \brief Find a video codec for a given fourcc
+ *  \param fourcc A four character code
+ *  \param encode Set to 1 to return encoders, 0 to return decoders
+ *  \returns A NULL terminated array containing one codec info if the codec was found
+ *
+ *  This function copies the codec info. Use \ref lqt_destroy_codec_info
+ *  to free the returned array.
+ */
+
+lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode);
+
+
+
+  
+
+  
 /** \ingroup codec_registry
  *  \brief Find an audio codec by its name
  *  \param name Short name of the codec (see \ref lqt_codec_info_s)
@@ -298,7 +338,6 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name);
  *  This function copies the codec info. Use \ref lqt_destroy_codec_info
  *  to free the returned array.
  */
-  
   
 lqt_codec_info_t ** lqt_audio_codec_from_file(quicktime_t * file, int track);
 

@@ -11,6 +11,8 @@ int usage(void)
 	printf("	Concatenate input frames into a Quicktime movie.\n\n");
 	printf("	-l <file_list> reads filenames of the frame from\n");
         printf("           <file_list>, which must contain one filename per line\n");
+	printf("        -f specifies the framerate either as float or rational number\n");
+        printf("           e.g. -f 30000:1001\n");
 	exit(1);
 	return 0;
 }
@@ -63,6 +65,7 @@ char ** add_frames_from_file(char ** input_frames,
 
 int main(int argc, char *argv[])
 {
+        lqt_codec_info_t ** codec_info;
 	quicktime_t *file;
 	FILE *input;
 	int i, j;
@@ -74,7 +77,9 @@ int main(int argc, char *argv[])
 	int total_input_frames = 0;
 	int width = 720, height = 480, bit_depth = 24;
 	char compressor[5] = "yv12";
-
+        int output_rate_num = 0;
+	int output_rate_den = 0;
+	
 	if(argc < 3)
 	{
 		usage();
@@ -86,8 +91,16 @@ int main(int argc, char *argv[])
 		{
 			if(i + 1 < argc)
 			{
-				output_rate = atof(argv[++i]);
-			}
+                                i++;
+				if(sscanf(argv[i], "%d:%d", &output_rate_num,
+                                          &output_rate_den) < 2)
+                                  {
+                                  output_rate = atof(argv[i]);
+                                  output_rate_num = 0;
+                                  }
+                                fprintf(stderr, "Rate: %f (%d:%d)\n", output_rate,
+                                        output_rate_num, output_rate_den);
+                        }
 			else
 				usage();
 		}
@@ -159,8 +172,15 @@ int main(int argc, char *argv[])
 		printf("Open failed\n");
 		exit(1);
 	}
-	
-	quicktime_set_video(file, 1, width, height, output_rate, compressor);
+	if(!output_rate_num)
+          quicktime_set_video(file, 1, width, height, output_rate, compressor);
+        else
+	  {
+          codec_info = lqt_find_video_codec(compressor, 1);
+	  lqt_add_video_track(file, width, height, output_rate_den, output_rate_num, 
+			      *codec_info);
+          lqt_destroy_codec_info(codec_info);
+          }
 	quicktime_set_depth(file, bit_depth, 0);
 	for(i = 0; i < total_input_frames; i++)
 	{

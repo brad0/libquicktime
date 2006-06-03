@@ -55,15 +55,6 @@ str[4] = fourcc & 0x00;
     ( (uint32_t)(unsigned char)(str[3]) ) )
 
 
-/* Find a codec for a fourcc (thread save) */
-
-lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode);
-lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode);
-
-/* Find an audio decoder from an AVI wav ID. */
-
-lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode);
-
 
 /*
  *  (un)lock the registry
