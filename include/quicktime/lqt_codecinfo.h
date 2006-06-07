@@ -50,7 +50,7 @@ extern "C" {
 typedef enum
   {
     LQT_PARAMETER_INT,     /*!< Integer */
-    LQT_PARAMETER_FLOAT,   /*!< FLoat */
+    LQT_PARAMETER_FLOAT,   /*!< Float */
     LQT_PARAMETER_STRING,  /*!< String  */
     LQT_PARAMETER_STRINGLIST, /*!< String with fixed set of options */
     /* This dummy type is used to separate sections (real_name will be on tab-label) */
@@ -67,7 +67,7 @@ typedef union
   {
   int val_int; /*!< For integer parameters */
   char * val_string; /*!< For string parameters */
-  float val_float; /*< For floating point parameters */
+  float val_float; /*!< For floating point parameters */
   } lqt_parameter_value_t;
 
 /** \ingroup codec_parameters
