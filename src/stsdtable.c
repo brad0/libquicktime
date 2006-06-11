@@ -98,11 +98,10 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_esds(file, &(table->esds));
             table->has_esds = 1;
             quicktime_atom_skip(file, &leaf_atom);
-            fprintf(stderr, "Got esds\n");
+            // fprintf(stderr, "Got esds\n");
             }
           else if(quicktime_atom_is(&leaf_atom, "chan"))
             {
-            fprintf(stderr, "Got chan atom\n");
             quicktime_read_chan(file, &(table->chan));
             table->has_chan = 1;
             quicktime_atom_skip(file, &leaf_atom);
