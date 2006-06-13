@@ -394,7 +394,7 @@ stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
   }
 
 #define COMPARE_FUNCS (char*[]){ "SAD", "SSE", "SATD", "DCT", "PSNR", \
-                        "BIT", "RD", "ZERO", "VSAD", "VSSE", "NSSE" }
+                        "BIT", "RD", "ZERO", "VSAD", "VSSE", "NSSE", (char*)0 }
 
 #define COMPARE_FUNCS_HELP "SAD: Sum of absolute differences\n"\
 "SSE: Sum of squared errors\n"\
@@ -602,7 +602,7 @@ stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
     type: LQT_PARAMETER_STRINGLIST,             \
     val_default: { val_string: "Use compare function" },        \
     stringlist_options: (char*[]){ "Use compare function", \
-                          "Fewest bits", "Rate distoration" },\
+                          "Fewest bits", "Rate distoration", (char*)0 },\
   }
 
 /** Frame types */
