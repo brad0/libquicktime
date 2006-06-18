@@ -29,7 +29,7 @@ static quicktime_ftyp_t ftyp_mp4 =
     major_brand:           MK_FOURCC('m','p','4','2'),
     minor_version:         0x0,
     num_compatible_brands: 4,
-    compatible_brands:     (uint32_t[]){MK_FOURCC('m','p','4','2'),0,0,0},
+    compatible_brands:     (uint32_t[]){MK_FOURCC('m','p','4','2'),MK_FOURCC('i','s','o','m'),0,0},
   };
 
 static quicktime_ftyp_t ftyp_m4a =
