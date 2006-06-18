@@ -1621,7 +1621,7 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
             if(quicktime_read_info(new_file))
               {
               quicktime_close(new_file);
-              fprintf(stderr, "quicktime_open: error in header\n");
+//              fprintf(stderr, "quicktime_open: error in header\n");
               new_file = 0;
               }
             //printf("quicktime_open 3\n");

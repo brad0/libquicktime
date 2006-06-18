@@ -973,8 +973,8 @@ void quicktime_set_chan(quicktime_audio_map_t * atrack)
                     atrack->channels))
       {
       chan->mChannelLayoutTag = channel_locations[i].layout;
-      fprintf(stderr, "Got exact layout tag %08x\n",
-              chan->mChannelLayoutTag);
+      //      fprintf(stderr, "Got exact layout tag %08x\n",
+      //              chan->mChannelLayoutTag);
       atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
       return;
       }
