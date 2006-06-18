@@ -12,6 +12,7 @@ int quicktime_moov_init(quicktime_moov_t *moov)
 	quicktime_mvhd_init(&(moov->mvhd));
 	quicktime_udta_init(&(moov->udta));
 	quicktime_ctab_init(&(moov->ctab));
+	quicktime_iods_init(&(moov->iods));
 	return 0;
 }
 
@@ -21,6 +22,7 @@ int quicktime_moov_delete(quicktime_moov_t *moov)
 	quicktime_mvhd_delete(&(moov->mvhd));
 	quicktime_udta_delete(&(moov->udta));
 	quicktime_ctab_delete(&(moov->ctab));
+	quicktime_iods_delete(&(moov->iods));
 	return 0;
 }
 
@@ -33,6 +35,9 @@ void quicktime_moov_dump(quicktime_moov_t *moov)
 	for(i = 0; i < moov->total_tracks; i++)
 		quicktime_trak_dump(moov->trak[i]);
 	quicktime_ctab_dump(&(moov->ctab));
+        if(moov->has_iods)
+          quicktime_iods_dump(&(moov->iods));
+        
 }
 
 static void* zalloc(void *opaque, unsigned int items, unsigned int size)
@@ -219,6 +224,12 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 			quicktime_read_ctab(file, &(moov->ctab));
 		}
 		else
+		if(quicktime_atom_is(&leaf_atom, "iods"))
+		{
+			quicktime_read_iods(file, &(moov->iods));
+                        moov->has_iods = 1;
+		}
+		else
 		quicktime_atom_skip(file, &leaf_atom);
 //printf("quicktime_read_moov %llx %llx\n", quicktime_position(file), parent_atom->end);
 	}while(quicktime_position(file) < parent_atom->end);
@@ -273,6 +284,8 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 		quicktime_write_trak(file, moov->trak[i], moov->mvhd.time_scale);
 	}
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
+        if(moov->has_iods)
+          quicktime_write_iods(file, &(moov->iods));
 
 	quicktime_atom_write_footer(file, &atom);
 }

@@ -515,6 +515,8 @@ void quicktime_set_framerate(quicktime_t *file, double framerate)
 		file->vtracks[i].track->mdia.minf.stbl.stts.table[0].sample_duration = new_sample_duration;
 	}
 }
+
+/* Used for writing only */
 quicktime_trak_t* quicktime_add_track(quicktime_t *file)
 {
         quicktime_moov_t *moov = &(file->moov);
@@ -528,10 +530,12 @@ quicktime_trak_t* quicktime_add_track(quicktime_t *file)
                 moov->trak[0] =
                 calloc(1, sizeof(quicktime_trak_t));
         quicktime_trak_init(trak);
+        
         moov->total_tracks++;
-                                                                                                                  
         for(i = 0; i < moov->total_tracks; i++)
                 moov->trak[i]->tkhd.track_id = i + 1;
+        quicktime_iods_add_track(&(moov->iods), trak);
+        
         moov->mvhd.next_track_id++;
         return trak;
 }
@@ -1611,6 +1615,10 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
           quicktime_ftyp_init(&new_file->ftyp, type);
           if(new_file->ftyp.major_brand)
             new_file->has_ftyp = 1;
+
+          /* Switch the iods atom on for MP4 */
+          if(new_file->file_type & LQT_FILE_MP4)
+            new_file->moov.has_iods = 1;
           }
         result = quicktime_file_open(new_file, filename, rd, wr);
 

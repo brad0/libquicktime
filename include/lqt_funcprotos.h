@@ -290,6 +290,10 @@ void quicktime_write_esds(quicktime_t * file, quicktime_esds_t * esds);
 void quicktime_esds_dump(quicktime_esds_t * esds);
 void quicktime_esds_delete(quicktime_esds_t * esds);
 
+int quicktime_write_mp4_descr_length(quicktime_t *file,
+                                     int length, int compact);
+int quicktime_read_mp4_descr_length(quicktime_t * file);
+
 /* Set up an esds atom for encoding. Arguments are  decoderConfig
    and decoderConfigLen. The esds atom will be returned so the
    other parameters can be set by the encoder */
@@ -382,6 +386,15 @@ int quicktime_impn_delete(quicktime_impn_t *impn);
 void quicktime_impn_dump(quicktime_impn_t *impn);
 int quicktime_read_impn(quicktime_t *file, quicktime_impn_t *impn, quicktime_qtatom_t *impn_atom);
 void quicktime_write_impn(quicktime_t *file, quicktime_impn_t *impn);
+
+/* iods.c */
+
+void quicktime_iods_init(quicktime_iods_t * iods);
+void quicktime_iods_add_track(quicktime_iods_t * iods, quicktime_trak_t * trak);
+void quicktime_read_iods(quicktime_t *file, quicktime_iods_t * iods);
+void quicktime_write_iods(quicktime_t *file, quicktime_iods_t * iods);
+void quicktime_iods_dump(quicktime_iods_t * iods);
+void quicktime_iods_delete(quicktime_iods_t * iods);
 
 /* matrix.c */
 

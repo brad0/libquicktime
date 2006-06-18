@@ -61,6 +61,7 @@ graphics.c \
 hdlr.c \
 imgp.c \
 impn.c \
+iods.c \
 matrix.c \
 mdat.c \
 mdhd.c \

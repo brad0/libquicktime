@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int read_mp4_descr_length(quicktime_t * file)
+int quicktime_read_mp4_descr_length(quicktime_t * file)
   {
   uint8_t b;
   int num_bytes = 0;
@@ -16,7 +16,7 @@ static int read_mp4_descr_length(quicktime_t * file)
     length = (length << 7) | (b & 0x7F);
     } while ((b & 0x80) && (num_bytes < 4));
 
-  fprintf(stderr, "read_mp4_descr_length: %d\n", length);
+  //  fprintf(stderr, "quicktime_read_mp4_descr_length: %d\n", length);
   
   return length;
   }
@@ -31,7 +31,7 @@ void quicktime_read_esds(quicktime_t * file, quicktime_esds_t * esds)
 
   if(tag == 0x03)
     {
-    if(read_mp4_descr_length(file) < 20)
+    if(quicktime_read_mp4_descr_length(file) < 20)
       return;
 // elementary stream id
     esds->esid = quicktime_read_int16(file);
@@ -46,7 +46,7 @@ void quicktime_read_esds(quicktime_t * file, quicktime_esds_t * esds)
   if(tag != 0x04)
     return;
 
-  if(read_mp4_descr_length(file) < 15)
+  if(quicktime_read_mp4_descr_length(file) < 15)
     return;
 
   quicktime_read_data(file, &esds->objectTypeId, 1);
@@ -60,7 +60,7 @@ void quicktime_read_esds(quicktime_t * file, quicktime_esds_t * esds)
   if(tag != 0x05)
     return;
 
-  esds->decoderConfigLen = read_mp4_descr_length(file);
+  esds->decoderConfigLen = quicktime_read_mp4_descr_length(file);
 
   /* Need some padding for ffmpeg */
   esds->decoderConfig = calloc(esds->decoderConfigLen+16, 1);
@@ -68,8 +68,8 @@ void quicktime_read_esds(quicktime_t * file, quicktime_esds_t * esds)
   
   }
 
-static int quicktime_write_mp4_descr_length(quicktime_t *file,
-                                            int length, int compact)
+int quicktime_write_mp4_descr_length(quicktime_t *file,
+                                     int length, int compact)
   {
   uint8_t b;
   int i;

@@ -262,6 +262,29 @@ typedef struct
 
   } quicktime_esds_t;
 
+/* MPEG-4 iods */
+
+typedef struct
+  {
+  int version;
+  long flags;
+
+  uint16_t ObjectDescriptorID;
+  uint8_t  ODProfileLevel;
+  uint8_t  sceneProfileLevel;
+  uint8_t  audioProfileId;
+  uint8_t  videoProfileId;
+  uint8_t  graphicsProfileLevel;
+
+  struct
+    {
+    uint8_t ES_ID_IncTag;
+    uint8_t length;
+    uint32_t track_id;
+    } * tracks;
+  int num_tracks;
+  } quicktime_iods_t;
+
 /* User atoms: These can be either inside a wave atom (for audio) or
    in the sample description (for video) */
 
@@ -793,6 +816,9 @@ typedef struct
 	quicktime_trak_t *trak[MAXTRACKS];
 	quicktime_udta_t udta;
 	quicktime_ctab_t ctab;
+        int has_iods;
+        quicktime_iods_t iods;
+
 } quicktime_moov_t;
 
 typedef struct

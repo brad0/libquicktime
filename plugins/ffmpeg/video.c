@@ -786,6 +786,9 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           esds->maxBitrate      = 200000;
           esds->avgBitrate      = 200000;
           codec->global_header_written = 1;
+          
+          /* Set iods profile */
+          file->moov.iods.videoProfileId = 0xf3; // MPEG-4 Adv Simple@L3
           }
 
         return result;
