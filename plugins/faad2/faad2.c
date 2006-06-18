@@ -364,7 +364,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   faacDecSetConfiguration(codec->dec, cfg);
 
   //  fprintf(stderr, "faad2 init\n");
-  lqt_hexdump(extradata, extradata_size, 16);
+  //  lqt_hexdump(extradata, extradata_size, 16);
   
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);

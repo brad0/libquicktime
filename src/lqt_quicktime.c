@@ -65,7 +65,7 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 		{
 			if(quicktime_atom_is(&leaf_atom, "moov"))
 			{
-                                fprintf(stderr, "old moov start: %lld\n", leaf_atom.start);
+                        //                                fprintf(stderr, "old moov start: %lld\n", leaf_atom.start);
 				moov_exists = atoms;
 				moov_length = leaf_atom.size;
 			}

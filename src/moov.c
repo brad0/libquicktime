@@ -227,6 +227,7 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		if(quicktime_atom_is(&leaf_atom, "iods"))
 		{
 			quicktime_read_iods(file, &(moov->iods));
+			quicktime_atom_skip(file, &leaf_atom);
                         moov->has_iods = 1;
 		}
 		else
@@ -285,7 +286,7 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 	}
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
         if(moov->has_iods)
-          quicktime_write_iods(file, &(moov->iods));
+          quicktime_write_iods(file, moov);
 
 	quicktime_atom_write_footer(file, &atom);
 }

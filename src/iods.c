@@ -51,11 +51,13 @@ void quicktime_read_iods(quicktime_t *file, quicktime_iods_t * iods)
   /* will skip the remainder of the atom */
   }
 
-void quicktime_write_iods(quicktime_t *file, quicktime_iods_t * iods)
+void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov)
   {
   quicktime_atom_t atom;
   int i;
-
+  quicktime_iods_t * iods = &(moov->iods);
+  //  fprintf(stderr, "quicktime_write_iods: %d\n", moov->total_tracks);
+  
   quicktime_atom_write_header(file, &atom, "iods");
 
   quicktime_write_char(file, iods->version);
@@ -71,13 +73,13 @@ void quicktime_write_iods(quicktime_t *file, quicktime_iods_t * iods)
   quicktime_write_char(file, iods->videoProfileId);       /* videoProfileLevel */
   quicktime_write_char(file, iods->graphicsProfileLevel);       /* graphicsProfileLevel */
   
-  for (i = 0; i < file->moov.total_tracks; i++)
+  for (i = 0; i < moov->total_tracks; i++)
     {
     quicktime_write_char(file, 0x0E);       /* ES_ID_IncTag */
     quicktime_write_char(file, 0x04);       /* length */
-    quicktime_write_int32(file, file->moov.trak[i]->tkhd.track_id);
+    quicktime_write_int32(file, moov->trak[i]->tkhd.track_id);
     }
-  
+ 
   /* no OCI_Descriptors */
   /* no IPMP_DescriptorPointers */
   /* no Extenstion_Descriptors */

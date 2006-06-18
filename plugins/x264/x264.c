@@ -497,7 +497,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       codec->params.rc.psz_stat_out = codec->stats_filename;
       codec->params.rc.b_stat_write = 1;
       }
-    else if(codec->pass == codec->total_passes)
+    else if(codec->total_passes && (codec->pass == codec->total_passes))
       {
       /* Strings will be made private by x264 */
       codec->params.rc.psz_stat_in = codec->stats_filename;

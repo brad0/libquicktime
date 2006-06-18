@@ -392,7 +392,7 @@ void quicktime_write_impn(quicktime_t *file, quicktime_impn_t *impn);
 void quicktime_iods_init(quicktime_iods_t * iods);
 void quicktime_iods_add_track(quicktime_iods_t * iods, quicktime_trak_t * trak);
 void quicktime_read_iods(quicktime_t *file, quicktime_iods_t * iods);
-void quicktime_write_iods(quicktime_t *file, quicktime_iods_t * iods);
+void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov);
 void quicktime_iods_dump(quicktime_iods_t * iods);
 void quicktime_iods_delete(quicktime_iods_t * iods);
 

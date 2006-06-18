@@ -307,7 +307,8 @@ static int flush(quicktime_t *file, int track)
     }
 
   while(encode_frame(file, track))
-   fprintf(stderr, "Flush: wrote frame\n");
+    ;
+  //   fprintf(stderr, "Flush: wrote frame\n");
   
   /* Finalize audio chunk */
   if(codec->chunk_started)
