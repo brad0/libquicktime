@@ -186,6 +186,18 @@ static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
   { /* End of parameters */ }
 };
 
+static lqt_parameter_info_static_t encode_parameters_dx50[] = {
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
+  ENCODE_PARAM_VIDEO_RATECONTROL,
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP,
+  ENCODE_PARAM_VIDEO_ME,
+  ENCODE_PARAM_VIDEO_ME_PRE,
+  ENCODE_PARAM_VIDEO_MASKING,
+  ENCODE_PARAM_VIDEO_MISC,
+  { /* End of parameters */ }
+};
+
+
 static lqt_parameter_info_static_t encode_parameters_h263[] = {
   ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
   ENCODE_PARAM_VIDEO_RATECONTROL,
@@ -294,12 +306,28 @@ struct CODECIDMAP codecidmap_v[] = {
           encode_parameters: encode_parameters_mpeg4,
           decode_parameters: decode_parameters_video,
 	  short_name: "mpg4",
-	  name: "Mpeg-4 Video",
+	  name: "MPEG-4",
 	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
                     "MP4V", (char *)0 },
           wav_ids: { LQT_WAV_ID_NONE },
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
+          do_encode: 1
+        },
+        {
+          id: CODEC_ID_MPEG4,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_dx50,
+          decode_parameters: decode_parameters_video,
+	  short_name: "mpg4",
+	  name: "MPEG-4 (Divx 4+ compatible)",
+	  fourccs: {"DX50", "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
+                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
+                    "MP4V", (char *)0 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_AVI | LQT_FILE_AVI_ODML,
           do_encode: 1
         },
 	{
@@ -332,7 +360,7 @@ struct CODECIDMAP codecidmap_v[] = {
           encode_parameters: encode_parameters_msmpeg4v3,
           decode_parameters: decode_parameters_video,
 	  short_name: "msmpeg4v3",
-	  name: "MSMpeg 4v3",
+	  name: "MSMpeg 4v3 (DivX 3 compatible)",
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                     (char *)0},

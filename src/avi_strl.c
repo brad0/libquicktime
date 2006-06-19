@@ -141,7 +141,7 @@ void quicktime_init_strl(quicktime_t *file,
     /* depth */
     quicktime_write_int16_le(file, 24); //                            biBitCount
     quicktime_write_char32(file, 
-                           trak->mdia.minf.stbl.stsd.table[0].format); //            biCompression
+                           trak->mdia.minf.stbl.stsd.table[0].format); // biCompression
     quicktime_write_int32_le(file, 
                              trak->tkhd.track_width * trak->tkhd.track_height * 3); // biSizeImage
     quicktime_write_int32_le(file, 0); //                             biXPelsPerMeter

@@ -656,10 +656,12 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           /* Use global headers for mp4v */
           if(codec->encoder->id == CODEC_ID_MPEG4)
             {
-            codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
-            codec->write_global_header = 1;
+            if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
+              {
+              codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+              codec->write_global_header = 1;
+              }
             }
-
           /* Initialize 2-pass */
           if(codec->total_passes)
             {
