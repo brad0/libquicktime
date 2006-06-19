@@ -321,7 +321,7 @@ struct CODECIDMAP codecidmap_v[] = {
           decoder: NULL,
           encode_parameters: encode_parameters_dx50,
           decode_parameters: decode_parameters_video,
-	  short_name: "mpg4",
+	  short_name: "divx4",
 	  name: "MPEG-4 (Divx 4+ compatible)",
 	  fourccs: {"DX50", "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
