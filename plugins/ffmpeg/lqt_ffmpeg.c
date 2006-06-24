@@ -314,22 +314,6 @@ struct CODECIDMAP codecidmap_v[] = {
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
           do_encode: 1
         },
-        {
-          id: CODEC_ID_MPEG4,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_dx50,
-          decode_parameters: decode_parameters_video,
-	  short_name: "divx4",
-	  name: "MPEG-4 (Divx 5 compatible)",
-	  fourccs: {"DX50", "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
-                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
-                    "MP4V", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_AVI | LQT_FILE_AVI_ODML,
-          do_encode: 1
-        },
 	{
           id: CODEC_ID_MSMPEG4V1,
 	  index: -1,
