@@ -159,6 +159,8 @@ void quicktime_set_indx_keyframe(quicktime_t *file,
   frame_count = 0;
   i = 0;
 
+  //  fprintf(stderr, "quicktime_set_indx_keyframe %d\n", trak->tkhd.track_id);
+
   while(frame_count + indx->table[i].ix->table_size < new_keyframe)
     {
     frame_count+= indx->table[i].ix->table_size;

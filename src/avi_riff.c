@@ -476,6 +476,8 @@ void quicktime_riff_dump(quicktime_riff_t * riff)
   int i = 0;
   if(riff->have_hdrl)
     {
+    quicktime_avih_dump(&riff->hdrl.avih);
+    
     while(riff->hdrl.strl[i])
       {
       quicktime_strl_dump(riff->hdrl.strl[i]);

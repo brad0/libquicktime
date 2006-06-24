@@ -31,6 +31,8 @@ void quicktime_write_avih(quicktime_t *file,
 
 void quicktime_avih_dump(quicktime_avih_t *avih);
 
+void quicktime_avih_init(quicktime_avih_t *avih, quicktime_t * file);
+
 /* avi_guid.c */
 
 void quicktime_GUID_dump(quicktime_GUID_t * g);
@@ -167,6 +169,13 @@ void quicktime_write_strf_video(quicktime_t *file,
                                 quicktime_strf_t *strf);
 
 void quicktime_strf_dump_video(quicktime_strf_t *strf);
+
+void quicktime_strf_set_video_extradata(quicktime_strf_t *strf, const uint8_t * data, int len);
+void quicktime_strf_delete_video(quicktime_strf_t *strf);
+
+void quicktime_strf_set_audio_extradata(quicktime_strf_t *strf, const uint8_t * data, int len);
+void quicktime_strf_delete_audio(quicktime_strf_t *strf);
+
 
 
 /* avi_strh.c */

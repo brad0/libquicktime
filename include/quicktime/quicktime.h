@@ -98,7 +98,7 @@ typedef enum
     LQT_FILE_AVI      = (1<<2), /*!< AVI */
     LQT_FILE_AVI_ODML = (1<<3), /*!< Opendml AVI (> 2G) */
     LQT_FILE_MP4      = (1<<4), /*!< .mp4 (ftyp = "mp42") */
-    LQT_FILE_M4A      = (1<<5), /*!< .m4a  (ftyp = "mp42") */
+    LQT_FILE_M4A      = (1<<5), /*!< .m4a  */
   } lqt_file_type_t;
 
   

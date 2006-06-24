@@ -384,7 +384,27 @@ static int write_data(quicktime_t *file, int track,
   return result;
   }
 
+#define PUT_16_LE(num, ptr) \
+ptr[0] = num & 0xff; \
+ptr[1] = (num >> 8) & 0xff;\
+ptr+=2;
 
+#define PUT_32_LE(num, ptr) \
+ptr[0] = num & 0xff; \
+ptr[1] = (num >> 8) & 0xff;\
+ptr[2] = (num >> 16) & 0xff;\
+ptr[3] = (num >> 24) & 0xff;\
+ptr+=4;
+
+/* nanosoft style mp3 definitions */
+
+#define MPEGLAYER3_ID_UNKNOWN            0
+#define MPEGLAYER3_ID_MPEG               1
+#define MPEGLAYER3_ID_CONSTANTFRAMESIZE  2
+
+#define MPEGLAYER3_FLAG_PADDING_ISO      0x00000000
+#define MPEGLAYER3_FLAG_PADDING_ON       0x00000001
+#define MPEGLAYER3_FLAG_PADDING_OFF      0x00000002
 
 static int encode(quicktime_t *file, 
                   void * _input, 
@@ -399,6 +419,10 @@ static int encode(quicktime_t *file,
   quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   int i;
 
+  uint8_t extradata[12];
+  uint8_t * extradata_ptr;
+  uint32_t tmp;
+    
   if(!codec->encode_initialized)
     {
     lqt_init_vbr_audio(file, track);
@@ -454,6 +478,27 @@ static int encode(quicktime_t *file,
       trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
       trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->bitrate / 8;
       trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+
+      /* Extradata (completely unneccesary for decoding) */
+
+      extradata_ptr = extradata;
+
+      tmp = MPEGLAYER3_ID_MPEG; // WORD          wID
+      PUT_16_LE(tmp, extradata_ptr);
+
+      tmp = MPEGLAYER3_FLAG_PADDING_ISO; // DWORD         fdwFlags;
+      PUT_32_LE(tmp, extradata_ptr);
+      
+      tmp = codec->samples_per_frame; // WORD          nBlockSize;
+      PUT_16_LE(tmp, extradata_ptr);
+
+      tmp = 1; // WORD nFramesPerBlock;
+      PUT_16_LE(tmp, extradata_ptr);
+
+      tmp = 0; //  WORD nCodecDelay;
+      PUT_16_LE(tmp, extradata_ptr);
+      
+      quicktime_strf_set_audio_extradata(&trak->strl->strf, extradata, 12);
       }
     }
 

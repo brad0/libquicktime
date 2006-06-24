@@ -41,6 +41,9 @@ void quicktime_read_avih(quicktime_t *file,
 void quicktime_write_avih(quicktime_t *file,
                           quicktime_avih_t *avih)
   {
+  quicktime_atom_t avih_atom;
+  quicktime_atom_write_header(file, &avih_atom, "avih");
+
   quicktime_write_int32_le(file, avih->dwMicroSecPerFrame);
   quicktime_write_int32_le(file, avih->dwMaxBytesPerSec);
   quicktime_write_int32_le(file, avih->dwReserved1);
@@ -55,23 +58,39 @@ void quicktime_write_avih(quicktime_t *file,
   quicktime_write_int32_le(file, avih->dwRate);
   quicktime_write_int32_le(file, avih->dwStart);
   quicktime_write_int32_le(file, avih->dwLength);
+  quicktime_atom_write_footer(file, &avih_atom);
   }
 
 void quicktime_avih_dump(quicktime_avih_t *avih)
   {
-  printf("dwMicroSecPerFrame: %d\n",    avih->dwMicroSecPerFrame);
-  printf("dwMaxBytesPerSec: %d\n",      avih->dwMaxBytesPerSec);
-  printf("dwReserved1: %d\n",           avih->dwReserved1);
-  printf("dwFlags: %d\n",               avih->dwFlags);
-  printf("dwTotalFrames: %d\n",         avih->dwTotalFrames);
-  printf("dwInitialFrames: %d\n",       avih->dwInitialFrames);
-  printf("dwStreams: %d\n",             avih->dwStreams);
-  printf("dwSuggestedBufferSize: %d\n", avih->dwSuggestedBufferSize);
-  printf("dwWidth: %d\n",               avih->dwWidth);
-  printf("dwHeight: %d\n",              avih->dwHeight);
-  printf("dwScale: %d\n",               avih->dwScale);
-  printf("dwRate: %d\n",                avih->dwRate);
-  printf("dwStart: %d\n",               avih->dwStart);
-  printf("dwLength: %d\n",              avih->dwLength);
+  printf("avih\n");
+  printf("  dwMicroSecPerFrame: %d\n",    avih->dwMicroSecPerFrame);
+  printf("  dwMaxBytesPerSec: %d\n",      avih->dwMaxBytesPerSec);
+  printf("  dwReserved1: %d\n",           avih->dwReserved1);
+  printf("  dwFlags: %d\n",               avih->dwFlags);
+  printf("  dwTotalFrames: %d\n",         avih->dwTotalFrames);
+  printf("  dwInitialFrames: %d\n",       avih->dwInitialFrames);
+  printf("  dwStreams: %d\n",             avih->dwStreams);
+  printf("  dwSuggestedBufferSize: %d\n", avih->dwSuggestedBufferSize);
+  printf("  dwWidth: %d\n",               avih->dwWidth);
+  printf("  dwHeight: %d\n",              avih->dwHeight);
+  printf("  dwScale: %d\n",               avih->dwScale);
+  printf("  dwRate: %d\n",                avih->dwRate);
+  printf("  dwStart: %d\n",               avih->dwStart);
+  printf("  dwLength: %d\n",              avih->dwLength);
   }
 
+void quicktime_avih_init(quicktime_avih_t *avih, quicktime_t * file)
+  {
+  if(file->total_vtracks)
+    avih->dwMicroSecPerFrame = (uint32_t)(1000000 / quicktime_frame_rate(file, 0));
+  avih->dwFlags = AVI_HASINDEX | AVI_ISINTERLEAVED;
+  avih->dwStreams = file->moov.total_tracks;
+  avih->dwSuggestedBufferSize = 1024 * 1024;
+
+  if(file->total_vtracks)
+    {
+    avih->dwWidth = file->vtracks[0].track->tkhd.track_width;
+    avih->dwHeight = file->vtracks[0].track->tkhd.track_height;
+    }
+  }

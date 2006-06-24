@@ -1040,9 +1040,6 @@ typedef struct
         int64_t avih_offset;
         quicktime_avih_t avih;
         quicktime_atom_t atom;
-        int64_t frames_offset;
-        int64_t bitrate_offset;
-/* Offsets to be written during file closure */
         int64_t total_frames_offset;
                                                                                                                      
 /* AVI equivalent for each trak.  Use file->moov.total_tracks */

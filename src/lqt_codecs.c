@@ -726,6 +726,7 @@ int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int tra
   quicktime_audio_map_t * atrack;
   atrack = &(file->atracks[track]);
   start_encoding(file);
+  file->atracks[track].current_position += samples;
   return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, input, 
                                                              samples,
                                                              track);
@@ -929,6 +930,8 @@ static int encode_audio_old(quicktime_t *file,
 
   /* Encode */
 
+  file->atracks[track].current_position += samples;
+  
   return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, atrack->sample_buffer,
                                                              samples, track);
   
@@ -943,9 +946,7 @@ int lqt_encode_audio_track(quicktime_t *file,
 	int result = 1;
 
 	result = encode_audio_old(file, input_i, input_f, samples, track);
-	file->atracks[track].current_position += samples;
-
-	return result;
+        return result;
   
   }
 

@@ -152,6 +152,20 @@ void quicktime_strf_dump_audio(quicktime_strf_t *strf)
     }
   }
 
+void quicktime_strf_set_audio_extradata(quicktime_strf_t *strf, const uint8_t * data, int len)
+  {
+  strf->wf.f.WAVEFORMATEX.ext_data = malloc(len);
+  memcpy(strf->wf.f.WAVEFORMATEX.ext_data, data, len);
+  strf->wf.f.WAVEFORMATEX.ext_size = len;
+  strf->wf.f.WAVEFORMATEX.cbSize += len;
+  }
+
+void quicktime_strf_delete_audio(quicktime_strf_t *strf)
+  {
+  if(strf->wf.f.WAVEFORMATEX.ext_data) free(strf->wf.f.WAVEFORMATEX.ext_data);
+  }
+
+
 #if 0
   uint32_t  biSize;  /* sizeof(BITMAPINFOHEADER) */
   uint32_t  biWidth;
@@ -252,4 +266,17 @@ void quicktime_strf_dump_video(quicktime_strf_t *strf)
     printf("    Extradata: %d bytes (hexdump follows)\n", strf->bh.ext_size);
     lqt_hexdump_stdout(strf->bh.ext_data, strf->bh.ext_size, 16);
     }
+  }
+
+void quicktime_strf_set_video_extradata(quicktime_strf_t *strf, const uint8_t * data, int len)
+  {
+  strf->bh.ext_data = malloc(len);
+  memcpy(strf->bh.ext_data, data, len);
+  strf->bh.ext_size = len;
+  strf->bh.biSize += len;
+  }
+
+void quicktime_strf_delete_video(quicktime_strf_t *strf)
+  {
+  if(strf->bh.ext_data) free(strf->bh.ext_data);
   }

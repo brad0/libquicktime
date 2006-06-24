@@ -42,7 +42,7 @@ void quicktime_write_strh(quicktime_t *file,
                           quicktime_strh_t *strl)
   {
   quicktime_atom_t atom;
-  quicktime_atom_write_header(file, &atom, "strl");
+  quicktime_atom_write_header(file, &atom, "strh");
   quicktime_write_data(file, (uint8_t*)(strl->fccType), 4);
   quicktime_write_data(file, (uint8_t*)(strl->fccHandler), 4);
   

@@ -661,6 +661,16 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
               codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
               codec->write_global_header = 1;
               }
+            
+            /* Tweak some stream headers so even bad players play this */
+            else
+              {
+              strncpy(trak->strl->strh.fccHandler, "divx", 4);
+              }
+            }
+          else if((codec->encoder->id == CODEC_ID_MSMPEG4V3) && (trak->strl))
+            {
+            strncpy(trak->strl->strh.fccHandler, "div3", 4);
             }
           /* Initialize 2-pass */
           if(codec->total_passes)

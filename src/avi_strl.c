@@ -63,11 +63,13 @@ void quicktime_init_strl(quicktime_t *file,
     strl->strh.dwSuggestedBufferSize = 1024 * 1024;
     strl->strh.dwQuality = -1;
     strl->strh.dwSampleSize = (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3;
+    strl->is_video = 1;
     }
   else if(atrack)
     {
     strncpy(strl->strh.fccType, "auds", 4);
     strl->strh.dwQuality = -1;
+    strl->is_audio = 1;
     }
   strl->strh_offset = quicktime_position(file);
   quicktime_write_strh(file, &strl->strh);
@@ -110,24 +112,21 @@ void quicktime_init_strl(quicktime_t *file,
   quicktime_atom_write_footer(file, &junk_atom);
   
   /* Initialize super index */
-  quicktime_init_indx(file, &strl->indx, strl);
-
-
+  if(file->file_type == LQT_FILE_AVI_ODML)
+    quicktime_init_indx(file, &strl->indx, strl);
+  
   quicktime_atom_write_footer(file, &list_atom);
-
-  /* Now, write the JUNK */
-
-  
-  
   }
 
 
 
 void quicktime_delete_strl(quicktime_strl_t *strl)
-{
-	quicktime_delete_indx(&strl->indx);
-	free(strl);
-}
+  {
+  if(strl->is_video) quicktime_strf_delete_video(&strl->strf);
+  if(strl->is_audio) quicktime_strf_delete_audio(&strl->strf);
+  quicktime_delete_indx(&strl->indx);
+  free(strl);
+  }
 
 void quicktime_read_strl(quicktime_t *file,
                          quicktime_strl_t *strl, 
@@ -314,10 +313,18 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
   
   int64_t old_pos, end_pos;
   /* Rewrite stream headers */
+
+  //  fprintf(stderr, "quicktime_finalize_strl %d\n", file->file_type);
+  
   strl->strh.dwLength = quicktime_track_samples(file, trak);
+  
+  if(trak->mdia.minf.is_audio)
+    strl->strh.dwSuggestedBufferSize = strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec / 2;
   
   old_pos = quicktime_position(file);
 
+  
+  
   quicktime_set_position(file, strl->strh_offset);
   quicktime_write_strh(file, &strl->strh);
 
@@ -336,7 +343,7 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
   end_pos = quicktime_position(file);
   
   quicktime_atom_write_header(file, &junk_atom, "JUNK");
-  for(i = 0; i < PADDING_SIZE + end_pos - strl->end_pos; i ++)
+  for(i = 0; i < PADDING_SIZE - (end_pos - strl->end_pos); i ++)
     quicktime_write_char(file, 0);
   quicktime_atom_write_footer(file, &junk_atom);
   }

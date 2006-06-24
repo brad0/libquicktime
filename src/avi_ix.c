@@ -38,12 +38,13 @@ void quicktime_update_ixtable(quicktime_t *file,
 	int64_t offset,
 	int size)
 {
-	quicktime_riff_t *first_riff = file->riff[0];
-        quicktime_indx_t *indx = &(first_riff->hdrl.strl[trak->tkhd.track_id - 1]->indx);
+        quicktime_indx_t *indx = &(trak->strl->indx);
         
         quicktime_ix_t *ix = indx->table[indx->table_size-1].ix;
         quicktime_ixtable_t *ix_table;
 
+        //        fprintf(stderr, "quicktime_update_ixtable %d\n", trak->tkhd.track_id);
+        
 /* Allocation */
 	if(ix->table_size >= ix->table_allocation)
 	{

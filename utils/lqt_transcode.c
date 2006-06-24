@@ -51,6 +51,36 @@ int colormodels[] =
     LQT_COLORMODEL_NONE
   };
 
+static struct
+  {
+  char * name;
+  lqt_file_type_t type;
+  char * extension;
+  char * description;
+  char * default_audio_codec;
+  char * default_video_codec;
+  }
+formats[] =
+  {
+    { "qt",       LQT_FILE_QT,        "mov", "Quicktime (QT7 compatible)",   "faac", "ffmpeg_mpg4" },
+    { "qtold",    LQT_FILE_QT_OLD,    "mov", "Quicktime (qt4l and old lqt)", "twos", "mjpa" },
+    { "avi",      LQT_FILE_AVI,       "avi", "AVI (< 2G)",                   "lame", "ffmpeg_msmpeg4v3" },
+    { "avi_odml", LQT_FILE_AVI_ODML, "avi", "AVI (> 2G)",                   "lame", "ffmpeg_msmpeg4v3" },
+    { "mp4",      LQT_FILE_MP4,       "mp4", "ISO MPEG-4",                    "faac", "ffmpeg_mpg4" },
+    { "m4a",      LQT_FILE_M4A,       "m4a", "m4a (iTunes compatible)",       "faac", "ffmpeg_mpg4"  },
+  };
+
+static void list_formats()
+  {
+  int i;
+  printf("Supported formats\n");
+  for(i = 0; i < sizeof(formats)/sizeof(formats[0]); i++)
+    {
+    printf("%8s: %s (default codecs: %s/%s)\n", formats[i].name, formats[i].description,
+           formats[i].default_audio_codec, formats[i].default_video_codec);
+    }
+  }
+
 typedef struct
   {
   quicktime_t * in_file;
@@ -94,12 +124,14 @@ typedef struct
 
 static void print_usage()
   {
-  printf("Usage: lqt_transcode [-avi] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
+  printf("Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
   printf("       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n\n");
   printf("       lqt_transcode -lv\n");
   printf("       List video encoders\n\n");
   printf("       lqt_transcode -la\n");
   printf("       List audio encoders\n");
+  printf("       lqt_transcode -lf\n");
+  printf("       List output formats\n");
   }
 
 static void list_info(lqt_codec_info_t ** info)
@@ -152,82 +184,13 @@ static void list_audio_codecs()
   lqt_destroy_codec_info(info);
   }
 
-#if 0
-static unsigned char ** alloc_video_buffer(int width, int height, int colormodel)
-  {
-  int bytes_per_line = 0;
-  int i;
-  int y_size, uv_size = 0;
-  unsigned char ** video_buffer;
-  /* Allocate frame buffer */
-
-  if(cmodel_is_planar(colormodel))
-    {
-    y_size = width * height;
-    
-    switch(colormodel)
-      {
-      case BC_YUV420P:
-      case BC_YUV411P:
-        uv_size = (width * height)/4;
-        break;
-      case BC_YUV422P:
-        uv_size = (width * height)/2;
-        break;
-      case BC_YUV444P:
-        uv_size = (width * height);
-      }
-    video_buffer    = malloc(3 * sizeof(unsigned char*));
-    video_buffer[0] = malloc(y_size + 2 * uv_size);
-    video_buffer[1] = &(video_buffer[0][y_size]);
-    video_buffer[2] = &(video_buffer[0][y_size+uv_size]);
-    }
-  else
-    {
-    video_buffer    = malloc(height * sizeof(unsigned char*));
-    switch(colormodel)
-      {
-      case BC_RGB565:
-      case BC_BGR565:
-      case BC_YUV422:
-        bytes_per_line = width * 2;
-        break;
-      case BC_BGR888:
-      case BC_RGB888:
-      case BC_YUV888:
-        bytes_per_line = width * 3;
-        break;
-      case BC_BGR8888:
-      case BC_RGBA8888:
-      case BC_YUVA8888:
-        bytes_per_line = width * 4;
-        break;
-        
-      case BC_RGB161616:
-      case BC_YUV161616:
-        bytes_per_line = width * 6;
-        break;
-      case BC_RGBA16161616:
-      case BC_YUVA16161616:
-        bytes_per_line = width * 8;
-        break;
-      }
-    video_buffer[0] = malloc(height * bytes_per_line);
-    for(i = 1; i < height; i++)
-      video_buffer[i] = &(video_buffer[0][i*bytes_per_line]);
-    
-    }
-  return video_buffer;
-  }
-#endif
-
 static int transcode_init(transcode_handle * h,
                           char * in_file,
                           char * out_file,
                           char * video_codec,
                           char * audio_codec,
                           int floataudio,
-                          int use_avi,
+                          lqt_file_type_t type,
                           char * qtvr,
                           int qtvr_rows,
                           int qtvr_columns)
@@ -235,6 +198,7 @@ static int transcode_init(transcode_handle * h,
   lqt_codec_info_t ** codec_info;
   int i;
   int in_cmodel, out_cmodel;
+  char * extension;
   
   h->in_file = quicktime_open(in_file, 1, 0);
   if(!h->in_file)
@@ -242,7 +206,48 @@ static int transcode_init(transcode_handle * h,
     fprintf(stderr, "Cannot open input file %s\n", in_file);
     return 0;
     }
-  h->out_file = quicktime_open(out_file, 0, 1);
+
+  /* Get the output format */
+
+  if(type == LQT_FILE_NONE)
+    {
+    extension = strrchr(out_file, '.');
+    if(!extension)
+      {
+      fprintf(stderr, "Need a file extension when autoguessing output format\n");
+      return 0;
+      }
+    extension++;
+    
+    for(i = 0; i < sizeof(formats)/sizeof(formats[0]); i++)
+      {
+      if(!strcasecmp(extension, formats[i].extension))
+        {
+        type = formats[i].type;
+        break;
+        }
+      }
+    }
+  if(type == LQT_FILE_NONE)
+    {
+    fprintf(stderr, "Cannot detect output format. Specify a valid extension or use -f <format>\n");
+    return 0;
+    }
+
+  if(!audio_codec || !video_codec)
+    {
+    for(i = 0; i < sizeof(formats)/sizeof(formats[0]); i++)
+      {
+      if(type == formats[i].type)
+        {
+        if(!audio_codec) audio_codec = formats[i].default_audio_codec;
+        if(!video_codec) video_codec = formats[i].default_video_codec;
+        }
+      }
+    
+    }
+  
+  h->out_file = lqt_open_write(out_file, type);
   if(!h->out_file)
     {
     fprintf(stderr, "Cannot open output file %s\n", out_file);
@@ -293,8 +298,8 @@ static int transcode_init(transcode_handle * h,
       h->colormodel = BC_RGB888;
       }
     
-    fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
-            h->width, h->height, lqt_colormodel_to_string(h->colormodel));
+    //    fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
+    //            h->width, h->height, lqt_colormodel_to_string(h->colormodel));
     
     h->video_buffer = lqt_rows_alloc(h->width, h->height, h->colormodel, &(h->rowspan), &(h->rowspan_uv));
     
@@ -335,24 +340,12 @@ static int transcode_init(transcode_handle * h,
     lqt_destroy_codec_info(codec_info);
     
     /* Decide about audio frame size */
-#if 0
-    if(h->do_video)
-      {
-      h->samples_per_frame = (int)(((double)h->frame_duration / (double)h->timescale)+0.5);
-      /* Avoid too odd numbers */
-      h->samples_per_frame = 16 * ((h->samples_per_frame + 15) / 16);
-      }
-    else
-      h->samples_per_frame = 4096;
-#else
 
     /* Ok, we must take care about the audio frame size.
        The sample count, we pass to encode_audio() directly affects interleaving.
-       Too many audio chunks make decoding inefficient, too few make seeking
-       take longer becauuse many samples inside a chunk have to be skipped.
+       Many small audio chunks make decoding inefficient, few large chunks make seeking
+       slower because many samples inside a chunk have to be skipped.
        
-       On the other hand, having too many audio chunks also slows down seeking...
-
        Ok, then lets just take half a second and see how it works :-)
 
        On a 25 fps system this means, that one audio chunks comes after an average of
@@ -364,7 +357,6 @@ static int transcode_init(transcode_handle * h,
     /* Avoid too odd numbers */
     h->samples_per_frame = 16 * ((h->samples_per_frame + 15) / 16);
 
-#endif
     /* Allocate output buffer */
 
     if(floataudio)
@@ -402,8 +394,6 @@ static int transcode_init(transcode_handle * h,
 	}
     }
     
-  if(use_avi)
-    quicktime_set_avi(h->out_file, 1);
   return 1;
   }
 
@@ -478,18 +468,20 @@ static void transcode_cleanup(transcode_handle * h)
   quicktime_close(h->in_file);
   quicktime_close(h->out_file);
   }
-     
+
+
 int main(int argc, char ** argv)
   {
   char * in_file = (char*)0;
   char * out_file = (char*)0;
   char * video_codec = (char*)0;
   char * audio_codec = (char*)0;
+  char * format = (char*)0;
   char * qtvr = (char*)0;
   unsigned short qtvr_rows = 0;
   unsigned short qtvr_columns = 0;
   int i, j;
-  int use_avi = 0, floataudio = 0;
+  lqt_file_type_t type = LQT_FILE_NONE, floataudio = 0;
   transcode_handle handle;
   int progress_written = 0;
   
@@ -506,13 +498,13 @@ int main(int argc, char ** argv)
         list_video_codecs();
       else if(!strcmp(argv[1], "-la"))
         list_audio_codecs();
+      else if(!strcmp(argv[1], "-lf"))
+        list_formats();
       else
         print_usage();
       exit(0);
       break;
     default:
-      audio_codec = "rawaudio";
-      video_codec = "raw";
       for(i = 1; i < argc - 2; i++)
         {
         if(!strcmp(argv[i], "-vc"))
@@ -525,8 +517,13 @@ int main(int argc, char ** argv)
           audio_codec = argv[i+1];
           i++;
           }
+        else if(!strcmp(argv[i], "-f"))
+          {
+          format = argv[i+1];
+          i++;
+          }
         else if(!strcmp(argv[i], "-avi"))
-          use_avi = 1;
+          format = "avi";
         else if(!strcmp(argv[i], "-floataudio"))
           floataudio = 1;
         else if(!strcmp(argv[i], "-qtvr")) {
@@ -545,11 +542,29 @@ int main(int argc, char ** argv)
       in_file = argv[argc-2];
       out_file = argv[argc-1];
     }
+
+  /* Get file type */
+  if(format)
+    {
+    for(i = 0; i < sizeof(formats)/sizeof(formats[0]); i++)
+      {
+      if(!strcasecmp(format, formats[i].name))
+        {
+        type = formats[i].type;
+        break;
+        }
+      }
+    if(type == LQT_FILE_NONE)
+      {
+      fprintf(stderr, "Unsupported format %s, try -lf", format);
+      return -1;
+      }
+    }
   
   if(!transcode_init(&handle, in_file, out_file, video_codec, audio_codec,
-                     floataudio, use_avi, qtvr, qtvr_rows, qtvr_columns))
+                     floataudio, type, qtvr, qtvr_rows, qtvr_columns))
     {
-    return 0;
+    return -1;
     }
   
   i = 10;
