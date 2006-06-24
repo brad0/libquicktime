@@ -20,6 +20,24 @@ void lqt_convert_audio_decode(void * in, int16_t ** out_int,
                               lqt_sample_format_t stream_format);
  
 
+/* avi_avih.c */
+
+void quicktime_read_avih(quicktime_t *file,
+                         quicktime_avih_t *avih,
+                         quicktime_atom_t *parent_atom);
+
+void quicktime_write_avih(quicktime_t *file,
+                          quicktime_avih_t *avih);
+
+void quicktime_avih_dump(quicktime_avih_t *avih);
+
+/* avi_guid.c */
+
+void quicktime_GUID_dump(quicktime_GUID_t * g);
+int  quicktime_GUID_equal(const quicktime_GUID_t * g1, const quicktime_GUID_t * g2);
+void quicktime_GUID_read(quicktime_t * file, quicktime_GUID_t * guid);
+void quicktime_GUID_write(quicktime_t * file, quicktime_GUID_t * guid);
+
 /* avi_hdrl.c */
 
 void quicktime_read_hdrl(quicktime_t *file, 
@@ -53,7 +71,7 @@ void quicktime_update_idx1table(quicktime_t *file,
 
 /* avi_indx.c */
 
-void quicktime_finalize_indx(quicktime_t *file);
+void quicktime_finalize_indx(quicktime_t *file, quicktime_indx_t *indx);
 
 void quicktime_delete_indx(quicktime_indx_t *indx);
 void quicktime_init_indx(quicktime_t *file,
@@ -128,19 +146,68 @@ void quicktime_init_riff(quicktime_t *file);
 void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff);
 quicktime_riff_t* quicktime_new_riff(quicktime_t *file);
 
+void quicktime_riff_dump(quicktime_riff_t * riff);
+
+/* avi_strf.c */
+
+void quicktime_read_strf_audio(quicktime_t *file,
+                               quicktime_strf_t *strf,
+                               quicktime_atom_t *parent_atom);
+
+void quicktime_write_strf_audio(quicktime_t *file,
+                                quicktime_strf_t *strf);
+
+void quicktime_strf_dump_audio(quicktime_strf_t *strf);
+
+void quicktime_read_strf_video(quicktime_t *file,
+                               quicktime_strf_t *strf,
+                               quicktime_atom_t *parent_atom);
+
+void quicktime_write_strf_video(quicktime_t *file,
+                                quicktime_strf_t *strf);
+
+void quicktime_strf_dump_video(quicktime_strf_t *strf);
+
+
+/* avi_strh.c */
+
+void quicktime_read_strh(quicktime_t *file,
+                         quicktime_strh_t *strh,
+                         quicktime_atom_t *parent_atom);
+
+void quicktime_write_strh(quicktime_t *file,
+                          quicktime_strh_t *strh);
+
+void quicktime_strh_dump(quicktime_strh_t *strh);
+
+
 /* avi_strl.c */
 
 void quicktime_delete_strl(quicktime_strl_t *strl);
 quicktime_strl_t* quicktime_new_strl();
+
 void quicktime_read_strl(quicktime_t *file,
                          quicktime_strl_t *strl,
                          quicktime_atom_t *parent_atom);
+
+void quicktime_strl_dump(quicktime_strl_t *strl);
+
+/* Convert an strl to a trak */
+void quicktime_strl_2_qt(quicktime_t *file,
+                         quicktime_strl_t *strl);
+
 
 void quicktime_init_strl(quicktime_t *file,
                          quicktime_audio_map_t *atrack,
                          quicktime_video_map_t *vtrack,
                          quicktime_trak_t *trak,
                          quicktime_strl_t *strl);
+
+void
+quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
+                        quicktime_strl_t *strl);
+
+
 
 /* chan.c */
 
@@ -1031,6 +1098,7 @@ int quicktime_match_32(void *input, void *output);
 int quicktime_match_24(char *input, char *output);
 
 void lqt_hexdump(uint8_t * data, int len, int linebreak);
+void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak);
 
 /* lqt_quicktime.c */
 

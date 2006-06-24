@@ -26,6 +26,8 @@ libquicktime_la_SOURCES= \
 audio.c \
 $(lqt_sources) \
 atom.c \
+avi_avih.c \
+avi_guid.c \
 avi_hdrl.c \
 avi_idx1.c \
 avi_info.c \
@@ -34,6 +36,8 @@ avi_ix.c \
 avi_movi.c \
 avi_odml.c \
 avi_riff.c \
+avi_strf.c \
+avi_strh.c \
 avi_strl.c \
 charset.c \
 colr.c \

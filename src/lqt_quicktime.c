@@ -1527,6 +1527,10 @@ int quicktime_dump(quicktime_t *file)
 	{
 		quicktime_ndhd_dump(&(file->qtvr_node[0].ndhd));
 	}
+        if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+          {
+          quicktime_riff_dump(file->riff[0]);
+          }
 	return 0;
 }
 
@@ -1715,9 +1719,6 @@ int quicktime_close(quicktime_t *file)
 // Finalize the odml header
                         quicktime_finalize_odml(file, &file->riff[0]->hdrl);
 
-                        // Finalize super indexes
-                        if(file->file_type == LQT_FILE_AVI_ODML)
-                          quicktime_finalize_indx(file);
                         
                 }
                 else

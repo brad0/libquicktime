@@ -72,7 +72,7 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
           table->sample_size = quicktime_read_int32(file);
           //          fprintf(stderr, "constBitsPerChannel: %d\n", table->sample_size);
           table->formatSpecificFlags = quicktime_read_int32(file);
-          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
+          //          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
 
           /* The following 2 are (hopefully) unused */
           

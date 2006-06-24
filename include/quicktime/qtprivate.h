@@ -883,35 +883,139 @@ typedef struct
         quicktime_indxtable_t *table;
 } quicktime_indx_t;
 
+/* AVI structures */
+
+/* strh */
+
+typedef struct
+  {
+  char fccType[4];
+  char fccHandler[4];
+  uint32_t dwFlags;
+  uint32_t dwReserved1;
+  uint32_t dwInitialFrames;
+  uint32_t dwScale;
+  uint32_t dwRate;
+  uint32_t dwStart;
+  uint32_t dwLength;
+  uint32_t dwSuggestedBufferSize;
+  uint32_t dwQuality;
+  uint32_t dwSampleSize;
+  } quicktime_strh_t;
+
+typedef struct
+  {
+  uint32_t dwMicroSecPerFrame;
+  uint32_t dwMaxBytesPerSec;
+  uint32_t dwReserved1;
+  uint32_t dwFlags;
+  uint32_t dwTotalFrames;
+  uint32_t dwInitialFrames;
+  uint32_t dwStreams;
+  uint32_t dwSuggestedBufferSize;
+  uint32_t dwWidth;
+  uint32_t dwHeight;
+  uint32_t dwScale;
+  uint32_t dwRate;
+  uint32_t dwStart;
+  uint32_t dwLength;
+  } quicktime_avih_t;
+
+typedef struct
+  {
+  uint32_t  biSize;  /* sizeof(BITMAPINFOHEADER) */
+  uint32_t  biWidth;
+  uint32_t  biHeight;
+  uint16_t  biPlanes; /* unused */
+  uint16_t  biBitCount;
+  char biCompression[5]; /* fourcc of image */
+  uint32_t  biSizeImage;   /* size of image. For uncompressed images */
+                           /* ( biCompression 0 or 3 ) can be zero.  */
+
+  uint32_t  biXPelsPerMeter; /* unused */
+  uint32_t  biYPelsPerMeter; /* unused */
+  uint32_t  biClrUsed;       /* valid only for palettized images. */
+  /* Number of colors in palette. */
+  uint32_t  biClrImportant;
+
+  /* Additional stuff */
+  int ext_size;
+  uint8_t * ext_data;
+  } quicktime_BITMAPINFOHEADER_t;
+
+typedef struct
+  {
+  uint32_t v1;
+  uint16_t v2;
+  uint16_t v3;
+  uint8_t  v4[8];
+  } quicktime_GUID_t;
+
+typedef enum
+  {
+    LQT_WAVEFORMAT_WAVEFORMAT,
+    LQT_WAVEFORMAT_PCMWAVEFORMAT,
+    LQT_WAVEFORMAT_WAVEFORMATEX,
+    LQT_WAVEFORMAT_WAVEFORMATEXTENSIBLE,
+  } quicktime_WAVEFORMAT_type_t;
+
+typedef struct
+  {
+  quicktime_WAVEFORMAT_type_t type;
+
+  struct
+    {
+    struct
+      {
+      uint16_t  wFormatTag;     /* value that identifies compression format */
+      uint16_t  nChannels;
+      uint32_t  nSamplesPerSec;
+      uint32_t  nAvgBytesPerSec;
+      uint16_t  nBlockAlign;    /* size of a data sample */
+      } WAVEFORMAT;
+    struct
+      {
+      uint16_t  wBitsPerSample;
+      } PCMWAVEFORMAT;
+    struct
+      {
+      uint16_t  cbSize;         /* size of format-specific data */
+      uint8_t * ext_data;
+      int       ext_size; /* Can be different from cbSize for WAVEFORMATEXTENSIBLE */
+      } WAVEFORMATEX;
+    struct
+      {
+      union
+        {
+        uint16_t wValidBitsPerSample;
+        uint16_t wSamplesPerBlock;
+        uint16_t wReserved;
+        } Samples;
+      uint32_t    dwChannelMask;
+      quicktime_GUID_t SubFormat;
+      } WAVEFORMATEXTENSIBLE;
+    } f;
+  } quicktime_WAVEFORMAT_t;
+
+typedef union
+  {
+  quicktime_BITMAPINFOHEADER_t bh;
+  quicktime_WAVEFORMAT_t       wf;
+  } quicktime_strf_t;
+
 struct quicktime_strl_s
 {
         quicktime_atom_t atom;
 /* Super index for reading */
         quicktime_indx_t indx;
-/* LIBQUICKTIME: These are the important values to make proper audio
-   headers. They are set by the ENCODER in the encode-functions before
-   writing the first audio chunk (i.e. after a call to quicktime_set_avi) */
 
-        /* strh stuff */
-
-        int64_t  dwScaleOffset;
-        uint32_t dwScale;
-
-        uint32_t dwRate;
-
-        int64_t  dwLengthOffset;
-
-        int64_t dwSampleSizeOffset;
-        uint32_t dwSampleSize;
-
-        /* WAVEFORMATEX stuff */
-
-        uint16_t nBlockAlign;
-
-        int64_t nAvgBytesPerSecOffset;
-        uint32_t nAvgBytesPerSec;
-
-        uint16_t wBitsPerSample;
+     /* strh stuff */
+        
+        int64_t  strh_offset;
+        int64_t  end_pos;
+        quicktime_strh_t strh;
+        /* Format */
+        quicktime_strf_t strf;
 
         /* The next ones will be used for generating index tables
            with the lowest possible error */
@@ -920,10 +1024,8 @@ struct quicktime_strl_s
         int64_t total_samples;
         int64_t total_blocks;
 
-/* Start of indx header for later writing */
-        int64_t indx_offset;
-/* Size of JUNK without 8 byte header which is to be replaced by indx */
-        int64_t padding_size;
+        uint32_t size; /* The size after the strl was first written */
+
 /* Tag for writer with NULL termination: 00wb, 00dc   Not available in reader.*/
         char tag[5];
 /* Flags for reader.  Not available in writer. */
@@ -935,6 +1037,8 @@ struct quicktime_strl_s
 
 typedef struct
 {
+        int64_t avih_offset;
+        quicktime_avih_t avih;
         quicktime_atom_t atom;
         int64_t frames_offset;
         int64_t bitrate_offset;

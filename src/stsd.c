@@ -73,7 +73,6 @@ void quicktime_stsd_init_video(quicktime_t *file,
 	quicktime_stsd_init_table(stsd);
 //printf("quicktime_stsd_init_video 1\n");
 	table = &(stsd->table[0]);
-//printf("quicktime_stsd_init_video 1\n");
 
 	quicktime_copy_char32(table->format, compression);
 //printf("quicktime_stsd_init_video 1\n");
@@ -99,13 +98,14 @@ void quicktime_stsd_init_audio(quicktime_t *file,
 	quicktime_stsd_table_t *table;
 	quicktime_stsd_init_table(stsd);
 	table = &(stsd->table[0]);
-
+        
 	quicktime_copy_char32(table->format, compressor);
 	quicktime_copy_char32(table->wave.frma.codec, compressor);
 	table->channels = channels;
 	table->sample_size = bits;
 	table->samplerate = sample_rate;
-        //        fprintf(stderr, "stsd_init_audio: %d\n", bits);
+        //        fprintf(stderr, "stsd_init_audio:\n");
+        //        lqt_hexdump(compressor, 4, 4);
 }
 
 void quicktime_stsd_delete(quicktime_stsd_t *stsd)

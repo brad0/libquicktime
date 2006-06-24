@@ -68,61 +68,42 @@ void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak)
   indx_table->duration     = indx_table->ix->table_size;
   }
 
+/* This function has to be called EXCLUSIVELY by quicktime_finalize_strl,
+   since the file position is to be expected behind the strf chunk */
 
+void quicktime_finalize_indx(quicktime_t *file, quicktime_indx_t * indx)
+  {
+  int j;
 
-void quicktime_finalize_indx(quicktime_t *file)
-{
-	int i, j;
-	quicktime_riff_t *riff = file->riff[0];
-	quicktime_hdrl_t *hdrl = &riff->hdrl;
-	quicktime_strl_t *strl;
-	quicktime_indx_t *indx;
-	quicktime_atom_t junk_atom;
-	int junk_size;
-
-	for(i = 0; i < file->moov.total_tracks; i++)
-          {
-          strl = hdrl->strl[i];
-          indx = &strl->indx;
+  /* Write indx */
+  //  quicktime_set_position(file, strl->indx_offset);
+  quicktime_atom_write_header(file, &indx->atom, "indx");
+  /* longs per entry */
+  quicktime_write_int16_le(file, indx->longs_per_entry);
+  /* index sub type */
+  quicktime_write_char(file, indx->index_subtype);
+  /* index type */
+  quicktime_write_char(file, indx->index_type);
+  /* entries in use */
+  quicktime_write_int32_le(file, indx->table_size);
+  /* chunk ID */
+  quicktime_write_char32(file, indx->chunk_id);
+  /* reserved */
+  quicktime_write_int32_le(file, 0);
+  quicktime_write_int32_le(file, 0);
+  quicktime_write_int32_le(file, 0);
           
-          /* Write indx */
-          quicktime_set_position(file, strl->indx_offset);
-          quicktime_atom_write_header(file, &indx->atom, "indx");
-          /* longs per entry */
-          quicktime_write_int16_le(file, indx->longs_per_entry);
-          /* index sub type */
-          quicktime_write_char(file, indx->index_subtype);
-          /* index type */
-          quicktime_write_char(file, indx->index_type);
-          /* entries in use */
-          quicktime_write_int32_le(file, indx->table_size);
-          /* chunk ID */
-          quicktime_write_char32(file, indx->chunk_id);
-          /* reserved */
-          quicktime_write_int32_le(file, 0);
-          quicktime_write_int32_le(file, 0);
-          quicktime_write_int32_le(file, 0);
+  /* table */
+  for(j = 0; j < indx->table_size; j++)
+    {
+    quicktime_indxtable_t *indx_table = &indx->table[j];
+    quicktime_write_int64_le(file, indx_table->index_offset);
+    quicktime_write_int32_le(file, indx_table->index_size);
+    quicktime_write_int32_le(file, indx_table->duration);
+    }
           
-          /* table */
-          for(j = 0; j < indx->table_size; j++)
-            {
-            quicktime_indxtable_t *indx_table = &indx->table[j];
-            quicktime_write_int64_le(file, indx_table->index_offset);
-            quicktime_write_int32_le(file, indx_table->index_size);
-            quicktime_write_int32_le(file, indx_table->duration);
-            }
-          
-          quicktime_atom_write_footer(file, &indx->atom);
-          
-          /* Rewrite JUNK less indx size and indx header size */
-          junk_size = strl->padding_size - indx->atom.size - 24;
-          
-          quicktime_atom_write_header(file, &junk_atom, "JUNK");
-          for(j = 0; j < junk_size; j += 4)
-            quicktime_write_int32_le(file, 0);
-          quicktime_atom_write_footer(file, &junk_atom);
-          }
-}
+  quicktime_atom_write_footer(file, &indx->atom);
+  }
 
 void quicktime_read_indx(quicktime_t *file, 
 	quicktime_strl_t *strl, 

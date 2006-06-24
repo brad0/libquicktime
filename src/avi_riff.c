@@ -45,11 +45,11 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
           // Got LIST 'hdrl'
           if(quicktime_match_32(data, "hdrl"))
             {
-
             // No size here.
             //printf("quicktime_read_riff 10 %llx\n", quicktime_position(file));
             quicktime_read_hdrl(file, &riff->hdrl, &leaf_atom);
             //printf("quicktime_read_riff 20 %llx\n", quicktime_position(file));
+            riff->have_hdrl = 1;
             }
           else if(quicktime_match_32(data, "movi"))  // Got LIST 'movi'
             {
@@ -221,33 +221,34 @@ static int bytes_to_samples(quicktime_strl_t * strl, int bytes, int samplerate)
   int ret;
 
   strl->total_bytes += bytes;
-  if(strl->nBlockAlign)
+  if(strl->strf.wf.f.WAVEFORMAT.nBlockAlign)
     {
-    strl->total_blocks = (strl->total_bytes + strl->nBlockAlign - 1) / strl->nBlockAlign;
+    strl->total_blocks = (strl->total_bytes + strl->strf.wf.f.WAVEFORMAT.nBlockAlign - 1) /
+      strl->strf.wf.f.WAVEFORMAT.nBlockAlign;
     }
   else
     strl->total_blocks++;
   
-  if((strl->dwSampleSize == 0) && (strl->dwScale > 1))
+  if((strl->strh.dwSampleSize == 0) && (strl->strh.dwScale > 1))
     {
     /* variable bitrate */
     total_samples = (samplerate * strl->total_blocks *
-                     strl->dwScale) / strl->dwRate;
+                     strl->strh.dwScale) / strl->strh.dwRate;
     }
   else
     {
     /* constant bitrate */
-    if(strl->nBlockAlign)
+    if(strl->strf.wf.f.WAVEFORMAT.nBlockAlign)
       {
       total_samples =
-        (strl->total_bytes * strl->dwScale * samplerate) /
-        (strl->nBlockAlign * strl->dwRate);
+        (strl->total_bytes * strl->strh.dwScale * samplerate) /
+        (strl->strf.wf.f.WAVEFORMAT.nBlockAlign * strl->strh.dwRate);
       }
     else
       {
       total_samples =
         (samplerate * strl->total_bytes *
-         strl->dwScale) / (strl->dwSampleSize * strl->dwRate);
+         strl->strh.dwScale) / (strl->strh.dwSampleSize * strl->strh.dwRate);
       }
     }
 
@@ -470,11 +471,15 @@ int quicktime_import_avi(quicktime_t *file)
   return 0;
   }
 
-
-
-
-
-
-
-
-
+void quicktime_riff_dump(quicktime_riff_t * riff)
+  {
+  int i = 0;
+  if(riff->have_hdrl)
+    {
+    while(riff->hdrl.strl[i])
+      {
+      quicktime_strl_dump(riff->hdrl.strl[i]);
+      i++;
+      }
+    }
+  }

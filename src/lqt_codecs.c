@@ -102,7 +102,7 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
     {
     
 #ifndef NDEBUG
-    fprintf(stderr, "Trying to find %s for fourcc \"%s\"...",
+    fprintf(stderr, "Trying to find %s for fourcc \"%4s\"...",
             (encode ? "Encoder" : "Decoder"), compressor);
 #endif
     

@@ -861,15 +861,15 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
     if(trak->strl)
       {
       /* strh stuff */
-      trak->strl->dwRate = track_map->samplerate;
-      trak->strl->dwScale = 1;
-      trak->strl->dwSampleSize = codec->block_align / track_map->channels;
+      trak->strl->strh.dwRate = track_map->samplerate;
+      trak->strl->strh.dwScale = 1;
+      trak->strl->strh.dwSampleSize = codec->block_align / track_map->channels;
       
       /* WAVEFORMATEX stuff */
       
-      trak->strl->nBlockAlign = codec->block_align;
-      trak->strl->nAvgBytesPerSec = codec->block_align * track_map->samplerate;
-      trak->strl->wBitsPerSample = trak->strl->dwSampleSize * 8;
+      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = codec->block_align;
+      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec = codec->block_align * track_map->samplerate;
+      trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = trak->strl->strh.dwSampleSize * 8;
       }
 
 

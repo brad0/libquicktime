@@ -39,6 +39,7 @@ void quicktime_read_hdrl(quicktime_t *file,
 					hdrl->strl[current_track++] = 
 					quicktime_new_strl();
 				quicktime_read_strl(file, strl, &leaf_atom);
+				quicktime_strl_2_qt(file, strl);
 			}
 		}
 
@@ -58,9 +59,10 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 	quicktime_atom_write_header(file, &hdrl->atom, "LIST");
 	quicktime_write_char32(file, "hdrl");
 
-
 // avih
-	quicktime_atom_write_header(file, &avih_atom, "avih");
+        hdrl->avih_offset = quicktime_position(file);
+        
+        quicktime_atom_write_header(file, &avih_atom, "avih");
 
 	if(file->total_vtracks)
    		quicktime_write_int32_le(file, 
@@ -147,70 +149,33 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 
 
 void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
-{
-	int i;
-	int64_t position = quicktime_position(file);
-	int64_t total_frames = 0;
-	double frame_rate = 0;
+  {
+  int i;
+  int64_t position = quicktime_position(file);
+  double frame_rate = 0;
+  int64_t total_frames;
+  
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    quicktime_trak_t *trak = file->moov.trak[i];
+    quicktime_strl_t *strl = trak->strl;
 
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_trak_t *trak = file->moov.trak[i];
-		quicktime_strl_t *strl = trak->strl;
+    quicktime_finalize_strl(file, trak, strl);
+    }
 
-		if(trak->mdia.minf.is_video)
-		{
-			int length;
-                        //                        fprintf(stderr, "Finalize video strl\n");
-			quicktime_set_position(file, strl->dwLengthOffset);
-			total_frames = length = quicktime_track_samples(file, trak);
-			quicktime_write_int32_le(file, length);
-			frame_rate = (double)trak->mdia.mdhd.time_scale /
-				trak->mdia.minf.stbl.stts.table[0].sample_duration;
-		}
-		else
-		if(trak->mdia.minf.is_audio)
-		{
-			int length;
-#if 0
-                        fprintf(stderr, "Finalize audio strl %lld %lld %lld %lld\n",
-                                strl->dwLengthOffset,
-                                strl->dwScaleOffset,
-                                strl->dwSampleSizeOffset,
-                                strl->nAvgBytesPerSecOffset
-                                );
-#endif
-			quicktime_set_position(file, strl->dwLengthOffset);
-			length = quicktime_track_samples(file, trak);
-			quicktime_write_int32_le(file, length);
-			quicktime_set_position(file, strl->dwScaleOffset);
+  if(file->total_vtracks)
+    {
+    total_frames = quicktime_video_length(file, 0);
+    frame_rate   = quicktime_frame_rate(file, 0);
 
-			quicktime_write_int32_le(file, strl->dwScale);
-			quicktime_write_int32_le(file, strl->dwRate);
+    hdrl->avih.dwMaxBytesPerSec = file->total_length / (total_frames / frame_rate);
+    hdrl->avih.dwLength = total_frames;
 
-			quicktime_set_position(file, strl->dwSampleSizeOffset);
-			quicktime_write_int32_le(file, strl->dwSampleSize);
-
-                        quicktime_set_position(file, strl->nAvgBytesPerSecOffset);
-                        quicktime_write_int32_le(file, strl->nAvgBytesPerSec);
-			quicktime_write_int16_le(file, strl->nBlockAlign);
-                        quicktime_write_int16_le(file, strl->wBitsPerSample);
-                        
-                        
-		}
-	}
-
-	if(total_frames)
-	{
-		quicktime_set_position(file, hdrl->bitrate_offset);
-		quicktime_write_int32_le(file, 
-			file->total_length / (total_frames / frame_rate));
-		quicktime_set_position(file, hdrl->frames_offset);
-		quicktime_write_int32_le(file, total_frames);
-	}
-
-	quicktime_set_position(file, position);
-}
+    quicktime_set_position(file, hdrl->avih_offset);
+    quicktime_write_avih(file, &hdrl->avih);
+    }
+  quicktime_set_position(file, position);
+  }
 
 
 

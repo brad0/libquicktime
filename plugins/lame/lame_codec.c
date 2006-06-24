@@ -445,15 +445,15 @@ static int encode(quicktime_t *file,
     if(trak->strl)
       {
       /* strh stuff */
-      trak->strl->dwRate = codec->bitrate / 8;
-      trak->strl->dwScale = 1;
-      trak->strl->dwSampleSize = 1;
+      trak->strl->strh.dwRate = codec->bitrate / 8;
+      trak->strl->strh.dwScale = 1;
+      trak->strl->strh.dwSampleSize = 1;
       
       /* WAVEFORMATEX stuff */
       
-      trak->strl->nBlockAlign = 1;
-      trak->strl->nAvgBytesPerSec =  codec->bitrate / 8;
-      trak->strl->wBitsPerSample = 0;
+      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
+      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->bitrate / 8;
+      trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
       }
     }
 

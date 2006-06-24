@@ -844,7 +844,7 @@ int quicktime_match_24(char *input, char *output)
 		return 0;
 }
 
-void lqt_hexdump(uint8_t * data, int len, int linebreak)
+void do_hexdump(uint8_t * data, int len, int linebreak, FILE * f)
   {
   int i;
   int bytes_written = 0;
@@ -854,17 +854,27 @@ void lqt_hexdump(uint8_t * data, int len, int linebreak)
     {
     imax = (bytes_written + linebreak > len) ? len - bytes_written : linebreak;
     for(i = 0; i < imax; i++)
-      fprintf(stderr, "%02x ", data[bytes_written + i]);
+      fprintf(f, "%02x ", data[bytes_written + i]);
     for(i = imax; i < linebreak; i++)
-      fprintf(stderr, "   ");
+      fprintf(f, "   ");
     for(i = 0; i < imax; i++)
       {
       if(!(data[bytes_written + i] & 0x80) && (data[bytes_written + i] >= 32))
-        fprintf(stderr, "%c", data[bytes_written + i]);
+        fprintf(f, "%c", data[bytes_written + i]);
       else
-        fprintf(stderr, ".");
+        fprintf(f, ".");
       }
     bytes_written += imax;
-    fprintf(stderr, "\n");
+    fprintf(f, "\n");
     }
+  }
+
+void lqt_hexdump(uint8_t * data, int len, int linebreak)
+  {
+  do_hexdump(data, len, linebreak, stderr);  
+  }
+
+void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak)
+  {
+  do_hexdump(data, len, linebreak, stdout);  
   }
