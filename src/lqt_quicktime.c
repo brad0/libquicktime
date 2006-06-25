@@ -534,7 +534,6 @@ quicktime_trak_t* quicktime_add_track(quicktime_t *file)
         moov->total_tracks++;
         for(i = 0; i < moov->total_tracks; i++)
                 moov->trak[i]->tkhd.track_id = i + 1;
-        quicktime_iods_add_track(&(moov->iods), trak);
         
         moov->mvhd.next_track_id++;
         return trak;

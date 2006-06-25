@@ -113,7 +113,9 @@ static int decode_chunk(quicktime_t *file, int track)
   if(codec->upsample)
     num_samples *= 2;
   
-  //  fprintf(stderr, "VBR Chunk: packets: %d, samples: %d\n", num_packets, num_samples);
+#if 0
+  fprintf(stderr, "Chunk: packets: %d, samples: %d\n", num_packets, num_samples);
+#endif
   
   if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
     {
@@ -130,10 +132,10 @@ static int decode_chunk(quicktime_t *file, int track)
 
     if(codec->upsample)
       num_samples *= 2;
-    
-    //    fprintf(stderr, "Read VBR packet, chunk: %lld, packet: %d, bytes: %d, samples: %d\n",
-    //            track_map->current_chunk, i, packet_size, num_samples);
-
+#if 0
+    fprintf(stderr, "Read VBR packet, chunk: %lld, packet: %d, bytes: %d, samples: %d\n",
+            track_map->current_chunk, i, packet_size, num_samples);
+#endif
 
     samples = faacDecDecode(codec->dec, &frame_info,
                             codec->data, packet_size);

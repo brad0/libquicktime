@@ -32,11 +32,11 @@ void quicktime_moov_dump(quicktime_moov_t *moov)
 	printf("movie (moov)\n");
 	quicktime_mvhd_dump(&(moov->mvhd));
 	quicktime_udta_dump(&(moov->udta));
-	for(i = 0; i < moov->total_tracks; i++)
-		quicktime_trak_dump(moov->trak[i]);
-	quicktime_ctab_dump(&(moov->ctab));
         if(moov->has_iods)
           quicktime_iods_dump(&(moov->iods));
+        for(i = 0; i < moov->total_tracks; i++)
+		quicktime_trak_dump(moov->trak[i]);
+	quicktime_ctab_dump(&(moov->ctab));
         
 }
 
@@ -255,6 +255,10 @@ void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
       {
       longest_duration = duration;
       }
+
+    /* Add tracks to iods */
+    quicktime_iods_add_track(&(moov->iods), moov->trak[i]);
+        
     }
   moov->mvhd.duration = longest_duration;
   moov->mvhd.selection_duration = longest_duration;
@@ -277,16 +281,15 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 		file->mdat.atom.end = quicktime_position(file);
 		quicktime_atom_write_header(file, &atom, "moov");
 	}
-        
-	quicktime_write_mvhd(file, &(moov->mvhd));
+        quicktime_write_mvhd(file, &(moov->mvhd));
+        if(moov->has_iods)
+          quicktime_write_iods(file, moov);
 	quicktime_write_udta(file, &(moov->udta));
 	for(i = 0; i < moov->total_tracks; i++)
 	{
 		quicktime_write_trak(file, moov->trak[i], moov->mvhd.time_scale);
 	}
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
-        if(moov->has_iods)
-          quicktime_write_iods(file, moov);
 
 	quicktime_atom_write_footer(file, &atom);
 }

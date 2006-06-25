@@ -520,6 +520,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
                                   "avcC", avcc, avcc_size);
 
+    file->moov.iods.videoProfileId = 0x15;
+    
 #ifdef DUMP_CONFIG    
     dump_params(&codec->params);
 #endif

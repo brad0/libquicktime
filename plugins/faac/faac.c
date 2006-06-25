@@ -225,6 +225,10 @@ static int encode(quicktime_t *file,
     /* Maybe correct these later? */
     esds->maxBitrate      = 128000;
     esds->avgBitrate      = 128000;
+
+    /* No idea if the following is right but other AAC LC files have the same */
+    file->moov.iods.audioProfileId  = 15;
+
     }
 
   /* Encode samples */
