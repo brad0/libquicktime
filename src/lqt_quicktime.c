@@ -1004,6 +1004,8 @@ int lqt_frame_duration(quicktime_t * file, int track, int *constant)
 
 char* quicktime_video_compressor(quicktime_t *file, int track)
 {
+	if ((track < 0) || (track >= file->total_vtracks))
+	   return NULL;
 	return file->vtracks[track].track->mdia.minf.stbl.stsd.table[0].format;
 }
 
