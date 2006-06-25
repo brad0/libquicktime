@@ -852,6 +852,8 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t *trak = track_map->track;
 
+  //  fprintf(stderr, "encode_pcm: %d\n", samples);
+  
   /* Initialize */
 
   if(!codec->initialized)
@@ -878,7 +880,7 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
       codec->init_encode(file, track);
     codec->initialized = 1;
     }
-  if(!input)
+  if(!input || !samples)
     return 0;
   
   /* Allocate chunk buffer */

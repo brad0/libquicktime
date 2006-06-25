@@ -599,7 +599,11 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
 		current_chunk - 1, 
 		sample_size);
-
+        /* Need to increase sample count (the VBR routines to it
+           themselves) */
+	if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
+          trak->mdia.minf.stbl.stts.table->sample_count += samples;
+        
 	if(trak->mdia.minf.is_panorama) {
 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
 		current_chunk - 1, 

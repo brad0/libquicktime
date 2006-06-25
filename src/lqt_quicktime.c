@@ -2174,7 +2174,6 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
 
   if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
     {
-    
     if(file->wr)
       {
       ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, (void*)0, 
@@ -2187,8 +2186,8 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
                                                           0, track);
 
       }
-    fprintf(stderr, "Obtained sampleformat: %s\n",
-            lqt_sample_format_to_string(atrack->sample_format));
+    //    fprintf(stderr, "Obtained sampleformat: %s\n",
+    //            lqt_sample_format_to_string(atrack->sample_format));
     }
   
   return atrack->sample_format;
