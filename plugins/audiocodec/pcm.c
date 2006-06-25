@@ -1439,8 +1439,8 @@ static void init_decode_lpcm(quicktime_t * file, int track)
 
   codec->block_align = (table->sample_size/8) * atrack->channels;
 
-  fprintf(stderr, "init_decode_lpcm: %p %s\n",
-          codec->decode, lqt_sample_format_to_string(atrack->sample_format));
+  //  fprintf(stderr, "init_decode_lpcm: %p %s\n",
+  //          codec->decode, lqt_sample_format_to_string(atrack->sample_format));
   }
 
 
