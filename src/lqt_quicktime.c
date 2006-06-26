@@ -624,15 +624,6 @@ int quicktime_get_timescale(double frame_rate)
 	return timescale;
 }
 
-#if 0
-int quicktime_seek_end(quicktime_t *file)
-{
-	quicktime_set_position(file, file->mdat.atom.size + file->mdat.atom.start + HEADER_LENGTH * 2);
-/*printf("quicktime_seek_end %ld\n", file->mdat.atom.size + file->mdat.atom.start); */
-	quicktime_update_positions(file);
-	return 0;
-}
-#endif
 
 int quicktime_seek_start(quicktime_t *file)
 {
@@ -670,41 +661,6 @@ long quicktime_audio_position(quicktime_t *file, int track)
 long quicktime_video_position(quicktime_t *file, int track)
 {
 	return file->vtracks[track].current_position;
-}
-
-int quicktime_update_positions(quicktime_t *file)
-{
-/* Get the sample position from the file offset */
-/* for routines that change the positions of all tracks, like */
-/* seek_end and seek_start but not for routines that reposition one track, like */
-/* set_audio_position. */
-
-	int64_t mdat_offset = quicktime_position(file) - file->mdat.atom.start;
-	int64_t sample, chunk, chunk_offset;
-	int i;
-
-	if(file->total_atracks)
-	{
-		sample = quicktime_offset_to_sample(file->atracks[0].track, mdat_offset);
-		chunk = quicktime_offset_to_chunk(&chunk_offset, file->atracks[0].track, mdat_offset);
-		for(i = 0; i < file->total_atracks; i++)
-		{
-			file->atracks[i].current_position = sample;
-			file->atracks[i].current_chunk = chunk;
-		}
-	}
-
-	if(file->total_vtracks)
-	{
-		sample = quicktime_offset_to_sample(file->vtracks[0].track, mdat_offset);
-		chunk = quicktime_offset_to_chunk(&chunk_offset, file->vtracks[0].track, mdat_offset);
-		for(i = 0; i < file->total_vtracks; i++)
-		{
-			file->vtracks[i].current_position = sample;
-			file->vtracks[i].current_chunk = chunk;
-		}
-	}
-	return 0;
 }
 
 int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
@@ -2197,6 +2153,7 @@ void lqt_init_vbr_audio(quicktime_t * file, int track)
   {
   quicktime_trak_t * trak = file->atracks[track].track;
   trak->mdia.minf.stbl.stsd.table[0].compression_id = -2;
+  trak->mdia.minf.stbl.stsz.sample_size = 0;
   trak->mdia.minf.is_audio_vbr = 1;
   }
 

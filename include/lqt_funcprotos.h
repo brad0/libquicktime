@@ -916,7 +916,6 @@ quicktime_trak_t* quicktime_add_trak(quicktime_t *file);
 int quicktime_delete_trak(quicktime_moov_t *moov);
 int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_atom_t *trak_atom);
 int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak, long moov_time_scale);
-int64_t quicktime_track_end(quicktime_trak_t *trak);
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 
@@ -965,7 +964,6 @@ int64_t quicktime_sample_range_size(quicktime_trak_t *trak,
                                     long sample);
 int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
 
-long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset);
 void quicktime_write_chunk_header(quicktime_t *file, 
                                   quicktime_trak_t *trak, 
                                   quicktime_atom_t *chunk);
@@ -1127,7 +1125,6 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack, quicktime_trak_t *tr
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack);
 
-int quicktime_update_positions(quicktime_t *file);
 
 void quicktime_init_maps(quicktime_t * file);
 void lqt_update_frame_position(quicktime_video_map_t * track);

@@ -213,45 +213,6 @@ int quicktime_write_trak(quicktime_t *file,
 	return 0;
 }
 
-int64_t quicktime_track_end(quicktime_trak_t *trak)
-{
-/* get the byte endpoint of the track in the file */
-	int64_t size = 0;
-	int64_t chunk, chunk_offset, chunk_samples, sample;
-	quicktime_stsz_t *stsz = &(trak->mdia.minf.stbl.stsz);
-	quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
-	quicktime_stco_t *stco;
-
-/* get the last chunk offset */
-/* the chunk offsets contain the HEADER_LENGTH themselves */
-	stco = &(trak->mdia.minf.stbl.stco);
-	chunk = stco->total_entries;
-	size = chunk_offset = stco->table[chunk - 1].offset;
-
-/* get the number of samples in the last chunk */
-	chunk_samples = stsc->table[stsc->total_entries - 1].samples;
-
-/* get the size of last samples */
-	if(stsz->sample_size)
-	{
-/* assume audio so calculate the sample size */
-		size += chunk_samples * stsz->sample_size
-			* trak->mdia.minf.stbl.stsd.table[0].channels 
-			* trak->mdia.minf.stbl.stsd.table[0].sample_size / 8;
-	}
-	else
-	{
-/* assume video */
-		for(sample = stsz->total_entries - chunk_samples; 
-			sample < stsz->total_entries; sample++)
-		{
-			size += stsz->table[sample].size;
-		}
-	}
-
-	return size;
-}
-
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 {
 		quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
@@ -502,31 +463,6 @@ int64_t quicktime_sample_to_offset(quicktime_t *file,
 	return chunk_offset2;
 }
 
-long quicktime_offset_to_sample(quicktime_trak_t *trak, int64_t offset)
-{
-	int64_t chunk_offset;
-	int64_t chunk = quicktime_offset_to_chunk(&chunk_offset, trak, offset);
-	int64_t chunk_sample = quicktime_sample_of_chunk(trak, chunk);
-	int64_t sample, sample_offset;
-	quicktime_stsz_table_t *table = trak->mdia.minf.stbl.stsz.table;
-	int64_t total_samples = trak->mdia.minf.stbl.stsz.total_entries;
-
-	if(trak->mdia.minf.stbl.stsz.sample_size)
-	{
-		sample = chunk_sample + (offset - chunk_offset) / 
-			trak->mdia.minf.stbl.stsz.sample_size;
-	}
-	else
-	for(sample = chunk_sample, sample_offset = chunk_offset; 
-		sample_offset < offset && sample < total_samples; )
-	{
-		sample_offset += table[sample].size;
-		if(sample_offset < offset) sample++;
-	}
-	
-	return sample;
-}
-
 void quicktime_write_chunk_header(quicktime_t *file, 
 	quicktime_trak_t *trak, 
 	quicktime_atom_t *chunk)
@@ -658,7 +594,7 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
         
         if(!trak->mdia.minf.stbl.stsz.total_entries)
 	{
-		trak->mdia.minf.stbl.stsz.sample_size = 1;
+        // trak->mdia.minf.stbl.stsz.sample_size = 1;
 		trak->mdia.minf.stbl.stsz.total_entries = samples;
 	}
 

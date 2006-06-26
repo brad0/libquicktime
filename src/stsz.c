@@ -31,7 +31,7 @@ void quicktime_stsz_init_audio(quicktime_t *file,
 {
 	/*stsz->sample_size = channels * bits / 8; */
 
-	stsz->sample_size = 0;
+	stsz->sample_size = 1;
 
 //printf("quicktime_stsz_init_audio 1 %d\n", stsz->sample_size);
 	stsz->total_entries = 0;   /* set this when closing */
@@ -40,9 +40,7 @@ void quicktime_stsz_init_audio(quicktime_t *file,
 
 void quicktime_stsz_delete(quicktime_stsz_t *stsz)
 {
-	if(!stsz->sample_size && stsz->total_entries) free(stsz->table);
-	stsz->total_entries = 0;
-	stsz->entries_allocated = 0;
+	if(stsz->table) free(stsz->table);
 }
 
 void quicktime_stsz_dump(quicktime_stsz_t *stsz)

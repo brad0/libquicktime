@@ -1455,7 +1455,8 @@ static void init_encode_lpcm(quicktime_t * file, int track)
   switch(codec->format)
     {
     case FORMAT_INT_16:
-      formatSpecificFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+      formatSpecificFlags =
+        kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
       if(!codec->little_endian)
         {
         formatSpecificFlags |= kAudioFormatFlagIsBigEndian;
@@ -1550,6 +1551,11 @@ static void init_encode_lpcm(quicktime_t * file, int track)
                               formatSpecificFlags,
                               codec->block_align /* constBytesPerAudioPacket */,
                               1 /* constLPCMFramesPerAudioPacket */);
+
+  /* Set correct stsz */
+  atrack->track->mdia.minf.stbl.stsz.sample_size =
+    (table->sample_size/8)*atrack->channels;
+  
   }
 
 
