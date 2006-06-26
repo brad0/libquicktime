@@ -143,6 +143,7 @@ void quicktime_delete_riff(quicktime_t *file, quicktime_riff_t *riff)
 
 void quicktime_init_riff(quicktime_t *file)
   {
+  quicktime_atom_t junk_atom;
   int i;
   // Create new RIFF
   quicktime_riff_t *riff = quicktime_new_riff(file);
@@ -158,10 +159,18 @@ void quicktime_init_riff(quicktime_t *file)
     quicktime_init_hdrl(file, &riff->hdrl);
     riff->have_hdrl = 1;
     quicktime_init_riffinfo(&riff->info);
-    
+#if 0
     quicktime_udta_2_riffinfo(&file->moov.udta, &riff->info);
     quicktime_write_riffinfo(file, &riff->info);
     riff->have_info = 1;
+#endif
+    /* Write JUNK once more */
+    quicktime_atom_write_header(file, &junk_atom, "JUNK");
+    for(i = 0; i < 256; i++)
+      {
+      quicktime_write_int32(file, 0);
+      }
+    quicktime_atom_write_footer(file, &junk_atom);
     }
   else
     quicktime_write_char32(file, "AVIX");

@@ -135,8 +135,8 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
     total_frames = quicktime_video_length(file, 0);
     frame_rate   = quicktime_frame_rate(file, 0);
 
-    hdrl->avih.dwMaxBytesPerSec = file->total_length / (total_frames / frame_rate);
-    hdrl->avih.dwLength = total_frames;
+    //    hdrl->avih.dwMaxBytesPerSec = file->total_length / (total_frames / frame_rate);
+    hdrl->avih.dwTotalFrames = total_frames;
 
     quicktime_set_position(file, hdrl->avih_offset);
     quicktime_write_avih(file, &hdrl->avih);

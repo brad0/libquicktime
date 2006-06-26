@@ -339,32 +339,46 @@ static int write_data(quicktime_t *file, int track,
 
   if(chunk_ptr > codec->encoder_output)
     {
-    lqt_start_audio_vbr_chunk(file, track);
-    quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
-
-    lqt_start_audio_vbr_frame(file, track);
-    result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-
-    
-    if(samples < 0)
+    if(track_map->track->strl)
       {
-      lqt_finish_audio_vbr_frame(file, track, chunk_samples);
+      quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
+      result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
       quicktime_write_chunk_footer(file, 
                                    track_map->track, 
                                    track_map->current_chunk,
                                    &chunk_atom,
-                                   track_map->vbr_num_frames);
-      codec->samples_written += chunk_samples;
+                                   chunk_samples);
+      
       }
     else
       {
-      lqt_finish_audio_vbr_frame(file, track, samples);
-      quicktime_write_chunk_footer(file, 
-                                   track_map->track, 
-                                   track_map->current_chunk,
-                                   &chunk_atom,
-                                   track_map->vbr_num_frames);
-      codec->samples_written += samples;
+      lqt_start_audio_vbr_chunk(file, track);
+      quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
+
+      lqt_start_audio_vbr_frame(file, track);
+      result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
+
+    
+      if(samples < 0)
+        {
+        lqt_finish_audio_vbr_frame(file, track, chunk_samples);
+        quicktime_write_chunk_footer(file, 
+                                     track_map->track, 
+                                     track_map->current_chunk,
+                                     &chunk_atom,
+                                     track_map->vbr_num_frames);
+        codec->samples_written += chunk_samples;
+        }
+      else
+        {
+        lqt_finish_audio_vbr_frame(file, track, samples);
+        quicktime_write_chunk_footer(file, 
+                                     track_map->track, 
+                                     track_map->current_chunk,
+                                     &chunk_atom,
+                                     track_map->vbr_num_frames);
+        codec->samples_written += samples;
+        }
       }
     
     track_map->current_chunk++;
@@ -422,10 +436,13 @@ static int encode(quicktime_t *file,
   uint8_t extradata[12];
   uint8_t * extradata_ptr;
   uint32_t tmp;
-    
+  int mpeg_version;
+  
   if(!codec->encode_initialized)
     {
-    lqt_init_vbr_audio(file, track);
+    if(!trak->strl)
+      lqt_init_vbr_audio(file, track);
+
     codec->encode_initialized = 1;
     codec->lame_global = lame_init();
 
@@ -481,6 +498,8 @@ static int encode(quicktime_t *file,
 
       /* Extradata (completely unneccesary for decoding) */
 
+      mpeg_version = lame_get_version(codec->lame_global);
+      
       extradata_ptr = extradata;
 
       tmp = MPEGLAYER3_ID_MPEG; // WORD          wID
@@ -489,13 +508,25 @@ static int encode(quicktime_t *file,
       tmp = MPEGLAYER3_FLAG_PADDING_ISO; // DWORD         fdwFlags;
       PUT_32_LE(tmp, extradata_ptr);
       
-      tmp = codec->samples_per_frame; // WORD          nBlockSize;
+      switch(mpeg_version)
+        {
+        case 0: // MPEG-2
+          tmp = ((144000 / 2) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
+          break;
+        case 1: // MPEG-1
+          tmp = ((144000 / 1) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
+          break;
+        case 2: // MPEG-2.5
+          tmp = ((144000 / 4) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
+          break;
+        }
+      
       PUT_16_LE(tmp, extradata_ptr);
 
       tmp = 1; // WORD nFramesPerBlock;
       PUT_16_LE(tmp, extradata_ptr);
 
-      tmp = 0; //  WORD nCodecDelay;
+      tmp = 1393; //  WORD nCodecDelay;
       PUT_16_LE(tmp, extradata_ptr);
       
       quicktime_strf_set_audio_extradata(&trak->strl->strf, extradata, 12);
