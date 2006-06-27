@@ -480,6 +480,8 @@ void quicktime_write_chunk_header(quicktime_t *file,
     if(file->file_type == LQT_FILE_AVI_ODML)
       {
       quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
+      //      fprintf(stderr, "Write chunk header %lld %d\n",
+      //              quicktime_position(file) - riff->atom.start, file->max_riff_size);
       if(quicktime_position(file) - riff->atom.start > file->max_riff_size)
         {
         quicktime_finalize_riff(file, riff);
@@ -522,7 +524,10 @@ void quicktime_write_chunk_footer(quicktime_t *file,
           // Save partial index entry
           if(file->file_type == LQT_FILE_AVI_ODML)
             quicktime_update_ixtable(file, trak, offset, sample_size);
-
+          
+          //          fprintf(stderr, "quicktime_write_chunk_footer: %d %d\n",
+          //                  sample_size, trak->strl->strh.dwSuggestedBufferSize);
+          
           if(sample_size > trak->strl->strh.dwSuggestedBufferSize)
             trak->strl->strh.dwSuggestedBufferSize = ((sample_size+15)/16)*16;
           }

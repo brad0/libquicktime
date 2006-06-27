@@ -1657,6 +1657,7 @@ quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type)
 
 int quicktime_close(quicktime_t *file)
   {
+  int i;
   int result = 0;
   if(file->wr)
     {
@@ -1666,17 +1667,21 @@ int quicktime_close(quicktime_t *file)
       {
 #if 0
       quicktime_atom_t junk_atom;
-      int i;
       int64_t position = quicktime_position(file);
 #endif
       // Finalize last header
       quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
-                                                                                                                  
-                                                                                                                  
       // Finalize the odml header
       quicktime_finalize_odml(file, &file->riff[0]->hdrl);
 
-                        
+      if(file->file_type == LQT_FILE_AVI_ODML)
+        {
+        for(i = 0; i < file->moov.total_tracks; i++)
+          {
+          quicktime_finalize_indx(file, &file->moov.trak[i]->strl->indx);
+          }
+        }
+      
       }
     else
       {

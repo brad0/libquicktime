@@ -20,42 +20,42 @@
  */
 
 void quicktime_read_strh(quicktime_t *file,
-                         quicktime_strh_t *strl,
+                         quicktime_strh_t *strh,
                          quicktime_atom_t *parent_atom)
   {
-  quicktime_read_data(file, (uint8_t*)(strl->fccType), 4);
-  quicktime_read_data(file, (uint8_t*)(strl->fccHandler), 4);
+  quicktime_read_data(file, (uint8_t*)(strh->fccType), 4);
+  quicktime_read_data(file, (uint8_t*)(strh->fccHandler), 4);
 
-  strl->dwFlags               = quicktime_read_int32_le(file);
-  strl->dwReserved1           = quicktime_read_int32_le(file);
-  strl->dwInitialFrames       = quicktime_read_int32_le(file);
-  strl->dwScale               = quicktime_read_int32_le(file);
-  strl->dwRate                = quicktime_read_int32_le(file);
-  strl->dwStart               = quicktime_read_int32_le(file);
-  strl->dwLength              = quicktime_read_int32_le(file);
-  strl->dwSuggestedBufferSize = quicktime_read_int32_le(file);
-  strl->dwQuality             = quicktime_read_int32_le(file);
-  strl->dwSampleSize          = quicktime_read_int32_le(file);
+  strh->dwFlags               = quicktime_read_int32_le(file);
+  strh->dwReserved1           = quicktime_read_int32_le(file);
+  strh->dwInitialFrames       = quicktime_read_int32_le(file);
+  strh->dwScale               = quicktime_read_int32_le(file);
+  strh->dwRate                = quicktime_read_int32_le(file);
+  strh->dwStart               = quicktime_read_int32_le(file);
+  strh->dwLength              = quicktime_read_int32_le(file);
+  strh->dwSuggestedBufferSize = quicktime_read_int32_le(file);
+  strh->dwQuality             = quicktime_read_int32_le(file);
+  strh->dwSampleSize          = quicktime_read_int32_le(file);
   }
 
 void quicktime_write_strh(quicktime_t *file,
-                          quicktime_strh_t *strl)
+                          quicktime_strh_t *strh)
   {
   quicktime_atom_t atom;
   quicktime_atom_write_header(file, &atom, "strh");
-  quicktime_write_data(file, (uint8_t*)(strl->fccType), 4);
-  quicktime_write_data(file, (uint8_t*)(strl->fccHandler), 4);
+  quicktime_write_data(file, (uint8_t*)(strh->fccType), 4);
+  quicktime_write_data(file, (uint8_t*)(strh->fccHandler), 4);
   
-  quicktime_write_int32_le(file, strl->dwFlags);
-  quicktime_write_int32_le(file, strl->dwReserved1);
-  quicktime_write_int32_le(file, strl->dwInitialFrames);
-  quicktime_write_int32_le(file, strl->dwScale);
-  quicktime_write_int32_le(file, strl->dwRate);
-  quicktime_write_int32_le(file, strl->dwStart);
-  quicktime_write_int32_le(file, strl->dwLength);
-  quicktime_write_int32_le(file, strl->dwSuggestedBufferSize);
-  quicktime_write_int32_le(file, strl->dwQuality);
-  quicktime_write_int32_le(file, strl->dwSampleSize);
+  quicktime_write_int32_le(file, strh->dwFlags);
+  quicktime_write_int32_le(file, strh->dwReserved1);
+  quicktime_write_int32_le(file, strh->dwInitialFrames);
+  quicktime_write_int32_le(file, strh->dwScale);
+  quicktime_write_int32_le(file, strh->dwRate);
+  quicktime_write_int32_le(file, strh->dwStart);
+  quicktime_write_int32_le(file, strh->dwLength);
+  quicktime_write_int32_le(file, strh->dwSuggestedBufferSize);
+  quicktime_write_int32_le(file, strh->dwQuality);
+  quicktime_write_int32_le(file, strh->dwSampleSize);
   quicktime_atom_write_footer(file, &atom);
   
   }

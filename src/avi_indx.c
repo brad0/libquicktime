@@ -35,6 +35,7 @@ void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak)
   strl = trak->strl;
   indx = &(strl->indx);
 
+  
   if(indx->table_size >= indx->table_allocation)
     {
     int new_allocation = indx->table_allocation * 2;
@@ -48,6 +49,8 @@ void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak)
   /* Append */
   indx_table = &indx->table[indx->table_size++];
   indx_table->ix = quicktime_new_ix(file, trak, strl);
+  //  fprintf(stderr, "quicktime_indx_init_riff: %d\n", indx->table_size);
+
   }
 
 void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak)
@@ -68,13 +71,14 @@ void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak)
   indx_table->duration     = indx_table->ix->table_size;
   }
 
-/* This function has to be called EXCLUSIVELY by quicktime_finalize_strl,
-   since the file position is to be expected behind the strf chunk */
 
 void quicktime_finalize_indx(quicktime_t *file, quicktime_indx_t * indx)
   {
   int j;
+  quicktime_atom_t junk_atom;
 
+  quicktime_set_position(file, indx->offset);
+  
   /* Write indx */
   //  quicktime_set_position(file, strl->indx_offset);
   quicktime_atom_write_header(file, &indx->atom, "indx");
@@ -103,6 +107,12 @@ void quicktime_finalize_indx(quicktime_t *file, quicktime_indx_t * indx)
     }
           
   quicktime_atom_write_footer(file, &indx->atom);
+
+  quicktime_atom_write_header(file, &junk_atom, "JUNK");
+
+  while(quicktime_position(file) < indx->offset + indx->size)
+    quicktime_write_char(file, 0);
+  quicktime_atom_write_footer(file, &junk_atom);
   }
 
 void quicktime_read_indx(quicktime_t *file, 

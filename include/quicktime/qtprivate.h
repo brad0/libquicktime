@@ -881,7 +881,12 @@ typedef struct
         int table_size;
         int table_allocation;
         quicktime_indxtable_t *table;
-} quicktime_indx_t;
+
+/* The following are used internally only. They are
+   set by quicktime_finalize_strl and used by quicktime_finalize_indx */
+  uint32_t offset;
+  uint32_t size;
+  } quicktime_indx_t;
 
 /* AVI structures */
 

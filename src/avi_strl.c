@@ -315,16 +315,14 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
   /* Rewrite stream headers */
 
   //  fprintf(stderr, "quicktime_finalize_strl %d\n", file->file_type);
-  
-  strl->strh.dwLength = quicktime_track_samples(file, trak);
+  if(!strl->strh.dwLength)
+    strl->strh.dwLength = quicktime_track_samples(file, trak);
   
   //  if(trak->mdia.minf.is_audio)
   //    strl->strh.dwSuggestedBufferSize = strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec / 2;
   
   old_pos = quicktime_position(file);
-
-  
-  
+ 
   quicktime_set_position(file, strl->strh_offset);
   quicktime_write_strh(file, &strl->strh);
 
@@ -336,16 +334,19 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
     {
     quicktime_write_strf_audio(file, &strl->strf);
     }
-  // Finalize super indexes
-  if(file->file_type == LQT_FILE_AVI_ODML)
-    quicktime_finalize_indx(file, &strl->indx);
 
   end_pos = quicktime_position(file);
+  
+  // Finalize super indexes
+  if(file->file_type == LQT_FILE_AVI_ODML)
+    strl->indx.offset = end_pos;
   
   quicktime_atom_write_header(file, &junk_atom, "JUNK");
   for(i = 0; i < PADDING_SIZE - (end_pos - strl->end_pos); i ++)
     quicktime_write_char(file, 0);
   quicktime_atom_write_footer(file, &junk_atom);
+  
+  strl->indx.size = quicktime_position(file) - strl->indx.offset;
   }
 
 void quicktime_strl_dump(quicktime_strl_t *strl)

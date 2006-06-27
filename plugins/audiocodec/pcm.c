@@ -1443,7 +1443,6 @@ static void init_decode_lpcm(quicktime_t * file, int track)
   //          codec->decode, lqt_sample_format_to_string(atrack->sample_format));
   }
 
-
 static void init_encode_lpcm(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);

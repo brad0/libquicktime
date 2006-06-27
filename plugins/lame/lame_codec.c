@@ -348,7 +348,10 @@ static int write_data(quicktime_t *file, int track,
                                    track_map->current_chunk,
                                    &chunk_atom,
                                    chunk_samples);
-      
+      if(file->total_riffs == 1)
+        {
+        track_map->track->strl->strh.dwLength += chunk_bytes;
+        }
       }
     else
       {
