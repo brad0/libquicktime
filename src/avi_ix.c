@@ -138,3 +138,20 @@ void quicktime_read_ix(quicktime_t *file,
 		ixtable->size = quicktime_read_int32_le(file);
 	}
 }
+
+void quicktime_ix_dump(quicktime_ix_t *ix)
+  {
+  int i;
+  printf("   table_size:      %d\n", ix->table_size);
+  printf("   longs_per_entry: %d\n", ix->longs_per_entry);
+  printf("   index_type:      %d\n", ix->index_type);
+  printf("   base_offset:     %lld\n", ix->base_offset);
+  printf("   tag:             %s\n", ix->tag);
+  printf("   chunk_id:        %s\n", ix->chunk_id);
+  for(i = 0; i < ix->table_size; i++)
+    {
+    printf("   off: %d, size: %d, k: %d\n", ix->table[i].relative_offset,
+           (ix->table[i].size & 0x7FFFFFFF),
+           !(ix->table[i].size & 0x80000000));
+    }
+  }

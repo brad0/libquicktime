@@ -522,9 +522,11 @@ void quicktime_write_chunk_footer(quicktime_t *file,
           // Save partial index entry
           if(file->file_type == LQT_FILE_AVI_ODML)
             quicktime_update_ixtable(file, trak, offset, sample_size);
+
+          if(sample_size > trak->strl->strh.dwSuggestedBufferSize)
+            trak->strl->strh.dwSuggestedBufferSize = ((sample_size+15)/16)*16;
           }
-        
-	if(offset + sample_size > file->mdat.atom.size)
+        if(offset + sample_size > file->mdat.atom.size)
 		file->mdat.atom.size = offset + sample_size;
 
 	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), 

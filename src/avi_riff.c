@@ -282,7 +282,10 @@ static void insert_audio_packet(quicktime_trak_t * trak,
   quicktime_stco_t *stco;
   quicktime_stsc_t *stsc;
   quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
-  
+#if 0
+  fprintf(stderr, "insert_audio_packet: %lld, %d\n",
+          offset, size);
+#endif  
   /* Update stco */
 
   stco = &trak->mdia.minf.stbl.stco;

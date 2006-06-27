@@ -114,7 +114,6 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
   quicktime_atom_write_footer(file, &hdrl->atom);
   }
 
-
 void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
   {
   int i;

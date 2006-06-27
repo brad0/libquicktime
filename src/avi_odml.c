@@ -28,15 +28,16 @@ void quicktime_init_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
 }
 
 void quicktime_finalize_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
-{
-// Get length in frames
-   if(file->total_vtracks)
-     {
-     quicktime_set_position(file, hdrl->total_frames_offset);
-     quicktime_write_int32_le(file, quicktime_track_samples(file, file->vtracks[0].track));
-     }
-}
+  {
+  // Get length in frames
+  if(file->total_vtracks)
+    {
+    quicktime_set_position(file, hdrl->total_frames_offset);
+    quicktime_write_int32_le(file, quicktime_track_samples(file, file->vtracks[0].track));
+    }
+  }
 
-
-
-
+void quicktime_dump_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
+  {
+  
+  }

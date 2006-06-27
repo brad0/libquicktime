@@ -225,7 +225,10 @@ if(atom->type[0] == (uint8_t)type[0] &&
 
 int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom)
 {
-	if(atom->start == atom->end) atom->end++;
+        if((file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)) &&
+           (atom->end % 2))
+          atom->end++;
+        else if(atom->start == atom->end) atom->end++;
 	return quicktime_set_position(file, atom->end);
 }
 

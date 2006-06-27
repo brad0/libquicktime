@@ -168,3 +168,24 @@ void quicktime_set_indx_keyframe(quicktime_t *file,
     }
   indx->table[i].ix->table[new_keyframe - frame_count].size &= 0x7fffffff;
   }
+
+void quicktime_indx_dump(quicktime_indx_t *indx)
+  {
+  int i;
+  printf(" indx");
+  printf(" longs_per_entry: %d\n", indx->longs_per_entry);
+  printf(" index_subtype:   %d\n", indx->index_subtype);
+  printf(" index_type:      %d\n", indx->index_type);
+  printf(" chunk_id:        %s\n", indx->chunk_id);
+  printf(" table_size:      %d\n", indx->table_size);
+
+  for(i = 0; i < indx->table_size; i++)
+    {
+    printf("   index_offset: %lld\n", indx->table[i].index_offset);
+    printf("   index_size:   %d\n", indx->table[i].index_size);
+    printf("   duration:     %d\n", indx->table[i].duration);
+    quicktime_ix_dump(indx->table[i].ix);
+    }
+  
+  }
+

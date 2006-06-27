@@ -1656,46 +1656,46 @@ quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type)
   }
 
 int quicktime_close(quicktime_t *file)
-{
-        int result = 0;
-        if(file->wr)
-        {
-                quicktime_codecs_flush(file);
+  {
+  int result = 0;
+  if(file->wr)
+    {
+    quicktime_codecs_flush(file);
                                                                                                                   
-                if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
-                {
+    if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+      {
 #if 0
-                        quicktime_atom_t junk_atom;
-                        int i;
-                        int64_t position = quicktime_position(file);
+      quicktime_atom_t junk_atom;
+      int i;
+      int64_t position = quicktime_position(file);
 #endif
-// Finalize last header
-                        quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
+      // Finalize last header
+      quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
                                                                                                                   
                                                                                                                   
-// Finalize the odml header
-                        quicktime_finalize_odml(file, &file->riff[0]->hdrl);
+      // Finalize the odml header
+      quicktime_finalize_odml(file, &file->riff[0]->hdrl);
 
                         
-                }
-                else
-                {
-		    	if (lqt_qtvr_get_object_track(file) >= 0)
-			{
-			    lqt_qtvr_add_node(file);
-			    lqt_qtvr_add_node(file);
-			}
-// Atoms are only written here
-                        quicktime_atom_write_footer(file, &file->mdat.atom);
-                        quicktime_finalize_moov(file, &(file->moov));
-                        quicktime_write_moov(file, &(file->moov));
-                }
+      }
+    else
+      {
+      if (lqt_qtvr_get_object_track(file) >= 0)
+        {
+        lqt_qtvr_add_node(file);
+        lqt_qtvr_add_node(file);
         }
-        quicktime_file_close(file);
-        quicktime_delete(file);
-        free(file);
-        return result;
-}
+      // Atoms are only written here
+      quicktime_atom_write_footer(file, &file->mdat.atom);
+      quicktime_finalize_moov(file, &(file->moov));
+      quicktime_write_moov(file, &(file->moov));
+      }
+    }
+  quicktime_file_close(file);
+  quicktime_delete(file);
+  free(file);
+  return result;
+  }
 
 
 

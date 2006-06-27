@@ -489,7 +489,6 @@ static int encode(quicktime_t *file,
       trak->strl->strh.dwRate = codec->bitrate / 8;
       trak->strl->strh.dwScale = 1;
       trak->strl->strh.dwSampleSize = 1;
-      
       /* WAVEFORMATEX stuff */
       
       trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;

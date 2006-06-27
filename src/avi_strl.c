@@ -148,7 +148,7 @@ void quicktime_read_strl(quicktime_t *file,
       quicktime_read_strh(file, &strl->strh, &leaf_atom);
       }
 
-    if(quicktime_atom_is(&leaf_atom, "strf"))
+    else if(quicktime_atom_is(&leaf_atom, "strf"))
       {
       if(quicktime_match_32(strl->strh.fccType, "vids"))
         quicktime_read_strf_video(file, &strl->strf, &leaf_atom);
@@ -159,7 +159,7 @@ void quicktime_read_strl(quicktime_t *file,
       // Super index.
       // Read the super index + all the partial indexes now
       {
-      //printf("quicktime_read_strl 50\n");
+      //      fprintf(stderr, "quicktime_read_strl got indx\n");
       quicktime_read_indx(file, strl, &leaf_atom);
       strl->have_indx = 1;
       }
@@ -357,4 +357,9 @@ void quicktime_strl_dump(quicktime_strl_t *strl)
     quicktime_strf_dump_audio(&strl->strf);
   if(!strncmp(strl->strh.fccType, "vids", 4))
     quicktime_strf_dump_video(&strl->strf);
+
+  if(strl->have_indx)
+    {
+    quicktime_indx_dump(&strl->indx);
+    }
   }

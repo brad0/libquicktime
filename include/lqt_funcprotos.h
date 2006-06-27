@@ -84,6 +84,9 @@ void quicktime_read_indx(quicktime_t *file,
                          quicktime_strl_t *strl,
                          quicktime_atom_t *parent_atom);
 
+void quicktime_indx_dump(quicktime_indx_t *);
+
+
 void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak);
 void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak);
 
@@ -121,6 +124,8 @@ void quicktime_write_ix(quicktime_t *file, quicktime_trak_t *trak);
 
 void quicktime_read_ix(quicktime_t *file,
                        quicktime_ix_t *ix);
+
+void quicktime_ix_dump(quicktime_ix_t *ix);
 
 
 
