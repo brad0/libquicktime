@@ -60,7 +60,7 @@ void quicktime_init_strl(quicktime_t *file,
     strl->strh.dwScale = trak->mdia.minf.stbl.stts.table[0].sample_duration;
     /* framerate numerator */
     strl->strh.dwRate  = trak->mdia.mdhd.time_scale;
-    strl->strh.dwSuggestedBufferSize = 1024 * 1024;
+    //    strl->strh.dwSuggestedBufferSize = 1024 * 1024;
     strl->strh.dwQuality = -1;
     strl->strh.dwSampleSize = (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3;
     strl->is_video = 1;
@@ -318,8 +318,8 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
   
   strl->strh.dwLength = quicktime_track_samples(file, trak);
   
-  if(trak->mdia.minf.is_audio)
-    strl->strh.dwSuggestedBufferSize = strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec / 2;
+  //  if(trak->mdia.minf.is_audio)
+  //    strl->strh.dwSuggestedBufferSize = strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec / 2;
   
   old_pos = quicktime_position(file);
 
