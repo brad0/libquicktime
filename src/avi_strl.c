@@ -62,7 +62,7 @@ void quicktime_init_strl(quicktime_t *file,
     strl->strh.dwRate  = trak->mdia.mdhd.time_scale;
     //    strl->strh.dwSuggestedBufferSize = 1024 * 1024;
     strl->strh.dwQuality = -1;
-    strl->strh.dwSampleSize = (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3;
+    //    strl->strh.dwSampleSize = (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3;
     strl->is_video = 1;
     }
   else if(atrack)
