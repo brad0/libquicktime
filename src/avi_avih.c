@@ -86,7 +86,7 @@ void quicktime_avih_init(quicktime_avih_t *avih, quicktime_t * file)
     avih->dwMicroSecPerFrame = (uint32_t)(1000000 / quicktime_frame_rate(file, 0));
   avih->dwFlags = AVI_HASINDEX | AVI_ISINTERLEAVED;
   avih->dwStreams = file->moov.total_tracks;
-  avih->dwSuggestedBufferSize = 1024 * 1024;
+  //  avih->dwSuggestedBufferSize = 1024 * 1024;
 
   if(file->total_vtracks)
     {
