@@ -906,6 +906,14 @@ typedef struct
   uint32_t dwSuggestedBufferSize;
   uint32_t dwQuality;
   uint32_t dwSampleSize;
+
+  struct {
+  uint16_t left;
+  uint16_t top;
+  uint16_t right;
+  uint16_t bottom;
+  }  rcFrame;
+  
   } quicktime_strh_t;
 
 typedef struct

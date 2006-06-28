@@ -36,6 +36,10 @@ void quicktime_read_strh(quicktime_t *file,
   strh->dwSuggestedBufferSize = quicktime_read_int32_le(file);
   strh->dwQuality             = quicktime_read_int32_le(file);
   strh->dwSampleSize          = quicktime_read_int32_le(file);
+  strh->rcFrame.left          = quicktime_read_int16_le(file);
+  strh->rcFrame.top           = quicktime_read_int16_le(file);
+  strh->rcFrame.right         = quicktime_read_int16_le(file);
+  strh->rcFrame.bottom        = quicktime_read_int16_le(file);
   }
 
 void quicktime_write_strh(quicktime_t *file,
@@ -56,6 +60,11 @@ void quicktime_write_strh(quicktime_t *file,
   quicktime_write_int32_le(file, strh->dwSuggestedBufferSize);
   quicktime_write_int32_le(file, strh->dwQuality);
   quicktime_write_int32_le(file, strh->dwSampleSize);
+  quicktime_write_int16_le(file, strh->rcFrame.left);
+  quicktime_write_int16_le(file, strh->rcFrame.top);
+  quicktime_write_int16_le(file, strh->rcFrame.right);
+  quicktime_write_int16_le(file, strh->rcFrame.bottom);
+  
   quicktime_atom_write_footer(file, &atom);
   
   }
@@ -76,4 +85,7 @@ void quicktime_strh_dump(quicktime_strh_t *strh)
   printf("    dwSuggestedBufferSize: %d\n", strh->dwSuggestedBufferSize);
   printf("    dwQuality:             %d\n", strh->dwQuality);
   printf("    dwSampleSize:          %d\n", strh->dwSampleSize);
+  printf("    rcFrame:               l: %d t: %d r: %d b: %d\n",
+         strh->rcFrame.left, strh->rcFrame.top, strh->rcFrame.right,
+         strh->rcFrame.bottom);
   }
