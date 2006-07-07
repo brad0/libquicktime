@@ -6,6 +6,7 @@
 #include <quicktime/lqt.h>
 #include <lqt_codecinfo_private.h>
 
+#include <lqt_private.h>
 #include <funcprotos.h>
 #include <lqt_fseek.h>
 #include <sys/stat.h>
@@ -25,7 +26,7 @@ int lqt_qtvr_add_node(quicktime_t *file)
     
     quicktime_ndhd_init(&(file->qtvr_node[0].ndhd));
     trak = file->moov.trak[lqt_qtvr_get_qtvr_track(file)];
-
+    
     if (quicktime_track_samples(file, trak) > 0) 
     {
 	fprintf(stderr,"lqt_qtvr_add_node only single node movies supported! aborting...\n");
@@ -55,7 +56,7 @@ int lqt_qtvr_add_node(quicktime_t *file)
     leaf_atom.child_count = 0;
     quicktime_write_obji(file, &(file->qtvr_node[0].obji));
 
-    /* not nessicery? */
+    /* not required? */
     /*quicktime_qtatom_write_header(file, &imtr_atom, "imtr", 1);
     imtr_atom.child_count = 0;
     quicktime_write_char32(file, "imgt");
@@ -79,7 +80,8 @@ int lqt_is_qtvr(quicktime_t  *file)
 	if (quicktime_match_32(file->moov.udta.ctyp, "stna") ||
 		      (lqt_qtvr_get_object_track(file) >= 0)) return QTVR_OBJ;
 	
-	if (quicktime_match_32(file->moov.udta.ctyp, "STpn")) return QTVR_PAN;
+	if (quicktime_match_32(file->moov.udta.ctyp, "STpn") ||
+		    (lqt_qtvr_get_panorama_track(file) >= 0)) return QTVR_PAN;
     }
     return 0;
 }
@@ -177,7 +179,11 @@ int lqt_qtvr_get_rows(quicktime_t  *file)
     }
     else
     if (lqt_is_qtvr(file) == QTVR_PAN) {
-	return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesHeight;
+	if (lqt_qtvr_get_qtvr_track(file) >= 0) {
+	    return file->qtvr_node[0].pdat.imageNumFramesX;
+	}
+	else
+	    return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesHeight;
     }
     return 0;
 }
@@ -197,7 +203,11 @@ int lqt_qtvr_get_columns(quicktime_t  *file)
     }
     else
     if (lqt_is_qtvr(file) == QTVR_PAN) {
-	return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesWidth;
+	if (lqt_qtvr_get_qtvr_track(file) >= 0) {
+	    return file->qtvr_node[0].pdat.imageNumFramesY;
+	}
+	else
+	    return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesWidth;
     }
     return 0;
 
@@ -383,9 +393,15 @@ int lqt_qtvr_set_columns(quicktime_t  *file, short columns)
 	}
 	else
 	if (lqt_is_qtvr(file) == QTVR_PAN) {
-	    file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesWidth = columns;
-	    file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.NumFrames = file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesHeight * columns;
-	}	
+	    if (lqt_qtvr_get_qtvr_track(file) >= 0) {
+		file->qtvr_node[0].pdat.imageNumFramesX = columns;
+	    }
+	    else 
+	    {
+		file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesWidth = columns;
+		file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.NumFrames = file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SNumFramesHeight * columns;
+	    }
+	}
     }
     return 0;
 }
@@ -465,7 +481,11 @@ int lqt_qtvr_get_width(quicktime_t  *file)
     }
     else
     if (lqt_is_qtvr(file) == QTVR_PAN) {
-	return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SWidth;
+	if (lqt_qtvr_get_qtvr_track(file) >= 0) {
+	    return file->qtvr_node[0].pdat.imageSizeY;
+	}
+	else
+	    return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SWidth;
     }
     return 0;
 }
@@ -477,7 +497,11 @@ int lqt_qtvr_get_height(quicktime_t  *file)
     }
     else
     if (lqt_is_qtvr(file) == QTVR_PAN) {
-	return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SHeight;
+	if (lqt_qtvr_get_qtvr_track(file) >= 0) {
+	    return file->qtvr_node[0].pdat.imageSizeX;
+	}
+	else
+	    return file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stsd.table->pano.SHeight;
     }
     return 0;
 }
@@ -490,6 +514,9 @@ int lqt_qtvr_get_panorama_track(quicktime_t  *file)
     for(i = 0; i < file->moov.total_tracks; i++) {
 
 	if (quicktime_match_32(file->moov.trak[i]->mdia.hdlr.component_subtype, "STpn")) {
+	    return i;
+	}
+	if (quicktime_match_32(file->moov.trak[i]->mdia.hdlr.component_subtype, "pano<")) {
 	    return i;
 	}
     }
@@ -550,11 +577,16 @@ int lqt_qtvr_set_image_track(quicktime_t  *file, int track)
     return 0;
 }
 
+// This will not work correctly with movies that contain panos and obj movies in the same file
+// replace with _get_object_image_track() and _get_pano_image_track()?
 int lqt_qtvr_get_image_track(quicktime_t  *file)
 {
-    if (lqt_qtvr_get_object_track(file) >= 0) {
+    if (lqt_qtvr_get_qtvr_track(file) >= 0) {
 	if (lqt_qtvr_get_object_track(file) != -1) {
 	    return file->moov.trak[lqt_qtvr_get_object_track(file)]->tref.trackIndex;
+	} else 
+	if (lqt_qtvr_get_panorama_track(file) != -1) {
+	    return file->qtvr_node[0].pdat.imageRefTrackIndex;
 	}
     }
     else

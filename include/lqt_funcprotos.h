@@ -651,6 +651,14 @@ void quicktime_pasp_dump(quicktime_pasp_t *pasp);
 void quicktime_read_pasp(quicktime_t *file, quicktime_pasp_t *pasp);
 void quicktime_write_pasp(quicktime_t *file, quicktime_pasp_t *pasp);
 
+/* pdat.c */
+
+int quicktime_pdat_init(quicktime_pdat_t *pdat);  
+int quicktime_pdat_delete(quicktime_pdat_t *pdat);
+void quicktime_pdat_dump(quicktime_pdat_t *pdat);
+int quicktime_read_pdat(quicktime_t *file, quicktime_pdat_t *pdat);
+void quicktime_write_pdat(quicktime_t *file, quicktime_pdat_t *pdat);
+
 /* pHdr */
 
 int quicktime_pHdr_init(quicktime_pHdr_t *pHdr);

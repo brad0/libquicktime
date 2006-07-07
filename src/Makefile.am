@@ -80,6 +80,7 @@ navg.c \
 obji.c \
 pano.c \
 pasp.c \
+pdat.c \
 pHdr.c \
 qtatom.c \
 qtvr.c \

@@ -714,7 +714,6 @@ typedef struct
 	quicktime_elst_t elst;
 } quicktime_edts_t;
 
-
 /* qtvr navg (v1.0) */
 typedef struct {
     int    version;        // Always 1
@@ -1242,6 +1241,36 @@ typedef struct
     long controlSettings;
 } quicktime_obji_t;
 
+/* pdat */
+
+typedef struct
+{
+    int version;
+    int revision;
+    long imageRefTrackIndex;
+    long hotSpotRefTrackIndex;
+    float minPan;
+    float maxPan;
+    float defaultPan;
+    float minTilt;
+    float maxTilt;
+    float defaultTilt;
+    float minFOV;
+    float maxFOV;
+    float defaultFOV;
+    long imageSizeX;
+    long imageSizeY;
+    int imageNumFramesX;
+    int imageNumFramesY;
+    long hotSpotSizeX;
+    long hotSpotSizeY;
+    int hotSpotNumFramesX;
+    int hotSpotNumFramesY;
+    long flags;
+    char panoType[4];
+    long reserved;
+} quicktime_pdat_t;
+
 /* pHdr */
 
 typedef struct
@@ -1274,7 +1303,8 @@ typedef struct
 	int64_t node_size; /* size of node in frames */
 	quicktime_ndhd_t ndhd;
 	quicktime_obji_t obji;
-	} quicktime_qtvr_node_t;
+	quicktime_pdat_t pdat;
+} quicktime_qtvr_node_t;
 
 /* file descriptor passed to all routines */
 

@@ -1399,7 +1399,7 @@ int quicktime_read_info(quicktime_t *file)
                         }
                 }while(!result && quicktime_position(file) < file->total_length);
 		
-		/* read QTVR sample atoms */
+		/* read QTVR sample atoms -- object */
 		if (lqt_qtvr_get_object_track(file) >= 0)
 		{
 			quicktime_qtatom_t leaf_atom, root_atom;
@@ -1427,7 +1427,36 @@ int quicktime_read_info(quicktime_t *file)
 			
 			quicktime_set_position(file, start_position);
 		}
-
+		
+		/* read QTVR sample atoms  -- panorama */
+		if (lqt_qtvr_get_panorama_track(file) >= 0 && lqt_qtvr_get_qtvr_track(file) >= 0)
+		{
+			quicktime_qtatom_t leaf_atom, root_atom;
+			int64_t start_position = quicktime_position(file);
+			quicktime_set_position(file, file->moov.trak[lqt_qtvr_get_panorama_track(file)]->mdia.minf.stbl.stco.table[0].offset);
+			quicktime_qtatom_read_container_header(file);
+			/* root qtatom "sean" */
+			quicktime_qtatom_read_header(file, &root_atom);
+			
+			do
+			{
+				quicktime_qtatom_read_header(file, &leaf_atom);
+				if(quicktime_qtatom_is(&leaf_atom, "pdat"))
+				{
+					quicktime_read_pdat(file, &file->qtvr_node[0].pdat);					
+				}     
+				else
+				if(quicktime_qtatom_is(&leaf_atom, "ndhd"))
+				{
+					quicktime_read_ndhd(file, &file->qtvr_node[0].ndhd);					
+				}     
+				else
+                                        quicktime_qtatom_skip(file, &leaf_atom);
+			} while(quicktime_position(file) < root_atom.end);
+			
+			quicktime_set_position(file, start_position);
+		}
+		
 		if (lqt_qtvr_get_qtvr_track(file) >= 0)
 		{
 			quicktime_qtatom_t leaf_atom, root_atom;
@@ -1479,6 +1508,10 @@ int quicktime_dump(quicktime_t *file)
 	if (lqt_qtvr_get_object_track(file) >= 0)
 	{
 		quicktime_obji_dump(&(file->qtvr_node[0].obji));
+	}
+	if (lqt_qtvr_get_panorama_track(file) >= 0)
+	{
+		quicktime_pdat_dump(&(file->qtvr_node[0].pdat));
 	}
 	if (lqt_qtvr_get_qtvr_track(file) >= 0)
 	{

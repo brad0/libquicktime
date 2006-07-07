@@ -793,7 +793,7 @@ static int64_t qt_frame_time; /* Timestamp of the decoded frame */
 static int qt_timescale = 0;
 
 static unsigned char *qt_frame,**qt_rows;
-static unsigned char *qt_panorama_buffer;
+static unsigned char *qt_panorama_buffer, *qt_frame_tmp;
 static XImage *qt_ximage;
 static XvImage *qt_xvimage;
 static GC qt_gc;
@@ -992,7 +992,8 @@ static int qt_init_video(void)
 	
 	qt_rows = malloc(qt_height * sizeof(char*));
 	if (qt_isqtvr == QTVR_PAN) {
-	    qt_frame = malloc(qtvr_dwidth * qtvr_dheight * 4);
+	    qt_frame = malloc(qtvr_dwidth * qtvr_dheight * 3);
+	    qt_frame_tmp = malloc(qtvr_dwidth * qtvr_dheight * 3);
 	    qt_panorama_buffer = malloc((lqt_qtvr_get_width(qt)+overhead_frames)*
 					 lqt_qtvr_get_height(qt)*
 					 3);
@@ -1101,7 +1102,8 @@ static int qt_init_video(void)
 static int qt_frame_decode(void)
   {
   int i;
-  
+  float x, y, x2, y2;
+
   if (qt_isqtvr == QTVR_OBJ) {
 	/* sanity check and decode  */
 	if (quicktime_video_position(qt, 0) >= 0 &&
@@ -1111,24 +1113,45 @@ static int qt_frame_decode(void)
     //			    qt_cmodel,qt_rows,0);
     }
     else if (qt_isqtvr == QTVR_PAN) {
-	int i, j, k = 0;
+	int i, j, i2, j2, r, g, b, k;
+	k = 0;
+	
 	i = (ypos * (lqt_qtvr_get_width(qt) + overhead_frames) + xpos) * 3;
 	do {
 	    for (j = 0; j < qtvr_dwidth * 3; j++) {
-		qt_frame[k] = qt_panorama_buffer[i];
+		qt_frame_tmp[k] = qt_panorama_buffer[i];
 		i++; k++;
 	    }
 	    i+= (lqt_qtvr_get_width(qt) + overhead_frames - qtvr_dwidth) * 3;
 	} while (k < (qtvr_dwidth * qtvr_dheight) * 3);
 
-	do {
-	    for (j = 0; j < qtvr_dwidth * 3; j++) {
-		qt_frame[k] = qt_panorama_buffer[i];
-		i++; k++;
+	for (j = 0; j < qtvr_dheight; j++) {
+	    for (i=0;i<qtvr_dwidth;i++) {
+		x = (i << 1) / (float)qtvr_dwidth - 1;
+                y = (j << 1) / (float)qtvr_dheight - 1;
+		
+		x2 = atan(x);
+		y2 = y / sqrt(1 + x * x);
+
+                i2 = (qtvr_dwidth >> 1) * (x2 + 1);
+                j2 = (qtvr_dheight >> 1) * (y2 + 1);
+                
+		if (i2 < 0 || i2 > qtvr_dwidth || j2 < 0 || j2 > qtvr_dheight) {
+                  continue;
+                }
+		
+		k = (j2 * qtvr_dwidth + i2) * 3;
+		r = qt_frame_tmp[k];
+		g = qt_frame_tmp[k+1];
+		b = qt_frame_tmp[k+2];
+
+		k = (j * qtvr_dwidth + i) * 3;
+		qt_frame[k] = r;
+		qt_frame[k+1] = g;
+		qt_frame[k+2] = b;
 	    }
-	    i+= (lqt_qtvr_get_width(qt) + overhead_frames - qtvr_dwidth) * 3;
-	} while (k < (qtvr_dwidth * qtvr_dheight) * 3);
-    }	
+	}
+    }
     else {
 	if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
 	    return -1;
