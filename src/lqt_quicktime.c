@@ -990,7 +990,9 @@ int quicktime_write_audio(quicktime_t *file,
         return result;
 }
 
-int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_t bytes, int track)
+int quicktime_write_frame(quicktime_t *file,
+                          unsigned char *video_buffer,
+                          int64_t bytes, int track)
 {
         int result = 0;
         quicktime_atom_t chunk_atom;
@@ -1004,6 +1006,12 @@ int quicktime_write_frame(quicktime_t *file, unsigned char *video_buffer, int64_
                                         vtrack->current_chunk,
                                         &chunk_atom,
                                         1);
+
+        if(file->vtracks[track].current_position)
+          quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
+                                file->vtracks[track].current_position-1,
+                                file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
+        
         file->vtracks[track].current_position++;
         file->vtracks[track].current_chunk++;
         return result;

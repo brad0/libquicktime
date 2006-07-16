@@ -238,23 +238,6 @@ int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
             }
           }
         return total;
-#if 0
-        /* get the sample count when creating a new file */
- 		quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
-		long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
-		long chunk = trak->mdia.minf.stbl.stco.total_entries;
-		int64_t sample;
-
-		if(chunk)
-		{
-			sample = quicktime_sample_of_chunk(trak, chunk);
-			sample += table[total_entries - 1].samples;
-		}
-		else 
-			sample = 0;
-
-		return sample;
-#endif
 	}
 	else
 	{
@@ -542,7 +525,7 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
 		current_chunk - 1, 
 		sample_size);
-        /* Need to increase sample count (the VBR routines to it
+        /* Need to increase sample count for VBR (the VBR routines to it
            themselves) */
 	if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
           trak->mdia.minf.stbl.stts.table->sample_count += samples;
@@ -585,7 +568,8 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
 {
 	long samples = quicktime_track_samples(file, trak);
-
+        fprintf(stderr, "quicktime_trak_fix_counts %ld\n",
+                samples);
         if(trak->mdia.minf.is_video)
           {
           quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
