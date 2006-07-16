@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 0.9.9)
+AM_INIT_AUTOMAKE(libquicktime, 0.9.10)
 AM_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST

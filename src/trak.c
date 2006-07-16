@@ -568,8 +568,6 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
 {
 	long samples = quicktime_track_samples(file, trak);
-        fprintf(stderr, "quicktime_trak_fix_counts %ld\n",
-                samples);
         if(trak->mdia.minf.is_video)
           {
           quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
