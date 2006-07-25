@@ -1491,13 +1491,17 @@ int quicktime_read_info(quicktime_t *file)
                 quicktime_set_position(file, start_position);
                                                                                                                   
         }
-                                                                                                                  
+        
 /* Initialize track map objects */
         if(got_header)
         {
                 quicktime_init_maps(file);
         }
-                                                                                                                  
+
+        /* Set file type if no ftyp is there */
+        if(file->file_type == LQT_FILE_NONE)
+          file->file_type = LQT_FILE_QT_OLD;
+        
 /* Shut down preload in case of an obsurdly high temp_size */
         quicktime_set_preload(file, 0);
                                                                                                                   
@@ -2452,7 +2456,7 @@ static struct
 filetypes[] =
   {
       { LQT_FILE_NONE,     "Unknown/Undefined" },
-      { LQT_FILE_QT_OLD,   "Quicktime (old)"   },
+      { LQT_FILE_QT_OLD,   "Quicktime"         },
       { LQT_FILE_QT,       "Quicktime"         },
       { LQT_FILE_AVI,      "AVI"               },
       { LQT_FILE_AVI_ODML, "AVI ODML"          },
