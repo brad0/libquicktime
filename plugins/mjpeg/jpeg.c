@@ -26,6 +26,7 @@ typedef struct
   unsigned char *temp_video;
   
   int have_frame;
+  int initialized;
   } quicktime_jpeg_codec_t;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
@@ -118,7 +119,23 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
             vtrack->stream_cmodel = BC_YUVJ422P;
           return 0;
           }
+        
+        if(!codec->initialized)
+          {
+          /* Quicktime for Windows must have this information. */
+          if((codec->jpeg_type == JPEG_MJPA) &&
+             !trak->mdia.minf.stbl.stsd.table[0].has_fiel)
+            {
+            lqt_set_fiel(file, track, 2, 1);
 
+            fprintf(stderr, "Init mjpeg %d\n", 
+                    trak->mdia.minf.stbl.stsd.table[0].has_fiel);
+
+            quicktime_fiel_dump(&trak->mdia.minf.stbl.stsd.table[0].fiel);
+            }
+          codec->initialized = 1;
+          }
+        
         if(file->vtracks[track].stream_row_span) 
           mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
         else
@@ -199,13 +216,4 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
                                  num_fields);
 	codec->jpeg_type = jpeg_type;
 
-#if 0
-        /* This information must be stored in the initialization routine because of */
-        /* direct copy rendering.  Quicktime for Windows must have this information. */
-	if(quicktime_match_32(compressor, QUICKTIME_MJPA) && !vtrack->track->mdia.minf.stbl.stsd.table[0].fields)
-          {
-          vtrack->track->mdia.minf.stbl.stsd.table[0].fields = 2;
-          vtrack->track->mdia.minf.stbl.stsd.table[0].field_dominance = 1;
-          }
-#endif
 }
