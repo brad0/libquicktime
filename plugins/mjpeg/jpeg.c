@@ -127,11 +127,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
              !trak->mdia.minf.stbl.stsd.table[0].has_fiel)
             {
             lqt_set_fiel(file, track, 2, 1);
-
-            fprintf(stderr, "Init mjpeg %d\n", 
-                    trak->mdia.minf.stbl.stsd.table[0].has_fiel);
-
-            quicktime_fiel_dump(&trak->mdia.minf.stbl.stsd.table[0].fiel);
             }
           codec->initialized = 1;
           }
