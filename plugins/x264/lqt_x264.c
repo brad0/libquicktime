@@ -74,11 +74,36 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       type:      LQT_PARAMETER_SECTION
     },
     {
+      name:        "x264_i_rc_method",
+      real_name:   "Ratecontrol method",
+      type:        LQT_PARAMETER_STRINGLIST,
+      val_default: { val_string: "Constant quality" },
+      stringlist_options: (char*[]){ "Constant quality",
+                                     "Average bitrate",
+                                     "CRF based VBR",
+                                     (char*)0 },
+      help_string: "Ratecontrol method:\n\
+Constant quality: Specify a quantizer parameter below\n\
+Average bitrate: Specify a bitrate below\n\
+CRF based VBR: Specify a rate factor below\n\
+Selecting 2-pass encoding will force Average bitrate.",
+    },
+    {
       name:        "x264_i_bitrate",
       real_name:   "Bitrate",
       type:        LQT_PARAMETER_INT,
       val_default: { val_int: 0 },
       help_string: "Bitrate in kbit/s. 0 means VBR (recommended)"
+    },
+    {
+      name:        "x264_i_rf_constant",
+      real_name:   "Nominal Quantizer parameter",
+      type:        LQT_PARAMETER_INT,
+      val_default: { val_int: 26 },
+      val_min:     { val_int: 0 },
+      val_max:     { val_int: 51 },
+      help_string: "This selects the nominal quantizer to use (1 to 51). Lower values result in " \
+    "better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
     },
     {
       name:        "x264_i_qp_constant",
@@ -90,7 +115,9 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       help_string: "This selects the quantizer to use (1 to 51). Lower values result in " \
     "better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
     },
-    {
+
+
+{
       name:        "x264_i_qp_min",
       real_name:   "Minimum quantizer parameter",
       type:        LQT_PARAMETER_INT,

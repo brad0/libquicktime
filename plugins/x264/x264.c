@@ -437,7 +437,7 @@ static int set_pass_x264(quicktime_t *file,
   codec->stats_filename = malloc(strlen(stats_file)+1);
   strcpy(codec->stats_filename, stats_file);
   
-  fprintf(stderr, "set_pass_x264 %d %d %s\n", pass, total_passes, stats_file);
+  //  fprintf(stderr, "set_pass_x264 %d %d %s\n", pass, total_passes, stats_file);
   return 1;
   }
 
@@ -488,22 +488,28 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->params.i_fps_den = lqt_frame_duration(file, track, NULL);
 
     /* Set multipass control */
+
+    if(codec->total_passes)
+      {
+      /* Force ABR */
+      codec->params.rc.i_rc_method = X264_RC_ABR;
+      codec->params.rc.i_rf_constant = 0;
+      if(codec->pass == 1)
+        {
+        /* Strings will be made private by x264 */
+        codec->params.rc.psz_stat_out = codec->stats_filename;
+        codec->params.rc.b_stat_write = 1;
+        }
+      else if(codec->pass == codec->total_passes)
+        {
+        /* Strings will be made private by x264 */
+        codec->params.rc.psz_stat_in = codec->stats_filename;
+        codec->params.rc.b_stat_read = 1;
+        }
+      }
     
     /* Open encoder */
 
-    if(codec->pass == 1)
-      {
-      /* Strings will be made private by x264 */
-      codec->params.rc.psz_stat_out = codec->stats_filename;
-      codec->params.rc.b_stat_write = 1;
-      }
-    else if(codec->total_passes && (codec->pass == codec->total_passes))
-      {
-      /* Strings will be made private by x264 */
-      codec->params.rc.psz_stat_in = codec->stats_filename;
-      codec->params.rc.b_stat_read = 1;
-      }
-    
     codec->enc = x264_encoder_open(&codec->params);
     if(!codec->enc)
       {
@@ -621,6 +627,14 @@ enum_t direct_modes[] =
     { "Auto",     X264_DIRECT_PRED_AUTO }
   };
 
+enum_t rc_methods[] =
+  {
+    { "Constant quality", X264_RC_CQP },
+    { "Average bitrate",  X264_RC_ABR },
+    { "CRF based VBR",    X264_RC_CRF }
+  };
+                                     
+
 static int set_parameter(quicktime_t *file, 
                          int track, 
                          char *key, 
@@ -637,22 +651,11 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_bframe_bias", codec->params.i_bframe_bias);
   INTPARAM("x264_b_bframe_pyramid", codec->params.b_bframe_pyramid);
 
-  if(!strcasecmp(key, "x264_i_bitrate"))
-    {
-    if(*(int*)(value))
-      {
-      codec->params.rc.b_cbr = 1;
-      codec->params.rc.i_bitrate = *(int*)(value);
-      }
-    else
-      {
-      codec->params.rc.b_cbr = 0;
-      codec->params.rc.i_bitrate = 0;
-      }
-    found = 1;
-    }
-
+  ENUMPARAM("x264_i_rc_method", codec->params.rc.i_rc_method, rc_methods);
+  INTPARAM("x264_i_bitrate", codec->params.rc.i_bitrate);
+  
   INTPARAM("x264_i_qp_constant", codec->params.rc.i_qp_constant);
+  INTPARAM("x264_i_rf_constant", codec->params.rc.i_rf_constant);
   INTPARAM("x264_i_qp_min", codec->params.rc.i_qp_min);
   INTPARAM("x264_i_qp_max", codec->params.rc.i_qp_max);
   INTPARAM("x264_i_qp_step", codec->params.rc.i_qp_step);

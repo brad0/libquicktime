@@ -345,8 +345,19 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
     quicktime_write_data(file, (uint8_t*)table->compressor_name, 31);
     quicktime_write_int16(file, table->depth);
     quicktime_write_int16(file, table->ctab_id);
+
+    if (table->has_pasp)
+      quicktime_write_pasp(file, &(table->pasp));
+    if (table->has_clap)
+      quicktime_write_clap(file, &(table->clap));
+    if (table->has_colr)
+      quicktime_write_colr(file, &(table->colr));
+    if (table->has_fiel)
+      quicktime_write_fiel(file, &(table->fiel));
+    if (table->has_gama)
+      quicktime_write_gama(file, &(table->gama));
     }
-  else
+  else /* Different stsd formats for mp4 variants */
     {
     quicktime_write_int16(file, 0);
     quicktime_write_int16(file, 0);
@@ -366,17 +377,6 @@ void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table
     quicktime_write_int16(file, 24);
     quicktime_write_int16(file, -1);
     }
-
-  if (table->has_pasp)
-    quicktime_write_pasp(file, &(table->pasp));
-  if (table->has_clap)
-    quicktime_write_clap(file, &(table->clap));
-  if (table->has_colr)
-    quicktime_write_colr(file, &(table->colr));
-  if (table->has_fiel)
-    quicktime_write_fiel(file, &(table->fiel));
-  if (table->has_gama)
-    quicktime_write_gama(file, &(table->gama));
     
   quicktime_write_user_atoms(file,
                              &table->user_atoms);
