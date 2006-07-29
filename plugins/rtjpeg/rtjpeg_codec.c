@@ -77,19 +77,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
                                              &(codec->rowspan_uv));
                 
 	}
+
+        buffer_size = lqt_read_video_frame(file, &codec->read_buffer, &codec->read_buffer_alloc,
+                                           vtrack->current_position, track);
+        if(buffer_size <= 0)
+          result = -1;
         
-	quicktime_set_video_position(file, vtrack->current_position, track);
-	buffer_size = quicktime_frame_size(file, vtrack->current_position, track);
-	if(buffer_size > codec->read_buffer_size)
-	{
-		free(codec->read_buffer);
-		codec->read_buffer = malloc(buffer_size + 1024);
-		if(!codec->read_buffer)
-			return -1;
-		codec->read_buffer_size = buffer_size + 1024;
-	}
-	result = !quicktime_read_data(file, codec->read_buffer, buffer_size);
-	if(buffer_size > 0) {
+        if(buffer_size > 0) {
 		if(!result)
                   RTjpeg_decompress(codec->decompress_struct, codec->read_buffer, codec->rows);
 	}

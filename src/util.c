@@ -132,92 +132,96 @@ static int read_preload(quicktime_t *file, uint8_t *data, int64_t size)
 }
 
 int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
-{
-	int result = 1;
-	if(!file->preload_size)
-	{
-		quicktime_fseek(file, file->file_position);
-		result = fread(data, size, 1, file->stream);
-		file->ftell_position += size;
-	}
-	else
-	{
-/* Region requested for loading */
-		int64_t selection_start = file->file_position;
-		int64_t selection_end = file->file_position + size;
-		int64_t fragment_start, fragment_len;
+  {
+  int result = 1;
+  if(!file->preload_size)
+    {
+    quicktime_fseek(file, file->file_position);
+    result = fread(data, 1, size, file->stream);
+    file->ftell_position += size;
+    }
+  else
+    {
+    /* Region requested for loading */
+    int64_t selection_start = file->file_position;
+    int64_t selection_end = file->file_position + size;
+    int64_t fragment_start, fragment_len;
 
-		if(selection_end - selection_start > file->preload_size)
-		{
-/* Size is larger than preload size.  Should never happen. */
-// printf("read data Size is larger than preload size. size=%llx preload_size=%llx\n",
-//       (long long)(selection_end - selection_start),
-//       (long long)(file->preload_size));
-			quicktime_fseek(file, file->file_position);
-			result = fread(data, size, 1, file->stream);
-			file->ftell_position += size;
-		}
-		else
-		if(selection_start >= file->preload_start && 
-			selection_start < file->preload_end &&
-			selection_end <= file->preload_end &&
-			selection_end > file->preload_start)
-		{
-/* Entire range is in buffer */
-			read_preload(file, data, size);
-		}
-		else
-		if(selection_end > file->preload_end && 
-			selection_end - file->preload_size < file->preload_end)
-		{
-/* Range is after buffer */
-/* Move the preload start to within one preload length of the selection_end */
-			while(selection_end - file->preload_start > file->preload_size)
-			{
-				fragment_len = selection_end - file->preload_start - file->preload_size;
-				if(file->preload_ptr + fragment_len > file->preload_size) 
-					fragment_len = file->preload_size - file->preload_ptr;
-				file->preload_start += fragment_len;
-				file->preload_ptr += fragment_len;
-				if(file->preload_ptr >= file->preload_size) file->preload_ptr = 0;
-			}
+    if(selection_end - selection_start > file->preload_size)
+      {
+      /* Size is larger than preload size.  Should never happen. */
+      // printf("read data Size is larger than preload size. size=%llx preload_size=%llx\n",
+      //       (long long)(selection_end - selection_start),
+      //       (long long)(file->preload_size));
+      quicktime_fseek(file, file->file_position);
+      result = fread(data, 1, size, file->stream);
+      file->ftell_position += size;
+      }
+    else if(selection_start >= file->preload_start && 
+            selection_start < file->preload_end &&
+            selection_end <= file->preload_end &&
+            selection_end > file->preload_start)
+      {
+      /* Entire range is in buffer */
+      read_preload(file, data, size);
+      result = size;
+      }
+    else if(selection_end > file->preload_end && 
+            selection_end - file->preload_size < file->preload_end)
+      {
+      /* Range is after buffer */
+      /* Move the preload start to within one preload length of the selection_end */
+      while(selection_end - file->preload_start > file->preload_size)
+        {
+        fragment_len = selection_end - file->preload_start - file->preload_size;
+        if(file->preload_ptr + fragment_len > file->preload_size) 
+          fragment_len = file->preload_size - file->preload_ptr;
+        file->preload_start += fragment_len;
+        file->preload_ptr += fragment_len;
+        if(file->preload_ptr >= file->preload_size) file->preload_ptr = 0;
+        }
+      
+      /* Append sequential data after the preload end to the new end */
+      fragment_start = file->preload_ptr + file->preload_end - file->preload_start;
+      while(fragment_start >= file->preload_size) 
+        fragment_start -= file->preload_size;
+      
+      while(file->preload_end < selection_end)
+        {
+        fragment_len = selection_end - file->preload_end;
+        if(fragment_start + fragment_len > file->preload_size)
+          fragment_len = file->preload_size - fragment_start;
+        quicktime_fseek(file, file->preload_end);
+        result = fread(&(file->preload_buffer[fragment_start]),
+                       fragment_len, 1, file->stream);
+        file->ftell_position += fragment_len;
+        file->preload_end += fragment_len;
+        fragment_start += fragment_len;
+        if(fragment_start >= file->preload_size)
+          fragment_start = 0;
+        }
+      
+      read_preload(file, data, size);
+      result = size;
+      }
+    else
+      {
+      /* Range is before buffer or over a preload_size away from the end of the buffer. */
+      /* Replace entire preload buffer with range. */
+      quicktime_fseek(file, file->file_position);
+      result = fread(file->preload_buffer, 1, size, file->stream);
+      file->ftell_position += size;
+      file->preload_start = file->file_position;
+      file->preload_end = file->file_position + size;
+      file->preload_ptr = 0;
+      read_preload(file, data, size);
+      
 
-/* Append sequential data after the preload end to the new end */
-			fragment_start = file->preload_ptr + file->preload_end - file->preload_start;
-			while(fragment_start >= file->preload_size) 
-				fragment_start -= file->preload_size;
-
-			while(file->preload_end < selection_end)
-			{
-				fragment_len = selection_end - file->preload_end;
-				if(fragment_start + fragment_len > file->preload_size) fragment_len = file->preload_size - fragment_start;
-				quicktime_fseek(file, file->preload_end);
-				result = fread(&(file->preload_buffer[fragment_start]), fragment_len, 1, file->stream);
-				file->ftell_position += fragment_len;
-				file->preload_end += fragment_len;
-				fragment_start += fragment_len;
-				if(fragment_start >= file->preload_size) fragment_start = 0;
-			}
-
-			read_preload(file, data, size);
-		}
-		else
-		{
-/* Range is before buffer or over a preload_size away from the end of the buffer. */
-/* Replace entire preload buffer with range. */
-			quicktime_fseek(file, file->file_position);
-			result = fread(file->preload_buffer, size, 1, file->stream);
-			file->ftell_position += size;
-			file->preload_start = file->file_position;
-			file->preload_end = file->file_position + size;
-			file->preload_ptr = 0;
-			read_preload(file, data, size);
-		}
-	}
-
-	file->file_position += size;
-	return result;
-}
+      }
+    }
+  file->file_position += size;
+  return result;
+  }
 
 int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
 {

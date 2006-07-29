@@ -12,10 +12,8 @@ dst[2] = pal->blue[indx] >> 8;
 
 typedef struct
 {
-//	unsigned char *temp_frame;  /* For changing color models and scaling */
-//	unsigned char **temp_rows;
-	unsigned char *temp_data;
-        int temp_data_alloc;
+	unsigned char *buffer;
+        int buffer_alloc;
 /* Support all possible depths */
 
         int bytes_per_line;
@@ -186,9 +184,9 @@ static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
 		free(codec->temp_rows);
 	}
 #endif
-	if(codec->temp_data)
+	if(codec->buffer)
 	{
-		free(codec->temp_data);
+		free(codec->buffer);
 	}
 
 	free(codec);
@@ -303,20 +301,16 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 
 
 /* Read data */
-	quicktime_set_video_position(file, file->vtracks[track].current_position, track);
-	bytes = quicktime_frame_size(file, file->vtracks[track].current_position, track);
 
-        if(codec->temp_data_alloc < bytes)
-          {
-          codec->temp_data_alloc = bytes + 16; /* Raw frames should be equally sized */
-          codec->temp_data = realloc(codec->temp_data, bytes);
-          }
+        bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                                     file->vtracks[track].current_position, track);
 
-        result = !quicktime_read_data(file, codec->temp_data, bytes);
+        if(bytes <= 0)
+          return -1;
         
         /* Do conversion of the scanlines */
 
-        ptr = codec->temp_data;
+        ptr = codec->buffer;
 
         for(i = 0; i < height; i++)
           {
@@ -367,13 +361,13 @@ static int quicktime_encode_raw(quicktime_t *file,
 
         if(vtrack->stream_cmodel == BC_RGBA8888)
           {
-          if(!codec->temp_data)
-            codec->temp_data = calloc(codec->bytes_per_line, 1);
+          if(!codec->buffer)
+            codec->buffer = calloc(codec->bytes_per_line, 1);
 
           for(i = 0; i < height; i++)
             {
             in_ptr = row_pointers[i];
-            out_ptr = codec->temp_data;
+            out_ptr = codec->buffer;
             for(j = 0; j < width; j++)
               {
               out_ptr[1] = in_ptr[0]; /* R */
@@ -383,7 +377,7 @@ static int quicktime_encode_raw(quicktime_t *file,
               out_ptr += 4;
               in_ptr  += 4;
               }
-            result = !quicktime_write_data(file, codec->temp_data, codec->bytes_per_line);
+            result = !quicktime_write_data(file, codec->buffer, codec->bytes_per_line);
             }
           }
         else /* BC_RGB888 */

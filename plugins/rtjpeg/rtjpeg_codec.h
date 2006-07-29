@@ -45,7 +45,7 @@ typedef struct
 	/* DeCompression stuff */
 	RTjpeg_t * decompress_struct;
 	uint8_t * read_buffer;
-	int read_buffer_size;
+	int read_buffer_alloc;
         int jpeg_width;
         int jpeg_height;
         int qt_width;

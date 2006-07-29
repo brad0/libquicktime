@@ -510,6 +510,26 @@ int64_t lqt_frame_time(quicktime_t * file, int track);
 int lqt_decode_video(quicktime_t *file,
                      unsigned char **row_pointers, int track);
 
+/** \ingroup video_decode
+ *  \brief Read a compressed video frame
+ *  \param file A quicktime handle
+ *  \param buffer Buffer where the frame will be read to
+ *  \param buffer_alloc Number of bytes allocated for the buffer
+ *  \param frame Number of the frame to be read (starting with 0)
+ *  \param track Track index (starting with 0)
+ *  \returns The number of bytes in the frame or 0 if no frame could be read.
+ *
+ * Read one compressed video frame. This function calls realloc()
+ * to ensure, that the buffer will be large enough. To use this
+ * function, set buffer to NULL and buffer_alloc to zero before
+ * the first call. After the last call, free the buffer with free().
+ * This function is mainly used by video codecs.
+ */
+
+int lqt_read_video_frame(quicktime_t * file,
+                         uint8_t ** buffer, int * buffer_alloc,
+                         int64_t frame, int track);
+  
 /** \ingroup video_encode
  *  \brief Encode one video frame
  *  \param file A quicktime handle

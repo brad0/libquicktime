@@ -19,8 +19,7 @@
 typedef struct
   {
   unsigned char *buffer;
-  long buffer_allocated;
-  long buffer_size;
+  int buffer_alloc;
   mjpeg_t *mjpeg;
   int jpeg_type;
   unsigned char *temp_video;
@@ -54,20 +53,11 @@ static int decode(quicktime_t *file,
   
   if(!codec->have_frame)
     {
-    quicktime_set_video_position(file, vtrack->current_position, track);
-    size = quicktime_frame_size(file, vtrack->current_position, track);
-    codec->buffer_size = size;
-    //    fprintf(stderr, "decode %p\n", row_pointers);
+    size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                                vtrack->current_position, track);
     
-    if(size > codec->buffer_allocated)
-      {
-      codec->buffer_allocated = size;
-      codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
-      }
-    
-    result = !quicktime_read_data(file, codec->buffer, size);
-    if(result)
-      return result;
+    if(size <= 0)
+      return -1;
     
     if(mjpeg_get_fields(mjpeg) == 2)
       {

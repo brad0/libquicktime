@@ -8,16 +8,17 @@
 
 
 typedef struct
-{
-	unsigned char *work_buffer;
-} quicktime_v308_codec_t;
+  {
+  uint8_t *buffer;
+  int buffer_alloc;
+  } quicktime_v308_codec_t;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_v308_codec_t *codec;
 
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	if(codec->work_buffer) free(codec->work_buffer);
+	if(codec->buffer) free(codec->buffer);
 	free(codec);
 	return 0;
 }
@@ -43,15 +44,14 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
           vtrack->stream_cmodel = BC_YUV444P;
           return 0;
           }
-        
-        if(!codec->work_buffer)
-          codec->work_buffer = malloc(width * height * 3);
-        
-	quicktime_set_video_position(file, vtrack->current_position, track);
-	bytes = quicktime_frame_size(file, vtrack->current_position, track);
-	result = !quicktime_read_data(file, codec->work_buffer, bytes);
 
-        in_ptr = codec->work_buffer;
+        bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                                     vtrack->current_position, track);
+
+        if(bytes <= 0)
+          return -1;
+        
+        in_ptr = codec->buffer;
 	for(i = 0; i < height; i++)
           {
           out_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
@@ -100,10 +100,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           return 0;
           }
         
-        if(!codec->work_buffer)
-          codec->work_buffer = malloc(width * height * 3);
+        if(!codec->buffer)
+          codec->buffer = malloc(width * height * 3);
 
-        out_ptr = codec->work_buffer;
+        out_ptr = codec->buffer;
 	for(i = 0; i < height; i++)
           {
           in_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
@@ -125,7 +125,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           }
         
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
-	result = !quicktime_write_data(file, codec->work_buffer, bytes);
+	result = !quicktime_write_data(file, codec->buffer, bytes);
 	quicktime_write_chunk_footer(file, 
 		trak,
 		vtrack->current_chunk,

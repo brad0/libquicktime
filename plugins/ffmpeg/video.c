@@ -33,8 +33,8 @@ typedef struct
   int initialized;
   
 
-  unsigned char * buffer;
-  int buffer_size;
+  uint8_t * buffer;
+  int buffer_alloc;
   
   int64_t last_frame;
 
@@ -209,30 +209,6 @@ static int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
     }
   return LQT_COLORMODEL_NONE;
   }
-
-static int read_video_frame(quicktime_t *file, quicktime_ffmpeg_video_codec_t *codec,
-                     int64_t frameno, int track)
-{
-	int i;
-	
-	quicktime_set_video_position(file, frameno, track);
-	i = quicktime_frame_size(file, frameno, track);
-	if(i + FF_INPUT_BUFFER_PADDING_SIZE > codec->buffer_size)
-	{
-		codec->buffer_size = i + 1024 + FF_INPUT_BUFFER_PADDING_SIZE;
-		codec->buffer = realloc(codec->buffer, codec->buffer_size);
-		if(!codec->buffer)
-			return -1;
-	}
-	if(quicktime_read_data(file, codec->buffer, i) < 0)
-		return -1;
-        codec->buffer[i] = 0;
-        codec->buffer[i+1] = 0;
-        codec->buffer[i+2] = 0;
-        codec->buffer[i+3] = 0;
-        //        fprintf(stderr, "Read video frame %p\n", codec->buffer);
-	return i;
-}
 
 /* Convert ffmpeg RGBA32 to BC_RGBA888 */
 
@@ -464,7 +440,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       frame1 = codec->last_frame + 1;
     while(frame1 < frame2)
       {
-      buffer_size = read_video_frame(file, codec, frame1, track);
+      buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                         &codec->buffer_alloc,
+                                         frame1, track);
       if(buffer_size > 0)
         {
         avcodec_decode_video(codec->avctx,
@@ -488,8 +466,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     {
     while(!got_pic)
       {
-      buffer_size = read_video_frame(file, codec,
-                                     vtrack->current_position, track);
+      buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                         &codec->buffer_alloc,
+                                         vtrack->current_position, track);
       
       if(buffer_size <= 0)
         return 0;
@@ -701,8 +680,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           /* Open codec */
           if(avcodec_open(codec->avctx, codec->encoder) != 0)
             return -1;
-          codec->buffer_size = width * height * 4 + 1024*256;
-          codec->buffer = malloc(codec->buffer_size);
+          codec->buffer_alloc = width * height * 4 + 1024*256;
+          codec->buffer = malloc(codec->buffer_alloc);
           if(!codec->buffer)
             return -1;
 
@@ -731,7 +710,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         
 	bytes_encoded = avcodec_encode_video(codec->avctx,
                                              codec->buffer,
-                                             codec->buffer_size,
+                                             codec->buffer_alloc,
                                              codec->frame);
 #if 0
         fprintf(stderr, "Encoded %d bytes, ", bytes_encoded);
@@ -822,7 +801,7 @@ static int flush(quicktime_t *file, int track)
         
 	bytes_encoded = avcodec_encode_video(codec->avctx,
                                              codec->buffer,
-                                             codec->buffer_size,
+                                             codec->buffer_alloc,
                                              (AVFrame*)0);
 #if 0
         fprintf(stderr, "Flush: encoded %d bytes, ", bytes_encoded);

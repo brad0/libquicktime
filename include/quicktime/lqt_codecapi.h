@@ -156,13 +156,3 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
                               uint8_t ** buffer, int * buffer_alloc, int * samples);
 
 
-/*
- *  Read one video frame
- *  buffer will be realloced if too small and buffer_alloc will be the
- *  new allocated size. Return value is the number of valid bytes,
- *  which might be smaller than buffer_alloc.
- */
-
-int lqt_read_video_frame(quicktime_t * file, int track,
-                         long frame,
-                         uint8_t ** buffer, int * buffer_alloc);

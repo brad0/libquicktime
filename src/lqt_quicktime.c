@@ -678,28 +678,81 @@ int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
   }
 
 int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
-{
-	int64_t offset, chunk_sample, chunk;
-	quicktime_trak_t *trak;
+  {
+  int64_t offset, chunk_sample, chunk;
+  quicktime_trak_t *trak;
 
-	if(track < file->total_vtracks)
-	{
-		trak = file->vtracks[track].track;
-		file->vtracks[track].current_position = frame;
-		quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
-		file->vtracks[track].current_chunk = chunk;
-		offset = quicktime_sample_to_offset(file, trak, frame);
-		quicktime_set_position(file, offset);
-                file->vtracks[track].timestamp =
-                  quicktime_sample_to_time(&(trak->mdia.minf.stbl.stts),
-                                           frame,
-                                           &(file->vtracks[track].stts_index),
-                                           &(file->vtracks[track].stts_count));
-        }
-	else
-		fprintf(stderr, "quicktime_set_video_position: track >= file->total_vtracks\n");
-	return 0;
-}
+  if(track < file->total_vtracks)
+    {
+    trak = file->vtracks[track].track;
+    file->vtracks[track].current_position = frame;
+    quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
+    file->vtracks[track].current_chunk = chunk;
+    offset = quicktime_sample_to_offset(file, trak, frame);
+    quicktime_set_position(file, offset);
+    file->vtracks[track].timestamp =
+      quicktime_sample_to_time(&(trak->mdia.minf.stbl.stts),
+                               frame,
+                               &(file->vtracks[track].stts_index),
+                               &(file->vtracks[track].stts_count));
+    }
+  else
+    fprintf(stderr, "quicktime_set_video_position: track >= file->total_vtracks\n");
+  return 0;
+  }
+
+#define FRAME_PADDING 128
+
+int lqt_read_video_frame(quicktime_t * file,
+                         uint8_t ** buffer, int * buffer_alloc,
+                         int64_t frame, int track)
+  {
+  int64_t offset, chunk_sample, chunk;
+  int result;
+  quicktime_trak_t *trak;
+  int len;
+  
+  if((track >= file->total_vtracks) || (track < 0))
+    return 0;
+  
+  trak = file->vtracks[track].track;
+
+  if((frame < 0) || (frame >= quicktime_track_samples(file, trak)))
+    return 0;
+  
+  file->vtracks[track].current_position = frame;
+  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
+  file->vtracks[track].current_chunk = chunk;
+  offset = quicktime_sample_to_offset(file, trak, frame);
+  quicktime_set_position(file, offset);
+  file->vtracks[track].timestamp =
+    quicktime_sample_to_time(&(trak->mdia.minf.stbl.stts),
+                             frame,
+                             &(file->vtracks[track].stts_index),
+                             &(file->vtracks[track].stts_count));
+  len = quicktime_frame_size(file, frame, track);
+  
+  if(len + FRAME_PADDING > *buffer_alloc)
+    {
+    *buffer_alloc = len + FRAME_PADDING + 1024;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+
+  //  fprintf(stderr, "calling quicktime_read_data\n");
+  result = quicktime_read_data(file, *buffer, len);
+
+  //  fprintf(stderr, "lqt_read_video_frame: %lld %d %d\n",
+  //          offset, len, result);
+
+  if(result < len)
+    {
+    return 0;
+    }
+  memset(*buffer + len, 0, FRAME_PADDING);
+  return len;
+  }
+
+#undef FRAME_PADDING
 
 void lqt_seek_video(quicktime_t * file, int track, int64_t time)
   {
@@ -2049,22 +2102,6 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   return result ? trak->chunk_sizes[chunk-1] : 0;
   }
 
-int lqt_read_video_frame(quicktime_t * file, int track,
-                         long frame,
-                         uint8_t ** buffer, int * buffer_alloc)
-  {
-  int size;
-  quicktime_set_video_position(file, frame, track);
-  size = quicktime_frame_size(file,  frame, track);
-
-  if(*buffer_alloc < size)
-    {
-    *buffer_alloc = size + 1024;
-    *buffer = realloc(*buffer, *buffer_alloc);
-    }
-  
-  return quicktime_read_data(file, *buffer, size);
-  }
 
 int64_t lqt_last_audio_position(quicktime_t * file, int track)
   {

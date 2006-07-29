@@ -14,7 +14,7 @@ typedef struct
 // Frame size
 	long buffer_size;
 // Buffer allocation
-	long buffer_allocated;
+	long buffer_alloc;
 	unsigned char *temp_frame;
 } quicktime_png_codec_t;
 
@@ -69,10 +69,10 @@ static void write_function(png_structp png_ptr, png_bytep data, png_uint_32 leng
 {
 	quicktime_png_codec_t *codec = png_get_io_ptr(png_ptr);
 
-	if((long)(length + codec->buffer_size) > codec->buffer_allocated)
+	if((long)(length + codec->buffer_size) > codec->buffer_alloc)
 	{
-		codec->buffer_allocated += length;
-		codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
+		codec->buffer_alloc += length;
+		codec->buffer = realloc(codec->buffer, codec->buffer_alloc);
 	}
 	memcpy(codec->buffer + codec->buffer_size, data, length);
 	codec->buffer_size += length;
@@ -99,17 +99,9 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
           return 0;
           }
 
-	quicktime_set_video_position(file, vtrack->current_position, track);
-	codec->buffer_size = quicktime_frame_size(file, vtrack->current_position, track);
-	codec->buffer_position = 0;
-	if(codec->buffer_size > codec->buffer_allocated)
-	{
-		codec->buffer_allocated = codec->buffer_size;
-		codec->buffer = realloc(codec->buffer, codec->buffer_allocated);
-	}
-
-	result = !quicktime_read_data(file, codec->buffer, codec->buffer_size);
-
+        codec->buffer_size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                                                  vtrack->current_position, track);
+        
 	if(!result)
 	{
 		png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);

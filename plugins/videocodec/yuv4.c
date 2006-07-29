@@ -18,29 +18,30 @@
 
 /* Now storing data as rows of UVYYYYUVYYYY */
 typedef struct
-{
-	int use_float;
-	long rtoy_tab[256], gtoy_tab[256], btoy_tab[256];
-	long rtou_tab[256], gtou_tab[256], btou_tab[256];
-	long rtov_tab[256], gtov_tab[256], btov_tab[256];
+  {
+  int use_float;
+  long rtoy_tab[256], gtoy_tab[256], btoy_tab[256];
+  long rtou_tab[256], gtou_tab[256], btou_tab[256];
+  long rtov_tab[256], gtov_tab[256], btov_tab[256];
 
-	long vtor_tab[256], vtog_tab[256];
-	long utog_tab[256], utob_tab[256];
-	long *vtor, *vtog, *utog, *utob;
+  long vtor_tab[256], vtog_tab[256];
+  long utog_tab[256], utob_tab[256];
+  long *vtor, *vtog, *utog, *utob;
 	
-	unsigned char *work_buffer;
+  uint8_t *buffer;
+  int buffer_alloc;
 
-/* The YUV4 codec requires a bytes per line that is a multiple of 4 */
-	int bytes_per_line;
-/* Actual rows encoded in the yuv4 format */
-	int rows;
-	int initialized;
-} quicktime_yuv4_codec_t;
+  /* The YUV4 codec requires a bytes per line that is a multiple of 4 */
+  int bytes_per_line;
+  /* Actual rows encoded in the yuv4 format */
+  int rows;
+  int initialized;
+  } quicktime_yuv4_codec_t;
 
 static int quicktime_delete_codec_yuv4(quicktime_video_map_t *vtrack)
 {
 	quicktime_yuv4_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	free(codec->work_buffer);
+	free(codec->buffer);
 	free(codec);
 	return 0;
 }
@@ -89,7 +90,7 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv4_codec_t *co
 		if((int)(vtrack->track->tkhd.track_height) % 2)
 			codec->rows++;
 
-		codec->work_buffer = malloc(codec->bytes_per_line * codec->rows);
+		codec->buffer = malloc(codec->bytes_per_line * codec->rows);
 		codec->initialized = 1;
 	}
 }
@@ -120,12 +121,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         
         initialize(vtrack, codec);
 
-	quicktime_set_video_position(file, vtrack->current_position, track);
-	bytes = quicktime_frame_size(file, vtrack->current_position, track);
+        bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                                     vtrack->current_position, track);
 
-        buffer = codec->work_buffer;
-        result = quicktime_read_data(file, buffer, bytes);
-        if(result) result = 0; else result = 1;
+        if(bytes <= 0)
+          return -1;
+
+        buffer = codec->buffer;
         
         for(out_y = 0, in_y = 0; out_y < height; in_y++)
           {
@@ -248,7 +250,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           }
         
 	initialize(vtrack, codec);
-        buffer = codec->work_buffer;
+        buffer = codec->buffer;
 
 
 
