@@ -303,7 +303,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 /* Read data */
 
         bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                     file->vtracks[track].current_position, track);
+                                     file->vtracks[track].current_position, NULL, track);
 
         if(bytes <= 0)
           return -1;

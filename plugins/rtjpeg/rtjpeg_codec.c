@@ -79,7 +79,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	}
 
         buffer_size = lqt_read_video_frame(file, &codec->read_buffer, &codec->read_buffer_alloc,
-                                           vtrack->current_position, track);
+                                           vtrack->current_position, NULL, track);
         if(buffer_size <= 0)
           result = -1;
         

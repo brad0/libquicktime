@@ -54,7 +54,7 @@ static int decode(quicktime_t *file,
   if(!codec->have_frame)
     {
     size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                vtrack->current_position, track);
+                                vtrack->current_position, NULL, track);
     
     if(size <= 0)
       return -1;
@@ -92,6 +92,13 @@ static int decode(quicktime_t *file,
   return result;
   }
 
+static void resync(quicktime_t *file, int track)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  codec->have_frame = 0;
+  }
+     
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
@@ -193,6 +200,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
 	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
+	((quicktime_codec_t*)vtrack->codec)->resync = resync;
 
 /* Init private items */
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;

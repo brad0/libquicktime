@@ -31,13 +31,12 @@ typedef struct
   AVCodec * encoder;
   AVCodec * decoder;
   int initialized;
-  
+
+  int decoding_delay;
 
   uint8_t * buffer;
   int buffer_alloc;
   
-  int64_t last_frame;
-
   AVFrame * frame;
   uint8_t * frame_buffer;
 
@@ -424,8 +423,8 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     codec->initialized = 1;
     }
 
+#if 0
   /* Check if we must seek */
-  
   if((quicktime_has_keyframes(file, track)) &&
      (vtrack->current_position != codec->last_frame + 1))
     {
@@ -457,7 +456,8 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     }
 
   codec->last_frame = vtrack->current_position;
-
+#endif
+  
   /* Read the frame from file and decode it */
 
   got_pic = 0;
@@ -468,13 +468,14 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       {
       buffer_size = lqt_read_video_frame(file, &codec->buffer,
                                          &codec->buffer_alloc,
-                                         vtrack->current_position, track);
+                                         vtrack->current_position + codec->decoding_delay,
+                                         NULL, track);
       
       if(buffer_size <= 0)
         return 0;
 #if 0
       fprintf(stderr, "Decode video...");
-      fprintf(stderr, "Frame size: %d\n", buffer_size);
+      fprintf(stderr, "Frame size: %d pos: %lld\n", buffer_size, vtrack->current_position);
       lqt_hexdump(codec->buffer, 16, 16);
       
 #endif 
@@ -488,6 +489,10 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         continue;
         }
       //      fprintf(stderr, "done\n");
+
+      if(!got_pic && trak->mdia.minf.stbl.has_ctts)
+        codec->decoding_delay++;
+      
       }
     }
   
@@ -515,35 +520,24 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       }
     }
   
-  /*
-   * Check for the colormodel
-   * There are 4 possible cases:
-   *
-   *  1. The decoded frame can be memcopied directly to row_pointers
-   *     this is the (most likely) case, when the colormodels of
-   *     the decoder and the file match and no scaling is required
-   *
-   *  2. The colormodel of the file is different from the codec,
-   *     but we can use cmodel_transfer
-   *
-   *  3. The decoder colormodel is not supported by libquicktime,
-   *     (e.g. YUV410P for sorenson). We must then use avcodec's
-   *     image conversion routines to convert to row_pointers.
-   *
-   *  4. The decoder colormodel is not supported by libquicktime
-   *     AND colorspace conversion is reqested. Is this worst case,
-   *     we need 2 conversions: The first converts to a colormodel
-   *     we support, the second does a cmodel_transfer
-   *
-   *  P.S. Volunteers are welcome to reduce this madness by supporting some more
-   *       colormodels for libquicktime. Look at quicktime4linux source
-   */
-
   if(!row_pointers)
     {
     codec->have_frame = 1;
     return 1;
     }
+
+  /*
+   * Check for the colormodel
+   * There are 2 possible cases:
+   *
+   *  1. The decoded frame can be memcopied directly to row_pointers
+   *     this is the (most likely) case, when the colormodel of
+   *     the decoder is supported by lqt
+   *
+   *  2. The decoder colormodel is not supported by libquicktime,
+   *     (e.g. YUV410P for sorenson). We must then use avcodec's
+   *     image conversion routines to convert to row_pointers.
+   */
   
   if(!codec->do_imgconvert)
     {
@@ -567,6 +561,47 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   //  fprintf(stderr, "Done\n"); 
   codec->have_frame = 0;
   return result;
+  }
+
+static void resync_ffmpeg(quicktime_t *file, int track)
+  {
+  int64_t keyframe, frame;
+  int buffer_size, got_pic;
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_ffmpeg_video_codec_t *codec =
+    ((quicktime_codec_t*)vtrack->codec)->priv;
+  
+  /* Forget about previously decoded frame */
+  codec->have_frame = 0;
+  codec->decoding_delay = 0;
+  
+  /* Reset lavc */
+  avcodec_flush_buffers(codec->avctx);
+
+  //  fprintf(stderr, "Resync: %ld\n", vtrack->current_position);
+  
+  if(quicktime_has_keyframes(file, track))
+    {
+    keyframe = quicktime_get_keyframe_before(file, vtrack->current_position, track);
+
+    frame = keyframe;
+    
+    while(frame < vtrack->current_position)
+      {
+      buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                         &codec->buffer_alloc,
+                                         frame, NULL, track);
+      if(buffer_size > 0)
+        {
+        avcodec_decode_video(codec->avctx,
+                             codec->frame,
+                             &got_pic,
+                             codec->buffer,
+                             buffer_size);
+        }
+      frame++;
+      }
+    }
   }
 
 static int set_pass_ffmpeg(quicktime_t *file, 
@@ -897,6 +932,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
 	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_ffmpeg_delete_video;
 	((quicktime_codec_t*)vtrack->codec)->flush = flush;
+	((quicktime_codec_t*)vtrack->codec)->resync = resync_ffmpeg;
 
         if(encoder)
           {

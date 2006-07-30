@@ -46,7 +46,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
           }
 
         bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                     vtrack->current_position, track);
+                                     vtrack->current_position, NULL, track);
 
         if(bytes <= 0)
           return -1;

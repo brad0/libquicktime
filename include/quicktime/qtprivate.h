@@ -520,7 +520,7 @@ typedef struct
 	int version;
 	long flags;
 	int64_t sample_size;
-	long total_entries;
+long total_entries;
 
 	long entries_allocated;    /* used by the library for allocating a table */
 	quicktime_stsz_table_t *table;
@@ -1408,10 +1408,13 @@ typedef struct
         int (*set_pass)(quicktime_t *file, 
 		int track, int pass, int total_passes,
                               const char * stats_file);
-	int (*flush)(quicktime_t *file, 
+        /* Encode and write remaining stuff before closing */
+        int (*flush)(quicktime_t *file, 
                      int track);
+        /* Resynchronize the codec after seeking */
+        void (*resync)(quicktime_t *file, int track);
 
-	void *priv;
+        void *priv;
 
         /* The followings are for libquicktime only */
         void *module;     /* Needed by libquicktime for dynamic loading */

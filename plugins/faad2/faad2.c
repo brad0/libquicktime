@@ -240,7 +240,7 @@ static int decode(quicktime_t *file,
 #endif
       return 0;
       }
-#if 1
+#if 0
     fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
             track_map->current_position,
             track_map->current_chunk, chunk_sample);

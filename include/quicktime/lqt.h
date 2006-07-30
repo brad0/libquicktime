@@ -516,6 +516,7 @@ int lqt_decode_video(quicktime_t *file,
  *  \param buffer Buffer where the frame will be read to
  *  \param buffer_alloc Number of bytes allocated for the buffer
  *  \param frame Number of the frame to be read (starting with 0)
+ *  \param time If non NULL, returns the timestamp in timescale tics
  *  \param track Track index (starting with 0)
  *  \returns The number of bytes in the frame or 0 if no frame could be read.
  *
@@ -528,7 +529,7 @@ int lqt_decode_video(quicktime_t *file,
 
 int lqt_read_video_frame(quicktime_t * file,
                          uint8_t ** buffer, int * buffer_alloc,
-                         int64_t frame, int track);
+                         int64_t frame, int64_t * time, int track);
   
 /** \ingroup video_encode
  *  \brief Encode one video frame

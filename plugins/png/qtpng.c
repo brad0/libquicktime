@@ -14,7 +14,7 @@ typedef struct
 // Frame size
 	long buffer_size;
 // Buffer allocation
-	long buffer_alloc;
+	int buffer_alloc;
 	unsigned char *temp_frame;
 } quicktime_png_codec_t;
 
@@ -100,7 +100,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
           }
 
         codec->buffer_size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                                  vtrack->current_position, track);
+                                                  vtrack->current_position, NULL, track);
         
 	if(!result)
 	{
