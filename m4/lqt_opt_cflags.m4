@@ -52,7 +52,7 @@ AC_HELP_STRING([--with-cpuflags],[Set CPU specific compiler flags. Default is au
                does autodetection. Specify none for compiling the most portable binaries]),
                lqt_cpuflags="$withval", lqt_cpuflags="auto")
 
-if test x$lqt_cpuflags = xnone; then
+if test "x$lqt_cpuflags" = "xnone"; then
 lqt_cpuflags=""
 fi
 
@@ -60,7 +60,7 @@ dnl
 dnl Autodetect CPU specific flags
 dnl
 
-if test x$lqt_cpuflags = xauto; then
+if test "x$lqt_cpuflags" = "xauto"; then
 
 lqt_cpu_family=""
 case [$1] in
