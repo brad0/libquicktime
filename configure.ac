@@ -532,54 +532,6 @@ AC_SUBST(X264_CFLAGS)
 fi
 AM_CONDITIONAL(HAVE_X264, test x$have_x264 = xtrue)
 
-#CPU Optimisation added by Justin Schoeman (justin@suntiger.ee.up.ac.za)
-
-AC_MSG_WARN(Doing a few not well tested checks for CPU optimisations.)
-AC_MSG_WARN(Please report any problems to justin@suntiger.ee.up.ac.za)
-
-RTJPEG_CFLAGS=$CFLAGS
-
-#Check for MMX-capable compiler
-AC_ARG_ENABLE(mmx, [  --enable-mmx            compile for MMX CPU [default=yes]])
-if test x${enable_mmx-yes} = xyes ; then
-  AC_MSG_CHECKING(for MMX-capable compiler)
-  AC_TRY_RUN([
-    #include "plugins/rtjpeg/mmx.h"
-    main()
-    { movq_r2r(mm0, mm1); return 0; }
-  ],
-  [
-    # program could be run
-    HAVE_MMX="yes"
-    AC_MSG_RESULT(yes)
-  ],
-    # program could not be run
-    HAVE_MMX="no"
-    AC_MSG_RESULT(no)
-  ,
-    # cross compiling (untested)
-  [
-    case "x${host_cpu}" in 
-         xi586 | xi686 | xk6 | xk7 | xathlon)
-            HAVE_MMX="yes"
-            AC_MSG_RESULT(yes) ;;
-        *)
-            HAVE_MMX="no"
-            AC_MSG_RESULT(not supported on ${host_cpu}) ;;
-    esac
-  ])
-fi
-
-# Set X86_MMX compile flag
-
-if test "x$HAVE_MMX" = "xyes" ; then
-  AC_MSG_WARN(Building with MMX optimisations - do not)
-  AC_MSG_WARN(execute the binary on a non-MMX machine.)
-  RTJPEG_CFLAGS="-DMMX $RTJPEG_CFLAGS"
-fi
-
-AC_SUBST(RTJPEG_CFLAGS)
-
 if test "x$prefix" = xNONE; then
    prefix="${ac_default_prefix}"
 fi
@@ -587,7 +539,6 @@ if test "x$exec_prefix" = xNONE; then
    exec_prefix="${prefix}"
 fi
 plugin_dir="$exec_prefix/lib/$PACKAGE"
-
 
 AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 

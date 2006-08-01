@@ -1,5 +1,3 @@
-AM_CFLAGS = @RTJPEG_CFLAGS@
-
 pkglib_LTLIBRARIES = lqt_rtjpeg.la
 
 lqt_rtjpeg_la_SOURCES = rtjpeg_codec.c lqt_rtjpeg.c RTjpeg.c
