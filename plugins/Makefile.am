@@ -2,7 +2,6 @@
 
 base_subdirs = audiocodec \
 videocodec \
-opendivx \
 rtjpeg
 
 if HAVE_LIBJPEG
