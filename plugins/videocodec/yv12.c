@@ -76,7 +76,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         memcpy(row_pointers[1], ptr, u_size);
         ptr+= u_size;
 
-        memcpy(row_pointers[1], ptr, v_size);
+        memcpy(row_pointers[2], ptr, v_size);
         ptr+= v_size;
         
 	return result;
