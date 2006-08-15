@@ -93,7 +93,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	quicktime_trak_t *trak = vtrack->track;
 	int result = 0;
 	int64_t y_size, u_size, v_size;
-	int64_t bytes = (int64_t)0;
 	quicktime_atom_t chunk_atom;
 
         if(!row_pointers)
@@ -107,7 +106,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	y_size = codec->coded_h * codec->coded_w;
 	u_size = codec->coded_h * codec->coded_w / 4;
 	v_size = codec->coded_h * codec->coded_w / 4;
-	bytes = quicktime_add3(y_size, u_size, v_size);
 
 	quicktime_write_chunk_header(file, trak, &chunk_atom);
         result = !quicktime_write_data(file, row_pointers[0], y_size);
