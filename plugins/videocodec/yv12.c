@@ -5,10 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef CLAMP
-#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
-#endif
-
 typedef struct
 {
 	int coded_w, coded_h;
