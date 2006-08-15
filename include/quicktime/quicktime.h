@@ -351,7 +351,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 8 bit Packed full-range (not video) YUV 4:2:2
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_YUV2 "yuv2"
@@ -376,7 +376,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 8 bit Packed YUV (video range) 4:2:2
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_2VUY "2vuy"
@@ -384,7 +384,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 8 bit Packed YUV 4:4:4
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_V308  "v308"
@@ -392,7 +392,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 8 bit Packed YUVA 4:4:4:4
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
 
 #define QUICKTIME_V408 "v408"
@@ -400,7 +400,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 10 bit Packed YUV 4:2:2
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_V210 "v210"
@@ -408,7 +408,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup video_codecs
  * \brief 10 bit Packed YUV 4:4:4
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
 
 #define QUICKTIME_V410 "v410"
@@ -431,7 +431,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup audio_codecs
  * \brief Unsigned 8 bit
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
  
 #define QUICKTIME_RAWAUDIO "raw "
@@ -439,7 +439,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup audio_codecs
  * \brief IMA4
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
 
 #define QUICKTIME_IMA4 "ima4"
@@ -447,7 +447,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup audio_codecs
  * \brief Twos compliment 16 bit
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_TWOS "twos"
@@ -455,7 +455,7 @@ typedef struct quicktime_s quicktime_t;
 /** \ingroup audio_codecs
  * \brief mu-law 2:1
  *
- * Should always be there, can savely be hardcoded.
+ * Should always be there, can safely be hardcoded.
  */
   
 #define QUICKTIME_ULAW "ulaw"
