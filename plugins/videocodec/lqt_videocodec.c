@@ -192,7 +192,7 @@ static lqt_codec_info_static_t codec_info_2vuy =
 static lqt_codec_info_static_t codec_info_yuv4 =
   {
     name:        "yuv4",
-    long_name:   "YUV 4:2:0", 
+    long_name:   "YUV 4:2:0 (yuv4)", 
     description: "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME",
     fourccs:     fourccs_yuv4,
     type:        LQT_CODEC_VIDEO,
@@ -206,7 +206,7 @@ static lqt_codec_info_static_t codec_info_yuv4 =
 static lqt_codec_info_static_t codec_info_yv12 =
   {
     name:        "yv12",
-    long_name:   "8 bit Planar YUV 4:2:0",
+    long_name:   "8 bit Planar YUV 4:2:0 (yv12)",
     description: "8 bit Planar YUV 4:2:0 (yv12)",
     fourccs:     fourccs_yv12,
     type:        LQT_CODEC_VIDEO,
