@@ -95,14 +95,14 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = source_cmodel(file, track);
-          fprintf(stderr, "Detected stream_cmodel: %s\n", lqt_colormodel_to_string(vtrack->stream_cmodel));
+          // fprintf(stderr, "Detected stream_cmodel: %s\n", lqt_colormodel_to_string(vtrack->stream_cmodel));
           return 0;
           }
 
         codec->buffer_size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
                                                   vtrack->current_position, NULL, track);
-        
-	if(!result)
+        codec->buffer_position = 0;
+	if(codec->buffer_size >= 0)
 	{
 		png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 		info_ptr = png_create_info_struct(png_ptr);
