@@ -238,7 +238,10 @@ dnl Check for other headers which might be missing
 dnl
 
 if test "$no_x" != "yes"; then
+saveCFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $X_CFLAGS"
 AC_CHECK_HEADER([X11/Xaw/Simple.h],[],no_x="yes")
+CFLAGS=$saveCFLAGS
 fi
 
 AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
