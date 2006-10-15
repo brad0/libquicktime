@@ -91,7 +91,11 @@ static void dump_params(x264_param_t * params)
   fprintf(stderr, "    i_qp_step:          %d\n", params->rc.i_qp_step);
   fprintf(stderr, "    b_cbr:              %d\n", params->rc.b_cbr);
   fprintf(stderr, "    i_bitrate:          %d\n", params->rc.i_bitrate);
+#if X264_BUILD < 54
   fprintf(stderr, "    i_rf_constant:      %d\n", params->rc.i_rf_constant);
+#else
+  fprintf(stderr, "    f_rf_constant:      %f\n", params->rc.f_rf_constant);
+#endif
   fprintf(stderr, "    f_rate_tolerance:   %f\n", params->rc.f_rate_tolerance);
   fprintf(stderr, "    i_vbv_max_bitrate:  %d\n", params->rc.i_vbv_max_bitrate);
   fprintf(stderr, "    i_vbv_buffer_size:  %d\n", params->rc.i_vbv_buffer_size);
@@ -160,7 +164,7 @@ encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal)
 
 static uint8_t *avc_find_startcode( uint8_t *p, uint8_t *end )
   {
-  uint8_t *a = p + 4 - ((int)p & 3);
+  uint8_t *a = p + 4 - ((long)p & 3);
   
   for( end -= 3; p < a && p < end; p++ )
     {
@@ -493,7 +497,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       {
       /* Force ABR */
       codec->params.rc.i_rc_method = X264_RC_ABR;
+#if X264_BUILD < 54
       codec->params.rc.i_rf_constant = 0;
+#else
+      codec->params.rc.f_rf_constant = 0.;
+#endif
       if(codec->pass == 1)
         {
         /* Strings will be made private by x264 */
@@ -655,7 +663,11 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_bitrate", codec->params.rc.i_bitrate);
   
   INTPARAM("x264_i_qp_constant", codec->params.rc.i_qp_constant);
+#if X264_BUILD < 54
   INTPARAM("x264_i_rf_constant", codec->params.rc.i_rf_constant);
+#else
+  FLOATPARAM("x264_f_rf_constant", codec->params.rc.f_rf_constant);
+#endif
   INTPARAM("x264_i_qp_min", codec->params.rc.i_qp_min);
   INTPARAM("x264_i_qp_max", codec->params.rc.i_qp_max);
   INTPARAM("x264_i_qp_step", codec->params.rc.i_qp_step);

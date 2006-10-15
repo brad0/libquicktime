@@ -3,6 +3,9 @@
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
 
+/* To get X264_BUILD value */
+#include <x264.h>
+
 void quicktime_init_codec_x264(quicktime_video_map_t *vtrack);
 
 static char * fourccs_x264[]  = { "avc1", (char*)0 };
@@ -95,6 +98,7 @@ Selecting 2-pass encoding will force Average bitrate.",
       val_default: { val_int: 0 },
       help_string: "Bitrate in kbit/s. 0 means VBR (recommended)"
     },
+#if X264_BUILD < 54
     {
       name:        "x264_i_rf_constant",
       real_name:   "Nominal Quantizer parameter",
@@ -105,6 +109,18 @@ Selecting 2-pass encoding will force Average bitrate.",
       help_string: "This selects the nominal quantizer to use (1 to 51). Lower values result in " \
     "better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
     },
+#else
+    {
+      name:        "x264_f_rf_constant",
+      real_name:   "Nominal Quantizer parameter",
+      type:        LQT_PARAMETER_FLOAT,
+      val_default: { val_float: 26.0 },
+      val_min:     { val_float: 0.0 },
+      val_max:     { val_float: 51.0 },
+      help_string: "This selects the nominal quantizer to use (1 to 51). Lower values result in " \
+    "better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
+    },
+#endif
     {
       name:        "x264_i_qp_constant",
       real_name:   "Quantizer parameter",
