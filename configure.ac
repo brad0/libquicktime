@@ -327,16 +327,52 @@ dnl
 dnl Check for libjpeg
 dnl
 
+AH_TEMPLATE([HAVE_LIBJPEG],
+            [Do we have libjpeg installed?])
+
+have_libjpeg=false
 JPEG_REQUIRED="6b"
-AC_CHECK_LIB(jpeg, jpeg_start_compress,
-	    [ JPEG_LIBS="-ljpeg"
-	      JPEG_CFLAGS=""
-	    have_libjpeg=true ],,)
+
+AC_ARG_ENABLE(libjpeg,
+[AC_HELP_STRING([--disable-libjpeg],[Disable libjpeg (default: autodetect)])],
+[case "${enableval}" in
+   yes) test_libjpeg=true ;;
+   no)  test_libjpeg=false ;;
+esac],[test_libjpeg=true])
+
+if test x$test_libjpeg = xtrue; then
+
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
+LIBS=-ljpeg
+CFLAGS=""
+
+AC_MSG_CHECKING(for libjpeg)
+AC_TRY_LINK([#include <stdio.h>
+             #include <jpeglib.h>],
+            [struct jpeg_decompress_struct cinfo;
+             jpeg_create_decompress(&cinfo);],
+            [have_libjpeg=true])
+case $have_libjpeg in
+  true) AC_DEFINE(HAVE_LIBJPEG)
+        AC_MSG_RESULT(yes)
+        JPEG_LIBS=$LIBS;
+        JPEG_CFLAGS=$CFLAGS;;
+  false) AC_MSG_RESULT(no); JPEG_LIBS=""; JPEG_CFLAGS="";;
+  * ) AC_MSG_RESULT("Somethings wrong: $have_libjpeg") ;;
+esac
+
+CFLAGS=$OLD_CFLAGS
+LIBS=$OLD_LIBS
+
+fi
 
 AC_SUBST(JPEG_LIBS)
 AC_SUBST(JPEG_CFLAGS)
 AC_SUBST(JPEG_REQUIRED)
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
+
+
 
 dnl
 dnl Check for libavcodec (ffmpeg)

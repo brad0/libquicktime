@@ -113,7 +113,7 @@ static int decode_chunk(quicktime_t *file, int track)
   if(codec->upsample)
     num_samples *= 2;
   
-#if 0
+#if 1
   fprintf(stderr, "Chunk: packets: %d, samples: %d\n", num_packets, num_samples);
 #endif
   
@@ -132,7 +132,7 @@ static int decode_chunk(quicktime_t *file, int track)
 
     if(codec->upsample)
       num_samples *= 2;
-#if 0
+#if 1
     fprintf(stderr, "Read VBR packet, chunk: %lld, packet: %d, bytes: %d, samples: %d\n",
             track_map->current_chunk, i, packet_size, num_samples);
 #endif
@@ -162,7 +162,7 @@ static int decode_chunk(quicktime_t *file, int track)
     
       
     
-#if 0
+#if 1
     fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
             samples, frame_info.bytesconsumed, packet_size, frame_info.samples / track_map->channels,
             num_samples, frame_info.sbr, frame_info.channels, frame_info.samplerate);
