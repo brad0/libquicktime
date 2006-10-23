@@ -42,8 +42,9 @@ int lqt_qtvr_add_node(quicktime_t *file)
     quicktime_qtatom_write_footer(file, &root_atom);
     quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.children++;
+    trak->mdia.minf.stbl.stts.table[0].sample_count = 1;
     /* set duration to duration of image track */
-    trak->mdia.minf.stbl.stts.table[0].sample_duration *= file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
+    trak->mdia.minf.stbl.stts.table[0].sample_duration = file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
     trak->tref.trackIndex = file->moov.trak[lqt_qtvr_get_object_track(file)]->tkhd.track_id;
     
     trak = file->moov.trak[lqt_qtvr_get_object_track(file)];
@@ -68,8 +69,9 @@ int lqt_qtvr_add_node(quicktime_t *file)
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
     quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
+    trak->mdia.minf.stbl.stts.table[0].sample_count = 1;
     /* set duration to duration of image track */
-    trak->mdia.minf.stbl.stts.table[0].sample_duration *= file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
+    trak->mdia.minf.stbl.stts.table[0].sample_duration = file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
     return 0;
 }
 
