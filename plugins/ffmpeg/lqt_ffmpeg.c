@@ -309,7 +309,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "MPEG-4",
 	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
                     "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
-                    "MP4V", (char *)0 },
+                    "MP4V", "3IV2", (char *)0 },
           wav_ids: { LQT_WAV_ID_NONE },
           compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
           do_encode: 1
@@ -347,7 +347,7 @@ struct CODECIDMAP codecidmap_v[] = {
 	  name: "MSMpeg 4v3 (DivX 3 compatible)",
 	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                     "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
-                    (char *)0},
+		    "3IVD", (char *)0},
           wav_ids: { LQT_WAV_ID_NONE },
           compatibility_flags: LQT_FILE_AVI,
           do_encode: 1,
