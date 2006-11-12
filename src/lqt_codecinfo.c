@@ -628,7 +628,7 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
     if(!pos)
       continue;
     
-    if(strcmp(pos, ".so"))
+    if(strcmp(pos, MODULE_EXT))
       continue;
     
     /* Now, the file should be a valid plugin, construct the filename */
