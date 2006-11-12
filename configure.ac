@@ -109,6 +109,20 @@ fi
 
 AM_CONDITIONAL(HOST_X86, $arch_x86)
 
+dnl
+dnl Extension for modules
+dnl
+
+AH_TEMPLATE([MODULE_EXT], [Extension for shared modules])
+
+MODULE_EXT=$shrext_cmds
+
+if test x$MODULE_EXT = x.dylib; then
+MODULE_EXT=".so"
+fi
+
+AC_DEFINE_UNQUOTED(MODULE_EXT, ["$MODULE_EXT"])
+
 dnl Checks for libraries.
 
 AC_CHECK_LIB(dl, dlopen)
