@@ -1,107 +1,111 @@
 #include <string.h>
 
-#include "funcprotos.h"
+#include <funcprotos.h>
 
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
+
 #include <x264.h>
+
+#define LOG_DOMAIN "x264"
 
 // #define DUMP_CONFIG
 #ifdef DUMP_CONFIG
 
+
 static void dump_params(x264_param_t * params)
   {
-  fprintf(stderr, "X264 params:\n");
-  fprintf(stderr, "  cpu:       %08x\n", params->cpu);
-  fprintf(stderr, "  i_threads: %d\n", params->i_threads);
-  fprintf(stderr, "  i_width: %d\n", params->i_width);
-  fprintf(stderr, "  i_height: %d\n", params->i_height);
-  fprintf(stderr, "  i_csp: %d\n", params->i_csp);
-  fprintf(stderr, "  i_level_idc: %d\n", params->i_level_idc);
-  fprintf(stderr, "  i_frame_total: %d\n", params->i_frame_total);
-  fprintf(stderr, "  vui:\n");
-  fprintf(stderr, "    i_sar_height: %d\n", params->vui.i_sar_height);
-  fprintf(stderr, "    i_sar_width:  %d\n", params->vui.i_sar_width);
-  fprintf(stderr, "    i_overscan:   %d\n", params->vui.i_overscan);
-  fprintf(stderr, "    i_vidformat:  %d\n", params->vui.i_vidformat);
-  fprintf(stderr, "    b_fullrange:  %d\n", params->vui.b_fullrange);
-  fprintf(stderr, "    i_colorprim:  %d\n", params->vui.i_colorprim);
-  fprintf(stderr, "    i_transfer:   %d\n", params->vui.i_transfer);
-  fprintf(stderr, "    i_colmatrix:  %d\n", params->vui.i_colmatrix);
-  fprintf(stderr, "    i_chroma_loc: %d\n", params->vui.i_chroma_loc);
+  lqt_dump("X264 params:\n");
+  lqt_dump("  cpu:       %08x\n", params->cpu);
+  lqt_dump("  i_threads: %d\n", params->i_threads);
+  lqt_dump("  i_width: %d\n", params->i_width);
+  lqt_dump("  i_height: %d\n", params->i_height);
+  lqt_dump("  i_csp: %d\n", params->i_csp);
+  lqt_dump("  i_level_idc: %d\n", params->i_level_idc);
+  lqt_dump("  i_frame_total: %d\n", params->i_frame_total);
+  lqt_dump("  vui:\n");
+  lqt_dump("    i_sar_height: %d\n", params->vui.i_sar_height);
+  lqt_dump("    i_sar_width:  %d\n", params->vui.i_sar_width);
+  lqt_dump("    i_overscan:   %d\n", params->vui.i_overscan);
+  lqt_dump("    i_vidformat:  %d\n", params->vui.i_vidformat);
+  lqt_dump("    b_fullrange:  %d\n", params->vui.b_fullrange);
+  lqt_dump("    i_colorprim:  %d\n", params->vui.i_colorprim);
+  lqt_dump("    i_transfer:   %d\n", params->vui.i_transfer);
+  lqt_dump("    i_colmatrix:  %d\n", params->vui.i_colmatrix);
+  lqt_dump("    i_chroma_loc: %d\n", params->vui.i_chroma_loc);
 
-  fprintf(stderr, "  fps: %d:%d\n", params->i_fps_num, params->i_fps_den);
+  lqt_dump("  fps: %d:%d\n", params->i_fps_num, params->i_fps_den);
 
   /* Bitstream parameters */
   
-  fprintf(stderr, "  i_frame_reference:           %d\n", params->i_frame_reference); // 1..16 
-  fprintf(stderr, "  i_keyint_min:                %d\n", params->i_keyint_min);      
-  fprintf(stderr, "  i_keyint_max:                %d\n", params->i_keyint_max);
-  fprintf(stderr, "  i_scenecut_threshold:        %d\n", params->i_scenecut_threshold); 
-  fprintf(stderr, "  i_bframe:                    %d\n", params->i_bframe);          // 0.. X264_BFRAME_MAX
-  fprintf(stderr, "  b_bframe_adaptive:           %d\n", params->b_bframe_adaptive);
-  fprintf(stderr, "  i_bframe_bias:               %d\n", params->i_bframe_bias);
-  fprintf(stderr, "  b_bframe_pyramid:            %d\n", params->b_bframe_pyramid);
+  lqt_dump("  i_frame_reference:           %d\n", params->i_frame_reference); // 1..16 
+  lqt_dump("  i_keyint_min:                %d\n", params->i_keyint_min);      
+  lqt_dump("  i_keyint_max:                %d\n", params->i_keyint_max);
+  lqt_dump("  i_scenecut_threshold:        %d\n", params->i_scenecut_threshold); 
+  lqt_dump("  i_bframe:                    %d\n", params->i_bframe);          // 0.. X264_BFRAME_MAX
+  lqt_dump("  b_bframe_adaptive:           %d\n", params->b_bframe_adaptive);
+  lqt_dump("  i_bframe_bias:               %d\n", params->i_bframe_bias);
+  lqt_dump("  b_bframe_pyramid:            %d\n", params->b_bframe_pyramid);
   
-  fprintf(stderr, "  b_deblocking_filter:         %d\n", params->b_deblocking_filter);
-  fprintf(stderr, "  i_deblocking_filter_alphac0: %d\n", params->i_deblocking_filter_alphac0); // -6..6
-  fprintf(stderr, "  i_deblocking_filter_beta:    %d\n", params->i_deblocking_filter_beta);    // -6..6
+  lqt_dump("  b_deblocking_filter:         %d\n", params->b_deblocking_filter);
+  lqt_dump("  i_deblocking_filter_alphac0: %d\n", params->i_deblocking_filter_alphac0); // -6..6
+  lqt_dump("  i_deblocking_filter_beta:    %d\n", params->i_deblocking_filter_beta);    // -6..6
 
-  fprintf(stderr, "  b_cabac:                     %d\n", params->b_cabac);
-  fprintf(stderr, "  i_cabac_init_idc:            %d\n", params->i_cabac_init_idc); // 0..2
+  lqt_dump("  b_cabac:                     %d\n", params->b_cabac);
+  lqt_dump("  i_cabac_init_idc:            %d\n", params->i_cabac_init_idc); // 0..2
 
-  fprintf(stderr, "  i_cqm_preset:                %d\n", params->i_cqm_preset);  
-  fprintf(stderr, "  psz_cqm_file:                %s\n", params->psz_cqm_file);
+  lqt_dump("  i_cqm_preset:                %d\n", params->i_cqm_preset);  
+  lqt_dump("  psz_cqm_file:                %s\n", params->psz_cqm_file);
 
-  fprintf(stderr, "  Analyze:\n");
+  lqt_dump("  Analyze:\n");
 
   // ORED value of X264_ANALYSE_I4x4, X264_ANALYSE_I8x8, X264_ANALYSE_PSUB16x16, X264_ANALYSE_PSUB8x8,
   // X264_ANALYSE_BSUB16x16
   
-  fprintf(stderr, "    intra:              %d\n", params->analyse.intra);
-  fprintf(stderr, "    inter:              %d\n", params->analyse.inter);
+  lqt_dump("    intra:              %d\n", params->analyse.intra);
+  lqt_dump("    inter:              %d\n", params->analyse.inter);
   
   
-  fprintf(stderr, "    b_transform_8x8:    %d\n", params->analyse.b_transform_8x8);
-  fprintf(stderr, "    b_weighted_bipred:  %d\n", params->analyse.b_weighted_bipred);
-  fprintf(stderr, "    i_direct_mv_pred:   %d\n", params->analyse.i_direct_mv_pred);
-  fprintf(stderr, "    i_chroma_qp_offset: %d\n", params->analyse.i_chroma_qp_offset);
+  lqt_dump("    b_transform_8x8:    %d\n", params->analyse.b_transform_8x8);
+  lqt_dump("    b_weighted_bipred:  %d\n", params->analyse.b_weighted_bipred);
+  lqt_dump("    i_direct_mv_pred:   %d\n", params->analyse.i_direct_mv_pred);
+  lqt_dump("    i_chroma_qp_offset: %d\n", params->analyse.i_chroma_qp_offset);
 
   // X264_ME_DIA, X264_ME_HEX, X264_ME_UMH, X264_ME_ESA
-  fprintf(stderr, "    i_me_method:        %d\n", params->analyse.i_me_method); 
+  lqt_dump("    i_me_method:        %d\n", params->analyse.i_me_method); 
 
   
-  fprintf(stderr, "    i_me_range:         %d\n", params->analyse.i_me_range);
-  fprintf(stderr, "    i_mv_range:         %d\n", params->analyse.i_mv_range);
-  fprintf(stderr, "    i_subpel_refine:    %d\n", params->analyse.i_subpel_refine); // 1..7
-  fprintf(stderr, "    b_bidir_me:         %d\n", params->analyse.b_bidir_me);
-  fprintf(stderr, "    b_chroma_me:        %d\n", params->analyse.b_chroma_me);
-  fprintf(stderr, "    b_bframe_rdo:       %d\n", params->analyse.b_bframe_rdo);
-  fprintf(stderr, "    b_mixed_references: %d\n", params->analyse.b_mixed_references);
-  fprintf(stderr, "    i_trellis:          %d\n", params->analyse.i_trellis);         // 0..2
-  fprintf(stderr, "    b_fast_pskip:       %d\n", params->analyse.b_fast_pskip);
-  fprintf(stderr, "    i_noise_reduction:  %d\n", params->analyse.i_noise_reduction); // 0..1<<16
-  fprintf(stderr, "    b_psnr:             %d\n", params->analyse.b_psnr);
+  lqt_dump("    i_me_range:         %d\n", params->analyse.i_me_range);
+  lqt_dump("    i_mv_range:         %d\n", params->analyse.i_mv_range);
+  lqt_dump("    i_subpel_refine:    %d\n", params->analyse.i_subpel_refine); // 1..7
+  lqt_dump("    b_bidir_me:         %d\n", params->analyse.b_bidir_me);
+  lqt_dump("    b_chroma_me:        %d\n", params->analyse.b_chroma_me);
+  lqt_dump("    b_bframe_rdo:       %d\n", params->analyse.b_bframe_rdo);
+  lqt_dump("    b_mixed_references: %d\n", params->analyse.b_mixed_references);
+  lqt_dump("    i_trellis:          %d\n", params->analyse.i_trellis);         // 0..2
+  lqt_dump("    b_fast_pskip:       %d\n", params->analyse.b_fast_pskip);
+  lqt_dump("    i_noise_reduction:  %d\n", params->analyse.i_noise_reduction); // 0..1<<16
+  lqt_dump("    b_psnr:             %d\n", params->analyse.b_psnr);
 
-  fprintf(stderr, "  Rate control:\n");
-  fprintf(stderr, "    i_qp_constant:      %d\n", params->rc.i_qp_constant);
-  fprintf(stderr, "    i_qp_min:           %d\n", params->rc.i_qp_min);
-  fprintf(stderr, "    i_qp_max:           %d\n", params->rc.i_qp_max);
-  fprintf(stderr, "    i_qp_step:          %d\n", params->rc.i_qp_step);
-  fprintf(stderr, "    b_cbr:              %d\n", params->rc.b_cbr);
-  fprintf(stderr, "    i_bitrate:          %d\n", params->rc.i_bitrate);
+  lqt_dump("  Rate control:\n");
+  lqt_dump("    i_qp_constant:      %d\n", params->rc.i_qp_constant);
+  lqt_dump("    i_qp_min:           %d\n", params->rc.i_qp_min);
+  lqt_dump("    i_qp_max:           %d\n", params->rc.i_qp_max);
+  lqt_dump("    i_qp_step:          %d\n", params->rc.i_qp_step);
+  lqt_dump("    b_cbr:              %d\n", params->rc.b_cbr);
+  lqt_dump("    i_bitrate:          %d\n", params->rc.i_bitrate);
 #if X264_BUILD < 54
-  fprintf(stderr, "    i_rf_constant:      %d\n", params->rc.i_rf_constant);
+  lqt_dump("    i_rf_constant:      %d\n", params->rc.i_rf_constant);
 #else
-  fprintf(stderr, "    f_rf_constant:      %f\n", params->rc.f_rf_constant);
+  lqt_dump("    f_rf_constant:      %f\n", params->rc.f_rf_constant);
 #endif
-  fprintf(stderr, "    f_rate_tolerance:   %f\n", params->rc.f_rate_tolerance);
-  fprintf(stderr, "    i_vbv_max_bitrate:  %d\n", params->rc.i_vbv_max_bitrate);
-  fprintf(stderr, "    i_vbv_buffer_size:  %d\n", params->rc.i_vbv_buffer_size);
-  fprintf(stderr, "    f_vbv_buffer_init:  %f\n", params->rc.f_vbv_buffer_init);
-  fprintf(stderr, "    f_ip_factor:        %f\n", params->rc.f_ip_factor);
-  fprintf(stderr, "    f_pb_factor:        %f\n", params->rc.f_pb_factor);
+  lqt_dump("    f_rate_tolerance:   %f\n", params->rc.f_rate_tolerance);
+  lqt_dump("    i_vbv_max_bitrate:  %d\n", params->rc.i_vbv_max_bitrate);
+  lqt_dump("    i_vbv_buffer_size:  %d\n", params->rc.i_vbv_buffer_size);
+  lqt_dump("    f_vbv_buffer_init:  %f\n", params->rc.f_vbv_buffer_init);
+  lqt_dump("    f_ip_factor:        %f\n", params->rc.f_ip_factor);
+  lqt_dump("    f_pb_factor:        %f\n", params->rc.f_pb_factor);
   
   }
 
@@ -279,7 +283,6 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
   uint8_t nal_type;
   
   x264_encoder_headers(codec->enc, &nal, &nnal);
-  //  fprintf(stderr, "Encoded %d header nals\n", nnal);
 
   tmp_size = 0;
 
@@ -329,8 +332,6 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
     2 +        // pps_size
     pps_size;  // pps
 
-  //  fprintf(stderr, "ret_size: %d, sps_size: %d, pps_size: %d\n",
-  //          *ret_size, sps_size, pps_size);
   
   ret = malloc(*ret_size);
   ret_ptr = ret;
@@ -405,7 +406,6 @@ static int flush_frame(quicktime_t *file, int track,
 
   vtrack->coded_timestamp =   pic_out.i_pts;
 
-  //  fprintf(stderr, "x264: Encoded %d bytes, pts: %lld\n", encoded_size, pic_out.i_pts);
 
   if(encoded_size)
     {
@@ -441,7 +441,6 @@ static int set_pass_x264(quicktime_t *file,
   codec->stats_filename = malloc(strlen(stats_file)+1);
   strcpy(codec->stats_filename, stats_file);
   
-  //  fprintf(stderr, "set_pass_x264 %d %d %s\n", pass, total_passes, stats_file);
   return 1;
   }
 
@@ -521,7 +520,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->enc = x264_encoder_open(&codec->params);
     if(!codec->enc)
       {
-      fprintf(stderr, "x264_encoder_open failed\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "x264_encoder_open failed");
       return result;
       }
 
@@ -766,7 +765,8 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_noise_reduction", codec->params.analyse.i_noise_reduction);
   
   if(!found)
-    fprintf(stderr, "Warning: Unrecognized parameter %s\n", key);
+    lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Unrecognized parameter %s", key);
   
   return 0;
   }

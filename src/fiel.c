@@ -13,9 +13,9 @@ void quicktime_fiel_delete(quicktime_fiel_t *fiel) { }
 void quicktime_fiel_dump(quicktime_fiel_t *fiel)
 {
 
-	printf("     fields (fiel)\n");
-	printf("       fields:    %d\n", fiel->fields);
-	printf("       dominance: %d\n", fiel->dominance);
+	lqt_dump("     fields (fiel)\n");
+	lqt_dump("       fields:    %d\n", fiel->fields);
+	lqt_dump("       dominance: %d\n", fiel->dominance);
 }
 
 void quicktime_read_fiel(quicktime_t *file, quicktime_fiel_t *fiel)

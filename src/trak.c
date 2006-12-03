@@ -101,7 +101,7 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
 
 int quicktime_trak_dump(quicktime_trak_t *trak)
 {
-	printf(" track\n");
+	lqt_dump(" track\n");
 	quicktime_tkhd_dump(&(trak->tkhd));
 	quicktime_edts_dump(&(trak->edts));
 	if (trak->has_tref)
@@ -144,7 +144,6 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
 
-//printf("quicktime_read_trak %llx %llx\n", quicktime_position(file), quicktime_ftell(file));
 /* mandatory */
 		if(quicktime_atom_is(&leaf_atom, "tkhd"))
 			{ quicktime_read_tkhd(file, &(trak->tkhd)); }
@@ -175,7 +174,6 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 			{ trak->has_tref = 1; quicktime_read_tref(file, &(trak->tref)); }
 		else
 			quicktime_atom_skip(file, &leaf_atom);
-//printf("quicktime_read_trak %llx %llx\n", quicktime_position(file), leaf_atom.end);
 	}while(quicktime_position(file) < trak_atom->end);
 
 	return 0;
@@ -191,7 +189,6 @@ int quicktime_write_trak(quicktime_t *file,
 	quicktime_atom_write_header(file, &atom, "trak");
 	quicktime_trak_duration(trak, &duration, &timescale);
 
-/*printf("quicktime_write_trak duration %d\n", duration); */
 /* get duration in movie's units */
 	trak->tkhd.duration = (long)((float)duration / timescale * moov_time_scale);
 	trak->mdia.mdhd.duration = duration;
@@ -204,7 +201,6 @@ int quicktime_write_trak(quicktime_t *file,
 	
 	if (trak->mdia.minf.is_qtvr) 
 	    quicktime_write_tref(file, &(trak->tref));
-//	printf("isobj: %i",trak->mdia.minf.is_object );
 //	if (trak->mdia.minf.is_object) 
 //	    quicktime_write_tref(file, &(trak->tref));
 	
@@ -219,7 +215,6 @@ int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
 		int i;
 		int64_t total = 0;
 
-/*printf("file->rd %d file->wr %d\n", file->rd, file->wr); */
 	if(file->wr)
 	{
         if(trak->mdia.minf.is_audio)
@@ -463,8 +458,6 @@ void quicktime_write_chunk_header(quicktime_t *file,
     if(file->file_type == LQT_FILE_AVI_ODML)
       {
       quicktime_riff_t *riff = file->riff[file->total_riffs - 1];
-      //      fprintf(stderr, "Write chunk header %lld %d\n",
-      //              quicktime_position(file) - riff->atom.start, file->max_riff_size);
       if(quicktime_position(file) - riff->atom.start > file->max_riff_size)
         {
         quicktime_finalize_riff(file, riff);
@@ -508,8 +501,6 @@ void quicktime_write_chunk_footer(quicktime_t *file,
           if(file->file_type == LQT_FILE_AVI_ODML)
             quicktime_update_ixtable(file, trak, offset, sample_size);
           
-          //          fprintf(stderr, "quicktime_write_chunk_footer: %d %d\n",
-          //                  sample_size, trak->strl->strh.dwSuggestedBufferSize);
           
           if(sample_size > trak->strl->strh.dwSuggestedBufferSize)
             trak->strl->strh.dwSuggestedBufferSize = ((sample_size+15)/16)*16;
@@ -600,7 +591,6 @@ long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
 
         if(!stsc->total_entries)
           return 0;
-        //        fprintf(stderr, "quicktime_chunk_samples: total_entries: %ld\n", stsc->total_entries);
 	do
 	{
 		current_chunk = stsc->table[i].chunk;

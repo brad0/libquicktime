@@ -4,7 +4,7 @@
 
 void quicktime_GUID_dump(quicktime_GUID_t * g)
   {
-  printf("%08x-%04x-%04x-%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x\n",
+  lqt_dump("%08x-%04x-%04x-%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x\n",
          g->v1, g->v2, g->v3, g->v4[0], g->v4[1], g->v4[2], g->v4[3],
          g->v4[4], g->v4[5], g->v4[6], g->v4[7]);
   }

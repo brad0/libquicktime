@@ -14,6 +14,8 @@
 #include "ulaw_tables.h"
 #include "alaw_tables.h"
 
+#define LOG_DOMAIN "pcm"
+
 #ifndef HAVE_LRINT
 #define lrint(x) ((long int)(x))
 #endif
@@ -726,7 +728,6 @@ static int read_audio_chunk(quicktime_t * file, int track,
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
-  //  fprintf(stderr, "Chunk: %d, samples: %d %d\n", chunk, samples, bytes);
   bytes_from_samples = samples * codec->block_align;
   if(bytes > bytes_from_samples)
     return bytes_from_samples;
@@ -757,7 +758,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
                                                 &(codec->chunk_buffer_alloc));
     if(codec->chunk_buffer_size <= 0)
       {
-      fprintf(stderr, "decode_pcm: EOF at the beginning of track\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
       return 0;
       }
     codec->chunk_buffer_ptr = codec->chunk_buffer;
@@ -800,7 +801,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     samples_to_skip = file->atracks[track].current_position - chunk_sample;
     if(samples_to_skip < 0)
       {
-      fprintf(stderr, "pcm: Cannot skip backwards\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
       samples_to_skip = 0;
       }
     codec->chunk_buffer_ptr = codec->chunk_buffer + samples_to_skip * codec->block_align;
@@ -852,7 +853,6 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
   quicktime_trak_t *trak = track_map->track;
 
-  //  fprintf(stderr, "encode_pcm: %d\n", samples);
   
   /* Initialize */
 
@@ -1439,8 +1439,6 @@ static void init_decode_lpcm(quicktime_t * file, int track)
 
   codec->block_align = (table->sample_size/8) * atrack->channels;
 
-  //  fprintf(stderr, "init_decode_lpcm: %p %s\n",
-  //          codec->decode, lqt_sample_format_to_string(atrack->sample_format));
   }
 
 static void init_encode_lpcm(quicktime_t * file, int track)

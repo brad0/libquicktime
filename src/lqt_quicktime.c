@@ -13,7 +13,9 @@
 #include <lqt_fseek.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <errno.h>
 
+#define LOG_DOMAIN "core"
 
 static int64_t get_file_length(quicktime_t *file)
 {
@@ -58,14 +60,12 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 /* get the locations of moov and mdat atoms */
 	do
 	{
-/*printf("%x\n", quicktime_position(&file)); */
 		result = quicktime_atom_read_header(&file, &leaf_atom);
 
 		if(!result)
 		{
 			if(quicktime_atom_is(&leaf_atom, "moov"))
 			{
-                        //                                fprintf(stderr, "old moov start: %lld\n", leaf_atom.start);
 				moov_exists = atoms;
 				moov_length = leaf_atom.size;
 			}
@@ -91,16 +91,18 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 	fclose(file.stream);
 
 	if(!moov_exists)
-	{
-		printf("quicktime_make_streamable: no moov atom\n");
-		return 1;
-	}
+          {
+          lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                  "quicktime_make_streamable: no moov atom");
+          return 1;
+          }
 
 	if(!mdat_exists)
-	{
-		printf("quicktime_make_streamable: no mdat atom\n");
-		return 1;
-	}
+          {
+          lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                  "quicktime_make_streamable: no mdat atom");
+          return 1;
+          }
 
 /* copy the old file to the new file */
 	if(moov_exists && mdat_exists)
@@ -126,7 +128,9 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 			
 			if(!(new_file.stream = fopen(out_path, "wb")))
 			{
-				perror("quicktime_make_streamable");
+                        lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                                "quicktime_make_streamable: cannot open output file: %s",
+                                strerror(errno));
 				result =  1;
 			}
 			else
@@ -145,8 +149,8 @@ int quicktime_make_streamable(char *in_path, char *out_path)
                         if(moov_length !=
                            quicktime_position(&new_file) - moov_start)
                           {
-                          fprintf(stderr,
-                                  "Warning: moov size changed from %lld to %lld (Pos: %lld, start: %lld)\n",
+                          lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                                  "quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, start: %lld)",
                                   moov_length, quicktime_position(&new_file) - moov_start,
                                   quicktime_position(&new_file), moov_start);
                           quicktime_set_position(&new_file, moov_start + moov_length);
@@ -488,7 +492,6 @@ int lqt_add_video_track(quicktime_t *file,
         /* Get encoding colormodel */
         ((quicktime_codec_t*)(file->vtracks[file->total_vtracks-1].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
         file->vtracks[file->total_vtracks-1].io_cmodel = file->vtracks[file->total_vtracks-1].stream_cmodel;
-        //        fprintf(stderr, "*** Got encoding colormodel %s\n", lqt_colormodel_to_string(file->vtracks[file->total_vtracks-1].stream_cmodel));
         return 0;
   }
 
@@ -502,7 +505,8 @@ void quicktime_set_framerate(quicktime_t *file, double framerate)
 
 	if(!file->wr)
 	{
-		fprintf(stderr, "quicktime_set_framerate shouldn't be called in read mode.\n");
+		lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                        "quicktime_set_framerate shouldn't be called in read mode.");
 		return;
 	}
 
@@ -620,7 +624,6 @@ int quicktime_get_timescale(double frame_rate)
 	else
 	if((600 / frame_rate) - (int)(600 / frame_rate) != 0) 
 			timescale = (int)(frame_rate * 100 + 0.5);
-//printf("quicktime_get_timescale %f %d\n", 600 / frame_rate, (int)(600 / frame_rate));
 	return timescale;
 }
 
@@ -673,7 +676,8 @@ int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
     file->atracks[track].eof = 0;
     }
   else
-    fprintf(stderr, "quicktime_set_audio_position: track >= file->total_atracks\n");
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+            "quicktime_set_audio_position: track >= file->total_atracks\n");
   return 0;
   }
 
@@ -728,7 +732,6 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
                              &(file->vtracks[track].stts_index),
                              &(file->vtracks[track].stts_count));
 
-  //  fprintf(stderr, "lqt_seek_video: %lld %lld\n", time, frame);
   
   quicktime_set_video_position(file, frame, track);
   }
@@ -773,11 +776,8 @@ int lqt_read_video_frame(quicktime_t * file,
     *buffer = realloc(*buffer, *buffer_alloc);
     }
 
-  //  fprintf(stderr, "calling quicktime_read_data\n");
   result = quicktime_read_data(file, *buffer, len);
 
-  //  fprintf(stderr, "lqt_read_video_frame: %lld %d %d\n",
-  //          offset, len, result);
 
   if(result < len)
     {
@@ -898,7 +898,7 @@ void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
   if((track < file->total_vtracks) && (track >= 0))
     file->vtracks[track].io_cmodel = colormodel;
   else
-    fprintf(stderr, "lqt_set_cmodel: No track No. %d\n", track);
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_cmodel: No track No. %d", track);
   }
 
 void quicktime_set_row_span(quicktime_t *file, int row_span)
@@ -1213,7 +1213,6 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
         // Offset 1
 	frame++;
         
-//printf("quicktime_insert_keyframe 1\n");
 // Get the keyframe greater or equal to new frame
 	for(i = 0; i < stss->total_entries; i++)
 	{
@@ -1247,7 +1246,6 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
 		stss->table[i].sample = frame;
 
 	stss->total_entries++;
-//printf("quicktime_insert_keyframe 2 %d\n", stss->total_entries);
 }
 
 
@@ -1418,7 +1416,6 @@ int quicktime_read_info(quicktime_t *file)
 /* McRoweSoft AVI section */
         if(file->file_type == LQT_FILE_AVI)
         {
-//printf("quicktime_read_info 1\n");
 /* Import first RIFF */
                 do
                 {
@@ -1436,11 +1433,9 @@ int quicktime_read_info(quicktime_t *file)
                         !got_header &&
                         quicktime_position(file) < file->total_length);
                                                                                                                   
-//printf("quicktime_read_info 10\n");
 /* Construct indexes. */
                 if(quicktime_import_avi(file))
                   return 1;
-                //printf("quicktime_read_info 20\n");
         }
 /* Quicktime section */
         else
@@ -1581,17 +1576,16 @@ int quicktime_read_info(quicktime_t *file)
 /* Shut down preload in case of an obsurdly high temp_size */
         quicktime_set_preload(file, 0);
                                                                                                                   
-//printf("quicktime_read_info 100\n");
         return !got_header;
 }
 
 
 int quicktime_dump(quicktime_t *file)
 {
-	printf("quicktime_dump\n");
-	printf("movie data\n");
-	printf(" size %lld\n", file->mdat.atom.size);
-	printf(" start %lld\n", file->mdat.atom.start);
+	lqt_dump("quicktime_dump\n");
+	lqt_dump("movie data\n");
+	lqt_dump(" size %lld\n", file->mdat.atom.size);
+	lqt_dump(" start %lld\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));
 	if (lqt_qtvr_get_object_track(file) >= 0)
 	{
@@ -1655,7 +1649,6 @@ int quicktime_check_sig(char *path)
                 }
         }
                                                                                                                   
-//printf(__FUNCTION__ " 2 %d\n", result2);
         quicktime_file_close(&file);
         quicktime_delete(&file);
         return result2;
@@ -1672,7 +1665,8 @@ int quicktime_is_avi(quicktime_t *file)
 return !!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML));
 }
 
-quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
+static quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type,
+                            lqt_log_callback_t log_cb, void * log_data)
 {
         int i;
 	quicktime_t *new_file;
@@ -1680,9 +1674,12 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
 
         new_file = calloc(1, sizeof(*new_file));
 
+        new_file->log_callback = log_cb;
+        new_file->log_data = log_data;
+        
         if(rd && wr)
           {
-	  fprintf(stderr, "read/write mode is not supported\n");
+	  lqt_log(new_file, LQT_LOG_ERROR, LOG_DOMAIN, "read/write mode is not supported");
           free(new_file);
           return (quicktime_t*)0;
           }
@@ -1710,17 +1707,15 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
             {
             if(quicktime_read_info(new_file))
               {
+              lqt_log(new_file, LQT_LOG_ERROR, LOG_DOMAIN, "Opening failed (unsupported filetype)");
               quicktime_close(new_file);
-//              fprintf(stderr, "quicktime_open: error in header\n");
               new_file = 0;
               }
-            //printf("quicktime_open 3\n");
             /* Set file type */
             else if(new_file->has_ftyp)
               new_file->file_type = quicktime_ftyp_get_file_type(&(new_file->ftyp));
             }
           
-          //printf("quicktime_open 4 %d %d\n", wr, exists);
           /* start the data atom */
           /* also don't want to do this if making a streamable file */
           if(wr)
@@ -1745,7 +1740,6 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
           new_file = 0;
           }
         
-        //printf("quicktime_open 5 %llx %llx\n", new_file->ftell_position, new_file->file_position);
         
         
 	if(rd && new_file)
@@ -1763,18 +1757,30 @@ quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type)
 
 quicktime_t* quicktime_open(const char *filename, int rd, int wr)
   {
-  return do_open(filename, rd, wr, LQT_FILE_QT_OLD);
+  return do_open(filename, rd, wr, LQT_FILE_QT_OLD, NULL, NULL);
   }
 
 quicktime_t * lqt_open_read(const char * filename)
   {
-  return do_open(filename, 1, 0, LQT_FILE_NONE);
+  return do_open(filename, 1, 0, LQT_FILE_NONE, NULL, NULL);
   }
 
 quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type)
   {
-  return do_open(filename, 0, 1, type);
+  return do_open(filename, 0, 1, type, NULL, NULL);
   }
+
+quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t * cb, void * log_data)
+  {
+  return do_open(filename, 1, 0, LQT_FILE_NONE, cb, log_data);
+  }
+
+quicktime_t * lqt_open_write_with_log(const char * filename, lqt_file_type_t type,
+                                      lqt_log_callback_t * cb, void * log_data)
+  {
+  return do_open(filename, 0, 1, type, cb, log_data);
+  }
+
 
 int quicktime_close(quicktime_t *file)
   {
@@ -1839,7 +1845,6 @@ static void apply_default_parameters(quicktime_t * file,
   lqt_parameter_info_t * parameter_info;
   int j;
 
-  //  fprintf(stderr, "APPLY CODEC INFO %s %d\n", codec_info->name, encode);
   
   if(encode)
     {
@@ -1857,30 +1862,24 @@ static void apply_default_parameters(quicktime_t * file,
     switch(parameter_info[j].type)
       {
       case LQT_PARAMETER_INT:
-#ifndef NDEBUG
-        fprintf(stderr, "Setting Parameter %s to %d\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %d\n",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_int);
-#endif
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_int));
         break;
       case LQT_PARAMETER_FLOAT:
-#ifndef NDEBUG
-        fprintf(stderr, "Setting Parameter %s to %f\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %f\n",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_float);
-#endif
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_float));
         break;
       case LQT_PARAMETER_STRING:
       case LQT_PARAMETER_STRINGLIST:
-#ifndef NDEBUG
-        fprintf(stderr, "Setting Parameter %s to %s\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %s\n",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_string);
-#endif
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_string));
         break;
@@ -2022,11 +2021,6 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
       ret[i] = file->mdat.atom.start +  file->mdat.atom.size - trak->mdia.minf.stbl.stco.table[i].offset;
       if(ret[i] < 0)
         ret[i] = 0;
-#if 0
-      fprintf(stderr, "Chunk size %lld, file->mdat.atom.start: %lld file->mdat.atom.size: %lld, trak->mdia.minf.stbl.stco.table[i].offset: %lld\n",
-              ret[i], file->mdat.atom.start, file->mdat.atom.size,
-              trak->mdia.minf.stbl.stco.table[i].offset);
-#endif
       }
     }
   free(chunk_indices);
@@ -2049,11 +2043,6 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
     file->atracks[track].eof = 1;
     return 0;
     }
-#if 0
-  fprintf(stderr, "lqt_read_audio_chunk %d %d\n",
-          chunk,
-          file->atracks[track].track->mdia.minf.stbl.stco.total_entries);
-#endif
   if(!trak->chunk_sizes)
     {
     trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);
@@ -2252,8 +2241,6 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
                                                           0, track);
 
       }
-    //    fprintf(stderr, "Obtained sampleformat: %s\n",
-    //            lqt_sample_format_to_string(atrack->sample_format));
     }
   
   return atrack->sample_format;
@@ -2276,7 +2263,6 @@ void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
   {
   quicktime_audio_map_t * atrack = &file->atracks[track];
   atrack->vbr_frame_start = quicktime_position(file);
-  //  fprintf(stderr, "lqt_start_audio_vbr_frame\n");
   }
 
 void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
@@ -2299,8 +2285,6 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   atrack->vbr_num_frames++;
   atrack->vbr_frames_written++;
 
-  //  fprintf(stderr, "lqt_finish_audio_vbr_frame (total_frames: %lld, samples: %d)\n",
-  //          atrack->vbr_frames_written, num_samples);
   
   }
 
@@ -2400,11 +2384,6 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
   *chunk_sample =
     get_uncompressed_samples(&trak->mdia.minf.stbl.stts, 0,
                              chunk_packet);
-#if 0
-  fprintf(stderr,
-          "lqt_chunk_of_sample_vbr, chunk_sample: %lld, chunk: %lld, sample: %lld\n",
-          *chunk_sample, *chunk, sample);
-#endif     
   return 0;
   }
 
@@ -2500,9 +2479,6 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
     *buffer_alloc = packet_size + 128;
     *buffer = realloc(*buffer, *buffer_alloc);
     }
-#if 0
-  fprintf(stderr, "Read VBR packet, offset: %llx, size: %x, samples: %d\n", offset, packet_size, *samples);
-#endif
   quicktime_set_position(file, offset);
   quicktime_read_data(file, *buffer, packet_size);
   return packet_size;

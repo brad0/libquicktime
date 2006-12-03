@@ -42,33 +42,33 @@ int quicktime_pano_delete(quicktime_pano_t *pano)
 
 void quicktime_pano_dump(quicktime_pano_t *pano)
 {
-       printf("       panorama (pano)\n");
-       printf("        version %i\n", pano->version );
-       printf("        revision %i\n", pano->revision );
+       lqt_dump("       panorama (pano)\n");
+       lqt_dump("        version %i\n", pano->version );
+       lqt_dump("        revision %i\n", pano->revision );
 
-       printf("        scene track %ld\n", pano->STrack );
-       printf("        lowres scene track %ld\n", pano->LowResSTrack );
-       printf("        hotspot track %ld\n", pano->HSTrack );
+       lqt_dump("        scene track %ld\n", pano->STrack );
+       lqt_dump("        lowres scene track %ld\n", pano->LowResSTrack );
+       lqt_dump("        hotspot track %ld\n", pano->HSTrack );
 
-       printf("        horizontal start pan %f\n", pano->HPanStart );
-       printf("        horizontal end pan %f\n", pano->HPanEnd );
-       printf("        vertical start pan %f\n", pano->VPanStart );
-       printf("        vertical end pan %f\n", pano->VPanEnd );
-       printf("        minimum zoom %f\n", pano->MinZoom );
-       printf("        maximum zoom %f\n", pano->MaxZoom );
+       lqt_dump("        horizontal start pan %f\n", pano->HPanStart );
+       lqt_dump("        horizontal end pan %f\n", pano->HPanEnd );
+       lqt_dump("        vertical start pan %f\n", pano->VPanStart );
+       lqt_dump("        vertical end pan %f\n", pano->VPanEnd );
+       lqt_dump("        minimum zoom %f\n", pano->MinZoom );
+       lqt_dump("        maximum zoom %f\n", pano->MaxZoom );
 
-       printf("        scene height %ld\n", pano->SHeight );
-       printf("        scene width %ld\n", pano->SWidth );
-       printf("        num frames %ld\n", pano->NumFrames );
-       printf("        num frames(height) %i\n", pano->SNumFramesHeight );
-       printf("        num frames(width) %i\n", pano->SNumFramesWidth );
-       printf("        scene depth %i\n", pano->SDepth );
+       lqt_dump("        scene height %ld\n", pano->SHeight );
+       lqt_dump("        scene width %ld\n", pano->SWidth );
+       lqt_dump("        num frames %ld\n", pano->NumFrames );
+       lqt_dump("        num frames(height) %i\n", pano->SNumFramesHeight );
+       lqt_dump("        num frames(width) %i\n", pano->SNumFramesWidth );
+       lqt_dump("        scene depth %i\n", pano->SDepth );
 
-       printf("        hotspot height %ld\n", pano->HSHeight );
-       printf("        hotspot width %ld\n", pano->HSWidth );
-       printf("        num. hotspot frames (height) %i\n", pano->HSNumFramesHeight );
-       printf("        num. hotspot frames (width) %i\n", pano->HSNumFramesWidth );
-       printf("        hotspot depth %i\n", pano->HSDepth );
+       lqt_dump("        hotspot height %ld\n", pano->HSHeight );
+       lqt_dump("        hotspot width %ld\n", pano->HSWidth );
+       lqt_dump("        num. hotspot frames (height) %i\n", pano->HSNumFramesHeight );
+       lqt_dump("        num. hotspot frames (width) %i\n", pano->HSNumFramesWidth );
+       lqt_dump("        hotspot depth %i\n", pano->HSDepth );
 }
 
 int quicktime_read_pano(quicktime_t *file, quicktime_pano_t *pano, quicktime_atom_t *pano_atom)

@@ -11,15 +11,19 @@
 #include "config.h"
 #endif
 
+#define LOG_DOMAIN "codecs"
+
 static int quicktime_delete_vcodec_stub(quicktime_video_map_t *vtrack)
 {
-	printf("quicktime_delete_vcodec_stub called\n");
+        lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_delete_vcodec_stub called");
 	return 0;
 }
 
 static int quicktime_delete_acodec_stub(quicktime_audio_map_t *atrack)
 {
-	printf("quicktime_delete_acodec_stub called\n");
+        lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_delete_acodec_stub called");
 	return 0;
 }
 
@@ -27,7 +31,8 @@ static int quicktime_decode_video_stub(quicktime_t *file,
 				unsigned char **row_pointers, 
 				int track)
 {
-	printf("quicktime_decode_video_stub called\n");
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_decode_video_stub called");
 	return 1;
 }
 
@@ -35,7 +40,8 @@ static int quicktime_encode_video_stub(quicktime_t *file,
 				unsigned char **row_pointers, 
 				int track)
 {
-	printf("quicktime_encode_video_stub called\n");
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_encode_video_stub called");
 	return 1;
 }
 
@@ -44,7 +50,8 @@ static int quicktime_decode_audio_stub(quicktime_t *file,
                                        long samples,
                                        int track)
 {
-	printf("quicktime_decode_audio_stub called\n");
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_decode_audio_stub called");
 	return 0;
 }
 
@@ -53,7 +60,8 @@ static int quicktime_encode_audio_stub(quicktime_t *file,
                                        long samples,
                                        int track)
 {
-	printf("quicktime_encode_audio_stub called\n");
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                "quicktime_encode_audio_stub called");
 	return 1;
 }
 
@@ -101,48 +109,32 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
   if(!codec_info)
     {
     
-#ifndef NDEBUG
-    fprintf(stderr, "Trying to find %s for fourcc \"%4s\"...",
-            (encode ? "Encoder" : "Decoder"), compressor);
-#endif
-    
     codec_array = lqt_find_video_codec(compressor, encode);
   
     if(!codec_array)
       {
-#ifndef NDEBUG
-      fprintf(stderr, "failed\n");
-#endif
+      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Could not find video %s for fourcc %4s",
+              (encode ? "Encoder" : "Decoder"), compressor);
       return -1;
       }
     codec_info = *codec_array;
     }
-  
-#ifndef NDEBUG
-  fprintf(stderr, "Found %s\n", codec_info->long_name);
-#endif
+  lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
+          "Loading module %s", codec_info->module_filename);
   
   /* dlopen the module */
-#ifndef NDEBUG
-  fprintf(stderr, "Trying to load module %s...",
-          codec_info->module_filename);
-#endif
   module = dlopen(codec_info->module_filename, RTLD_NOW);
   
   if(!module)
     {
-#ifndef NDEBUG
-    fprintf(stderr, "failed, %s\n", dlerror());
-#endif
-
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading module %s failed: %s",
+            codec_info->module_filename, dlerror());
+    
     if(codec_array)
       lqt_destroy_codec_info(codec_array);
 
     return -1;
     }
-#ifndef NDEBUG
-  fprintf(stderr, "Success\n");
-#endif
   
   ((quicktime_codec_t*)vtrack->codec)->codec_name =
     malloc(strlen(codec_info->name)+1);
@@ -160,7 +152,8 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
   
   if(!get_codec)
     {
-    fprintf(stderr, "Module %s contains no function get_video_codec",
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Module %s contains no function get_video_codec",
             codec_info->module_filename);
     if(codec_array)
       lqt_destroy_codec_info(codec_array);
@@ -206,53 +199,35 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
 
     if(compressor && (*compressor != '\0'))
       {
-#ifndef NDEBUG
-    fprintf(stderr, "Trying to find Audio %s for fourcc \"%s\"...",
-            (encode ? "Encoder" : "Decoder"), compressor);
-#endif
       codec_array = lqt_find_audio_codec(compressor, encode);
       }
     else if(wav_id)
       {
-#ifndef NDEBUG
-      fprintf(stderr, "Trying to find Audio %s for wav_id 0x%02x...",
-              (encode ? "Encoder" : "Decoder"), wav_id);
-#endif
       codec_array = lqt_find_audio_codec_by_wav_id(wav_id, encode);
       }
     if(!codec_array)
       {
-#ifndef NDEBUG
-      fprintf(stderr, "failed\n");
-#endif
+      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Could not find audio %s for fourcc %4s",
+              (encode ? "Encoder" : "Decoder"), compressor);
       return -1;
       }
     codec_info = *codec_array;
     }
-  
-#ifndef NDEBUG
-  fprintf(stderr, "Found %s\n", codec_info->long_name);
-#endif
+
+  lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
+          "Loading module %s", codec_info->module_filename);
   
   /* dlopen the module */
-#ifndef NDEBUG
-  fprintf(stderr, "Trying to load module %s...",
-          codec_info->module_filename);
-#endif
   module = dlopen(codec_info->module_filename, RTLD_NOW);
   
   if(!module)
     {
-#ifndef NDEBUG
-    fprintf(stderr, "failed, %s\n", dlerror());
-#endif
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading module %s failed: %s",
+            codec_info->module_filename, dlerror());
     if(codec_array)
       lqt_destroy_codec_info(codec_array);
     return -1;
     }
-#ifndef NDEBUG
-  fprintf(stderr, "Success\n");
-#endif
 
   ((quicktime_codec_t*)atrack->codec)->codec_name = malloc(strlen(codec_info->name)+1);
   strcpy(((quicktime_codec_t*)atrack->codec)->codec_name, codec_info->name);
@@ -269,7 +244,8 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   
   if(!get_codec)
     {
-    fprintf(stderr, "Module %s contains no function get_audio_codec",
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Module %s contains no function get_audio_codec",
             codec_info->module_filename);
     if(codec_array)
       lqt_destroy_codec_info(codec_array);
@@ -278,11 +254,6 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   
   /* Obtain the initializer for the actual codec */
 
-#ifndef NDEBUG
-  fprintf(stderr, "Creating codec %s, module %s, index %d\n",
-          codec_info->name, codec_info->module_filename,
-          codec_info->module_index);
-#endif
   init_codec = get_codec(codec_info->module_index);
   
   init_codec(atrack);
@@ -304,14 +275,8 @@ int quicktime_delete_vcodec(quicktime_video_map_t *vtrack)
   ((quicktime_codec_t*)vtrack->codec)->delete_vcodec(vtrack);
   /* Close the module */
   
-#ifndef NDEBUG
-  fprintf(stderr, "Closing module...");
-#endif
   if(((quicktime_codec_t*)vtrack->codec)->module)
     dlclose(((quicktime_codec_t*)vtrack->codec)->module);
-#ifndef NDEBUG
-  fprintf(stderr, "done\n");
-#endif
   if(((quicktime_codec_t*)vtrack->codec)->codec_name)
     free(((quicktime_codec_t*)vtrack->codec)->codec_name);
   free(vtrack->codec);
@@ -323,14 +288,8 @@ int quicktime_delete_acodec(quicktime_audio_map_t *atrack)
   {
   ((quicktime_codec_t*)atrack->codec)->delete_acodec(atrack);
   /* Close the module */
-#ifndef NDEBUG
-  fprintf(stderr, "Closing module...");
-#endif
   if(((quicktime_codec_t*)atrack->codec)->module)
     dlclose(((quicktime_codec_t*)atrack->codec)->module);
-#ifndef NDEBUG
-  fprintf(stderr, "done\n");
-#endif
   if(((quicktime_codec_t*)atrack->codec)->codec_name)
     free(((quicktime_codec_t*)atrack->codec)->codec_name);
   free(atrack->codec);
@@ -371,7 +330,6 @@ int quicktime_supported_audio(quicktime_t *file, int track)
 
 void lqt_update_frame_position(quicktime_video_map_t * track)
   {
-  //  fprintf(stderr, "Timestamp: %lld\n", track->timestamp);
   track->timestamp +=
     track->track->mdia.minf.stbl.stts.table[track->stts_index].sample_duration;
 
@@ -409,16 +367,7 @@ int lqt_decode_video(quicktime_t *file,
 	int result;
         int height;
 	int width;
-#if 0
-        fprintf(stderr, "lqt_decode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
-                lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
-                lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
-                file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
-                file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
-#endif
-        //        fprintf(stderr, "Rowspan: [%d,%d]/", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
         set_default_rowspan(file, track);
-        //        fprintf(stderr, "[%d,%d]\n", file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv);
         
         height = quicktime_video_height(file, track);
 	width =  quicktime_video_width(file, track);
@@ -461,9 +410,7 @@ int lqt_decode_video(quicktime_t *file,
           
           }
         
-        //printf("quicktime_decode_video 1\n");
         lqt_update_frame_position(&(file->vtracks[track]));
-//printf("quicktime_decode_video 2\n");
 	return result;
 }
 
@@ -575,13 +522,6 @@ static int do_encode_video(quicktime_t *file,
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
 
-#if 0
-  fprintf(stderr, "lqt_encode_video: %s -> %s (io_span: %d, %d, stream_span: %d %d)\n",
-          lqt_colormodel_to_string(file->vtracks[track].io_cmodel),
-          lqt_colormodel_to_string(file->vtracks[track].stream_cmodel),
-          file->vtracks[track].io_row_span, file->vtracks[track].io_row_span_uv,
-          file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
-#endif   
   
   if(file->vtracks[track].io_cmodel != file->vtracks[track].stream_cmodel)
     {
@@ -652,13 +592,6 @@ int lqt_encode_video(quicktime_t *file,
       quicktime_update_ctts(&file->vtracks[track].track->mdia.minf.stbl.ctts,
                             file->vtracks[track].current_chunk - 2,
                             file->vtracks[track].coded_timestamp - dts);
-#if 0      
-      fprintf(stderr, "pts: %lld, dts: %lld, diff: %lld, position: %ld, chunk: %ld\n",
-              file->vtracks[track].coded_timestamp, dts,
-              file->vtracks[track].coded_timestamp - dts,
-              file->vtracks[track].current_position,
-              file->vtracks[track].current_chunk-2);
-#endif      
       }
     }
   else
@@ -769,7 +702,8 @@ static int decode_audio_old(quicktime_t *file,
                                                                track);
   
   /* Convert */
-  lqt_convert_audio_decode(atrack->sample_buffer, output_i, output_f, atrack->channels, samples,
+  lqt_convert_audio_decode(file, atrack->sample_buffer, output_i, output_f,
+                           atrack->channels, samples,
                            atrack->sample_format);
   return result;
   }
@@ -886,7 +820,6 @@ int lqt_decode_audio_track(quicktime_t *file,
                            int track)
   {
   int result = 1;
-  //  fprintf(stderr, "lqt_decode_audio_track\n");
 
   if(file->atracks[track].eof)
     return 1;
@@ -930,7 +863,7 @@ static int encode_audio_old(quicktime_t *file,
 
   /* Convert */
 
-  lqt_convert_audio_encode(input_i, input_f, atrack->sample_buffer, atrack->channels, samples,
+  lqt_convert_audio_encode(file, input_i, input_f, atrack->sample_buffer, atrack->channels, samples,
                            atrack->sample_format);
 
   /* Encode */
@@ -1040,8 +973,6 @@ int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
   int samples_to_copy;
   samples_to_copy = src_size < dst_size ? src_size : dst_size;
 
-  //  fprintf(stderr, "lqt copy audio %d, src_pos: %d, dst_pos: %d, src_size: %d, dst_size: %d, samples_to_copy: %d\n",
-  //          num_channels, src_pos, dst_pos, src_size, dst_size, samples_to_copy);
   
   if(src_i)
     {

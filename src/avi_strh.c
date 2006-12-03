@@ -71,21 +71,21 @@ void quicktime_write_strh(quicktime_t *file,
 
 void quicktime_strh_dump(quicktime_strh_t *strh)
   {
-  printf("  strh\n");
+  lqt_dump("  strh\n");
 
-  printf("    fccType:               %.4s\n",  strh->fccType);
-  printf("    fccHandler:            %.4s\n",  strh->fccHandler);
-  printf("    dwFlags:               %08x\n", strh->dwFlags);
-  printf("    dwReserved1:           %08x\n", strh->dwReserved1);
-  printf("    dwInitialFrames:       %d\n", strh->dwInitialFrames);
-  printf("    dwScale:               %d\n", strh->dwScale);
-  printf("    dwRate:                %d\n", strh->dwRate);
-  printf("    dwStart:               %d\n", strh->dwStart);
-  printf("    dwLength:              %d\n", strh->dwLength);
-  printf("    dwSuggestedBufferSize: %d\n", strh->dwSuggestedBufferSize);
-  printf("    dwQuality:             %d\n", strh->dwQuality);
-  printf("    dwSampleSize:          %d\n", strh->dwSampleSize);
-  printf("    rcFrame:               l: %d t: %d r: %d b: %d\n",
+  lqt_dump("    fccType:               %.4s\n",  strh->fccType);
+  lqt_dump("    fccHandler:            %.4s\n",  strh->fccHandler);
+  lqt_dump("    dwFlags:               %08x\n", strh->dwFlags);
+  lqt_dump("    dwReserved1:           %08x\n", strh->dwReserved1);
+  lqt_dump("    dwInitialFrames:       %d\n", strh->dwInitialFrames);
+  lqt_dump("    dwScale:               %d\n", strh->dwScale);
+  lqt_dump("    dwRate:                %d\n", strh->dwRate);
+  lqt_dump("    dwStart:               %d\n", strh->dwStart);
+  lqt_dump("    dwLength:              %d\n", strh->dwLength);
+  lqt_dump("    dwSuggestedBufferSize: %d\n", strh->dwSuggestedBufferSize);
+  lqt_dump("    dwQuality:             %d\n", strh->dwQuality);
+  lqt_dump("    dwSampleSize:          %d\n", strh->dwSampleSize);
+  lqt_dump("    rcFrame:               l: %d t: %d r: %d b: %d\n",
          strh->rcFrame.left, strh->rcFrame.top, strh->rcFrame.right,
          strh->rcFrame.bottom);
   }

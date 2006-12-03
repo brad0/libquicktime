@@ -1,5 +1,5 @@
 /*
- * $Id: clap.c,v 1.3 2006/04/13 19:25:48 gmerlin Exp $
+ * $Id: clap.c,v 1.4 2006/12/03 01:04:18 gmerlin Exp $
  *
  * init, read, write handler for the "clap" (Clean Aperture) atom
 */
@@ -18,15 +18,15 @@ void quicktime_clap_delete(quicktime_clap_t *clap) { }
 void quicktime_clap_dump(quicktime_clap_t *clap)
 {
 
-	printf("     clean aperture (clap)\n");
-	printf("       cleanApertureWidthN %d\n", clap->cleanApertureWidthN);
-	printf("       cleanApertureWidthD %d\n", clap->cleanApertureWidthD);
-	printf("       cleanApertureHeightN %d\n", clap->cleanApertureHeightN);
-	printf("       cleanApertureHeightD %d\n", clap->cleanApertureHeightD);
-	printf("       horizOffN %d\n", clap->horizOffN);
-	printf("       horizOffD %d\n", clap->horizOffD);
-	printf("       vertOffN %d\n", clap->vertOffN);
-	printf("       vertOffD %d\n", clap->vertOffD);
+	lqt_dump("     clean aperture (clap)\n");
+	lqt_dump("       cleanApertureWidthN %d\n", clap->cleanApertureWidthN);
+	lqt_dump("       cleanApertureWidthD %d\n", clap->cleanApertureWidthD);
+	lqt_dump("       cleanApertureHeightN %d\n", clap->cleanApertureHeightN);
+	lqt_dump("       cleanApertureHeightD %d\n", clap->cleanApertureHeightD);
+	lqt_dump("       horizOffN %d\n", clap->horizOffN);
+	lqt_dump("       horizOffD %d\n", clap->horizOffD);
+	lqt_dump("       vertOffN %d\n", clap->vertOffN);
+	lqt_dump("       vertOffD %d\n", clap->vertOffD);
 }
 
 void quicktime_read_clap(quicktime_t *file, quicktime_clap_t *clap)

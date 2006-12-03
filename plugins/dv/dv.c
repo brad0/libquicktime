@@ -59,13 +59,11 @@ static int check_sequentiality( unsigned char **row_pointers,
 								int height )
 {
 	int i = 0;
-//printf( "dv.c check_sequentiality: %p, %d, %d\n", row_pointers, bytes_per_row, height );
  
 	for(; i < height-1; i++)
 	{
 		if( row_pointers[i+1] - row_pointers[i] != bytes_per_row )
 		{
-//printf( "dv.c check_sequentiality: %p - %p != %p\n", row_pointers[i+1], row_pointers[i], bytes_per_row );
 			return 0;
 		}
 	}
@@ -96,7 +94,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           return 0;
           }
         
-        //  fprintf(stderr, "Encoding %s\n", (isPAL ? "PAL" : "NTSC"));
         
 	if( codec->dv_encoder != NULL && codec->parameters_changed )
 	{
@@ -109,7 +106,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	{
 		pthread_mutex_lock( &libdv_init_mutex );
 
-		//printf( "dv.c encode: Alloc'ing encoder\n" );
 	
 		codec->dv_encoder = dv_encoder_new( codec->rem_ntsc_setup,
 											codec->clamp_luma,
@@ -160,17 +156,14 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		codec->dv_encoder->isPAL = isPAL;
 
 
-//printf("dv.c encode: 1 %d %d %d\n", width_i, height_i, encode_dv_colormodel);
 		dv_encode_full_frame( codec->dv_encoder,
 							  input_rows, encode_dv_colormodel, codec->data );
-//printf("dv.c encode: 2 %d %d\n", width_i, height_i);
 
                 
                 quicktime_write_chunk_header(file, trak, &chunk_atom);
                 result = !quicktime_write_data(file, codec->data, data_length);
                 quicktime_write_chunk_footer(file, trak, vtrack->current_chunk, &chunk_atom, 1);
                 file->vtracks[track].current_chunk++;
-//printf("encode 3\n");
 	}
 
 	return result;

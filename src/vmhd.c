@@ -27,11 +27,11 @@ void quicktime_vmhd_delete(quicktime_vmhd_t *vmhd)
 
 void quicktime_vmhd_dump(quicktime_vmhd_t *vmhd)
 {
-	printf("    video media header\n");
-	printf("     version %d\n", vmhd->version);
-	printf("     flags %ld\n", vmhd->flags);
-	printf("     graphics_mode %d\n", vmhd->graphics_mode);
-	printf("     opcolor %d %d %d\n", vmhd->opcolor[0], vmhd->opcolor[1], vmhd->opcolor[2]);
+	lqt_dump("    video media header\n");
+	lqt_dump("     version %d\n", vmhd->version);
+	lqt_dump("     flags %ld\n", vmhd->flags);
+	lqt_dump("     graphics_mode %d\n", vmhd->graphics_mode);
+	lqt_dump("     opcolor %d %d %d\n", vmhd->opcolor[0], vmhd->opcolor[1], vmhd->opcolor[2]);
 }
 
 void quicktime_read_vmhd(quicktime_t *file, quicktime_vmhd_t *vmhd)

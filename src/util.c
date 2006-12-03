@@ -150,9 +150,6 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
     if(selection_end - selection_start > file->preload_size)
       {
       /* Size is larger than preload size.  Should never happen. */
-      // printf("read data Size is larger than preload size. size=%llx preload_size=%llx\n",
-      //       (long long)(selection_end - selection_start),
-      //       (long long)(file->preload_size));
       quicktime_fseek(file, file->file_position);
       result = fread(data, 1, size, file->stream);
       file->ftell_position += size;
@@ -228,7 +225,6 @@ int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
         int data_offset = 0;
         int writes_attempted = 0;
         int writes_succeeded = 0;
-//printf("quicktime_write_data 1 %d\n", size);
                                                                                                                   
 // Flush existing buffer and seek to new position
         if(file->file_position != file->presave_position)
@@ -262,7 +258,6 @@ int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
                                                                                                                   
                 if(file->presave_size >= QUICKTIME_PRESAVE)
                 {
-//if(++iterations > 1) printf("quicktime_write_data 2 iterations=%d\n", iterations);
                         quicktime_fseek(file, file->presave_position - file->presave_size);
                         writes_succeeded += fwrite(file->presave_buffer, 1, file->presave_size, file->stream);
                         writes_attempted += file->presave_size;
@@ -580,7 +575,6 @@ float quicktime_read_fixed16(quicktime_t *file)
 	unsigned char data[2];
 	
 	quicktime_read_data(file, data, 2);
-//printf("quicktime_read_fixed16 %02x%02x\n", data[0], data[1]);
 	if(data[1])
 		return (float)data[0] + (float)data[1] / 256;
 	else
@@ -813,9 +807,9 @@ void quicktime_copy_char32(char *output, char *input)
 void quicktime_print_chars(char *desc, uint8_t *input, int len)
 {
 	int i;
-	printf("%s", desc);
-	for(i = 0; i < len; i++) printf("%02x ", input[i]);
-	printf("\n");
+	lqt_dump("%s", desc);
+	for(i = 0; i < len; i++) lqt_dump("%02x ", input[i]);
+	lqt_dump("\n");
 }
 
 unsigned long quicktime_current_time(void)

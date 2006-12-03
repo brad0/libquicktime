@@ -24,14 +24,14 @@ int quicktime_ndhd_delete(quicktime_ndhd_t *ndhd)
 
 void quicktime_ndhd_dump(quicktime_ndhd_t *ndhd)
 {
-       printf("node header (ndhd)\n");
-       printf(" version %i\n", ndhd->version );
-       printf(" revision %i\n", ndhd->revision );
+       lqt_dump("node header (ndhd)\n");
+       lqt_dump(" version %i\n", ndhd->version );
+       lqt_dump(" revision %i\n", ndhd->revision );
 
-       printf(" node type %c%c%c%c\n", ndhd->nodeType[0],ndhd->nodeType[1],ndhd->nodeType[2],ndhd->nodeType[3] );
-       printf(" node id %ld\n", ndhd->nodeID );
-       printf(" name atom id %ld\n", ndhd->nameAtomID );
-       printf(" comment atom id %ld\n", ndhd->commentAtomID );
+       lqt_dump(" node type %c%c%c%c\n", ndhd->nodeType[0],ndhd->nodeType[1],ndhd->nodeType[2],ndhd->nodeType[3] );
+       lqt_dump(" node id %ld\n", ndhd->nodeID );
+       lqt_dump(" name atom id %ld\n", ndhd->nameAtomID );
+       lqt_dump(" comment atom id %ld\n", ndhd->commentAtomID );
 }
 
 int quicktime_read_ndhd(quicktime_t *file, quicktime_ndhd_t *ndhd)

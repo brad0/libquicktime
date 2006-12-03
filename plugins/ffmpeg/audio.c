@@ -31,7 +31,7 @@
 
 #include "ffmpeg.h"
 
-
+#define LOG_DOMAIN "ffmpeg_audio"
 
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
@@ -101,7 +101,6 @@ static int header_check(uint32_t head)
                 return 0;
         if ((head & 0xffff0000) == 0xfffe0000)
                 return 0;
-        //        fprintf(stderr, "Head check ok %08x\n", head);
         return 1;
 }
 
@@ -347,7 +346,6 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
     {
     
     codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + num_samples;
-    //    fprintf(stderr, "codec->sample_buffer_alloc: %d\n", codec->sample_buffer_alloc);
     codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_alloc *
                                    track_map->channels);
     }
@@ -369,14 +367,9 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
                            packet_size + FF_INPUT_BUFFER_PADDING_SIZE);
     if(frame_bytes < 0)
       {
-      fprintf(stderr, "avcodec_decode_audio error\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio error");
       break;
       }
-#if 0
-    fprintf(stderr, "decode_chunk_vbr: Samples decoded: %d, Bytes used: %d\n",
-            bytes_decoded / (track_map->channels * 2),
-            frame_bytes);
-#endif
     codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
     }
   track_map->current_chunk++;
@@ -407,12 +400,9 @@ static int decode_chunk(quicktime_t * file, int track)
                                       &(codec->chunk_buffer_alloc),
                                       codec->bytes_in_chunk_buffer);
 
-  //  fprintf(stderr, "Got chunk:\n");
-  //  lqt_hexdump(codec->chunk_buffer, 16, 16);
   
   if(!chunk_size)
     {
-    //    fprintf(stderr, "audio_ffmpeg: EOF 1 (%d bytes left)\n", codec->bytes_in_chunk_buffer);
     /* If the codec is mp3, make sure to decode the very last frame */
 
     if((codec->avctx->codec_id == CODEC_ID_MP3) &&
@@ -420,12 +410,12 @@ static int decode_chunk(quicktime_t * file, int track)
       {
       if(!decode_header(&mph, codec->chunk_buffer, (const mpeg_header*)0))
         {
-        fprintf(stderr, "Decode header failed\n");
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Decode header failed");
         return 0;
         }
       if(mph.frame_bytes <= codec->bytes_in_chunk_buffer)
         {
-        fprintf(stderr, "Huh, frame not decoded?\n");
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Huh, frame not decoded?");
         return 0;
         }
 
@@ -444,17 +434,14 @@ static int decode_chunk(quicktime_t * file, int track)
     }
   else
     {
-    //  fprintf(stderr, "decode chunk, bytes from last chunk: %d\n", codec->bytes_in_chunk_buffer);
     num_samples = quicktime_chunk_samples(track_map->track, track_map->current_chunk);
     track_map->current_chunk++;
     codec->bytes_in_chunk_buffer += chunk_size;
     }
   
-  //  fprintf(stderr, "chunk samples: %d\n", num_samples);
 
   if(!num_samples)
     {
-    //    fprintf(stderr, "audio_ffmpeg: EOF\n");
     return 0;
     }
   /*
@@ -470,7 +457,6 @@ static int decode_chunk(quicktime_t * file, int track)
     {
     
     codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + num_samples;
-    //    fprintf(stderr, "codec->sample_buffer_alloc: %d\n", codec->sample_buffer_alloc);
     codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_alloc *
                                    track_map->channels);
     }
@@ -481,24 +467,10 @@ static int decode_chunk(quicktime_t * file, int track)
   bytes_used = 0;
   while(1)
     {
-#if 0
-    fprintf(stderr, "Avcodec decode audio %d, header: ",
-            codec->bytes_in_chunk_buffer);
-    fprintf(stderr, "%02x %02x %02x %02x\n",
-            codec->chunk_buffer[bytes_used],
-            codec->chunk_buffer[bytes_used+1],
-            codec->chunk_buffer[bytes_used+2],
-            codec->chunk_buffer[bytes_used+3]);
-#endif
 
         
     /* BIG NOTE: We pass extra FF_INPUT_BUFFER_PADDING_SIZE for the buffer size
        because we know, that lqt_read_audio_chunk allocates 16 extra bytes for us */
-#if 0
-    fprintf(stderr, "decode_chunk: Sample buffer: %d, chunk_buffer: %d\n",
-            (int)(codec->sample_buffer_end - codec->sample_buffer_start),
-            codec->bytes_in_chunk_buffer);
-#endif
     
     /* Some really broken mp3 files have the header bytes split across 2 chunks */
 
@@ -506,7 +478,6 @@ static int decode_chunk(quicktime_t * file, int track)
       {
       if(codec->bytes_in_chunk_buffer < 4)
         {
-        //        fprintf(stderr, "decode_chunk: Incomplete frame %d\n", codec->bytes_in_chunk_buffer);
         
         if(codec->bytes_in_chunk_buffer > 0)
           memmove(codec->chunk_buffer,
@@ -534,7 +505,6 @@ static int decode_chunk(quicktime_t * file, int track)
         bytes_skipped++;
         if(codec->bytes_in_chunk_buffer <= 4)
           {
-          //          fprintf(stderr, "decode_chunk: Incomplete frame %d\n", codec->bytes_in_chunk_buffer);
 
           if(codec->bytes_in_chunk_buffer > 0)
             memmove(codec->chunk_buffer,
@@ -542,14 +512,8 @@ static int decode_chunk(quicktime_t * file, int track)
           return 1;
           }
         }
-#if 0
-      if(bytes_skipped)
-        fprintf(stderr, "Skipped %d bytes, bytes_in_chunk_buffer: %d\n",
-                bytes_skipped, codec->bytes_in_chunk_buffer);
-#endif 
       if(codec->bytes_in_chunk_buffer < mph.frame_bytes)
         {
-        //        fprintf(stderr, "decode_chunk: Incomplete frame %d\n", codec->bytes_in_chunk_buffer);
         
         if(codec->bytes_in_chunk_buffer > 0)
           memmove(codec->chunk_buffer,
@@ -576,14 +540,9 @@ static int decode_chunk(quicktime_t * file, int track)
                            codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
     if(frame_bytes < 0)
       {
-      fprintf(stderr, "avcodec_decode_audio error\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio error");
       break;
       }
-#if 0
-    fprintf(stderr, "decode_chunk: Samples decoded: %d, Bytes used: %d, chunk_size: %lld, chunk buffer: %d\n",
-            bytes_decoded / (track_map->channels * 2),
-            frame_bytes, chunk_size, codec->bytes_in_chunk_buffer);
-#endif
 
     bytes_used                   += frame_bytes;
     codec->bytes_in_chunk_buffer -= frame_bytes;
@@ -609,10 +568,6 @@ static int decode_chunk(quicktime_t * file, int track)
       else
         {
         /* Incomplete frame, save the data for later use and exit here */
-#if 0
-        fprintf(stderr, "decode_chunk: Incomplete frame %d %d\n", bytes_decoded,
-                codec->bytes_in_chunk_buffer);
-#endif   
         if(codec->bytes_in_chunk_buffer > 0)
           memmove(codec->chunk_buffer,
                   codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
@@ -636,7 +591,7 @@ static int decode_chunk(quicktime_t * file, int track)
     codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
 
     if((int)(codec->sample_buffer_end - codec->sample_buffer_start) > codec->sample_buffer_alloc)
-      fprintf(stderr, "BUUUUG, buffer overflow, %d %d\n",
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "BUUUUG, buffer overflow, %d %d",
               (int)(codec->sample_buffer_end - codec->sample_buffer_start),
               codec->sample_buffer_alloc);
     
@@ -644,11 +599,6 @@ static int decode_chunk(quicktime_t * file, int track)
       break;
 
     }
-#if 0
-  fprintf(stderr, "Last samples decoded: %d, Bytes used: %d, samples decoded %d, chunk_size: %lld\n",
-          bytes_decoded / (track_map->channels * 2),
-          bytes_used, samples_decoded, chunk_size);
-#endif
   //  track_map->current_chunk++;
   return samples_decoded;
   }
@@ -669,7 +619,6 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   int samples_to_skip;
   int samples_to_move;
 
-  //  fprintf(stderr, "ffmpeg decode audio %lld %d\n", track_map->current_position, samples);
 
   if(!output) /* Global initialization */
     {
@@ -731,7 +680,7 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
     
     if(avcodec_open(codec->avctx, codec->decoder) != 0)
       {
-      fprintf(stderr, "Avcodec open failed\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Avcodec open failed");
       return 0;
       }
     
@@ -757,12 +706,6 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
                                   &(track_map->current_chunk),
                                   track_map->track,
                                   track_map->current_position);
-#if 0
-      fprintf(stderr, "Seek: last_pos: %ld, pos: %lld, chunk: %lld, chunk_sample: %lld\n",
-              track_map->last_position,
-              track_map->current_position,
-              track_map->current_chunk, chunk_sample);
-#endif       
       codec->sample_buffer_start = chunk_sample;
       codec->sample_buffer_end   = chunk_sample;
       codec->bytes_in_chunk_buffer = 0;
@@ -779,10 +722,6 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   if(track_map->current_position > codec->sample_buffer_start)
     {
     samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-#if 0
-    fprintf(stderr, "** Flush samples_to_skip: %d, %d\n", samples_to_skip,
-            (int)(codec->sample_buffer_end - codec->sample_buffer_start));
-#endif
     if(samples_to_skip > (int)(codec->sample_buffer_end - codec->sample_buffer_start))
       samples_to_skip = (int)(codec->sample_buffer_end - codec->sample_buffer_start);
     
@@ -790,15 +729,12 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
       {
       samples_to_move = codec->sample_buffer_end - track_map->current_position;
 
-      //      fprintf(stderr, "Memmove...");
       memmove(codec->sample_buffer,
               &(codec->sample_buffer[samples_to_skip * channels]),
               samples_to_move * channels * sizeof(int16_t));
-      //      fprintf(stderr, "done\n");
       }
     codec->sample_buffer_start += samples_to_skip;
     
-    //    fprintf(stderr, " %d\n", (int)(codec->sample_buffer_end - codec->sample_buffer_start));
 
     }
   samples_to_skip = track_map->current_position - codec->sample_buffer_start;
@@ -806,11 +742,6 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   /* Read new chunks until we have enough samples */
   while(codec->sample_buffer_end - codec->sample_buffer_start < samples + samples_to_skip)
     {
-#if 0
-    fprintf(stderr, "Samples: %lld -> %lld %lld, %d\n",
-            codec->sample_buffer_start, codec->sample_buffer_end,
-            codec->sample_buffer_end - codec->sample_buffer_start, samples);
-#endif
     
     //    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
     //      return 0;
@@ -831,7 +762,6 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   if(samples_decoded > samples)
     samples_decoded = samples;
   
-  //  fprintf(stderr, "Samples_decoded: %d\n", samples_decoded);
   /* Deinterleave into the buffer */
   
   
@@ -872,7 +802,7 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
 
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       {
-      fprintf(stderr, "Avcodec open failed\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Avcodec open failed");
       return -1;
       }
     
@@ -913,11 +843,8 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   
   /* Encode */
   
-  //  fprintf(stderr, "codec->samples_in_buffer: %d, codec->avctx->frame_size %d\n",
-  //          codec->samples_in_buffer, codec->avctx->frame_size);
   while(codec->samples_in_buffer >= codec->avctx->frame_size)
     {
-    //    fprintf(stderr, "avcodec_encode_audio %d...", samples_done);
     
     frame_bytes = avcodec_encode_audio(codec->avctx, codec->chunk_buffer,
                                        codec->chunk_buffer_alloc,
@@ -932,7 +859,6 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
 #endif
         samples_encoded = codec->avctx->frame_size;
 
-      //      fprintf(stderr, "Done %d->%d\n", samples_encoded, frame_bytes);
 
       samples_done              += samples_encoded;
       codec->samples_in_buffer  -= samples_encoded;
@@ -958,7 +884,6 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	quicktime_ffmpeg_audio_codec_t *codec;
 
 	avcodec_init();
-        fprintf(stderr, "quicktime_init_audio_codec_ffmpeg 1\n");
 	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
 	if(!codec)
           return;

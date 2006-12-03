@@ -34,9 +34,9 @@ int quicktime_tref_delete(quicktime_tref_t *tref)
 
 void quicktime_tref_dump(quicktime_tref_t *tref)
 {
-	printf("  track reference (tref)\n");
-	printf("   reference type %c%c%c%c\n", tref->refType[0], tref->refType[1], tref->refType[2], tref->refType[3]);
-	printf("   track index: %ld\n", tref->trackIndex);
+	lqt_dump("  track reference (tref)\n");
+	lqt_dump("   reference type %c%c%c%c\n", tref->refType[0], tref->refType[1], tref->refType[2], tref->refType[3]);
+	lqt_dump("   track index: %ld\n", tref->trackIndex);
 }
 
 int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref)

@@ -53,15 +53,10 @@ void quicktime_minf_init_video(quicktime_t *file,
 								char *compressor)
 {
 	minf->is_video = 1;
-//printf("quicktime_minf_init_video 1\n");
 	quicktime_vmhd_init_video(file, &(minf->vmhd), frame_w, frame_h, frame_duration, time_scale);
-//printf("quicktime_minf_init_video 1 %d %f\n", time_scale, frame_rate);
 	quicktime_stbl_init_video(file, &(minf->stbl), frame_w, frame_h, frame_duration, time_scale, compressor);
-//printf("quicktime_minf_init_video 2\n");
 	quicktime_hdlr_init_data(&(minf->hdlr));
-//printf("quicktime_minf_init_video 1\n");
 	quicktime_dinf_init_all(&(minf->dinf));
-//printf("quicktime_minf_init_video 2\n");
 }
 
 void quicktime_minf_init_audio(quicktime_t *file, 
@@ -90,10 +85,10 @@ void quicktime_minf_delete(quicktime_minf_t *minf)
 
 void quicktime_minf_dump(quicktime_minf_t *minf)
 {
-	printf("   media info\n");
-	printf("    is_audio     %d\n", minf->is_audio);
-	printf("    is_audio_vbr %d\n", minf->is_audio_vbr);
-	printf("    is_video     %d\n", minf->is_video);
+	lqt_dump("   media info\n");
+	lqt_dump("    is_audio     %d\n", minf->is_audio);
+	lqt_dump("    is_audio_vbr %d\n", minf->is_audio_vbr);
+	lqt_dump("    is_video     %d\n", minf->is_video);
 	if(minf->is_audio) quicktime_smhd_dump(&(minf->smhd));
 	if(minf->is_video) quicktime_vmhd_dump(&(minf->vmhd));
 	if(minf->has_baseheader) quicktime_gmhd_dump(&(minf->gmhd));
@@ -109,7 +104,6 @@ int quicktime_read_minf(quicktime_t *file, quicktime_trak_t *trak,
 	do
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
-//printf("quicktime_read_minf 1\n");
 
 /* mandatory */
 		if(quicktime_atom_is(&leaf_atom, "vmhd"))

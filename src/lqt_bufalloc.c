@@ -8,7 +8,7 @@
  * buffers be aligned on a 16 byte boundary (SSE/SSE2 require 64 byte 
  * alignment).
  *
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.6 2005/12/02 23:02:39 gmerlin Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.7 2006/12/03 01:04:18 gmerlin Exp $
 */
 
 #ifdef HAVE_CONFIG_H
@@ -21,6 +21,10 @@
 
 #include <string.h> /* Memset */
 
+#include <quicktime.h>
+#include <lqt_funcprotos.h>
+
+#define LOG_DOMAIN "bufalloc"
 
 
 /*
@@ -93,11 +97,12 @@ void *lqt_bufalloc(size_t size)
 		buf = memalign(pgsize, size);
 		}
 	if	(buf == NULL)
-		fprintf(stderr, "lqt_bufalloc: malloc of %d bytes failed", (int)size);
+                lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "malloc of %d bytes failed", (int)size);
 	else
 		memset(buf, '\0', size);
 
 	if	((size_t)buf & (simd_alignment - 1))
-		fprintf(stderr, "lqt_bufalloc: could not allocate %d bytes aligned on a %d byte boundary", (int)size, (int)simd_alignment);
+                lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                        "could not allocate %d bytes aligned on a %d byte boundary", (int)size, (int)simd_alignment);
 	return buf;
 	}

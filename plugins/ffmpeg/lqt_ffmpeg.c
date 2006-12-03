@@ -32,6 +32,8 @@
 #include "ffmpeg.h"
 #include "params.h"
 
+#define LOG_DOMAIN "ffmpeg"
+
 #define MAX_FOURCCS 30
 #define MAX_WAV_IDS 4
 
@@ -186,6 +188,7 @@ static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
   { /* End of parameters */ }
 };
 
+#if 0
 static lqt_parameter_info_static_t encode_parameters_dx50[] = {
   ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
   ENCODE_PARAM_VIDEO_RATECONTROL,
@@ -196,7 +199,7 @@ static lqt_parameter_info_static_t encode_parameters_dx50[] = {
   ENCODE_PARAM_VIDEO_MISC,
   { /* End of parameters */ }
 };
-
+#endif
 
 static lqt_parameter_info_static_t encode_parameters_h263[] = {
   ENCODE_PARAM_VIDEO_FRAMETYPES_IP,
@@ -696,14 +699,10 @@ struct CODECIDMAP codecidmap_a[] = {
 static void ffmpeg_map_init(void)
   {
   int i;
-  //  fprintf(stderr, "Init map...");
   if(ffmpeg_num_video_codecs >= 0)
     {
-    //    fprintf(stderr, "already initialized\n");
     return;
     }
-  //  else
-  //    fprintf(stderr, "initializing\n");
     
   avcodec_register_all();
   avcodec_init();
@@ -719,12 +718,6 @@ static void ffmpeg_map_init(void)
     if(codecidmap_v[i].encoder || codecidmap_v[i].decoder)
       {
       codecidmap_v[i].index = ffmpeg_num_video_codecs++;
-#if 0
-      fprintf(stderr, "Found video codec %s %p %p %d %s\n",
-              codecidmap_v[i].name, codecidmap_v[i].encoder, codecidmap_v[i].decoder,
-              codecidmap_v[i].index,
-              (codecidmap_v[i].encoder?codecidmap_v[i].encoder->name:codecidmap_v[i].decoder->name));
-#endif
       }
     }
   for(i = 0; i < NUMMAPS_A; i++)
@@ -736,12 +729,6 @@ static void ffmpeg_map_init(void)
     if(codecidmap_a[i].encoder || codecidmap_a[i].decoder)
       {
       codecidmap_a[i].index = ffmpeg_num_audio_codecs++ + ffmpeg_num_video_codecs;
-#if 0
-      fprintf(stderr, "Found audio codec %s %p %p %d %s\n",
-              codecidmap_a[i].name, codecidmap_a[i].encoder, codecidmap_a[i].decoder,
-              codecidmap_a[i].index,
-              (codecidmap_a[i].encoder?codecidmap_a[i].encoder->name:codecidmap_a[i].decoder->name));
-#endif
       }
     }
   }
@@ -768,7 +755,6 @@ static lqt_codec_info_static_t codec_info_ffmpeg = {
 
 extern int get_num_codecs()
 {
-//        fprintf(stderr, "Get num codecs\n");
 	ffmpeg_map_init();
 	return ffmpeg_num_video_codecs + ffmpeg_num_audio_codecs;
 }
@@ -779,7 +765,6 @@ static void set_codec_info(struct CODECIDMAP * map)
 
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
-  //  fprintf(stderr, "Short name: %s, wav_ids: %p\n", map->short_name, map->wav_ids);
   if(map->encoder && map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;
@@ -824,7 +809,6 @@ static void set_codec_info(struct CODECIDMAP * map)
 static struct CODECIDMAP * find_codec(int index)
   {
   int i;
-  //  fprintf(stderr, "Find codec\n");
   for(i = 0; i < NUMMAPS_V; i++)
     {
     if(codecidmap_v[i].index == index)
@@ -954,10 +938,10 @@ IFUNC(29)
 
 extern lqt_init_video_codec_func_t get_video_codec(int index)
 {
-//        fprintf(stderr, "Get video codec %d\n", index);
 	ffmpeg_map_init();
 	if(index > MAX_VIDEO_FUNC) {
-		fprintf(stderr, "lqt_ffmpeg error: Insufficient dummy calls - please report!\n");
+		lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                        "Insufficient dummy calls - please report!");
 		return NULL;
 	}
 	switch(index) {
@@ -999,10 +983,10 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
 
 extern lqt_init_audio_codec_func_t get_audio_codec(int index)
 {
-//        fprintf(stderr, "Get audio codec %d\n", index);
 	ffmpeg_map_init();
 	if(index > MAX_AUDIO_FUNC) {
-		fprintf(stderr, "lqt_ffmpeg error: Insufficient dummy calls - please report!\n");
+		lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                        "Insufficient dummy calls - please report!");
 		return NULL;
 	}
 	switch(index) {

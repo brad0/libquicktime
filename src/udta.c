@@ -23,12 +23,7 @@ static char trkn_id[]      = {  't', 'r', 'k', 'n' };
 int quicktime_udta_init(quicktime_udta_t *udta)
   {
   memset(udta, 0, sizeof(*udta));
-
-  // No, no, it's bad to tell lies here (especially when decoding)
-  //	udta->info = malloc(strlen(DEFAULT_INFO) + 1);
-  //	udta->info_len = strlen(DEFAULT_INFO);
-  //	sprintf(udta->info, DEFAULT_INFO);
-
+  
   udta->is_qtvr = 0;
   quicktime_navg_init(&(udta->navg));
   return 0;
@@ -79,17 +74,17 @@ int quicktime_udta_delete(quicktime_udta_t *udta)
 
 void quicktime_udta_dump(quicktime_udta_t *udta)
   {
-  printf(" user data (udta)\n");
-  if(udta->copyright_len) printf("  copyright: %s\n", udta->copyright);
-  if(udta->name_len)      printf("  name:      %s\n", udta->name);
-  if(udta->info_len)      printf("  info:      %s\n", udta->info);
-  if(udta->author_len)    printf("  author:    %s\n", udta->author);
-  if(udta->artist_len)    printf("  artist:    %s\n", udta->artist);
-  if(udta->album_len)     printf("  album:     %s\n", udta->album);
-  if(udta->track_len)     printf("  track:     %s\n", udta->track);
-  if(udta->genre_len)     printf("  genre:     %s\n", udta->genre);
-  if(udta->comment_len)   printf("  comment:   %s\n", udta->comment);
-  if(udta->is_qtvr)       printf("  ctyp:      %c%c%c%c\n", udta->ctyp[0],
+  lqt_dump(" user data (udta)\n");
+  if(udta->copyright_len) lqt_dump("  copyright: %s\n", udta->copyright);
+  if(udta->name_len)      lqt_dump("  name:      %s\n", udta->name);
+  if(udta->info_len)      lqt_dump("  info:      %s\n", udta->info);
+  if(udta->author_len)    lqt_dump("  author:    %s\n", udta->author);
+  if(udta->artist_len)    lqt_dump("  artist:    %s\n", udta->artist);
+  if(udta->album_len)     lqt_dump("  album:     %s\n", udta->album);
+  if(udta->track_len)     lqt_dump("  track:     %s\n", udta->track);
+  if(udta->genre_len)     lqt_dump("  genre:     %s\n", udta->genre);
+  if(udta->comment_len)   lqt_dump("  comment:   %s\n", udta->comment);
+  if(udta->is_qtvr)       lqt_dump("  ctyp:      %c%c%c%c\n", udta->ctyp[0],
                                  udta->ctyp[1],
                                  udta->ctyp[2],
                                  udta->ctyp[3]);
@@ -110,7 +105,7 @@ static int quicktime_read_udta_string(quicktime_t *file, char **string, int *siz
     result = quicktime_read_data(file, (uint8_t*)(*string), *size);
     
     if(!(*cnv))
-      *cnv = lqt_charset_converter_create("ISO-8859-1", "UTF-8");
+      *cnv = lqt_charset_converter_create(file, "ISO-8859-1", "UTF-8");
     lqt_charset_convert(*cnv, string, *size, size);
     return !result;
     }
@@ -240,7 +235,7 @@ static int quicktime_write_udta_string(quicktime_t *file, char ** string, int il
   if(!ilst)
     {
     if(!(*cnv))
-      *cnv = lqt_charset_converter_create("UTF-8", "ISO-8859-1");
+      *cnv = lqt_charset_converter_create(file, "UTF-8", "ISO-8859-1");
 
     lqt_charset_convert(*cnv, string, -1, &new_size);
     
@@ -266,13 +261,10 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
   int tmp;
   int have_ilst = !!(file->file_type & ILST_TYPES);
   lqt_charset_converter_t * cnv = (lqt_charset_converter_t*)0;
-  //        fprintf(stderr, "quicktime_write_udta, type: %s, ilst: %d\n",
-  //                lqt_file_type_to_string(file->file_type), have_ilst);
   quicktime_atom_write_header(file, &atom, "udta");
   
   if(have_ilst)
     {
-    //          fprintf(stderr, "Writing ilst\n");
     quicktime_atom_write_header(file, &meta_atom, "meta");
     quicktime_write_int32(file, 0); /* Version and flags (probably 0) */
 

@@ -30,7 +30,6 @@ void quicktime_stts_init_qtvr(quicktime_t *file, quicktime_stts_t *stts, int fra
 
 	table->sample_count = 0;      /* need to set this when closing */
 	table->sample_duration = frame_duration;
-//printf("quicktime_stts_init_qtvr");
 }
 
 void quicktime_stts_init_panorama(quicktime_t *file, quicktime_stts_t *stts, int frame_duration)
@@ -41,7 +40,6 @@ void quicktime_stts_init_panorama(quicktime_t *file, quicktime_stts_t *stts, int
 
 	table->sample_count = 0;      /* need to set this when closing */
 	table->sample_duration = frame_duration;
-//printf("quicktime_stts_init_panorama %d %f\n", time_scale, frame_rate);
 }
 
 void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int frame_duration)
@@ -53,7 +51,6 @@ void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int fr
 	table->sample_count = 0;      /* need to set this when closing */
 	table->sample_duration = frame_duration;
         stts->default_duration = frame_duration;
-//printf("quicktime_stts_init_video %d %f\n", time_scale, frame_rate);
 }
 
 void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts, int sample_rate)
@@ -75,13 +72,13 @@ void quicktime_stts_delete(quicktime_stts_t *stts)
 void quicktime_stts_dump(quicktime_stts_t *stts)
 {
 	int i;
-	printf("     time to sample (stts)\n");
-	printf("      version %d\n", stts->version);
-	printf("      flags %ld\n", stts->flags);
-	printf("      total_entries %ld\n", stts->total_entries);
+	lqt_dump("     time to sample (stts)\n");
+	lqt_dump("      version %d\n", stts->version);
+	lqt_dump("      flags %ld\n", stts->flags);
+	lqt_dump("      total_entries %ld\n", stts->total_entries);
 	for(i = 0; i < stts->total_entries; i++)
 	{
-		printf("       count %ld duration %ld\n", stts->table[i].sample_count, stts->table[i].sample_duration);
+		lqt_dump("       count %ld duration %ld\n", stts->table[i].sample_count, stts->table[i].sample_duration);
 	}
 }
 

@@ -38,13 +38,11 @@ void quicktime_read_idx1(quicktime_t *file,
 	int i;
 	quicktime_idx1_t *idx1 = &riff->idx1;
 
-//printf("quicktime_read_idx1 1 %llx\n", quicktime_position(file));
 
 // Allocate table.
 	idx1->table_size = (parent_atom->end - quicktime_position(file)) / 16;
 	idx1->table_allocation = idx1->table_size;
 	idx1->table = calloc(sizeof(quicktime_idx1table_t), idx1->table_size);
-//printf("quicktime_read_idx1 10\n");
 
 // Store it in idx1 table now.
 // Wait for full ix table discovery before converting to stco.
@@ -58,7 +56,6 @@ void quicktime_read_idx1(quicktime_t *file,
 		idx1table->size = quicktime_read_int32_le(file);
 	}
 
-//printf("quicktime_read_idx1 100\n");
 
 
 }
@@ -71,7 +68,6 @@ void quicktime_write_idx1(quicktime_t *file,
 	int table_size = idx1->table_size;
 
 
-        //        fprintf(stderr, "Writing idx1 %llx\n", quicktime_position(file));
 // Write table
 	quicktime_atom_write_header(file, &idx1->atom, "idx1");
 

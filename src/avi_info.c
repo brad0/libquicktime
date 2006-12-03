@@ -40,7 +40,7 @@ void quicktime_read_riffinfo(quicktime_t *file,
   
   end_ptr = ptr + size;
 
-  cnv = lqt_charset_converter_create("ISO-8859-1", "UTF-8");
+  cnv = lqt_charset_converter_create(file, "ISO-8859-1", "UTF-8");
   
   while(ptr < end_ptr)
     {
@@ -107,7 +107,7 @@ void quicktime_write_riffinfo(quicktime_t *file,
   quicktime_atom_t child_atom;
   lqt_charset_converter_t * cnv;
   
-  cnv = lqt_charset_converter_create("UTF-8", "ISO-8859-1");
+  cnv = lqt_charset_converter_create(file, "UTF-8", "ISO-8859-1");
 
   quicktime_atom_write_header(file, &atom, "LIST");
   quicktime_write_char32(file, "INFO");

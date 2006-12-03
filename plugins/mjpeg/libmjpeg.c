@@ -25,6 +25,8 @@
 #include "lqt.h"
 #include "libmjpeg.h"
 
+#define LOG_DOMAIN "libmjpeg"
+
 /* JPEG MARKERS */
 #define   M_SOF0    0xc0
 #define   M_SOF1    0xc1
@@ -231,7 +233,6 @@ METHODDEF(boolean) fill_input_buffer(j_decompress_ptr cinfo)
   src->pub.next_input_byte = src->buffer;
   src->pub.bytes_in_buffer = 2;
 
-  fprintf(stderr, "fill_input_buffer\n");
   
   return TRUE;
   }
@@ -527,7 +528,7 @@ static void add_huff_table (j_decompress_ptr dinfo,
     nsymbols += bits[len];
   if (nsymbols < 1 || nsymbols > 256)
     //    mjpeg_error_exit1("jpegutils.c:  add_huff_table failed badly. ");
-    fprintf(stderr, "add_huff_table failed badly.\n");
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "add_huff_table failed badly.\n");
   
   memcpy((*htblptr)->huffval, val, nsymbols * sizeof(UINT8));
 }
@@ -624,7 +625,6 @@ static void decompress_field(mjpeg_compressor *engine, int field)
   unsigned char *buffer = mjpeg->input_data + buffer_offset;
   long buffer_size;
 
-  //  fprintf(stderr, "** DECOMPRESS_FIELD\n");
 
   if(mjpeg->fields > 1)
     {
@@ -650,13 +650,10 @@ static void decompress_field(mjpeg_compressor *engine, int field)
   jpeg_buffer_src(&engine->jpeg_decompress, 
                   buffer, 
                   buffer_size);
-  //  fprintf(stderr, "Read header %d (buf: %p, size: %d...\n", field, buffer, 
-  //          buffer_size);
   jpeg_read_header(&engine->jpeg_decompress, TRUE);
   guarantee_huff_tables(&engine->jpeg_decompress);
 
 
-  //  fprintf(stderr, "Read header done\n");
   
   // Reset by jpeg_read_header
   engine->jpeg_decompress.raw_data_out = TRUE;
@@ -702,7 +699,6 @@ static void compress_field(mjpeg_compressor *engine, int field)
   {
   mjpeg_t *mjpeg = engine->mjpeg;
 
-  //printf("compress_field 1\n");
   get_rows(engine->mjpeg, engine, field);
   reset_buffer(&engine->output_buffer, &engine->output_size, &engine->output_allocated);
   jpeg_buffer_dest(&engine->jpeg_compress, engine);
@@ -720,7 +716,6 @@ static void compress_field(mjpeg_compressor *engine, int field)
 			engine->field_h);
     }
   jpeg_finish_compress(&engine->jpeg_compress);
-  //printf("compress_field 2\n");
   }
 
 
@@ -857,7 +852,6 @@ int mjpeg_compress(mjpeg_t *mjpeg,
   uint8_t * cpy_rows[3];
   int i;
 
-  //printf("mjpeg_compress 1 %d\n", color_model);
   /* Reset output buffer */
   reset_buffer(&mjpeg->output_data, 
                &mjpeg->output_size, 
@@ -893,7 +887,6 @@ int mjpeg_compress(mjpeg_t *mjpeg,
     if(i == 0) mjpeg->output_field2 = mjpeg->output_size;
     }	
 
-  //printf("mjpeg_compress 2\n");
   return 0;
   }
 
@@ -905,21 +898,16 @@ int mjpeg_decompress(mjpeg_t *mjpeg,
   {
   int i;
 
-  //printf("mjpeg_decompress 1 %ld %ld\n", buffer_len, input_field2);
   if(buffer_len == 0) return 1;
   if(input_field2 == 0 && mjpeg->fields > 1) return 1;
 
-  //  fprintf(stderr, "mjpeg_decompress: %p %ld %ld\n", buffer, 
-  //          buffer_len, input_field2);
     
-  //printf("mjpeg_decompress 2\n");
   /* Create decompression engines as needed */
   if(!mjpeg->decompressor)
     {
     mjpeg->decompressor = mjpeg_new_decompressor(mjpeg);
     }
   
-  //printf("mjpeg_decompress 3\n");
   /* Arm YUV buffers */
   //	mjpeg->y_argument = y_plane;
   //	mjpeg->u_argument = u_plane;
@@ -1182,7 +1170,6 @@ static void table_offsets(unsigned char *buffer,
   for(field = 0; field < 2; field++)
     {
     done = 0;
-    //printf("table_offsets 1 %d %d\n", field, offset);
     while(!done)
       {
       marker = next_marker(buffer, 
@@ -1201,11 +1188,9 @@ static void table_offsets(unsigned char *buffer,
               offset - 2;
             }
           len = 0;
-          //printf("table_offsets 1 %x %d\n", header[0].next_offset, field);
           break;
 
         case M_DQT:
-          //printf("table_offsets M_DQT %d %d\n", field, offset);
           if(!header[field].quant_offset)
             {
             header[field].quant_offset = offset - 2;
@@ -1265,7 +1250,6 @@ static void table_offsets(unsigned char *buffer,
             //							header[0].padded_field_size = 
             //							offset;
             }
-          //printf("table_offsets M_EOI %d %x\n", field, offset);
           done = 1;
           len = 0;
           break;
@@ -1315,10 +1299,6 @@ void mjpeg_insert_quicktime_markers(unsigned char **buffer,
   if(fields < 2) return;
   // Get offsets for tables in both fields
   table_offsets(*buffer, *buffer_size, header);
-  //printf("mjpeg_insert_quicktime_markers %x %02x %02x\n", 
-  //	header[0].next_offset, (*buffer)[*field2_offset], (*buffer)[*field2_offset + 1]);
-  //if(*field2_offset == 0)
-  //	fwrite(*buffer, *buffer_size, 1, stdout);
 
   header[0].field_size += QUICKTIME_MARKER_SIZE;
   header[0].padded_field_size += QUICKTIME_MARKER_SIZE;

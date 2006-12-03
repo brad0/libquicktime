@@ -2,6 +2,8 @@
 #include <quicktime/quicktime.h>
 #include <string.h>
 
+#define LOG_DOMAIN "stsdtable"
+
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom)
 {
@@ -21,7 +23,6 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
           if(table->samplerate + 65536 == 96000 ||
              table->samplerate + 65536 == 88200) table->samplerate += 65536;
           
-          //          fprintf(stderr, "stsd version: %d\n", table->version);
           
           if(table->version == 1)
             {
@@ -47,7 +48,6 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
            */
           quicktime_set_position(file, quicktime_position(file) + 16);
           //          quicktime_set_position(file, quicktime_position(file) + 12);
-          //          fprintf(stderr, "sizeOfStructOnly: %d\n", quicktime_read_int32(file));
           
           /*
            * Float64    audioSampleRate;
@@ -65,14 +65,11 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
            */
           
           quicktime_set_position(file, quicktime_position(file) + 4);
-          //          fprintf(stderr, "always7F000000: %08lx\n", quicktime_read_int32(file));
 
           
 
           table->sample_size = quicktime_read_int32(file);
-          //          fprintf(stderr, "constBitsPerChannel: %d\n", table->sample_size);
           table->formatSpecificFlags = quicktime_read_int32(file);
-          //          fprintf(stderr, "formatSpecificFlags: %08x\n", table->formatSpecificFlags);
 
           /* The following 2 are (hopefully) unused */
           
@@ -98,18 +95,16 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
             quicktime_read_esds(file, &(table->esds));
             table->has_esds = 1;
             quicktime_atom_skip(file, &leaf_atom);
-            // fprintf(stderr, "Got esds\n");
             }
           else if(quicktime_atom_is(&leaf_atom, "chan"))
             {
             quicktime_read_chan(file, &(table->chan));
             table->has_chan = 1;
             quicktime_atom_skip(file, &leaf_atom);
-            //            fprintf(stderr, "Got chan\n");
             }
           else
             {
-            fprintf(stderr, "Skipping unknown atom \"%4s\" inside audio stsd\n",
+            lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN, "Skipping unknown atom \"%4s\" inside audio stsd",
                     leaf_atom.type);
             quicktime_atom_skip(file, &leaf_atom);
             }
@@ -209,7 +204,6 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	quicktime_atom_t leaf_atom;
 	int len, bits_per_pixel;
         
-        //        fprintf(stderr, "quicktime_read_stsd_video 1 %lld\n", quicktime_position(file));
 	table->version = quicktime_read_int16(file);
 	table->revision = quicktime_read_int16(file);
 	quicktime_read_data(file, (uint8_t*)table->vendor, 4);
@@ -226,7 +220,6 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 	table->depth = quicktime_read_int16(file);
 	table->ctab_id = quicktime_read_int16(file);
         
-        //  fprintf(stderr, "quicktime_read_stsd_video 2 %lld\n", quicktime_position(file));
         
         /*  If ctab_id is zero, the colortable follows immediately
          *  after the ctab ID
@@ -238,27 +231,14 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
             (bits_per_pixel == 4) ||
             (bits_per_pixel == 8)))
           {
-          //          fprintf(stderr, "Reading color table, depth: %d\n", table->depth);
           quicktime_read_ctab(file, &(table->ctab));
           }
         else
           quicktime_default_ctab(&(table->ctab), table->depth);
         
-        //        fprintf(stderr, "quicktime_read_stsd_video 3 %lld\n",
-        //                quicktime_position(file));
 	while(quicktime_position(file) + 8 < parent_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
-#if 0
-                fprintf(stderr, "quicktime_read_stsd_video 1 %c%c%c%c, pos: %lld, end: %lld\n",
-                        leaf_atom.type[0],
-                        leaf_atom.type[1],
-                        leaf_atom.type[2],
-                        leaf_atom.type[3],
-                        quicktime_position(file),
-                        parent_atom->end
-                       );
-#endif		
 		if(quicktime_atom_is(&leaf_atom, "ctab"))
 		{
 			quicktime_read_ctab(file, &(table->ctab));
@@ -296,7 +276,6 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		else
 		if (quicktime_atom_is(&leaf_atom, "esds"))
 		{
-                //                fprintf(stderr, "*** GOT ESDS ATOM\n");
 			quicktime_read_esds(file, &(table->esds));
                         table->has_esds = 1;
                         quicktime_atom_skip(file, &leaf_atom);
@@ -309,18 +288,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                                                &leaf_atom);
                 }
                 quicktime_atom_skip(file, &leaf_atom);
-#if 0
-                fprintf(stderr, "quicktime_read_stsd_video 2 %c%c%c%c, pos: %lld, end: %lld\n",
-                leaf_atom.type[0],
-                leaf_atom.type[1],
-                leaf_atom.type[2],
-                leaf_atom.type[3],
-                quicktime_position(file),
-                parent_atom->end
-                );
-#endif
 	}
-//printf("quicktime_read_stsd_video 2\n");
 }
 
 
@@ -480,20 +448,20 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
 
 void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 {
-	printf("       version %d\n", table->version);
-	printf("       revision %d\n", table->revision);
-	printf("       vendor %c%c%c%c\n", table->vendor[0], table->vendor[1], table->vendor[2], table->vendor[3]);
-	printf("       temporal_quality %ld\n", table->temporal_quality);
-	printf("       spatial_quality %ld\n", table->spatial_quality);
-	printf("       width %d\n", table->width);
-	printf("       height %d\n", table->height);
-	printf("       dpi_horizontal %f\n", table->dpi_horizontal);
-	printf("       dpi_vertical %f\n", table->dpi_vertical);
-	printf("       data_size %lld\n", table->data_size);
-	printf("       frames_per_sample %d\n", table->frames_per_sample);
-	printf("       compressor_name %s\n", table->compressor_name);
-	printf("       depth %d\n", table->depth);
-	printf("       ctab_id %d\n", table->ctab_id);
+	lqt_dump("       version %d\n", table->version);
+	lqt_dump("       revision %d\n", table->revision);
+	lqt_dump("       vendor %c%c%c%c\n", table->vendor[0], table->vendor[1], table->vendor[2], table->vendor[3]);
+	lqt_dump("       temporal_quality %ld\n", table->temporal_quality);
+	lqt_dump("       spatial_quality %ld\n", table->spatial_quality);
+	lqt_dump("       width %d\n", table->width);
+	lqt_dump("       height %d\n", table->height);
+	lqt_dump("       dpi_horizontal %f\n", table->dpi_horizontal);
+	lqt_dump("       dpi_vertical %f\n", table->dpi_vertical);
+	lqt_dump("       data_size %lld\n", table->data_size);
+	lqt_dump("       frames_per_sample %d\n", table->frames_per_sample);
+	lqt_dump("       compressor_name %s\n", table->compressor_name);
+	lqt_dump("       depth %d\n", table->depth);
+	lqt_dump("       ctab_id %d\n", table->ctab_id);
 
 	if (table->has_pasp)
 		quicktime_pasp_dump(&(table->pasp));
@@ -513,33 +481,33 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 
 void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
 {
-	printf("       version %d\n", table->version);
-	printf("       revision %d\n", table->revision);
-	printf("       vendor %c%c%c%c\n", table->vendor[0], table->vendor[1], table->vendor[2], table->vendor[3]);
-	printf("       channels %d\n", table->channels);
-	printf("       sample_size %d\n", table->sample_size);
+	lqt_dump("       version %d\n", table->version);
+	lqt_dump("       revision %d\n", table->revision);
+	lqt_dump("       vendor %c%c%c%c\n", table->vendor[0], table->vendor[1], table->vendor[2], table->vendor[3]);
+	lqt_dump("       channels %d\n", table->channels);
+	lqt_dump("       sample_size %d\n", table->sample_size);
 
         if(table->version < 2)
           {
-          printf("       compression_id %d\n", table->compression_id);
-          printf("       packet_size %d\n", table->packet_size);
-          printf("       samplerate %f\n",  table->samplerate);
+          lqt_dump("       compression_id %d\n", table->compression_id);
+          lqt_dump("       packet_size %d\n", table->packet_size);
+          lqt_dump("       samplerate %f\n",  table->samplerate);
           
           if(table->version == 1)
             {
-            printf("       samples_per_packet: %d\n", table->audio_samples_per_packet);
-            printf("       bytes_per_packet:   %d\n", table->audio_bytes_per_packet);
-            printf("       bytes_per_frame:    %d\n", table->audio_bytes_per_frame);
-            printf("       bytes_per_samples:  %d\n", table->audio_bytes_per_sample);
+            lqt_dump("       samples_per_packet: %d\n", table->audio_samples_per_packet);
+            lqt_dump("       bytes_per_packet:   %d\n", table->audio_bytes_per_packet);
+            lqt_dump("       bytes_per_frame:    %d\n", table->audio_bytes_per_frame);
+            lqt_dump("       bytes_per_samples:  %d\n", table->audio_bytes_per_sample);
             }
           
           }
         else if(table->version == 2)
           {
-          printf("       samplerate                     %f\n",  table->samplerate);
-          printf("       formatSpecificFlags:           %08x\n", table->formatSpecificFlags);
-          printf("       constBytesPerAudioPacket:      %d\n", table->constBytesPerAudioPacket);
-          printf("       constLPCMFramesPerAudioPacket: %d\n", table->constLPCMFramesPerAudioPacket);
+          lqt_dump("       samplerate                     %f\n",  table->samplerate);
+          lqt_dump("       formatSpecificFlags:           %08x\n", table->formatSpecificFlags);
+          lqt_dump("       constBytesPerAudioPacket:      %d\n", table->constBytesPerAudioPacket);
+          lqt_dump("       constLPCMFramesPerAudioPacket: %d\n", table->constLPCMFramesPerAudioPacket);
           }
         
         if(table->has_wave)
@@ -555,12 +523,12 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
 void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 {
 	quicktime_minf_t *minf = minf_ptr;
-	printf("       format %c%c%c%c\n",
+	lqt_dump("       format %c%c%c%c\n",
                table->format[0], table->format[1],
                table->format[2], table->format[3]);
 
 	quicktime_print_chars("       reserved ", table->reserved, 6);
-	printf("       data_reference %d\n", table->data_reference);
+	lqt_dump("       data_reference %d\n", table->data_reference);
 
 	if(minf->is_audio) quicktime_stsd_audio_dump(table);
 	if(minf->is_video) quicktime_stsd_video_dump(table);
@@ -575,7 +543,6 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 {
 	quicktime_atom_t atom;
 	quicktime_atom_write_header(file, &atom, table->format);
-/*printf("quicktime_write_stsd_table %c%c%c%c\n", table->format[0], table->format[1], table->format[2], table->format[3]); */
 	quicktime_write_data(file, table->reserved, 6);
 	quicktime_write_int16(file, table->data_reference);
 

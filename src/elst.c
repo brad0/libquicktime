@@ -30,10 +30,10 @@ void quicktime_write_elst_table(quicktime_t *file, quicktime_elst_table_t *table
 
 void quicktime_elst_table_dump(quicktime_elst_table_t *table)
 {
-	printf("    edit list table\n");
-	printf("     duration %ld\n", table->duration);
-	printf("     time %ld\n", table->time);
-	printf("     rate %f\n", table->rate);
+	lqt_dump("    edit list table\n");
+	lqt_dump("     duration %ld\n", table->duration);
+	lqt_dump("     time %ld\n", table->time);
+	lqt_dump("     rate %f\n", table->rate);
 }
 
 void quicktime_elst_init(quicktime_elst_t *elst)
@@ -69,10 +69,10 @@ void quicktime_elst_delete(quicktime_elst_t *elst)
 void quicktime_elst_dump(quicktime_elst_t *elst)
 {
 	int i;
-	printf("   edit list (elst)\n");
-	printf("    version %d\n", elst->version);
-	printf("    flags %ld\n", elst->flags);
-	printf("    total_entries %ld\n", elst->total_entries);
+	lqt_dump("   edit list (elst)\n");
+	lqt_dump("    version %d\n", elst->version);
+	lqt_dump("    flags %ld\n", elst->flags);
+	lqt_dump("    total_entries %ld\n", elst->total_entries);
 
 	for(i = 0; i < elst->total_entries; i++)
 	{

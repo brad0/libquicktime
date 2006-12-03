@@ -28,9 +28,9 @@ void quicktime_read_matrix(quicktime_t *file, quicktime_matrix_t *matrix)
 void quicktime_matrix_dump(quicktime_matrix_t *matrix)
 {
 	int i;
-	printf("   matrix");
-	for(i = 0; i < 9; i++) printf(" %f", matrix->values[i]);
-	printf("\n");
+	lqt_dump("   matrix");
+	for(i = 0; i < 9; i++) lqt_dump(" %f", matrix->values[i]);
+	lqt_dump("\n");
 }
 
 void quicktime_write_matrix(quicktime_t *file, quicktime_matrix_t *matrix)

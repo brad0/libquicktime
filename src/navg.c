@@ -31,21 +31,21 @@ int quicktime_navg_delete(quicktime_navg_t *navg)
 
 void quicktime_navg_dump(quicktime_navg_t *navg)
 {
-	printf("  object parameters (navg)\n");
-	printf("    version %i\n", navg->version);
-	printf("    columns %i\n", navg->columns);
-	printf("    rows %i\n", navg->rows);
-	printf("    loop frames %i\n", navg->loop_frames);
-	printf("    loop frame duration %i\n", navg->loop_dur);
-	printf("    movie type %i\n", navg->movietype);
-	printf("    loop timescale %i\n", navg->loop_timescale);
-	printf("    field of view %f\n", navg->fieldofview);
-	printf("    horizontal start pan %f\n", navg->startHPan);
-	printf("    horizontal end pan %f\n", navg->endHPan);
-	printf("    vertical end pan %f\n", navg->endVPan);
-	printf("    vertical start pan %f\n", navg->startVPan);
-	printf("    initial horizontal pan %f\n", navg->initialHPan);
-	printf("    initial vertical pan %f\n", navg->initialVPan);
+	lqt_dump("  object parameters (navg)\n");
+	lqt_dump("    version %i\n", navg->version);
+	lqt_dump("    columns %i\n", navg->columns);
+	lqt_dump("    rows %i\n", navg->rows);
+	lqt_dump("    loop frames %i\n", navg->loop_frames);
+	lqt_dump("    loop frame duration %i\n", navg->loop_dur);
+	lqt_dump("    movie type %i\n", navg->movietype);
+	lqt_dump("    loop timescale %i\n", navg->loop_timescale);
+	lqt_dump("    field of view %f\n", navg->fieldofview);
+	lqt_dump("    horizontal start pan %f\n", navg->startHPan);
+	lqt_dump("    horizontal end pan %f\n", navg->endHPan);
+	lqt_dump("    vertical end pan %f\n", navg->endVPan);
+	lqt_dump("    vertical start pan %f\n", navg->startVPan);
+	lqt_dump("    initial horizontal pan %f\n", navg->initialHPan);
+	lqt_dump("    initial vertical pan %f\n", navg->initialVPan);
 }
 
 int quicktime_read_navg(quicktime_t *file, quicktime_navg_t *navg, quicktime_atom_t *navg_atom)

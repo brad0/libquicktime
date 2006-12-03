@@ -38,35 +38,35 @@ int quicktime_obji_delete(quicktime_obji_t *obji)
 
 void quicktime_obji_dump(quicktime_obji_t *obji)
 {
-       printf("object node (obji)\n");
-       printf(" version %i\n", obji->version );
-       printf(" revision %i\n", obji->revision );
+       lqt_dump("object node (obji)\n");
+       lqt_dump(" version %i\n", obji->version );
+       lqt_dump(" revision %i\n", obji->revision );
 
-       printf(" movie type %i\n", obji->movieType );
-       printf(" view state count %i\n", obji->viewStateCount );
-       printf(" default viewstate %i\n", obji->defaultViewState );
-       printf(" mousedown viewstate %i\n", obji->mouseDownViewState );
-       printf(" view duration %ld\n", obji->viewDuration );
-       printf(" columns %ld\n", obji->columns );
-       printf(" rows %ld\n", obji->rows );
+       lqt_dump(" movie type %i\n", obji->movieType );
+       lqt_dump(" view state count %i\n", obji->viewStateCount );
+       lqt_dump(" default viewstate %i\n", obji->defaultViewState );
+       lqt_dump(" mousedown viewstate %i\n", obji->mouseDownViewState );
+       lqt_dump(" view duration %ld\n", obji->viewDuration );
+       lqt_dump(" columns %ld\n", obji->columns );
+       lqt_dump(" rows %ld\n", obji->rows );
        
-       printf(" mouse motion scale %f\n", obji->mouseMotionScale);
-       printf(" minimum pan %f\n", obji->minPan );
-       printf(" maximum pan %f\n", obji->maxPan );
-       printf(" default pan %f\n", obji->defaultPan );
-       printf(" minimum tilt %f\n", obji->minTilt );
-       printf(" maximum tilt %f\n", obji->maxTilt );
-       printf(" default tilt %f\n", obji->defaultTilt );
-       printf(" minimum fov %f\n", obji->minFOV );
-       printf(" fov %f\n", obji->FOV );
-       printf(" default fov %f\n", obji->defaultFOV );
-       printf(" default horizontal viewcenter %f\n", obji->defaultViewCenterH );
-       printf(" default vertical viewcenter %f\n", obji->defaultViewCenterV );
-       printf(" view rate %f\n", obji->viewRate );
-       printf(" frame rate %f\n", obji->frameRate );
+       lqt_dump(" mouse motion scale %f\n", obji->mouseMotionScale);
+       lqt_dump(" minimum pan %f\n", obji->minPan );
+       lqt_dump(" maximum pan %f\n", obji->maxPan );
+       lqt_dump(" default pan %f\n", obji->defaultPan );
+       lqt_dump(" minimum tilt %f\n", obji->minTilt );
+       lqt_dump(" maximum tilt %f\n", obji->maxTilt );
+       lqt_dump(" default tilt %f\n", obji->defaultTilt );
+       lqt_dump(" minimum fov %f\n", obji->minFOV );
+       lqt_dump(" fov %f\n", obji->FOV );
+       lqt_dump(" default fov %f\n", obji->defaultFOV );
+       lqt_dump(" default horizontal viewcenter %f\n", obji->defaultViewCenterH );
+       lqt_dump(" default vertical viewcenter %f\n", obji->defaultViewCenterV );
+       lqt_dump(" view rate %f\n", obji->viewRate );
+       lqt_dump(" frame rate %f\n", obji->frameRate );
        
-       printf(" animation settings %ld\n", obji->animSettings );
-       printf(" control settings %ld\n", obji->controlSettings );
+       lqt_dump(" animation settings %ld\n", obji->animSettings );
+       lqt_dump(" control settings %ld\n", obji->controlSettings );
 }
 
 int quicktime_read_obji(quicktime_t *file, quicktime_obji_t *obji)

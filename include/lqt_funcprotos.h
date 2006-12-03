@@ -11,11 +11,11 @@ int quicktime_atom_skip(quicktime_t *file, quicktime_atom_t *atom);
 
 /* audio.c */
 
-void lqt_convert_audio_encode(int16_t ** in_int, float ** in_float,
+void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in_float,
                               void * out, int num_channels, int num_samples,
                               lqt_sample_format_t stream_format);
 
-void lqt_convert_audio_decode(void * in, int16_t ** out_int,
+void lqt_convert_audio_decode(quicktime_t * file, void * in, int16_t ** out_int,
                               float ** out_float, int num_channels, int num_samples,
                               lqt_sample_format_t stream_format);
  
@@ -476,6 +476,14 @@ void quicktime_read_iods(quicktime_t *file, quicktime_iods_t * iods);
 void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov);
 void quicktime_iods_dump(quicktime_iods_t * iods);
 void quicktime_iods_delete(quicktime_iods_t * iods);
+
+/* log.c */
+
+void lqt_log(quicktime_t * file, lqt_log_level_t level,
+             const char * domain, const char * format, ...);
+
+/* For dumping strings */
+void lqt_dump(const char * format, ...);
 
 /* matrix.c */
 

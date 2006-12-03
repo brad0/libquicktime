@@ -154,21 +154,21 @@ void quicktime_iods_delete(quicktime_iods_t * iods)
 void quicktime_iods_dump(quicktime_iods_t * iods)
   {
   int i;
-  printf("Initial object descriptor (iods)\n");
-  printf("  version:              %d\n", iods->version);
-  printf("  flags:                %ld\n", iods->flags);
-  printf("  ObjectDescriptorID:   %04x\n", iods->ObjectDescriptorID);
-  printf("  ODProfileLevel:       %d\n", iods->ODProfileLevel);
-  printf("  sceneProfileLevel:    %d\n", iods->sceneProfileLevel);
-  printf("  audioProfileId:       %d [%s]\n", iods->audioProfileId,
+  lqt_dump("Initial object descriptor (iods)\n");
+  lqt_dump("  version:              %d\n", iods->version);
+  lqt_dump("  flags:                %ld\n", iods->flags);
+  lqt_dump("  ObjectDescriptorID:   %04x\n", iods->ObjectDescriptorID);
+  lqt_dump("  ODProfileLevel:       %d\n", iods->ODProfileLevel);
+  lqt_dump("  sceneProfileLevel:    %d\n", iods->sceneProfileLevel);
+  lqt_dump("  audioProfileId:       %d [%s]\n", iods->audioProfileId,
          get_audio_profile_name(iods->audioProfileId));
-  printf("  videoProfileId:       %d [%s]\n", iods->videoProfileId,
+  lqt_dump("  videoProfileId:       %d [%s]\n", iods->videoProfileId,
          get_video_profile_name(iods->videoProfileId));
-  printf("  graphicsProfileLevel: %d\n", iods->graphicsProfileLevel);
+  lqt_dump("  graphicsProfileLevel: %d\n", iods->graphicsProfileLevel);
   
   for(i = 0; i < iods->num_tracks; i++)
     {
-    printf("  track %d: ES_ID_IncTag: %d, length: %d, track_id: %d\n",
+    lqt_dump("  track %d: ES_ID_IncTag: %d, length: %d, track_id: %d\n",
            i+1, iods->tracks[i].ES_ID_IncTag,
            iods->tracks[i].length, iods->tracks[i].track_id);
     }
@@ -181,7 +181,6 @@ void quicktime_iods_add_track(quicktime_iods_t * iods, quicktime_trak_t * trak)
   iods->tracks[iods->num_tracks].length       = 0x04;
   iods->tracks[iods->num_tracks].track_id     = trak->tkhd.track_id;
   iods->num_tracks++;
-  //  fprintf(stderr, "quicktime_iods_add_track %d\n", trak->tkhd.track_id);
   }
 
 void quicktime_read_iods(quicktime_t *file, quicktime_iods_t * iods)
@@ -217,7 +216,6 @@ void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov)
   quicktime_atom_t atom;
   int i;
   quicktime_iods_t * iods = &(moov->iods);
-  //  fprintf(stderr, "quicktime_write_iods: %d\n", moov->total_tracks);
   
   quicktime_atom_write_header(file, &atom, "iods");
 

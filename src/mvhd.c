@@ -31,24 +31,24 @@ int quicktime_mvhd_delete(quicktime_mvhd_t *mvhd)
 
 void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 {
-	printf(" movie header\n");
-	printf("  version %d\n", mvhd->version);
-	printf("  flags %ld\n", mvhd->flags);
-	printf("  creation_time %llu\n", mvhd->creation_time);
-	printf("  modification_time %llu\n", mvhd->modification_time);
-	printf("  time_scale %ld\n", mvhd->time_scale);
-	printf("  duration %lld\n", mvhd->duration);
-	printf("  preferred_rate %f\n", mvhd->preferred_rate);
-	printf("  preferred_volume %f\n", mvhd->preferred_volume);
+	lqt_dump(" movie header\n");
+	lqt_dump("  version %d\n", mvhd->version);
+	lqt_dump("  flags %ld\n", mvhd->flags);
+	lqt_dump("  creation_time %llu\n", mvhd->creation_time);
+	lqt_dump("  modification_time %llu\n", mvhd->modification_time);
+	lqt_dump("  time_scale %ld\n", mvhd->time_scale);
+	lqt_dump("  duration %lld\n", mvhd->duration);
+	lqt_dump("  preferred_rate %f\n", mvhd->preferred_rate);
+	lqt_dump("  preferred_volume %f\n", mvhd->preferred_volume);
 	quicktime_print_chars("  reserved ", mvhd->reserved, 10);
 	quicktime_matrix_dump(&(mvhd->matrix));
-	printf("  preview_time %ld\n", mvhd->preview_time);
-	printf("  preview_duration %ld\n", mvhd->preview_duration);
-	printf("  poster_time %ld\n", mvhd->poster_time);
-	printf("  selection_time %ld\n", mvhd->selection_time);
-	printf("  selection_duration %ld\n", mvhd->selection_duration);
-	printf("  current_time %ld\n", mvhd->current_time);
-	printf("  next_track_id %ld\n", mvhd->next_track_id);
+	lqt_dump("  preview_time %ld\n", mvhd->preview_time);
+	lqt_dump("  preview_duration %ld\n", mvhd->preview_duration);
+	lqt_dump("  poster_time %ld\n", mvhd->poster_time);
+	lqt_dump("  selection_time %ld\n", mvhd->selection_time);
+	lqt_dump("  selection_duration %ld\n", mvhd->selection_duration);
+	lqt_dump("  current_time %ld\n", mvhd->current_time);
+	lqt_dump("  next_track_id %ld\n", mvhd->next_track_id);
 }
 
 void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_atom_t *parent_atom)

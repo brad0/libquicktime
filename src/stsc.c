@@ -50,13 +50,13 @@ void quicktime_stsc_delete(quicktime_stsc_t *stsc)
 void quicktime_stsc_dump(quicktime_stsc_t *stsc)
 {
 	int i;
-	printf("     sample to chunk (stsc)\n");
-	printf("      version %d\n", stsc->version);
-	printf("      flags %ld\n", stsc->flags);
-	printf("      total_entries %ld\n", stsc->total_entries);
+	lqt_dump("     sample to chunk (stsc)\n");
+	lqt_dump("      version %d\n", stsc->version);
+	lqt_dump("      flags %ld\n", stsc->flags);
+	lqt_dump("      total_entries %ld\n", stsc->total_entries);
 	for(i = 0; i < stsc->total_entries; i++)
 	{
-		printf("       chunk %ld samples %lx id %ld\n", 
+		lqt_dump("       chunk %ld samples %lx id %ld\n", 
 			stsc->table[i].chunk, stsc->table[i].samples, stsc->table[i].id);
 	}
 }

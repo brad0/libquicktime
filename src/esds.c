@@ -16,7 +16,6 @@ int quicktime_read_mp4_descr_length(quicktime_t * file)
     length = (length << 7) | (b & 0x7F);
     } while ((b & 0x80) && (num_bytes < 4));
 
-  //  fprintf(stderr, "quicktime_read_mp4_descr_length: %d\n", length);
   
   return length;
   }
@@ -156,27 +155,27 @@ void quicktime_write_esds(quicktime_t * file, quicktime_esds_t * esds)
 void quicktime_esds_dump(quicktime_esds_t * esds)
   {
   int i;
-  printf("         esds: \n");
-  printf("           Version:          %d\n", esds->version);
-  printf("           Flags:            0x%06lx\n", esds->flags);
-  printf("           ES ID:            0x%04x\n", esds->esid);
-  printf("           Priority:         0x%02x\n", esds->stream_priority);
-  printf("           objectTypeId:     %d\n", esds->objectTypeId);
-  printf("           streamType:       0x%02x\n", esds->streamType);
-  printf("           bufferSizeDB:     %d\n", esds->bufferSizeDB);
+  lqt_dump("         esds: \n");
+  lqt_dump("           Version:          %d\n", esds->version);
+  lqt_dump("           Flags:            0x%06lx\n", esds->flags);
+  lqt_dump("           ES ID:            0x%04x\n", esds->esid);
+  lqt_dump("           Priority:         0x%02x\n", esds->stream_priority);
+  lqt_dump("           objectTypeId:     %d\n", esds->objectTypeId);
+  lqt_dump("           streamType:       0x%02x\n", esds->streamType);
+  lqt_dump("           bufferSizeDB:     %d\n", esds->bufferSizeDB);
 
-  printf("           maxBitrate:       %d\n", esds->maxBitrate);
-  printf("           avgBitrate:       %d\n", esds->avgBitrate);
-  printf("           decoderConfigLen: %d\n", esds->decoderConfigLen);
-  printf("           decoderConfig:");
+  lqt_dump("           maxBitrate:       %d\n", esds->maxBitrate);
+  lqt_dump("           avgBitrate:       %d\n", esds->avgBitrate);
+  lqt_dump("           decoderConfigLen: %d\n", esds->decoderConfigLen);
+  lqt_dump("           decoderConfig:");
 
   for(i = 0; i < esds->decoderConfigLen; i++)
     {
     if(!(i % 16))
-      printf("\n           ");
-    printf("%02x ", esds->decoderConfig[i]);
+      lqt_dump("\n           ");
+    lqt_dump("%02x ", esds->decoderConfig[i]);
     }
-  printf("\n");
+  lqt_dump("\n");
   }
 
 void quicktime_esds_delete(quicktime_esds_t * esds)

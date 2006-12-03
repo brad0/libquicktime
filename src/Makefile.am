@@ -66,6 +66,7 @@ hdlr.c \
 imgp.c \
 impn.c \
 iods.c \
+log.c \
 matrix.c \
 mdat.c \
 mdhd.c \

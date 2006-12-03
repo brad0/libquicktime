@@ -17,8 +17,8 @@ int quicktime_vrni_delete(quicktime_vrni_t *vrni)
 
 void quicktime_vrni_dump(quicktime_vrni_t *vrni)
 {
-	printf("         node id (vrni)\n");
-	printf("          id %i\n", vrni->ID);
+	lqt_dump("         node id (vrni)\n");
+	lqt_dump("          id %i\n", vrni->ID);
 	quicktime_nloc_dump(&(vrni->nloc));
 }
 

@@ -1379,6 +1379,10 @@ struct quicktime_s
 /*	int color_model, row_span; */
 
 	quicktime_qtvr_node_t qtvr_node[MAXNODES];
+
+/* Logging support */
+        lqt_log_callback_t log_callback;
+        void * log_data;
 };
 
 typedef struct

@@ -149,7 +149,7 @@ AC_HEADER_TIME
 dnl Checks for library functions.
 
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([gettimeofday memalign posix_memalign lrint])
+AC_CHECK_FUNCS([gettimeofday memalign posix_memalign lrint vasprintf])
 AC_CHECK_FUNCS(fseeko, [have_fseeko="true"])
 AM_CONDITIONAL(HAVE_FSEEKO, test x"$have_fseeko" = "xtrue")
 

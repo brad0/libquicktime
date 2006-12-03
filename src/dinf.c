@@ -18,7 +18,7 @@ void quicktime_dinf_init_all(quicktime_dinf_t *dinf)
 
 void quicktime_dinf_dump(quicktime_dinf_t *dinf)
 {
-	printf("    data information (dinf)\n");
+	lqt_dump("    data information (dinf)\n");
 	quicktime_dref_dump(&(dinf->dref));
 }
 

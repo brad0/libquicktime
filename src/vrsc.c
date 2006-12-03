@@ -18,12 +18,12 @@ int quicktime_vrsc_delete(quicktime_vrsc_t *vrsc)
 
 void quicktime_vrsc_dump(quicktime_vrsc_t *vrsc)
 {
-	printf("        world header (vrsc)\n");
-	printf("         version %i\n",  vrsc->version);
-	printf("         revision %i\n",  vrsc->revision);
-	printf("         name atom id %ld\n",  vrsc->NameAtomID);
-	printf("         default node %ld\n", vrsc->DefaultNodeID);
-	printf("         world flags %ld\n", vrsc->flags);
+	lqt_dump("        world header (vrsc)\n");
+	lqt_dump("         version %i\n",  vrsc->version);
+	lqt_dump("         revision %i\n",  vrsc->revision);
+	lqt_dump("         name atom id %ld\n",  vrsc->NameAtomID);
+	lqt_dump("         default node %ld\n", vrsc->DefaultNodeID);
+	lqt_dump("         world flags %ld\n", vrsc->flags);
 }
 
 int quicktime_read_vrsc(quicktime_t *file, quicktime_vrsc_t *vrsc, quicktime_qtatom_t *vrsc_atom)

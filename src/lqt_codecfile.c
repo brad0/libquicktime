@@ -8,11 +8,15 @@
 
 #include <quicktime/lqt.h>
 
+#include <lqt_funcprotos.h>
+
 #include <lqt_codecinfo_private.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#define LOG_DOMAIN "codecfile"
 
 /*
  *  The keywords are defined globaly, so they are automatically
@@ -516,16 +520,7 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   char * pos = (char*)0;
   lqt_codec_info_t * ret =     (lqt_codec_info_t *)0;
   lqt_codec_info_t * ret_end = (lqt_codec_info_t *)0;
-
-#ifndef NDEBUG
-  int num_audio_codecs = 0;
-  int num_video_codecs = 0;
-#endif
   
-#ifndef NDEBUG
-  //  fprintf(stderr, "Reading codec file %s...", filename_buffer);
-#endif
-
   if(*filename_buffer == '\0')
     create_filename();
   
@@ -534,9 +529,6 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   if(!input)
     {
 
-#ifndef NDEBUG
-    //    fprintf(stderr, "failed\n");
-#endif
     return (lqt_codec_info_t*)0;
     }
   
@@ -591,21 +583,10 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
         }
       read_codec_info(input, ret_end, pos);
 
-#ifndef NDEBUG
-      if(ret_end->type == LQT_CODEC_AUDIO)
-        num_audio_codecs++;
-      else if(ret_end->type == LQT_CODEC_VIDEO)
-        num_video_codecs++;
-#endif
       ret_end->next = (lqt_codec_info_t*)0;
       }
     }
 
-#ifndef NDEBUG
-  //  fprintf(stderr, "done, found %d audio codecs, %d video codecs\n",
-  //          num_audio_codecs, num_video_codecs);
-
-#endif
 
   fclose(input);
   
@@ -822,9 +803,6 @@ void lqt_registry_write()
   if(*filename_buffer == '\0')
     create_filename();
 
-#ifndef NDEBUG
-  //  fprintf(stderr, "Writing codec file %s...", filename_buffer);
-#endif
   
   output = fopen(filename_buffer, "w");
   
@@ -895,15 +873,12 @@ void lqt_registry_write()
   fclose(output);
   lqt_registry_unlock();
 
-#ifndef NDEBUG
-  //  fprintf(stderr, "done\n");
-#endif
   return;
 fail:
   fclose(output);
   lqt_registry_unlock();
-#ifndef NDEBUG
-  fprintf(stderr, "%s could not be written, deleting imcomplete file\n", filename_buffer);
-#endif
+  
+  lqt_log(NULL, LQT_LOG_INFO, LOG_DOMAIN,
+          "%s could not be written, deleting imcomplete file", filename_buffer);
   remove(filename_buffer);
   }

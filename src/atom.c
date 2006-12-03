@@ -10,7 +10,6 @@ static int read_type(uint8_t *data, uint8_t *type)
 	type[2] = data[6];
 	type[3] = data[7];
 
-/*printf("%c%c%c%c ", type[0], type[1], type[2], type[3]); */
 /* need this for quicktime_check_sig */
 	if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
 	return 0;
@@ -101,13 +100,6 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 		result = read_type(header, atom->type);
 		atom->size = read_size(header);
 		atom->end = atom->start + atom->size;
-/*
- * printf("quicktime_atom_read_header 1 %c%c%c%c start %llx size %llx end %llx ftell %llx %llx\n", 
- * 	atom->type[0], atom->type[1], atom->type[2], atom->type[3],
- * 	atom->start, atom->size, atom->end,
- * 	file->file_position,
- * 	(int64_t)ftello(file->stream));
- */
 
 /* Skip placeholder atom */
 		if(quicktime_match_32(atom->type, "wide"))
@@ -131,12 +123,6 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 			if(!quicktime_read_data(file, header, HEADER_LENGTH)) return 1;
 			atom->size = read_size64(header);
 			atom->end = atom->start + atom->size;
-/*
- * printf("quicktime_atom_read_header 2 %c%c%c%c start %llx size %llx end %llx ftell %llx\n", 
- * 	atom->type[0], atom->type[1], atom->type[2], atom->type[3],
- * 	atom->start, atom->size, atom->end,
- * 	file->file_position);
- */
 		}
 	}
 
@@ -199,7 +185,6 @@ void quicktime_atom_write_footer(quicktime_t *file, quicktime_atom_t *atom)
 		if(atom->use_64)
 		{
 			quicktime_set_position(file, atom->start + 8);
-//printf("quicktime_atom_write_footer %llx %llx %llx %llx\n", file->total_length, file->file_position, atom->start, atom->end);
 			quicktime_write_int64(file, atom->end - atom->start);
 		}
 		else

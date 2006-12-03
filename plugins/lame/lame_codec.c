@@ -5,6 +5,8 @@
 #include <lame/lame.h>
 #include <quicktime/quicktime.h>
 
+#define LOG_DOMAIN "lame"
+
 /*
  *  We decode all headers to figure out, how many COMPLETE frames we have encoded.
  */
@@ -77,7 +79,6 @@ static int header_check(uint32_t head)
                 return 0;
         if ((head & 0xffff0000) == 0xfffe0000)
                 return 0;
-        //        fprintf(stderr, "Head check ok %08x\n", head);
         return 1;
 }
 
@@ -322,7 +323,7 @@ static int write_data(quicktime_t *file, int track,
     {
     if(!decode_header(&h, chunk_ptr))
       {
-      fprintf(stderr, "Ouch: lame created non mp3 data\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Ouch: lame created non mp3 data\n");
       break;
       }
     if(codec->encoder_output_size >= h.frame_bytes)
@@ -331,7 +332,6 @@ static int write_data(quicktime_t *file, int track,
       chunk_ptr += h.frame_bytes;
       chunk_bytes += h.frame_bytes;
       chunk_samples += h.samples_per_frame;
-      //      fprintf(stderr, "Created frame %d bytes\n", h.frame_bytes);
       }
     else
       break;
@@ -391,10 +391,6 @@ static int write_data(quicktime_t *file, int track,
     if(codec->encoder_output_size)
       memmove(codec->encoder_output, chunk_ptr, codec->encoder_output_size);
     
-#if 0
-    fprintf(stderr, "Encoded %d samples %d bytes %d remaining\n",
-            chunk_samples, chunk_bytes, codec->encoder_output_size);
-#endif   
     }
   
   
@@ -480,7 +476,7 @@ static int encode(quicktime_t *file,
     //    lame_set_padding_type(codec->lame_global, PAD_ALL); // PAD_NO | PAD_ALL | PAD_ADJUST
     
     if((result = lame_init_params(codec->lame_global)) < 0)
-      printf(" lame_init_params returned %d\n", result);
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lame_init_params returned %d\n", result);
     //    codec->encoded_header = mpeg3_new_layer();
     codec->samples_per_frame = lame_get_framesize(codec->lame_global);
 
@@ -617,8 +613,6 @@ static int set_parameter(quicktime_t *file, int track,
     codec->quality = *(int*)value;
   else if(!strcasecmp(key, "mp3_quality_vbr"))
     codec->quality_vbr = *(int*)value;
-  else
-    fprintf(stderr, "set_parameter: %s\n", key);
   
   return 0;
   }
@@ -640,14 +634,12 @@ static int flush(quicktime_t *file, int track)
 
     if(result > 0)
       {
-      //      fprintf(stderr, "Flush: %d\n", result);
       codec->encoder_output_size += result;
       write_data(file, track, codec, codec->samples_read - codec->samples_written);
       return 1;
       }
     }
   return 0;
-  //  fprintf(stderr, "Samples read: %lld, Samples written: %lld\n", codec->samples_read, codec->samples_written);
   }
 
 void quicktime_init_codec_lame(quicktime_audio_map_t *atrack)

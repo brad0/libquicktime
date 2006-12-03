@@ -16,13 +16,9 @@ void quicktime_mdia_init_qtvr(quicktime_t *file,
 								int timescale,
 								int frame_duration)
 {
-//printf("quicktime_mdia_init_panorama 1\n");
 	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
-//printf("quicktime_mdia_init_panorama 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
 	quicktime_minf_init_qtvr(file, &(mdia->minf), track_type, width, height, frame_duration);
-//printf("quicktime_mdia_init_panorama 1\n");
 	quicktime_hdlr_init_qtvr(&(mdia->hdlr), track_type);
-//printf("quicktime_mdia_init_panorama 2\n");
 }
 
 void quicktime_mdia_init_panorama(quicktime_t *file,
@@ -32,13 +28,9 @@ void quicktime_mdia_init_panorama(quicktime_t *file,
 								int timescale,
 								int frame_duration)
 {
-//printf("quicktime_mdia_init_panorama 1\n");
 	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
-//printf("quicktime_mdia_init_panorama 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
 	quicktime_minf_init_panorama(file, &(mdia->minf), width, height, frame_duration);
-//printf("quicktime_mdia_init_panorama 1\n");
 	quicktime_hdlr_init_panorama(&(mdia->hdlr));
-//printf("quicktime_mdia_init_panorama 2\n");
 }
 
 void quicktime_mdia_init_video(quicktime_t *file, 
@@ -49,13 +41,9 @@ void quicktime_mdia_init_video(quicktime_t *file,
                                                                 int timescale,
 								char *compressor)
 {
-//printf("quicktime_mdia_init_video 1\n");
 	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
-//printf("quicktime_mdia_init_video 1 %d %f\n", mdia->mdhd.time_scale, frame_rate);
 	quicktime_minf_init_video(file, &(mdia->minf), frame_w, frame_h, frame_duration, timescale, compressor);
-//printf("quicktime_mdia_init_video 1\n");
 	quicktime_hdlr_init_video(&(mdia->hdlr));
-//printf("quicktime_mdia_init_video 2\n");
 }
 
 void quicktime_mdia_init_audio(quicktime_t *file, 
@@ -85,7 +73,7 @@ void quicktime_mdia_delete(quicktime_mdia_t *mdia)
 
 void quicktime_mdia_dump(quicktime_mdia_t *mdia)
 {
-	printf("  media (mdia)\n");
+	lqt_dump("  media (mdia)\n");
 	quicktime_mdhd_dump(&(mdia->mdhd));
 	quicktime_hdlr_dump(&(mdia->hdlr));
 	quicktime_minf_dump(&(mdia->minf));
@@ -99,7 +87,6 @@ int quicktime_read_mdia(quicktime_t *file, quicktime_trak_t *trak,
 	do
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
-//printf("quicktime_read_mdia %llx\n", quicktime_position(file));
 
 /* mandatory */
 		if(quicktime_atom_is(&leaf_atom, "mdhd"))

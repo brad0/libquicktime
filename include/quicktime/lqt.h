@@ -17,6 +17,17 @@ extern "C" {
   
 void *lqt_bufalloc(size_t size);
 
+
+  
+/** \ingroup log
+ *  \brief Set callback for global logging
+ *  \param cb Callback function
+ *  \param data Application supplied data
+ */
+
+void lqt_set_log_callback(lqt_log_callback_t * cb, void * data);
+                           
+  
 /** \ingroup general
  *
  * \brief Return the raw filedescriptor associated with the file
@@ -972,6 +983,17 @@ lqt_file_type_t lqt_get_file_type(quicktime_t * file);
 quicktime_t * lqt_open_read(const char * filename);
 
 /** \ingroup general
+    \brief Open a file for reading
+    \param filename A path to a regular file
+    \param cb Log callback
+    \param log_data Data for log callback
+    \returns An initialized file handle or NULL if opening failed.
+    
+*/
+
+  quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t * cb, void * log_data);
+  
+/** \ingroup general
     \brief Open a file for writing
     \param filename A path to a regular file
     \param type The type of the file, you want to create
@@ -981,6 +1003,19 @@ quicktime_t * lqt_open_read(const char * filename);
 
 quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type);
 
+/** \ingroup general
+    \brief Open a file for writing
+    \param filename A path to a regular file
+    \param type The type of the file, you want to create
+    \param cb Log callback
+    \param log_data Data for log callback
+    \returns An initialized file handle or NULL if opening failed.
+    
+*/
+
+quicktime_t * lqt_open_write_with_log(const char * filename, lqt_file_type_t type,
+                                      lqt_log_callback_t * cb, void * log_data);
+  
 /** \ingroup general
     \brief Set the segment size for ODML AVIs
     \param file A quicktime handle

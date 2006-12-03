@@ -18,11 +18,11 @@ void quicktime_smhd_delete(quicktime_smhd_t *smhd)
 
 void quicktime_smhd_dump(quicktime_smhd_t *smhd)
 {
-	printf("    sound media header\n");
-	printf("     version %d\n", smhd->version);
-	printf("     flags %ld\n", smhd->flags);
-	printf("     balance %d\n", smhd->balance);
-	printf("     reserved %d\n", smhd->reserved);
+	lqt_dump("    sound media header\n");
+	lqt_dump("     version %d\n", smhd->version);
+	lqt_dump("     flags %ld\n", smhd->flags);
+	lqt_dump("     balance %d\n", smhd->balance);
+	lqt_dump("     reserved %d\n", smhd->reserved);
 }
 
 void quicktime_read_smhd(quicktime_t *file, quicktime_smhd_t *smhd)

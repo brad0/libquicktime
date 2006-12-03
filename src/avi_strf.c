@@ -103,49 +103,49 @@ void quicktime_strf_dump_audio(quicktime_strf_t *strf)
   switch(strf->wf.type)
     {
     case LQT_WAVEFORMAT_WAVEFORMAT:
-      printf("  strf (WAVEFORMAT)");
+      lqt_dump("  strf (WAVEFORMAT)");
       break;
     case LQT_WAVEFORMAT_PCMWAVEFORMAT:
-      printf("  strf (PCMWAVEFORMAT)");
+      lqt_dump("  strf (PCMWAVEFORMAT)");
       break;
     case LQT_WAVEFORMAT_WAVEFORMATEX:
-      printf("  strf (WAVEFORMATEX)");
+      lqt_dump("  strf (WAVEFORMATEX)");
       break;
     case LQT_WAVEFORMAT_WAVEFORMATEXTENSIBLE:
-      printf("  strf (WAVEFORMATEXTENSIBLE)");
+      lqt_dump("  strf (WAVEFORMATEXTENSIBLE)");
       break;
     }
 
-  printf("\n    wFormatTag:      %04x\n", strf->wf.f.WAVEFORMAT.wFormatTag);     /* value that identifies compression format */
-  printf("    nChannels:       %d\n", strf->wf.f.WAVEFORMAT.nChannels);
-  printf("    nSamplesPerSec:  %d\n", strf->wf.f.WAVEFORMAT.nSamplesPerSec);
-  printf("    nAvgBytesPerSec: %d\n", strf->wf.f.WAVEFORMAT.nAvgBytesPerSec);
-  printf("    nBlockAlign:     %d\n", strf->wf.f.WAVEFORMAT.nBlockAlign);    /* size of a data sample */
+  lqt_dump("\n    wFormatTag:      %04x\n", strf->wf.f.WAVEFORMAT.wFormatTag);     /* value that identifies compression format */
+  lqt_dump("    nChannels:       %d\n", strf->wf.f.WAVEFORMAT.nChannels);
+  lqt_dump("    nSamplesPerSec:  %d\n", strf->wf.f.WAVEFORMAT.nSamplesPerSec);
+  lqt_dump("    nAvgBytesPerSec: %d\n", strf->wf.f.WAVEFORMAT.nAvgBytesPerSec);
+  lqt_dump("    nBlockAlign:     %d\n", strf->wf.f.WAVEFORMAT.nBlockAlign);    /* size of a data sample */
   
   switch(strf->wf.type)
     {
     case LQT_WAVEFORMAT_WAVEFORMAT:
       break;
     case LQT_WAVEFORMAT_PCMWAVEFORMAT:
-      printf("    wBitsPerSample:  %d\n",  strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
+      lqt_dump("    wBitsPerSample:  %d\n",  strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
       break;
     case LQT_WAVEFORMAT_WAVEFORMATEX:
-      printf("    wBitsPerSample:  %d\n",  strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
-      printf("    cbSize:          %d\n",  strf->wf.f.WAVEFORMATEX.cbSize);
+      lqt_dump("    wBitsPerSample:  %d\n",  strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
+      lqt_dump("    cbSize:          %d\n",  strf->wf.f.WAVEFORMATEX.cbSize);
       break;
     case LQT_WAVEFORMAT_WAVEFORMATEXTENSIBLE:
-      printf("    wBitsPerSample:      %d\n", strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
-      printf("    cbSize:              %d\n", strf->wf.f.WAVEFORMATEX.cbSize);
-      printf("    wValidBitsPerSample: %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.Samples.wValidBitsPerSample);
-      printf("    dwChannelMask:       %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.dwChannelMask);
-      printf("    SubFormat:           ");
+      lqt_dump("    wBitsPerSample:      %d\n", strf->wf.f.PCMWAVEFORMAT.wBitsPerSample);
+      lqt_dump("    cbSize:              %d\n", strf->wf.f.WAVEFORMATEX.cbSize);
+      lqt_dump("    wValidBitsPerSample: %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.Samples.wValidBitsPerSample);
+      lqt_dump("    dwChannelMask:       %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.dwChannelMask);
+      lqt_dump("    SubFormat:           ");
       quicktime_GUID_dump(&(strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat));
-      printf("  \n");
+      lqt_dump("  \n");
       break;
     }
   if(strf->wf.f.WAVEFORMATEX.ext_data)
     {
-    printf("    Extradata: %d bytes (hexdump follows)\n",
+    lqt_dump("    Extradata: %d bytes (hexdump follows)\n",
            strf->wf.f.WAVEFORMATEX.ext_size);
     lqt_hexdump_stdout(strf->wf.f.WAVEFORMATEX.ext_data,
                        strf->wf.f.WAVEFORMATEX.ext_size, 16);
@@ -245,25 +245,25 @@ void quicktime_write_strf_video(quicktime_t *file,
 
 void quicktime_strf_dump_video(quicktime_strf_t *strf)
   {
-  printf("  strf (BITMAPINFOHEADER)\n");
-  printf("    biSize:          %d\n", strf->bh.biSize);  /* sizeof(BITMAPINFOHEADER) */
-  printf("    biWidth:         %d\n", strf->bh.biWidth);
-  printf("    biHeight:        %d\n", strf->bh.biHeight);
-  printf("    biPlanes:        %d\n", strf->bh.biPlanes); /* unused */
-  printf("    biBitCount:      %d\n", strf->bh.biBitCount);
-  printf("    biCompression:   %4s\n", strf->bh.biCompression); /* fourcc of image */
-  printf("    biSizeImage:     %d\n", strf->bh.biSizeImage);   /* size of image. For uncompressed images */
+  lqt_dump("  strf (BITMAPINFOHEADER)\n");
+  lqt_dump("    biSize:          %d\n", strf->bh.biSize);  /* sizeof(BITMAPINFOHEADER) */
+  lqt_dump("    biWidth:         %d\n", strf->bh.biWidth);
+  lqt_dump("    biHeight:        %d\n", strf->bh.biHeight);
+  lqt_dump("    biPlanes:        %d\n", strf->bh.biPlanes); /* unused */
+  lqt_dump("    biBitCount:      %d\n", strf->bh.biBitCount);
+  lqt_dump("    biCompression:   %4s\n", strf->bh.biCompression); /* fourcc of image */
+  lqt_dump("    biSizeImage:     %d\n", strf->bh.biSizeImage);   /* size of image. For uncompressed images */
                            /* ( biCompression 0 or 3 ) can be zero.  */
 
-  printf("    biXPelsPerMeter: %d\n", strf->bh.biXPelsPerMeter); /* unused */
-  printf("    biYPelsPerMeter: %d\n", strf->bh.biYPelsPerMeter); /* unused */
-  printf("    biClrUsed:       %d\n", strf->bh.biClrUsed);       /* valid only for palettized images. */
+  lqt_dump("    biXPelsPerMeter: %d\n", strf->bh.biXPelsPerMeter); /* unused */
+  lqt_dump("    biYPelsPerMeter: %d\n", strf->bh.biYPelsPerMeter); /* unused */
+  lqt_dump("    biClrUsed:       %d\n", strf->bh.biClrUsed);       /* valid only for palettized images. */
   /* Number of colors in palette. */
-  printf("    biClrImportant:  %d\n",  strf->bh.biClrImportant);
+  lqt_dump("    biClrImportant:  %d\n",  strf->bh.biClrImportant);
 
   if(strf->bh.ext_data)
     {
-    printf("    Extradata: %d bytes (hexdump follows)\n", strf->bh.ext_size);
+    lqt_dump("    Extradata: %d bytes (hexdump follows)\n", strf->bh.ext_size);
     lqt_hexdump_stdout(strf->bh.ext_data, strf->bh.ext_size, 16);
     }
   }

@@ -19,12 +19,12 @@ void quicktime_gmin_delete(quicktime_gmin_t *gmin) { }
 
 void quicktime_gmin_dump(quicktime_gmin_t *gmin)
 {
-       printf("     Base media info\n");
-       printf("      version %d\n", gmin->version);
-       printf("      flags %ld\n", gmin->flags);
-       printf("      graphics_mode %d\n", gmin->graphics_mode);
-       printf("      opcolor %d %d %d\n", gmin->opcolor[0], gmin->opcolor[1], gmin->opcolor[2]);
-       printf("      balance %d\n", gmin->balance);
+       lqt_dump("     Base media info\n");
+       lqt_dump("      version %d\n", gmin->version);
+       lqt_dump("      flags %ld\n", gmin->flags);
+       lqt_dump("      graphics_mode %d\n", gmin->graphics_mode);
+       lqt_dump("      opcolor %d %d %d\n", gmin->opcolor[0], gmin->opcolor[1], gmin->opcolor[2]);
+       lqt_dump("      balance %d\n", gmin->balance);
 }
 
 void quicktime_read_gmin(quicktime_t *file, quicktime_gmin_t *gmin)

@@ -26,6 +26,8 @@
 #include <faac.h>
 #include <string.h>
 
+#define LOG_DOMAIN "faac"
+
 typedef struct
   {
   float * sample_buffer;
@@ -79,19 +81,16 @@ static int encode_frame(quicktime_t *file,
     }
   
   /* Encode this frame */
-  //  fprintf(stderr, "Encode frame...%d\n", codec->sample_buffer_size);
   bytes_encoded = faacEncEncode(codec->enc,
                                 (int32_t*)codec->sample_buffer,
                                 codec->sample_buffer_size * track_map->channels,
                                 codec->chunk_buffer,
                                 codec->chunk_buffer_size);
-  //  fprintf(stderr, "Encode frame done\n");
 
   codec->sample_buffer_size = 0;
     
   if(bytes_encoded <= 0)
     {
-    //    fprintf(stderr, "Encoded %d bytes\n", bytes_encoded);
     return 0;
     }
   
@@ -139,11 +138,6 @@ static int encode(quicktime_t *file,
   if(!codec->initialized)
     {
     lqt_init_vbr_audio(file, track);
-#if 0
-    fprintf(stderr, "Initialized, channels: %d, rate: %d\n", 
-            trak->mdia.minf.stbl.stsd.table[0].sample_rate,
-            track_map->channels);
-#endif
     /* Create encoder */
     
     codec->enc = faacEncOpen(track_map->samplerate,
@@ -161,13 +155,8 @@ static int encode(quicktime_t *file,
     
     if(!faacEncSetConfiguration(codec->enc, enc_config))
       {
-      fprintf(stderr, "Setting encode parameters failed, check settings\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Setting encode parameters failed, check settings");
       }
-#if 0
-    else
-      fprintf(stderr, "faac initialized, input_samples: %ld, output_bytes: %ld\n",
-              input_samples, output_bytes);
-#endif    
     /* Allocate buffers */
 
     codec->samples_per_frame = input_samples / track_map->channels;
@@ -236,7 +225,6 @@ static int encode(quicktime_t *file,
 
   input = (float*)_input;
   
-  //  fprintf(stderr, "faac: Encoding %ld samples\n", samples);
   
   
   while(samples_read < samples)
@@ -312,7 +300,6 @@ static int flush(quicktime_t *file, int track)
 
   while(encode_frame(file, track))
     ;
-  //   fprintf(stderr, "Flush: wrote frame\n");
   
   /* Finalize audio chunk */
   if(codec->chunk_started)

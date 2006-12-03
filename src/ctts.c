@@ -16,13 +16,13 @@ void quicktime_ctts_delete(quicktime_ctts_t *ctts)
 void quicktime_ctts_dump(quicktime_ctts_t *ctts)
   {
   int i;
-  printf("     composition time to sample (ctts)\n");
-  printf("      version %d\n", ctts->version);
-  printf("      flags %ld\n", ctts->flags);
-  printf("      total_entries %ld\n", ctts->total_entries);
+  lqt_dump("     composition time to sample (ctts)\n");
+  lqt_dump("      version %d\n", ctts->version);
+  lqt_dump("      flags %ld\n", ctts->flags);
+  lqt_dump("      total_entries %ld\n", ctts->total_entries);
   for(i = 0; i < ctts->total_entries; i++)
     {
-    printf("       count %ld duration %ld\n", ctts->table[i].sample_count,
+    lqt_dump("       count %ld duration %ld\n", ctts->table[i].sample_count,
            ctts->table[i].sample_duration);
     }
   }
@@ -63,8 +63,6 @@ void quicktime_write_ctts(quicktime_t *file, quicktime_ctts_t *ctts)
 
 void quicktime_update_ctts(quicktime_ctts_t *ctts, long sample, long duration)
   {
-  //  fprintf(stderr, "quicktime_update_ctts: sample: %ld, duration: %ld\n",
-  //          sample, duration);
   if(sample >= ctts->entries_allocated)
     {
     ctts->entries_allocated = sample + 1024;

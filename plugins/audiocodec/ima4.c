@@ -6,10 +6,14 @@
 
 #include <string.h>
 
+#define LOG_DOMAIN "ima4"
+
 /* Known by divine revelation */
 
 #define BLOCK_SIZE 0x22
 #define SAMPLES_PER_BLOCK 0x40
+
+
 
 typedef struct
 {
@@ -300,16 +304,10 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
             codec->chunk_buffer_ptr = codec->chunk_buffer;
             }
           
-#if 0          
-          fprintf(stderr, "Seeking done, pos: %lld, chunk_sample: %lld, chunk: %lld\n",
-                  file->atracks[track].current_position,
-                  chunk_sample,
-                  file->atracks[track].current_chunk);
-#endif    
           samples_to_skip = file->atracks[track].current_position - chunk_sample;
           if(samples_to_skip < 0)
             {
-            fprintf(stderr, "ima4: Cannot skip backwards\n");
+            lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
             samples_to_skip = 0;
             }
           
@@ -414,7 +412,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   quicktime_atom_t chunk_atom;
   int samples_encoded, total_samples_copied, samples_copied, frames_encoded, old_buffer_size;
 
-  //  fprintf(stderr, "Encode %d (%d)\n", samples, codec->sample_buffer_size);
   
   /* Get output size */
   chunk_bytes = ima4_samples_to_bytes(samples + codec->sample_buffer_size, track_map->channels);
@@ -468,7 +465,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
 
     if(codec->sample_buffer_size == SAMPLES_PER_BLOCK)
       {
-      //      fprintf(stderr, "Encode block...");
       for(j = 0; j < track_map->channels; j++)
         {
         ima4_encode_block(track_map, output_ptr, codec->sample_buffer + j,
@@ -478,7 +474,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
       samples_encoded += SAMPLES_PER_BLOCK;
       frames_encoded ++;
       codec->sample_buffer_size = 0;
-      //      fprintf(stderr, "done\n");
       }
     else
       {
@@ -486,11 +481,9 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
       }
     }
   
-  //  fprintf(stderr, "Encoded %d frames\n", frames_encoded);
   
   /* Write to disk */
         
-  /*printf("quicktime_encode_ima4 1 %ld\n", chunk_samples); */
   /* The block division may result in 0 samples getting encoded. */
   /* Don't write 0 samples. */
   if(samples_encoded)
@@ -510,7 +503,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
 
     track_map->current_chunk++;
     }
-  //  fprintf(stderr, "Keeping %d samples\n", codec->sample_buffer_size);
   return result;
   }
 
@@ -526,7 +518,6 @@ static int flush(quicktime_t *file, int track)
   int i;
   unsigned char *output_ptr;
   
-  //  fprintf(stderr, "quicktime_flush_ima4 %d\n", codec->sample_buffer_size);
   if(codec->sample_buffer_size)
     {
     /* Zero out enough to get a block */

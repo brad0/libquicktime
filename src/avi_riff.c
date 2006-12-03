@@ -2,6 +2,7 @@
 #include <funcprotos.h>
 #include <string.h>
 
+#define LOG_DOMAIN "avi_riff"
 
 void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
   {
@@ -14,7 +15,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
 
   // AVI
   quicktime_read_data(file, data, 4);
-  //printf("quicktime_read_riff 1 %llx\n", quicktime_position(file));
 
   // Certain AVI parameters must be copied over to quicktime objects:
   // hdrl -> moov
@@ -24,15 +24,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
     {
     result = quicktime_atom_read_header(file, &leaf_atom);
 
-    /*
-     * printf("quicktime_read_riff 1 %llx %llx %c%c%c%c\n", 
-     * leaf_atom.start,
-     * leaf_atom.size,
-     * leaf_atom.type[0], 
-     * leaf_atom.type[1], 
-     * leaf_atom.type[2], 
-     * leaf_atom.type[3]);
-     */
     if(!result)
       {
       if(quicktime_atom_is(&leaf_atom, "LIST"))
@@ -46,16 +37,12 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
           if(quicktime_match_32(data, "hdrl"))
             {
             // No size here.
-            //printf("quicktime_read_riff 10 %llx\n", quicktime_position(file));
             quicktime_read_hdrl(file, &riff->hdrl, &leaf_atom);
-            //printf("quicktime_read_riff 20 %llx\n", quicktime_position(file));
             riff->have_hdrl = 1;
             }
           else if(quicktime_match_32(data, "movi"))  // Got LIST 'movi'
             {
-            //printf("quicktime_read_riff 30 %llx\n", quicktime_position(file));
             quicktime_read_movi(file, &leaf_atom, &riff->movi);
-            //printf("quicktime_read_riff 40 %llx\n", quicktime_position(file));
             }
           else if(quicktime_match_32(data, "INFO"))
             {
@@ -79,7 +66,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
         else if(quicktime_atom_is(&leaf_atom, "idx1"))
           {
           
-          //printf("quicktime_read_riff 50 %llx\n", quicktime_position(file));
           // Preload idx1 here
           int64_t start_position = quicktime_position(file);
           long temp_size = leaf_atom.end - start_position;
@@ -92,7 +78,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
 
           // Read idx1
           quicktime_read_idx1(file, riff, &leaf_atom);
-          //printf("quicktime_read_riff 60 %llx\n", quicktime_position(file));
 
           }
         else if(quicktime_atom_is(&leaf_atom, "INFO"))
@@ -110,7 +95,6 @@ void quicktime_read_riff(quicktime_t *file, quicktime_atom_t *parent_atom)
       }
     }while(!result && quicktime_position(file) < parent_atom->end);
     
-  //printf("quicktime_read_riff 10\n");
   
   }
 
@@ -119,8 +103,8 @@ quicktime_riff_t* quicktime_new_riff(quicktime_t *file)
 {
 	if(file->total_riffs >= MAX_RIFFS)
 	{
-		fprintf(stderr, "quicktime_new_riff file->total_riffs >= MAX_RIFFS\n");
-		return 0;
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "file->total_riffs >= MAX_RIFFS");
+        return 0;
 	}
 	else
 	{
@@ -181,14 +165,11 @@ void quicktime_init_riff(quicktime_t *file)
   
   if(file->file_type == LQT_FILE_AVI_ODML)
     {
-    //    fprintf(stderr, "init_riff (ODML)\n");
     for(i = 0; i < file->moov.total_tracks; i++)
       {
       quicktime_indx_init_riff(file, file->moov.trak[i]);
       }
     }
-  //  else
-  //    fprintf(stderr, "init_riff (AVI 1.0)\n");
   }
 
 void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff)
@@ -206,16 +187,12 @@ void quicktime_finalize_riff(quicktime_t *file, quicktime_riff_t *riff)
   quicktime_finalize_movi(file, &riff->movi);
   if(riff->have_hdrl)
     {
-    //    printf("quicktime_finalize_riff 1\n");
     quicktime_finalize_hdrl(file, &riff->hdrl);
-    //    printf("quicktime_finalize_riff 10\n");
 
     // Write original index for first RIFF
     quicktime_write_idx1(file, &riff->idx1);
-    //    printf("quicktime_finalize_riff 100\n");
     }
   quicktime_atom_write_footer(file, &riff->atom);
-  //  printf("quicktime_finalize_riff\n");
   }
 
 
@@ -284,10 +261,6 @@ static void insert_audio_packet(quicktime_trak_t * trak,
   quicktime_stco_t *stco;
   quicktime_stsc_t *stsc;
   quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
-#if 0
-  fprintf(stderr, "insert_audio_packet: %lld, %d\n",
-          offset, size);
-#endif  
   /* Update stco */
 
   stco = &trak->mdia.minf.stbl.stco;

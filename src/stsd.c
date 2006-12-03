@@ -71,21 +71,14 @@ void quicktime_stsd_init_video(quicktime_t *file,
 {
 	quicktime_stsd_table_t *table;
 	quicktime_stsd_init_table(stsd);
-//printf("quicktime_stsd_init_video 1\n");
 	table = &(stsd->table[0]);
 
 	quicktime_copy_char32(table->format, compression);
-//printf("quicktime_stsd_init_video 1\n");
 	table->width = frame_w;
-//printf("quicktime_stsd_init_video 1\n");
 	table->height = frame_h;
-//printf("quicktime_stsd_init_video 1\n");
 	table->frames_per_sample = 1;
-//printf("quicktime_stsd_init_video 1\n");
 	table->depth = 24;
-//printf("quicktime_stsd_init_video 1\n");
 	table->ctab_id = 65535;
-//printf("quicktime_stsd_init_video 2\n");
 }
 
 void quicktime_stsd_init_audio(quicktime_t *file, 
@@ -104,8 +97,6 @@ void quicktime_stsd_init_audio(quicktime_t *file,
 	table->channels = channels;
 	table->sample_size = bits;
 	table->samplerate = sample_rate;
-        //        fprintf(stderr, "stsd_init_audio:\n");
-        //        lqt_hexdump(compressor, 4, 4);
 }
 
 void quicktime_stsd_delete(quicktime_stsd_t *stsd)
@@ -124,10 +115,10 @@ void quicktime_stsd_delete(quicktime_stsd_t *stsd)
 void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd)
 {
 	int i;
-	printf("     sample description (stsd)\n");
-	printf("      version %d\n", stsd->version);
-	printf("      flags %ld\n", stsd->flags);
-	printf("      total_entries %ld\n", stsd->total_entries);
+	lqt_dump("     sample description (stsd)\n");
+	lqt_dump("      version %d\n", stsd->version);
+	lqt_dump("      flags %ld\n", stsd->flags);
+	lqt_dump("      total_entries %ld\n", stsd->total_entries);
 	
 	for(i = 0; i < stsd->total_entries; i++)
 	{
@@ -146,7 +137,6 @@ void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd)
 	for(i = 0; i < stsd->total_entries; i++)
 	{
 		quicktime_read_stsd_table_raw(file, &(stsd->table[i]));
-                //                fprintf(stderr, "Read table raw: %d bytes\n", stsd->table[i].table_raw_size);
 	}
 }
 
@@ -175,11 +165,6 @@ void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak, quickt
                 
                 
                 quicktime_set_position(file, 0);
-#if 0
-                fprintf(stderr, "reading final stsd table (%d bytes), file pos: %lld\n",
-                        stsd->table[i].table_raw_size, quicktime_position(file));
-                lqt_hexdump(stsd->table[i].table_raw, stsd->table[i].table_raw_size, 16);
-#endif
 
                 file->preload_size = stsd->table[i].table_raw_size;
                 file->preload_buffer = stsd->table[i].table_raw;

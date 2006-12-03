@@ -25,6 +25,7 @@
 #include <string.h>
 #include <faad.h>
 
+#define LOG_DOMAIN "faad2"
 
 typedef struct
   {
@@ -113,9 +114,6 @@ static int decode_chunk(quicktime_t *file, int track)
   if(codec->upsample)
     num_samples *= 2;
   
-#if 0
-  fprintf(stderr, "Chunk: packets: %d, samples: %d\n", num_packets, num_samples);
-#endif
   
   if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
     {
@@ -132,17 +130,13 @@ static int decode_chunk(quicktime_t *file, int track)
 
     if(codec->upsample)
       num_samples *= 2;
-#if 0
-    fprintf(stderr, "Read VBR packet, chunk: %lld, packet: %d, bytes: %d, samples: %d\n",
-            track_map->current_chunk, i, packet_size, num_samples);
-#endif
 
     samples = faacDecDecode(codec->dec, &frame_info,
                             codec->data, packet_size);
     if(!samples)
       {
-      fprintf(stderr, "faad2: faacDecDecode failed %s\n",
-                faacDecGetErrorMessage(frame_info.error));
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "faacDecDecode failed %s",
+              faacDecGetErrorMessage(frame_info.error));
       
       return 0;
       }
@@ -155,18 +149,12 @@ static int decode_chunk(quicktime_t *file, int track)
       for(i = 0; i < track_map->channels; i++)
         {
         track_map->channel_setup[i] = get_channel(frame_info.channel_position[i]);
-        //        fprintf(stderr, "channel_setup[%d]: %s\n", i, lqt_channel_to_string(track_map->channel_setup[i]));
         }
 
       }
     
       
     
-#if 0
-    fprintf(stderr, "Decoded: samples: %p, bytes_used: %ld/%d, samples: %ld/%d sbr: %d, chns: %d, rate: %d\n",
-            samples, frame_info.bytesconsumed, packet_size, frame_info.samples / track_map->channels,
-            num_samples, frame_info.sbr, frame_info.channels, frame_info.samplerate);
-#endif
     
     if((track_map->channels == 1) && (frame_info.channels == 2))
       {
@@ -201,10 +189,6 @@ static int decode(quicktime_t *file,
   quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
   /* TODO Check whether seeking happened */
-#if 0
-  fprintf(stderr, "Decode: %lld, %lld\n", track_map->current_position,
-          track_map->last_position);
-#endif
 
   if(!output)
     {
@@ -233,18 +217,8 @@ static int decode(quicktime_t *file,
     
     if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
       {
-#if 0
-      fprintf(stderr, "Detected EOF %lld %ld\n",
-              track_map->current_chunk,
-              track_map->track->mdia.minf.stbl.stco.total_entries);
-#endif
       return 0;
       }
-#if 0
-    fprintf(stderr, "Seek: pos: %lld, chunk: %lld, chunk_sample: %lld\n",
-            track_map->current_position,
-            track_map->current_chunk, chunk_sample);
-#endif
     
     codec->sample_buffer_start = chunk_sample;
     codec->sample_buffer_end   = chunk_sample;
@@ -255,7 +229,6 @@ static int decode(quicktime_t *file,
       {
       if(!decode_chunk(file, track))
         break;
-      //    fprintf(stderr, "Decoded frame\n");
       }
     }
   
@@ -264,16 +237,11 @@ static int decode(quicktime_t *file,
   if(track_map->current_position > codec->sample_buffer_start)
     {
     samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-#if 0
-    fprintf(stderr, "Flush start: %lld end: %lld current: %lld\n",
-            codec->sample_buffer_start, codec->sample_buffer_end, track_map->current_position);
-#endif
 
     samples_to_move = codec->sample_buffer_end - track_map->current_position;
 
     if(samples_to_move > 0)
       {
-      //      fprintf(stderr, "Memmove %d %d...", samples_to_skip, samples_to_move);
       memmove(codec->sample_buffer, codec->sample_buffer + samples_to_skip * track_map->channels,
               samples_to_move * track_map->channels * sizeof(float));
       }
@@ -290,7 +258,6 @@ static int decode(quicktime_t *file,
     {
     if(!decode_chunk(file, track))
       break;
-    //    fprintf(stderr, "Decoded frame\n");
     }
 
   samples_decoded = codec->sample_buffer_end - codec->sample_buffer_start;
@@ -357,7 +324,8 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
     }
   else
     {
-    fprintf(stderr, "No extradata found, decoding is doomed to failure\n");
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "No extradata found, decoding is doomed to failure");
     }
 
   cfg = faacDecGetCurrentConfiguration(codec->dec);
@@ -365,21 +333,16 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   
   faacDecSetConfiguration(codec->dec, cfg);
 
-  //  fprintf(stderr, "faad2 init\n");
-  //  lqt_hexdump(extradata, extradata_size, 16);
   
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);
 
   if(atrack->samplerate != samplerate)
     {
-    //    fprintf(stderr, "faad2: Changing samplerate: %d -> %d\n", atrack->samplerate,
-    //            (int)samplerate);
     atrack->samplerate = samplerate;
     codec->upsample = 1;
     atrack->total_samples *= 2;
     }
-  //  fprintf(stderr, "Channels: %d %d\n", stsd->table[0].channels, channels);
   stsd->table[0].channels = channels;
   atrack->channels = channels;
   

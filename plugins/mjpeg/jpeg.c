@@ -75,7 +75,6 @@ static int decode(quicktime_t *file,
       {
       /* Detect colormodel and return */
       vtrack->stream_cmodel = mjpeg->jpeg_color_model;
-      //      fprintf(stderr, "Got colormodel: %s\n", lqt_colormodel_to_string(mjpeg->jpeg_color_model));
       codec->have_frame = 1;
       return 0;
       }

@@ -729,46 +729,46 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
   int num_channels;
   int i, j;
   uint32_t mask;
-  printf("       channel description\n");
-  printf("        version                     %d\n", chan->version);
-  printf("        flags                       %ld\n", chan->flags);
-  printf("        mChannelLayoutTag:          0x%08x", chan->mChannelLayoutTag);
+  lqt_dump("       channel description\n");
+  lqt_dump("        version                     %d\n", chan->version);
+  lqt_dump("        flags                       %ld\n", chan->flags);
+  lqt_dump("        mChannelLayoutTag:          0x%08x", chan->mChannelLayoutTag);
 
   if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelDescriptions)
     {
-    printf(" [Use channel decriptions]\n");
+    lqt_dump(" [Use channel decriptions]\n");
     }
   else if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelBitmap)
     {
-    printf(" [Use channel bitmap]\n");
+    lqt_dump(" [Use channel bitmap]\n");
     }
   else
     {
     channel_labels = get_channel_locations(chan->mChannelLayoutTag, &num_channels);
     
-    printf(" [");
+    lqt_dump(" [");
 
     if(channel_labels)
       {
       for(i = 0; i < num_channels; i++)
         {
-        printf("%s", get_channel_name(channel_labels[i]));
+        lqt_dump("%s", get_channel_name(channel_labels[i]));
         if(i < num_channels-1)
-          printf(", ");
+          lqt_dump(", ");
         }
       }
     else
       {
-      printf("Not available");
+      lqt_dump("Not available");
       }
-    printf("]\n");
+    lqt_dump("]\n");
     }
   
-  printf("        mChannelBitmap:             0x%08x", chan->mChannelBitmap);
+  lqt_dump("        mChannelBitmap:             0x%08x", chan->mChannelBitmap);
 
   if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelBitmap)
     {
-    printf(" [");
+    lqt_dump(" [");
     j = 0;
     mask = 1;
     for(i = 0; i < 32; i++)
@@ -776,26 +776,26 @@ void quicktime_chan_dump(quicktime_chan_t *chan)
       if(chan->mChannelBitmap & mask)
         {
         if(j)
-          printf(", ");
-        printf("%s", get_channel_name(channel_bit_2_channel_label(mask)));
+          lqt_dump(", ");
+        lqt_dump("%s", get_channel_name(channel_bit_2_channel_label(mask)));
         j++;
         }
       mask <<= 1;
       }
-    printf("]\n");
+    lqt_dump("]\n");
     }
   else
-    printf("\n");
+    lqt_dump("\n");
    
   
-  printf("        mNumberChannelDescriptions: %d\n", chan->mNumberChannelDescriptions);
+  lqt_dump("        mNumberChannelDescriptions: %d\n", chan->mNumberChannelDescriptions);
   for(i = 0; i < chan->mNumberChannelDescriptions; i++)
     {
-    printf("         mChannelLabel[%d]: 0x%08x [%s]\n", i,
+    lqt_dump("         mChannelLabel[%d]: 0x%08x [%s]\n", i,
            chan->ChannelDescriptions[i].mChannelLabel, get_channel_name(chan->ChannelDescriptions[i].mChannelLabel));
-    printf("         mChannelFlags[%d]: 0x%08x\n", i,
+    lqt_dump("         mChannelFlags[%d]: 0x%08x\n", i,
            chan->ChannelDescriptions[i].mChannelFlags);
-    printf("         mCoordinates[%d]: [%f %f %f]\n", i,
+    lqt_dump("         mCoordinates[%d]: [%f %f %f]\n", i,
            chan->ChannelDescriptions[i].mCoordinates[0],
            chan->ChannelDescriptions[i].mCoordinates[1],
            chan->ChannelDescriptions[i].mCoordinates[2]);
@@ -973,8 +973,6 @@ void quicktime_set_chan(quicktime_audio_map_t * atrack)
                     atrack->channels))
       {
       chan->mChannelLayoutTag = channel_locations[i].layout;
-      //      fprintf(stderr, "Got exact layout tag %08x\n",
-      //              chan->mChannelLayoutTag);
       atrack->track->mdia.minf.stbl.stsd.table[0].has_chan = 1;
       return;
       }

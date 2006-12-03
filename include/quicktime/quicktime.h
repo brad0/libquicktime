@@ -19,6 +19,11 @@ extern "C" {
 /** \defgroup general General
     \brief General structures and functions
  */
+
+/** \defgroup log Logging
+    \brief Message handling
+ */
+
   
 /** \defgroup audio Audio
     \brief Audio related definitions and functions
@@ -84,6 +89,32 @@ extern "C" {
 
 */
 
+/** \ingroup log
+ *  \brief Log level
+ */
+
+typedef enum
+  {
+    LQT_LOG_ERROR   = (1<<0),
+    LQT_LOG_WARNING = (1<<1),
+    LQT_LOG_INFO    = (1<<2),
+    LQT_LOG_DEBUG   = (1<<3),
+  } lqt_log_level_t;
+
+/** \ingroup log
+ *  \brief Log callback
+ *  \param level The log level
+ *  \param domain Log domain (e.g. name of the module)
+ *  \param message The message to pass
+ *  \param data Application supplied data
+ */
+
+typedef void (*lqt_log_callback_t)(lqt_log_level_t level,
+                                   const char * domain,
+                                   const char * message,
+                                   void * data);
+
+  
 /** \ingroup General
  *  \brief File types
  *

@@ -68,7 +68,6 @@ static void flushbits(unsigned char **data,
 	int *bit_pos, 
 	uint64_t *bit_store)
 {
-//printf("flushbits %llx\n", (*bit_store));
 	while((*bit_pos) > 0)
 	{
 		*(*data)++ = (*bit_store) >> 56;
@@ -306,12 +305,6 @@ int quicktime_divx_write_vol(unsigned char *data_start,
 
 
 
-/*
- * for(i = 0; i < data - data_start; i++)
- * 	for(j = 0x80; j >= 1; j /= 2)
- * 		printf("%d", (data_start[i] & j) ? 1 : 0);
- * printf("\n");
- */
 
 
 

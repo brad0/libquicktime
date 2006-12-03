@@ -33,6 +33,9 @@
 #include "mmx.h"
 #endif
 
+#include <lqt_funcprotos.h> // lqt_log
+#define LOG_DOMAIN "rtjpeg"
+
 static const unsigned char RTjpeg_ZZ[64]={
 0,
 8, 1,
@@ -2132,9 +2135,7 @@ static mmx_t fix_108n184	= (mmx_t)0xcf04cf04cf04cf04LL;
 
 	/*
    movq_r2m(mm4, *dummy);
-	fprintf(stderr, "3-4 %016llx\n", dummy);
    movq_r2m(mm4, *dummy);
-	fprintf(stderr, "3+4 %016llx\n", dummy);
 	*/
 	
 
@@ -2424,7 +2425,7 @@ int RTjpeg_set_size(RTjpeg_t *rtj, int *w, int *h)
   rtj->old=(int16_t *)(tmp<<5);
   if(!rtj->old)
   {
-   fprintf(stderr, "RTjpeg: Could not allocate memory\n");
+   lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "RTjpeg: Could not allocate memory");
    return -1;
   }
   bzero(rtj->old, ((4*rtj->width*rtj->height)));
@@ -2460,7 +2461,7 @@ int RTjpeg_set_intra(RTjpeg_t *rtj, int *key, int *lm, int *cm)
  rtj->old=(int16_t *)(tmp<<5);
  if (!rtj->old)
  {
-  fprintf(stderr, "RTjpeg: Could not allocate memory\n");
+  lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "RTjpeg: Could not allocate memory");
   return -1;
  }
  bzero(rtj->old, ((4*rtj->width*rtj->height)));

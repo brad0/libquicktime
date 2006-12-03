@@ -130,7 +130,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		vtrack->current_chunk,
 		&chunk_atom, 
 		1);
-//printf("quicktime_encode_yv12 2\n");
 
 	vtrack->current_chunk++;
 	

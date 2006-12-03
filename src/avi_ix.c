@@ -43,7 +43,6 @@ void quicktime_update_ixtable(quicktime_t *file,
         quicktime_ix_t *ix = indx->table[indx->table_size-1].ix;
         quicktime_ixtable_t *ix_table;
 
-        //        fprintf(stderr, "quicktime_update_ixtable %d\n", trak->tkhd.track_id);
         
 /* Allocation */
 	if(ix->table_size >= ix->table_allocation)
@@ -142,15 +141,15 @@ void quicktime_read_ix(quicktime_t *file,
 void quicktime_ix_dump(quicktime_ix_t *ix)
   {
   int i;
-  printf("   table_size:      %d\n", ix->table_size);
-  printf("   longs_per_entry: %d\n", ix->longs_per_entry);
-  printf("   index_type:      %d\n", ix->index_type);
-  printf("   base_offset:     %lld\n", ix->base_offset);
-  printf("   tag:             %s\n", ix->tag);
-  printf("   chunk_id:        %s\n", ix->chunk_id);
+  lqt_dump("   table_size:      %d\n", ix->table_size);
+  lqt_dump("   longs_per_entry: %d\n", ix->longs_per_entry);
+  lqt_dump("   index_type:      %d\n", ix->index_type);
+  lqt_dump("   base_offset:     %lld\n", ix->base_offset);
+  lqt_dump("   tag:             %s\n", ix->tag);
+  lqt_dump("   chunk_id:        %s\n", ix->chunk_id);
   for(i = 0; i < ix->table_size; i++)
     {
-    printf("   off: %d, size: %d, k: %d\n", ix->table[i].relative_offset,
+    lqt_dump("   off: %d, size: %d, k: %d\n", ix->table[i].relative_offset,
            (ix->table[i].size & 0x7FFFFFFF),
            !(ix->table[i].size & 0x80000000));
     }

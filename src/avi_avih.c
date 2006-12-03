@@ -63,21 +63,21 @@ void quicktime_write_avih(quicktime_t *file,
 
 void quicktime_avih_dump(quicktime_avih_t *avih)
   {
-  printf("avih\n");
-  printf("  dwMicroSecPerFrame: %d\n",    avih->dwMicroSecPerFrame);
-  printf("  dwMaxBytesPerSec: %d\n",      avih->dwMaxBytesPerSec);
-  printf("  dwReserved1: %d\n",           avih->dwReserved1);
-  printf("  dwFlags: %d\n",               avih->dwFlags);
-  printf("  dwTotalFrames: %d\n",         avih->dwTotalFrames);
-  printf("  dwInitialFrames: %d\n",       avih->dwInitialFrames);
-  printf("  dwStreams: %d\n",             avih->dwStreams);
-  printf("  dwSuggestedBufferSize: %d\n", avih->dwSuggestedBufferSize);
-  printf("  dwWidth: %d\n",               avih->dwWidth);
-  printf("  dwHeight: %d\n",              avih->dwHeight);
-  printf("  dwScale: %d\n",               avih->dwScale);
-  printf("  dwRate: %d\n",                avih->dwRate);
-  printf("  dwStart: %d\n",               avih->dwStart);
-  printf("  dwLength: %d\n",              avih->dwLength);
+  lqt_dump("avih\n");
+  lqt_dump("  dwMicroSecPerFrame: %d\n",    avih->dwMicroSecPerFrame);
+  lqt_dump("  dwMaxBytesPerSec: %d\n",      avih->dwMaxBytesPerSec);
+  lqt_dump("  dwReserved1: %d\n",           avih->dwReserved1);
+  lqt_dump("  dwFlags: %d\n",               avih->dwFlags);
+  lqt_dump("  dwTotalFrames: %d\n",         avih->dwTotalFrames);
+  lqt_dump("  dwInitialFrames: %d\n",       avih->dwInitialFrames);
+  lqt_dump("  dwStreams: %d\n",             avih->dwStreams);
+  lqt_dump("  dwSuggestedBufferSize: %d\n", avih->dwSuggestedBufferSize);
+  lqt_dump("  dwWidth: %d\n",               avih->dwWidth);
+  lqt_dump("  dwHeight: %d\n",              avih->dwHeight);
+  lqt_dump("  dwScale: %d\n",               avih->dwScale);
+  lqt_dump("  dwRate: %d\n",                avih->dwRate);
+  lqt_dump("  dwStart: %d\n",               avih->dwStart);
+  lqt_dump("  dwLength: %d\n",              avih->dwLength);
   }
 
 void quicktime_avih_init(quicktime_avih_t *avih, quicktime_t * file)

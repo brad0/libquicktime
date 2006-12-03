@@ -20,7 +20,6 @@ uint8_t * quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u,
         ((uint32_t)u->atoms[i][1] << 16) |
         ((uint32_t)u->atoms[i][2] <<  8) |
         u->atoms[i][3];
-      //      fprintf(stderr, "Getting user atom %.4s (%d bytes)\n", name, *len);
       return u->atoms[i];
       }
     }
@@ -98,7 +97,7 @@ void quicktime_user_atoms_dump(quicktime_user_atoms_t * u)
       ((uint32_t)u->atoms[i][1] << 16) |
       ((uint32_t)u->atoms[i][2] <<  8) |
       u->atoms[i][3];
-    printf("         User atom %.4s (%d bytes)\n",
+    lqt_dump("         User atom %.4s (%d bytes)\n",
            u->atoms[i] + 4,
            len);
     }

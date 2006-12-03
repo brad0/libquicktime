@@ -26,18 +26,18 @@ int quicktime_ctab_delete(quicktime_ctab_t *ctab)
 void quicktime_ctab_dump(quicktime_ctab_t *ctab)
 {
 	int i;
-	printf(" color table\n");
-	printf("  seed %ld\n", ctab->seed);
-	printf("  flags %ld\n", ctab->flags);
-	printf("  size %ld\n", ctab->size);
-	printf("  colors ");
+	lqt_dump(" color table\n");
+	lqt_dump("  seed %ld\n", ctab->seed);
+	lqt_dump("  flags %ld\n", ctab->flags);
+	lqt_dump("  size %ld\n", ctab->size);
+	lqt_dump("  colors ");
 	for(i = 0; i < ctab->size; i++)
 	{
-		printf("[0x%02x 0x%02x 0x%02x 0x%02x]\n",
+		lqt_dump("[0x%02x 0x%02x 0x%02x 0x%02x]\n",
                        (ctab->red[i])>>8, (ctab->green[i])>>8,
                        (ctab->blue[i])>>8, (ctab->alpha[i])>>8);
 	}
-	printf("\n");
+	lqt_dump("\n");
 }
 
 int quicktime_read_ctab(quicktime_t *file, quicktime_ctab_t *ctab)

@@ -16,7 +16,7 @@ void quicktime_gmhd_delete(quicktime_gmhd_t *gmhd)
 void quicktime_gmhd_dump(quicktime_gmhd_t *gmhd)
 {
 
-       printf("     base media header (gmhd)\n");
+       lqt_dump("     base media header (gmhd)\n");
        quicktime_gmin_dump(&gmhd->gmin);
 
 }

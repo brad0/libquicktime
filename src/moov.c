@@ -3,6 +3,8 @@
 #include <quicktime/quicktime.h>
 #include <zlib.h>
 
+#define LOG_DOMAIN "moov"
+
 int quicktime_moov_init(quicktime_moov_t *moov)
 {
 	int i;
@@ -29,7 +31,7 @@ int quicktime_moov_delete(quicktime_moov_t *moov)
 void quicktime_moov_dump(quicktime_moov_t *moov)
 {
 	int i;
-	printf("movie (moov)\n");
+	lqt_dump("movie (moov)\n");
 	quicktime_mvhd_dump(&(moov->mvhd));
 	quicktime_udta_dump(&(moov->udta));
         if(moov->has_iods)
@@ -72,13 +74,12 @@ static int read_cmov(quicktime_t *file,
                 if(quicktime_atom_is(&leaf_atom, "dcom"))
                 {
                         char data[5];
-//printf("read_cmov 1 %lld\n", quicktime_position(file));
                         quicktime_read_data(file, (uint8_t*)data, 4);
                         data[4] = 0;
                         if(strcmp(data, "zlib"))
                         {
-                                fprintf(stderr,
-                                        "read_cmov: compression '%c%c%c%c' not zlib.  Giving up and going to a movie.\n",
+                                lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+                                        "read_cmov: compression '%c%c%c%c' not zlib.",
                                         data[0],
                                         data[1],
                                         data[2],
@@ -96,13 +97,6 @@ static int read_cmov(quicktime_t *file,
                         int uncompressed_size = quicktime_read_int32(file);
 /* Read compressed data */
                         int compressed_size = leaf_atom.end - quicktime_position(file);
-                        if(compressed_size > uncompressed_size)
-                        {
-                                fprintf(stderr,
-                                        "read_cmov: FYI compressed_size=%d uncompressed_size=%d\n",
-                                        compressed_size,
-                                        uncompressed_size);
-                        }
 
                         data_in = calloc(1, compressed_size);
                         quicktime_read_data(file, data_in, compressed_size);
@@ -177,16 +171,7 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 
         do
         {
-//printf("quicktime_read_moov 1 %llx\n", quicktime_position(file));
                 quicktime_atom_read_header(file, &leaf_atom);
-
-/*
- * printf("quicktime_read_moov 2 %c%c%c%c\n",
- * leaf_atom.type[0],
- * leaf_atom.type[1],
- * leaf_atom.type[2],
- * leaf_atom.type[3]);
- */
 
                 if(quicktime_atom_is(&leaf_atom, "cmov"))
                 {
@@ -209,12 +194,10 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		{
 			quicktime_trak_t *trak = quicktime_add_trak(file);
 			quicktime_read_trak(file, trak, &leaf_atom);
-/*printf("quicktime_read_moov trak\n"); */
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "udta"))
 		{
-                //                        fprintf(stderr, "READ UDTA\n");
 			quicktime_read_udta(file, &(moov->udta), &leaf_atom);
 			quicktime_atom_skip(file, &leaf_atom);
 		}
@@ -232,7 +215,6 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		}
 		else
 		quicktime_atom_skip(file, &leaf_atom);
-//printf("quicktime_read_moov %llx %llx\n", quicktime_position(file), parent_atom->end);
 	}while(quicktime_position(file) < parent_atom->end);
 	
 	return 0;

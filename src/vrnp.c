@@ -18,8 +18,8 @@ int quicktime_vrnp_delete(quicktime_vrnp_t *vrnp)
 void quicktime_vrnp_dump(quicktime_vrnp_t *vrnp)
 {
     	int i;
-	printf("        node parent (vrnp)\n");
-	printf("         nodes %i\n", vrnp->children);
+	lqt_dump("        node parent (vrnp)\n");
+	lqt_dump("         nodes %i\n", vrnp->children);
 	for (i = 0; i < vrnp->children; i++)
 	{
 	    quicktime_vrni_dump(&(vrnp->vrni[i]));

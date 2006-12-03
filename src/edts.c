@@ -24,7 +24,6 @@ void quicktime_read_edts(quicktime_t *file, quicktime_edts_t *edts, quicktime_at
 	do
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
-//printf("quicktime_read_edts %llx %llx\n", quicktime_position(file), leaf_atom.end);
 		if(quicktime_atom_is(&leaf_atom, "elst"))
 		{ quicktime_read_elst(file, &(edts->elst)); }
 		else
@@ -34,7 +33,7 @@ void quicktime_read_edts(quicktime_t *file, quicktime_edts_t *edts, quicktime_at
 
 void quicktime_edts_dump(quicktime_edts_t *edts)
 {
-	printf("  edit atom (edts)\n");
+	lqt_dump("  edit atom (edts)\n");
 	quicktime_elst_dump(&(edts->elst));
 }
 

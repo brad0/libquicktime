@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <quicktime/lqt.h>
 
+#include <lqt_funcprotos.h>
+
 #include <lqt_codecinfo_private.h>
 
 /*
@@ -24,6 +26,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#define LOG_DOMAIN "codecinfo"
 
 /* Public function (lqt.h) */
 
@@ -411,25 +415,15 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
   
   lqt_codec_info_t * ret = (lqt_codec_info_t*)0;
 
-#ifndef NDEBUG  
-  //  fprintf(stderr, "Trying to load %s...", plugin_filename);
-#endif
   
   module = dlopen(plugin_filename, RTLD_NOW);
   if(!module)
     {
-#ifndef NDEBUG  
-    //    fprintf(stderr, "\n");
-#endif
-    fprintf(stderr, "load_codec_info_from_plugin: dlopen failed for %s: %s\n",
-             plugin_filename, dlerror());
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "dlopen failed for %s: %s",
+            plugin_filename, dlerror());
     return ret;
     }
-#ifndef NDEBUG  
-  //  else
-  //    fprintf(stderr, "success\n");
-#endif
-
+  
   /* Now, get the codec parameters */
 
   /* Check the api version */
@@ -438,7 +432,8 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
 
   if(!get_codec_api_version)
     {
-    fprintf(stderr, "module %s has no API version and is thus terribly old\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Module %s has no API version and is thus terribly old",
             plugin_filename);
     dlclose(module);
     return ret;
@@ -448,9 +443,8 @@ static lqt_codec_info_t * load_codec_info_from_plugin(char * plugin_filename,
 
   if(codec_api_version_module != codec_api_version_us)
     {
-    fprintf(stderr, "Codec interface version mismatch of module %s\n\
-Module interface version       %d\n\
-Libquicktime interface version %d\n", 
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Codec interface version mismatch of module %s: %d [module] != %d [lqt]",
             plugin_filename,
             codec_api_version_module,
             codec_api_version_us);
@@ -461,8 +455,8 @@ Libquicktime interface version %d\n",
 
   if(!get_num_codecs)
     {
-    fprintf(stderr, "Symbol %s not found in %s\n",
-            "get_num_codecs", plugin_filename);
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Symbol get_num_codecs not found in %s",
+            plugin_filename);
     dlclose(module);
     return ret;
     }
@@ -470,8 +464,8 @@ Libquicktime interface version %d\n",
   get_codec_info = (lqt_codec_info_static_t*(*)(int))(dlsym(module, "get_codec_info"));
   if(!get_codec_info)
     {
-    fprintf(stderr, "Symbol %s not found in %s\n",
-            "get_codec_info", plugin_filename);
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Symbol get_codec_info not found in %s",
+            plugin_filename);
     dlclose(module);
     return ret;
     }
@@ -481,7 +475,8 @@ Libquicktime interface version %d\n",
   num_codecs = get_num_codecs();
   if(!num_codecs)
     {
-    fprintf(stderr, "No codecs found\n");
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "No codecs found in %s",
+            plugin_filename);
     dlclose(module);
     return ret;
     }
@@ -526,9 +521,6 @@ static void register_codecs(lqt_codec_info_t * list,
     {
     if(list->type == LQT_CODEC_AUDIO)
       {
-#ifndef NDEBUG
-      //      fprintf(stderr, "Registering audio codec %s\n", list->name);
-#endif
       if(*audio_codecs_end)
         {
         (*audio_codecs_end)->next = list;
@@ -543,9 +535,6 @@ static void register_codecs(lqt_codec_info_t * list,
       }
     if(list->type == LQT_CODEC_VIDEO)
       {
-#ifndef NDEBUG
-      //      fprintf(stderr, "Registering video codec %s\n", list->name);
-#endif
       if((*video_codecs_end))
         {
         (*video_codecs_end)->next = list;
@@ -582,9 +571,6 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
   
   /* Set the end pointers so we can quickly add codecs after */
 
-#ifndef NDEBUG
-  //  fprintf(stderr, "Scanning %s for plugins\n", plugin_dir);
-#endif
   
   audio_codecs_end = lqt_audio_codecs;
 
@@ -602,9 +588,7 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
 
   if(!directory)
     {
-    fprintf(stderr, "Cannot open plugin directory %s\n\
-Did you forget \"make install\"? You need it because\n\
-libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot open plugin directory %s (forgot make install?)");
     return 0;
     }
 
@@ -641,28 +625,17 @@ libquicktime cannot load plugins out of the sourcetree\n", plugin_dir);
     if(!S_ISREG(status.st_mode))
       continue;
 
-#ifndef NDEBUG
-    //    fprintf(stderr, "Found %s...", directory_entry->d_name);
-#endif
     
     codecs = find_codec_by_filename(database, filename, status.st_ctime);
     
     if(codecs) /* Codec information found in database */
       {
-#ifndef NDEBUG
-      //      fprintf(stderr,
-      //              "Already in database, registering all codecs\n");
-#endif
       register_codecs(codecs,
                       &audio_codecs_end,
                       &video_codecs_end);
       }
     else /* Load the informations from the module */
       {
-#ifndef NDEBUG
-      //      fprintf(stderr,
-      //              "Getting codec info from module\n");
-#endif
       codecs = load_codec_info_from_plugin(filename, status.st_ctime);
       register_codecs(codecs,
                       &audio_codecs_end,
@@ -739,9 +712,6 @@ void lqt_registry_init()
   
   while(file_codecs)
     {
-#ifndef NDEBUG
-    //    fprintf(stderr, "Removing codec %s from registry\n", file_codecs->name);
-#endif
     tmp_file_codecs = file_codecs;
     file_codecs = file_codecs->next;
     destroy_codec_info(tmp_file_codecs);
@@ -896,7 +866,7 @@ create_parameter_info(lqt_parameter_info_t * ret,
       ret->val_default.val_string = __lqt_strdup(info->val_default.val_string);
       if(!info->stringlist_options)
         {
-        fprintf(stderr, "Stringlist parameter %s has NULL options\n",
+        lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Stringlist parameter %s has NULL options",
                 info->name);
         return;
         }
@@ -936,7 +906,7 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
 
   if(!template->fourccs)
     {
-    fprintf(stderr, "Codec %s has no fourccs defined\n", template->name);
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Codec %s has no fourccs defined", template->name);
     return (lqt_codec_info_t*)0;
     }
   
@@ -1052,81 +1022,81 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
 static void dump_codec_parameter(lqt_parameter_info_t * p)
   {
   int i;
-  fprintf(stderr, "Parameter: %s (%s) ", p->name,
+  lqt_dump("Parameter: %s (%s) ", p->name,
           p->real_name);
-  fprintf(stderr, "Type: ");
+  lqt_dump("Type: ");
   switch(p->type)
     {
     case LQT_PARAMETER_INT:
-      fprintf(stderr, "Integer, Default Value: %d ",
+      lqt_dump("Integer, Default Value: %d ",
               p->val_default.val_int);
 
       if(p->val_min.val_int < p->val_max.val_int)
-        fprintf(stderr, "(%d..%d)\n",
+        lqt_dump("(%d..%d)\n",
                 p->val_min.val_int, p->val_max.val_int);
       else
-        fprintf(stderr, "(unlimited)\n");
+        lqt_dump("(unlimited)\n");
       break;
     case LQT_PARAMETER_FLOAT:
-      fprintf(stderr, "Float, Default Value: %f ",
+      lqt_dump("Float, Default Value: %f ",
               p->val_default.val_float);
 
       if(p->val_min.val_float < p->val_max.val_float)
-        fprintf(stderr, "(%f..%f)\n",
+        lqt_dump("(%f..%f)\n",
                 p->val_min.val_float, p->val_max.val_float);
       else
-        fprintf(stderr, "(unlimited)\n");
+        lqt_dump("(unlimited)\n");
       break;
     case LQT_PARAMETER_STRING:
-      fprintf(stderr, "String, Default Value : %s\n",
+      lqt_dump("String, Default Value : %s\n",
               (p->val_default.val_string ? p->val_default.val_string : "NULL"));
       break;
     case LQT_PARAMETER_STRINGLIST:
-      fprintf(stderr, "Stringlist, Default Value : %s\n",
+      lqt_dump("Stringlist, Default Value : %s\n",
               (p->val_default.val_string ? p->val_default.val_string :
                "NULL"));
-      fprintf(stderr, "Options: ");
+      lqt_dump("Options: ");
       for(i = 0; i < p->num_stringlist_options; i++)
-        fprintf(stderr, "%s ", p->stringlist_options[i]);
-      fprintf(stderr, "\n");
+        lqt_dump("%s ", p->stringlist_options[i]);
+      lqt_dump("\n");
       break;
     case LQT_PARAMETER_SECTION:
-      fprintf(stderr, "Section");
+      lqt_dump("Section");
     }
   if(p->help_string)
-    fprintf(stderr, "Help string: %s\n", p->help_string);
+    lqt_dump("Help string: %s\n", p->help_string);
   }
 
 void lqt_dump_codec_info(const lqt_codec_info_t * info)
   {
   int i;
-  fprintf(stderr, "Codec: %s (%s)\n", info->long_name, info->name);
+  lqt_dump("Codec: %s (%s)\n", info->long_name, info->name);
   
-  fprintf(stderr, "Type: %s Direction: ",
+  lqt_dump("Type: %s Direction: ",
           (info->type == LQT_CODEC_AUDIO ? "Audio, " : "Video, ") );
   switch(info->direction)
     {
     case LQT_DIRECTION_ENCODE:
-      fprintf(stderr, "Encode\n");
+      lqt_dump("Encode\n");
       break;
     case LQT_DIRECTION_DECODE:
-      fprintf(stderr, "Decode\n");
+      lqt_dump("Decode\n");
       break;
     case LQT_DIRECTION_BOTH:
-      fprintf(stderr, "Encode/Decode\n");
+      lqt_dump("Encode/Decode\n");
       break;
     }
 
-  fprintf(stderr, "Description:\n%s\n", info->description);
+  lqt_dump("Description:\n%s\n", info->description);
 
-  fprintf(stderr, "Four character codes: (fourccs)\n");
+  lqt_dump("Four character codes: (fourccs)\n");
   for(i = 0; i < info->num_fourccs; i++)
-    fprintf(stderr, "%s (0x%08x)\n", info->fourccs[i],
+    lqt_dump("%s (0x%08x)\n", info->fourccs[i],
             LQT_STRING_2_FOURCC(info->fourccs[i]));
 
   if(!info->num_encoding_parameters)
     {
-    fprintf(stderr, "No settable parameters for encoding\n");
+    lqt_dump("No settable parameters for encoding\n");
     }
   else
     {
@@ -1136,14 +1106,14 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
 
   if(!info->num_encoding_parameters)
     {
-    fprintf(stderr, "No settable parameters for decoding\n");
+    lqt_dump("No settable parameters for decoding\n");
     }
   else
     {
     for(i = 0; i < info->num_decoding_parameters; i++)
       dump_codec_parameter(&(info->decoding_parameters[i]));
     }
-  fprintf(stderr, "Module filename: %s\nIndex inside module: %d\n",
+  lqt_dump("Module filename: %s\nIndex inside module: %d\n",
           info->module_filename, info->module_index);
 
   }
@@ -1389,14 +1359,6 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
     }
   lqt_registry_unlock();
 
-#ifndef NDEBUG
-  if(ret)
-    fprintf(stderr, "lqt_find_audio_codec_by_name(%s) success\n",
-            name);
-  else
-    fprintf(stderr, "lqt_find_audio_codec_by_name(%s) failed\n",
-            name);
-#endif
 
   return ret;
   }
@@ -1430,14 +1392,6 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
     }
   lqt_registry_unlock();
 
-#ifndef NDEBUG
-  if(ret)
-    fprintf(stderr, "lqt_find_video_codec_by_name(%s) success\n",
-            name);
-  else
-    fprintf(stderr, "lqt_find_video_codec_by_name(%s) failed\n",
-            name);
-#endif
 
   return ret;
   }
@@ -1511,7 +1465,7 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
 
   if(!codec_info)
     {
-    fprintf(stderr, "lqt_set_default_parameter: No %s codec %s found\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_default_parameter: No %s codec %s found",
             ((type == LQT_CODEC_AUDIO) ? "audio" : "video"),  codec_name);
     lqt_registry_unlock();
     return;
@@ -1541,8 +1495,8 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
 
   if(!parameter_found)
     {
-    fprintf(stderr, "lqt_set_default_parameter: No parameter %s for codec \
-%s found\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "lqt_set_default_parameter: No parameter %s for codec %s found",
             parameter_name,
             codec_name);
     lqt_registry_unlock();
@@ -1555,23 +1509,9 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
     {
     case LQT_PARAMETER_INT:
       parameter_info[i].val_default.val_int = val->val_int;
-#ifndef NDEBUG
-  fprintf(stderr,
-          "%s parameter %s for codec %s (value: %d) stored in registry\n",
-          (encode ? "Encoding" : "Decoding"),
-          parameter_name,
-          codec_name, parameter_info[i].val_default.val_int);
-#endif
       break;
     case LQT_PARAMETER_FLOAT:
       parameter_info[i].val_default.val_float = val->val_float;
-#ifndef NDEBUG
-  fprintf(stderr,
-          "%s parameter %s for codec %s (value: %f) stored in registry\n",
-          (encode ? "Encoding" : "Decoding"),
-          parameter_name,
-          codec_name, parameter_info[i].val_default.val_float);
-#endif
       break;
     case LQT_PARAMETER_STRING:
     case LQT_PARAMETER_STRINGLIST:
@@ -1579,13 +1519,6 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
         free(parameter_info[i].val_default.val_string);
       parameter_info[i].val_default.val_string =
         __lqt_strdup(val->val_string);
-#ifndef NDEBUG
-  fprintf(stderr,
-          "%s parameter %s for codec %s (value: \"%s\") stored in registry\n",
-          (encode ? "Encoding" : "Decoding"),
-          parameter_name,
-          codec_name, parameter_info[i].val_default.val_string);
-#endif
       break;
     case LQT_PARAMETER_SECTION:
       break;
@@ -1621,7 +1554,8 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   module = dlopen(codec_info->module_filename, RTLD_NOW);
   if(!module)
     {
-    fprintf(stderr, "lqt_restore_default_parameters: dlopen failed for %s: %s\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "lqt_restore_default_parameters: dlopen failed for %s: %s",
              codec_info->module_filename, dlerror());
     return;
     }
@@ -1629,7 +1563,7 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   get_codec_info = (lqt_codec_info_static_t*(*)(int))(dlsym(module, "get_codec_info"));
   if(!get_codec_info)
     {
-    fprintf(stderr, "Symbol %s not found in %s\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Symbol %s not found in %s",
             "get_codec_info", codec_info->module_filename);
     return;
     }
@@ -1638,7 +1572,7 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   
   if(!info_from_module)
     {
-    fprintf(stderr, "Couldn't get codec info for %s from_module %s\n",
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Couldn't get codec info for %s from_module %s",
             codec_info->long_name, codec_info->module_filename);
     return;
     }
@@ -1658,10 +1592,6 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
         copy_parameter_value(&(codec_info->encoding_parameters[i].val_default),
                              &(info_from_module->encoding_parameters[i].val_default),
                              codec_info->encoding_parameters[i].type);
-#ifndef NDEBUG
-        //        fprintf(stderr, "Setting encoding parameter %s\n",
-        //                codec_info->encoding_parameters[i].name);
-#endif
 
         }
       }
@@ -1680,10 +1610,6 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
         copy_parameter_value(&(codec_info->decoding_parameters[i].val_default),
                              &(info_from_module->decoding_parameters[i].val_default),
                              codec_info->decoding_parameters[i].type);
-#ifndef NDEBUG
-        //        fprintf(stderr, "Setting decoding parameter %s\n",
-        //                codec_info->decoding_parameters[i].name);
-#endif
 
         }
       }
@@ -1726,9 +1652,6 @@ sort_codecs_internal(lqt_codec_info_t * original, char * names)
   if(!end_pos)
     end_pos = pos + strlen(pos);
 
-#ifndef NDEBUG
-  //  fprintf(stderr, "Sorting codecs, sort string: %s\n", pos);
-#endif
   
   while(1)
     {
@@ -1849,7 +1772,6 @@ static void __lqt_cleanup_codecinfo() __attribute__ ((destructor));
 
 static void __lqt_cleanup_codecinfo()
   {
-  //  fprintf(stderr, "Deleting quicktime codecs\n");
   lqt_registry_destroy();
   }
 

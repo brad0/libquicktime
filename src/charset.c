@@ -5,26 +5,32 @@
 #include <string.h>
 
 
+#include <quicktime.h>
+#include <funcprotos.h>
 #include <charset.h>
+
+#define LOG_DOMAIN "charset"
 
 struct lqt_charset_converter_s
   {
   iconv_t cd;
+  quicktime_t * file; /* For logging */
   };
 
 
 lqt_charset_converter_t *
-lqt_charset_converter_create(const char * src_charset, const char * dst_charset)
+lqt_charset_converter_create(quicktime_t * file, const char * src_charset, const char * dst_charset)
   {
   lqt_charset_converter_t * ret = calloc(1, sizeof(*ret));
   ret->cd = iconv_open(dst_charset, src_charset);
+  ret->file = file;
   return ret;
   
   }
 
 #define BYTES_INCREMENT 10
 
-int do_convert(iconv_t cd, char * in_string, int len, int * out_len,
+int do_convert(lqt_charset_converter_t * cnv, char * in_string, int len, int * out_len,
                char ** ret, int * ret_alloc)
   {
 
@@ -46,7 +52,7 @@ int do_convert(iconv_t cd, char * in_string, int len, int * out_len,
   outbuf = *ret;
   while(1)
     {
-    if(iconv(cd, &inbuf, &inbytesleft,
+    if(iconv(cnv->cd, &inbuf, &inbytesleft,
              &outbuf, &outbytesleft) == (size_t)-1)
       {
       switch(errno)
@@ -61,11 +67,11 @@ int do_convert(iconv_t cd, char * in_string, int len, int * out_len,
           outbuf = &((*ret)[output_pos]);
           break;
         case EILSEQ:
-          fprintf(stderr, "Invalid Multibyte sequence\n");
+          lqt_log(cnv->file, LQT_LOG_ERROR, LOG_DOMAIN, "Invalid Multibyte sequence");
           return 0;
           break;
         case EINVAL:
-          fprintf(stderr, "Incomplete Multibyte sequence\n");
+          lqt_log(cnv->file, LQT_LOG_ERROR, LOG_DOMAIN, "Incomplete Multibyte sequence");
           return 0;
           break;
         }
@@ -104,7 +110,6 @@ void lqt_charset_convert(lqt_charset_converter_t * cnv,
   if(!do_convert(cnv->cd, *str, in_len, out_len,
                  &new, &new_alloc))
     {
-    fprintf(stderr, "Charset conversion failed\n");
     if(new) free(new);
     return;
     }

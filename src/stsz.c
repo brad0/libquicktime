@@ -33,7 +33,6 @@ void quicktime_stsz_init_audio(quicktime_t *file,
 
 	stsz->sample_size = 1;
 
-//printf("quicktime_stsz_init_audio 1 %d\n", stsz->sample_size);
 	stsz->total_entries = 0;   /* set this when closing */
 	stsz->entries_allocated = 0;
 }
@@ -46,17 +45,17 @@ void quicktime_stsz_delete(quicktime_stsz_t *stsz)
 void quicktime_stsz_dump(quicktime_stsz_t *stsz)
 {
 	int i;
-	printf("     sample size (stsz)\n");
-	printf("      version %d\n", stsz->version);
-	printf("      flags %ld\n", stsz->flags);
-	printf("      sample_size %lld\n", (long long)(stsz->sample_size));
-	printf("      total_entries %ld\n", stsz->total_entries);
+	lqt_dump("     sample size (stsz)\n");
+	lqt_dump("      version %d\n", stsz->version);
+	lqt_dump("      flags %ld\n", stsz->flags);
+	lqt_dump("      sample_size %lld\n", (long long)(stsz->sample_size));
+	lqt_dump("      total_entries %ld\n", stsz->total_entries);
 	
 	if(!stsz->sample_size)
 	{
 		for(i = 0; i < stsz->total_entries; i++)
 		{
-			printf("       sample_size %llx (%lld)\n",
+			lqt_dump("       sample_size %llx (%lld)\n",
                                (long long)(stsz->table[i].size), (long long)(stsz->table[i].size));
 		}
 	}
@@ -70,7 +69,6 @@ void quicktime_read_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 	stsz->sample_size = quicktime_read_int32(file);
 	stsz->total_entries = quicktime_read_int32(file);
 	stsz->entries_allocated = stsz->total_entries;
-//printf("quicktime_read_stsz 1 %d\n", stsz->sample_size);
 	if(!stsz->sample_size)
 	{
 		stsz->table = (quicktime_stsz_table_t*)calloc(sizeof(quicktime_stsz_table_t), stsz->entries_allocated);
@@ -129,7 +127,6 @@ void quicktime_update_stsz(quicktime_stsz_t *stsz,
                            long sample, 
                            long sample_size)
   {
-  //  fprintf(stderr, "quicktime_update_stsz %d %d\n", sample, sample_size);
   if(!stsz->sample_size)
     {
     if(sample >= stsz->entries_allocated)

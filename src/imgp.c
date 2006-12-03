@@ -16,7 +16,7 @@ int quicktime_imgp_delete(quicktime_imgp_t *imgp)
 
 void quicktime_imgp_dump(quicktime_imgp_t *imgp)
 {
-	printf("        Imaging Parent (imgp)\n");
+	lqt_dump("        Imaging Parent (imgp)\n");
 	quicktime_impn_dump(&(imgp->impn));
 
 }

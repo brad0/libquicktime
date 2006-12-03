@@ -19,7 +19,7 @@ int quicktime_qtvr_delete(quicktime_qtvr_t *qtvr)
 
 void quicktime_qtvr_dump(quicktime_qtvr_t *qtvr)
 {
-	printf("       qtvr world\n");
+	lqt_dump("       qtvr world\n");
 	quicktime_vrsc_dump(&(qtvr->vrsc));
 	quicktime_imgp_dump(&(qtvr->imgp));
 	quicktime_vrnp_dump(&(qtvr->vrnp));

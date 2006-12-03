@@ -49,7 +49,6 @@ void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak)
   /* Append */
   indx_table = &indx->table[indx->table_size++];
   indx_table->ix = quicktime_new_ix(file, trak, strl);
-  //  fprintf(stderr, "quicktime_indx_init_riff: %d\n", indx->table_size);
 
   }
 
@@ -136,7 +135,6 @@ void quicktime_read_indx(quicktime_t *file,
 	quicktime_read_int32_le(file);
 	quicktime_read_int32_le(file);
 
-//printf("quicktime_read_indx 1\n");
 /* Read indx entries */
 	indx->table = calloc(indx->table_size, sizeof(quicktime_indxtable_t));
 	for(i = 0; i < indx->table_size; i++)
@@ -153,7 +151,6 @@ void quicktime_read_indx(quicktime_t *file,
 		quicktime_read_ix(file, ix);
 		quicktime_set_position(file, offset);
 	}
-//printf("quicktime_read_indx 100\n");
 
 }
 
@@ -169,7 +166,6 @@ void quicktime_set_indx_keyframe(quicktime_t *file,
   frame_count = 0;
   i = 0;
 
-  //  fprintf(stderr, "quicktime_set_indx_keyframe %d\n", trak->tkhd.track_id);
 
   while(frame_count + indx->table[i].ix->table_size < new_keyframe)
     {
@@ -182,18 +178,18 @@ void quicktime_set_indx_keyframe(quicktime_t *file,
 void quicktime_indx_dump(quicktime_indx_t *indx)
   {
   int i;
-  printf(" indx");
-  printf(" longs_per_entry: %d\n", indx->longs_per_entry);
-  printf(" index_subtype:   %d\n", indx->index_subtype);
-  printf(" index_type:      %d\n", indx->index_type);
-  printf(" chunk_id:        %s\n", indx->chunk_id);
-  printf(" table_size:      %d\n", indx->table_size);
+  lqt_dump(" indx");
+  lqt_dump(" longs_per_entry: %d\n", indx->longs_per_entry);
+  lqt_dump(" index_subtype:   %d\n", indx->index_subtype);
+  lqt_dump(" index_type:      %d\n", indx->index_type);
+  lqt_dump(" chunk_id:        %s\n", indx->chunk_id);
+  lqt_dump(" table_size:      %d\n", indx->table_size);
 
   for(i = 0; i < indx->table_size; i++)
     {
-    printf("   index_offset: %lld\n", indx->table[i].index_offset);
-    printf("   index_size:   %d\n", indx->table[i].index_size);
-    printf("   duration:     %d\n", indx->table[i].duration);
+    lqt_dump("   index_offset: %lld\n", indx->table[i].index_offset);
+    lqt_dump("   index_size:   %d\n", indx->table[i].index_size);
+    lqt_dump("   duration:     %d\n", indx->table[i].duration);
     quicktime_ix_dump(indx->table[i].ix);
     }
   

@@ -11,6 +11,8 @@
 #include <lqt_fseek.h>
 #include <sys/stat.h>
 
+#define LOG_DOMAIN "qtvr"
+
 /* util */
 
 static int deg2frame(quicktime_t *file, float hdeg, float vdeg)
@@ -29,7 +31,8 @@ int lqt_qtvr_add_node(quicktime_t *file)
     
     if (quicktime_track_samples(file, trak) > 0) 
     {
-	fprintf(stderr,"lqt_qtvr_add_node only single node movies supported! aborting...\n");
+	lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+                "lqt_qtvr_add_node only single node movies supported.\n");
 	return -1;
     }
     quicktime_write_chunk_header(file, trak, &chunk_atom);

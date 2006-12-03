@@ -23,13 +23,13 @@ void quicktime_stss_delete(quicktime_stss_t *stss)
 void quicktime_stss_dump(quicktime_stss_t *stss)
 {
 	int i;
-	printf("     sync sample (stss)\n");
-	printf("      version %d\n", stss->version);
-	printf("      flags %ld\n", stss->flags);
-	printf("      total_entries %ld\n", stss->total_entries);
+	lqt_dump("     sync sample (stss)\n");
+	lqt_dump("      version %d\n", stss->version);
+	lqt_dump("      flags %ld\n", stss->flags);
+	lqt_dump("      total_entries %ld\n", stss->total_entries);
 	for(i = 0; i < stss->total_entries; i++)
 	{
-		printf("       sample %lx\n", stss->table[i].sample);
+		lqt_dump("       sample %lx\n", stss->table[i].sample);
 	}
 }
 

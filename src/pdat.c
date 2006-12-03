@@ -41,31 +41,31 @@ int quicktime_pdat_delete(quicktime_pdat_t *pdat)
 
 void quicktime_pdat_dump(quicktime_pdat_t *pdat)
 {
-       printf("object node (pdat)\n");
-       printf(" version %i\n", pdat->version );
-       printf(" revision %i\n", pdat->revision );
+       lqt_dump("object node (pdat)\n");
+       lqt_dump(" version %i\n", pdat->version );
+       lqt_dump(" revision %i\n", pdat->revision );
 
-       printf(" image track index %ld\n", pdat->imageRefTrackIndex );
-       printf(" hotspot track index %ld\n", pdat->hotSpotRefTrackIndex );       
-       printf(" minimum pan %f\n", pdat->minPan );
-       printf(" maximum pan %f\n", pdat->maxPan );
-       printf(" minimum tilt %f\n", pdat->minTilt );
-       printf(" maximum tilt %f\n", pdat->maxTilt );
-       printf(" minimum fov %f\n", pdat->minFOV );
-       printf(" fov %f\n", pdat->maxFOV );
-       printf(" default pan %f\n", pdat->defaultPan );
-       printf(" default tilt %f\n", pdat->defaultTilt );
-       printf(" default fov %f\n", pdat->defaultFOV );
-       printf(" image size x %ld\n", pdat->imageSizeX );
-       printf(" image size y %ld\n", pdat->imageSizeY );
-       printf(" image frames x %i\n", pdat->imageNumFramesX );
-       printf(" image frames y %i\n", pdat->imageNumFramesY );
-       printf(" hotspot size x %ld\n", pdat->hotSpotSizeX );
-       printf(" hotspot size y %ld\n", pdat->hotSpotSizeY );
-       printf(" hotspot frames x %i\n", pdat->hotSpotNumFramesX );
-       printf(" hotspot frames y %i\n", pdat->hotSpotNumFramesY );
-       printf(" flags %ld\n", pdat->flags );
-       printf(" panorama type %c%c%c%c\n",  pdat->panoType[0], pdat->panoType[1], pdat->panoType[2], pdat->panoType[3]);
+       lqt_dump(" image track index %ld\n", pdat->imageRefTrackIndex );
+       lqt_dump(" hotspot track index %ld\n", pdat->hotSpotRefTrackIndex );       
+       lqt_dump(" minimum pan %f\n", pdat->minPan );
+       lqt_dump(" maximum pan %f\n", pdat->maxPan );
+       lqt_dump(" minimum tilt %f\n", pdat->minTilt );
+       lqt_dump(" maximum tilt %f\n", pdat->maxTilt );
+       lqt_dump(" minimum fov %f\n", pdat->minFOV );
+       lqt_dump(" fov %f\n", pdat->maxFOV );
+       lqt_dump(" default pan %f\n", pdat->defaultPan );
+       lqt_dump(" default tilt %f\n", pdat->defaultTilt );
+       lqt_dump(" default fov %f\n", pdat->defaultFOV );
+       lqt_dump(" image size x %ld\n", pdat->imageSizeX );
+       lqt_dump(" image size y %ld\n", pdat->imageSizeY );
+       lqt_dump(" image frames x %i\n", pdat->imageNumFramesX );
+       lqt_dump(" image frames y %i\n", pdat->imageNumFramesY );
+       lqt_dump(" hotspot size x %ld\n", pdat->hotSpotSizeX );
+       lqt_dump(" hotspot size y %ld\n", pdat->hotSpotSizeY );
+       lqt_dump(" hotspot frames x %i\n", pdat->hotSpotNumFramesX );
+       lqt_dump(" hotspot frames y %i\n", pdat->hotSpotNumFramesY );
+       lqt_dump(" flags %ld\n", pdat->flags );
+       lqt_dump(" panorama type %c%c%c%c\n",  pdat->panoType[0], pdat->panoType[1], pdat->panoType[2], pdat->panoType[3]);
 
 }
 

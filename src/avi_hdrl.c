@@ -21,7 +21,6 @@ void quicktime_read_hdrl(quicktime_t *file,
 	uint8_t data[4];
 	int current_track = 0;
 
-//printf("quicktime_read_hdrl 1\n");
 	do
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
@@ -101,12 +100,6 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
                         strl);
     }
     
-  /*
-   * for(i = 0; i < file->moov.total_tracks; i++)
-   * {
-   * printf("quicktime_init_hdrl 10 %d %p\n", i, file->riff[0]->hdrl.strl[i]->tag);
-   * }
-   */
 
   /* ODML header */
 

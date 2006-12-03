@@ -21,17 +21,11 @@ void quicktime_stbl_init_qtvr(quicktime_t *file,
 								int height,
 								int frame_duration)
 {
-//printf("quicktime_stbl_init_qtvr 1\n");
 	quicktime_stsd_init_qtvr(file, &(stbl->stsd), track_type, width, height);
-//printf("quicktime_stbl_init_video 1 %d %f\n", time_scale, frame_rate);
 	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsc_init_video(file, &(stbl->stsc));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsz_init_video(file, &(stbl->stsz));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stco_init_common(file, &(stbl->stco));
-//printf("quicktime_stbl_init_video 2\n");
 }
 
 
@@ -41,17 +35,11 @@ void quicktime_stbl_init_panorama(quicktime_t *file,
 								int height,
 								int frame_duration)
 {
-//printf("quicktime_stbl_init_panorama 1\n");
 	quicktime_stsd_init_panorama(file, &(stbl->stsd), width, height);
-//printf("quicktime_stbl_init_panorama 1 %d %f\n", time_scale, frame_rate);
 	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsc_init_video(file, &(stbl->stsc));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsz_init_video(file, &(stbl->stsz));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stco_init_common(file, &(stbl->stco));
-//printf("quicktime_stbl_init_video 2\n");
 }
 
 
@@ -63,17 +51,11 @@ void quicktime_stbl_init_video(quicktime_t *file,
 								int time_scale, 
 								char *compressor)
 {
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsd_init_video(file, &(stbl->stsd), frame_w, frame_h, compressor);
-//printf("quicktime_stbl_init_video 1 %d %f\n", time_scale, frame_rate);
 	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsc_init_video(file, &(stbl->stsc));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stsz_init_video(file, &(stbl->stsz));
-//printf("quicktime_stbl_init_video 1\n");
 	quicktime_stco_init_common(file, &(stbl->stco));
-//printf("quicktime_stbl_init_video 2\n");
 }
 
 
@@ -107,7 +89,7 @@ void quicktime_stbl_delete(quicktime_stbl_t *stbl)
 
 void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
 {
-	printf("    sample table\n");
+	lqt_dump("    sample table\n");
 	quicktime_stsd_dump(minf_ptr, &(stbl->stsd));
 	quicktime_stts_dump(&(stbl->stts));
 	quicktime_stss_dump(&(stbl->stss));
@@ -128,7 +110,6 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
     {
     quicktime_atom_read_header(file, &leaf_atom);
 
-    //printf("quicktime_read_stbl 1\n");
     /* mandatory */
     if(quicktime_atom_is(&leaf_atom, "stsd"))
       { 

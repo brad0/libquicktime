@@ -18,8 +18,8 @@ void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma)
 
 void quicktime_frma_dump(quicktime_frma_t *frma)
   {
-  printf("         frma: \n");
-  printf("           codec: %c%c%c%c\n",
+  lqt_dump("         frma: \n");
+  lqt_dump("           codec: %c%c%c%c\n",
          frma->codec[0], frma->codec[1], frma->codec[2], frma->codec[3]);
   }
 

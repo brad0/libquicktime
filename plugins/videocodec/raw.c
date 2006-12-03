@@ -4,6 +4,8 @@
 #include <graphics.h>
 #include <string.h>
 
+#define LOG_DOMAIN "rawaudio"
+
 #define PALETTE_2_RGB24(pal, indx, dst)     \
 dst[0] = pal->red[indx] >> 8;\
 dst[1] = pal->green[indx] >> 8;\
@@ -235,7 +237,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
               codec->scanline_func = scanline_raw_1;
               if(ctab->size < 2)
                 {
-                fprintf(stderr, "Palette missing or too small\n");
+                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
                 return 0;
                 }
               break;
@@ -244,7 +246,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
               codec->scanline_func = scanline_raw_2;
               if(ctab->size < 4)
                 {
-                fprintf(stderr, "Palette missing or too small\n");
+                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
                 return 0;
                 }
               break;
@@ -253,7 +255,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
               codec->scanline_func = scanline_raw_4;
               if(ctab->size < 16)
                 {
-                fprintf(stderr, "Palette missing or too small\n");
+                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
                 return 0;
                 }
               break;
@@ -262,7 +264,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
               codec->scanline_func = scanline_raw_8;
               if(ctab->size < 256)
                 {
-                fprintf(stderr, "Palette missing or too small\n");
+                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small\n");
                 return 0;
                 }
               break;
@@ -336,7 +338,6 @@ static int quicktime_encode_raw(quicktime_t *file,
         quicktime_atom_t chunk_atom;
 	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
         
-//printf("quicktime_encode_raw %llx %llx\n", file->file_position, file->ftell_position);
         if(!row_pointers)
           {
           if(depth == 32)

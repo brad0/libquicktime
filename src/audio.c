@@ -1,16 +1,7 @@
 #include <quicktime/lqt.h>
 #include <funcprotos.h>
 
-#if 0
-typedef enum 
-  {
-    LQT_SAMPLE_INT8,
-    LQT_SAMPLE_UINT8,
-    LQT_SAMPLE_INT16,
-    LQT_SAMPLE_INT32,
-    LQT_SAMPLE_FLOAT /* Float is ALWAYS machine native */
-  } lqt_sample_format_t;
-#endif
+#define LOG_DOMAIN "audio"
 
 /***************************************************
  * Audio conversion functions
@@ -216,7 +207,7 @@ static void encode_float_to_float(float ** in, void * _out, int num_channels, in
   }
 
 
-void lqt_convert_audio_encode(int16_t ** in_int, float ** in_float, void * out,
+void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in_float, void * out,
                               int num_channels, int num_samples,
                               lqt_sample_format_t stream_format)
   {
@@ -253,7 +244,7 @@ void lqt_convert_audio_encode(int16_t ** in_int, float ** in_float, void * out,
         encode_float_to_float(in_float, out, num_channels, num_samples);
       break;
     case LQT_SAMPLE_UNDEFINED:
-      fprintf(stderr, "lqt_convert_audio_encode: Input format undefined\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot encode samples: Stream format undefined");
       break;
     }
   }
@@ -440,7 +431,8 @@ static void decode_float_to_float(void * _in, float ** out, int num_channels, in
     }
   }
 
-void lqt_convert_audio_decode(void * in, int16_t ** out_int, float ** out_float,
+void lqt_convert_audio_decode(quicktime_t * file,
+                              void * in, int16_t ** out_int, float ** out_float,
                               int num_channels, int num_samples,
                               lqt_sample_format_t stream_format)
   {
@@ -477,7 +469,7 @@ void lqt_convert_audio_decode(void * in, int16_t ** out_int, float ** out_float,
         decode_float_to_float(in, out_float, num_channels, num_samples);
       break;
     case LQT_SAMPLE_UNDEFINED:
-      fprintf(stderr, "lqt_convert_audio_encode: Output format undefined\n");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
       break;
     }
   }

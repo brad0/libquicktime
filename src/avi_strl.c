@@ -159,14 +159,12 @@ void quicktime_read_strl(quicktime_t *file,
       // Super index.
       // Read the super index + all the partial indexes now
       {
-      //      fprintf(stderr, "quicktime_read_strl got indx\n");
       quicktime_read_indx(file, strl, &leaf_atom);
       strl->have_indx = 1;
       }
     quicktime_atom_skip(file, &leaf_atom);
     } while(quicktime_position(file) < parent_atom->end);
   
-  //printf("quicktime_read_strl 100\n");
   }
 
 
@@ -273,7 +271,6 @@ void quicktime_strl_2_qt(quicktime_t *file,
     else
       bits_per_sample = 8;
     
-    //printf("quicktime_read_strl 20 %d\n", strl->dwScale);
     
     channels       = strl->strf.wf.f.WAVEFORMAT.nChannels;
     sample_rate    = strl->strf.wf.f.WAVEFORMAT.nSamplesPerSec;
@@ -314,7 +311,6 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
   int64_t old_pos, end_pos;
   /* Rewrite stream headers */
 
-  //  fprintf(stderr, "quicktime_finalize_strl %d\n", file->file_type);
   if(!strl->strh.dwLength)
     strl->strh.dwLength = quicktime_track_samples(file, trak);
   
@@ -351,7 +347,7 @@ void quicktime_finalize_strl(quicktime_t *file, quicktime_trak_t * trak,
 
 void quicktime_strl_dump(quicktime_strl_t *strl)
   {
-  printf("strl\n");
+  lqt_dump("strl\n");
   quicktime_strh_dump(&strl->strh);
 
   if(!strncmp(strl->strh.fccType, "auds", 4))

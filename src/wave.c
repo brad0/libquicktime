@@ -29,7 +29,6 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
                          quicktime_atom_t *wave_atom)
   {
   quicktime_atom_t leaf_atom;
-  //  printf("quicktime_read_wave");
   do{
     quicktime_atom_read_header(file, &leaf_atom);
     
@@ -83,7 +82,7 @@ void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave)
 
 void quicktime_wave_dump(quicktime_wave_t *wave)
   {
-  printf("       wave: \n");
+  lqt_dump("       wave: \n");
   if(wave->has_frma)
     quicktime_frma_dump(&wave->frma);
   if(wave->has_enda)

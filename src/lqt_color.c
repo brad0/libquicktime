@@ -1,5 +1,6 @@
 #include <quicktime/lqt.h>
 #include <qtprivate.h>
+#include <lqt_funcprotos.h>
 
 #include <quicktime/colormodels.h>
 #include <string.h>
@@ -12,6 +13,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#define LOG_DOMAIN "color"
 
 typedef struct
   {
@@ -185,7 +188,8 @@ static int colormodel_get_bits(int colormodel)
     case BC_RGBA16161616:
       return 64;
     default:
-      fprintf(stderr,"lqt: warning: unknown colormodel (%d)\n",colormodel);
+      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Unknown colormodel (%d)\n",colormodel);
       return 0;
     }
   }
@@ -218,19 +222,15 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
   
   if(!input_is_rgb && !input_is_yuv)
     {
-#ifndef NDEBUG
-    fprintf(stderr,
-            "Input colorspace is neither RGB nor YUV, can't predict conversion price\n");
-#endif
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Input colorspace is neither RGB nor YUV, can't predict conversion price");
     return 6;
     }
   
   if(!output_is_rgb && !output_is_yuv)
     {
-#ifndef NDEBUG
-    fprintf(stderr,
-            "Output colorspace is neither RGB nor YUV, can't predict conversion price\n");
-#endif
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Output colorspace is neither RGB nor YUV, can't predict conversion price");
     return 6;
     }
 
@@ -320,10 +320,6 @@ lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
         {
         conversion_price
           = get_conversion_price(decoder_colormodel, supported[index]);
-/*         fprintf(stderr, "Conversion: %s -> %s: %d\n", */
-/*                 lqt_colormodel_to_string(decoder_colormodel), */
-/*                 lqt_colormodel_to_string(supported[index]), */
-/*                 conversion_price);     */
         if(conversion_price < best_conversion_price)
           {
           best_conversion_price = conversion_price;
@@ -349,14 +345,12 @@ lqt_get_best_colormodel_encode(quicktime_t * file, int track,
   
   index_supported = 0;
 
-  fprintf(stderr, "Get best colormodel %s\n", lqt_colormodel_to_string(file->vtracks[track].stream_cmodel));
 
   while(supported[index_supported] != LQT_COLORMODEL_NONE)
     {
     if(file->vtracks[track].stream_cmodel == supported[index_supported])
       {
       ret = file->vtracks[track].stream_cmodel;
-      fprintf(stderr, "*** GOT ENCODER CMODEL: %s\n", lqt_colormodel_to_string(ret));
       break;
       }
     index_supported++;
@@ -495,10 +489,6 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
   int sub_h = 0, sub_v = 0;
 
   /* Allocate frame buffer */
-#if 0  
-  fprintf(stderr, "lqt_rows_alloc: %d x %d, %s, %d %d\n", width, height, lqt_colormodel_to_string(colormodel),
-          *rowspan, *rowspan_uv);
-#endif
   bytes_per_line = get_bytes_per_line(colormodel, width);
     
   if(cmodel_is_planar(colormodel))
@@ -563,10 +553,6 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
   int sub_h = 0, sub_v = 0;
 
   int bytes_per_line;
-#if 0
-  fprintf(stderr, "lqt_rows_copy: w: %d, h: %d, in_rowspan: %d, in_rowspan_uv: %d, out_rowspan: %d, out_rowspan_uv: %d, colormodel: %s\n",
-          width, height, in_rowspan, in_rowspan_uv, out_rowspan, out_rowspan_uv, lqt_colormodel_to_string(colormodel));
-#endif
   if(lqt_colormodel_is_planar(colormodel))
     {
     lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);

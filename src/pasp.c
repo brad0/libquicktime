@@ -1,5 +1,5 @@
 /*
- * $Id: pasp.c,v 1.5 2006/04/13 19:25:48 gmerlin Exp $
+ * $Id: pasp.c,v 1.6 2006/12/03 01:04:18 gmerlin Exp $
  *
  * init, read, write handler for the "pasp" (Pixel Aspect) atom
 */
@@ -21,9 +21,9 @@ void quicktime_pasp_delete(quicktime_pasp_t *pasp) { }
 void quicktime_pasp_dump(quicktime_pasp_t *pasp)
 {
 
-	printf("     pixel aspect (pasp)\n");
-	printf("       hSpacing %d\n", pasp->hSpacing);
-	printf("       vSpacing %d\n", pasp->vSpacing);
+	lqt_dump("     pixel aspect (pasp)\n");
+	lqt_dump("       hSpacing %d\n", pasp->hSpacing);
+	lqt_dump("       vSpacing %d\n", pasp->vSpacing);
 }
 
 void quicktime_read_pasp(quicktime_t *file, quicktime_pasp_t *pasp)

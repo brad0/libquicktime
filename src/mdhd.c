@@ -18,7 +18,6 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 								int timescale)
 {
 	mdhd->time_scale = timescale;
-//printf("quicktime_mdhd_init_video %d %f\n", mdhd->time_scale, frame_rate);
 	mdhd->duration = 0;      /* set this when closing */
 }
 
@@ -47,15 +46,15 @@ void quicktime_read_mdhd(quicktime_t *file, quicktime_mdhd_t *mdhd)
 
 void quicktime_mdhd_dump(quicktime_mdhd_t *mdhd)
 {
-	printf("   media header\n");
-	printf("    version %d\n", mdhd->version);
-	printf("    flags %ld\n", mdhd->flags);
-	printf("    creation_time %lu\n", mdhd->creation_time);
-	printf("    modification_time %lu\n", mdhd->modification_time);
-	printf("    time_scale %ld\n", mdhd->time_scale);
-	printf("    duration %ld\n", mdhd->duration);
-	printf("    language %d\n", mdhd->language);
-	printf("    quality %d\n", mdhd->quality);
+	lqt_dump("   media header\n");
+	lqt_dump("    version %d\n", mdhd->version);
+	lqt_dump("    flags %ld\n", mdhd->flags);
+	lqt_dump("    creation_time %lu\n", mdhd->creation_time);
+	lqt_dump("    modification_time %lu\n", mdhd->modification_time);
+	lqt_dump("    time_scale %ld\n", mdhd->time_scale);
+	lqt_dump("    duration %ld\n", mdhd->duration);
+	lqt_dump("    language %d\n", mdhd->language);
+	lqt_dump("    quality %d\n", mdhd->quality);
 }
 
 void quicktime_write_mdhd(quicktime_t *file, quicktime_mdhd_t *mdhd)

@@ -123,12 +123,12 @@ void quicktime_hdlr_delete(quicktime_hdlr_t *hdlr)
 
 void quicktime_hdlr_dump(quicktime_hdlr_t *hdlr)
 {
-	printf("   handler reference (hdlr)\n");
-	printf("    version %d\n", hdlr->version);
-	printf("    flags %ld\n", hdlr->flags);
-	printf("    component_type %c%c%c%c\n", hdlr->component_type[0], hdlr->component_type[1], hdlr->component_type[2], hdlr->component_type[3]);
-	printf("    component_subtype %c%c%c%c\n", hdlr->component_subtype[0], hdlr->component_subtype[1], hdlr->component_subtype[2], hdlr->component_subtype[3]);
-	printf("    component_name %s\n", hdlr->component_name);
+	lqt_dump("   handler reference (hdlr)\n");
+	lqt_dump("    version %d\n", hdlr->version);
+	lqt_dump("    flags %ld\n", hdlr->flags);
+	lqt_dump("    component_type %c%c%c%c\n", hdlr->component_type[0], hdlr->component_type[1], hdlr->component_type[2], hdlr->component_type[3]);
+	lqt_dump("    component_subtype %c%c%c%c\n", hdlr->component_subtype[0], hdlr->component_subtype[1], hdlr->component_subtype[2], hdlr->component_subtype[3]);
+	lqt_dump("    component_name %s\n", hdlr->component_name);
 }
 
 void quicktime_read_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr, quicktime_atom_t * parent_atom)

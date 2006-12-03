@@ -22,12 +22,9 @@ typedef struct
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-//printf("quicktime_delete_codec_png 1\n");
 	if(codec->buffer) free(codec->buffer);
 	if(codec->temp_frame) free(codec->temp_frame);
-//printf("quicktime_delete_codec_png 1\n");
 	free(codec);
-//printf("quicktime_delete_codec_png 2\n");
 	return 0;
 }
 
@@ -95,7 +92,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = source_cmodel(file, track);
-          // fprintf(stderr, "Detected stream_cmodel: %s\n", lqt_colormodel_to_string(vtrack->stream_cmodel));
           return 0;
           }
 
@@ -133,9 +129,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!row_pointers)
           {
           vtrack->stream_cmodel = source_cmodel(file, track);
-          fprintf(stderr, "Detected stream_cmodel: %s, %d\n",
-                  lqt_colormodel_to_string(vtrack->stream_cmodel),
-                  quicktime_video_depth(file, track));
           return 0;
           }
         

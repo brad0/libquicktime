@@ -26,8 +26,8 @@ void quicktime_set_enda(quicktime_stsd_table_t *table, int little_endian)
 
 void quicktime_enda_dump(quicktime_enda_t *enda)
   {
-  printf("         enda: \n");
-  printf("           littleEndian: %d\n", enda->littleEndian);
+  lqt_dump("         enda: \n");
+  lqt_dump("           littleEndian: %d\n", enda->littleEndian);
   }
 
 /* Returns TRUE if little endian */

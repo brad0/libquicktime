@@ -12,7 +12,7 @@ void quicktime_gama_delete(quicktime_gama_t *gama) { }
 void quicktime_gama_dump(quicktime_gama_t *gama)
 {
 
-        printf("     Gamma value (gama): %f\n", gama->gamma);
+        lqt_dump("     Gamma value (gama): %f\n", gama->gamma);
 }
 
 void quicktime_read_gama(quicktime_t *file, quicktime_gama_t *gama)

@@ -2,7 +2,8 @@
 typedef struct lqt_charset_converter_s lqt_charset_converter_t;
 
 lqt_charset_converter_t *
-lqt_charset_converter_create(const char * src_charset, const char * dst_charset);
+lqt_charset_converter_create(quicktime_t * file, const char * src_charset,
+                             const char * dst_charset);
 
 /* We convert all strings "in place" */
 

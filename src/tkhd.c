@@ -29,27 +29,26 @@ int quicktime_tkhd_delete(quicktime_tkhd_t *tkhd)
 
 void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd)
 {
-	printf("  track header\n");
-	printf("   version %d\n", tkhd->version);
-	printf("   flags %ld\n", tkhd->flags);
-	printf("   creation_time %llu\n", tkhd->creation_time);
-	printf("   modification_time %llu\n", tkhd->modification_time);
-	printf("   track_id %d\n", tkhd->track_id);
-	printf("   reserved1 %ld\n", tkhd->reserved1);
-	printf("   duration %lld\n", tkhd->duration);
+	lqt_dump("  track header\n");
+	lqt_dump("   version %d\n", tkhd->version);
+	lqt_dump("   flags %ld\n", tkhd->flags);
+	lqt_dump("   creation_time %llu\n", tkhd->creation_time);
+	lqt_dump("   modification_time %llu\n", tkhd->modification_time);
+	lqt_dump("   track_id %d\n", tkhd->track_id);
+	lqt_dump("   reserved1 %ld\n", tkhd->reserved1);
+	lqt_dump("   duration %lld\n", tkhd->duration);
 	quicktime_print_chars("   reserved2 ", tkhd->reserved2, 8);
-	printf("   layer %d\n", tkhd->layer);
-	printf("   alternate_group %d\n", tkhd->alternate_group);
-	printf("   volume %f\n", tkhd->volume);
-	printf("   reserved3 %ld\n", tkhd->reserved3);
+	lqt_dump("   layer %d\n", tkhd->layer);
+	lqt_dump("   alternate_group %d\n", tkhd->alternate_group);
+	lqt_dump("   volume %f\n", tkhd->volume);
+	lqt_dump("   reserved3 %ld\n", tkhd->reserved3);
 	quicktime_matrix_dump(&(tkhd->matrix));
-	printf("   track_width %f\n", tkhd->track_width);
-	printf("   track_height %f\n", tkhd->track_height);
+	lqt_dump("   track_width %f\n", tkhd->track_width);
+	lqt_dump("   track_height %f\n", tkhd->track_height);
 }
 
 void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 {
-//printf("quicktime_read_tkhd 1 %llx\n", quicktime_position(file));
 	tkhd->version = quicktime_read_char(file);
 	tkhd->flags = quicktime_read_int24(file);
         if(tkhd->version == 0)
@@ -72,9 +71,7 @@ void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 	quicktime_read_data(file, tkhd->reserved2, 8);
 	tkhd->layer = quicktime_read_int16(file);
 	tkhd->alternate_group = quicktime_read_int16(file);
-//printf("quicktime_read_tkhd 1 %llx\n", quicktime_position(file));
 	tkhd->volume = quicktime_read_fixed16(file);
-//printf("quicktime_read_tkhd 2\n");
 	tkhd->reserved3 = quicktime_read_int16(file);
 	quicktime_read_matrix(file, &(tkhd->matrix));
 	tkhd->track_width = quicktime_read_fixed32(file);

@@ -96,7 +96,6 @@ static void get_scale_tables(int **column_table,
 	for(i = 0; i < h_out; i++)
 	{
 		(*row_table)[i] = (int)(vscale * i) + in_y1;
-//printf("get_scale_tables %d %d\n", i, (int)(vscale * i));
 	}
 }
 

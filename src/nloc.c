@@ -23,12 +23,12 @@ int quicktime_nloc_delete(quicktime_nloc_t *nloc)
 
 void quicktime_nloc_dump(quicktime_nloc_t *nloc)
 {
-	printf("          node location (nloc)\n");
-	printf("           version %i\n",  nloc->version);
-	printf("           revision %i\n",  nloc->revision);
-	printf("           node type %c%c%c%c\n",  nloc->nodeType[0], nloc->nodeType[1], nloc->nodeType[2], nloc->nodeType[3]);
-	printf("           location flags %ld\n",  nloc->locationFlags);
-	printf("           location data %ld\n", nloc->locationData);
+	lqt_dump("          node location (nloc)\n");
+	lqt_dump("           version %i\n",  nloc->version);
+	lqt_dump("           revision %i\n",  nloc->revision);
+	lqt_dump("           node type %c%c%c%c\n",  nloc->nodeType[0], nloc->nodeType[1], nloc->nodeType[2], nloc->nodeType[3]);
+	lqt_dump("           location flags %ld\n",  nloc->locationFlags);
+	lqt_dump("           location data %ld\n", nloc->locationData);
 }
 
 int quicktime_read_nloc(quicktime_t *file, quicktime_nloc_t *nloc, quicktime_qtatom_t *nloc_atom)

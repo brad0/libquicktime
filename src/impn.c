@@ -22,15 +22,15 @@ int quicktime_impn_delete(quicktime_impn_t *impn)
 
 void quicktime_impn_dump(quicktime_impn_t *impn)
 {
-	printf("        Panorama Imaging Atom (impn)\n");
-	printf("         Version %i\n",  impn->version);
-	printf("         Revision %i\n",  impn->revision);
-	printf("         imagingMode %ld\n",  impn->imagingMode);
-	printf("         imagingValidFlags %ld\n", impn->imagingValidFlags);
-	printf("         Correction %ld\n", impn->correction);
-	printf("         Quality %ld\n", impn->quality);
-	printf("         directdraw %ld\n", impn->directdraw);
-	printf("         Imaging Properties %ld %ld %ld %ld %ld %ld \n", impn->imagingProperties[0], impn->imagingProperties[1], impn->imagingProperties[2], impn->imagingProperties[3], impn->imagingProperties[4], impn->imagingProperties[5]);
+	lqt_dump("        Panorama Imaging Atom (impn)\n");
+	lqt_dump("         Version %i\n",  impn->version);
+	lqt_dump("         Revision %i\n",  impn->revision);
+	lqt_dump("         imagingMode %ld\n",  impn->imagingMode);
+	lqt_dump("         imagingValidFlags %ld\n", impn->imagingValidFlags);
+	lqt_dump("         Correction %ld\n", impn->correction);
+	lqt_dump("         Quality %ld\n", impn->quality);
+	lqt_dump("         directdraw %ld\n", impn->directdraw);
+	lqt_dump("         Imaging Properties %ld %ld %ld %ld %ld %ld \n", impn->imagingProperties[0], impn->imagingProperties[1], impn->imagingProperties[2], impn->imagingProperties[3], impn->imagingProperties[4], impn->imagingProperties[5]);
 
 }
 
