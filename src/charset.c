@@ -107,7 +107,7 @@ void lqt_charset_convert(lqt_charset_converter_t * cnv,
     return;
   if(in_len < 0) in_len = strlen(*str);
   
-  if(!do_convert(cnv->cd, *str, in_len, out_len,
+  if(!do_convert(cnv, *str, in_len, out_len,
                  &new, &new_alloc))
     {
     if(new) free(new);
