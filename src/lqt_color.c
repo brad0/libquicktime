@@ -545,8 +545,8 @@ void lqt_rows_free(uint8_t ** rows)
   free(rows);
   }
 
-void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan, int in_rowspan_uv,
-                   int out_rowspan, int out_rowspan_uv, int colormodel)
+void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan,
+                   int in_rowspan_uv, int out_rowspan, int out_rowspan_uv, int colormodel)
   {
   uint8_t * src_ptr, *dst_ptr;
   int i;
@@ -590,11 +590,50 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
     }
   else /* Packed */
     {
+    /* This is nasty: We don't know, how the frames are allocated.
+       We test rows[1] to check this and handle all 4 combinations
+       separately */
+    
     bytes_per_line = get_bytes_per_line(colormodel, width);
-    for(i = 0; i < height; i++)
-      memcpy(out_rows[i], in_rows[i], bytes_per_line);
+    
+    if(in_rows[1] && out_rows[1])
+      {
+      for(i = 0; i < height; i++)
+        memcpy(out_rows[i], in_rows[i], bytes_per_line);
+      }
+    else if(in_rows[1])
+      {
+      dst_ptr = out_rows[0];
+      
+      for(i = 0; i < height; i++)
+        {
+        memcpy(dst_ptr, in_rows[i], bytes_per_line);
+        dst_ptr += out_rowspan;
+        }
+      }
+    else if(out_rows[1])
+      {
+      src_ptr = in_rows[0];
+      
+      for(i = 0; i < height; i++)
+        {
+        memcpy(out_rows[i], src_ptr, bytes_per_line);
+        src_ptr += in_rowspan;
+        }
+      }
+    else
+      {
+      src_ptr = in_rows[0];
+      dst_ptr = out_rows[0];
+      
+      for(i = 0; i < height; i++)
+        {
+        memcpy(dst_ptr, src_ptr, bytes_per_line);
+        src_ptr += in_rowspan;
+        dst_ptr += out_rowspan;
+        }
+      }
     }
-  
   }
 
 // for i in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do for j in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do echo $i"_to_"$j.png; gthumb $i"_to_"$j.png; done; done

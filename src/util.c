@@ -13,6 +13,7 @@
 #include <lqt_fseek.h>
 #include <workarounds.h>
 #include <string.h>
+#include <errno.h>
 
 
 #ifndef HAVE_LRINT
@@ -134,10 +135,20 @@ static int read_preload(quicktime_t *file, uint8_t *data, int64_t size)
 int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
   {
   int result = 1;
+
+  /* Return if we had an error before */
+  if(file->io_error || file->io_eof)
+    return 0;
+  
   if(!file->preload_size)
     {
     quicktime_fseek(file, file->file_position);
     result = fread(data, 1, size, file->stream);
+    if(result < size)
+      {
+      file->io_error = ferror(file->stream);
+      file->io_eof   = feof(file->stream);
+      }
     file->ftell_position += size;
     }
   else
@@ -152,6 +163,11 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
       /* Size is larger than preload size.  Should never happen. */
       quicktime_fseek(file, file->file_position);
       result = fread(data, 1, size, file->stream);
+      if(result < size)
+        {
+        file->io_error = ferror(file->stream);
+        file->io_eof   = feof(file->stream);
+        }
       file->ftell_position += size;
       }
     else if(selection_start >= file->preload_start && 
@@ -191,6 +207,12 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
         quicktime_fseek(file, file->preload_end);
         result = fread(&(file->preload_buffer[fragment_start]),
                        fragment_len, 1, file->stream);
+
+        if(result < fragment_len)
+          {
+          file->io_error = ferror(file->stream);
+          file->io_eof   = feof(file->stream);
+          }
         file->ftell_position += fragment_len;
         file->preload_end += fragment_len;
         fragment_start += fragment_len;
@@ -207,6 +229,11 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
       /* Replace entire preload buffer with range. */
       quicktime_fseek(file, file->file_position);
       result = fread(file->preload_buffer, 1, size, file->stream);
+      if(result < size)
+        {
+        file->io_error = ferror(file->stream);
+        file->io_eof   = feof(file->stream);
+        }
       file->ftell_position += size;
       file->preload_start = file->file_position;
       file->preload_end = file->file_position + size;
@@ -221,68 +248,72 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
   }
 
 int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
-{
-        int data_offset = 0;
-        int writes_attempted = 0;
-        int writes_succeeded = 0;
-                                                                                                                  
-// Flush existing buffer and seek to new position
-        if(file->file_position != file->presave_position)
-        {
-                if(file->presave_size)
-                {
-                        quicktime_fseek(file, file->presave_position - file->presave_size);
-                        writes_succeeded += fwrite(file->presave_buffer, 1, file->presave_size, file->stream);
-                        writes_attempted += file->presave_size;
-                        file->presave_size = 0;
-                }
-                file->presave_position = file->file_position;
-        }
-                                                                                                                  
-// Write presave buffers until done
-        while(size > 0)
-        {
-                int fragment_size = QUICKTIME_PRESAVE;
-                if(fragment_size > size) fragment_size = size;
-                if(fragment_size + file->presave_size > QUICKTIME_PRESAVE)
-                        fragment_size = QUICKTIME_PRESAVE- file->presave_size;
-                                                                                                                  
-                memcpy(file->presave_buffer + file->presave_size,
-                        data + data_offset,
-                        fragment_size);
-                                                                                                                  
-                file->presave_position += fragment_size;
-                file->presave_size += fragment_size;
-                data_offset += fragment_size;
-                size -= fragment_size;
-                                                                                                                  
-                if(file->presave_size >= QUICKTIME_PRESAVE)
-                {
-                        quicktime_fseek(file, file->presave_position - file->presave_size);
-                        writes_succeeded += fwrite(file->presave_buffer, 1, file->presave_size, file->stream);
-                        writes_attempted += file->presave_size;
-                        file->presave_size = 0;
-                }
-        }
-                                                                                                                  
-/* Adjust file position */
-        file->file_position = file->presave_position;
-/* Adjust ftell position */
-        file->ftell_position = file->presave_position;
-/* Adjust total length */
-        if(file->total_length < file->ftell_position) file->total_length = file->ftell_position;
-                                                                                                                  
-/* fwrite failed */
-        if(!writes_succeeded && writes_attempted)
-        {
-                return 0;
-        }
-        else
-        if(!size)
-                return 1;
-        else
-                return size;
-}
+  {
+  int data_offset = 0;
+  int writes_attempted = 0;
+  int writes_succeeded = 0;
+
+  if(file->io_error)
+    return 0;
+  
+  // Flush existing buffer and seek to new position
+  if(file->file_position != file->presave_position)
+    {
+    if(file->presave_size)
+      {
+      quicktime_fseek(file, file->presave_position - file->presave_size);
+      writes_succeeded += fwrite(file->presave_buffer, 1, file->presave_size, file->stream);
+      writes_attempted += file->presave_size;
+      file->presave_size = 0;
+      }
+    file->presave_position = file->file_position;
+    }
+
+  // Write presave buffers until done
+  while(size > 0)
+    {
+    int fragment_size = QUICKTIME_PRESAVE;
+    if(fragment_size > size) fragment_size = size;
+    if(fragment_size + file->presave_size > QUICKTIME_PRESAVE)
+      fragment_size = QUICKTIME_PRESAVE- file->presave_size;
+
+    memcpy(file->presave_buffer + file->presave_size,
+           data + data_offset,
+           fragment_size);
+
+    file->presave_position += fragment_size;
+    file->presave_size += fragment_size;
+    data_offset += fragment_size;
+    size -= fragment_size;
+
+    if(file->presave_size >= QUICKTIME_PRESAVE)
+      {
+      quicktime_fseek(file, file->presave_position - file->presave_size);
+      writes_succeeded += fwrite(file->presave_buffer, 1, file->presave_size, file->stream);
+      writes_attempted += file->presave_size;
+      file->presave_size = 0;
+      }
+    }
+
+  /* Adjust file position */
+  file->file_position = file->presave_position;
+  /* Adjust ftell position */
+  file->ftell_position = file->presave_position;
+  /* Adjust total length */
+  if(file->total_length < file->ftell_position) file->total_length = file->ftell_position;
+
+  /* fwrite failed */
+  if(!writes_succeeded && writes_attempted)
+    {
+    file->io_error = ferror(file->stream);
+    return 0;
+    }
+  else
+    if(!size)
+      return 1;
+    else
+      return size;
+  }
 
 int64_t quicktime_byte_position(quicktime_t *file)
 {

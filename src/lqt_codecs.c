@@ -574,6 +574,9 @@ int lqt_encode_video(quicktime_t *file,
     
   result = do_encode_video(file, row_pointers, track);
 
+  if(file->io_error)
+    return 0;
+  
   if(file->vtracks[track].has_b_frames)
     {
     file->vtracks[track].track->mdia.minf.stbl.has_ctts = 1;
@@ -603,7 +606,7 @@ int lqt_encode_video(quicktime_t *file,
     } 
   
   file->vtracks[track].current_position++;
-  return result;
+  return 1;
   }
 
 int quicktime_encode_video(quicktime_t *file, 
@@ -656,15 +659,20 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
 
 int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int track)
   {
+  int result;
   quicktime_audio_map_t * atrack;
   if(!samples)
     return 0;
   atrack = &(file->atracks[track]);
   start_encoding(file);
   file->atracks[track].current_position += samples;
-  return ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, input, 
-                                                             samples,
-                                                             track);
+  result = ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, input, 
+                                                               samples,
+                                                               track);
+  if(file->io_error)
+    return 0;
+  else
+    return samples;
   }
 
 /* Compatibility function for old decoding API */

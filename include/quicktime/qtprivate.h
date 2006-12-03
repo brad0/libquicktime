@@ -1383,6 +1383,12 @@ struct quicktime_s
 /* Logging support */
         lqt_log_callback_t log_callback;
         void * log_data;
+
+/* I/O Error is saved here: It has the advantage, that
+   codecs don't have to check the return values of quicktime_[read|write]_data
+   all the time. */
+        int io_error;
+        int io_eof;
 };
 
 typedef struct

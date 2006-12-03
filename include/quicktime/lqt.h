@@ -25,7 +25,7 @@ void *lqt_bufalloc(size_t size);
  *  \param data Application supplied data
  */
 
-void lqt_set_log_callback(lqt_log_callback_t * cb, void * data);
+void lqt_set_log_callback(lqt_log_callback_t cb, void * data);
                            
   
 /** \ingroup general
@@ -548,6 +548,7 @@ int lqt_read_video_frame(quicktime_t * file,
  *  \param row_pointers Frame (see \ref lqt_rows_alloc)
  *  \param track Track index (starting with 0)
  *  \param time Timestamp of the frame in timescale tics
+ *  \returns 1 if the frame was encoded, 0 else.
  *
  * Encode one video frame. The presentation timestamp is in
  * timescale tics with the timescale you passed to
@@ -780,6 +781,7 @@ int lqt_decode_audio_raw(quicktime_t *file,
  * \param input An array of interleaved samples
  * \param samples Number of samples to encode
  * \param track Track index (starting with 0)
+ * \returns The number of encoded samples or 0 if an error occurred.
  *
  * This function bypasses all internal sampleformat conversion and allows
  * full resolution input for up to 32 bit integer and 32 bit float.
@@ -991,7 +993,7 @@ quicktime_t * lqt_open_read(const char * filename);
     
 */
 
-  quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t * cb, void * log_data);
+  quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t cb, void * log_data);
   
 /** \ingroup general
     \brief Open a file for writing
@@ -1014,7 +1016,7 @@ quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type);
 */
 
 quicktime_t * lqt_open_write_with_log(const char * filename, lqt_file_type_t type,
-                                      lqt_log_callback_t * cb, void * log_data);
+                                      lqt_log_callback_t cb, void * log_data);
   
 /** \ingroup general
     \brief Set the segment size for ODML AVIs

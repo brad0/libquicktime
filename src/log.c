@@ -40,7 +40,11 @@ static lqt_log_callback_t log_callback;
 static void * log_data;
 static int log_mask = LQT_LOG_ERROR | LQT_LOG_WARNING;
 
-
+void lqt_set_log_callback(lqt_log_callback_t cb, void * data)
+  {
+  log_callback = cb;
+  log_data = data;
+  }
 
 void lqt_log(quicktime_t * file, lqt_log_level_t level,
              const char * domain, const char * format, ...)
@@ -52,7 +56,7 @@ void lqt_log(quicktime_t * file, lqt_log_level_t level,
   int len;
 #endif
 
-  if((!file || !file->log_callback) && !(level & log_mask))
+  if((!file || !file->log_callback) && !log_callback && !(level & log_mask))
     return;
   
   va_start( argp, format);

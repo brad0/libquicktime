@@ -455,7 +455,44 @@ struct CODECIDMAP codecidmap_v[] = {
           compatibility_flags: LQT_FILE_AVI,
           do_encode: 1,
         },
-	{
+        {
+          id: CODEC_ID_MJPEGB,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+          encode_parameters: encode_parameters_mjpeg,
+	  short_name: "mjpegb",
+	  name: "MotionJPEG-B",
+	  fourccs: {"mjpb", (char *)0 },
+          wav_ids: { LQT_WAV_ID_NONE },
+          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+          do_encode: 1,
+        },
+#if LIBAVCODEC_BUILD >= 3346688
+        {
+          id: CODEC_ID_TARGA,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+	  short_name: "TGA",
+	  name: "Targa",
+	  fourccs: {"tga ", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+#endif
+#if LIBAVCODEC_BUILD >= 3347456
+        {
+          id: CODEC_ID_TIFF,
+	  index: -1,
+          encoder: NULL,
+          decoder: NULL,
+	  short_name: "TIFF",
+	  name: "TIFF",
+	  fourccs: {"tiff", (char *)0},
+          wav_ids: { LQT_WAV_ID_NONE },
+        },
+#endif
+        {
           id: CODEC_ID_8BPS,
 	  index: -1,
           encoder: NULL,

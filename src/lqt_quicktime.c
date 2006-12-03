@@ -1770,13 +1770,13 @@ quicktime_t * lqt_open_write(const char * filename, lqt_file_type_t type)
   return do_open(filename, 0, 1, type, NULL, NULL);
   }
 
-quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t * cb, void * log_data)
+quicktime_t * lqt_open_read_with_log(const char * filename, lqt_log_callback_t cb, void * log_data)
   {
   return do_open(filename, 1, 0, LQT_FILE_NONE, cb, log_data);
   }
 
 quicktime_t * lqt_open_write_with_log(const char * filename, lqt_file_type_t type,
-                                      lqt_log_callback_t * cb, void * log_data)
+                                      lqt_log_callback_t cb, void * log_data)
   {
   return do_open(filename, 0, 1, type, cb, log_data);
   }
@@ -1862,14 +1862,14 @@ static void apply_default_parameters(quicktime_t * file,
     switch(parameter_info[j].type)
       {
       case LQT_PARAMETER_INT:
-        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %d\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting parameter %s to %d",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_int);
         codec->set_parameter(file, track, parameter_info[j].name,
                              &(parameter_info[j].val_default.val_int));
         break;
       case LQT_PARAMETER_FLOAT:
-        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %f\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting parameter %s to %f",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_float);
         codec->set_parameter(file, track, parameter_info[j].name,
@@ -1877,7 +1877,7 @@ static void apply_default_parameters(quicktime_t * file,
         break;
       case LQT_PARAMETER_STRING:
       case LQT_PARAMETER_STRINGLIST:
-        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting Parameter %s to %s\n",
+        lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Setting parameter %s to %s",
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_string);
         codec->set_parameter(file, track, parameter_info[j].name,
