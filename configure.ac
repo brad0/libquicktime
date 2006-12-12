@@ -585,6 +585,10 @@ AC_SUBST(X264_CFLAGS)
 fi
 AM_CONDITIONAL(HAVE_X264, test x$have_x264 = xtrue)
 
+dnl
+dnl Plugin directory
+dnl
+
 if test "x$prefix" = xNONE; then
    prefix="${ac_default_prefix}"
 fi
@@ -760,6 +764,5 @@ echo "Yes"
 else
 echo "Missing (Go to http://developers.videolan.org/x264.html)"
 fi  
-
 
 fi

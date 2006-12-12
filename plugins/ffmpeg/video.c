@@ -452,9 +452,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
                                          &codec->buffer_alloc,
                                          vtrack->current_position + codec->decoding_delay,
                                          NULL, track);
+
+      codec->decoding_delay++;
       
-      if(buffer_size <= 0)
-        return 0;
       if(avcodec_decode_video(codec->avctx,
                               codec->frame,
                               &got_pic,
@@ -464,10 +464,12 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Skipping corrupted frame");
         continue;
         }
-
-      if(!got_pic && trak->mdia.minf.stbl.has_ctts)
-        codec->decoding_delay++;
       
+      if(got_pic)
+        codec->decoding_delay--;
+      
+      if((buffer_size <= 0) && !got_pic)
+        return 0;
       }
     }
   

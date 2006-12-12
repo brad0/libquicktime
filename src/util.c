@@ -54,7 +54,6 @@ int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr)
 
 	if(!(file->stream = fopen(path, flags)))
 	{
-		perror(__FUNCTION__);
 		return 1;
 	}
 
