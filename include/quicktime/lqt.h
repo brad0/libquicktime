@@ -107,6 +107,22 @@ int lqt_set_pixel_aspect(quicktime_t *file, int track, int pixel_width,
 
 lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track);
 
+/** \ingroup video_encode
+ *  \brief Set the interlace mode
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param mode The interlace mode.
+ *  \returns 1 if the call was successful, 0 if there is no such track
+ *
+ *  This will in most cases store the correct interlacing information
+ *  in the file (e.g. in the fiel atom). For tweaking the fiel atom
+ *  directly, advanced users might look at \ref quicktime_set_fiel.
+ */
+
+int lqt_set_interlace_mode(quicktime_t * file, int track,
+                           lqt_interlace_mode_t mode);
+
+  
 /** \ingroup video
     \brief Convert an interlace mode to a human readable string
     \param mode An interlace mode

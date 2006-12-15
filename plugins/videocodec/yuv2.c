@@ -198,6 +198,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
             vtrack->stream_cmodel = BC_YUVJ422P;
           return 0;
           }
+
+        if(!codec->initialized)
+          lqt_set_fiel_uncompressed(file, track);
         
 	initialize(vtrack, codec, width, height);
 

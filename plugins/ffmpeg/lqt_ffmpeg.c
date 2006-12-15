@@ -29,6 +29,7 @@
 #include <quicktime/lqt.h>
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
+#include <funcprotos.h>
 #include "ffmpeg.h"
 #include "params.h"
 
@@ -924,8 +925,19 @@ IFUNC(26)
 IFUNC(27)
 IFUNC(28)
 IFUNC(29)
+IFUNC(30)
+IFUNC(31)
+IFUNC(32)
+IFUNC(33)
+IFUNC(34)
+IFUNC(35)
+IFUNC(36)
+IFUNC(37)
+IFUNC(38)
+IFUNC(39)
+IFUNC(40)
 #undef IFUNC
-#define MAX_VIDEO_FUNC 29
+#define MAX_VIDEO_FUNC 40
 #define IFUNC(x) \
 void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
 { \
@@ -968,7 +980,18 @@ IFUNC(26)
 IFUNC(27)
 IFUNC(28)
 IFUNC(29)
-#define MAX_AUDIO_FUNC 29
+IFUNC(30)
+IFUNC(31)
+IFUNC(32)
+IFUNC(33)
+IFUNC(34)
+IFUNC(35)
+IFUNC(36)
+IFUNC(37)
+IFUNC(38)
+IFUNC(39)
+IFUNC(40)
+#define MAX_AUDIO_FUNC 40
 
      
 #undef IFUNC
@@ -978,7 +1001,7 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
 	ffmpeg_map_init();
 	if(index > MAX_VIDEO_FUNC) {
 		lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
-                        "Insufficient dummy calls - please report!");
+                        "Video index too large: %d", index);
 		return NULL;
 	}
 	switch(index) {
@@ -1012,6 +1035,17 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
 		case 27: return quicktime_init_video_codec_ffmpeg27;
 		case 28: return quicktime_init_video_codec_ffmpeg28;
 		case 29: return quicktime_init_video_codec_ffmpeg29;
+		case 30: return quicktime_init_video_codec_ffmpeg30;
+		case 31: return quicktime_init_video_codec_ffmpeg31;
+		case 32: return quicktime_init_video_codec_ffmpeg32;
+		case 33: return quicktime_init_video_codec_ffmpeg33;
+		case 34: return quicktime_init_video_codec_ffmpeg34;
+		case 35: return quicktime_init_video_codec_ffmpeg35;
+		case 36: return quicktime_init_video_codec_ffmpeg36;
+		case 37: return quicktime_init_video_codec_ffmpeg37;
+		case 38: return quicktime_init_video_codec_ffmpeg38;
+		case 39: return quicktime_init_video_codec_ffmpeg39;
+		case 40: return quicktime_init_video_codec_ffmpeg40;
 		default:
 			break;
 	}
@@ -1023,7 +1057,7 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
 	ffmpeg_map_init();
 	if(index > MAX_AUDIO_FUNC) {
 		lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
-                        "Insufficient dummy calls - please report!");
+                        "Audio index too large: %d", index);
 		return NULL;
 	}
 	switch(index) {
@@ -1057,6 +1091,17 @@ extern lqt_init_audio_codec_func_t get_audio_codec(int index)
 		case 27: return quicktime_init_audio_codec_ffmpeg27;
 		case 28: return quicktime_init_audio_codec_ffmpeg28;
 		case 29: return quicktime_init_audio_codec_ffmpeg29;
+                case 30: return quicktime_init_audio_codec_ffmpeg30;
+		case 31: return quicktime_init_audio_codec_ffmpeg31;
+		case 32: return quicktime_init_audio_codec_ffmpeg32;
+		case 33: return quicktime_init_audio_codec_ffmpeg33;
+		case 34: return quicktime_init_audio_codec_ffmpeg34;
+		case 35: return quicktime_init_audio_codec_ffmpeg35;
+		case 36: return quicktime_init_audio_codec_ffmpeg36;
+		case 37: return quicktime_init_audio_codec_ffmpeg37;
+		case 38: return quicktime_init_audio_codec_ffmpeg38;
+		case 39: return quicktime_init_audio_codec_ffmpeg39;
+		case 40: return quicktime_init_audio_codec_ffmpeg40;
 		default:
 			break;
 	}

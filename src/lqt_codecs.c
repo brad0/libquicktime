@@ -119,6 +119,9 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
       }
     codec_info = *codec_array;
     }
+
+  vtrack->compatibility_flags = codec_info->compatibility_flags;
+  
   lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
           "Loading module %s", codec_info->module_filename);
   
@@ -214,6 +217,8 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
     codec_info = *codec_array;
     }
 
+  atrack->compatibility_flags = codec_info->compatibility_flags;
+  
   lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
           "Loading module %s", codec_info->module_filename);
   
@@ -493,6 +498,7 @@ int lqt_set_video_pass(quicktime_t *file,
 
 static void start_encoding(quicktime_t *file)
   {
+  int i;
   if(file->encoding_started)
     return;
 
@@ -503,6 +509,21 @@ static void start_encoding(quicktime_t *file)
     quicktime_set_position(file, 0);
     // Write RIFF chunk
     quicktime_init_riff(file);
+    }
+  
+  /* Trigger warnings if codecs are in the wrong container */
+  for(i = 0; i < file->total_atracks; i++)
+    {
+    if(!(file->atracks[i].compatibility_flags & file->file_type))
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Audio codec and container are not known to be compatible. File might be playable by libquicktime only");
+    }
+  for(i = 0; i < file->total_vtracks; i++)
+    {
+    if(!(file->vtracks[i].compatibility_flags & file->file_type))
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Video codec and container are not known to be compatible. File might be playable by libquicktime only");
+    
     }
   }
 

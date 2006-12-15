@@ -651,6 +651,15 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
               strncpy(trak->strl->strh.fccHandler, "divx", 4);
               strncpy(trak->strl->strf.bh.biCompression, "DX50", 4);
               }
+#if 0 // Seems not to work yet
+            /* enable interlaced encoding */
+            if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
+              {
+              lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN, "Enabling interlaced encoding");
+              codec->avctx->flags |=
+                (CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME);
+              }
+#endif
             }
           else if((codec->encoder->id == CODEC_ID_MSMPEG4V3) && (trak->strl))
             {
@@ -708,7 +717,14 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         codec->frame->pts = vtrack->timestamp;
         if(codec->avctx->flags & CODEC_FLAG_QSCALE)
           codec->frame->quality = codec->qscale;
-        
+#if 0
+        if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
+          {
+          codec->frame->interlaced_frame = 1;
+          if(vtrack->interlace_mode == LQT_INTERLACE_TOP_FIRST)
+            codec->frame->top_field_first = 1;
+          }
+#endif   
 	bytes_encoded = avcodec_encode_video(codec->avctx,
                                              codec->buffer,
                                              codec->buffer_alloc,

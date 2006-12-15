@@ -13,6 +13,8 @@
 #define JPEG_PROGRESSIVE 0
 #define JPEG_MJPA 1
 
+#define LOG_DOMAIN "mjpeg"
+
 /* MJPB isn't supported anyway */
 // #define JPEG_MJPB 2 
 
@@ -50,6 +52,19 @@ static int decode(quicktime_t *file,
   mjpeg_t *mjpeg = codec->mjpeg;
   long size, field2_offset;
   int result = 0;
+
+  if(!codec->initialized)
+    {
+    /* Special treatment of bottom_field_first.
+       We cannot use lqt_get_interlace_mode at this point,
+       since this piece is called *before* the interlace mode
+       is set by quicktime_init_maps() */
+    int nfields, dominance;
+    if(lqt_get_fiel(file, track, &nfields, &dominance) &&
+       (nfields == 2) && (dominance == 6))
+      codec->mjpeg->bottom_first = 1;
+    codec->initialized = 1;
+    }
   
   if(!codec->have_frame)
     {
@@ -81,7 +96,8 @@ static int decode(quicktime_t *file,
     }
 
   if(file->vtracks[track].stream_row_span) 
-    mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
+    mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span,
+                      file->vtracks[track].stream_row_span_uv);
   else
     mjpeg_set_rowspan(codec->mjpeg, 0, 0);
     
@@ -118,11 +134,30 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         
         if(!codec->initialized)
           {
+          // Bottom first needs special treatment */
+          if(vtrack->interlace_mode == LQT_INTERLACE_BOTTOM_FIRST)
+            codec->mjpeg->bottom_first = 1;
+          
           /* Quicktime for Windows must have this information. */
           if((codec->jpeg_type == JPEG_MJPA) &&
              !trak->mdia.minf.stbl.stsd.table[0].has_fiel)
             {
-            lqt_set_fiel(file, track, 2, 1);
+            switch(vtrack->interlace_mode)
+              {
+              case LQT_INTERLACE_TOP_FIRST:
+                lqt_set_fiel(file, track, 2, 1);
+                break;
+              case LQT_INTERLACE_BOTTOM_FIRST:
+                lqt_set_fiel(file, track, 2, 6);
+                break;
+              case LQT_INTERLACE_NONE:
+                lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                        "Encoding progressive video as interlaced. Motion JPEG-A is not suitable for progressive video.");
+                lqt_set_fiel(file, track, 2, 1);
+                break;
+                
+              }
+            
             }
           codec->initialized = 1;
           }

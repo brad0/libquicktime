@@ -374,7 +374,7 @@ static void allocate_temps(mjpeg_t *mjpeg)
     }
   }
 
-static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i, int field)
+static int get_input_row(mjpeg_t *mjpeg, int i, int field)
   {
   int input_row;
   if(mjpeg->fields > 1) 
@@ -389,6 +389,10 @@ static int get_input_row(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int i, in
 static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int field)
   {
   int i;
+
+  if((mjpeg->fields > 1) && (mjpeg->bottom_first))
+    field = 1 - field;
+    
   switch(mjpeg->jpeg_color_model)
     {
     case BC_YUVJ444P:
@@ -402,7 +406,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int field)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i, field);
+        int input_row = get_input_row(mjpeg, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
         compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
@@ -421,7 +425,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int field)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i, field);
+        int input_row = get_input_row(mjpeg, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         compressor->rows[1][i] = mjpeg->temp_rows[1][input_row];
         compressor->rows[2][i] = mjpeg->temp_rows[2][input_row];
@@ -440,7 +444,7 @@ static void get_rows(mjpeg_t *mjpeg, mjpeg_compressor *compressor, int field)
 
       for(i = 0; i < compressor->field_h; i++)
         {
-        int input_row = get_input_row(mjpeg, compressor, i, field);
+        int input_row = get_input_row(mjpeg, i, field);
         compressor->rows[0][i] = mjpeg->temp_rows[0][input_row];
         if(i < compressor->field_h / 2)
           {
@@ -968,8 +972,8 @@ mjpeg_t* mjpeg_new(int w,
                    int h, 
                    int fields)
   {
-  mjpeg_t *result = lqt_bufalloc(sizeof(mjpeg_t));
-
+  mjpeg_t *result = calloc(1, sizeof(*result));
+  
   result->output_w = w;
   result->output_h = h;
   result->fields = fields;
@@ -1055,7 +1059,8 @@ static inline int read_int16(unsigned char *data, long *offset, long length)
           (((unsigned int)data[*offset - 1])));
   }
 
-static inline int next_int16(unsigned char *data, long *offset, long length)
+static inline int
+next_int16(unsigned char *data, long *offset, long length)
   {
   if(length - *offset < 2)	
     {
@@ -1066,7 +1071,9 @@ static inline int next_int16(unsigned char *data, long *offset, long length)
           (((unsigned int)data[*offset + 1])));
   }
 
-static inline void write_int32(unsigned char *data, long *offset, long length, unsigned int value)
+static inline void
+write_int32(unsigned char *data, long *offset, long length,
+            unsigned int value)
   {
   if(length - *offset < 4)
     {

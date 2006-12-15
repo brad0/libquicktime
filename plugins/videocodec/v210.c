@@ -35,7 +35,7 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 static void initialize(quicktime_video_map_t *vtrack, 
                quicktime_v210_codec_t *codec, int width, int height) 
     {
-
+        
     if  (codec->initialized != 0)
         return;
     codec->bytes_per_line = ((((width + 47) / 48) * 48 * 8) / 3);;
@@ -43,6 +43,7 @@ static void initialize(quicktime_video_map_t *vtrack,
 
     if  (!codec->buffer)
         codec->buffer = malloc(codec->buffer_alloc);
+    
     codec->initialized = 1;
     }
 
@@ -157,6 +158,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         return 0;
         }
 
+    if(!codec->initialized)
+      lqt_set_fiel_uncompressed(file, track);
+    
     initialize(vtrack, codec, width, height);
 
     out_ptr = codec->buffer;

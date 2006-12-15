@@ -120,6 +120,9 @@ extern "C" {
     long input_field2;
     int rowspan, rowspan_uv;
 
+    // Bottom first needs special treatment
+    int bottom_first;
+        
     } mjpeg_t;
 
 

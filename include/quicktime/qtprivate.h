@@ -1178,6 +1178,8 @@ typedef struct
 /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
         int wav_id;
 
+        int compatibility_flags; /* Taken from codec info */
+
 } quicktime_audio_map_t;
 
 typedef struct
@@ -1205,8 +1207,11 @@ typedef struct
 
         /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
         uint8_t ** temp_frame;
+
         lqt_chroma_placement_t chroma_placement;
         lqt_interlace_mode_t interlace_mode;
+
+        int compatibility_flags; /* Taken from codec info */
 
   } quicktime_video_map_t;
 

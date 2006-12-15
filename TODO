@@ -1,21 +1,6 @@
-- Try xvid (www.videocoding.de)
-
-- Find replacement for opendivx encoder (i.e.
-  some MPEG-4 based encoder whose output can be read
-  by Quicktime4linux)
-
-- Support Vorbis encoding compatible with
-  qtcomponents.sf.net (Fourcc OggV, codec initialization data
-  in the stsd atom instead of the first audio chunk)
-
-- Support reading/writing of MPEG-4 esds atoms
-
-- Support AAC audio en-/decoding via faad
+- Read/write quicktime text subtitles
 
 - Set compatibility flags for all encoders
-
-- Make MPEG-4 video encoding readable by Apple Quicktime
-  (requires at least esds atoms see above).
 
 - Maybe more steps towards proper mp4 encoding?
 

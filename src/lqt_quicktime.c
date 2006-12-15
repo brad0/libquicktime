@@ -2142,6 +2142,15 @@ lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track)
   return file->vtracks[track].interlace_mode;
   }
 
+int lqt_set_interlace_mode(quicktime_t * file, int track,
+                           lqt_interlace_mode_t mode)
+  {
+  if(track < 0 || track > file->total_vtracks)
+    return 0;
+  file->vtracks[track].interlace_mode = mode;
+  return 1;
+  }
+
 const char * lqt_interlace_mode_to_string(lqt_interlace_mode_t mode)
   {
   int i = 0;
