@@ -117,7 +117,7 @@ AH_TEMPLATE([MODULE_EXT], [Extension for shared modules])
 
 MODULE_EXT=$shrext_cmds
 
-if test x$MODULE_EXT = x.dylib; then
+if test x$MODULE_EXT = x.dylib -o x$MODULE_EXT = x; then
 MODULE_EXT=".so"
 fi
 
