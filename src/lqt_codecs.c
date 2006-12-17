@@ -594,9 +594,11 @@ int lqt_encode_video(quicktime_t *file,
      vtrack->current_position is number of frames, which came from the user */
     
   result = do_encode_video(file, row_pointers, track);
+  if (result)
+     return(result);
 
   if(file->io_error)
-    return 0;
+    return 1;
   
   if(file->vtracks[track].has_b_frames)
     {
@@ -625,9 +627,8 @@ int lqt_encode_video(quicktime_t *file,
                             file->vtracks[track].current_position - 1,
                             time - last_time);
     } 
-  
   file->vtracks[track].current_position++;
-  return 1;
+  return 0;
   }
 
 int quicktime_encode_video(quicktime_t *file, 
