@@ -564,7 +564,7 @@ int lqt_read_video_frame(quicktime_t * file,
  *  \param row_pointers Frame (see \ref lqt_rows_alloc)
  *  \param track Track index (starting with 0)
  *  \param time Timestamp of the frame in timescale tics
- *  \returns 1 if the frame was encoded, 0 else.
+ *  \returns 0 if the frame was encoded, 1 else.
  *
  * Encode one video frame. The presentation timestamp is in
  * timescale tics with the timescale you passed to
