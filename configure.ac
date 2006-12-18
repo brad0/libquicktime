@@ -168,7 +168,9 @@ VORBIS_REQUIRED="1.0"
 have_vorbis=false
 AH_TEMPLATE([HAVE_VORBIS], [Vorbis libraries are there])
   
+if test "x$with_vorbis" != "xno"; then
 XIPH_PATH_VORBIS(have_vorbis=true)
+fi
 AM_CONDITIONAL(HAVE_VORBIS, test x$have_vorbis = xtrue)
   
 if test x$have_vorbis = xtrue; then
@@ -183,6 +185,10 @@ dnl
 
 LAME_REQUIRED="3.93"
 have_lame="false"
+
+AC_ARG_WITH([lame], AS_HELP_STRING([--without-lame], [Build without lame library (default: test)]))
+
+if test "x$with_lame" != "xno"; then
 
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
@@ -235,6 +241,8 @@ AC_SUBST(LAME_CFLAGS)
 AC_SUBST(LAME_LIBS)
 AC_SUBST(LAME_REQUIRED)
 
+fi
+
 AM_CONDITIONAL(HAVE_LAME, test x$have_lame = xtrue)
 
 dnl
@@ -266,6 +274,10 @@ dnl
 
 AH_TEMPLATE([HAVE_GL], [Do we have OpenGL?])
 
+AC_ARG_WITH([opengl], AS_HELP_STRING([--without-opengl], [Build without opengl library (default: test)]))
+
+if test "x$with_opengl" != "xno"; then
+
 have_gl="yes"
 
 AC_CHECK_HEADER([GL/gl.h],[],have_gl="no")
@@ -280,7 +292,12 @@ fi
 
 if test "x$have_gl" = "xyes"; then
 AC_DEFINE(HAVE_GL,1)
+GL_LIBS="-lGLU -lGL"
 fi
+
+fi
+
+AC_SUBST(GL_LIBS)
 
 dnl
 dnl Check for Alsa
@@ -290,8 +307,13 @@ have_libalsa="false"
 
 AH_TEMPLATE([HAVE_ALSA], [Do we have Alsa?])
 
+AC_ARG_WITH([alsa], AS_HELP_STRING([--without-alsa], [Build without alsa library (default: test)]))
+
+if test "x$with_alsa" != "xno"; then
 ALSA_REQUIRED="0.9"
 PKG_CHECK_MODULES(ALSA, alsa >= $ALSA_REQUIRED, have_alsa="true", have_alsa="false")
+fi
+
 AM_CONDITIONAL(HAVE_ALSA, test x$have_alsa = xtrue)
 
 if test x$have_alsa = xtrue; then
@@ -315,7 +337,12 @@ dnl Check for gtk
 dnl This is neccesary for the utils/gtk subdirectory
 dnl
 GTK_REQUIRED="2.4.0"
+AC_ARG_WITH([gtk], AS_HELP_STRING([--without-gtk], [Build without gtk library (default: test)]))
+
+if test "x$with_gtk" != "xno"; then
 AM_PATH_GTK_2_0($GTK_REQUIRED, have_gtk=true, have_gtk=false)
+fi
+
 AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
 AC_SUBST(GTK_REQUIRED)
 
@@ -330,7 +357,12 @@ have_libdv="false"
 
 LIBDV_REQUIRED="0.102"
 
+AC_ARG_WITH([libdv], AS_HELP_STRING([--without-libdv], [Build without libdv support (default: test)]))
+
+if test "x$with_libdv" != "xno"; then
 PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true", have_libdv="false")
+fi
+
 AC_SUBST(LIBDV_REQUIRED)
 AC_SUBST(LIBDV_LIBS)
 AC_SUBST(LIBDV_CFLAGS)
@@ -347,9 +379,9 @@ AH_TEMPLATE([HAVE_LIBJPEG],
 have_libjpeg=false
 JPEG_REQUIRED="6b"
 
-AC_ARG_ENABLE(libjpeg,
-[AC_HELP_STRING([--disable-libjpeg],[Disable libjpeg (default: autodetect)])],
-[case "${enableval}" in
+AC_ARG_WITH(libjpeg,
+[AC_HELP_STRING([--without-libjpeg],[Disable libjpeg (default: autodetect)])],
+[case "${withval}" in
    yes) test_libjpeg=true ;;
    no)  test_libjpeg=false ;;
 esac],[test_libjpeg=true])
@@ -399,8 +431,14 @@ have_libavcodec=false
 
 AVCODEC_BUILD="3277056"
 
+AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
+
+if test "x$with_ffmpeg" != "xno"; then
+
 dnl PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
 ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
+
+fi
 
 AVCODEC_REQUIRED=$AVCODEC_VERSION
 
@@ -418,6 +456,10 @@ AH_TEMPLATE([HAVE_LIBPNG], [Enable png codec])
 
 have_libpng=false
 PNG_REQUIRED="1.0.8"
+
+AC_ARG_WITH([libpng], AS_HELP_STRING([--without-libpng], [Build without png library (default: test)]))
+
+if test "x$with_libpng" != "xno"; then
 
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
@@ -444,6 +486,8 @@ esac
 CFLAGS=$OLD_CFLAGS
 LIBS=$OLD_LIBS
 
+fi
+
 AC_SUBST(PNG_CFLAGS)
 AC_SUBST(PNG_LIBS)
 AC_SUBST(PNG_REQUIRED)
@@ -459,6 +503,13 @@ FAAC_REQUIRED="1.24"
 AH_TEMPLATE([HAVE_FAAC], [Enable faac])
 
 if test $have_gpl = "true"; then
+
+AC_ARG_WITH([faac], AS_HELP_STRING([--without-faac], [Build without faac library (default: test)]))
+
+if test "x$with_faac" != "xno"; then
+
+OLD_CFLAGS=$CFLAGS
+OLD_LIBS=$LIBS
 
 LIBS="$LIBS -lfaac -lm"
 CFLAGS="$CFLAGS"
@@ -497,6 +548,7 @@ LIBS=$OLD_LIBS
 
 fi
 
+fi
 AC_SUBST(FAAC_CFLAGS)
 AC_SUBST(FAAC_LIBS)
 AC_SUBST(FAAC_REQUIRED)
@@ -515,7 +567,11 @@ FAAD2_REQUIRED="2.0"
 AH_TEMPLATE([HAVE_FAAD2], [Enable FAAD2])
 have_faad2="false"
 
+AC_ARG_WITH([faad2], AS_HELP_STRING([--without-faad2], [Build without faad2 library (default: test)]))
+
 if test $have_gpl = "true"; then
+
+if test "x$with_faad2" != "xno"; then
 
 AC_MSG_CHECKING(for faad2)
 
@@ -558,6 +614,8 @@ LIBS=$OLD_LIBS
 
 fi
 
+fi
+
 AC_SUBST(FAAD2_CFLAGS)
 AC_SUBST(FAAD2_LIBS)
 AC_SUBST(FAAD2_REQUIRED)
@@ -574,10 +632,14 @@ AH_TEMPLATE([HAVE_X264], [Enable X264])
 
 have_x264="false"
 
+AC_ARG_WITH([x264], AS_HELP_STRING([--without-x264], [Build without x264 library (default: test)]))
+
 if test $have_gpl = "true"; then
 X264_REQUIRED="0.48"
 
+if test "x$with_x264" != "xno"; then
 PKG_CHECK_MODULES(X264, x264 >= $X264_REQUIRED, have_x264="true", have_x264="false")
+fi
 AC_SUBST(X264_REQUIRED)
 AC_SUBST(X264_LIBS)
 AC_SUBST(X264_CFLAGS)
