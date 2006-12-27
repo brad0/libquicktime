@@ -1,4 +1,6 @@
 #include "funcprotos.h"
+#include "videocodec.h"
+
 #include <quicktime/colormodels.h>
 #include <quicktime/quicktime.h>
 #include <workarounds.h>

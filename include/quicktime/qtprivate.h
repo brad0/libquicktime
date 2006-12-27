@@ -560,10 +560,17 @@ typedef struct
   } quicktime_stbl_t;
 
 typedef struct
-{
-    	char refType[4];
-	long trackIndex;
-} quicktime_tref_t;
+  {
+  char type[4];
+  int num_tracks;
+  uint32_t * tracks;
+  } quicktime_track_reference_t;
+
+typedef struct
+  {
+  int num_references;
+  quicktime_track_reference_t * references;
+  } quicktime_tref_t;
 
 /* data reference */
 
@@ -747,7 +754,8 @@ typedef struct
 	quicktime_tkhd_t tkhd;
 	quicktime_mdia_t mdia;
 	quicktime_edts_t edts;
-	quicktime_tref_t tref;
+
+        quicktime_tref_t tref;
         quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
         int chunk_sizes_alloc;
         int64_t * chunk_sizes; /* This contains the chunk sizes for audio
@@ -1215,6 +1223,13 @@ typedef struct
 
   } quicktime_video_map_t;
 
+typedef struct
+  {
+  quicktime_trak_t *track;
+  int is_chapter_track;
+  int current_position;
+  } quicktime_text_map_t;
+
 /* obji */
 
 typedef struct
@@ -1377,6 +1392,10 @@ struct quicktime_s
 /* mapping of video tracks to movie tracks */
 	int total_vtracks;
 	quicktime_video_map_t *vtracks;
+
+/* Mapping of text tracks to movie tracks */
+	int total_ttracks;
+	quicktime_text_map_t *ttracks;
 
 /* Parameters for frame currently being decoded */
 	int in_x, in_y, in_w, in_h, out_w, out_h;

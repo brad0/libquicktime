@@ -48,10 +48,13 @@ int lqt_qtvr_add_node(quicktime_t *file)
     trak->mdia.minf.stbl.stts.table[0].sample_count = 1;
     /* set duration to duration of image track */
     trak->mdia.minf.stbl.stts.table[0].sample_duration = file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
-    trak->tref.trackIndex = file->moov.trak[lqt_qtvr_get_object_track(file)]->tkhd.track_id;
+    trak->tref.references[0].tracks[0] =
+      file->moov.trak[lqt_qtvr_get_object_track(file)]->tkhd.track_id;
     
     trak = file->moov.trak[lqt_qtvr_get_object_track(file)];
-    trak->tref.trackIndex = 3;
+
+    trak->tref.references[0].tracks[0] = 3;
+
     quicktime_write_chunk_header(file, trak, &chunk_atom);
     quicktime_qtatom_write_container_header(file);
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
@@ -561,7 +564,8 @@ int lqt_qtvr_set_image_track(quicktime_t  *file, int track)
 	int otrack = lqt_qtvr_get_object_track(file);
 	
 	if (otrack != -1 && file->total_vtracks > track) {	    
-	    file->moov.trak[otrack]->tref.trackIndex = file->vtracks[track].track->tkhd.track_id;
+	    file->moov.trak[otrack]->tref.references[0].tracks[0] =
+              file->vtracks[track].track->tkhd.track_id;
 	    return 1;
 	}
     }
@@ -588,7 +592,8 @@ int lqt_qtvr_get_image_track(quicktime_t  *file)
 {
     if (lqt_qtvr_get_qtvr_track(file) >= 0) {
 	if (lqt_qtvr_get_object_track(file) != -1) {
-	    return file->moov.trak[lqt_qtvr_get_object_track(file)]->tref.trackIndex;
+	    return
+              file->moov.trak[lqt_qtvr_get_object_track(file)]->tref.references[0].tracks[0];
 	} else 
 	if (lqt_qtvr_get_panorama_track(file) != -1) {
 	    return file->qtvr_node[0].pdat.imageRefTrackIndex;

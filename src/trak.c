@@ -50,7 +50,7 @@ int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int trac
 		&(trak->mdia), track_type, width, height, timescale, frame_duration);
 	quicktime_edts_init_table(&(trak->edts));
 	quicktime_tref_init_qtvr(&(trak->tref), track_type);
-
+        trak->has_tref = 1;
 	return 0;
 }
 
@@ -67,8 +67,6 @@ int quicktime_trak_init_panorama(quicktime_t *file, quicktime_trak_t *trak, int 
 
 	return 0;
 }
-
-
 
 int quicktime_trak_init_audio(quicktime_t *file, 
 							quicktime_trak_t *trak, 
@@ -136,48 +134,43 @@ int quicktime_delete_trak(quicktime_moov_t *moov)
 }
 
 
-int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_atom_t *trak_atom)
-{
-	quicktime_atom_t leaf_atom;
+int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
+                        quicktime_atom_t *trak_atom)
+  {
+  quicktime_atom_t leaf_atom;
 
-	do
-	{
-		quicktime_atom_read_header(file, &leaf_atom);
+  do
+    {
+    quicktime_atom_read_header(file, &leaf_atom);
 
-/* mandatory */
-		if(quicktime_atom_is(&leaf_atom, "tkhd"))
-			{ quicktime_read_tkhd(file, &(trak->tkhd)); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "mdia"))
-                  { quicktime_read_mdia(file, trak, &(trak->mdia), &leaf_atom); }
-		else
-/* optional */
-		if(quicktime_atom_is(&leaf_atom, "clip"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "matt"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "edts"))
-			{ quicktime_read_edts(file, &(trak->edts), &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "load"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "imap"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "udta"))
-			{ quicktime_atom_skip(file, &leaf_atom); }
-		else
-		if(quicktime_atom_is(&leaf_atom, "tref"))
-			{ trak->has_tref = 1; quicktime_read_tref(file, &(trak->tref)); }
-		else
-			quicktime_atom_skip(file, &leaf_atom);
-	}while(quicktime_position(file) < trak_atom->end);
-
-	return 0;
-}
+    /* mandatory */
+    if(quicktime_atom_is(&leaf_atom, "tkhd"))
+      quicktime_read_tkhd(file, &(trak->tkhd));
+    else if(quicktime_atom_is(&leaf_atom, "mdia"))
+      quicktime_read_mdia(file, trak, &(trak->mdia), &leaf_atom);
+    /* optional */
+    else if(quicktime_atom_is(&leaf_atom, "clip"))
+      quicktime_atom_skip(file, &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "matt"))
+      quicktime_atom_skip(file, &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "edts"))
+      quicktime_read_edts(file, &(trak->edts), &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "load"))
+      quicktime_atom_skip(file, &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "imap"))
+      quicktime_atom_skip(file, &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "udta"))
+      quicktime_atom_skip(file, &leaf_atom);
+    else if(quicktime_atom_is(&leaf_atom, "tref"))
+      {
+      trak->has_tref = 1;
+      quicktime_read_tref(file, &(trak->tref), &leaf_atom);
+      }
+    else quicktime_atom_skip(file, &leaf_atom);
+    } while(quicktime_position(file) < trak_atom->end);
+  
+  return 0;
+  }
 
 int quicktime_write_trak(quicktime_t *file, 
 	quicktime_trak_t *trak, 
@@ -199,8 +192,8 @@ int quicktime_write_trak(quicktime_t *file,
 	quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
 	quicktime_write_mdia(file, &(trak->mdia));
 	
-	if (trak->mdia.minf.is_qtvr) 
-	    quicktime_write_tref(file, &(trak->tref));
+	if (trak->has_tref) 
+          quicktime_write_tref(file, &(trak->tref));
 //	if (trak->mdia.minf.is_object) 
 //	    quicktime_write_tref(file, &(trak->tref));
 	

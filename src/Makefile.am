@@ -66,6 +66,7 @@ hdlr.c \
 imgp.c \
 impn.c \
 iods.c \
+language.c \
 log.c \
 matrix.c \
 mdat.c \

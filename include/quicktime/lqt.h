@@ -469,6 +469,18 @@ int lqt_add_audio_track(quicktime_t *file,
                         int channels, long sample_rate, int bits,
                         lqt_codec_info_t * codec_info);
 
+/** \ingroup audio_encode
+ *  \brief Set the audio language
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param language ISO-639 Language code
+ *
+ *  The language code is a 3-character code, English is "eng",
+ *  Japanese is "jpn".
+ */
+
+void lqt_set_audio_language(quicktime_t * file, int track, const char * language);
+  
 /** \ingroup video_encode
  *  \brief Add a video track for encoding
  *  \param file A quicktime handle
@@ -791,6 +803,20 @@ int lqt_decode_audio_raw(quicktime_t *file,
                          long samples,
                          int track);
 
+/** \ingroup audio_decode
+ *  \brief Get the audio language
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param language Returns ISO-639 Language code
+ *  \returns 1 on success, 0 on error.
+ *
+ *  The language code is a 3-character code, English is "eng",
+ *  Japanese is "jpn".
+ */
+
+int lqt_get_audio_language(quicktime_t * file, int track, char * language);
+
+  
 /** \ingroup audio_encode
  * \brief Encode audio in the native sampleformat of the codec
  * \param file A quicktime handle

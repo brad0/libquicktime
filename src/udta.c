@@ -5,6 +5,8 @@
 
 #define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4)
 
+#define LOG_DOMAIN "udta"
+
 // #define DEFAULT_INFO "Made with Libquicktime"
 
 /* Atom IDs */
@@ -91,22 +93,35 @@ void quicktime_udta_dump(quicktime_udta_t *udta)
   if(quicktime_match_32(udta->ctyp, "stna")) quicktime_navg_dump(&(udta->navg));
   }
 
-static int quicktime_read_udta_string(quicktime_t *file, char **string, int *size, int ilst, lqt_charset_converter_t ** cnv)
+static int quicktime_read_udta_string(quicktime_t *file,
+                                      char **string,
+                                      int *size, int ilst)
   {
   quicktime_atom_t leaf_atom;
   int result;
   uint32_t tmp;
+  lqt_charset_converter_t * cnv;
+  const char * charset;
+  uint16_t language;
+  
   if(*size) free(*string);
   if(!ilst)
     {
     *size = quicktime_read_int16(file);  /* Size of string */
-    quicktime_read_int16(file);  /* Discard language code */
+    language = quicktime_read_int16(file);  /* Discard language code */
     *string = malloc(*size + 1);
     result = quicktime_read_data(file, (uint8_t*)(*string), *size);
-    
-    if(!(*cnv))
-      *cnv = lqt_charset_converter_create(file, "ISO-8859-1", "UTF-8");
-    lqt_charset_convert(*cnv, string, *size, size);
+
+    charset = lqt_get_charset(language);
+    if(!charset)
+      {
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Unknown character set for language code %d, assuming ISO-8859-1");
+      charset = "ISO-8859-1";
+      }
+    cnv = lqt_charset_converter_create(file, charset, "UTF-8");
+    lqt_charset_convert(cnv, string, *size, size);
+    lqt_charset_converter_destroy(cnv);
     return !result;
     }
   else
@@ -154,31 +169,31 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       }
     else if(quicktime_atom_is(&leaf_atom, copyright_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->copyright), &(udta->copyright_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->copyright), &(udta->copyright_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, name_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->name), &(udta->name_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->name), &(udta->name_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, info_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->info), &(udta->info_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->info), &(udta->info_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, artist_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->artist), &(udta->artist_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->artist), &(udta->artist_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, album_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->album), &(udta->album_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->album), &(udta->album_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, genre_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->genre), &(udta->genre_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->genre), &(udta->genre_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, track_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->track), &(udta->track_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->track), &(udta->track_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, trkn_id))
       {
@@ -197,11 +212,11 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       }
     else if(quicktime_atom_is(&leaf_atom, comment_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->comment), &(udta->comment_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->comment), &(udta->comment_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, author_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->author), &(udta->author_len), have_ilst, &cnv);
+      result += quicktime_read_udta_string(file, &(udta->author), &(udta->author_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, "NAVG"))
       {
@@ -226,7 +241,8 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
   return result;
   }
 
-static int quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_charset_converter_t ** cnv)
+static int
+quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_charset_converter_t ** cnv)
   {
   quicktime_atom_t data_atom;
   int new_size;
@@ -235,12 +251,12 @@ static int quicktime_write_udta_string(quicktime_t *file, char ** string, int il
   if(!ilst)
     {
     if(!(*cnv))
-      *cnv = lqt_charset_converter_create(file, "UTF-8", "ISO-8859-1");
+      *cnv = lqt_charset_converter_create(file, "UTF-8", "MACINTOSH");
 
     lqt_charset_convert(*cnv, string, -1, &new_size);
     
     quicktime_write_int16(file, new_size);    /* String size */
-    quicktime_write_int16(file, 0);    /* Language code */
+    quicktime_write_int16(file, 0);    /* Language code (defaults to english, probably not good) */
     result = quicktime_write_data(file, (uint8_t*)(*string), new_size);
     }
   else

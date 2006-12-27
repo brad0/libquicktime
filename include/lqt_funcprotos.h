@@ -477,6 +477,10 @@ void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov);
 void quicktime_iods_dump(quicktime_iods_t * iods);
 void quicktime_iods_delete(quicktime_iods_t * iods);
 
+/* language.c */
+
+const char * lqt_get_charset(int mac_code);
+
 /* log.c */
 
 void lqt_log(quicktime_t * file, lqt_log_level_t level,
@@ -1008,7 +1012,8 @@ int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
 int quicktime_tref_init(quicktime_tref_t *tref);
 int quicktime_tref_delete(quicktime_tref_t *tref);
 void quicktime_tref_dump(quicktime_tref_t *tref);
-int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref);
+int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref,
+                        quicktime_atom_t *tref_atom);
 void quicktime_write_tref(quicktime_t *file, quicktime_tref_t *tref);
 int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type);
 
