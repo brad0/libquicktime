@@ -148,11 +148,10 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
   quicktime_atom_t leaf_atom;
   int result = 0, tmp;
   int have_meta = 0, have_ilst = 0;
-  lqt_charset_converter_t * cnv = (lqt_charset_converter_t*)0;
-  do
+  while(udta_atom->end - quicktime_position(file) >= 8)
     {
     quicktime_atom_read_header(file, &leaf_atom);
-		
+    
     if(quicktime_atom_is(&leaf_atom, "meta"))
       {
       /* Skip version and flags (0) */
@@ -169,31 +168,38 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       }
     else if(quicktime_atom_is(&leaf_atom, copyright_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->copyright), &(udta->copyright_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->copyright),
+                                           &(udta->copyright_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, name_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->name), &(udta->name_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->name),
+                                           &(udta->name_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, info_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->info), &(udta->info_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->info),
+                                           &(udta->info_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, artist_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->artist), &(udta->artist_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->artist),
+                                           &(udta->artist_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, album_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->album), &(udta->album_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->album),
+                                           &(udta->album_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, genre_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->genre), &(udta->genre_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->genre),
+                                           &(udta->genre_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, track_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->track), &(udta->track_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->track),
+                                           &(udta->track_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, trkn_id))
       {
@@ -212,11 +218,13 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       }
     else if(quicktime_atom_is(&leaf_atom, comment_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->comment), &(udta->comment_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->comment),
+                                           &(udta->comment_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, author_id))
       {
-      result += quicktime_read_udta_string(file, &(udta->author), &(udta->author_len), have_ilst);
+      result += quicktime_read_udta_string(file, &(udta->author),
+                                           &(udta->author_len), have_ilst);
       }
     else if(quicktime_atom_is(&leaf_atom, "NAVG"))
       {
@@ -229,15 +237,14 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       udta->ctyp[2] = quicktime_read_char(file);
       udta->ctyp[3] = quicktime_read_char(file);
       if (quicktime_match_32(udta->ctyp, "stna") ||
-                                    quicktime_match_32(udta->ctyp, "qtvr") ||
-          quicktime_match_32(udta->ctyp, "STpn")) udta->is_qtvr = 1;
+          quicktime_match_32(udta->ctyp, "qtvr") ||
+          quicktime_match_32(udta->ctyp, "STpn"))
+        udta->is_qtvr = 1;
       }
     else
       quicktime_atom_skip(file, &leaf_atom);
-    }while(quicktime_position(file) < udta_atom->end);
-
-  if(cnv) lqt_charset_converter_destroy(cnv);
-    
+    }
+  quicktime_atom_skip(file, udta_atom);
   return result;
   }
 
