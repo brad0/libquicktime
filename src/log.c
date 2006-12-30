@@ -82,6 +82,7 @@ void lqt_log(quicktime_t * file, lqt_log_level_t level,
     {
     file->log_callback(level, domain, msg_string, file->log_data);
     }
+  free(msg_string);
   }
 
 void lqt_dump(const char * format, ...)

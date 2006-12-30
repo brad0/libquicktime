@@ -48,6 +48,16 @@ int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type)
   return 0;
   }
 
+int quicktime_tref_init_chap(quicktime_tref_t * tref, int track_id)
+  {
+  quicktime_track_reference_t * ref = add_reference(tref);
+  ref->type[0] = 'c';
+  ref->type[1] = 'h';
+  ref->type[2] = 'a';
+  ref->type[3] = 'p';
+  add_track(ref, track_id);
+  }
+
 int quicktime_tref_delete(quicktime_tref_t *tref)
   {
   int i;

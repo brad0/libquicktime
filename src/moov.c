@@ -237,10 +237,9 @@ void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
       {
       longest_duration = duration;
       }
-
+    
     /* Add tracks to iods */
     quicktime_iods_add_track(&(moov->iods), moov->trak[i]);
-        
     }
   moov->mvhd.duration = longest_duration;
   moov->mvhd.selection_duration = longest_duration;

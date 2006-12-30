@@ -27,7 +27,7 @@ void quicktime_vmhd_delete(quicktime_vmhd_t *vmhd)
 
 void quicktime_vmhd_dump(quicktime_vmhd_t *vmhd)
 {
-	lqt_dump("    video media header\n");
+	lqt_dump("    video media header (vmhd)\n");
 	lqt_dump("     version %d\n", vmhd->version);
 	lqt_dump("     flags %ld\n", vmhd->flags);
 	lqt_dump("     graphics_mode %d\n", vmhd->graphics_mode);

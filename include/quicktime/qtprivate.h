@@ -2,8 +2,11 @@
 #define PRIVATE_H
 
 #include <inttypes.h>
-#include <lqt_atoms.h>
 #include <stdio.h>
+
+
+#include <lqt_atoms.h>
+#include <charset.h>
 
 /* ================================= structures */
 
@@ -348,6 +351,56 @@ typedef struct
   float gamma;
   } quicktime_gama_t;
 
+/* Font table for MPEG-4 timed text */
+
+typedef struct
+  {
+  uint16_t num_fonts;
+
+  struct
+    {
+    uint16_t font_id;
+    char font_name[256];
+    } * fonts;
+  } quicktime_ftab_t;
+
+/* Sample description for Quicktime text tracks */
+
+typedef struct
+  {
+  uint32_t displayFlags;
+  uint32_t textJustification;
+  uint16_t bgColor[3];
+  uint16_t defaultTextBox[4];
+  uint32_t scrpStartChar;              /*starting character position*/
+  uint16_t scrpHeight;
+  uint16_t scrpAscent;
+  uint16_t scrpFont;
+  uint16_t scrpFace;
+  uint16_t scrpSize;
+  uint16_t scrpColor[3];
+  char font_name[256];
+  } quicktime_stsd_text_t;
+
+/* Sample description for MPEG-4 text tracks */
+
+typedef struct
+  {
+  uint32_t display_flags;
+  uint8_t horizontal_justification;
+  uint8_t vertical_justification;
+  uint8_t back_color[4];
+  uint16_t defaultTextBox[4];
+  uint16_t start_char_offset;
+  uint16_t end_char_offset;
+  uint16_t font_id;
+  uint8_t  style_flags;
+  uint8_t  font_size;
+  uint8_t  text_color[4];
+  int has_ftab;
+  quicktime_ftab_t ftab;
+  } quicktime_stsd_tx3g_t;
+
 typedef struct
 {
 	char format[4];
@@ -426,7 +479,11 @@ typedef struct
         unsigned char * table_raw;
         int table_raw_size;
 
-        
+/* Quicktime text */
+        quicktime_stsd_text_t text;
+
+/* Quicktime tx3g */
+        quicktime_stsd_tx3g_t tx3g;
 
 } quicktime_stsd_table_t;
 
@@ -632,14 +689,32 @@ typedef struct
 	int reserved;
 } quicktime_gmin_t;
 
+/* Obscure text atom found inside the gmhd atom
+ * of text tracks
+ * TODO: Reverse engineer this
+ */
 
-/* Base media header */
+typedef struct
+  {
+  uint32_t unk[9];
+  } quicktime_gmhd_text_t;
+
+
+/* Base (generic) media header */
+
+typedef struct
+  {
+  quicktime_gmin_t gmin;
+
+  int has_gmhd_text;
+  quicktime_gmhd_text_t gmhd_text;
+  } quicktime_gmhd_t;
 
 typedef struct
 {
-    	quicktime_gmin_t gmin;
-} quicktime_gmhd_t;
-
+	int version;
+	long flags;
+} quicktime_nmhd_t;
 
 /* handler reference */
 
@@ -662,14 +737,19 @@ typedef struct
 	int is_video;
 	int is_audio;
         int is_audio_vbr;   /* Special flag indicating VBR audio */
-	int has_baseheader;
 	int is_panorama;
 	int is_qtvr;
 	int is_object;
+        int is_text;
 	quicktime_vmhd_t vmhd;
 	quicktime_smhd_t smhd;
 	quicktime_gmhd_t gmhd;
-	quicktime_stbl_t stbl;
+	int has_gmhd;
+
+        quicktime_nmhd_t nmhd;
+	int has_nmhd;
+
+        quicktime_stbl_t stbl;
 	quicktime_hdlr_t hdlr;
 	quicktime_dinf_t dinf;
 } quicktime_minf_t;
@@ -1223,11 +1303,22 @@ typedef struct
 
   } quicktime_video_map_t;
 
+/* Text track */
+
 typedef struct
   {
   quicktime_trak_t *track;
-  int is_chapter_track;
+  int is_chapter_track; /* For encoding only */
   int current_position;
+  
+  lqt_charset_converter_t * cnv;
+
+  char * text_buffer;
+  int text_buffer_alloc;
+
+  int initialized; /* For encoding only */
+  int64_t current_chunk;
+  
   } quicktime_text_map_t;
 
 /* obji */

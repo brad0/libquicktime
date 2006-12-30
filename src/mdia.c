@@ -53,16 +53,39 @@ void quicktime_mdia_init_audio(quicktime_t *file,
 							int bits, 
 							char *compressor)
 {
-        quicktime_mdhd_init_audio(&(mdia->mdhd),
-                sample_rate);
+        quicktime_mdhd_init_audio(file,
+                                  &(mdia->mdhd),
+                                  sample_rate);
         quicktime_minf_init_audio(file,
-                &(mdia->minf),
-                channels,
-                sample_rate,
-                bits,
-                compressor);
+                                  &(mdia->minf),
+                                  channels,
+                                  sample_rate,
+                                  bits,
+                                  compressor);
 	quicktime_hdlr_init_audio(&(mdia->hdlr));
 }
+
+void quicktime_mdia_init_text(quicktime_t * file,
+                              quicktime_mdia_t * mdia, 
+                              int timescale)
+  {
+  quicktime_hdlr_init_text(&(mdia->hdlr));
+  quicktime_mdhd_init_text(file, &(mdia->mdhd),
+                           timescale);
+
+  quicktime_minf_init_text(file, &(mdia->minf));
+  }
+
+void quicktime_mdia_init_tx3g(quicktime_t * file,
+                              quicktime_mdia_t * mdia, 
+                              int timescale)
+  {
+  quicktime_hdlr_init_tx3g(&(mdia->hdlr));
+  quicktime_mdhd_init_text(file, &(mdia->mdhd),
+                           timescale);
+  quicktime_minf_init_tx3g(file, &(mdia->minf));
+  }
+
 
 void quicktime_mdia_delete(quicktime_mdia_t *mdia)
 {

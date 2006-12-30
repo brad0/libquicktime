@@ -77,6 +77,23 @@ void quicktime_stbl_init_audio(quicktime_t *file,
 	quicktime_stco_init_common(file, &(stbl->stco));
 }
 
+void quicktime_stbl_init_text(quicktime_t *file,
+                              quicktime_stbl_t *stbl)
+  {
+  quicktime_stco_init_common(file, &(stbl->stco));
+  quicktime_stsd_init_text(file, &(stbl->stsd));
+  /* stts doesn't need to be updated */
+  }
+
+void quicktime_stbl_init_tx3g(quicktime_t *file,
+                              quicktime_stbl_t *stbl)
+  {
+  quicktime_stco_init_common(file, &(stbl->stco));
+  quicktime_stsd_init_tx3g(file, &(stbl->stsd));
+  /* stts doesn't need to be updated */
+  }
+
+
 void quicktime_stbl_delete(quicktime_stbl_t *stbl)
 {
 	quicktime_stsd_delete(&(stbl->stsd));

@@ -116,7 +116,7 @@ lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track);
  *
  *  This will in most cases store the correct interlacing information
  *  in the file (e.g. in the fiel atom). For tweaking the fiel atom
- *  directly, advanced users might look at \ref quicktime_set_fiel.
+ *  directly, advanced users might look at \ref lqt_set_fiel.
  */
 
 int lqt_set_interlace_mode(quicktime_t * file, int track,
@@ -194,6 +194,168 @@ void lqt_set_channel_setup(quicktime_t * file, int track, lqt_channel_t * ch);
  */
   
 const lqt_channel_t * lqt_get_channel_setup(quicktime_t * file, int track);
+
+
+/** \defgroup text Text
+    \brief Text related definitions and functions
+
+    Libquicktime supports reading and writing of text tracks from/to
+    Quicktime and mp4 files. Text tracks contain samples, which
+    are simple text strings. Libquicktime tries to handle character set issues
+    internally, all string you pass to/from libquicktime can assumed to be UTF-8.
+
+    A text track can either be used for subtitles (which is the default), or for
+    chapters. In the latter case, each text sample denotes the title of the chapter,
+    the corresponding timestamp is the start time of the chapter.
+
+    For subtitles, there is only a start time defined for each sample, not the duration,
+    after which the subtitle will be hidden. To make subtitles disappear at a specified
+    time, insert an empty subtitle with the right timestamp.
+
+    What's not supported are text attributes, font selection etc. Feel free to make a
+    proposal how to support these things.
+*/
+  
+/** \defgroup text_encode Writing text
+    \ingroup text
+    \brief Encode text
+
+    @{
+*/
+
+/** \brief Add a text track
+ *  \param file A quicktime handle
+ *  \param timescale The timescale, in which timestamps will be given.
+ */
+  
+int lqt_add_text_track(quicktime_t * file, int timescale);
+
+/** \brief Set the language for a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param language ISO-639 Language code
+ *
+ *  The language code is a 3-character code, English is "eng",
+ *  Japanese is "jpn".
+ */
+
+void lqt_set_text_language(quicktime_t * file, int track, const char * language);
+
+/** \brief Make a text track a chapter track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *
+ *  By default, text tracks are subtitles. By calling this function,
+ *  you tell libquicktime, that the text track should be a chapter track.
+ */
+  
+void lqt_set_chapter_track(quicktime_t * file, int track);
+
+/** \brief Write a text sample
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param text A null-terminated UTF-8 string
+ *  \param timestamp The time associated with this sample
+ *  \returns 0 if a the text sample could be written to the file, nonzero else
+ */
+  
+int lqt_write_text(quicktime_t * file, int track, const char * text, int64_t duration);
+  
+/**
+   @}
+*/
+  
+/** \defgroup text_decode Reading text
+    \ingroup text
+    \brief Decode text
+
+    @{
+
+*/
+
+/** \brief Get the number of text tracks
+ *  \param file A quicktime handle
+ *  \returns The number of text tracks found in the file
+ */
+  
+int lqt_text_tracks(quicktime_t * file);
+
+/** \brief Get the text language
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param language Returns ISO-639 Language code
+ *  \returns 1 on success, 0 on error.
+ *
+ *  The language code is a 3-character code, English is "eng",
+ *  Japanese is "jpn".
+ */
+
+int lqt_get_text_language(quicktime_t * file, int track, char * language);
+
+/** \brief Get the timescale for a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns The timescale of the track.
+ */
+
+int lqt_text_time_scale(quicktime_t * file, int track);
+
+/** \brief Read a text sample
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param text Address of a buffer
+ *  \param text_alloc Allocated bytes for this buffer (will be changed)
+ *  \param timestamp Returns the timestamp of the track
+ *  \returns 1 if a sample was decoded, 0 if the track is finished
+ *
+ *  This funtion calls realloc() to make sure there is enough space for
+ *  for the text. It's a good idea to always pass the same buffer to this
+ *  function (set to NULL initially) and free it after the file is closed.
+ */
+  
+int lqt_read_text(quicktime_t * file, int track, char ** text, int * text_alloc,
+                  int64_t * timestamp, int64_t * duration);
+
+/** \brief Check if a track is a chapter track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns 1 if the text track is a chapter track, 0 else
+ */
+     
+  
+int lqt_is_chapter_track(quicktime_t * file, int track);
+
+/** \brief Get the total number of text samples
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns The number of samples
+ */
+
+int64_t lqt_text_samples(quicktime_t * file, int track);
+
+/** \brief Go to a specific sample
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param position The sample position (starting with 0)
+ */
+
+void lqt_set_text_position(quicktime_t * file, int track, int64_t position);
+
+/** \brief Go to a specific time
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param time Time
+ *
+ *  This wil reposition the text track such, that the next call
+ *  to \ref lqt_read_text will return a sample with at least the
+ *  timestamp you specified.
+ */
+
+void lqt_set_text_time(quicktime_t * file, int track, int64_t time);
+
+/**
+   @}
+*/
 
   
 /***********************************************

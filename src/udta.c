@@ -108,11 +108,11 @@ static int quicktime_read_udta_string(quicktime_t *file,
   if(!ilst)
     {
     *size = quicktime_read_int16(file);  /* Size of string */
-    language = quicktime_read_int16(file);  /* Discard language code */
+    language = quicktime_read_int16(file);  /* Language code */
     *string = malloc(*size + 1);
     result = quicktime_read_data(file, (uint8_t*)(*string), *size);
 
-    charset = lqt_get_charset(language);
+    charset = lqt_get_charset(language, file->file_type);
     if(!charset)
       {
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,

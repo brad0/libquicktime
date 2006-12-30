@@ -74,15 +74,33 @@ int quicktime_trak_init_audio(quicktime_t *file,
 							int sample_rate, 
 							int bits, 
 							char *compressor)
-{
-	quicktime_mdia_init_audio(file, &(trak->mdia), 
-		channels, 
-		sample_rate, 
-		bits, 
-		compressor);
-	quicktime_edts_init_table(&(trak->edts));
-	return 0;
-}
+  {
+  quicktime_mdia_init_audio(file, &(trak->mdia), 
+                            channels, 
+                            sample_rate, 
+                            bits, 
+                            compressor);
+  quicktime_edts_init_table(&(trak->edts));
+  return 0;
+  }
+
+int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
+                             int timescale)
+  {
+  quicktime_mdia_init_text(file, &(trak->mdia), 
+                           timescale);
+  
+  }
+
+int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
+                             int timescale)
+  {
+  quicktime_mdia_init_tx3g(file, &(trak->mdia), 
+                           timescale);
+  
+  }
+                            
+                            
 
 int quicktime_trak_delete(quicktime_trak_t *trak)
 {
@@ -468,10 +486,10 @@ void quicktime_write_chunk_header(quicktime_t *file,
   }
 
 void quicktime_write_chunk_footer(quicktime_t *file, 
-	quicktime_trak_t *trak,
-	int current_chunk,
-	quicktime_atom_t *chunk, 
-	int samples)
+                                  quicktime_trak_t *trak,
+                                  int current_chunk,
+                                  quicktime_atom_t *chunk, 
+                                  int samples)
 {
 	int64_t offset = chunk->start;
 	int sample_size = quicktime_position(file) - offset;
@@ -505,10 +523,10 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 		current_chunk, 
 		offset);
 
-	if(trak->mdia.minf.is_video)
-		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-		current_chunk - 1, 
-		sample_size);
+	if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
+          quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+                                current_chunk - 1, 
+                                sample_size);
         /* Need to increase sample count for VBR (the VBR routines to it
            themselves) */
 	if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
@@ -552,7 +570,7 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
 {
 	long samples = quicktime_track_samples(file, trak);
-        if(trak->mdia.minf.is_video)
+        if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
           {
           quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
           if(trak->mdia.minf.stbl.stts.total_entries == 1)

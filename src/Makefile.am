@@ -57,9 +57,11 @@ enda.c \
 esds.c \
 fiel.c \
 frma.c \
+ftab.c \
 ftyp.c \
 gama.c \
 gmhd.c \
+gmhd_text.c \
 gmin.c \
 graphics.c \
 hdlr.c \
@@ -76,9 +78,10 @@ minf.c \
 moov.c \
 mvhd.c \
 multichannel.c \
+navg.c \
 ndhd.c \
 nloc.c \
-navg.c \
+nmhd.c \
 obji.c \
 pano.c \
 pasp.c \
@@ -95,6 +98,7 @@ stsdtable.c \
 stss.c \
 stsz.c \
 stts.c \
+texttrack.c \
 tkhd.c \
 trak.c \
 tref.c \

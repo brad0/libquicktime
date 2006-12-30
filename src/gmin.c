@@ -19,7 +19,7 @@ void quicktime_gmin_delete(quicktime_gmin_t *gmin) { }
 
 void quicktime_gmin_dump(quicktime_gmin_t *gmin)
 {
-       lqt_dump("     Base media info\n");
+       lqt_dump("     Base media info (gmin)\n");
        lqt_dump("      version %d\n", gmin->version);
        lqt_dump("      flags %ld\n", gmin->flags);
        lqt_dump("      graphics_mode %d\n", gmin->graphics_mode);

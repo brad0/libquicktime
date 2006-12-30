@@ -399,7 +399,7 @@ int lqt_add_audio_track(quicktime_t *file,
 
   file->atracks = realloc(file->atracks, (file->total_atracks+1)*sizeof(quicktime_audio_map_t));
   memset(&(file->atracks[file->total_atracks]), 0, sizeof(quicktime_audio_map_t));
-
+  
   trak = quicktime_add_track(file);
   quicktime_trak_init_audio(file, trak, channels,
                             sample_rate, bits, compressor);
@@ -522,26 +522,25 @@ void quicktime_set_framerate(quicktime_t *file, double framerate)
 
 /* Used for writing only */
 quicktime_trak_t* quicktime_add_track(quicktime_t *file)
-{
-        quicktime_moov_t *moov = &(file->moov);
-        quicktime_trak_t *trak;
-        int i;
+  {
+  quicktime_moov_t *moov = &(file->moov);
+  quicktime_trak_t *trak;
+  
+  //  for(i = moov->total_tracks; i > 0; i--)
+  //    moov->trak[i] = moov->trak[i - 1];
+  
+  trak =
+    moov->trak[moov->total_tracks] =
+    calloc(1, sizeof(quicktime_trak_t));
 
-        for(i = moov->total_tracks; i > 0; i--)
-                moov->trak[i] = moov->trak[i - 1];
-                                                                                                                  
-        trak =
-                moov->trak[0] =
-                calloc(1, sizeof(quicktime_trak_t));
-        quicktime_trak_init(trak);
-        
-        moov->total_tracks++;
-        for(i = 0; i < moov->total_tracks; i++)
-                moov->trak[i]->tkhd.track_id = i + 1;
-        
-        moov->mvhd.next_track_id++;
-        return trak;
-}
+  quicktime_trak_init(trak);
+
+  moov->trak[moov->total_tracks]->tkhd.track_id = moov->mvhd.next_track_id;
+  
+  moov->total_tracks++;
+  moov->mvhd.next_track_id++;
+  return trak;
+  }
 
 /* ============================= Initialization functions */
 
@@ -569,6 +568,12 @@ int quicktime_delete(quicktime_t *file)
 		for(i = 0; i < file->total_vtracks; i++)
 			quicktime_delete_video_map(&(file->vtracks[i]));
 		free(file->vtracks);
+	}
+	if(file->total_ttracks)
+	{
+                for(i = 0; i < file->total_ttracks; i++)
+			lqt_delete_text_map(file, &(file->ttracks[i]));
+		free(file->ttracks);
 	}
 	file->total_atracks = 0;
 	file->total_vtracks = 0;
@@ -732,7 +737,9 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
                              &(file->vtracks[track].stts_index),
                              &(file->vtracks[track].stts_count));
 
-  
+  fprintf(stderr, "lqt_seek_video %lld -> %lld\n",
+          time, frame);
+
   quicktime_set_video_position(file, frame, track);
   }
 
@@ -1314,6 +1321,8 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
         return 0;
 }
 
+// Initialize maps, for reading only
+
 void quicktime_init_maps(quicktime_t * file)
   {
   int i, dom, track;
@@ -1322,7 +1331,7 @@ void quicktime_init_maps(quicktime_t * file)
 
   if(file->total_atracks)
     {
-    file->atracks = (quicktime_audio_map_t*)calloc(1, sizeof(quicktime_audio_map_t) * file->total_atracks);
+    file->atracks = calloc(1, sizeof(*file->atracks) * file->total_atracks);
     for(i = 0, track = 0; i < file->total_atracks; i++, track++)
       {
       while(!file->moov.trak[track]->mdia.minf.is_audio)
@@ -1339,7 +1348,7 @@ void quicktime_init_maps(quicktime_t * file)
 
   if(file->total_vtracks)
     {
-    file->vtracks = (quicktime_video_map_t*)calloc(1, sizeof(quicktime_video_map_t) * file->total_vtracks);
+    file->vtracks = calloc(1, sizeof(*file->vtracks) * file->total_vtracks);
     
     for(track = 0, i = 0; i < file->total_vtracks; i++, track++)
       {
@@ -1373,6 +1382,26 @@ void quicktime_init_maps(quicktime_t * file)
         }
       }
     }
+
+  /* Text tracks */
+
+  file->total_ttracks = lqt_text_tracks(file);
+
+  if(file->total_ttracks)
+    {
+    file->ttracks = calloc(file->total_ttracks, sizeof(*file->ttracks));
+
+    for(track = 0, i = 0; i < file->total_ttracks; i++, track++)
+      {
+      while(!file->moov.trak[track]->mdia.minf.is_text)
+        track++;
+      lqt_init_text_map(file,
+                        &file->ttracks[i], file->moov.trak[track], 0);
+      }
+    }
+  
+  
+
   }
 
 int quicktime_read_info(quicktime_t *file)
@@ -1455,6 +1484,7 @@ int quicktime_read_info(quicktime_t *file)
                                 if(quicktime_atom_is(&leaf_atom, "ftyp"))
                                 {
                                         quicktime_read_ftyp(file, &file->ftyp, &leaf_atom);
+                                        file->file_type = quicktime_ftyp_get_file_type(&file->ftyp);
                                         file->has_ftyp = 1;
                                 }
                                 else
@@ -1711,9 +1741,6 @@ static quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_
               quicktime_close(new_file);
               new_file = 0;
               }
-            /* Set file type */
-            else if(new_file->has_ftyp)
-              new_file->file_type = quicktime_ftyp_get_file_type(&(new_file->ftyp));
             }
           
           /* start the data atom */

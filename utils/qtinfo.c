@@ -32,6 +32,7 @@ file_info(char *filename)
         char * str;
         int frame_duration, framerate_constant;
         int pixel_width, pixel_height;
+        char language[4];
         qtfile = quicktime_open(filename, 1, 0);
 
 	if(!qtfile) {
@@ -111,6 +112,11 @@ file_info(char *filename)
           }
         else
           printf("Not available\n");
+        printf("    Language: ");
+        if(lqt_get_audio_language(qtfile, i, language))
+          printf("%c%c%c\n", language[0], language[1], language[2]);
+        else
+          printf("Not available\n");
         printf("    %ssupported.\n",
                quicktime_supported_audio(qtfile, i)?"":"NOT ");
         }
@@ -140,6 +146,20 @@ file_info(char *filename)
           printf("    %ssupported.\n",
                  quicktime_supported_video(qtfile, i)?"":"NOT ");
           }
+
+	n = lqt_text_tracks(qtfile);
+	printf("  %d text tracks.\n", n);
+	for(i = 0; i < n; i++)
+          {
+          printf("    timescale: %d, length: %lld, language: ",
+                 lqt_text_time_scale(qtfile, i), lqt_text_samples(qtfile, i)); 
+          if(lqt_get_text_language(qtfile, i, language))
+            printf("%c%c%c, ", language[0], language[1], language[2]);
+          else
+            printf("Not available, ");
+          printf("type: %s\n", lqt_is_chapter_track(qtfile, i) ? "Chapters" : "Subtitles" );
+          }
+        
         quicktime_close(qtfile);
 }
 

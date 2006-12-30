@@ -83,6 +83,8 @@ lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp)
     case MK_FOURCC('i','s','o','m'):
     case MK_FOURCC('m','p','4','1'):
     case MK_FOURCC('m','p','4','2'):
+    case MK_FOURCC('3','g','p','4'):
+    case MK_FOURCC('3','g','p','5'):
       return LQT_FILE_MP4;
       break;
     case MK_FOURCC('M','4','A',' '):

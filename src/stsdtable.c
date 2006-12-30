@@ -4,6 +4,178 @@
 
 #define LOG_DOMAIN "stsdtable"
 
+static void quicktime_stsdtable_read_text(quicktime_t *file,
+                                          quicktime_stsd_table_t *table,
+                                          quicktime_atom_t *parent_atom)
+  {
+  table->text.displayFlags = quicktime_read_int32(file);
+  table->text.textJustification = quicktime_read_int32(file);
+
+  table->text.bgColor[0] = quicktime_read_int16(file);
+  table->text.bgColor[1] = quicktime_read_int16(file);
+  table->text.bgColor[2] = quicktime_read_int16(file);
+
+  table->text.defaultTextBox[0] = quicktime_read_int16(file);
+  table->text.defaultTextBox[1] = quicktime_read_int16(file);
+  table->text.defaultTextBox[2] = quicktime_read_int16(file);
+  table->text.defaultTextBox[3] = quicktime_read_int16(file);
+
+  table->text.scrpStartChar = quicktime_read_int32(file);
+
+  table->text.scrpHeight = quicktime_read_int16(file);
+  table->text.scrpAscent = quicktime_read_int16(file);
+  table->text.scrpFont = quicktime_read_int16(file);
+  table->text.scrpFace = quicktime_read_int16(file);
+  table->text.scrpSize = quicktime_read_int16(file);
+  
+  table->text.scrpColor[0] = quicktime_read_int16(file);
+  table->text.scrpColor[1] = quicktime_read_int16(file);
+  table->text.scrpColor[2] = quicktime_read_int16(file);
+
+  quicktime_read_pascal(file, table->text.font_name);
+  }
+
+static void quicktime_write_stsd_text(quicktime_t *file,
+                                      quicktime_stsd_table_t *table)
+  {
+  quicktime_write_int32(file, table->text.displayFlags);
+  quicktime_write_int32(file, table->text.textJustification);
+
+  quicktime_write_int16(file, table->text.bgColor[0]);
+  quicktime_write_int16(file, table->text.bgColor[1]);
+  quicktime_write_int16(file, table->text.bgColor[2]);
+
+  quicktime_write_int16(file, table->text.defaultTextBox[0]);
+  quicktime_write_int16(file, table->text.defaultTextBox[1]);
+  quicktime_write_int16(file, table->text.defaultTextBox[2]);
+  quicktime_write_int16(file, table->text.defaultTextBox[3]);
+
+  quicktime_write_int32(file, table->text.scrpStartChar);
+
+  quicktime_write_int16(file, table->text.scrpHeight);
+  quicktime_write_int16(file, table->text.scrpAscent);
+  quicktime_write_int16(file, table->text.scrpFont);
+  quicktime_write_int16(file, table->text.scrpFace);
+  quicktime_write_int16(file, table->text.scrpSize);
+  
+  quicktime_write_int16(file, table->text.scrpColor[0]);
+  quicktime_write_int16(file, table->text.scrpColor[1]);
+  quicktime_write_int16(file, table->text.scrpColor[2]);
+
+  quicktime_write_pascal(file, table->text.font_name);
+  }
+
+static void quicktime_stsdtable_dump_text(quicktime_stsd_table_t *table)
+  {
+  lqt_dump("       displayFlags      %08x\n", table->text.displayFlags);
+  lqt_dump("       textJustification %d\n", table->text.textJustification);
+  lqt_dump("       bgColor:          [%d,%d,%d]\n", table->text.bgColor[0],
+           table->text.bgColor[1],table->text.bgColor[2]);
+  lqt_dump("       defaultTextBox:   [%d,%d,%d,%d]\n",
+           table->text.defaultTextBox[0],
+           table->text.defaultTextBox[1],
+           table->text.defaultTextBox[2],
+           table->text.defaultTextBox[3]);
+  lqt_dump("       scrpStartChar:    %d\n", table->text.scrpStartChar);
+  lqt_dump("       scrpHeight:       %d\n", table->text.scrpHeight);
+  lqt_dump("       scrpFont:         %d\n", table->text.scrpFont);
+  lqt_dump("       scrpFace:         %d\n", table->text.scrpFace);
+  lqt_dump("       scrpSize:         %d\n", table->text.scrpSize);
+  lqt_dump("       scrpColor:        [%d,%d,%d]\n",
+           table->text.scrpColor[0],
+           table->text.scrpColor[1],
+           table->text.scrpColor[2]);
+  lqt_dump("       Font:             %s\n", table->text.font_name);
+  }
+
+static void
+quicktime_stsdtable_read_tx3g(quicktime_t *file,
+                              quicktime_stsd_table_t *table,
+                              quicktime_atom_t *parent_atom)
+  {
+  quicktime_atom_t leaf_atom;
+  table->tx3g.display_flags = quicktime_read_int32(file);
+  quicktime_read_data(file, &table->tx3g.horizontal_justification, 1);
+  quicktime_read_data(file, &table->tx3g.vertical_justification, 1);
+  quicktime_read_data(file, table->tx3g.back_color, 4);
+  table->tx3g.defaultTextBox[0] = quicktime_read_int16(file);
+  table->tx3g.defaultTextBox[1] = quicktime_read_int16(file);
+  table->tx3g.defaultTextBox[2] = quicktime_read_int16(file);
+  table->tx3g.defaultTextBox[3] = quicktime_read_int16(file);
+  table->tx3g.start_char_offset = quicktime_read_int16(file);
+  table->tx3g.end_char_offset   = quicktime_read_int16(file);
+  table->tx3g.font_id           = quicktime_read_int16(file);
+  quicktime_read_data(file, &table->tx3g.style_flags, 1);
+  quicktime_read_data(file, &table->tx3g.font_size, 1);
+  quicktime_read_data(file, table->tx3g.text_color, 4);
+
+  while(quicktime_position(file) < parent_atom->end)
+    {
+    quicktime_atom_read_header(file, &leaf_atom);
+    if(quicktime_atom_is(&leaf_atom, "ftab"))
+      {
+      quicktime_read_ftab(file, &(table->tx3g.ftab));
+      table->tx3g.has_ftab = 1;
+      }
+    else
+      quicktime_atom_skip(file, &leaf_atom);
+    }
+  }
+
+static void
+quicktime_write_stsd_tx3g(quicktime_t *file,
+                          quicktime_stsd_table_t *table)
+  {
+  quicktime_write_int32(file, table->tx3g.display_flags);
+  quicktime_write_data(file, &table->tx3g.horizontal_justification, 1);
+  quicktime_write_data(file, &table->tx3g.vertical_justification, 1);
+  quicktime_write_data(file, table->tx3g.back_color, 4);
+  quicktime_write_int16(file, table->tx3g.defaultTextBox[0]);
+  quicktime_write_int16(file, table->tx3g.defaultTextBox[1]);
+  quicktime_write_int16(file, table->tx3g.defaultTextBox[2]);
+  quicktime_write_int16(file, table->tx3g.defaultTextBox[3]);
+  quicktime_write_int16(file, table->tx3g.start_char_offset);
+  quicktime_write_int16(file, table->tx3g.end_char_offset);
+  quicktime_write_int16(file, table->tx3g.font_id);
+  quicktime_write_data(file, &table->tx3g.style_flags, 1);
+  quicktime_write_data(file, &table->tx3g.font_size, 1);
+  quicktime_write_data(file, table->tx3g.text_color, 4);
+  
+  if(table->tx3g.has_ftab)
+    quicktime_write_ftab(file, &table->tx3g.ftab);
+  }
+
+static void quicktime_stsdtable_dump_tx3g(quicktime_stsd_table_t *table)
+  {
+  lqt_dump("       display_flags:            %08x\n", table->tx3g.display_flags);
+  lqt_dump("       horizontal_justification: %d\n", table->tx3g.horizontal_justification);
+  lqt_dump("       vertical_justification:   %d\n", table->tx3g.vertical_justification);
+  lqt_dump("       back_color:               [%d,%d,%d,%d]\n",
+           table->tx3g.back_color[0],
+           table->tx3g.back_color[1],
+           table->tx3g.back_color[2],
+           table->tx3g.back_color[3]);
+  lqt_dump("       defaultTextBox:           [%d,%d,%d,%d]\n",
+           table->tx3g.defaultTextBox[0],
+           table->tx3g.defaultTextBox[1],
+           table->tx3g.defaultTextBox[2],
+           table->tx3g.defaultTextBox[3]);
+  lqt_dump("       start_char_offset:        %d\n", table->tx3g.start_char_offset);
+  lqt_dump("       end_char_offset:          %d\n", table->tx3g.end_char_offset);
+  lqt_dump("       font_id:                  %d\n", table->tx3g.font_id);
+  lqt_dump("       style_flags:              %02x\n", table->tx3g.style_flags);
+  lqt_dump("       font_size:                %d\n", table->tx3g.font_size);
+  lqt_dump("       text_color:               [%d,%d,%d,%d]\n",
+           table->tx3g.text_color[0], table->tx3g.text_color[1],
+           table->tx3g.text_color[2], table->tx3g.text_color[3]);
+
+  if(table->tx3g.has_ftab)
+    {
+    quicktime_ftab_dump(&table->tx3g.ftab);
+    }
+  }
+
+
 void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom)
 {
@@ -382,6 +554,16 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf,
 	{	    
 	    minf->is_object = 1;
 	}
+        else if (quicktime_match_32(leaf_atom.type, "text"))
+        {
+            quicktime_stsdtable_read_text(file, table, &leaf_atom);
+            minf->is_text = 1;
+        }
+        else if (quicktime_match_32(leaf_atom.type, "tx3g"))
+        {
+            quicktime_stsdtable_read_tx3g(file, table, &leaf_atom);
+            minf->is_text = 1;
+        }
 	else 
 	{
 	    if(minf->is_audio) quicktime_read_stsd_audio(file, table, &leaf_atom);
@@ -443,6 +625,7 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
         quicktime_ctab_delete(&(table->ctab));
 	quicktime_wave_delete(&(table->wave));
 	quicktime_esds_delete(&(table->esds));
+	quicktime_ftab_delete(&(table->tx3g.ftab));
         quicktime_user_atoms_delete(&(table->user_atoms));
 }
 
@@ -531,12 +714,16 @@ void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
 	lqt_dump("       data_reference %d\n", table->data_reference);
 
 	if(minf->is_audio) quicktime_stsd_audio_dump(table);
-	if(minf->is_video) quicktime_stsd_video_dump(table);
-
-	if (quicktime_match_32(table->format, "pano"))
+	else if(minf->is_video) quicktime_stsd_video_dump(table);
+        
+	else if (quicktime_match_32(table->format, "pano"))
 	    quicktime_pano_dump(&(table->pano));
-	if (quicktime_match_32(table->format, "qtvr"))
+	else if (quicktime_match_32(table->format, "qtvr"))
 	    quicktime_qtvr_dump(&(table->qtvr));
+        else if(quicktime_match_32(table->format, "text"))
+            quicktime_stsdtable_dump_text(table);
+        else if(quicktime_match_32(table->format, "tx3g"))
+            quicktime_stsdtable_dump_tx3g(table);
 }
 
 void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table)
@@ -551,6 +738,14 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 	if(minf->is_panorama) quicktime_write_pano(file, &(table->pano));
 	if(minf->is_qtvr == QTVR_QTVR) quicktime_write_qtvr(file, &(table->qtvr));
 
+        if(minf->is_text)
+          {
+          if(quicktime_match_32(table->format, "text"))
+            quicktime_write_stsd_text(file, table);
+          else if(quicktime_match_32(table->format, "tx3g"))
+            quicktime_write_stsd_tx3g(file, table);
+          }
+        
 	quicktime_atom_write_footer(file, &atom);
 }
 

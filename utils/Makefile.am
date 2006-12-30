@@ -15,7 +15,7 @@ xman :=
 endif
 noinst_PROGRAMS := test_codec testqt dump_codecs gen_colorspace_tables
 # bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover lqt_transcode
-bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode
+bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode qt2text
 man1_MANS := $(xman)
 
 lqt_transcode_SOURCES=lqt_transcode.c
@@ -35,6 +35,9 @@ qtstreamize_LDADD=@UTIL_LIBADD@
 
 qtdump_SOURCES=dump.c
 qtdump_LDADD=@UTIL_LIBADD@
+
+qt2text_SOURCES=qt2text.c
+qt2text_LDADD=@UTIL_LIBADD@
 
 gen_colorspace_tables_sources=gen_colorspace_tables.c
 

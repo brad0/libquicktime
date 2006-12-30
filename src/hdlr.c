@@ -21,7 +21,7 @@ void quicktime_hdlr_init(quicktime_hdlr_t *hdlr)
 	hdlr->component_manufacturer[3] = 0;
 	hdlr->component_flags = 0;
 	hdlr->component_flag_mask = 0;
-	strcpy(hdlr->component_name, "Linux Media Handler");
+	strcpy(hdlr->component_name, "Libquicktime Media Handler");
 }
 
 void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type)
@@ -32,7 +32,7 @@ void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type)
 	    hdlr->component_subtype[1] = 't';
 	    hdlr->component_subtype[2] = 'v';
 	    hdlr->component_subtype[3] = 'r';
-	    strcpy(hdlr->component_name, "Linux QTVR Handler");
+	    strcpy(hdlr->component_name, "Libquicktime QTVR Handler");
 	} else
 	if (track_type == QTVR_OBJ)
 	{
@@ -40,7 +40,7 @@ void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type)
 	    hdlr->component_subtype[1] = 'b';
 	    hdlr->component_subtype[2] = 'j';
 	    hdlr->component_subtype[3] = 'e';
-	    strcpy(hdlr->component_name, "Linux QTVR OBject Handler");
+	    strcpy(hdlr->component_name, "Libquicktime QTVR OBject Handler");
 	}
 }
 
@@ -50,7 +50,7 @@ void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr)
 	hdlr->component_subtype[1] = 'T';
 	hdlr->component_subtype[2] = 'p';
 	hdlr->component_subtype[3] = 'n';
-	strcpy(hdlr->component_name, "Linux Panorama Media Handler");
+	strcpy(hdlr->component_name, "Libquicktime Panorama Media Handler");
 }
 
 void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr)
@@ -59,17 +59,36 @@ void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr)
 	hdlr->component_subtype[1] = 'i';
 	hdlr->component_subtype[2] = 'd';
 	hdlr->component_subtype[3] = 'e';
-	strcpy(hdlr->component_name, "Linux Video Media Handler");
+	strcpy(hdlr->component_name, "Libquicktime Video Media Handler");
 }
 
 void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr)
 {
-	hdlr->component_subtype[0] = 's';
+        hdlr->component_subtype[0] = 's';
 	hdlr->component_subtype[1] = 'o';
 	hdlr->component_subtype[2] = 'u';
 	hdlr->component_subtype[3] = 'n';
-	strcpy(hdlr->component_name, "Linux Sound Media Handler");
+	strcpy(hdlr->component_name, "Libquicktime Sound Media Handler");
 }
+
+void quicktime_hdlr_init_text(quicktime_hdlr_t *hdlr)
+  {
+  hdlr->component_subtype[0] = 't';
+  hdlr->component_subtype[1] = 'e';
+  hdlr->component_subtype[2] = 'x';
+  hdlr->component_subtype[3] = 't';
+  strcpy(hdlr->component_name, "Libquicktime Text Media Handler");
+  
+  }
+
+void quicktime_hdlr_init_tx3g(quicktime_hdlr_t *hdlr)
+  {
+  hdlr->component_subtype[0] = 't';
+  hdlr->component_subtype[1] = 'e';
+  hdlr->component_subtype[2] = 'x';
+  hdlr->component_subtype[3] = 't';
+  strcpy(hdlr->component_name, "Libquicktime Streaming Text Handler");
+  }
 
 /*
   	hdlr->version = quicktime_read_char(file);

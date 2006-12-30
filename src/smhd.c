@@ -18,7 +18,7 @@ void quicktime_smhd_delete(quicktime_smhd_t *smhd)
 
 void quicktime_smhd_dump(quicktime_smhd_t *smhd)
 {
-	lqt_dump("    sound media header\n");
+        lqt_dump("    sound media header (smhd)\n");
 	lqt_dump("     version %d\n", smhd->version);
 	lqt_dump("     flags %ld\n", smhd->flags);
 	lqt_dump("     balance %d\n", smhd->balance);

@@ -22,6 +22,7 @@
 #include <lqt.h>
 #include <qtprivate.h>
 #include <funcprotos.h>
+#include <charset.h>
 
 #define LOG_DOMAIN "language"
 
@@ -186,9 +187,17 @@ mac_languages[] =
 
 #define NUM_CODES (sizeof(mac_languages)/sizeof(mac_languages[0]))
 
-static int get_language(quicktime_trak_t * trak, char * ret)
+static int get_language(quicktime_trak_t * trak, char * ret, lqt_file_type_t file_type)
   {
   int i;
+  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+    {
+    ret[0] = ((trak->mdia.mdhd.language >> 10) & 0x1f) + 0x60;
+    ret[1] = ((trak->mdia.mdhd.language >> 5) & 0x1f)  + 0x60;
+    ret[2] = (trak->mdia.mdhd.language & 0x1f)         + 0x60;
+    ret[3] = '\0';
+    return 1;
+    }
   for(i = 0; i < NUM_CODES; i++)
     {
     if(trak->mdia.mdhd.language == mac_languages[i].mac_code)
@@ -200,22 +209,37 @@ static int get_language(quicktime_trak_t * trak, char * ret)
   return 0;
   }
 
-const char * lqt_get_charset(int mac_code)
+static char * unicode_string = LQT_UTF_8_16;
+
+const char * lqt_get_charset(int mac_code, lqt_file_type_t file_type)
   {
   int i;
+
+  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+    return unicode_string;
+  
   for(i = 0; i < NUM_CODES; i++)
     {
     if(mac_code == mac_languages[i].mac_code)
-      {
       return mac_languages[i].charset;
-      }
     }
   return (char*)0;
   }
 
-static int set_language_code(quicktime_trak_t * trak, const char * language)
+static int set_language_code(quicktime_trak_t * trak,
+                             const char * language, lqt_file_type_t file_type)
   {
   int i;
+
+  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+    {
+    trak->mdia.mdhd.language =
+      ((int)(language[0]-0x60) << 10) ||
+      ((int)(language[1]-0x60) << 5) ||
+      ((int)(language[2]-0x60));
+    return 0;
+    }
+  
   for(i = 0; i < NUM_CODES; i++)
     {
     if(!strcmp(language, mac_languages[i].language))
@@ -231,15 +255,14 @@ void lqt_set_audio_language(quicktime_t * file, int track, const char * language
   {
   if((track < 0) || (track >= file->total_atracks))
     return;
-  
-  set_language_code((file->atracks[track].track), language);
+  set_language_code((file->atracks[track].track), language, file->file_type);
   }
 
 int  lqt_get_audio_language(quicktime_t * file, int track, char * language)
   {
   if((track < 0) || (track >= file->total_atracks))
     return 0;
-  return get_language(file->atracks[track].track, language);
+  return get_language(file->atracks[track].track, language, file->file_type);
   }
 
 
@@ -248,12 +271,12 @@ void lqt_set_text_language(quicktime_t * file, int track, const char * language)
   if((track < 0) || (track >= file->total_ttracks))
     return;
   
-  set_language_code((file->ttracks[track].track), language);
+  set_language_code((file->ttracks[track].track), language, file->file_type);
   }
 
 int  lqt_get_text_language(quicktime_t * file, int track, char * language)
   {
   if((track < 0) || (track >= file->total_ttracks))
     return 0;
-  return get_language(file->ttracks[track].track, language);
+  return get_language(file->ttracks[track].track, language, file->file_type);
   }
