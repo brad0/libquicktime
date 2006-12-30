@@ -14,6 +14,8 @@ static quicktime_track_reference_t * add_reference(quicktime_tref_t *tref)
   tref->num_references++;
   tref->references = realloc(tref->references,
                              tref->num_references * sizeof(*(tref->references)));
+  memset(&tref->references[tref->num_references-1],
+         0, sizeof(tref->references[tref->num_references-1]));
   return &tref->references[tref->num_references-1];
   }
 
@@ -56,6 +58,7 @@ int quicktime_tref_init_chap(quicktime_tref_t * tref, int track_id)
   ref->type[2] = 'a';
   ref->type[3] = 'p';
   add_track(ref, track_id);
+  return 0;
   }
 
 int quicktime_tref_delete(quicktime_tref_t *tref)

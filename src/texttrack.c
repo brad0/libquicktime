@@ -177,8 +177,6 @@ void lqt_set_text_time(quicktime_t * file, int track, int64_t time)
                              &(stts_index),
                              &(stts_count));
   
-  fprintf(stderr, "lqt_set_text_time: %lld, %d\n", time,
-          file->ttracks[track].current_position);
   }
 
 /* Encoding */
@@ -277,23 +275,31 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     }
 
   quicktime_write_chunk_header(file, trak, &chunk_atom);
-  
-  if(ttrack->cnv)
+
+  if(text)
     {
-    lqt_charset_convert_realloc(ttrack->cnv,
-                                text, -1,
-                                &ttrack->text_buffer, &ttrack->text_buffer_alloc,
-                                &out_len);
-    quicktime_write_int16(file, out_len);
-    quicktime_write_data(file, (uint8_t*)ttrack->text_buffer, out_len);
+    if(ttrack->cnv)
+      {
+      lqt_charset_convert_realloc(ttrack->cnv,
+                                  text, -1,
+                                  &ttrack->text_buffer, &ttrack->text_buffer_alloc,
+                                  &out_len);
+      quicktime_write_int16(file, out_len);
+      quicktime_write_data(file, (uint8_t*)ttrack->text_buffer, out_len);
+      }
+    else
+      {
+      out_len = strlen(text);
+      
+      quicktime_write_int16(file, out_len);
+      quicktime_write_data(file, (uint8_t*)text, out_len);
+      }
     }
   else
     {
-    out_len = strlen(text);
-    
-    quicktime_write_int16(file, out_len);
-    quicktime_write_data(file, (uint8_t*)text, out_len);
+    quicktime_write_int16(file, 0);
     }
+  
   quicktime_write_chunk_footer(file, trak, ttrack->current_chunk,
                                &chunk_atom, 1);
 

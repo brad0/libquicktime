@@ -187,7 +187,8 @@ mac_languages[] =
 
 #define NUM_CODES (sizeof(mac_languages)/sizeof(mac_languages[0]))
 
-static int get_language(quicktime_trak_t * trak, char * ret, lqt_file_type_t file_type)
+static int get_language(quicktime_trak_t * trak, char * ret,
+                        lqt_file_type_t file_type)
   {
   int i;
   if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
@@ -234,8 +235,8 @@ static int set_language_code(quicktime_trak_t * trak,
   if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
     {
     trak->mdia.mdhd.language =
-      ((int)(language[0]-0x60) << 10) ||
-      ((int)(language[1]-0x60) << 5) ||
+      ((int)(language[0]-0x60) << 10) |
+      ((int)(language[1]-0x60) << 5) |
       ((int)(language[2]-0x60));
     return 0;
     }

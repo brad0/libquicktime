@@ -737,8 +737,6 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
                              &(file->vtracks[track].stts_index),
                              &(file->vtracks[track].stts_count));
 
-  fprintf(stderr, "lqt_seek_video %lld -> %lld\n",
-          time, frame);
 
   quicktime_set_video_position(file, frame, track);
   }
