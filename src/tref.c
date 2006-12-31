@@ -89,7 +89,7 @@ void quicktime_tref_dump(quicktime_tref_t *tref)
     lqt_dump("     track indices: %ld\n", ref->num_tracks);
     for(j = 0; j < ref->num_tracks; j++)
       {
-      lqt_dump("       track_index %d: %d\n", j, ref->tracks[i]);
+      lqt_dump("       track_index %d: %d\n", j, ref->tracks[j]);
       }
     
     }
