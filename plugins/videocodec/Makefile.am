@@ -18,4 +18,4 @@ lqt_videocodec_la_LIBADD = @MODULE_LIBADD@
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime
 
-noinst_HEADERS = videocodec.c
+noinst_HEADERS = videocodec.h
