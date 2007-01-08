@@ -657,7 +657,7 @@ fi
 if test "x$exec_prefix" = xNONE; then
    exec_prefix="${prefix}"
 fi
-plugin_dir="$exec_prefix/lib/$PACKAGE"
+plugin_dir="$libdir/$PACKAGE"
 
 AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 
