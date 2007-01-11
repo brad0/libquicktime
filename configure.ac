@@ -652,7 +652,7 @@ dnl Plugin directory
 dnl
 
 if test "x$prefix" = xNONE; then
-   prefix="${ac_default_prefix}"
+  prefix="${ac_default_prefix}"
 fi
 if test "x$exec_prefix" = xNONE; then
    exec_prefix="${prefix}"
@@ -661,8 +661,8 @@ plugin_dir="$libdir/$PACKAGE"
 
 AH_TEMPLATE([PLUGIN_DIR], [Directory for plugins])
 
-PLUGIN_DIR=$plugin_dir
-AC_DEFINE_UNQUOTED(PLUGIN_DIR, ["$plugin_dir"])
+PLUGIN_DIR=`eval echo $plugin_dir`
+AC_DEFINE_UNQUOTED(PLUGIN_DIR, "$PLUGIN_DIR")
 AC_SUBST(PLUGIN_DIR)
 
 dnl
