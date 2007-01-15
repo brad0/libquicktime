@@ -606,10 +606,10 @@ stringlist_options: (char*[]){ "Left", "Plane", "Median", (char*)0 },    \
   }
 
 /** Frame types */
-#define PARAM_SCENE_CHANGE_THESHOLD \
+#define PARAM_SCENE_CHANGE_THRESHOLD \
   {                                 \
     name:      "ff_scenechange_threshold",        \
-    real_name: "Scenechange theshold",            \
+    real_name: "Scenechange threshold",            \
     type: LQT_PARAMETER_INT,             \
     val_default: { val_int: 0 },                \
     val_min: { val_int: -1000000000 },                    \

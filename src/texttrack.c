@@ -203,13 +203,6 @@ int lqt_add_text_track(quicktime_t * file, int timescale)
   return 0;
   }
 
-#if 0
-void lqt_set_text_language(quicktime_t * file, int track, const char * language)
-  {
-
-  }
-#endif
-
 void lqt_set_chapter_track(quicktime_t * file, int track)
   {
   file->ttracks[track].is_chapter_track = 1;
@@ -272,6 +265,7 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     /* Set up chapter track */
     if(ttrack->is_chapter_track)
       make_chapter_track(file, trak);
+    ttrack->initialized = 1;
     }
 
   quicktime_write_chunk_header(file, trak, &chunk_atom);
