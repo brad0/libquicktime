@@ -87,17 +87,15 @@ int quicktime_trak_init_audio(quicktime_t *file,
 int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
                              int timescale)
   {
-  quicktime_mdia_init_text(file, &(trak->mdia), 
-                           timescale);
-  
+  quicktime_mdia_init_text(file, &(trak->mdia), timescale);
+  return 0;
   }
 
 int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
                              int timescale)
   {
-  quicktime_mdia_init_tx3g(file, &(trak->mdia), 
-                           timescale);
-  
+  quicktime_mdia_init_tx3g(file, &(trak->mdia), timescale);
+  return 0;
   }
                             
                             
