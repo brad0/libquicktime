@@ -195,7 +195,8 @@ int lqt_add_text_track(quicktime_t * file, int timescale)
   else if(file->file_type & (LQT_FILE_QT | LQT_FILE_QT_OLD))
     quicktime_trak_init_text(file, trak, timescale);
   else
-    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Text track not supported for this file");
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Text track not supported for this file");
 
   lqt_init_text_map(file, &(file->ttracks[file->total_ttracks]),
                     trak, 1);
@@ -208,7 +209,8 @@ void lqt_set_chapter_track(quicktime_t * file, int track)
   file->ttracks[track].is_chapter_track = 1;
   }
 
-static void make_chapter_track(quicktime_t * file, quicktime_trak_t * trak)
+static void make_chapter_track(quicktime_t * file,
+                               quicktime_trak_t * trak)
   {
   quicktime_trak_t * ref_track;
   
@@ -243,7 +245,8 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
   /* Issue a warning for AVI files (No subitles are supported here) */
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
-    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Subtitles are not supported in AVI files");
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Subtitles are not supported in AVI files");
     return 1;
     }
   
@@ -252,7 +255,8 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     /* Create character set converter */
     if(file->file_type & (LQT_FILE_QT_OLD|LQT_FILE_QT))
       {
-      charset = lqt_get_charset(trak->mdia.mdhd.language, file->file_type);
+      charset = lqt_get_charset(trak->mdia.mdhd.language,
+                                file->file_type);
       if(!charset)
         {
         lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
@@ -302,4 +306,58 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
   ttrack->current_chunk++;
   ttrack->current_position++;
   return 0;
+  }
+
+/* Rectangle */
+
+void lqt_set_text_box(quicktime_t * file, int track,
+                      uint16_t top, uint16_t left,
+                      uint16_t bottom, uint16_t right)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    stsd->text.defaultTextBox[0] = top;
+    stsd->text.defaultTextBox[1] = left;
+    stsd->text.defaultTextBox[2] = bottom;
+    stsd->text.defaultTextBox[3] = right;
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    stsd->tx3g.defaultTextBox[0] = top;
+    stsd->tx3g.defaultTextBox[1] = left;
+    stsd->tx3g.defaultTextBox[2] = bottom;
+    stsd->tx3g.defaultTextBox[3] = right;
+    }
+  trak->tkhd.track_width  = right - left;
+  trak->tkhd.track_height = bottom - top;
+  }
+
+void lqt_get_text_box(quicktime_t * file, int track,
+                      uint16_t * top, uint16_t * left,
+                      uint16_t * bottom, uint16_t * right)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+  
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    *top    = stsd->text.defaultTextBox[0];
+    *left   = stsd->text.defaultTextBox[1];
+    *bottom = stsd->text.defaultTextBox[2];
+    *right  = stsd->text.defaultTextBox[3];
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    *top    = stsd->tx3g.defaultTextBox[0];
+    *left   = stsd->tx3g.defaultTextBox[1];
+    *bottom = stsd->tx3g.defaultTextBox[2];
+    *right  = stsd->tx3g.defaultTextBox[3];
+    }
   }

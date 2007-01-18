@@ -248,9 +248,25 @@ void lqt_set_text_language(quicktime_t * file, int track, const char * language)
  *  By default, text tracks are subtitles. By calling this function,
  *  you tell libquicktime, that the text track should be a chapter track.
  */
+
+
   
 void lqt_set_chapter_track(quicktime_t * file, int track);
 
+/** \brief Set the text box of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param top Top border
+ *  \param left Left border
+ *  \param bottom Bottom border
+ *  \param right Right border
+ */
+  
+void lqt_set_text_box(quicktime_t * file, int track,
+                      uint16_t top, uint16_t left,
+                      uint16_t bottom, uint16_t right);
+
+  
 /** \brief Write a text sample
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -300,6 +316,20 @@ int lqt_get_text_language(quicktime_t * file, int track, char * language);
 
 int lqt_text_time_scale(quicktime_t * file, int track);
 
+/** \brief Set the text box of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param top Returns the top border
+ *  \param left Returns the left border
+ *  \param bottom Returns the bottom border
+ *  \param right Returns the right border
+ */
+  
+void lqt_get_text_box(quicktime_t * file, int track,
+                      uint16_t * top, uint16_t * left,
+                      uint16_t * bottom, uint16_t * right);
+
+  
 /** \brief Read a text sample
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
