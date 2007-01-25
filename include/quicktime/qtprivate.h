@@ -751,7 +751,9 @@ typedef struct
 
         quicktime_stbl_t stbl;
 	quicktime_hdlr_t hdlr;
-	quicktime_dinf_t dinf;
+        int has_hdlr;
+
+        quicktime_dinf_t dinf;
 } quicktime_minf_t;
 
 
@@ -830,19 +832,20 @@ typedef struct {
 
 
 typedef struct
-{
-	quicktime_tkhd_t tkhd;
-	quicktime_mdia_t mdia;
-	quicktime_edts_t edts;
-
-        quicktime_tref_t tref;
-        quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
-        int chunk_sizes_alloc;
-        int64_t * chunk_sizes; /* This contains the chunk sizes for audio
-                                  tracks. They can not so easily be obtained
-                                  during decoding */
-	int has_tref;
-} quicktime_trak_t;
+  {
+  quicktime_tkhd_t tkhd;
+  quicktime_mdia_t mdia;
+  quicktime_edts_t edts;
+  int has_edts;
+  
+  quicktime_tref_t tref;
+  quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
+  int chunk_sizes_alloc;
+  int64_t * chunk_sizes; /* This contains the chunk sizes for audio
+                            tracks. They can not so easily be obtained
+                            during decoding */
+  int has_tref;
+  } quicktime_trak_t;
 
 
 typedef struct

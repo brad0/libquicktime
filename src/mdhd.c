@@ -1,7 +1,7 @@
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
-#define MP4_DEFAULT_LANGUAGE 5575
+#define MP4_DEFAULT_LANGUAGE 5575 // English
 
 void quicktime_mdhd_init(quicktime_mdhd_t *mdhd)
 {
@@ -19,7 +19,7 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 								quicktime_mdhd_t *mdhd,
 								int timescale)
   {
-  if(file->file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file->file_type))
     mdhd->language = MP4_DEFAULT_LANGUAGE;
   mdhd->time_scale = timescale;
   mdhd->duration = 0;      /* set this when closing */
@@ -29,7 +29,7 @@ void quicktime_mdhd_init_audio(quicktime_t *file,
                                quicktime_mdhd_t *mdhd, 
                                int sample_rate)
   {
-  if(file->file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file->file_type))
     mdhd->language = MP4_DEFAULT_LANGUAGE;
   mdhd->time_scale = sample_rate;
   mdhd->duration = 0;      /* set this when closing */
@@ -39,9 +39,11 @@ void quicktime_mdhd_init_text(quicktime_t *file,
                               quicktime_mdhd_t *mdhd, 
                               int timescale)
   {
-  if(file->file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file->file_type))
+    {
     mdhd->language = MP4_DEFAULT_LANGUAGE;
-  
+    mdhd->quality = 0;
+    }
   mdhd->time_scale = timescale;
   mdhd->duration = 0;      /* set this when closing */
   }

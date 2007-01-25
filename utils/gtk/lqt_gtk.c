@@ -390,8 +390,13 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
 
   ret->tooltips = gtk_tooltips_new();
   g_object_ref (G_OBJECT (ret->tooltips));
+
+#if GTK_MINOR_VERSION < 10
   gtk_object_sink (GTK_OBJECT (ret->tooltips));
-    
+#else
+  g_object_ref_sink(G_OBJECT(ret->tooltips));
+#endif
+  
   if(parameter_info[0].type == LQT_PARAMETER_SECTION)
     {
     for(i = 0; i < num_parameters; i++)

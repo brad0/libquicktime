@@ -1,5 +1,12 @@
 #include <lqt.h>
 #include <qtprivate.h>
+
+/* Some macros */
+
+#define IS_QUICKTIME(type) (type & (LQT_FILE_QT_OLD | LQT_FILE_QT))
+#define IS_MP4(type) (type & (LQT_FILE_MP4 | LQT_FILE_M4A | LQT_FILE_3GP))
+#define IS_AVI(type) (type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+
 /* atom.c */
 
 int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom);
@@ -420,6 +427,7 @@ lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp);
 void quicktime_read_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp,
                          quicktime_atom_t *parent_atom);
 void quicktime_write_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp);
+void quicktime_ftyp_dump(quicktime_ftyp_t *ftyp);
 
 
 /* gama.c */

@@ -3,7 +3,7 @@
 #include <quicktime/quicktime.h>
 #include <string.h>
 
-#define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4)
+#define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4|LQT_FILE_3GP)
 
 #define LOG_DOMAIN "udta"
 

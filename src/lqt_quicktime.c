@@ -1611,7 +1611,10 @@ int quicktime_read_info(quicktime_t *file)
 int quicktime_dump(quicktime_t *file)
 {
 	lqt_dump("quicktime_dump\n");
-	lqt_dump("movie data\n");
+        if(file->has_ftyp)
+          quicktime_ftyp_dump(&(file->ftyp));
+	
+        lqt_dump("movie data\n");
 	lqt_dump(" size %lld\n", file->mdat.atom.size);
 	lqt_dump(" start %lld\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));
@@ -2532,6 +2535,7 @@ filetypes[] =
       { LQT_FILE_AVI_ODML, "AVI ODML"          },
       { LQT_FILE_MP4,      "MP4"               },
       { LQT_FILE_M4A,      "M4A"               },
+      { LQT_FILE_3GP,      "3GP"               },
   };
   
 const char * lqt_file_type_to_string(lqt_file_type_t type)

@@ -28,9 +28,23 @@ static quicktime_ftyp_t ftyp_mp4 =
   {
     major_brand:           MK_FOURCC('m','p','4','2'),
     minor_version:         0x0,
-    num_compatible_brands: 4,
-    compatible_brands:     (uint32_t[]){MK_FOURCC('m','p','4','2'),MK_FOURCC('i','s','o','m'),0,0},
+    num_compatible_brands: 2,
+    compatible_brands:     (uint32_t[]){MK_FOURCC('m','p','4','2'),
+                                        MK_FOURCC('i','s','o','m')},
   };
+
+static quicktime_ftyp_t ftyp_3gp =
+  {
+    major_brand:           MK_FOURCC('3','g','p','5'),
+    minor_version:         0x0,
+    num_compatible_brands: 5,
+    compatible_brands:     (uint32_t[]){MK_FOURCC('i','s','o','m'),
+                                        MK_FOURCC('3','g','p','5'),
+                                        MK_FOURCC('3','g','p','4'),
+                                        MK_FOURCC('m','p','4','1'),
+                                        MK_FOURCC('m','p','4','2')},
+  };
+
 
 static quicktime_ftyp_t ftyp_m4a =
   {
@@ -73,6 +87,9 @@ void quicktime_ftyp_init(quicktime_ftyp_t * ftyp, lqt_file_type_t type)
     case LQT_FILE_M4A:
       copy_ftyp(ftyp, &ftyp_m4a);
       return;
+    case LQT_FILE_3GP:
+      copy_ftyp(ftyp, &ftyp_3gp);
+      return;
     }
   }
 
@@ -83,8 +100,6 @@ lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp)
     case MK_FOURCC('i','s','o','m'):
     case MK_FOURCC('m','p','4','1'):
     case MK_FOURCC('m','p','4','2'):
-    case MK_FOURCC('3','g','p','4'):
-    case MK_FOURCC('3','g','p','5'):
       return LQT_FILE_MP4;
       break;
     case MK_FOURCC('M','4','A',' '):
@@ -93,6 +108,9 @@ lqt_file_type_t quicktime_ftyp_get_file_type(quicktime_ftyp_t * ftyp)
     case MK_FOURCC('q','t',' ',' '):
       return LQT_FILE_QT;
       break;
+    case MK_FOURCC('3','g','p','4'):
+    case MK_FOURCC('3','g','p','5'):
+      return LQT_FILE_3GP;
     }
   return 0;
   }
@@ -124,3 +142,29 @@ void quicktime_write_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp)
     quicktime_write_int32(file, ftyp->compatible_brands[i]);
   quicktime_atom_write_footer(file, &atom);
   }
+
+static void dump_fourcc(uint32_t f)
+  {
+  lqt_dump("%c%c%c%c",
+           (f >> 24) & 0xff,
+           (f >> 16) & 0xff,
+           (f >>  8) & 0xff,
+           f & 0xff);
+  }
+
+void quicktime_ftyp_dump(quicktime_ftyp_t *ftyp)
+  {
+  int i;
+  lqt_dump("ftyp\n");
+  lqt_dump(" major brand: ");
+  dump_fourcc(ftyp->major_brand);
+  lqt_dump("\n minor version: %08x\n", ftyp->minor_version);
+  lqt_dump(" compatible brands: ");
+  for(i = 0; i < ftyp->num_compatible_brands; i++)
+    {
+    dump_fourcc(ftyp->compatible_brands[i]);
+    lqt_dump(" ");
+    }
+  lqt_dump("\n");
+  }
+

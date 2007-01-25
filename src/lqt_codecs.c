@@ -516,13 +516,13 @@ static void start_encoding(quicktime_t *file)
     {
     if(!(file->atracks[i].compatibility_flags & file->file_type))
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-              "Audio codec and container are not known to be compatible. File might be playable by libquicktime only");
+              "Audio codec and container are not known to be compatible. File might be playable by libquicktime only.");
     }
   for(i = 0; i < file->total_vtracks; i++)
     {
     if(!(file->vtracks[i].compatibility_flags & file->file_type))
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-              "Video codec and container are not known to be compatible. File might be playable by libquicktime only");
+              "Video codec and container are not known to be compatible. File might be playable by libquicktime only.");
     
     }
   }

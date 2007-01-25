@@ -34,8 +34,9 @@ int quicktime_trak_init_video(quicktime_t *file,
                 frame_duration,
                 timescale,
 		compressor);
-
-	return 0;
+	quicktime_edts_init_table(&(trak->edts));
+        trak->has_edts = 1;
+        return 0;
 }
 
 
@@ -49,6 +50,7 @@ int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int trac
 	quicktime_mdia_init_qtvr(file, 
 		&(trak->mdia), track_type, width, height, timescale, frame_duration);
 	quicktime_edts_init_table(&(trak->edts));
+        trak->has_edts = 1;
 	quicktime_tref_init_qtvr(&(trak->tref), track_type);
         trak->has_tref = 1;
 	return 0;
@@ -64,6 +66,7 @@ int quicktime_trak_init_panorama(quicktime_t *file, quicktime_trak_t *trak, int 
 	quicktime_mdia_init_panorama(file, 
 		&(trak->mdia), width, height, timescale, frame_duration);
 	quicktime_edts_init_table(&(trak->edts));
+        trak->has_edts = 1;
 
 	return 0;
 }
@@ -81,20 +84,31 @@ int quicktime_trak_init_audio(quicktime_t *file,
                             bits, 
                             compressor);
   quicktime_edts_init_table(&(trak->edts));
+  trak->has_edts = 1;
+
   return 0;
   }
 
 int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
                              int timescale)
   {
-  quicktime_mdia_init_text(file, &(trak->mdia), timescale);
+  trak->tkhd.volume = 0;
+  trak->tkhd.flags = 3;
+  quicktime_mdia_init_text(file, &(trak->mdia), 
+                           timescale);
+  quicktime_edts_init_table(&(trak->edts));
+  trak->has_edts = 1;
   return 0;
   }
 
 int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
                              int timescale)
   {
-  quicktime_mdia_init_tx3g(file, &(trak->mdia), timescale);
+  trak->tkhd.volume = 0;
+  trak->tkhd.flags = 1;
+  quicktime_mdia_init_tx3g(file, &(trak->mdia), 
+                           timescale);
+ 
   return 0;
   }
                             
@@ -117,7 +131,7 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
 {
 	lqt_dump(" track\n");
 	quicktime_tkhd_dump(&(trak->tkhd));
-	quicktime_edts_dump(&(trak->edts));
+	if(trak->has_edts) quicktime_edts_dump(&(trak->edts));
 	if (trak->has_tref)
 	    quicktime_tref_dump(&(trak->tref));
 	quicktime_mdia_dump(&(trak->mdia));
@@ -170,7 +184,10 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
     else if(quicktime_atom_is(&leaf_atom, "matt"))
       quicktime_atom_skip(file, &leaf_atom);
     else if(quicktime_atom_is(&leaf_atom, "edts"))
+      {
       quicktime_read_edts(file, &(trak->edts), &leaf_atom);
+      trak->has_edts = 1;
+      }
     else if(quicktime_atom_is(&leaf_atom, "load"))
       quicktime_atom_skip(file, &leaf_atom);
     else if(quicktime_atom_is(&leaf_atom, "imap"))
@@ -197,7 +214,7 @@ int quicktime_write_trak(quicktime_t *file,
 	quicktime_atom_t atom;
 	quicktime_atom_write_header(file, &atom, "trak");
 	quicktime_trak_duration(trak, &duration, &timescale);
-
+        
 /* get duration in movie's units */
 	trak->tkhd.duration = (long)((float)duration / timescale * moov_time_scale);
 	trak->mdia.mdhd.duration = duration;
@@ -205,7 +222,8 @@ int quicktime_write_trak(quicktime_t *file,
 
 	quicktime_write_tkhd(file, &(trak->tkhd));
 	if (trak->mdia.minf.is_panorama) trak->edts.elst.total_entries = 1;
-	quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
+        
+        if(trak->has_edts) quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
 	quicktime_write_mdia(file, &(trak->mdia));
 	
 	if (trak->has_tref) 

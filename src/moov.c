@@ -263,8 +263,8 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 		quicktime_atom_write_header(file, &atom, "moov");
 	}
         quicktime_write_mvhd(file, &(moov->mvhd));
-        if(moov->has_iods)
-          quicktime_write_iods(file, moov);
+        //        if(moov->has_iods)
+        //          quicktime_write_iods(file, moov);
 	quicktime_write_udta(file, &(moov->udta));
 	for(i = 0; i < moov->total_tracks; i++)
 	{

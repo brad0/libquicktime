@@ -190,7 +190,7 @@ int lqt_add_text_track(quicktime_t * file, int timescale)
   
   trak = quicktime_add_track(file);
 
-  if(file->file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file->file_type))
     quicktime_trak_init_tx3g(file, trak, timescale);
   else if(file->file_type & (LQT_FILE_QT | LQT_FILE_QT_OLD))
     quicktime_trak_init_text(file, trak, timescale);
@@ -321,20 +321,21 @@ void lqt_set_text_box(quicktime_t * file, int track,
 
   if(quicktime_match_32(stsd->format, "text"))
     {
-    stsd->text.defaultTextBox[0] = top;
-    stsd->text.defaultTextBox[1] = left;
-    stsd->text.defaultTextBox[2] = bottom;
-    stsd->text.defaultTextBox[3] = right;
+    trak->tkhd.matrix.values[6] += (float)left;
+    trak->tkhd.matrix.values[7] += (float)top;
+    trak->tkhd.track_width  = right - left;
+    trak->tkhd.track_height = bottom - top;
     }
   else if(quicktime_match_32(stsd->format, "tx3g"))
     {
+    trak->tkhd.track_width  = right - left;
+    trak->tkhd.track_height = bottom - top;
+    
     stsd->tx3g.defaultTextBox[0] = top;
     stsd->tx3g.defaultTextBox[1] = left;
     stsd->tx3g.defaultTextBox[2] = bottom;
     stsd->tx3g.defaultTextBox[3] = right;
     }
-  trak->tkhd.track_width  = right - left;
-  trak->tkhd.track_height = bottom - top;
   }
 
 void lqt_get_text_box(quicktime_t * file, int track,
@@ -360,4 +361,114 @@ void lqt_get_text_box(quicktime_t * file, int track,
     *bottom = stsd->tx3g.defaultTextBox[2];
     *right  = stsd->tx3g.defaultTextBox[3];
     }
+  }
+
+void lqt_set_text_fg_color(quicktime_t * file, int track,
+                           uint16_t r, uint16_t g,
+                           uint16_t b, uint16_t a)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    stsd->text.scrpColor[0] = r;
+    stsd->text.scrpColor[1] = g;
+    stsd->text.scrpColor[2] = b;
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    stsd->tx3g.text_color[0] = r >> 8;
+    stsd->tx3g.text_color[1] = g >> 8;
+    stsd->tx3g.text_color[2] = b >> 8;
+    stsd->tx3g.text_color[3] = a >> 8;
+    }
+  }
+
+  
+void lqt_set_text_bg_color(quicktime_t * file, int track,
+                           uint16_t r, uint16_t g,
+                           uint16_t b, uint16_t a)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    stsd->text.bgColor[0] = r;
+    stsd->text.bgColor[1] = g;
+    stsd->text.bgColor[2] = b;
+    if(a < 0x8000)
+      stsd->text.displayFlags |= 0x4000;
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    stsd->tx3g.back_color[0] = r >> 8;
+    stsd->tx3g.back_color[1] = g >> 8;
+    stsd->tx3g.back_color[2] = b >> 8;
+    stsd->tx3g.back_color[3] = a >> 8;
+    }
+  }
+
+  
+void lqt_get_text_fg_color(quicktime_t * file, int track,
+                           uint16_t * r, uint16_t * g,
+                           uint16_t * b, uint16_t * a)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    *r = stsd->text.scrpColor[0];
+    *g = stsd->text.scrpColor[1];
+    *b = stsd->text.scrpColor[2];
+    *a = 0xffff;
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    *r = (stsd->tx3g.text_color[0] << 8) | stsd->tx3g.text_color[0];
+    *g = (stsd->tx3g.text_color[1] << 8) | stsd->tx3g.text_color[1];
+    *b = (stsd->tx3g.text_color[2] << 8) | stsd->tx3g.text_color[2];
+    *a = (stsd->tx3g.text_color[3] << 8) | stsd->tx3g.text_color[3];
+    }
+
+  
+  }
+
+void lqt_get_text_bg_color(quicktime_t * file, int track,
+                           uint16_t * r, uint16_t * g,
+                           uint16_t * b, uint16_t * a)
+  {
+  quicktime_trak_t      * trak;
+  quicktime_stsd_table_t * stsd;
+  trak = file->ttracks[track].track;
+  stsd = &trak->mdia.minf.stbl.stsd.table[0];
+
+  if(quicktime_match_32(stsd->format, "text"))
+    {
+    *r = stsd->text.bgColor[0];
+    *g = stsd->text.bgColor[1];
+    *b = stsd->text.bgColor[2];
+
+    if(stsd->text.displayFlags & 0x4000)
+      *a = 0x0000;
+    else
+      *a = 0xFFFF;
+    }
+  else if(quicktime_match_32(stsd->format, "tx3g"))
+    {
+    *r = (stsd->tx3g.back_color[0] << 8) | stsd->tx3g.back_color[0];
+    *g = (stsd->tx3g.back_color[1] << 8) | stsd->tx3g.back_color[1];
+    *b = (stsd->tx3g.back_color[2] << 8) | stsd->tx3g.back_color[2];
+    *a = (stsd->tx3g.back_color[3] << 8) | stsd->tx3g.back_color[3];
+    }
+  
+  
   }

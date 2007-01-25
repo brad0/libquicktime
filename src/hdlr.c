@@ -78,7 +78,6 @@ void quicktime_hdlr_init_text(quicktime_hdlr_t *hdlr)
   hdlr->component_subtype[2] = 'x';
   hdlr->component_subtype[3] = 't';
   strcpy(hdlr->component_name, "Libquicktime Text Media Handler");
-  
   }
 
 void quicktime_hdlr_init_tx3g(quicktime_hdlr_t *hdlr)
@@ -188,7 +187,7 @@ void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	quicktime_write_char(file, hdlr->version);
 	quicktime_write_int24(file, hdlr->flags);
         
-        if(file->file_type & (LQT_FILE_M4A|LQT_FILE_MP4))
+        if(IS_MP4(file->file_type))
           quicktime_write_int32(file, 0);
         else
           quicktime_write_char32(file, hdlr->component_type);
@@ -198,7 +197,7 @@ void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	quicktime_write_int32(file, hdlr->component_flags);
 	quicktime_write_int32(file, hdlr->component_flag_mask);
 
-        if(file->file_type & (LQT_FILE_M4A|LQT_FILE_MP4))
+        if(IS_MP4(file->file_type))
           quicktime_write_data(file, (uint8_t*)hdlr->component_name, strlen(hdlr->component_name)+1);
         else
           quicktime_write_pascal(file, hdlr->component_name);

@@ -191,7 +191,7 @@ static int get_language(quicktime_trak_t * trak, char * ret,
                         lqt_file_type_t file_type)
   {
   int i;
-  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file_type))
     {
     ret[0] = ((trak->mdia.mdhd.language >> 10) & 0x1f) + 0x60;
     ret[1] = ((trak->mdia.mdhd.language >> 5) & 0x1f)  + 0x60;
@@ -216,7 +216,7 @@ const char * lqt_get_charset(int mac_code, lqt_file_type_t file_type)
   {
   int i;
 
-  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file_type))
     return unicode_string;
   
   for(i = 0; i < NUM_CODES; i++)
@@ -232,7 +232,7 @@ static int set_language_code(quicktime_trak_t * trak,
   {
   int i;
 
-  if(file_type & (LQT_FILE_MP4 | LQT_FILE_M4A))
+  if(IS_MP4(file_type))
     {
     trak->mdia.mdhd.language =
       ((int)(language[0]-0x60) << 10) |

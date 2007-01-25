@@ -266,6 +266,41 @@ void lqt_set_text_box(quicktime_t * file, int track,
                       uint16_t top, uint16_t left,
                       uint16_t bottom, uint16_t right);
 
+/** \brief Set the foreground color of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param r Red
+ *  \param g Green
+ *  \param b Blue
+ *  \param a Alpha
+ *
+ *  Color values are between 0x0000 and 0xffff. The alpha value
+ *  is only used for mp4.
+ */
+  
+void lqt_set_text_fg_color(quicktime_t * file, int track,
+                           uint16_t r, uint16_t g,
+                           uint16_t b, uint16_t a);
+
+/** \brief Set the background color of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param r Red
+ *  \param g Green
+ *  \param b Blue
+ *  \param a Alpha
+ *
+ *  Color values are between 0x0000 and 0xffff. The alpha value
+ *  is only used for mp4. For Quicktime, the text box is set to transparent
+ *  if the alpha value is below 0x8000.
+ */
+  
+void lqt_set_text_bg_color(quicktime_t * file, int track,
+                           uint16_t r, uint16_t g,
+                           uint16_t b, uint16_t a);
+
+  
+  
   
 /** \brief Write a text sample
  *  \param file A quicktime handle
@@ -382,6 +417,36 @@ void lqt_set_text_position(quicktime_t * file, int track, int64_t position);
  */
 
 void lqt_set_text_time(quicktime_t * file, int track, int64_t time);
+
+/** \brief Get the foreground color of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param r Returns red
+ *  \param g Returns green
+ *  \param b Returns blue
+ *  \param a Returns alpha
+ *
+ *  Color values are between 0x0000 and 0xffff.
+ */
+  
+void lqt_get_text_fg_color(quicktime_t * file, int track,
+                           uint16_t * r, uint16_t * g,
+                           uint16_t * b, uint16_t * a);
+
+/** \brief Get the background color of a text track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param r Returns red
+ *  \param g Returns green
+ *  \param b Returns blue
+ *  \param a Returns alpha
+ *
+ *  Color values are between 0x0000 and 0xffff.
+ */
+  
+void lqt_get_text_bg_color(quicktime_t * file, int track,
+                           uint16_t * r, uint16_t * g,
+                           uint16_t * b, uint16_t * a);
 
 /**
    @}

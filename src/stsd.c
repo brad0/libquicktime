@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <funcprotos.h>
 #include <quicktime/quicktime.h>
 
@@ -116,7 +118,7 @@ void quicktime_stsd_init_text(quicktime_t *file,
   text = &table->text;
 
   text->displayFlags = 0;
-  text->textJustification = 0;
+  text->textJustification = 1;
   text->bgColor[0] = 0;
   text->bgColor[1] = 0;
   text->bgColor[2] = 0;
@@ -129,7 +131,7 @@ void quicktime_stsd_init_text(quicktime_t *file,
   text->scrpStartChar = 0;
 
   text->scrpHeight =  16;
-  text->scrpFont   =   1;
+  text->scrpFont   =   0;
   text->scrpFace   =   0;
   text->scrpSize   =  12;
 
@@ -137,7 +139,7 @@ void quicktime_stsd_init_text(quicktime_t *file,
   text->scrpColor[1] = 65535;
   text->scrpColor[2] = 65535;
 
-  //  strcpy(text->font, "Sans-Serif");
+  strcpy(text->font_name, "Sans-Serif");
   }
 
 void quicktime_stsd_init_tx3g(quicktime_t *file, 
