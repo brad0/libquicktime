@@ -7,16 +7,16 @@ endif
 SUBDIRS = $(gtk_subdirs)
 
 if HAVE_X11
-xbin := lqtplay
-xman := lqtplay.1
+xbin = lqtplay
+xman = lqtplay.1
 else
-xbin :=
-xman :=
+xbin =
+xman =
 endif
-noinst_PROGRAMS := test_codec testqt dump_codecs gen_colorspace_tables
-# bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover lqt_transcode
-bin_PROGRAMS := $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode qt2text
-man1_MANS := $(xman)
+noinst_PROGRAMS = test_codec testqt dump_codecs gen_colorspace_tables
+# bin_PROGRAMS = $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump qtrecover lqt_transcode
+bin_PROGRAMS = $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump lqt_transcode qt2text
+man1_MANS = $(xman)
 
 lqt_transcode_SOURCES=lqt_transcode.c
 lqt_transcode_LDADD=@UTIL_LIBADD@ -lm

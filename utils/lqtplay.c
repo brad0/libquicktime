@@ -226,10 +226,13 @@ static void x11_init(void)
 	    pixmap_bytes = pf[i].bits_per_pixel/8;
 
     /* byteswapping needed ??? */
-    if (ImageByteOrder(dpy)==LSBFirst && BYTE_ORDER!=LITTLE_ENDIAN)
+#ifdef WORDS_BIGENDIAN
+    if (ImageByteOrder(dpy)==LSBFirst)
 	x11_byteswap=1;
-    if (ImageByteOrder(dpy)==MSBFirst && BYTE_ORDER!=BIG_ENDIAN)
+#else
+    if (ImageByteOrder(dpy)==MSBFirst)
 	x11_byteswap=1;
+#endif
 
     /* init lookup tables */
     x11_lut(vinfo.red_mask, vinfo.green_mask, vinfo.blue_mask,
@@ -703,7 +706,7 @@ return 0;
 /* oss code                                                                 */
 
 #ifndef AFMT_S16_NE
-# if BYTE_ORDER == BIG_ENDIAN
+# ifdef WORDS_BIGENDIAN
 #  define AFMT_S16_NE AFMT_S16_BE
 # else
 #  define AFMT_S16_NE AFMT_S16_LE
