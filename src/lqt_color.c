@@ -44,7 +44,7 @@ static lqt_colormodel_tab colormodel_table[] =
     { "YUV 4:2:2 planar (jpeg)",   BC_YUVJ422P },
     { "YUV 4:4:4 planar (jpeg)",   BC_YUVJ444P },
     { "YUV 4:1:1 planar",          BC_YUV411P },
-    { (char*)0, LQT_COLORMODEL_NONE }
+    { "Undefined",                 LQT_COLORMODEL_NONE }
   };
 
 /* Some functions to find out, how cheap a colorspace conversion can be */
@@ -398,42 +398,30 @@ int lqt_get_best_colormodel(quicktime_t * file, int track,
     return lqt_get_best_colormodel_decode(file, track, supported);
   }
 
+static const int num_colormodels =
+  sizeof(colormodel_table)/sizeof(colormodel_table[0])-1;
+
 const char * lqt_colormodel_to_string(int colormodel)
   {
-  int index = 0;
-  
-  while(1)
-    {
-    if((colormodel_table[index].colormodel == colormodel) ||
-       (colormodel_table[index].colormodel == LQT_COLORMODEL_NONE))
+  int i = 0;
+  for(; i < num_colormodels; i++)
+    if(colormodel_table[i].colormodel == colormodel)
       break;
-    index++;
-    }
-  return colormodel_table[index].name;
+  return colormodel_table[i].name;
   }
 
 int lqt_string_to_colormodel(const char * str)
   {
-  int index = 0;
-  
-  while(1)
-    {
-    if((!colormodel_table[index].name) ||
-       !strcmp(colormodel_table[index].name, str))
+  int i = 0;
+  for(; i < num_colormodels; i++)
+    if(!strcmp(colormodel_table[i].name, str))
       break;
-    index++;
-    }
-  return colormodel_table[index].colormodel;
+  return colormodel_table[i].colormodel;
   }
 
 int lqt_num_colormodels()
   {
-  int ret = 0;
-  
-  while(colormodel_table[ret].name)
-    ret++;
-  
-  return ret;
+  return num_colormodels;
   }
 
 const char * lqt_get_colormodel_string(int index)
