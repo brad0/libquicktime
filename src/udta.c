@@ -116,7 +116,8 @@ static int quicktime_read_udta_string(quicktime_t *file,
     if(!charset)
       {
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-              "Unknown character set for language code %d, assuming ISO-8859-1");
+              "Unknown character set for language code %d, assuming ISO-8859-1",
+              language);
       charset = "ISO-8859-1";
       }
     cnv = lqt_charset_converter_create(file, charset, "UTF-8");

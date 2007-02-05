@@ -588,7 +588,8 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
 
   if(!directory)
     {
-    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot open plugin directory %s (forgot make install?)");
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Cannot open plugin directory %s (forgot make install?)", plugin_dir);
     return 0;
     }
 

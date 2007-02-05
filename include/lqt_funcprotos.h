@@ -516,10 +516,11 @@ const char * lqt_get_charset(int mac_code, lqt_file_type_t file_type);
 /* log.c */
 
 void lqt_log(quicktime_t * file, lqt_log_level_t level,
-             const char * domain, const char * format, ...);
+             const char * domain, const char * format, ...)
+  __attribute__ ((format (printf, 4, 5)));
 
 /* For dumping strings */
-void lqt_dump(const char * format, ...);
+void lqt_dump(const char * format, ...)  __attribute__ ((format (printf, 1, 2)));
 
 /* matrix.c */
 

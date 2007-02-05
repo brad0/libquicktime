@@ -86,7 +86,7 @@ void quicktime_tref_dump(quicktime_tref_t *tref)
              i+1,
              ref->type[0], ref->type[1],
              ref->type[2], ref->type[3]);
-    lqt_dump("     track indices: %ld\n", ref->num_tracks);
+    lqt_dump("     track indices: %d\n", ref->num_tracks);
     for(j = 0; j < ref->num_tracks; j++)
       {
       lqt_dump("       track_index %d: %d\n", j, ref->tracks[j]);
