@@ -16,23 +16,23 @@ void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
-static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3",   (char*)0 };
+static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3", (char*)0 };
 
-static char * fourccs_v210[] = { QUICKTIME_V210,  (char *)0};
+static char * fourccs_v210[] = { QUICKTIME_V210, (char *)0};
 
-static char * fourccs_v308[] = { QUICKTIME_V308,        (char*)0 };
+static char * fourccs_v308[] = { QUICKTIME_V308, (char*)0 };
 
-static char * fourccs_v408[] = { QUICKTIME_V408,     (char*)0 };
+static char * fourccs_v408[] = { QUICKTIME_V408, (char*)0 };
 
-static char * fourccs_v410[] = { QUICKTIME_V410 , (char*)0 };
+static char * fourccs_v410[] = { QUICKTIME_V410, (char*)0 };
 
-static char * fourccs_yuv2[] = { QUICKTIME_YUV2 ,       (char*)0 };
+static char * fourccs_yuv2[] = { QUICKTIME_YUV2, (char*)0 };
 
-static char * fourccs_2vuy[] = { QUICKTIME_2VUY ,         (char*)0 };
+static char * fourccs_2vuy[] = { QUICKTIME_2VUY, (char*)0 };
 
-static char * fourccs_yuv4[] = { QUICKTIME_YUV4 ,         (char*)0 };
+static char * fourccs_yuv4[] = { QUICKTIME_YUV4, (char*)0 };
 
-static char * fourccs_yv12[] = { QUICKTIME_YUV420 , "I420", (char*)0 };
+static char * fourccs_yv12[] = { QUICKTIME_YUV420, "I420", (char*)0 };
 
 // if DUMMY_PARAMETERS is defined it will cause segfaults
 #undef DUMMY_PARAMETERS
@@ -50,22 +50,22 @@ static char * dummy_stringlist_options[] =
 static lqt_parameter_info_static_t dummy_parameters[] =
   {
      {
-       name:               "dummy_string_test",
-       real_name:          "String Test",
-       type:               LQT_PARAMETER_STRING,
-       val_default:        { (int)"String Test" },
-       val_min:            0,
-       val_max:            0,
-       stringlist_options: (char**)0
+       .name =               "dummy_string_test",
+       .real_name =          "String Test",
+       .type =               LQT_PARAMETER_STRING,
+       .val_default =        { (int)"String Test" },
+       .val_min =            0,
+       .val_max =            0,
+       .stringlist_options = (char**)0
      },
      { 
-       name:      "dummy_stringlist_test",
-       real_name: "Stringlist test",
-       type:      LQT_PARAMETER_STRINGLIST,
-       val_default:        { (int)"Option1" },
-       val_min:            0,
-       val_max:            0,
-       stringlist_options: dummy_stringlist_options
+       .name =               "dummy_stringlist_test",
+       .real_name =          "Stringlist test",
+       .type =               LQT_PARAMETER_STRINGLIST,
+       .val_default =        { (int)"Option1" },
+       .val_min =            0,
+       .val_max =            0,
+       .stringlist_options = dummy_stringlist_options
      },
      { /* End of array */ }
   };
@@ -74,147 +74,144 @@ static lqt_parameter_info_static_t dummy_parameters[] =
 
 static lqt_codec_info_static_t codec_info_raw =
   {
-  name:        "raw",
-  long_name:   "RGB uncompressed",
-  description: "RGB uncompressed.",
-  fourccs:     fourccs_raw,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
+  .name =                "raw",
+  .long_name =           "RGB uncompressed",
+  .description =         "RGB uncompressed.",
+  .fourccs =             fourccs_raw,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
 #ifdef DUMMY_PARAMETERS
-  encoding_parameters: dummy_parameters,
-  decoding_parameters: dummy_parameters,
+  .encoding_parameters = dummy_parameters,
+  .decoding_parameters = dummy_parameters,
 #else
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
 #endif
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_rawalpha =
   {
-  name:        "rawalpha",
-  long_name:   "RGBA uncompressed",
-  description: "RGBA uncompressed",
-  fourccs:     fourccs_raw,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_ENCODE,
+  .name =                "rawalpha",
+  .long_name =           "RGBA uncompressed",
+  .description =         "RGBA uncompressed",
+  .fourccs =             fourccs_raw,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_ENCODE,
 #ifdef DUMMY_PARAMETERS
-  encoding_parameters: dummy_parameters,
-  decoding_parameters: dummy_parameters,
+  .encoding_parameters = dummy_parameters,
+  .decoding_parameters = dummy_parameters,
 #else
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
 #endif
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 
 static lqt_codec_info_static_t codec_info_v210 =
   {
-  name:        "v210",
-  long_name:   "10 bit Packed YUV 4:2:2 (v210)",
-  description: "10 bit Packed YUV 4:2:2 (v210)",
-  fourccs:     fourccs_v210,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "v210",
+  .long_name =           "10 bit Packed YUV 4:2:2 (v210)",
+  .description =         "10 bit Packed YUV 4:2:2 (v210)",
+  .fourccs =             fourccs_v210,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v308 =
   {
-  name:        "v308",
-  long_name:   "8 bit Planar YUV 4:4:4 (v308)",
-  description: "8 bit Planar YUV 4:4:4 (v308)",
-  fourccs:     fourccs_v308,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "v308",
+  .long_name =           "8 bit Planar YUV 4:4:4 (v308)",
+  .description =         "8 bit Planar YUV 4:4:4 (v308)",
+  .fourccs =             fourccs_v308,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v408 =
   {
-  name:              "v408",
-  long_name:         "8 bit Planar YUVA 4:4:4:4 (v408)",
-  description:       "8 bit Planar YUVA 4:4:4:4 (v408)",
-  fourccs:           fourccs_v408,
-  type:              LQT_CODEC_VIDEO,
-  direction:         LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "v408",
+  .long_name =           "8 bit Planar YUVA 4:4:4:4 (v408)",
+  .description =         "8 bit Planar YUVA 4:4:4:4 (v408)",
+  .fourccs =             fourccs_v408,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_v410 =
   {
-  name:        "v410",
-  long_name:   "10 bit Packed YUV 4:4:4 (v410)",
-  description: "10 bit Packed YUV 4:4:4 (v410)",
-  fourccs:     fourccs_v410,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "v410",
+  .long_name =           "10 bit Packed YUV 4:4:4 (v410)",
+  .description =         "10 bit Packed YUV 4:4:4 (v410)",
+  .fourccs =             fourccs_v410,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_yuv2 =
   {
-  name:        "yuv2",
-  long_name:   "8 bit Packed YUV 4:2:2 (yuv2)",     /* Long name of the codec */
-  description: "8 bit Packed YUV 4:2:2 (yuv2)",      /* Description            */
-  fourccs:     fourccs_yuv2,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "yuv2",
+  .long_name =           "8 bit Packed YUV 4:2:2 (yuv2)",
+  .description =         "8 bit Packed YUV 4:2:2 (yuv2)",
+  .fourccs =             fourccs_yuv2,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_2vuy =
   {
-  name:        "2vuy",
-  long_name:   "8 bit Packed YUV 4:2:2 (2vuy)",     /* Long name of the codec */
-  description: "8 bit Packed YUV 4:2:2 (2vuy)",      /* Description            */
-  fourccs:     fourccs_2vuy,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: (lqt_parameter_info_static_t*)0,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-
+  .name =                "2vuy",
+  .long_name =           "8 bit Packed YUV 4:2:2 (2vuy)",
+  .description =         "8 bit Packed YUV 4:2:2 (2vuy)",
+  .fourccs =             fourccs_2vuy,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_yuv4 =
   {
-    name:        "yuv4",
-    long_name:   "YUV 4:2:0 (yuv4)", 
-    description: "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME",
-    fourccs:     fourccs_yuv4,
-    type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-
+  .name =                "yuv4",
+  .long_name =           "YUV 4:2:0 (yuv4)", 
+  .description =         "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD \
+QUICKTIME",
+  .fourccs =             fourccs_yuv4,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_yv12 =
   {
-    name:        "yv12",
-    long_name:   "8 bit Planar YUV 4:2:0 (yv12)",
-    description: "8 bit Planar YUV 4:2:0 (yv12)",
-    fourccs:     fourccs_yv12,
-    type:        LQT_CODEC_VIDEO,
-    direction:   LQT_DIRECTION_BOTH,
-    encoding_parameters: (lqt_parameter_info_static_t*)0,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-    
+  .name =                "yv12",
+  .long_name =           "8 bit Planar YUV 4:2:0 (yv12)",
+  .description =         "8 bit Planar YUV 4:2:0 (yv12)",
+  .fourccs =             fourccs_yv12,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 /* These are called from the plugin loader */

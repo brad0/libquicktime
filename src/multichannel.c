@@ -37,13 +37,12 @@ channels[] =
 const char * lqt_channel_to_string(lqt_channel_t ch)
   {
   int i;
-
   for(i = 0; i < sizeof(channels) / sizeof(channels[0]); i++)
     {
     if(channels[i].ch == ch)
       return channels[i].name;
     }
-  return (char*)0;
+  return channels[0].name;
   }
 
 

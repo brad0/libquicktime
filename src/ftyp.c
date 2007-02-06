@@ -18,27 +18,27 @@
 
 static quicktime_ftyp_t ftyp_qt =
   {
-    major_brand:           MK_FOURCC('q','t',' ',' '),
-    minor_version:         0x20050300,
-    num_compatible_brands: 4,
-    compatible_brands:     (uint32_t[]){ MK_FOURCC('q','t',' ',' '),0,0,0 },
+    .major_brand =           MK_FOURCC('q','t',' ',' '),
+    .minor_version =         0x20050300,
+    .num_compatible_brands = 4,
+    .compatible_brands =     (uint32_t[]){ MK_FOURCC('q','t',' ',' '),0,0,0 },
   };
 
 static quicktime_ftyp_t ftyp_mp4 =
   {
-    major_brand:           MK_FOURCC('m','p','4','2'),
-    minor_version:         0x0,
-    num_compatible_brands: 2,
-    compatible_brands:     (uint32_t[]){MK_FOURCC('m','p','4','2'),
+    .major_brand =           MK_FOURCC('m','p','4','2'),
+    .minor_version =         0x0,
+    .num_compatible_brands = 2,
+    .compatible_brands =     (uint32_t[]){MK_FOURCC('m','p','4','2'),
                                         MK_FOURCC('i','s','o','m')},
   };
 
 static quicktime_ftyp_t ftyp_3gp =
   {
-    major_brand:           MK_FOURCC('3','g','p','5'),
-    minor_version:         0x0,
-    num_compatible_brands: 5,
-    compatible_brands:     (uint32_t[]){MK_FOURCC('i','s','o','m'),
+    .major_brand =           MK_FOURCC('3','g','p','5'),
+    .minor_version =         0x0,
+    .num_compatible_brands = 5,
+    .compatible_brands =     (uint32_t[]){MK_FOURCC('i','s','o','m'),
                                         MK_FOURCC('3','g','p','5'),
                                         MK_FOURCC('3','g','p','4'),
                                         MK_FOURCC('m','p','4','1'),
@@ -48,10 +48,10 @@ static quicktime_ftyp_t ftyp_3gp =
 
 static quicktime_ftyp_t ftyp_m4a =
   {
-    major_brand:           MK_FOURCC('M','4','A',' '),
-    minor_version:         0x0,
-    num_compatible_brands: 4,
-    compatible_brands:     (uint32_t[]){MK_FOURCC('M','4','A',' '),
+    .major_brand =           MK_FOURCC('M','4','A',' '),
+    .minor_version =         0x0,
+    .num_compatible_brands = 4,
+    .compatible_brands =     (uint32_t[]){MK_FOURCC('M','4','A',' '),
                                         MK_FOURCC('m','p','4','2'),
                                         MK_FOURCC('i','s','o','m'),
                                         0},

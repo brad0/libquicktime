@@ -8,63 +8,62 @@ static char * fourccs_vorbis_qt[]  = { "OggV", QUICKTIME_VORBIS, (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_vorbis[] =
   {
      { 
-       name:               "vorbis_bitrate",
-       real_name:          "Nominal Bitrate",
-       type:               LQT_PARAMETER_INT,
-       val_default:        { val_int: 128000 },
+       .name =        "vorbis_bitrate",
+       .real_name =   "Nominal Bitrate",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = 128000 },
      },
      { 
-       name:      "vorbis_vbr",
-       real_name: "Use variable bitrate",
-       type:      LQT_PARAMETER_INT,
-       val_default:        { val_int: 1 },
-       val_min:            { val_int: 0 },
-       val_max:            { val_int: 1 },
+       .name =        "vorbis_vbr",
+       .real_name =   "Use variable bitrate",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = 1 },
+       .val_min =     { .val_int = 0 },
+       .val_max =     { .val_int = 1 },
+     },
+     {          
+       .name =        "vorbis_max_bitrate",
+       .real_name =   "Maximum Bitrate (-1 = no limit)",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = -1 },
+       .val_min =     { .val_int = 0 },
+       .val_max =     { .val_int = 0 },
      },
      { 
-       name:      "vorbis_max_bitrate",
-       real_name: "Maximum Bitrate (-1: no limit)",
-       type:      LQT_PARAMETER_INT,
-       val_default:        { val_int: -1 },
-       val_min:            { val_int: 0 },
-       val_max:            { val_int: 0 },
-     },
-     { 
-       name:      "vorbis_min_bitrate",
-       real_name: "Minimum Bitrate (-1: no limit)",
-       type:      LQT_PARAMETER_INT,
-       val_default:        { val_int: -1 },
-       val_min:            { val_int: 0 },
-       val_max:            { val_int: 0 },
-       stringlist_options: (char**)0
+       .name =        "vorbis_min_bitrate",
+       .real_name =   "Minimum Bitrate (-1 = no limit)",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = -1 },
+       .val_min =     { .val_int = 0 },
+       .val_max =     { .val_int = 0 }
      },
      { /* End of paramaters */ }
   };
 
 static lqt_codec_info_static_t codec_info_vorbis =
   {
-    name:                "vorbis",
-    long_name:           "Ogg Vorbis (qt4l compatible)",
-    description:         "Patent free audio codec (see http://www.vorbis.com)",
-    fourccs:             fourccs_vorbis,
-    type:                LQT_CODEC_AUDIO,
-    direction:           LQT_DIRECTION_BOTH,
-    encoding_parameters: encode_parameters_vorbis,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+    .name =                "vorbis",
+    .long_name =           "Ogg Vorbis (qt4l compatible)",
+    .description =         "Patent free audio codec (see http://www.vorbis.com)",
+    .fourccs =             fourccs_vorbis,
+    .type =                LQT_CODEC_AUDIO,
+    .direction =           LQT_DIRECTION_BOTH,
+    .encoding_parameters = encode_parameters_vorbis,
+    .decoding_parameters = (lqt_parameter_info_static_t*)0,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_vorbis_qt =
   {
-    name:                "vorbis_qt",
-    long_name:           "Ogg Vorbis (qtcomponents compatible)",
-    description:         "Patent free audio codec (see http://www.vorbis.com)",
-    fourccs:             fourccs_vorbis_qt,
-    type:                LQT_CODEC_AUDIO,
-    direction:           LQT_DIRECTION_BOTH,
-    encoding_parameters: encode_parameters_vorbis,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT,
+    .name =                "vorbis_qt",
+    .long_name =           "Ogg Vorbis (qtcomponents compatible)",
+    .description =         "Patent free audio codec (see http://www.vorbis.com)",
+    .fourccs =             fourccs_vorbis_qt,
+    .type =                LQT_CODEC_AUDIO,
+    .direction =           LQT_DIRECTION_BOTH,
+    .encoding_parameters = encode_parameters_vorbis,
+    .decoding_parameters = (lqt_parameter_info_static_t*)0,
+    .compatibility_flags = LQT_FILE_QT,
   };
 
 

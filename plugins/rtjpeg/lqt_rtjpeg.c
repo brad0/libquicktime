@@ -29,44 +29,44 @@ static char * fourccs_rtjpeg[]  = { "RTJ0", (char*)0 };
 
 static lqt_parameter_info_static_t encode_parameters_rtjpeg[] = {
 	{
-          name:        "rtjpeg_quality",
-          real_name:   "Quality setting",
-	  type:        LQT_PARAMETER_INT,
-	  val_default: { val_int: 100 },
-          val_min: { val_int: 0 },
-	  val_max: { val_int: 100 },
+          .name =        "rtjpeg_quality",
+          .real_name =   "Quality setting",
+          .type =        LQT_PARAMETER_INT,
+          .val_default = { .val_int = 100 },
+          .val_min =     { .val_int = 0 },
+          .val_max =     { .val_int = 100 },
 	},
 	{
-          name:        "rtjpeg_key_rate",
-          real_name:   "Key frame interval",
-          type:        LQT_PARAMETER_INT,
-          val_default: { val_int: 25 },
+          .name =        "rtjpeg_key_rate",
+          .real_name =   "Key frame interval",
+          .type =        LQT_PARAMETER_INT,
+          .val_default = { .val_int = 25 },
 	},
 	{
-          name:        "rtjpeg_luma_quant",
-          real_name:   "Luma quantiser",
-          type:        LQT_PARAMETER_INT,
-          val_default: { val_int: 1 },
+          .name =        "rtjpeg_luma_quant",
+          .real_name =   "Luma quantiser",
+          .type =        LQT_PARAMETER_INT,
+          .val_default = { .val_int = 1 },
 	},
 	{
-          name:        "rtjpeg_chroma_quant",
-          real_name:   "Chroma quantiser",
-          type:        LQT_PARAMETER_INT,
-          val_default: { val_int: 1 },
+          .name =        "rtjpeg_chroma_quant",
+          .real_name =   "Chroma quantiser",
+          .type =        LQT_PARAMETER_INT,
+          .val_default = { .val_int = 1 },
 	},
 	{ /* End of parameters */ }
 };
 
 static lqt_codec_info_static_t codec_info_rtjpeg = {
-	name:        "rtjpeg",
-	long_name:   "RTjpeg",
-	description: "RTjpeg - real time lossy codec.",
-	fourccs:     fourccs_rtjpeg,
-	type:        LQT_CODEC_VIDEO,
-	direction:   LQT_DIRECTION_BOTH,
-	encoding_parameters: encode_parameters_rtjpeg,
-	decoding_parameters: (lqt_parameter_info_static_t*)0,
-        compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+	.name =                "rtjpeg",
+	.long_name =           "RTjpeg",
+	.description =         "RTjpeg - real time lossy codec.",
+	.fourccs =             fourccs_rtjpeg,
+	.type =                LQT_CODEC_VIDEO,
+	.direction =           LQT_DIRECTION_BOTH,
+	.encoding_parameters = encode_parameters_rtjpeg,
+	.decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
 };
 
 /* These are called from the plugin loader */

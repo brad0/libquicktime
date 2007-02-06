@@ -17,20 +17,20 @@ static char * fourccs_mjpa[]  = { QUICKTIME_MJPA, (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_jpeg[] =
   {
     { 
-      name:        "jpeg_quality",
-      real_name:   "Quality",
-      type:        LQT_PARAMETER_INT,
-      val_default: { val_int: 95 },
-      val_min:     { val_int: 1 },
-      val_max:     { val_int: 100 },
+      .name =        "jpeg_quality",
+      .real_name =   "Quality",
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 95 },
+      .val_min =     { .val_int = 1 },
+      .val_max =     { .val_int = 100 },
      },
      { 
-       name:        "jpeg_usefloat",
-       real_name:   "Use float",
-       type:        LQT_PARAMETER_INT,
-       val_default: { val_int: 0 },
-       val_min:     { val_int: 0 },
-       val_max:     { val_int: 1 },
+       .name =        "jpeg_usefloat",
+       .real_name =   "Use float",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = 0 },
+       .val_min =     { .val_int = 0 },
+       .val_max =     { .val_int = 1 },
      },
      { /* End of parameters */ }
   };
@@ -38,31 +38,31 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
 
 static lqt_codec_info_static_t codec_info_jpeg =
   {
-    name:                "jpeg",
-    long_name:           "Jpeg photo",
-    description:         "This format writes a seperate JPEG photo for\
- every frame in YUV 4:2:0",
-    fourccs:             fourccs_jpeg,
-    type:                LQT_CODEC_VIDEO,
-    direction:           LQT_DIRECTION_BOTH,
-    encoding_parameters: encode_parameters_jpeg,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+    .name =                "jpeg",
+    .long_name =           "Jpeg photo",
+    .description =         "This format writes a seperate JPEG photo for \
+every frame in YUV 4:2:0",
+    .fourccs =             fourccs_jpeg,
+    .type =                LQT_CODEC_VIDEO,
+    .direction =           LQT_DIRECTION_BOTH,
+    .encoding_parameters = encode_parameters_jpeg,
+    .decoding_parameters = (lqt_parameter_info_static_t*)0,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
     
   };
 
 static lqt_codec_info_static_t codec_info_mjpa =
   {
-    name:                "mjpa",
-    long_name:           "Motion Jpeg A",
-    description:         "MJPA stores each frame as two JPEGs interlaced\
- and in YUV 4:2:2",
-    fourccs:             fourccs_mjpa,
-    type:                LQT_CODEC_VIDEO,
-    direction:           LQT_DIRECTION_BOTH,
-    encoding_parameters: encode_parameters_jpeg,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+    .name =                "mjpa",
+    .long_name =           "Motion Jpeg A",
+    .description =         "MJPA stores each frame as two JPEGs interlaced \
+and in YUV 4:2:2",
+    .fourccs =             fourccs_mjpa,
+    .type =                LQT_CODEC_VIDEO,
+    .direction =           LQT_DIRECTION_BOTH,
+    .encoding_parameters = encode_parameters_jpeg,
+    .decoding_parameters = (lqt_parameter_info_static_t*)0,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 

@@ -2159,8 +2159,7 @@ interlace_modes[] =
   {
     { LQT_INTERLACE_NONE,         "None (Progressive)" },
     { LQT_INTERLACE_TOP_FIRST,    "Top field first"    },
-    { LQT_INTERLACE_BOTTOM_FIRST, "Bottom field first" },
-    {  /* End of array */ }
+    { LQT_INTERLACE_BOTTOM_FIRST, "Bottom field first" }
   };
   
 lqt_interlace_mode_t lqt_get_interlace_mode(quicktime_t * file, int track)
@@ -2181,14 +2180,13 @@ int lqt_set_interlace_mode(quicktime_t * file, int track,
 
 const char * lqt_interlace_mode_to_string(lqt_interlace_mode_t mode)
   {
-  int i = 0;
-  while(interlace_modes[i].name)
+  int i;
+  for(i = 0; i < sizeof(interlace_modes)/sizeof(interlace_modes[0]); i++)
     {
     if(interlace_modes[i].mode == mode)
       return interlace_modes[i].name;
-    i++;
     }
-  return (const char*)0;
+  return interlace_modes[0].name;
   }
 
 /* Chroma placement */
@@ -2202,20 +2200,18 @@ chroma_placements[] =
   {
     { LQT_CHROMA_PLACEMENT_DEFAULT,  "MPEG-1/JPEG" },
     { LQT_CHROMA_PLACEMENT_MPEG2,    "MPEG-2" },
-    { LQT_CHROMA_PLACEMENT_DVPAL,    "PAL DV" },
-    {  /* End of array */ }
+    { LQT_CHROMA_PLACEMENT_DVPAL,    "PAL DV" }
   };
 
-const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t p)
+const char * lqt_chroma_placement_to_string(lqt_chroma_placement_t placement)
   {
-  int i = 0;
-  while(chroma_placements[i].name)
+  int i;
+  for(i = 0; i < sizeof(chroma_placements)/sizeof(chroma_placements[0]); i++)
     {
-    if(chroma_placements[i].placement == p)
+    if(chroma_placements[i].placement == placement)
       return chroma_placements[i].name;
-    i++;
     }
-  return (const char*)0;
+  return chroma_placements[0].name;
   }
 
 lqt_chroma_placement_t lqt_get_chroma_placement(quicktime_t * file, int track)
@@ -2239,20 +2235,18 @@ sample_formats[] =
     { LQT_SAMPLE_UINT8, "8 bit unsigned" },
     { LQT_SAMPLE_INT16, "16 bit signed" },
     { LQT_SAMPLE_INT32, "32 bit signed" },
-    { LQT_SAMPLE_FLOAT, "Floating point" }, /* Float is ALWAYS machine native */
-    {  /* End of array */ }
+    { LQT_SAMPLE_FLOAT, "Floating point" } /* Float is ALWAYS machine native */
   };
 
-const char * lqt_sample_format_to_string(lqt_sample_format_t s)
+const char * lqt_sample_format_to_string(lqt_sample_format_t format)
   {
-  int i = 0;
-  while(sample_formats[i].name)
+  int i;
+  for(i = 0; i < sizeof(sample_formats)/sizeof(sample_formats[0]); i++)
     {
-    if(sample_formats[i].format == s)
+    if(sample_formats[i].format == format)
       return sample_formats[i].name;
-    i++;
     }
-  return (const char*)0;
+  return sample_formats[0].name;
   }
 
 lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
@@ -2535,7 +2529,7 @@ filetypes[] =
       { LQT_FILE_AVI_ODML, "AVI ODML"          },
       { LQT_FILE_MP4,      "MP4"               },
       { LQT_FILE_M4A,      "M4A"               },
-      { LQT_FILE_3GP,      "3GP"               },
+      { LQT_FILE_3GP,      "3GP"               }
   };
   
 const char * lqt_file_type_to_string(lqt_file_type_t type)

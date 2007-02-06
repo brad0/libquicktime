@@ -10,12 +10,12 @@ static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_png[] =
   {
      { 
-       name: "png_compression_level",
-       real_name: "Compression Level",
-       type: LQT_PARAMETER_INT,
-       val_default: { val_int: 9 },
-       val_min:     { val_int: 0},
-       val_max:     { val_int: 9},
+       .name =        "png_compression_level",
+       .real_name =   "Compression Level",
+       .type =        LQT_PARAMETER_INT,
+       .val_default = { .val_int = 9 },
+       .val_min =     { .val_int = 0 },
+       .val_max =     { .val_int = 9 },
      },
      { /* End of parameters */ }
   };
@@ -25,28 +25,28 @@ static lqt_parameter_info_static_t encode_parameters_png[] =
 
 static lqt_codec_info_static_t codec_info_pngalpha =
   {
-  name:        "pngalpha",
-  long_name:   "PNG (with alpha)",
-  description: "Lossless video codec (RGBA mode)",
-  fourccs:     fourccs_png,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_ENCODE,
-  encoding_parameters: encode_parameters_png,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "pngalpha",
+  .long_name =           "PNG (with alpha)",
+  .description =         "Lossless video codec (RGBA mode)",
+  .fourccs =             fourccs_png,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_ENCODE,
+  .encoding_parameters = encode_parameters_png,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_png =
   {
-  name:        "png",
-  long_name:   "PNG",
-  description: "Lossless video codec (RGB mode)",
-  fourccs:     fourccs_png,
-  type:        LQT_CODEC_VIDEO,
-  direction:   LQT_DIRECTION_BOTH,
-  encoding_parameters: encode_parameters_png,
-  decoding_parameters: (lqt_parameter_info_static_t*)0,
-  compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .name =                "png",
+  .long_name =           "PNG",
+  .description =         "Lossless video codec (RGB mode)",
+  .fourccs =             fourccs_png,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = encode_parameters_png,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 /* These are called from the plugin loader */
