@@ -49,17 +49,6 @@ extern "C" {
 
   typedef struct mjpeg_error_mgr* mjpeg_error_ptr;
 
-#ifndef __alpha__
-  typedef struct
-    {
-    } mjpeg_lml_hdr;
-
-  typedef struct
-    {
-    } mjpeg_dc10_hdr;
-#endif
-
-
   // The compressor structure is shared between decompressors and compressors
   typedef struct
     {

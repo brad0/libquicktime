@@ -669,7 +669,12 @@ dnl
 dnl Build CFLAGS
 dnl
 
-COMMON_CFLAGS="-finline-functions -Wall -Winline"
+COMMON_CFLAGS=""
+lqt_test_cflags="-finline-functions -Wall -Winline"
+for i in $lqt_test_cflags; do
+  LQT_TRY_CFLAGS($i, COMMON_CFLAGS="$COMMON_CFLAGS $i") ;
+done
+
 
 dnl Optimizing flags
 
