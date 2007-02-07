@@ -32,10 +32,16 @@ lqt_charset_converter_create(quicktime_t * file, const char * src_charset, const
     ret->out_charset = malloc(strlen(dst_charset)+1);
     strcpy(ret->out_charset, dst_charset);
     ret->utf_8_16 = 1;
+    ret->cd = (iconv_t)-1;
     }
   else
     {
     ret->cd = iconv_open(dst_charset, src_charset);
+    if(ret->cd == (iconv_t)-1)
+      {
+      free(ret);
+      return (lqt_charset_converter_t*)0;
+      }
     }
   ret->file = file;
   return ret;
@@ -56,7 +62,7 @@ int do_convert(lqt_charset_converter_t * cnv, char * in_string, int len, int * o
   size_t outbytesleft;
 
   /* Check for MP4 Unicode */
-  if(cnv->utf_8_16 && !cnv->cd)
+  if(cnv->utf_8_16 && (cnv->cd == (iconv_t)-1))
     {
     /* Byte order Little Endian */
     if((len > 1) &&
@@ -188,7 +194,7 @@ void lqt_charset_convert_realloc(lqt_charset_converter_t * cnv,
 
 void lqt_charset_converter_destroy(lqt_charset_converter_t * cnv)
   {
-  if(cnv->cd)
+  if(cnv->cd != (iconv_t)-1)
     iconv_close(cnv->cd);
   if(cnv->out_charset)
     free(cnv->out_charset);
