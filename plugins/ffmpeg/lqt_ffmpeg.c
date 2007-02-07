@@ -41,78 +41,78 @@
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
   
-#define ENCODE_PARAM_AUDIO                     \
-  {                                            \
-    name:      "bit_rate_audio",                 \
-    real_name: "Bit rate (kbps)",                \
-    type:      LQT_PARAMETER_INT,                \
-    val_default: { val_int: 128 },               \
+#define ENCODE_PARAM_AUDIO \
+  { \
+    .name =        "bit_rate_audio", \
+    .real_name =   "Bit rate (kbps)", \
+    .type =        LQT_PARAMETER_INT, \
+    .val_default = { .val_int = 128 }, \
   }
 
 #define ENCODE_PARAM_VIDEO_RATECONTROL \
-  {                                           \
-    name:      "rate_control",                       \
-    real_name: "Rate control",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
-    PARAM_BITRATE_VIDEO,                    \
-    PARAM_BITRATE_TOLERANCE,                \
-    PARAM_RC_MIN_RATE,                      \
-    PARAM_RC_MAX_RATE,                      \
-    PARAM_RC_BUFFER_SIZE,                   \
-    PARAM_RC_INITIAL_COMPLEX,               \
+  { \
+    .name =      "rate_control", \
+    .real_name = "Rate control", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
+    PARAM_BITRATE_VIDEO, \
+    PARAM_BITRATE_TOLERANCE, \
+    PARAM_RC_MIN_RATE, \
+    PARAM_RC_MAX_RATE, \
+    PARAM_RC_BUFFER_SIZE, \
+    PARAM_RC_INITIAL_COMPLEX, \
     PARAM_RC_INITIAL_BUFFER_OCCUPANCY
 
 #define ENCODE_PARAM_VIDEO_QUANTIZER_I \
-  {                                           \
-    name:      "quantizer",                       \
-    real_name: "Quantizer",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
-    PARAM_QMIN,                             \
-    PARAM_QMAX,                             \
-    PARAM_MAX_QDIFF,                        \
-    PARAM_FLAG_QSCALE,                      \
-    PARAM_QSCALE,                      \
-    PARAM_QCOMPRESS,                        \
-    PARAM_QBLUR,                            \
-    PARAM_QUANTIZER_NOISE_SHAPING,          \
+  { \
+    .name =      "quantizer", \
+    .real_name = "Quantizer", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
+    PARAM_QMIN, \
+    PARAM_QMAX, \
+    PARAM_MAX_QDIFF, \
+    PARAM_FLAG_QSCALE, \
+    PARAM_QSCALE, \
+    PARAM_QCOMPRESS, \
+    PARAM_QBLUR, \
+    PARAM_QUANTIZER_NOISE_SHAPING, \
     PARAM_FLAG_TRELLIS_QUANT
 
 #define ENCODE_PARAM_VIDEO_QUANTIZER_IP \
-  ENCODE_PARAM_VIDEO_QUANTIZER_I,               \
-  PARAM_I_QUANT_FACTOR,                         \
+  ENCODE_PARAM_VIDEO_QUANTIZER_I, \
+  PARAM_I_QUANT_FACTOR, \
   PARAM_I_QUANT_OFFSET
 
 #define ENCODE_PARAM_VIDEO_QUANTIZER_IPB \
-  ENCODE_PARAM_VIDEO_QUANTIZER_IP,        \
-  PARAM_B_QUANT_FACTOR,                   \
+  ENCODE_PARAM_VIDEO_QUANTIZER_IP, \
+  PARAM_B_QUANT_FACTOR, \
   PARAM_B_QUANT_OFFSET
 
 #define ENCODE_PARAM_VIDEO_FRAMETYPES_IP \
-  {                                           \
-    name:      "frame_types",                       \
-    real_name: "Frame types",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
-  PARAM_GOP_SIZE,                      \
-  PARAM_SCENE_CHANGE_THRESHOLD,       \
-  PARAM_SCENECHANGE_FACTOR,        \
-  PARAM_FLAG_CLOSED_GOP,         \
+  { \
+    .name =      "frame_types", \
+    .real_name = "Frame types", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
+  PARAM_GOP_SIZE, \
+  PARAM_SCENE_CHANGE_THRESHOLD, \
+  PARAM_SCENECHANGE_FACTOR, \
+  PARAM_FLAG_CLOSED_GOP, \
   PARAM_FLAG2_STRICT_GOP
 
 #define ENCODE_PARAM_VIDEO_FRAMETYPES_IPB \
-  ENCODE_PARAM_VIDEO_FRAMETYPES_IP,        \
-  PARAM_MAX_B_FRAMES,                 \
+  ENCODE_PARAM_VIDEO_FRAMETYPES_IP, \
+  PARAM_MAX_B_FRAMES, \
   PARAM_B_FRAME_STRATEGY
 
 #define ENCODE_PARAM_VIDEO_ME \
-  {                                           \
-    name:      "motion_estimation",                       \
-    real_name: "Motion estimation",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
-    PARAM_ME_METHOD,                        \
+  { \
+    .name =      "motion_estimation", \
+    .real_name = "Motion estimation", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
+    PARAM_ME_METHOD, \
     PARAM_ME_CMP,\
     PARAM_ME_CMP_CHROMA,\
     PARAM_ME_RANGE,\
@@ -121,22 +121,22 @@ int ffmpeg_num_video_codecs = -1;
     PARAM_DIA_SIZE
 
 #define ENCODE_PARAM_VIDEO_ME_PRE \
-  {                                           \
-    name:      "motion_estimation",                       \
-    real_name: "ME pre-pass",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
+  { \
+    .name =      "motion_estimation", \
+    .real_name = "ME pre-pass", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
     PARAM_PRE_ME,\
     PARAM_ME_PRE_CMP,\
     PARAM_ME_PRE_CMP_CHROMA,\
     PARAM_PRE_DIA_SIZE
 
-#define ENCODE_PARAM_VIDEO_QPEL                 \
-  {                                           \
-    name:      "qpel_motion_estimation",                       \
-    real_name: "Qpel ME",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
+#define ENCODE_PARAM_VIDEO_QPEL \
+  { \
+    .name =      "qpel_motion_estimation", \
+    .real_name = "Qpel ME", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
     PARAM_FLAG_QPEL, \
     PARAM_ME_SUB_CMP,\
     PARAM_ME_SUB_CMP_CHROMA,\
@@ -144,26 +144,26 @@ int ffmpeg_num_video_codecs = -1;
 
 
 #define ENCODE_PARAM_VIDEO_MASKING \
-  {                                \
-    name:      "masking",                       \
-    real_name: "Masking",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
+  { \
+    .name =      "masking", \
+    .real_name = "Masking", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
     PARAM_LUMI_MASKING, \
     PARAM_DARK_MASKING, \
     PARAM_TEMPORAL_CPLX_MASKING, \
     PARAM_SPATIAL_CPLX_MASKING, \
     PARAM_BORDER_MASKING, \
-    PARAM_P_MASKING,                                       \
+    PARAM_P_MASKING, \
     PARAM_FLAG_NORMALIZE_AQP
 
 #define ENCODE_PARAM_VIDEO_MISC \
-  {                                           \
-    name:      "misc",                       \
-    real_name: "Misc",                     \
-    type:      LQT_PARAMETER_SECTION,         \
-  },                                        \
-    PARAM_STRICT_STANDARD_COMPLIANCE,       \
+  { \
+    .name =      "misc", \
+    .real_name = "Misc", \
+    .type =      LQT_PARAMETER_SECTION, \
+  }, \
+    PARAM_STRICT_STANDARD_COMPLIANCE, \
     PARAM_NOISE_REDUCTION, \
     PARAM_FLAG_GRAY, \
     PARAM_FLAG_BITEXACT
@@ -287,447 +287,451 @@ struct CODECIDMAP {
         int   do_encode; 
   };
 
-struct CODECIDMAP codecidmap_v[] = {
-/* Tables from mplayers config... */
-/* Video */
-        {
-          id: CODEC_ID_MPEG1VIDEO,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "mpg1",
-	  name: "Mpeg 1 Video",
-	  fourccs: {"mpg1", "MPG1", "pim1", "PIM1", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE }
+/* Video; tables from mplayers config... */
 
-        },
-        {
-          id: CODEC_ID_MPEG4,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_mpeg4,
-          decode_parameters: decode_parameters_video,
-	  short_name: "mpg4",
-	  name: "MPEG-4",
-	  fourccs: {"mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s", "M4S2",
-                    "m4s2", "xvid", "XVID", "XviD", "DX50", "dx50", "DIVX",
-                    "MP4V", "3IV2", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 | LQT_FILE_3GP,
-          do_encode: 1
-        },
-	{
-          id: CODEC_ID_MSMPEG4V1,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "msmpeg4v1",
-	  name: "MSMpeg 4v1",
-	  fourccs: {"DIV1", "div1", "MPG4", "mpg4", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_MSMPEG4V2,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "msmpeg4v2",
-	  name: "MSMpeg 4v2",
-	  fourccs: {"DIV2", "div2", "MP42", "mp42", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_MSMPEG4V3,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_msmpeg4v3,
-          decode_parameters: decode_parameters_video,
-	  short_name: "msmpeg4v3",
-	  name: "MSMpeg 4v3 (DivX 3 compatible)",
-	  fourccs: {"DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
-                    "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
-		    "3IVD", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_AVI,
-          do_encode: 1,
-        },
+struct CODECIDMAP codecidmap_v[] =
+  {
+    {
+      .id = CODEC_ID_MPEG1VIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "mpg1",
+      .name = "Mpeg 1 Video",
+      .fourccs = { "mpg1", "MPG1", "pim1", "PIM1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE }
+    },
+    {
+      .id = CODEC_ID_MPEG4,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_mpeg4,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "mpg4",
+      .name = "MPEG-4",
+      .fourccs = { "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s",
+                   "M4S2", "m4s2", "xvid", "XVID", "XviD", "DX50",
+                   "dx50", "DIVX", "MP4V", "3IV2", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
+                             LQT_FILE_3GP,
+      .do_encode = 1
+    },
+    {
+      .id = CODEC_ID_MSMPEG4V1,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "msmpeg4v1",
+      .name = "MSMpeg 4v1",
+      .fourccs = { "DIV1", "div1", "MPG4", "mpg4", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_MSMPEG4V2,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "msmpeg4v2",
+      .name = "MSMpeg 4v2",
+      .fourccs = { "DIV2", "div2", "MP42", "mp42", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_MSMPEG4V3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_msmpeg4v3,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "msmpeg4v3",
+      .name = "MSMpeg 4v3 (DivX 3 compatible)",
+      .fourccs = { "DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
+                   "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
+                   "3IVD", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_AVI,
+      .do_encode = 1,
+    },
 #if 0
-	{
-          id: CODEC_ID_WMV1,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_mpegvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "wmv1",
-	  name: "WMV1",
-	  fourccs: {"WMV1", "wmv1", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
+    {
+      .id = CODEC_ID_WMV1,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_mpegvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "wmv1",
+      .name = "WMV1",
+      .fourccs = { "WMV1", "wmv1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
 #endif
-	{
-          id: CODEC_ID_H263,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_h263,
-          decode_parameters: decode_parameters_video,
-	  short_name: "h263",
-	  name: "H263",
-	  fourccs: {"H263", "h263", "U263", "u263", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1,
-        },
-	{
-          id: CODEC_ID_H264,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "h264",
-	  name: "H264",
-	  fourccs: {"avc1", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_H263P,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_h263p,
-          decode_parameters: decode_parameters_video,
-	  short_name: "h263p",
-	  name: "H263+",
-	  fourccs: {"U263", "u263", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1,
-        },
-	{
-          id: CODEC_ID_H263I,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "i263",
-	  name: "I263",
-	  fourccs: {"I263", "i263", "viv1", "VIV1", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_SVQ1,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "svq1",
-	  name: "Sorenson Video 1",
-	  fourccs: {"SVQ1", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_SVQ3,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "svq3",
-	  name: "Sorenson Video 3",
-	  fourccs: {"SVQ3", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_MJPEG,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_mjpeg,
-          decode_parameters: decode_parameters_video,
-	  short_name: "mjpg",
-	  name: "MJPEG",
-	  fourccs: {"MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_AVI,
-          do_encode: 1,
-        },
-        {
-          id: CODEC_ID_MJPEGB,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_mjpeg,
-	  short_name: "mjpegb",
-	  name: "MotionJPEG-B",
-	  fourccs: {"mjpb", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1,
-        },
+    {
+      .id = CODEC_ID_H263,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_h263,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "h263",
+      .name = "H263",
+      .fourccs = { "H263", "h263", "U263", "u263", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_H264,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "h264",
+      .name = "H264",
+      .fourccs = { "avc1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_H263P,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_h263p,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "h263p",
+      .name = "H263+",
+      .fourccs = { "U263", "u263", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_H263I,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "i263",
+      .name = "I263",
+      .fourccs = { "I263", "i263", "viv1", "VIV1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_SVQ1,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "svq1",
+      .name = "Sorenson Video 1",
+      .fourccs = { "SVQ1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_SVQ3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "svq3",
+      .name = "Sorenson Video 3",
+      .fourccs = { "SVQ3", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_MJPEG,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_mjpeg,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "mjpg",
+      .name = "MJPEG",
+      .fourccs = { "MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_AVI,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_MJPEGB,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_mjpeg,
+      .short_name = "mjpegb",
+      .name = "MotionJPEG-B",
+      .fourccs = { "mjpb", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1,
+    },
 #if LIBAVCODEC_BUILD >= 3346688
-        {
-          id: CODEC_ID_TARGA,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "TGA",
-	  name: "Targa",
-	  fourccs: {"tga ", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
+    {
+      .id = CODEC_ID_TARGA,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "TGA",
+      .name = "Targa",
+      .fourccs = { "tga ", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
 #endif
 #if LIBAVCODEC_BUILD >= 3347456
-        {
-          id: CODEC_ID_TIFF,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "TIFF",
-	  name: "TIFF",
-	  fourccs: {"tiff", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
+    {
+      .id = CODEC_ID_TIFF,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "TIFF",
+      .name = "TIFF",
+      .fourccs = { "tiff", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
 #endif
-        {
-          id: CODEC_ID_8BPS,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "8BPS",
-	  name: "Quicktime Planar RGB (8BPS)",
-	  fourccs: {"8BPS", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_INDEO3,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "indeo",
-	  name: "Intel Indeo 3",
-	  fourccs: {"IV31", "IV32", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_RPZA,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "rpza",
-	  name: "Apple Video",
-	  fourccs: {"rpza", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_SMC,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "smc",
-	  name: "Apple Graphics",
-	  fourccs: {"smc ", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_CINEPAK,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "cinepak",
-	  name: "Cinepak",
-	  fourccs: {"cvid", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_CYUV,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_video,
-	  short_name: "cyuv",
-	  name: "Creative YUV",
-	  fourccs: {"CYUV", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_QTRLE,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "rle",
-	  name: "RLE",
-	  fourccs: {"rle ", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_MSRLE,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-	  short_name: "wrle",
-	  name: "Microsoft RLE",
-	  fourccs: {"WRLE", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-        {
-          id: CODEC_ID_DVVIDEO,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_dvvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "dv_ntsc",
-	  name: "DV (NTSC)",
-	  fourccs: {"dvc ", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1,
-
-        },
-        {
-          id: CODEC_ID_DVVIDEO,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_dvvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "dv_pal",
-	  name: "DV (PAL)",
-	  fourccs: {"dvcp", "dvpp", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1
-        },
-        {
-          id: CODEC_ID_DVVIDEO,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_dvvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "dv50_pal",
-	  name: "DVCPRO50 (PAL)",
-	  fourccs: {"dv5p", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1
-        },
-        {
-          id: CODEC_ID_DVVIDEO,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_dvvideo,
-          decode_parameters: decode_parameters_video,
-	  short_name: "dv50_ntsc",
-	  name: "DVCPRO50 (NTSC)",
-	  fourccs: {"dv5n", (char *)0 },
-          wav_ids: { LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT,
-          do_encode: 1
-        },
+    {
+      .id = CODEC_ID_8BPS,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "8BPS",
+      .name = "Quicktime Planar RGB (8BPS)",
+      .fourccs = { "8BPS", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_INDEO3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "indeo",
+      .name = "Intel Indeo 3",
+      .fourccs = { "IV31", "IV32", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_RPZA,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "rpza",
+      .name = "Apple Video",
+      .fourccs = { "rpza", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_SMC,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "smc",
+      .name = "Apple Graphics",
+      .fourccs = { "smc ", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_CINEPAK,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "cinepak",
+      .name = "Cinepak",
+      .fourccs = { "cvid", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_CYUV,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "cyuv",
+      .name = "Creative YUV",
+      .fourccs = { "CYUV", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_QTRLE,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "rle",
+      .name = "RLE",
+      .fourccs = { "rle ", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_MSRLE,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "wrle",
+      .name = "Microsoft RLE",
+      .fourccs = { "WRLE", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_DVVIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_dvvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dv_ntsc",
+      .name = "DV (NTSC)",
+      .fourccs = { "dvc ", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_DVVIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_dvvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dv_pal",
+      .name = "DV (PAL)",
+      .fourccs = { "dvcp", "dvpp", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1
+    },
+    {
+      .id = CODEC_ID_DVVIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_dvvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dv50_pal",
+      .name = "DVCPRO50 (PAL)",
+      .fourccs = { "dv5p", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1
+    },
+    {
+      .id = CODEC_ID_DVVIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_dvvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dv50_ntsc",
+      .name = "DVCPRO50 (NTSC)",
+	    .fourccs = { "dv5n", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1
+    },
 };
 
-struct CODECIDMAP codecidmap_a[] = {
-         /* Audio */
-        {
-          id: CODEC_ID_MP3,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          decode_parameters: decode_parameters_audio,
-	  short_name: "mp3",
-	  name: "MPEG-1/2 audio layer 1/2/3",
-	  fourccs: {".mp2", ".MP2", "ms\0\x50", "MS\0\x50",".mp3", ".MP3", "ms\0\x55", "MS\0\x55", (char *)0},
-          wav_ids: { 0x50, 0x55, LQT_WAV_ID_NONE },
-        },
-	{
-          id: CODEC_ID_MP2,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_audio,
-          decode_parameters: decode_parameters_audio,
-	  short_name: "mp2",
-	  name: "Mpeg Layer 2 Audio",
-	  fourccs: {".mp2", ".MP2", (char *)0 },
-          wav_ids: { 0x55, LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
-          do_encode: 1,
-        },
-	{
-          id: CODEC_ID_AC3,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_audio,
-          decode_parameters: decode_parameters_audio,
-	  short_name: "ac3",
-	  name: "AC3 Audio",
-	  fourccs: {".ac3", ".AC3", (char *)0},
-          wav_ids: { 0x2000, LQT_WAV_ID_NONE },
-          compatibility_flags: LQT_FILE_AVI,
-          do_encode: 1,
-        },
-        {
-          id: CODEC_ID_QDM2,
-          index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          encode_parameters: encode_parameters_audio,
-          decode_parameters: decode_parameters_audio,
-          short_name: "qdm2",
-          name: "QDM2 Audio",
-          fourccs: {"QDM2", (char *)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-          //          do_encode: 1,
-        },
-#if 1 /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
-	{
-          id: CODEC_ID_ALAC,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          short_name: "alac",
-	  name: "Apple lossless",
-	  fourccs: { "alac", (char*)0},
-          wav_ids: { LQT_WAV_ID_NONE },
-        },
-#endif
-#if 1 /* Sounds ugly */
-	{
-          id: CODEC_ID_ADPCM_MS,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          short_name: "adpcm_ms",
-	  name: "McRowsoft ADPCM",
-	  fourccs: {"ms\0\x02", "MS\0\x02", (char*)0},
-          wav_ids: { 0x02, LQT_WAV_ID_NONE },
-        },
-#endif
-#if 1 /* Sounds ugly */
-        {
-          id: CODEC_ID_ADPCM_IMA_WAV,
-	  index: -1,
-          encoder: NULL,
-          decoder: NULL,
-          short_name: "ima_adpcm_wav",
-	  name: "ADPCM ima WAV",
-	  fourccs: {"ms\0\x11", "MS\0\x11", (char*)0},
-          wav_ids: { 0x11, LQT_WAV_ID_NONE },
-          
-        },
-#endif
-};
+/* Audio */
 
+struct CODECIDMAP codecidmap_a[] =
+  {
+    {
+      .id = CODEC_ID_MP3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_audio,
+      .short_name = "mp3",
+      .name = "MPEG-1/2 audio layer 1/2/3",
+      .fourccs = { ".mp2", ".MP2", "ms\0\x50", "MS\0\x50",".mp3", ".MP3",
+                   "ms\0\x55", "MS\0\x55", (char *)0 },
+      .wav_ids = { 0x50, 0x55, LQT_WAV_ID_NONE },
+    },
+    {
+      .id = CODEC_ID_MP2,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_audio,
+      .decode_parameters = decode_parameters_audio,
+      .short_name = "mp2",
+      .name = "Mpeg Layer 2 Audio",
+      .fourccs = { ".mp2", ".MP2", (char *)0 },
+      .wav_ids = { 0x55, LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_AC3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_audio,
+      .decode_parameters = decode_parameters_audio,
+      .short_name = "ac3",
+      .name = "AC3 Audio",
+      .fourccs = { ".ac3", ".AC3", (char *)0 },
+      .wav_ids = { 0x2000, LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_AVI,
+      .do_encode = 1,
+    },
+    {
+      .id = CODEC_ID_QDM2,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_audio,
+      .decode_parameters = decode_parameters_audio,
+      .short_name = "qdm2",
+      .name = "QDM2 Audio",
+      .fourccs = { "QDM2", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      //.do_encode = 1,
+    },
+#if 1
+    /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
+    {
+      .id = CODEC_ID_ALAC,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "alac",
+      .name = "Apple lossless",
+      .fourccs = { "alac", (char*)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+    },
+#endif
+#if 1
+    /* Sounds ugly */
+    {
+      .id = CODEC_ID_ADPCM_MS,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "adpcm_ms",
+      .name = "McRowsoft ADPCM",
+      .fourccs = { "ms\0\x02", "MS\0\x02", (char*)0 },
+      .wav_ids = { 0x02, LQT_WAV_ID_NONE },
+    },
+#endif
+#if 1
+    /* Sounds ugly */
+    {
+      .id = CODEC_ID_ADPCM_IMA_WAV,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .short_name = "ima_adpcm_wav",
+      .name = "ADPCM ima WAV",
+      .fourccs = { "ms\0\x11", "MS\0\x11", (char*)0 },
+      .wav_ids = { 0x11, LQT_WAV_ID_NONE },
+    }
+#endif
+  };
 
 #define NUMMAPS_A ((int)(sizeof(codecidmap_a)/sizeof(struct CODECIDMAP)))
 #define NUMMAPS_V ((int)(sizeof(codecidmap_v)/sizeof(struct CODECIDMAP)))
@@ -777,17 +781,18 @@ static char ffmpeg_name[256];
 static char ffmpeg_long_name[256];
 static char ffmpeg_description[256];
 
-static lqt_codec_info_static_t codec_info_ffmpeg = {
-	name:        ffmpeg_name,
-	long_name:   ffmpeg_long_name,
-	description: ffmpeg_description,
-	fourccs:     NULL,
-        wav_ids:     NULL,
-	type:        0,
-	direction:   0,
-	encoding_parameters: NULL,
-	decoding_parameters: NULL,
-};
+static lqt_codec_info_static_t codec_info_ffmpeg =
+  {
+    .name =                ffmpeg_name,
+    .long_name =           ffmpeg_long_name,
+    .description =         ffmpeg_description,
+    .fourccs =             NULL,
+    .wav_ids =             NULL,
+    .type =                0,
+    .direction =           0,
+    .encoding_parameters = NULL,
+    .decoding_parameters = NULL
+  };
 
 /* These are called from the plugin loader */
 
@@ -889,7 +894,7 @@ void quicktime_init_video_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
 	int i; \
 	for(i = 0; i < ffmpeg_num_video_codecs; i++) { \
 		if(codecidmap_v[i].index == x) { \
-                     quicktime_init_video_codec_ffmpeg(vtrack,       \
+                     quicktime_init_video_codec_ffmpeg(vtrack, \
 				codecidmap_v[i].encoder, \
 				codecidmap_v[i].decoder); \
 		} \
@@ -944,7 +949,7 @@ void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
 	int i; \
 	for(i = 0; i < ffmpeg_num_audio_codecs; i++) { \
 		if(codecidmap_a[i].index == x) { \
-                      quicktime_init_audio_codec_ffmpeg(atrack,       \
+                      quicktime_init_audio_codec_ffmpeg(atrack, \
 				codecidmap_a[i].encoder, \
 				codecidmap_a[i].decoder); \
 		} \

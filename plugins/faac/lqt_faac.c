@@ -28,33 +28,34 @@ static char * fourccs_faac[]     = { "mp4a", (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_faac[] =
   {
     {
-      name:        "faac_bitrate",
-      real_name:   "Bitrate (kbps, 0 = VBR)",
-      type:        LQT_PARAMETER_INT,
-      val_default: { val_int: 0 }
+      .name =        "faac_bitrate",
+      .real_name =   "Bitrate (kbps, 0 = VBR)",
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 0 }
     },
     {
-      name:        "quality",
-      real_name:   "VBR Quality",
-      type:        LQT_PARAMETER_INT,
-      val_min:     { val_int: 10 },
-      val_max:     { val_int: 500 },
-      val_default: { val_int: 100 },
+      .name =        "quality",
+      .real_name =   "VBR Quality",
+      .type =        LQT_PARAMETER_INT,
+      .val_min =     { .val_int = 10 },
+      .val_max =     { .val_int = 500 },
+      .val_default = { .val_int = 100 },
     },
     { /* End of parameters */ }
   };
 
 static lqt_codec_info_static_t codec_info_faac =
   {
-    name:                "faac",
-    long_name:           "MPEG-2/4 AAC encoder",
-    description:         "MPEG-2/4 AAC encoder (faac based)",
-    fourccs:             fourccs_faac,
-    type:                LQT_CODEC_AUDIO,
-    direction:           LQT_DIRECTION_ENCODE,
-    encoding_parameters: encode_parameters_faac,
-    decoding_parameters: (lqt_parameter_info_static_t*)0,
-    compatibility_flags: LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 | LQT_FILE_M4A | LQT_FILE_3GP,
+    .name =                "faac",
+    .long_name =           "MPEG-2/4 AAC encoder",
+    .description =         "MPEG-2/4 AAC encoder (faac based)",
+    .fourccs =             fourccs_faac,
+    .type =                LQT_CODEC_AUDIO,
+    .direction =           LQT_DIRECTION_ENCODE,
+    .encoding_parameters = encode_parameters_faac,
+    .decoding_parameters = (lqt_parameter_info_static_t*)0,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
+                           LQT_FILE_M4A | LQT_FILE_3GP
   };
 
 /* These are called from the plugin loader */
