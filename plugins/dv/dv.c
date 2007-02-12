@@ -1,7 +1,6 @@
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
-#include <funcprotos.h>
 #include <libdv/dv.h>
-#include <quicktime/quicktime.h>
 #include <pthread.h>
 #include <string.h>
 

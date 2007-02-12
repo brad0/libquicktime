@@ -1,7 +1,6 @@
-#include <quicktime/quicktime.h>
-#include <charset.h>
-
-#include <funcprotos.h>
+#include "lqt_private.h"
+#include "charset.h"
+#include <stdlib.h>
 #include <string.h>
 
 static char * my_strdup(const char * str)

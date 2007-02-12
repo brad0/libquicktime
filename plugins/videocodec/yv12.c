@@ -1,7 +1,6 @@
-#include "funcprotos.h"
+#include "lqt_private.h"
+#include "workarounds.h"
 #include <quicktime/colormodels.h>
-#include <workarounds.h>
-
 #include <stdlib.h>
 #include <string.h>
 

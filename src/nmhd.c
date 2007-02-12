@@ -1,6 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
+#include "lqt_private.h"
 
 int quicktime_nmhd_init(quicktime_nmhd_t *nmhd)
   {

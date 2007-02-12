@@ -18,20 +18,12 @@
 #ifndef LIBMJPEG_H
 #define LIBMJPEG_H
 
-
-/* Motion JPEG library */
-
-
-
 /* use a thread to run compressors / decompressors */
 // #define USE_THREAD 0
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
 
 #include <stdio.h>
 #include <jpeglib.h>

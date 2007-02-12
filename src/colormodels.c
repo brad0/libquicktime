@@ -14,10 +14,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
  * USA
  */
+
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
-#include <string.h>
-#include <funcprotos.h>
 
 int cmodel_is_planar(int colormodel)
 {

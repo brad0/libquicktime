@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
 
 void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,

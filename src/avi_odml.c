@@ -1,7 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
+#include "lqt_private.h"
 
 void quicktime_read_odml(quicktime_t *file, quicktime_atom_t *parent_atom)
 {

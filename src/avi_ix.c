@@ -1,8 +1,6 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-
-
 
 static char* make_tag(int number, char *tag)
 {

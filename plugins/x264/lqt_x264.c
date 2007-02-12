@@ -1,10 +1,6 @@
-#include "config.h"
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
-#include <quicktime/colormodels.h>
-
-/* To get X264_BUILD value */
-#include <x264.h>
+#include <x264.h> // X264_BUILD value
 
 void quicktime_init_codec_x264(quicktime_video_map_t *vtrack);
 

@@ -17,12 +17,8 @@
  
 *****************************************************************/
 
+#include "lqt_private.h"
 #include <string.h>
-
-#include <lqt.h>
-#include <qtprivate.h>
-#include <funcprotos.h>
-#include <charset.h>
 
 #define LOG_DOMAIN "language"
 

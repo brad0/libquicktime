@@ -1,7 +1,7 @@
-#include <string.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <zlib.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define LOG_DOMAIN "moov"
 

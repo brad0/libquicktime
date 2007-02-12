@@ -8,24 +8,16 @@
  * buffers be aligned on a 16 byte boundary (SSE/SSE2 require 64 byte 
  * alignment).
  *
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.7 2006/12/03 01:04:18 gmerlin Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_bufalloc.c,v 1.8 2007/02/12 12:37:09 gmerlin Exp $
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include <stdlib.h>
+#include "lqt_private.h"
 #include <unistd.h>
-#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
-#include <string.h> /* Memset */
-
-#include <quicktime.h>
-#include <lqt_funcprotos.h>
-
 #define LOG_DOMAIN "bufalloc"
-
 
 /*
  * Allocate memory aligned to suit SIMD 

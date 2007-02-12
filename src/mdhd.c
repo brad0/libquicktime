@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 #define MP4_DEFAULT_LANGUAGE 5575 // English
 

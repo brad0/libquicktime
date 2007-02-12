@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 void quicktime_delete_movi(quicktime_t *file, quicktime_movi_t *movi)
 {

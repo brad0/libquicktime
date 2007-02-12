@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 void quicktime_mdat_delete(quicktime_mdat_t *mdat)
 {

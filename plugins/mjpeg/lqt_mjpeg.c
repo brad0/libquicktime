@@ -1,7 +1,5 @@
-#include "config.h"
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
-#include <quicktime/colormodels.h>
 
 void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
 

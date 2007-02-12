@@ -2,19 +2,13 @@
  *   Codec file handling
  */
 
+#include "lqt_private.h"
+#include "lqt_codecinfo_private.h"
+#include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-
-#include <quicktime/lqt.h>
-
-#include <lqt_funcprotos.h>
-
-#include <lqt_codecinfo_private.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #define LOG_DOMAIN "codecfile"
 

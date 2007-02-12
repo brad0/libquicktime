@@ -1,11 +1,10 @@
 /*
- * $Id: clap.c,v 1.4 2006/12/03 01:04:18 gmerlin Exp $
+ * $Id: clap.c,v 1.5 2007/02/12 12:37:09 gmerlin Exp $
  *
  * init, read, write handler for the "clap" (Clean Aperture) atom
 */
 
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
 
 void quicktime_clap_init(quicktime_clap_t *clap)

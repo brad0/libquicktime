@@ -17,7 +17,7 @@
 
 *****************************************************************/
 
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 
 extern void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack);

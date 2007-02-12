@@ -23,15 +23,11 @@
    
 */
 
-#include "config.h"
-#include <ctype.h>
-#include <string.h>
-#include <quicktime/lqt.h>
-#include <quicktime/lqt_codecapi.h>
-#include <quicktime/colormodels.h>
-#include <funcprotos.h>
+#include "lqt_private.h"
 #include "ffmpeg.h"
 #include "params.h"
+#include <quicktime/lqt_codecapi.h>
+#include <stdio.h>
 
 #define LOG_DOMAIN "ffmpeg"
 

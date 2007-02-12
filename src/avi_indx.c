@@ -1,6 +1,6 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h> // memcpy
+#include "lqt_private.h"
+#include <stdlib.h>
+#include <string.h>
 
 void quicktime_delete_indx(quicktime_indx_t *indx)
 {

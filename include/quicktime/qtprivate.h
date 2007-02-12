@@ -1,12 +1,10 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
+#include "charset.h"
+#include <quicktime/lqt_atoms.h>
 #include <inttypes.h>
-#include <stdio.h>
-
-
-#include <lqt_atoms.h>
-#include <charset.h>
+#include <stdio.h> // For quicktime_s->stream
 
 /* ================================= structures */
 

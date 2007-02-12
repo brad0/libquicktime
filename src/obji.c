@@ -1,7 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
-
+#include "lqt_private.h"
 
 int quicktime_obji_init(quicktime_obji_t *obji)
 {

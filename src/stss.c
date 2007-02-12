@@ -1,7 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
+#include "lqt_private.h"
+#include <stdlib.h>
 
 void quicktime_stss_init(quicktime_stss_t *stss)
 {

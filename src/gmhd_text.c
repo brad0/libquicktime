@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 #define LOG_DOMAIN "gmhd_text"
 

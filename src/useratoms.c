@@ -1,7 +1,6 @@
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
 
 uint8_t * quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u,
                                         char * name, uint32_t * len)

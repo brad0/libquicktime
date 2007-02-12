@@ -15,15 +15,12 @@
  * USA
  */
 
-#include <inttypes.h>
-#include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>	/* for memcpy & bzero prototypes */
-#include "funcprotos.h"
-#include "colormodels.h"
-#include "lqt.h"
+#include "lqt_private.h"
 #include "libmjpeg.h"
+#include <quicktime/colormodels.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 
 #define LOG_DOMAIN "libmjpeg"
 

@@ -1,11 +1,12 @@
-#include <funcprotos.h>
-#include <charset.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include "charset.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
-#define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4|LQT_FILE_3GP)
-
 #define LOG_DOMAIN "udta"
+
+#define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4|LQT_FILE_3GP)
 
 // #define DEFAULT_INFO "Made with Libquicktime"
 

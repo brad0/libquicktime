@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 void quicktime_stbl_init(quicktime_stbl_t *stbl)
 {

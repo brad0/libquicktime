@@ -1,9 +1,8 @@
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
+#include "dv.h"
 #include <quicktime/lqt_codecapi.h>
 #include <quicktime/colormodels.h>
-#include "dv.h"
 #include <libdv/dv.h>
-
 
 // static char * fourccs_dv[]  = { QUICKTIME_DV, QUICKTIME_DV_AVID, QUICKTIME_DV_AVID_A, (char*)0 };
 

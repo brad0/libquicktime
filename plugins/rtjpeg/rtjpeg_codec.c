@@ -19,19 +19,18 @@
  *  
  */
 
+#include "lqt_private.h"
+#include "rtjpeg_codec.h"
+#include <quicktime/colormodels.h>
+#include <stdlib.h>
+#include <string.h>
+
 /*
  *  Support for video, which is no multiple of 16 by
  *  Burkhard Plaum
  */
 
 #define BLOCK_SIZE 16
-
-#include "config.h"
-#include <string.h>
-#include <quicktime/colormodels.h>
-#include <funcprotos.h>
-#include "rtjpeg_codec.h"
-#include <lqt.h>
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {

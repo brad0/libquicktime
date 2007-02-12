@@ -1,15 +1,5 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
-#include <lqt_codecinfo_private.h>
-
-#include <lqt_private.h>
-#include <funcprotos.h>
-#include <lqt_fseek.h>
-#include <sys/stat.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 
 #define LOG_DOMAIN "qtvr"
 

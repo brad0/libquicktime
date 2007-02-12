@@ -1,7 +1,7 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#define LOG_DOMAIN "stco"
+#include "lqt_private.h"
+#include <stdlib.h>
 
+#define LOG_DOMAIN "stco"
 
 void quicktime_stco_init(quicktime_stco_t *stco)
 {

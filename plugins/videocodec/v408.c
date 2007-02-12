@@ -1,11 +1,8 @@
-#include "funcprotos.h"
+#include "lqt_private.h"
+#include "workarounds.h"
 #include "videocodec.h"
 #include <quicktime/colormodels.h>
-#include <quicktime/quicktime.h>
-#include <workarounds.h>
-
 #include <stdlib.h>
-#include <string.h>
 
 static uint8_t decode_alpha_v408[256] =
 {

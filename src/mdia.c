@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 void quicktime_mdia_init(quicktime_mdia_t *mdia)
 {

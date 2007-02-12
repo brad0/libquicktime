@@ -18,11 +18,11 @@
  */
 
 
-#include "config.h"
-#include "funcprotos.h"
-#include <quicktime/colormodels.h>
+#include "lqt_private.h"
 #include "ffmpeg.h"
-
+#include <quicktime/colormodels.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define LOG_DOMAIN "ffmpeg_video"

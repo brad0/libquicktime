@@ -1,5 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
 
 void quicktime_GUID_dump(quicktime_GUID_t * g)

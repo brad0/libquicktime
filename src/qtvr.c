@@ -1,7 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
-
 
 int quicktime_qtvr_init(quicktime_qtvr_t *qtvr)
 {

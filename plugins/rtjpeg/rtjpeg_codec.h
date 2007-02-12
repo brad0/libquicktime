@@ -27,7 +27,7 @@
 #define QUICKTIME_RTJPEG_H
 
 #include "RTjpeg.h"
-#include <quicktime/quicktime.h>
+#include <quicktime/qtprivate.h>
 
 typedef struct
 {

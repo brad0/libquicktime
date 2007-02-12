@@ -22,12 +22,8 @@
 #define HAVE_YUV_8_TO_YUVJ
 #define HAVE_YUVJ_TO_YUV_8
 
-#include <inttypes.h>
-#include <cmodel_permutation.h>
-#include <lqt.h>
-#include <lqt_funcprotos.h>
-
-
+#include "lqt_private.h"
+#include "cmodel_permutation.h"
 
 #define TRANSFER_FRAME_DEFAULT(output, \
 	input, \

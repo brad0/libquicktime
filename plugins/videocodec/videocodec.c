@@ -1,5 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include "videocodec.h"
 
 /* Common functions used by most uncompressed video codecs */
 

@@ -1,7 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
-
 
 void quicktime_hdlr_init(quicktime_hdlr_t *hdlr)
 {

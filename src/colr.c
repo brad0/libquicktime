@@ -1,11 +1,10 @@
 /*
- * $Id: colr.c,v 1.5 2006/12/03 01:04:18 gmerlin Exp $
+ * $Id: colr.c,v 1.6 2007/02/12 12:37:09 gmerlin Exp $
  *
  * init, read, write handler for the "colr" (Clean Aperture) atom
 */
 
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <string.h>
 
 void quicktime_colr_init(quicktime_colr_t *colr)

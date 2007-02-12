@@ -8,7 +8,7 @@
  *
  *
  * IDENTIFICATION
- * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_fseeko.c,v 1.2 2004/01/21 04:32:30 sms00 Exp $
+ * $Header: /cvsroot/libquicktime/libquicktime/src/lqt_fseeko.c,v 1.3 2007/02/12 12:37:09 gmerlin Exp $
  *
  *-------------------------------------------------------------------------
  */
@@ -82,4 +82,5 @@ lqt_ftello(FILE *stream)
 		return -1;
 	return floc;
 }
+
 #endif

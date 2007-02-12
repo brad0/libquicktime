@@ -1,12 +1,10 @@
-#include <funcprotos.h>
-#include <lqt_fseek.h>
-#include <quicktime/quicktime.h>
-
-#include <stdio.h>
+#include "lqt_private.h"
+#include "lqt_fseek.h"
+/*#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <inttypes.h>
+#include <inttypes.h>*/
 
 #define WIDTH 720
 #define HEIGHT 480

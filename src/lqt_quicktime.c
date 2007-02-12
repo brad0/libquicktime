@@ -1,18 +1,10 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "lqt_private.h"
+#include "lqt_fseek.h"
 #include <quicktime/colormodels.h>
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
-#define LQT_LIBQUICKTIME
-#include <quicktime/lqt_codecapi.h>
-#include <lqt_codecinfo_private.h>
-
-#include <funcprotos.h>
-#include <lqt_fseek.h>
-#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 
 #define LOG_DOMAIN "core"

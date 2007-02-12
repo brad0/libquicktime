@@ -1,7 +1,6 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-
 
 int quicktime_tref_init(quicktime_tref_t *tref)
 {

@@ -1,7 +1,6 @@
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-
-#include <quicktime/quicktime.h>
-#include <funcprotos.h>
 
 #define MK_FOURCC(a, b, c, d) \
   (((uint32_t)a << 24) |      \

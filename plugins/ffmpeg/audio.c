@@ -18,18 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA    
  */
 
-#include <string.h>
-#include "config.h"
-
-#include "funcprotos.h"
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include "ffmpeg.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
-#include "funcprotos.h"
-#include <quicktime/colormodels.h>
-
-#include "ffmpeg.h"
+#include <stdlib.h>
+#include <string.h>
 
 #define LOG_DOMAIN "ffmpeg_audio"
 

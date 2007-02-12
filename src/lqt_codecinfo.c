@@ -1,31 +1,15 @@
-#include <string.h>
-#include <limits.h>
-#include <dlfcn.h>
-
-#include <pthread.h>
-
-#include <sys/types.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <quicktime/lqt.h>
-
-#include <lqt_funcprotos.h>
-
-#include <lqt_codecinfo_private.h>
-
-/*
- *  Define LQT_LIBQUICKTIME to prevent compiling the
- *  get_codec_api_version() function
- */
-
+#include "lqt_private.h"
+#include "lqt_codecinfo_private.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <sys/stat.h>
+#include <pthread.h>
+#include <dlfcn.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 #define LOG_DOMAIN "codecinfo"
 

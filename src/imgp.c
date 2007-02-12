@@ -1,7 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
-
+#include "lqt_private.h"
 
 int quicktime_imgp_init(quicktime_imgp_t *imgp)
 {

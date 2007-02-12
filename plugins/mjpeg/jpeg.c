@@ -1,19 +1,14 @@
-#include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <quicktime/colormodels.h>
-#include "funcprotos.h"
-#include <string.h>
-#include <quicktime.h>
-#include <lqt.h>
-
+#include "lqt_private.h"
 #include "libmjpeg.h"
+#include <quicktime/colormodels.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define LOG_DOMAIN "mjpeg"
 
 // Jpeg types
 #define JPEG_PROGRESSIVE 0
 #define JPEG_MJPA 1
-
-#define LOG_DOMAIN "mjpeg"
 
 /* MJPB isn't supported anyway */
 // #define JPEG_MJPB 2 

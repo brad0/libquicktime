@@ -17,13 +17,11 @@
 
 *****************************************************************/
 
-#include "funcprotos.h"
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
-#include <string.h>
 #include <faad.h>
+#include <string.h>
 
 #define LOG_DOMAIN "faad2"
 

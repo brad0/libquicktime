@@ -1,9 +1,7 @@
-#include "funcprotos.h"
-
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
-
 #include <png.h>
+#include <stdlib.h>
 
 typedef struct
 {

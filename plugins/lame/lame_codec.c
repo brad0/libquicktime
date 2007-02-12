@@ -1,9 +1,7 @@
-#include "funcprotos.h"
-#include <stdio.h>
+#include "lqt_private.h"
+#include <lame/lame.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lame/lame.h>
-#include <quicktime/quicktime.h>
 
 #define LOG_DOMAIN "lame"
 

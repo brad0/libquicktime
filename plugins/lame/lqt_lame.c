@@ -1,5 +1,4 @@
-#include "config.h"
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 
 extern void quicktime_init_codec_lame(quicktime_audio_map_t *atrack);

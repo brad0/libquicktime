@@ -1,8 +1,5 @@
-#include <quicktime/quicktime.h>
-#include <funcprotos.h>
-
-
-
+#include "lqt_private.h"
+#include <stdlib.h>
 
 int quicktime_trak_init(quicktime_trak_t *trak)
 {

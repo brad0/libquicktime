@@ -1,7 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
-
+#include "lqt_private.h"
 
 int quicktime_pdat_init(quicktime_pdat_t *pdat)
 {

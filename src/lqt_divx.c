@@ -1,4 +1,4 @@
-#include <inttypes.h>
+#include "lqt_private.h"
 
 // Determine of the compressed frame is a keyframe for direct copy
 int quicktime_divx_is_key(unsigned char *data, long size)
@@ -88,7 +88,7 @@ int quicktime_divx_write_vol(unsigned char *data_start,
 	int vol_width, 
 	int vol_height, 
 	int time_increment_resolution, 
-	float frame_rate)
+	double frame_rate)
 {
 	int written = 0;
 	int bits, fixed_vop_time_increment;

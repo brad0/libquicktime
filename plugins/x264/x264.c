@@ -1,12 +1,6 @@
-#include <string.h>
-
-#include <funcprotos.h>
-
-#include <quicktime/lqt.h>
-#include <quicktime/colormodels.h>
-
-
+#include "lqt_private.h"
 #include <x264.h>
+#include <string.h>
 
 #define LOG_DOMAIN "x264"
 

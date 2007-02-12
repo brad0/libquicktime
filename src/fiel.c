@@ -1,7 +1,5 @@
+#include "lqt_private.h"
 #include <string.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
 
 void quicktime_fiel_init(quicktime_fiel_t *fiel)
 {

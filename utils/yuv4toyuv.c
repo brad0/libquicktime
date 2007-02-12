@@ -1,5 +1,6 @@
-#include <quicktime/lqt.h>
-#include <lqt_funcprotos.h>
+#include "lqt_private.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 int usage(void)
 {

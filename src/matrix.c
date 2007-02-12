@@ -1,8 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
-
+#include "lqt_private.h"
 
 void quicktime_matrix_init(quicktime_matrix_t *matrix)
 {

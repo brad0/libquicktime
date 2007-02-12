@@ -1,9 +1,8 @@
-#include "funcprotos.h"
+#include "lqt_private.h"
 #include "ima4.h"
-#include <quicktime/quicktime.h>
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG_DOMAIN "ima4"

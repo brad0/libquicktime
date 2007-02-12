@@ -1,7 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 #include <stdlib.h>
-#include <string.h>
 
 static const char * get_video_profile_name(uint8_t video_pl)
   {

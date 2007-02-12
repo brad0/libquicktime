@@ -1,18 +1,7 @@
-#include <quicktime/lqt.h>
-#include <qtprivate.h>
-#include <lqt_funcprotos.h>
-
-#include <quicktime/colormodels.h>
+#include "lqt_private.h"
+#include "quicktime/colormodels.h"
+#include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h>
-
-#ifndef NDEBUG
-#include <stdio.h>
-#endif
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #define LOG_DOMAIN "color"
 

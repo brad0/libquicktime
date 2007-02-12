@@ -7,7 +7,7 @@
  *
  * NOTE: Only for the X86 cpu family.
 */
-#include <stdio.h>
+
 #include <sys/time.h>
 
 #ifdef __MINGW32__
@@ -29,6 +29,7 @@ typedef long long int64_t;
 #include <inttypes.h>
 #endif
 
+#include <stdio.h>
 
 typedef struct cpuid_regs {
 	unsigned int eax;

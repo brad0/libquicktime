@@ -21,15 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifdef HAVE_STDINT_H
-#ifndef _STDINT_H
-#include <stdint.h>
-#endif
-#else
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif
-#endif
 
 #ifdef __RTJPEG_INTERNAL__
 

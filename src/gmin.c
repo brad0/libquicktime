@@ -1,8 +1,4 @@
-
-
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
+#include "lqt_private.h"
 
 void quicktime_gmin_init(quicktime_gmin_t *gmin)
 {

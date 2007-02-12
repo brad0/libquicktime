@@ -1,7 +1,5 @@
+#include "lqt_private.h"
 #include <ctype.h>
-#include <stdio.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
 
 static int read_type(uint8_t *data, uint8_t *type)
 {

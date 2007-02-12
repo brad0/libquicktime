@@ -1,5 +1,4 @@
-#include <lqt_funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
 
 /*
   uint32_t dwMicroSecPerFrame;

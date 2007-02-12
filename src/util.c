@@ -1,20 +1,13 @@
-#include "config.h"
-
-#include <fcntl.h>
-#include <math.h>
-#include <stdio.h>
-#include <sys/ioctl.h>
+#include "lqt_private.h"
+#include "lqt_fseek.h"
+#include "workarounds.h"
 #include <sys/stat.h>
-#include <time.h>
 #include <unistd.h>
-
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <lqt_fseek.h>
-#include <workarounds.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <errno.h>
-
+#include <time.h>
+#include <math.h>
 
 #ifndef HAVE_LRINT
 #define lrint(x) ((long int)(x))

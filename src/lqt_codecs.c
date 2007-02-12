@@ -1,15 +1,10 @@
-#include <dlfcn.h>
-#include <quicktime/colormodels.h>
-#include <quicktime/lqt.h>
-#include <funcprotos.h>
-#include <lqt_codecinfo_private.h>
+#include "lqt_private.h"
+#include "quicktime/colormodels.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
+#include <dlfcn.h>
+#include <stdlib.h>
 #include <string.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #define LOG_DOMAIN "codecs"
 

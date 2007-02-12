@@ -1,7 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
+#include "lqt_private.h"
+#include <stdlib.h>
 
 void quicktime_stsz_init(quicktime_stsz_t *stsz)
 {

@@ -1,8 +1,6 @@
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
 
 void quicktime_stts_init(quicktime_stts_t *stts)
   {

@@ -5,9 +5,8 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <inttypes.h>
+#include <stddef.h>
 
 /* Some public enums needed by most subsequent headers */
 
@@ -265,13 +264,6 @@ typedef enum
     LQT_SAMPLE_INT32,     /*!< int32_t */
     LQT_SAMPLE_FLOAT      /*!< Float (machine native) */
   } lqt_sample_format_t;
-  
-
-
-  
-// #include "qtprivate.h"
-
-
   
 /** \ingroup general
     \brief Quicktime handle

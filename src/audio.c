@@ -1,5 +1,4 @@
-#include <quicktime/lqt.h>
-#include <funcprotos.h>
+#include "lqt_private.h"
 
 #define LOG_DOMAIN "audio"
 

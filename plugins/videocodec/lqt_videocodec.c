@@ -1,8 +1,5 @@
-#include "config.h"
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
-
-#include <quicktime/colormodels.h>
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack);
 void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack);

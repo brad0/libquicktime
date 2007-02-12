@@ -1,7 +1,7 @@
-#include <string.h>
-#include <ffmpeg/avcodec.h>
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include "params.h"
+#include <ffmpeg/avcodec.h>
+#include <string.h>
 
 typedef struct
   {

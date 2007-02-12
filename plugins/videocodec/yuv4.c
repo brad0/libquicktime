@@ -1,6 +1,6 @@
-#include "funcprotos.h"
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
-#include "quicktime.h"
+#include <stdlib.h>
 
 /* U V values are signed but Y R G B values are unsigned! */
 /*

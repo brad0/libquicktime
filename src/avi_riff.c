@@ -1,5 +1,5 @@
-#include <quicktime/quicktime.h>
-#include <funcprotos.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG_DOMAIN "avi_riff"

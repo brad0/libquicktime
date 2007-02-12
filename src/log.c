@@ -1,12 +1,7 @@
-#include <config.h>
-
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
-
-#include <lqt.h>
-#include <qtprivate.h>
-#include <lqt_funcprotos.h>
-
 
 static struct
   {

@@ -3,8 +3,8 @@
  * the codecs for the webpage
  */
 
+#include "lqt_private.h"
 #include <stdio.h>
-#include <quicktime/lqt.h>
 
 static char * header = "<h1>Codecs</h1>\n\
 Note that this list might not reflect the last stable release.\n\

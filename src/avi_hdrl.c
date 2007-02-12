@@ -1,7 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
-
+#include "lqt_private.h"
 
 void quicktime_delete_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 {

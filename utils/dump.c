@@ -1,10 +1,6 @@
-#include <quicktime/quicktime.h>
-
-
-
-
-
-
+#include "lqt_private.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {

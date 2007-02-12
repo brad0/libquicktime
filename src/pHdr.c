@@ -1,6 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-
+#include "lqt_private.h"
 
 int quicktime_pHdr_init(quicktime_pHdr_t *pHdr)
 {

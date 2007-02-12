@@ -1,13 +1,9 @@
+#include "lqt_private.h"
+#include "charset.h"
 #include <iconv.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <stdio.h>
 #include <string.h>
-
-
-#include <quicktime.h>
-#include <funcprotos.h>
-#include <charset.h>
+#include <errno.h>
 
 #define LOG_DOMAIN "charset"
 

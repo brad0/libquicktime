@@ -25,10 +25,11 @@
 
 /* Limitation: Handles only 1 audio- and one video stream per file */
 
-#include <string.h>
-
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 /* Supported colormodels */
 

@@ -5,18 +5,23 @@
  *
  */
 
-// #define USE_GL
+#include "lqt_private.h"
+#include <quicktime/colormodels.h>
 
-#include "config.h"
+#include <X11/Xlib.h>
+#include <X11/Intrinsic.h>
+#include <X11/StringDefs.h>
+#include <X11/Shell.h>
+#include <X11/Xaw/Simple.h>
+#include <X11/extensions/XShm.h>
+#include <X11/extensions/Xv.h>
+#include <X11/extensions/Xvlib.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <strings.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <time.h>
-#include <math.h>
+#ifdef HAVE_GL
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -34,24 +39,13 @@
 #include <alsa/asoundlib.h>
 #endif
 
-#include <X11/Xlib.h>
-#include <X11/Intrinsic.h>
-#include <X11/StringDefs.h>
-#include <X11/Shell.h>
-#include <X11/Xaw/Simple.h>
-#include <X11/extensions/XShm.h>
-#include <X11/extensions/Xv.h>
-#include <X11/extensions/Xvlib.h>
-
-#ifdef HAVE_GL
-
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
-#endif
-
-#include <quicktime/lqt.h>
-#include <quicktime/colormodels.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <time.h>
+#include <math.h>
+#include <errno.h>
 
 /* File handle */
 

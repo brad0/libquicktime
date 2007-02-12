@@ -1,7 +1,7 @@
+#include "lqt_private.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
 
 /* Dump all text strings from a quicktime file */
 

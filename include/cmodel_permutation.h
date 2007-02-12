@@ -15,9 +15,8 @@
  * USA
  */
 
-#include <colorspace_tables.h>
-#include <colorspace_macros.h>
-
+#include "colorspace_tables.h"
+#include "colorspace_macros.h"
 #include <quicktime/colormodels.h>
 #include <inttypes.h>
 

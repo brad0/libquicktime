@@ -22,18 +22,15 @@
  */
 
 
-#include "config.h"
-#include <stdio.h>
+#include "lqt_private.h"
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 #define __RTJPEG_INTERNAL__
 #include "RTjpeg.h"
-
 #ifdef MMX
 #include "mmx.h"
 #endif
 
-#include <lqt_funcprotos.h> // lqt_log
 #define LOG_DOMAIN "rtjpeg"
 
 static const unsigned char RTjpeg_ZZ[64]={

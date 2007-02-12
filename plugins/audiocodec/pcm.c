@@ -1,18 +1,12 @@
-#include <config.h>
-#include "funcprotos.h"
-#include <quicktime/quicktime.h>
-#define LQT_LIBQUICKTIME
-#include <quicktime/lqt_codecapi.h>
-
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-
-
+#include "lqt_private.h"
 #include "pcm.h"
-
 #include "ulaw_tables.h"
 #include "alaw_tables.h"
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 #define LOG_DOMAIN "pcm"
 

@@ -1,7 +1,6 @@
-#include <quicktime/lqt.h>
-#include <stdio.h>
+#include "lqt_private.h"
 #include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 #include <math.h>
 
 int main(int argc, char** argv)

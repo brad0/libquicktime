@@ -1,7 +1,6 @@
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
-#include <lqt.h>
-#include <quicktime/qtprivate.h>
-#include <lqt_funcprotos.h>
 
 /* Multichannel support for libquicktime */
 

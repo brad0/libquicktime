@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 
 int quicktime_ctab_init(quicktime_ctab_t *ctab)
 {

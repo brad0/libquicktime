@@ -1,5 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
 
 void quicktime_dref_table_init(quicktime_dref_table_t *table)

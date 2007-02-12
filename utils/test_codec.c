@@ -3,9 +3,9 @@
  * installed libquicktime codecs
  ***************************************************/
 
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
-#include <lqt_codecinfo_private.h>
+#include "lqt_private.h"
+#include "lqt_codecinfo_private.h"
+#include <stdio.h>
 
 int main()
   {

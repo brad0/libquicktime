@@ -1,5 +1,4 @@
-#include "funcprotos.h"
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 
 /* Encoding parameters */

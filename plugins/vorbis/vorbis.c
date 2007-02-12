@@ -1,13 +1,10 @@
-#include "funcprotos.h"
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include "qtvorbis.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
-#include "qtvorbis.h"
 #include <vorbis/vorbisenc.h>
-
+#include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #define LOG_DOMAIN "vorbis"
 

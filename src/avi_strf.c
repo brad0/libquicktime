@@ -1,5 +1,5 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
+#include "lqt_private.h"
+#include <stdlib.h>
 #include <string.h>
 
 void quicktime_read_strf_audio(quicktime_t *file,

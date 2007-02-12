@@ -1,12 +1,10 @@
 /*
- * $Id: pasp.c,v 1.6 2006/12/03 01:04:18 gmerlin Exp $
+ * $Id: pasp.c,v 1.7 2007/02/12 12:37:10 gmerlin Exp $
  *
  * init, read, write handler for the "pasp" (Pixel Aspect) atom
 */
 
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
+#include "lqt_private.h"
 
 void quicktime_pasp_init(quicktime_pasp_t *pasp)
 {

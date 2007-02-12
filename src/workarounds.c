@@ -1,12 +1,5 @@
-
-#define EX_INLINE
-
-/* #include "libdv/vlc.h" */
-/* #include "libdv/mmx.h" */
-
-#include <quicktime/quicktime.h>
-#include <quicktime/qtprivate.h>
-#include <workarounds.h>
+#include "lqt_private.h"
+#include "workarounds.h"
 
 int64_t quicktime_add(int64_t a, int64_t b)
 {

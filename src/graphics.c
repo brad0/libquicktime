@@ -1,8 +1,6 @@
-#include <graphics.h>
-
-#include <string.h>
+#include "lqt_private.h"
+#include "graphics.h"
 #include <stdlib.h>
-#include <quicktime/colormodels.h>
 
 /* Graphics acceleration routines */
 

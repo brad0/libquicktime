@@ -1,6 +1,5 @@
+#include "lqt_private.h"
 #include <string.h>
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
 
 void quicktime_gama_init(quicktime_gama_t *gama)
 {

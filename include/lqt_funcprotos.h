@@ -1,5 +1,5 @@
-#include <lqt.h>
-#include <qtprivate.h>
+#include <quicktime/lqt.h>
+#include <quicktime/qtprivate.h>
 
 /* Some macros */
 

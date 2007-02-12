@@ -1,7 +1,6 @@
-#include <funcprotos.h>
-#include <charset.h>
-#include <quicktime/quicktime.h>
-#include <quicktime/qtprivate.h>
+#include "lqt_private.h"
+#include "charset.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG_DOMAIN "texttrack"

@@ -1,6 +1,6 @@
-#include <quicktime/lqt.h>
-#include <quicktime/lqt_codecapi.h>
+#include "lqt_private.h"
 #include "qtvorbis.h"
+#include <quicktime/lqt_codecapi.h>
 
 static char * fourccs_vorbis[]     = { QUICKTIME_VORBIS, "OggV", (char*)0 };
 static char * fourccs_vorbis_qt[]  = { "OggV", QUICKTIME_VORBIS, (char*)0 };

@@ -1,6 +1,4 @@
-#include <funcprotos.h>
-#include <quicktime/quicktime.h>
-#include <string.h>
+#include "lqt_private.h"
 
 void quicktime_read_enda(quicktime_t *file, quicktime_enda_t *enda,
                          quicktime_atom_t *enda_atom)

@@ -1,10 +1,8 @@
-#include <locale.h>
-#include <config.h>
-#include <quicktime/lqt.h>
-
-#include <gtk/gtk.h>
-
+#include "lqt_private.h"
 #include "lqt_gtk.h"
+#include <gtk/gtk.h>
+#include <stdlib.h>
+#include <locale.h>
 
 typedef struct
   {

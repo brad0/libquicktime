@@ -1,8 +1,8 @@
 /* 	Qtinfo by Elliot Lee <sopwith@redhat.com> */
 
-#include <quicktime/quicktime.h>
-#include <quicktime/lqt.h>
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
+#include <stdio.h>
 
 static void file_info(char *filename);
 

@@ -1,7 +1,6 @@
-#include "funcprotos.h"
+#include "lqt_private.h"
 #include <quicktime/colormodels.h>
-#include <quicktime/quicktime.h>
-#include <graphics.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG_DOMAIN "rawaudio"

@@ -1,10 +1,9 @@
-#define GTK_OPTION_MENU(x) x
-
-#include <quicktime/lqt.h>
-#include <gtk/gtk.h>
+#include "lqt_private.h"
+#include "lqt_gtk.h"
+#include <stdlib.h>
 #include <string.h>
 
-#include "lqt_gtk.h"
+#define GTK_OPTION_MENU(x) x
 
 enum 
 {

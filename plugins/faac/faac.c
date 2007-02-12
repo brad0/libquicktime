@@ -17,12 +17,9 @@
 
 *****************************************************************/
 
-#include <quicktime/lqt.h>
-#include <lqt_funcprotos.h>
-
+#include "lqt_private.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
-
 #include <faac.h>
 #include <string.h>
 
