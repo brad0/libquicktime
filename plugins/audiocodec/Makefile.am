@@ -10,8 +10,6 @@ lqt_audiocodec_la_LDFLAGS = -avoid-version -module
 lqt_audiocodec_la_LIBADD = @MODULE_LIBADD@
 
 noinst_HEADERS = \
-ima4.h \
-pcm.h \
 alaw_tables.h \
 ulaw_tables.h
 

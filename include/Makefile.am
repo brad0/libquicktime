@@ -5,7 +5,6 @@ charset.h \
 cmodel_permutation.h \
 colorspace_tables.h \
 colorspace_macros.h \
-graphics.h \
 lqt_codecfile.h \
 lqt_codecinfo.h \
 lqt_codecinfo_private.h \

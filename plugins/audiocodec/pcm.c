@@ -1,5 +1,4 @@
 #include "lqt_private.h"
-#include "pcm.h"
 #include "ulaw_tables.h"
 #include "alaw_tables.h"
 #define LQT_LIBQUICKTIME

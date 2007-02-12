@@ -1,5 +1,4 @@
 #include "lqt_private.h"
-#include "ima4.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
 #include <stdlib.h>
