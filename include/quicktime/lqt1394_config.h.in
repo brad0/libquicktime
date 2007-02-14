@@ -1,2 +1,0 @@
-/* tell libdv.c to support firewire */
-#undef HAVE_FIREWIRE

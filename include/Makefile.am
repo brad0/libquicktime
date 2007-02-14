@@ -10,6 +10,5 @@ lqt_codecinfo.h \
 lqt_codecinfo_private.h \
 lqt_fseek.h \
 lqt_funcprotos.h \
-lqt_loader.h \
 lqt_private.h \
 workarounds.h
