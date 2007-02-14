@@ -1,3 +1,27 @@
+/*******************************************************************************
+ colorspace_macros.h
+
+ libquicktime - A library for reading and writing quicktime/avi/mp4 files.
+ http://libquicktime.sourceforge.net
+
+ Copyright (C) 2002 Heroine Virtual Ltd.
+ Copyright (C) 2002-2007 Members of the libquicktime project.
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option)
+ any later version.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License along
+ with this library; if not, write to the Free Software Foundation, Inc., 51
+ Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*******************************************************************************/
+
 #define RECLIP_8(color) (uint8_t)((color>0xFF)?0xff:((color<0)?0:color))
 #define RECLIP_16(color) (uint16_t)((color>0xFFFF)?0xFFFF:((color<0)?0:color))
 #define RECLIP_FLOAT(color) ((color>1.0)?1.0:((color<0.0)?0.0:color))

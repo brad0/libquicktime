@@ -1,16 +1,43 @@
-libquicktime (a modified version of Heroine Virtual's Quicktime for Linux)
+libquicktime - A library for reading and writing quicktime/avi/mp4 files.
+http://libquicktime.sourceforge.net
 
-Original Author: Heroine Virtual (Motion picture solutions for Linux)
-                    <broadcast@earthling.net>
-Original Author's Home Page: heroinewarrior.com/quicktime
+Copyright (C) 2002 Heroine Virtual Ltd.
+Copyright (C) 2002-2007 Members of the libquicktime project.
 
-Main Developers for libquicktime project:
-	Arthur Peters <amp@singingwizard.org>
-	Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
-	Gerd Knorr <kraxel@bytesex.org>
-	and others
+Original quicktime4linux developer:
 
-Homepage: http://libquicktime.sourceforge.net/
+  Heroine Virtual (Motion picture solutions for Linux)
+  <broadcast@earthling.net>
+  http://heroinewarrior.com/quicktime
+
+libquicktime developers:
+
+  Arthur Peters <amp@singingwizard.org>
+  Burkhard Plaum <plaum@ipf.uni-stuttgart.de>
+  Gerd Knorr <kraxel@bytesex.org>
+  Justin Schoeman 1998 <justin@suntiger.ee.up.ac.za>
+  Elliot Lee <sopwith@redhat.com>
+  and others
+
+RTjpeg:
+
+  Copyright (C) Justin Schoeman 1998 <justin@suntiger.ee.up.ac.za>
+
+  With modifications by:
+
+  Copyright (C) 1998, 1999 by Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
+  Copyright (C) 1999 by Wim Taymans <wim.taymans@tvd.be>
+
+Portions from FFmpeg (plugins/rtjpeg/mmx.h):
+
+  Copyright (C) 1997-2001 H. Dietz and R. Fisher
+
+Portions from libsndfile (plugins/audiocodec/alaw_tables.h, ulaw_tables.h):
+
+  Copyright (C) 2002-2004 Erik de Castro Lopo
+
+------------------------------------------------------------------------
+
 Requires: 
 	libpthread
 	glibc >= 2.1
@@ -21,6 +48,8 @@ If you want to have all availiable codec you will need:
 	libpng
 	the OggVorbis libraries
 	libjpeg
+
+
 
 ------------------------------------------------------------------------
 

@@ -12,5 +12,4 @@ lqt_fseek.h \
 lqt_funcprotos.h \
 lqt_loader.h \
 lqt_private.h \
-mmx.h \
 workarounds.h
