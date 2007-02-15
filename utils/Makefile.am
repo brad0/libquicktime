@@ -64,6 +64,6 @@ INCLUDES = -I$(top_srcdir)/include \
 	    -I$(top_builddir)/include/quicktime \
 	    @X_CFLAGS@ @ALSA_CFLAGS@
 
-EXTRA_DIST=lqtplay.1 
+EXTRA_DIST=lqtplay.1 cpuinfo.c
 
 #CFLAGS += -g3 -Werror
