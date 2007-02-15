@@ -24,6 +24,7 @@
 
 #include "lqt_private.h"
 #include <x264.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define LOG_DOMAIN "x264"
