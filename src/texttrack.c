@@ -36,18 +36,30 @@ void lqt_init_text_map(quicktime_t * file,
                        int encode)
   {
   const char * charset;
+  const char * charset_fallback;
   map->track = trak;
   map->current_chunk = 1;
   if(!encode)
     {
-    charset = lqt_get_charset(trak->mdia.mdhd.language, file->file_type);
-    if(!charset)
+    charset          = lqt_get_charset(trak->mdia.mdhd.language, file->file_type);
+    charset_fallback = lqt_get_charset_fallback(trak->mdia.mdhd.language, file->file_type);
+    
+    if(!charset && !charset_fallback)
       {
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
               "Cannot determine character set of text track, will copy the strings verbatim");
+      return;
       }
     else
-      map->cnv = lqt_charset_converter_create(file, charset, "UTF-8");
+      {
+      if(charset)
+        map->cnv = lqt_charset_converter_create(file, charset, "UTF-8");
+      if(!map->cnv && charset_fallback)
+        map->cnv = lqt_charset_converter_create(file, charset_fallback, "UTF-8");
+      }
+    if(!map->cnv)
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Unsupported charset in text track, will copy the strings verbatim");
     }
   }
 
@@ -111,11 +123,23 @@ int lqt_read_text(quicktime_t * file, int track, char ** text, int * text_alloc,
       ttrack->text_buffer = realloc(ttrack->text_buffer, ttrack->text_buffer_alloc);
       }
     quicktime_read_data(file, (uint8_t*)ttrack->text_buffer, string_length);
-  
-    /* Convert character set */
-    lqt_charset_convert_realloc(ttrack->cnv,
-                                ttrack->text_buffer, string_length,
-                                text, text_alloc, (int*)0);
+
+    if(ttrack->cnv)
+      {
+      /* Convert character set */
+      lqt_charset_convert_realloc(ttrack->cnv,
+                                  ttrack->text_buffer, string_length,
+                                  text, text_alloc, (int*)0);
+      }
+    else /* Copy verbatim */
+      {
+      if(*text_alloc < string_length)
+        {
+        *text_alloc = string_length + 64;
+        *text = realloc(*text, *text_alloc);
+        memcpy(*text, ttrack->text_buffer, string_length);
+        }
+      }
     }
   else /* Empty string */
     {
@@ -248,6 +272,7 @@ static void make_chapter_track(quicktime_t * file,
     {
     lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
             "Need at least one audio or video stream for chapters");
+    return;
     }
   quicktime_tref_init_chap(&ref_track->tref, trak->tkhd.track_id);
   ref_track->has_tref = 1;
@@ -257,6 +282,7 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
                    int64_t duration)
   {
   const char * charset;
+  const char * charset_fallback;
   quicktime_text_map_t * ttrack;
   quicktime_trak_t     * trak;
   quicktime_atom_t       chunk_atom;
@@ -280,13 +306,26 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
       {
       charset = lqt_get_charset(trak->mdia.mdhd.language,
                                 file->file_type);
-      if(!charset)
+      charset_fallback = lqt_get_charset_fallback(trak->mdia.mdhd.language,
+                                         file->file_type);
+      if(!charset && !charset_fallback)
         {
         lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-                "Subtitles character set could not be determined");
-        return 1;
+                "Subtitles character set could not be determined, string will be copied verbatim");
         }
-      ttrack->cnv = lqt_charset_converter_create(file, "UTF-8", charset);
+      else
+        {
+        if(charset)
+          ttrack->cnv = lqt_charset_converter_create(file, "UTF-8", charset);
+        if(!ttrack->cnv && charset_fallback)
+          ttrack->cnv = lqt_charset_converter_create(file, "UTF-8", charset_fallback);
+        
+        if(!ttrack->cnv)
+          {
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+                  "Unsupported character set in text track, string will be copied verbatim");
+          }
+        }
       }
     
     /* Set up chapter track */

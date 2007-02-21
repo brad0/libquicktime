@@ -31,42 +31,42 @@
    symbols to iconv charsets. The ones, which are set to (char*)0
    are not available in iconv (replacements??) */
 
-#define smRoman            "MACINTOSH"
-#define smHebrew           (char*)0
-#define smJapanese         (char*)0
-#define smArabic           (char*)0
-#define smExtArabic        (char*)0
-#define smGreek            (char*)0
-#define smCentralEuroRoman (char*)0
-#define smIcelandic        "MAC-IS"
-#define smTradChinese      (char*)0
-#define smDevanagari       (char*)0
-#define smThai             (char*)0
-#define smKorean           (char*)0
-#define smSami             "MAC-SAMI"
-#define smCyrillic         "MAC-CYRILLIC"
-#define smSimpChinese      (char*)0
-#define smCeltic           (char*)0
-#define smRomanian         (char*)0
-#define smUkrainian        "MAC-UK"
-#define smArmenian         (char*)0
-#define smGeorgian         (char*)0
-#define smMongolian        (char*)0
-#define smTibetan          (char*)0
-#define smBengali          (char*)0
-#define smGuriati          (char*)0
-#define smGurmukhi         (char*)0
-#define smOriya            (char*)0
-#define smMalayalam        (char*)0
-#define smKannada          (char*)0
-#define smTamil            (char*)0
-#define smTelugu           (char*)0
-#define smSinhalese        (char*)0
-#define smBurmese          (char*)0
-#define smKhmer            (char*)0
-#define smLaotian          (char*)0
-#define smVietnamese       (char*)0
-#define smEthiopic         (char*)0
+#define smRoman            { "MACINTOSH",    "ISO-8859-1"    },
+#define smHebrew           { (char*)0,       "ISO-8859-8"    },
+#define smJapanese         { (char*)0,       "SHIFT-JIS"     },
+#define smArabic           { (char*)0,       "ISO-8859-6"    },
+#define smExtArabic        { (char*)0,       "ISO-8859-6"    },
+#define smGreek            { (char*)0,       (char*)0        },
+#define smCentralEuroRoman { (char*)0,       "ISO-8859-2"    },
+#define smIcelandic        { "MAC-IS",       (char*)0        },
+#define smTradChinese      { (char*)0,       (char*)0        },
+#define smDevanagari       { (char*)0,       (char*)0        },
+#define smThai             { (char*)0,       (char*)0        },
+#define smKorean           { (char*)0,       (char*)0        },
+#define smSami             { "MAC-SAMI",     (char*)0        },
+#define smCyrillic         { "MAC-CYRILLIC", (char*)0        },
+#define smSimpChinese      { (char*)0,       (char*)0        },
+#define smCeltic           { (char*)0,       (char*)0        },
+#define smRomanian         { (char*)0,       (char*)0        },
+#define smUkrainian        { "MAC-UK",       (char*)0        },
+#define smArmenian         { (char*)0,       (char*)0        },
+#define smGeorgian         { (char*)0,       (char*)0        },
+#define smMongolian        { (char*)0,       (char*)0        },
+#define smTibetan          { (char*)0,       (char*)0        },
+#define smBengali          { (char*)0,       (char*)0        },
+#define smGuriati          { (char*)0,       (char*)0        },
+#define smGurmukhi         { (char*)0,       (char*)0        },
+#define smOriya            { (char*)0,       (char*)0        },
+#define smMalayalam        { (char*)0,       (char*)0        },
+#define smKannada          { (char*)0,       (char*)0        },
+#define smTamil            { (char*)0,       (char*)0        },
+#define smTelugu           { (char*)0,       (char*)0        },
+#define smSinhalese        { (char*)0,       (char*)0        },
+#define smBurmese          { (char*)0,       (char*)0        },
+#define smKhmer            { (char*)0,       (char*)0        },
+#define smLaotian          { (char*)0,       (char*)0        },
+#define smVietnamese       { (char*)0,       (char*)0        },
+#define smEthiopic         { (char*)0,       (char*)0        },
 
 /* Language / character set codecs */
 
@@ -74,7 +74,12 @@ static struct
   {
   int  mac_code;  // Integer mac code
   char language[4];   // 3 character language code
-  char * charset; // Character set (understood by iconv_open)
+
+  struct
+    {
+    char * charset; // Character set (understood by iconv_open)
+    char * charset_fallback; // Character set (understood by iconv_open)
+    } cs;
   }
 mac_languages[] =
   {
@@ -223,10 +228,26 @@ const char * lqt_get_charset(int mac_code, lqt_file_type_t file_type)
   for(i = 0; i < NUM_CODES; i++)
     {
     if(mac_code == mac_languages[i].mac_code)
-      return mac_languages[i].charset;
+      return mac_languages[i].cs.charset;
     }
   return (char*)0;
   }
+
+const char * lqt_get_charset_fallback(int mac_code, lqt_file_type_t file_type)
+  {
+  int i;
+
+  if(IS_MP4(file_type))
+    return unicode_string;
+  
+  for(i = 0; i < NUM_CODES; i++)
+    {
+    if(mac_code == mac_languages[i].mac_code)
+      return mac_languages[i].cs.charset_fallback;
+    }
+  return (char*)0;
+  }
+
 
 static int set_language_code(quicktime_trak_t * trak,
                              const char * language, lqt_file_type_t file_type)

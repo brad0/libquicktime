@@ -537,6 +537,10 @@ void quicktime_iods_delete(quicktime_iods_t * iods);
 
 const char * lqt_get_charset(int mac_code, lqt_file_type_t file_type);
 
+/* Macintosh charsets are not supported everywhere, but some are pretty
+   close to other ones */
+const char * lqt_get_charset_fallback(int mac_code, lqt_file_type_t file_type);
+
 /* log.c */
 
 void lqt_log(quicktime_t * file, lqt_log_level_t level,

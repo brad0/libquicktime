@@ -125,8 +125,9 @@ static int quicktime_read_udta_string(quicktime_t *file,
   quicktime_atom_t leaf_atom;
   int result;
   uint32_t tmp;
-  lqt_charset_converter_t * cnv;
+  lqt_charset_converter_t * cnv = (lqt_charset_converter_t*)0;
   const char * charset;
+  const char * charset_fallback;
   uint16_t language;
   
   if(*size) free(*string);
@@ -137,17 +138,28 @@ static int quicktime_read_udta_string(quicktime_t *file,
     *string = malloc(*size + 1);
     result = quicktime_read_data(file, (uint8_t*)(*string), *size);
 
-    charset = lqt_get_charset(language, file->file_type);
-    if(!charset)
+    charset          = lqt_get_charset(language, file->file_type);
+    charset_fallback = lqt_get_charset(language, file->file_type);
+    if(!charset && !charset_fallback)
       {
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-              "Unknown character set for language code %d, assuming ISO-8859-1",
+              "Unknown character set for language code %d, will copy the string verbatim",
               language);
-      charset = "ISO-8859-1";
       }
-    cnv = lqt_charset_converter_create(file, charset, "UTF-8");
-    lqt_charset_convert(cnv, string, *size, size);
-    lqt_charset_converter_destroy(cnv);
+    else
+      {
+      if(charset)
+        cnv = lqt_charset_converter_create(file, charset, "UTF-8");
+      if(!cnv && charset_fallback)
+        cnv = lqt_charset_converter_create(file, charset_fallback, "UTF-8");
+
+      if(cnv)
+        {
+        lqt_charset_convert(cnv, string, *size, size);
+        lqt_charset_converter_destroy(cnv);
+        }
+      }
+    
     return !result;
     }
   else
@@ -284,8 +296,13 @@ quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_cha
   if(!ilst)
     {
     if(!(*cnv))
+      {
+      /* Hard wired charsets for Western European languages (probably not good) */
       *cnv = lqt_charset_converter_create(file, "UTF-8", "MACINTOSH");
-
+      if(!(*cnv))
+        *cnv = lqt_charset_converter_create(file, "UTF-8", "ISO-8859-1");
+      
+      }
     lqt_charset_convert(*cnv, string, -1, &new_size);
     
     quicktime_write_int16(file, new_size);    /* String size */
