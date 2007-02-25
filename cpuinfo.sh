@@ -60,10 +60,16 @@ fi
 
 do_x86()
 {
+
+CFLAGS=-O
+if test $IsDarwin = yes; then
+   CFLAGS="$CFLAGS -fno-pic -Wl,-read_only_relocs -Wl,suppress"
+fi
+
 if test -r /proc/cpuinfo; then
 	_cpuinfo="cat /proc/cpuinfo"
 else
-	$CC -o cpuinfo utils/cpuinfo.c
+	$CC $CFLAGS -o cpuinfo utils/cpuinfo.c
 	_cpuinfo="./cpuinfo"
 fi
 
