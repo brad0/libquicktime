@@ -47,8 +47,6 @@
 #define LQT_MAKE_BUILD(a,b,c) ((a << 16) + (b << 8) + c)
 
 #define LQT_BUILD \
-LQT_MAKE_BUILD(LQT_VERSION_MAJOR, 
-               LQT_VERSION_MINOR,
-               LQT_VERSION_MICRO)
+LQT_MAKE_BUILD(LQT_VERSION_MAJOR, LQT_VERSION_MINOR, LQT_VERSION_MICRO)
 
 #endif /* __LQT_VERSION_H_ */
