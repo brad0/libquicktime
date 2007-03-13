@@ -34,13 +34,11 @@ void quicktime_mdia_init(quicktime_mdia_t *mdia)
 void quicktime_mdia_init_qtvr(quicktime_t *file,
 								quicktime_mdia_t *mdia,
 								int track_type,
-								int width,
-								int height,
 								int timescale,
 								int frame_duration)
 {
 	quicktime_mdhd_init_video(file, &(mdia->mdhd), timescale);
-	quicktime_minf_init_qtvr(file, &(mdia->minf), track_type, width, height, frame_duration);
+	quicktime_minf_init_qtvr(file, &(mdia->minf), track_type, frame_duration);
 	quicktime_hdlr_init_qtvr(&(mdia->hdlr), track_type);
 }
 

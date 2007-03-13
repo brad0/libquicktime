@@ -30,11 +30,14 @@ extern "C" {
 #endif /* __cplusplus */
   
 /* QTVR stuff */
+#define QTVR_PANO_HORZ 1
+#define QTVR_PANO_VERT 2
 
-#define QTVR_OBJ 2
-#define QTVR_PAN 3
-#define QTVR_QTVR 1
-  
+#define QTVR_QTVR_OBJ 1
+#define QTVR_QTVR_PAN 2
+#define QTVR_OBJ 3
+#define QTVR_PAN 4
+
 /* check if the file is a qtvr file */
 /* return values:                                                             */
 /* QTVR_OBJ  = file is object movie                                           */
@@ -61,16 +64,16 @@ int lqt_qtvr_get_height(quicktime_t  *file);
 /* get depth of the movie */
 int lqt_qtvr_get_depth(quicktime_t  *file);
 
-/* get/set number of rows */
-int lqt_qtvr_set_rows(quicktime_t  *file, short rows);
+/* get number of rows/columns */
 int lqt_qtvr_get_rows(quicktime_t  *file);
-
-/* get/set number of columns */
-int lqt_qtvr_set_columns(quicktime_t  *file, short columns);
 int lqt_qtvr_get_columns(quicktime_t  *file);
 
+/* set number of columns/rows */
+int lqt_qtvr_set_rows(quicktime_t  *file, int rows);
+int lqt_qtvr_set_columns(quicktime_t  *file, int columns);
+
 /* get initial frame to display */
-int lqt_qtvr_initial_position(quicktime_t  *file);
+int lqt_qtvr_get_initial_position(quicktime_t  *file);
 
 /* panning, tilting, fov, movietype */
 /* optional parameters that define player behavior                            */
@@ -153,12 +156,10 @@ int lqt_qtvr_get_image_track(quicktime_t  *file);
 /* set the scene track */
 int lqt_qtvr_set_image_track(quicktime_t  *file, int track);
 
-/* write a dummy node into panorama track */
-int lqt_qtvr_write_dummy_node(quicktime_t *file);
+int lqt_qtvr_add_panorama_node(quicktime_t *file);
+int lqt_qtvr_add_object_node(quicktime_t *file);
 
-int lqt_qtvr_add_node(quicktime_t *file);
-
-  
+int lqt_qtvr_get_panotype(quicktime_t *file);
   
 #ifdef __cplusplus
 }

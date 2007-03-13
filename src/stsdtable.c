@@ -760,8 +760,8 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 
 	if(minf->is_audio) quicktime_write_stsd_audio(file, table);
 	if(minf->is_video) quicktime_write_stsd_video(file, table);
-	if(minf->is_panorama) quicktime_write_pano(file, &(table->pano));
-	if(minf->is_qtvr == QTVR_QTVR) quicktime_write_qtvr(file, &(table->qtvr));
+	if(minf->is_qtvr == QTVR_QTVR_PAN) quicktime_write_qtvr(file, &(table->qtvr));
+	if(minf->is_qtvr == QTVR_QTVR_OBJ) quicktime_write_qtvr(file, &(table->qtvr));
 
         if(minf->is_text)
           {

@@ -40,11 +40,9 @@ void quicktime_stbl_init(quicktime_stbl_t *stbl)
 void quicktime_stbl_init_qtvr(quicktime_t *file,
 								quicktime_stbl_t *stbl,
 								int track_type,
-								int width,
-								int height,
 								int frame_duration)
 {
-	quicktime_stsd_init_qtvr(file, &(stbl->stsd), track_type, width, height);
+	quicktime_stsd_init_qtvr(file, &(stbl->stsd), track_type);
 	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
 	quicktime_stsc_init_video(file, &(stbl->stsc));
 	quicktime_stsz_init_video(file, &(stbl->stsz));

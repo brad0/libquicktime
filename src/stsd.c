@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define LOG_DOMAIN "stsd"
+
 void quicktime_stsd_init(quicktime_stsd_t *stsd)
   {
   stsd->version = 0;
@@ -43,30 +45,37 @@ void quicktime_stsd_init_table(quicktime_stsd_t *stsd)
     }
   }
 
-void quicktime_stsd_init_qtvr(quicktime_t *file, 
-                              quicktime_stsd_t *stsd,
-                              int track_type, int width,
-                              int height)
+int quicktime_stsd_init_qtvr(quicktime_t *file, 
+                             quicktime_stsd_t *stsd,
+                             int track_type)
   {
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
-	
+
   table = &(stsd->table[0]);
-  if (track_type == QTVR_QTVR)
-    {
-    table->format[0] = 'q';
-    table->format[1] = 't';
-    table->format[2] = 'v';
-    table->format[3] = 'r';
-    } else
-      if (track_type == QTVR_OBJ)
+  switch(track_type)
 	{
-        table->format[0] = '\0';
-        table->format[1] = '\0';
-        table->format[2] = '\0';
-        table->format[3] = '\0';
+	case QTVR_OBJ:
+	case QTVR_PAN:
+	  table->format[0] = '\0';
+	  table->format[1] = '\0';
+	  table->format[2] = '\0';
+	  table->format[3] = '\0';
+	  break;
+	case QTVR_QTVR_OBJ:
+	case QTVR_QTVR_PAN:
+	  table->format[0] = 'q';
+	  table->format[1] = 't';
+	  table->format[2] = 'v';
+	  table->format[3] = 'r';
+	  break;
+	default:
+	  lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+			  "quicktime_stsd_init_qtvr invalid track type supplied.");
+	  return -1;
 	}
 
+  return 0;
   }
 
 

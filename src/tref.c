@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 int quicktime_tref_init(quicktime_tref_t *tref)
 {
 //	tref->trackIndex = 1;
@@ -54,19 +55,31 @@ static void add_track(quicktime_track_reference_t * ref,
 int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type)
   {
   quicktime_track_reference_t * ref = add_reference(tref);
-  if(track_type == QTVR_OBJ)
-    {
-    ref->type[0] = 'i';
-    ref->type[1] = 'm';
-    ref->type[2] = 'g';
-    ref->type[3] = 't';
-    }
-  else if (track_type == QTVR_QTVR)
-    {
-    ref->type[0] = 'o';
-    ref->type[1] = 'b';
-    ref->type[2] = 'j';
-    ref->type[3] = 'e';
+  switch(track_type)
+	{
+	case QTVR_OBJ:
+	case QTVR_PAN:
+	  ref->type[0] = 'i';
+	  ref->type[1] = 'm';
+	  ref->type[2] = 'g';
+	  ref->type[3] = 't';
+	  break;
+	case QTVR_QTVR_OBJ:
+	  ref->type[0] = 'o';
+	  ref->type[1] = 'b';
+	  ref->type[2] = 'j';
+	  ref->type[3] = 'e';
+	  break;
+	case QTVR_QTVR_PAN:
+	  ref->type[0] = 'p';
+	  ref->type[1] = 'a';
+	  ref->type[2] = 'n';
+	  ref->type[3] = 'o';
+	  break;
+    default:
+//	  lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+//	          "quicktime_tref_init_qtvr invalid track type supplied");
+	  return -1;
     }
   
   add_track(ref, 1);

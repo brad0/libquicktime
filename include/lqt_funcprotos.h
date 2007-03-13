@@ -496,7 +496,7 @@ void quicktime_write_gmin(quicktime_t *file, quicktime_gmin_t *gmin);
 void quicktime_hdlr_init(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr);
-void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type);
+int quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type);
 void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_data(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_text(quicktime_hdlr_t *hdlr);
@@ -619,8 +619,6 @@ void quicktime_mdia_init_panorama(quicktime_t *file,
 void quicktime_mdia_init_qtvr(quicktime_t *file,
 				  quicktime_mdia_t *mdia,
 				  int track_type,
-				  int width,
-				  int height,
 				  int frame_duration,
 				  int timescale);
 
@@ -666,8 +664,6 @@ void quicktime_minf_init_panorama(quicktime_t *file,
 void quicktime_minf_init_qtvr(quicktime_t *file,
 				  quicktime_minf_t *minf,
 				  int frame_type,
-				  int width,
-				  int height,
 				  int frame_duration);
 
 void quicktime_minf_init_text(quicktime_t *file, 
@@ -827,8 +823,6 @@ void quicktime_stbl_init_panorama(quicktime_t *file,
 void quicktime_stbl_init_qtvr(quicktime_t *file,
 				  quicktime_stbl_t *stbl,
 				  int track_type,
-				  int width,
-				  int height,
 				  int frame_duration);			     
 
 void quicktime_stbl_init_text(quicktime_t *file,
@@ -896,11 +890,9 @@ void quicktime_stsd_init_panorama(quicktime_t *file,
 				  int width,
 				  int height);
 
-void quicktime_stsd_init_qtvr(quicktime_t *file,
+int quicktime_stsd_init_qtvr(quicktime_t *file,
                               quicktime_stsd_t *stsd,
-                              int track_type,
-                              int width,
-                              int height);
+                              int track_type);
 
 void quicktime_stsd_init_text(quicktime_t *file,
                               quicktime_stsd_t *stsd);

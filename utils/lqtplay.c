@@ -111,7 +111,7 @@ static int use_gl       = 0;
 
 static int xpos = 0;
 static int ypos = 0;
-static int overhead_frames = 0;
+static int oh_width = 0;
 
 static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
@@ -814,8 +814,9 @@ static int qt_width = 320, qt_height = 32, qt_drop = 0, qt_droptotal = 0, qtvr_d
 static int64_t qt_frame_time; /* Timestamp of the decoded frame */
 static int qt_timescale = 0;
 
-static unsigned char *qt_frame,**qt_rows;
-static unsigned char *qt_panorama_buffer, *qt_frame_tmp;
+static unsigned char *qt_frame, *qt_frame_row, **qt_rows;
+static unsigned char *qt_panorama_buffer;
+static unsigned int *qt_frame_tmp[2];
 static XImage *qt_ximage;
 static XvImage *qt_xvimage;
 static GC qt_gc;
@@ -902,17 +903,15 @@ static void qt_init(FILE *fp, char *filename)
     qt_isqtvr = lqt_is_qtvr(qt);
     if (qt_isqtvr) {
 	if (qt_isqtvr != QTVR_OBJ && qt_isqtvr != QTVR_PAN) {
-	    fprintf(stderr, "'%s' is no QTVR file or an unsupported version.\n"
-			    "Currently only QTVR V1.0 object and panorama files are supported.\n", filename);
+	    fprintf(stderr, "'%s' is no QTVR file or an unsupported variant.\n", filename);
 	    exit(1);
 	}
 	
-	ipos = lqt_qtvr_initial_position(qt);
+	ipos = lqt_qtvr_get_initial_position(qt);
 	lqt_qtvr_get_pan(qt, &(minpan), &(maxpan), NULL);
 	qtvr_dwidth = lqt_qtvr_get_display_width(qt);
 	qtvr_dheight = lqt_qtvr_get_display_height(qt);
 	fprintf(stderr, "startpos :%i\n", ipos);
-	//fprintf(stderr, "fov :%f\n", lqt_qtvr_get_fov(qt));
 	fprintf(stderr, "movietype :%i\n", lqt_qtvr_get_movietype(qt));
 	fprintf(stderr, "panning :%f %f\n", minpan, maxpan);
 	fprintf(stderr, "rows :%i\n", lqt_qtvr_get_rows(qt));
@@ -924,9 +923,16 @@ static void qt_init(FILE *fp, char *filename)
 	fprintf(stderr, "depth :%i\n", lqt_qtvr_get_depth(qt));
     
 	if (qt_isqtvr == QTVR_PAN) {
-	    overhead_frames = (float)lqt_qtvr_get_height(qt) * ((float)qtvr_dwidth / (float)qtvr_dheight);
-	    overhead_frames = floor((float)overhead_frames / (float)quicktime_video_height(qt, 0)) * (float)quicktime_video_height(qt, 0) + quicktime_video_height(qt, 0);
-	    fprintf(stderr, "overhead_frames :%i\n",overhead_frames);
+		oh_width = lqt_qtvr_get_height(qt) * qtvr_dwidth / (float)qtvr_dheight;
+		if (lqt_qtvr_get_panotype(qt) == QTVR_PANO_VERT) {
+			oh_width = floor(oh_width / (float)quicktime_video_height(qt, 0) + 1) *
+							  quicktime_video_height(qt, 0);
+		} else if (lqt_qtvr_get_panotype(qt) == QTVR_PANO_HORZ) {
+			oh_width = floor(oh_width / (float)quicktime_video_width(qt, 0) + 1) *
+							  quicktime_video_width(qt, 0);
+		}
+		fprintf(stderr, "oh_width verz :%i\n",oh_width);
+
 	}
     }
     /* print audio info */
@@ -1014,9 +1020,17 @@ static int qt_init_video(void)
 	
 	qt_rows = malloc(qt_height * sizeof(char*));
 	if (qt_isqtvr == QTVR_PAN) {
+	    qt_frame_row = malloc(qtvr_dwidth * 3);
 	    qt_frame = malloc(qtvr_dwidth * qtvr_dheight * 3);
-	    qt_frame_tmp = malloc(qtvr_dwidth * qtvr_dheight * 3);
-	    qt_panorama_buffer = malloc((lqt_qtvr_get_width(qt)+overhead_frames)*
+        if (lqt_qtvr_get_panotype(qt) == QTVR_PANO_VERT) {
+            qt_frame_tmp[0] = malloc(sizeof(int) * qtvr_dwidth * qt_width);
+            qt_frame_tmp[1] = malloc(sizeof(int) * qtvr_dwidth * qt_width);
+
+        } else {
+            qt_frame_tmp[0] = malloc(sizeof(int) * qtvr_dwidth * qt_height);
+            qt_frame_tmp[1] = malloc(sizeof(int) * qtvr_dwidth * qt_height);
+        }
+		qt_panorama_buffer = malloc((lqt_qtvr_get_width(qt)+oh_width)*
 					 lqt_qtvr_get_height(qt)*
 					 3);
 	}
@@ -1084,47 +1098,99 @@ static int qt_init_video(void)
 	}
 	if (qt_isqtvr) {
 	    /* has to be done here to set initial pov */ // look into this
-	    quicktime_set_video_position(qt, lqt_qtvr_initial_position(qt),0);
+		quicktime_set_video_position(qt, lqt_qtvr_get_initial_position(qt),0);
 	    /*XSetInputFocus(dpy, XtWindow(simple), RevertToPointerRoot, CurrentTime);
 	    */
 	    if (qt_isqtvr == QTVR_PAN) {
-		int i,l,j,k;
-		long buffer_size;
-      
-		buffer_size = (lqt_qtvr_get_width(qt) + overhead_frames) * lqt_qtvr_get_height(qt) * 3;
-		for ( l = 0; l < lqt_qtvr_get_columns(qt) + (int)(overhead_frames/qt_height); l++) {
-		    /* set position in video file */
-		    /* if position larger than panorama, start from the beginning (overhead)*/
-		    quicktime_set_video_position(qt,
-						 (l>=lqt_qtvr_get_columns(qt))?l-lqt_qtvr_get_columns(qt):l,
-						 0);
-		    /* decode a frame */
-		    lqt_decode_video(qt, qt_rows, 0);
-		    
-		    /* set position in the output buffer */
-		    /* to the upper left corner of the desired frame */
-		    j = l * qt_height * 3;
-		    
-		    /* put frame, rotated into buffer */
-		    for (k = 0; k < qt_width; k++) {
-			for (i = qt_height - 1; i >= 0; i--) {
-			    qt_panorama_buffer[buffer_size - j + 0] = qt_frame[((qt_height - i) * qt_width - k) * 3 + 0];
-			    qt_panorama_buffer[buffer_size - j + 1] = qt_frame[((qt_height - i) * qt_width - k) * 3 + 1];
-			    qt_panorama_buffer[buffer_size - j + 2] = qt_frame[((qt_height - i) * qt_width - k) * 3 + 2];
-			    j = j + 3;
+			float dist;
+			int oh_frames;
+			int i, i2, l, j, j2, k;
+			float x, y;			
+			int pano_width = lqt_qtvr_get_width(qt);
+			int pano_height = lqt_qtvr_get_height(qt);
+			
+			oh_frames = oh_width/((lqt_qtvr_get_panotype(qt) == QTVR_PANO_HORZ)?qt_width:qt_height);
+
+			for (i = 0; i < lqt_qtvr_get_columns(qt) + oh_frames; i++) {
+				/* set position in video file */
+				/* if position larger than panorama, start from the beginning (overhead)*/
+				quicktime_set_video_position(qt,
+					 (i>=lqt_qtvr_get_columns(qt))?i-lqt_qtvr_get_columns(qt):i,
+					 0);
+				/* decode a frame */
+				lqt_decode_video(qt, qt_rows, 0);
+	
+				if (lqt_qtvr_get_panotype(qt) == QTVR_PANO_VERT) {
+					long buffer_size;
+					buffer_size = (pano_width + oh_width) * qt_width * 3;
+					
+					/* set position in the output buffer */
+					/* to the upper left corner of the desired frame */
+					j = i * qt_height * 3;
+					
+					/* put frame, rotated into buffer */
+					/* TODO: do this slightly less ass backwards */
+					for (k = 0; k < qt_width; k++) {
+						for (l = qt_height - 1; l >= 0; l--) {
+							qt_panorama_buffer[buffer_size - j + 0] = qt_frame[((qt_height - l) * qt_width - k) * 3 + 0];
+							qt_panorama_buffer[buffer_size - j + 1] = qt_frame[((qt_height - l) * qt_width - k) * 3 + 1];
+							qt_panorama_buffer[buffer_size - j + 2] = qt_frame[((qt_height - l) * qt_width - k) * 3 + 2];
+							j+=3;
+						}
+					j += (pano_width + oh_width - qt_height) * 3;
+					}
+					
+				} else if (lqt_qtvr_get_panotype(qt) == QTVR_PANO_HORZ) {
+					int row_offset;
+					/* put frame into buffer at offset j */
+					j = i * qt_width;
+					
+					for (k = 0; k < qt_height; k++) {
+						row_offset = k * (pano_width + oh_width) + j;
+						for (l = 0; l < qt_width; l++) {
+							qt_panorama_buffer[(row_offset + l) * 3    ] = qt_frame[(k * qt_width + l) * 3    ];
+							qt_panorama_buffer[(row_offset + l) * 3 + 1] = qt_frame[(k * qt_width + l) * 3 + 1];
+							qt_panorama_buffer[(row_offset + l) * 3 + 2] = qt_frame[(k * qt_width + l) * 3 + 2];
+						}
+					}
+				}
 			}
-			j += (lqt_qtvr_get_width(qt) + overhead_frames - qt_height) * 3;
-		    }
+			
+			// "precalc"
+			
+			// default "zoom"
+			dist = lqt_qtvr_get_width(qt)/(2*M_PI);
+			
+			for (j = 0; j < pano_height; j++) {
+				for (i=0; i < qtvr_dwidth; i++) {
+					x = i - (qtvr_dwidth/2);
+					y = j - (pano_height/2);
+					
+					
+					i2 = (qtvr_dwidth / 2) + dist * atan(x / dist);
+					j2 = (pano_height / 2) + (dist * y) / sqrt(dist * dist + x * x);
+					
+					//j2 = j; i2 = i;                  
+					if (i2 < 0 || i2 > qtvr_dwidth || j2 < 0 || j2 > pano_height) {
+						continue;
+					}
+					
+					k = (j * qtvr_dwidth + i);
+		
+					qt_frame_tmp[0][k] = i2; //x
+					qt_frame_tmp[1][k] = j2; //y
+				}
+			}
 		}
-	    }
 	}
-        return 0;
+	return 0;
 }
 
 static int qt_frame_decode(void)
   {
-  int i;
-  float x, y, x2, y2;
+  int i, j, k1, k2, x2, x, y, i2;
+  int pano_width = lqt_qtvr_get_width(qt);
+  int pano_height = lqt_qtvr_get_height(qt);
 
   if (qt_isqtvr == QTVR_OBJ) {
 	/* sanity check and decode  */
@@ -1135,61 +1201,60 @@ static int qt_frame_decode(void)
     //			    qt_cmodel,qt_rows,0);
     }
     else if (qt_isqtvr == QTVR_PAN) {
-	int i, j, i2, j2, r, g, b, k;
-	k = 0;
-	
-	i = (ypos * (lqt_qtvr_get_width(qt) + overhead_frames) + xpos) * 3;
-	do {
-	    for (j = 0; j < qtvr_dwidth * 3; j++) {
-		qt_frame_tmp[k] = qt_panorama_buffer[i];
-		i++; k++;
-	    }
-	    i+= (lqt_qtvr_get_width(qt) + overhead_frames - qtvr_dwidth) * 3;
-	} while (k < (qtvr_dwidth * qtvr_dheight) * 3);
-
-	for (j = 0; j < qtvr_dheight; j++) {
-	    for (i=0;i<qtvr_dwidth;i++) {
-		x = (i << 1) / (float)qtvr_dwidth - 1;
-                y = (j << 1) / (float)qtvr_dheight - 1;
+		float qdist = pow(pano_width / (2 * M_PI), 2);
+		int tilt = ypos + qtvr_dheight / 2 - pano_height / 2;
+		int tmp_row_offset;
+		float hofac, hofac2;
 		
-		x2 = atan(x);
-		y2 = y / sqrt(1 + x * x);
-
-                i2 = (qtvr_dwidth >> 1) * (x2 + 1);
-                j2 = (qtvr_dheight >> 1) * (y2 + 1);
-                
-		if (i2 < 0 || i2 > qtvr_dwidth || j2 < 0 || j2 > qtvr_dheight) {
-                  continue;
-                }
+		hofac = qtvr_dheight * (qtvr_dheight - pano_height) / (-12 * qdist);
 		
-		k = (j2 * qtvr_dwidth + i2) * 3;
-		r = qt_frame_tmp[k];
-		g = qt_frame_tmp[k+1];
-		b = qt_frame_tmp[k+2];
+		for (j = 0; j < qtvr_dheight; j++) {
+			tmp_row_offset = (ypos + j) * qtvr_dwidth;
+			for (i = 0; i < qtvr_dwidth; i++) {
+				k2 = i * 3;
+				k1 = (qt_frame_tmp[1][tmp_row_offset + i] * (pano_width + oh_width) +
+					  qt_frame_tmp[0][tmp_row_offset + i] + xpos) * 3;
 
-		k = (j * qtvr_dwidth + i) * 3;
-		qt_frame[k] = r;
-		qt_frame[k+1] = g;
-		qt_frame[k+2] = b;
-	    }
-	}
+				qt_frame_row[k2] = qt_panorama_buffer[k1];
+				qt_frame_row[k2 + 1] = qt_panorama_buffer[k1 + 1];
+				qt_frame_row[k2 + 2] = qt_panorama_buffer[k1 + 2];
+			}
+			
+			// Perspective Correction
+			// probably wrong
+			y = j - (qtvr_dheight/2);
+			hofac2 = (((y * tilt) / (qdist * 3)) + 1 - hofac);
+			for (i=0; i < qtvr_dwidth; i++) {
+				x = i - (qtvr_dwidth / 2);
+			
+				x2 = x * hofac2;
+				i2 =  (qtvr_dwidth / 2) + x2;
+			
+				k2 = (j * qtvr_dwidth + i) * 3;
+				k1 = i2 * 3;
+				
+				qt_frame[k2] = qt_frame_row[k1];
+				qt_frame[k2 + 1] = qt_frame_row[k1 + 1];
+				qt_frame[k2 + 2] = qt_frame_row[k1 + 2];
+			}
+		}
     }
     else {
-	if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
-	    return -1;
-    
-	if (qt_drop) {
-	    	qt_droptotal += qt_drop;
-		fprintf(stderr,"dropped %d frame(s)\r",qt_droptotal);
-	    for (i = 0; i < qt_drop; i++)
-		quicktime_read_frame(qt,qt_frame,0);
-	    qt_drop = 0;
-	  }
-	qt_frame_time = lqt_frame_time(qt, 0);
-//        fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
-	lqt_decode_video(qt, qt_rows, 0);
-//        quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
-//			    qt_cmodel,qt_rows,0);
+		if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
+			return -1;
+		
+		if (qt_drop) {
+			qt_droptotal += qt_drop;
+			fprintf(stderr,"dropped %d frame(s)\r",qt_droptotal);
+			for (i = 0; i < qt_drop; i++)
+			  	quicktime_read_frame(qt,qt_frame,0);
+			qt_drop = 0;
+		}
+		qt_frame_time = lqt_frame_time(qt, 0);
+	//        fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
+		lqt_decode_video(qt, qt_rows, 0);
+	//        quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
+	//			    qt_cmodel,qt_rows,0);
 
     }
   return 0;
@@ -1468,30 +1533,28 @@ static void decode_qtvr()
     int startpos;
 
     startpos = quicktime_video_position(qt, 0);
-
     XFlush(dpy);
     if (qt_hasvideo) {
-	if (0 != qt_frame_decode()) exit(0);
-	if (0 != qt_frame_blit()) exit(0);
+	  	if (qt_frame_decode() || qt_frame_blit()) exit(0);
     }
 
     for (;;) {
-	struct timespec time;
-	
-//      printf("loop pos :%ld\n",quicktime_video_position(qt,0));
-	if (quicktime_video_position(qt,0) >= startpos + lqt_qtvr_get_loop_frames(qt))
-	    quicktime_set_video_position(qt, startpos, 0);
-
-	if (True == XCheckMaskEvent(dpy, ~0, &event)) {
-	    XtDispatchEvent(&event);
-	} else {
-//	printf("loop pos before decode :%ld\n",quicktime_video_position(qt,0));
-	    XFlush(dpy);
-	    XtAppProcessEvent(app_context, KeyPressMask||KeyReleaseMask);
-	    time.tv_nsec = 10000000;
-	    time.tv_sec = 0;
-	    nanosleep(&time, NULL);
-	}
+		struct timespec time;
+		
+		//      printf("loop pos :%ld\n",quicktime_video_position(qt,0));
+		if (quicktime_video_position(qt,0) >= startpos + lqt_qtvr_get_loop_frames(qt))
+			quicktime_set_video_position(qt, startpos, 0);
+		
+		if (True == XCheckMaskEvent(dpy, ~0, &event)) {
+			XtDispatchEvent(&event);
+		} else {
+		//	printf("loop pos before decode :%ld\n",quicktime_video_position(qt,0));
+			XFlush(dpy);
+			XtAppProcessEvent(app_context, KeyPressMask||KeyReleaseMask);
+			time.tv_nsec = 10000000;
+			time.tv_sec = 0;
+			nanosleep(&time, NULL);
+		}
     }
 }
 
@@ -1507,18 +1570,18 @@ static void resize_ev(Widget widget, XtPointer client_data,
     switch(event->type) {
     case MapNotify:
     case ConfigureNotify:
-	XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
-	fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
+        XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
+        fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
 #ifdef HAVE_GL
-	if (use_gl)
-	    gl_resize(widget,swidth,sheight);
+	      if (use_gl)
+	          gl_resize(widget,swidth,sheight);
 #endif
-	if (qt_isqtvr != 0) decode_qtvr();
-	break;
+        if (qt_isqtvr != 0) decode_qtvr();
+        break;
     case UnmapNotify:
     case DestroyNotify:
-    	exit(0);
-	break;
+            exit(0);
+        break;
     }
 }
 
@@ -1528,98 +1591,97 @@ static void left_ac(Widget widget, XEvent *event,
 		    String *params, Cardinal *num_params)
 {
     if (qt_isqtvr == QTVR_PAN) {
-	if (xpos - 10 >= 0 ) xpos -= 10;
-	if (xpos - 10 < 0) {
-	    xpos = xpos-10 + lqt_qtvr_get_width(qt);
-	}
+        if (xpos - 10 >= 0 ) xpos -= 10;
+    
+        if (xpos - 10 < 0) {
+            xpos = xpos-10 + lqt_qtvr_get_width(qt);
+        }
     }
     else if (qt_isqtvr == QTVR_OBJ) {
-	int vpos = quicktime_video_position(qt, 0);
-	int lfxcolumns = lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt);
-	
-	if (vpos % lfxcolumns == lfxcolumns - lqt_qtvr_get_loop_frames(qt) && vpos != 0) {
-	    quicktime_set_video_position(qt, vpos - (lqt_qtvr_get_columns(qt)-1), 0); 
-	} 
-	else {	
-	    quicktime_set_video_position(qt, vpos + lqt_qtvr_get_loop_frames(qt), 0);
-	}
+        int vpos = quicktime_video_position(qt, 0);
+        int lfxcolumns = lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt);
+    
+        if (vpos % lfxcolumns == lfxcolumns - lqt_qtvr_get_loop_frames(qt) && vpos != 0) {
+            quicktime_set_video_position(qt, vpos - (lqt_qtvr_get_columns(qt)-1), 0); 
+        } 
+        else {	
+            quicktime_set_video_position(qt, vpos + lqt_qtvr_get_loop_frames(qt), 0);
+        }
     }
     else
-	return;
+        return;
 //    printf("pos %ld\n",quicktime_video_position(qt,0));
     decode_qtvr();
 }
-
 
 static void right_ac(Widget widget, XEvent *event,
 		    String *params, Cardinal *num_params)
 {
     if (qt_isqtvr == QTVR_PAN) {
-	if (xpos + 10 <= lqt_qtvr_get_width(qt)+overhead_frames - qtvr_dwidth) xpos += 10;
-	if (xpos + 10 > lqt_qtvr_get_width(qt)) {
-	    xpos = xpos+10 - lqt_qtvr_get_width(qt);
-	}
+	  	if (xpos + 10 <= lqt_qtvr_get_width(qt)+oh_width - qtvr_dwidth) xpos += 10;
+		if (xpos + 10 > lqt_qtvr_get_width(qt)) {
+			xpos = xpos+10 - lqt_qtvr_get_width(qt);
+		}
     }
     else if (qt_isqtvr == QTVR_OBJ) {
-	int vpos = quicktime_video_position(qt, 0);
-	int lfxcolumns = lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt);
-    
-	if (vpos % lfxcolumns == 0) { 
-	    quicktime_set_video_position(qt, vpos + (lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt)-1), 0);
+		int vpos = quicktime_video_position(qt, 0);
+		int lfxcolumns = lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt);
+		
+		if (vpos % lfxcolumns == 0) { 
+			quicktime_set_video_position(qt, vpos + (lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_columns(qt)-1), 0);
 	} 
 	else {
-	    quicktime_set_video_position(qt, vpos - lqt_qtvr_get_loop_frames(qt), 0);
-	}
+			quicktime_set_video_position(qt, vpos - lqt_qtvr_get_loop_frames(qt), 0);
+		}
     }
     else
-	return;
+	  	return;
 //    printf("pos %ld\n",quicktime_video_position(qt,0));
     decode_qtvr();
 }
-
 
 static void up_ac(Widget widget, XEvent *event,
 		    String *params, Cardinal *num_params)
 {
     if (qt_isqtvr == QTVR_PAN) {
-	if (ypos - 10 >= 0 ) ypos -= 10;
+	  	if (ypos - 10 >= 0 ) ypos -= 10;
     }
     else if (qt_isqtvr == QTVR_OBJ) {
-	int vpos = quicktime_video_position(qt, 0);
+		int vpos = quicktime_video_position(qt, 0);
 
-	if (vpos + lqt_qtvr_get_columns(qt) < lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_rows(qt) * lqt_qtvr_get_columns(qt)) {
-	    quicktime_set_video_position(qt ,vpos + lqt_qtvr_get_columns(qt), 0);
-	}
+		if (vpos + lqt_qtvr_get_columns(qt) < lqt_qtvr_get_loop_frames(qt) * lqt_qtvr_get_rows(qt) * lqt_qtvr_get_columns(qt)) {
+			quicktime_set_video_position(qt ,vpos + lqt_qtvr_get_columns(qt), 0);
+		}
 //  printf("pos %ld\n",quicktime_video_position(qt,0));
     }
     else 
-	return;
+	  	return;
+
     decode_qtvr();
 }
-
 
 static void down_ac(Widget widget, XEvent *event,
 		    String *params, Cardinal *num_params)
 {
     if (qt_isqtvr == QTVR_PAN) {
-	if (ypos + 10 <= lqt_qtvr_get_height(qt) - lqt_qtvr_get_display_height(qt)) ypos += 10;
+	  	if (ypos + 10 < lqt_qtvr_get_height(qt) - lqt_qtvr_get_display_height(qt)) ypos += 10;
     }
     else if (qt_isqtvr == QTVR_OBJ) {
-	if (quicktime_video_position(qt, 0) - lqt_qtvr_get_columns(qt) >= 0) {
-	    quicktime_set_video_position(qt ,quicktime_video_position(qt, 0) - lqt_qtvr_get_columns(qt), 0);
-	}
+		if (quicktime_video_position(qt, 0) - lqt_qtvr_get_columns(qt) >= 0) {
+			quicktime_set_video_position(qt ,quicktime_video_position(qt, 0) - lqt_qtvr_get_columns(qt), 0);
+		}
     }
     else 
-	return;
+	  	return;
 //  printf("pos %ld\n",quicktime_video_position(qt,0));    
-    decode_qtvr();
+	decode_qtvr();
 }
 
 static void expose_ev(Widget widget, XtPointer client_data,
 		      XEvent *event, Boolean *d)
 {
     if (event->type == Expose)
-	decode_qtvr();
+        decode_qtvr();
 }
 
 static XtActionsRec action_table[] = {

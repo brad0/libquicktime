@@ -1858,8 +1858,11 @@ int quicktime_close(quicktime_t *file)
       {
       if (lqt_qtvr_get_object_track(file) >= 0)
         {
-        lqt_qtvr_add_node(file);
-        lqt_qtvr_add_node(file);
+        lqt_qtvr_add_object_node(file);
+        }
+      else if (lqt_qtvr_get_panorama_track(file) >= 0)
+        {
+        lqt_qtvr_add_panorama_node(file);
         }
       // Atoms are only written here
       quicktime_atom_write_footer(file, &file->mdat.atom);

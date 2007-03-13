@@ -82,13 +82,12 @@ void quicktime_write_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr )
 
 	quicktime_qtatom_write_container_header(file);
 	quicktime_qtatom_write_header(file, &subatom, "sean", 1);
-    	if(file->moov.udta.is_qtvr) // boo
-	{
-	    	subatom.child_count = 3;
-		quicktime_write_vrsc(file, &(qtvr->vrsc));
-		quicktime_write_imgp(file, &(qtvr->imgp));
-		quicktime_write_vrnp(file, &(qtvr->vrnp));
-	}	
+
+   	subatom.child_count = 3;
+	quicktime_write_vrsc(file, &(qtvr->vrsc));
+	quicktime_write_imgp(file, &(qtvr->imgp));
+	quicktime_write_vrnp(file, &(qtvr->vrnp));
+
 	quicktime_qtatom_write_footer(file, &subatom);
 
 }

@@ -388,15 +388,12 @@ static int transcode_init(transcode_handle * h,
 	}
 	
 	if(strncmp(qtvr,"pano", 4) == 0) {
-	    lqt_qtvr_set_type(h->out_file, QTVR_PAN, qtvr_columns * h->height, qtvr_rows * h->width, h->frame_duration, h->timescale, 0);
+	    lqt_qtvr_set_type(h->out_file, QTVR_PAN, h->width/2, h->width, h->frame_duration, h->timescale, 0);
 	}
 	
-	if(qtvr_columns) {
-	    lqt_qtvr_set_columns(h->out_file, (short)qtvr_columns);
-	}
-	
-	if(qtvr_rows) {
-	    lqt_qtvr_set_rows(h->out_file, (short)qtvr_rows);
+	if(qtvr_columns && qtvr_rows) {
+	    lqt_qtvr_set_rows(h->out_file, qtvr_rows);
+	    lqt_qtvr_set_columns(h->out_file, qtvr_columns);
 	}
     }
     

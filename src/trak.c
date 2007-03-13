@@ -65,11 +65,11 @@ int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int trac
 {
 
 	quicktime_tkhd_init_video(file, 
-		&(trak->tkhd), 
+		&(trak->tkhd),
 		height, 
-		height/2);
+		width);
 	quicktime_mdia_init_qtvr(file, 
-		&(trak->mdia), track_type, width, height, timescale, frame_duration);
+		&(trak->mdia), track_type, timescale, frame_duration);
 	quicktime_edts_init_table(&(trak->edts));
         trak->has_edts = 1;
 	quicktime_tref_init_qtvr(&(trak->tref), track_type);

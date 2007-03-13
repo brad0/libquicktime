@@ -40,12 +40,10 @@ void quicktime_minf_init(quicktime_minf_t *minf)
 void quicktime_minf_init_qtvr(quicktime_t *file,
                               quicktime_minf_t *minf,
                               int track_type,
-                              int width,
-                              int height,
                               int frame_duration)
   {
   minf->is_qtvr = track_type;
-  quicktime_stbl_init_qtvr(file, &(minf->stbl), track_type, width, height, frame_duration);
+  quicktime_stbl_init_qtvr(file, &(minf->stbl), track_type, frame_duration);
   quicktime_hdlr_init_data(&(minf->hdlr));
   minf->has_hdlr = 1;
   quicktime_dinf_init_all(&(minf->dinf));

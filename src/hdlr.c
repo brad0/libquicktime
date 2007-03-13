@@ -46,24 +46,37 @@ void quicktime_hdlr_init(quicktime_hdlr_t *hdlr)
 	strcpy(hdlr->component_name, "Libquicktime Media Handler");
 }
 
-void quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type)
+int quicktime_hdlr_init_qtvr(quicktime_hdlr_t *hdlr, int track_type)
 {
-    	if (track_type == QTVR_QTVR)
+	switch(track_type)
 	{
-	    hdlr->component_subtype[0] = 'q';
-	    hdlr->component_subtype[1] = 't';
-	    hdlr->component_subtype[2] = 'v';
-	    hdlr->component_subtype[3] = 'r';
-	    strcpy(hdlr->component_name, "Libquicktime QTVR Handler");
-	} else
-	if (track_type == QTVR_OBJ)
-	{
-	    hdlr->component_subtype[0] = 'o';
-	    hdlr->component_subtype[1] = 'b';
-	    hdlr->component_subtype[2] = 'j';
-	    hdlr->component_subtype[3] = 'e';
-	    strcpy(hdlr->component_name, "Libquicktime QTVR OBject Handler");
+	case QTVR_QTVR_OBJ:
+	case QTVR_QTVR_PAN:
+		hdlr->component_subtype[0] = 'q';
+		hdlr->component_subtype[1] = 't';
+		hdlr->component_subtype[2] = 'v';
+		hdlr->component_subtype[3] = 'r';
+		strcpy(hdlr->component_name, "Libquicktime QTVR Handler");
+		break;
+	case QTVR_OBJ:
+		hdlr->component_subtype[0] = 'o';
+		hdlr->component_subtype[1] = 'b';
+		hdlr->component_subtype[2] = 'j';
+		hdlr->component_subtype[3] = 'e';
+		strcpy(hdlr->component_name, "Libquicktime QTVR Object Handler");
+		break;
+	case QTVR_PAN:
+		hdlr->component_subtype[0] = 'p';
+		hdlr->component_subtype[1] = 'a';
+		hdlr->component_subtype[2] = 'n';
+		hdlr->component_subtype[3] = 'o';
+		strcpy(hdlr->component_name, "Libquicktime QTVR Panorama Handler");
+		break;
+	default:
+		return -1;
 	}
+    
+	return 0;
 }
 
 void quicktime_hdlr_init_panorama(quicktime_hdlr_t *hdlr)
@@ -86,7 +99,7 @@ void quicktime_hdlr_init_video(quicktime_hdlr_t *hdlr)
 
 void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr)
 {
-        hdlr->component_subtype[0] = 's';
+	hdlr->component_subtype[0] = 's';
 	hdlr->component_subtype[1] = 'o';
 	hdlr->component_subtype[2] = 'u';
 	hdlr->component_subtype[3] = 'n';
