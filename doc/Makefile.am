@@ -2,6 +2,7 @@ EXTRA_DIST = \
 mainpage.incl \
 api_usage.html \
 codecs.html \
+hackersguide.txt \
 qt4l_building.html \
 qt4l_codecs.html \
 qt4l_firewire.html \

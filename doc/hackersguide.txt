@@ -1,0 +1,77 @@
+Libquicktime hackers guide
+==========================
+
+1. Intendation:
+
+No special rules here. If you change code, someone else has written, 
+try to follow the style. Indentation should be the same inside each
+function.
+
+2. How to add support for new atoms:
+
+- Each atom fooo MUST have a corresponding C-struct quicktime_fooo_t defined 
+  in qtprivate.h. Member names should match the ones of the document, where 
+  the fooo atom is specified (including upper/lower case conventions). 
+  A link to the specification may be useful as a comment.
+  If you reverse-engineered an atom, you are free to invent the member names.
+
+- For an atom fooo, there MUST be a file fooo.c, which contains at least
+  the following 3 functions:
+
+  quicktime_read_fooo();
+  quicktime_write_fooo();
+  quicktime_fooo_dump();
+
+  If some members have default values other than zero, define
+
+  quicktime_fooo_init();
+
+  If default values are different for audio and video, you may define
+
+  quicktime_fooo_init_audio();
+  quicktime_fooo_init_video();
+
+  instead (same for text, qtvr or other track types). 
+  If the atom contains dynamically allocated memory, you also need
+
+  quicktime_fooo_delete();
+
+  Prototypes for all these functions go into lqt_funcprotos.h. Note that
+  lqt_funcprotos.h is sorted alphabetically by C-file.
+
+- Calls to ALL these functions must be inserted into the analogous functions 
+  of the parent atom.
+
+- Reading an atom and writing it again MUST lead to bit-identical results,
+  if libquicktime was used to generate the initial file. For most atoms,
+  this is no problems, others need special care. Not following this rule
+  would break quicktime_make_streamable().
+
+- Each new atom fooo MUST have an integer variable has_fooo in the parent
+  atom, if fooo is optional. Indicating the presence of fooo by just 
+  looking for meaningful members of fooo is ambiguous and thus forbidden.
+
+3. Submitting patches
+
+Patches must be done in unified diff format against current CVS. The best
+way to create them is to type:
+
+cvs diff -u > name_of_the_patch.diff
+
+in the libquicktime directory. Patches should be submitted as binary attachment 
+to 
+
+   libquicktime-devel@lists.sourceforge.net
+
+4. Larger changes
+
+If you want to write some major new features, show up at the mailing list and 
+talk about your plans. Usually it's a good idea to first implement support
+for the new atoms (if needed) and send it as an initial patch. This makes
+things easier to review.
+
+5. CVS write access
+
+You can always ask for CVS write access. Your chances depend on the number
+and quality of patches you submitted before.
+
