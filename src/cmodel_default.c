@@ -26,6 +26,7 @@
 #define HAVE_RGB_TO_YUV
 #define HAVE_RGB_TO_YUVJ
 #define HAVE_YUV_TO_RGB
+#define HAVE_YUVJ_TO_RGB
 #define HAVE_YUV_8_TO_YUVJ
 #define HAVE_YUVJ_TO_YUV_8
 

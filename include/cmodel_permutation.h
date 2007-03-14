@@ -1332,7 +1332,7 @@ static inline void transfer_YUVJ444P_to_RGB888(unsigned char *(*output),
 	unsigned char *input_v)
 {
         int i_tmp;
-	YUV_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	YUVJ_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
 	(*output) += 3;
 }
 
@@ -1344,7 +1344,7 @@ static inline void transfer_YUVJ422P_to_RGB888(unsigned char *(*output),
 	unsigned char *input_v)
 {
         int i_tmp;
-	YUV_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	YUVJ_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
 	(*output) += 3;
 }
 
@@ -1390,7 +1390,7 @@ static inline void transfer_YUVJ420P_to_RGB888(unsigned char *(*output),
 	unsigned char *input_v)
 {
         int i_tmp;
-	YUV_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	YUVJ_8_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
 	(*output) += 3;
 }
 
