@@ -37,14 +37,14 @@ function.
   quicktime_fooo_delete();
 
   Prototypes for all these functions go into lqt_funcprotos.h. Note that
-  lqt_funcprotos.h is sorted alphabetically by C-file.
+  lqt_funcprotos.h is sorted alphabetically by .c file.
 
-- Calls to ALL these functions must be inserted into the analogous functions 
-  of the parent atom.
+- Calls to ALL these functions must be inserted into the corresponding 
+  functions of the parent atom.
 
 - Reading an atom and writing it again MUST lead to bit-identical results,
   if libquicktime was used to generate the initial file. For most atoms,
-  this is no problems, others need special care. Not following this rule
+  this is no problem, others need special care. Not following this rule
   would break quicktime_make_streamable().
 
 - Each new atom fooo MUST have an integer variable has_fooo in the parent
@@ -72,6 +72,6 @@ things easier to review.
 
 5. CVS write access
 
-You can always ask for CVS write access. Your chances depend on the number
-and quality of patches you submitted before.
+You can always ask for CVS write access. Your chances however depend on the 
+number and quality of patches you submitted before.
 
