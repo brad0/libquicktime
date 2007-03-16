@@ -5,7 +5,6 @@ codecs.html \
 hackersguide.txt \
 qt4l_building.html \
 qt4l_codecs.html \
-qt4l_firewire.html \
 qt4l_index.html \
 qt4l_license.html \
 qt4l_opening.html \
