@@ -62,9 +62,9 @@ static char * fourccs_yv12[] = { QUICKTIME_YUV420, "I420", (char*)0 };
 
 static char * dummy_stringlist_options[] =
   {
-    "Option 1",
-    "Option 2",
-    "Option 3",
+    TRS("Option 1"),
+    TRS("Option 2"),
+    TRS("Option 3"),
     (char*)0
   };
 
@@ -77,7 +77,6 @@ static lqt_parameter_info_static_t dummy_parameters[] =
        .val_default =        { (int)"String Test" },
        .val_min =            0,
        .val_max =            0,
-       .stringlist_options = (char**)0
      },
      { 
        .name =               "dummy_stringlist_test",

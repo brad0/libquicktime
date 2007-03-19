@@ -65,8 +65,9 @@ the reference. Unused for constant quantizer encoding") \
     .real_name =   TRS("Motion estimation method"),     \
     .type =        LQT_PARAMETER_STRINGLIST, \
     .val_default = { .val_string = "Zero" }, \
-    .stringlist_options = (char *[]){ "Zero", "Phods", "Log", "X1", "Epzs", \
-                                      "Full", (char *)0 } \
+    .stringlist_options = (char *[]){ TRS("Zero"), TRS("Phods"), TRS("Log"), \
+                                      TRS("X1"), TRS("Epzs"), TRS("Full"), \
+                                      (char *)0 }  \
   }
 
 /** Frame types */
@@ -398,7 +399,7 @@ with max and/or min bitrate, this must be specified.") \
     .real_name =   TRS("Precition method"),  \
     .type =        LQT_PARAMETER_STRINGLIST, \
     .val_default = { .val_string = "Left" },\
-    .stringlist_options = (char*[]){ "Left", "Plane", "Median", (char*)0 }, \
+    .stringlist_options = (char*[]){ TRS("Left"), TRS("Plane"), TRS("Median"), (char*)0 }, \
   }
 
 /** Quantizer */
@@ -423,8 +424,9 @@ with max and/or min bitrate, this must be specified.") \
     .val_max =     { .val_int = 31 }, \
   }
 
-#define COMPARE_FUNCS (char*[]){ "SAD", "SSE", "SATD", "DCT", "PSNR", \
-                                 "BIT", "RD", "ZERO", "VSAD", "VSSE", "NSSE", \
+#define COMPARE_FUNCS (char*[]){ TRS("SAD"), TRS("SSE"), TRS("SATD"), TRS("DCT"), TRS("PSNR"), \
+                                 TRS("BIT"), TRS("RD"), TRS("ZERO"), TRS("VSAD"), TRS("VSSE"), \
+                                 TRS("NSSE"), \
                                  (char*)0 }
 
 #define COMPARE_FUNCS_HELP "SAD: Sum of absolute differences\n" \
@@ -689,8 +691,8 @@ with max and/or min bitrate, this must be specified.") \
     .real_name =   TRS("MB decision mode"),  \
     .type =        LQT_PARAMETER_STRINGLIST, \
     .val_default = { .val_string = "Use compare function" }, \
-    .stringlist_options = (char*[]){ "Use compare function", "Fewest bits", \
-                                     "Rate distoration", (char*)0 }, \
+    .stringlist_options = (char*[]){ TRS("Use compare function"), TRS("Fewest bits"), \
+                                     TRS("Rate distoration"), (char*)0 }, \
   }
 
 /** Frame types */

@@ -86,6 +86,10 @@ static const char * module_filename_key  = "ModuleFilename: ";
 static const char * module_index_key     = "ModuleIndex: ";
 static const char * module_file_time_key = "FileTime: ";
 
+static const char * gettext_domain_key  = "GettextDomain";
+static const char * gettext_directory_key  = "GettextDirectory";
+
+
 /* Types for parameters */
 
 static const char * type_int            = "Integer";
@@ -109,6 +113,8 @@ static const char * real_name_key       = "RealName: ";
 
 static const char * num_options_key     = "NumOptions: ";
 static const char * option_key          = "Options: ";
+static const char * label_key           = "OptionLabels: ";
+
 
 
 /* Codec order */
@@ -200,6 +206,7 @@ static void read_parameter_info(FILE * input,
   {
   char * pos;
   int options_read = 0;
+  int labels_read = 0;
   
   /* First, get the name */
 
@@ -305,12 +312,20 @@ static void read_parameter_info(FILE * input,
       info->num_stringlist_options = atoi(pos);
       info->stringlist_options = calloc(info->num_stringlist_options,
                                         sizeof(char*));
+      info->stringlist_labels = calloc(info->num_stringlist_options,
+                                       sizeof(char*));
       }
     else if(CHECK_KEYWORD(option_key))
       {
       pos = line + strlen(option_key);
       info->stringlist_options[options_read] = __lqt_strdup(pos);
       options_read++;
+      }
+    else if(CHECK_KEYWORD(label_key))
+      {
+      pos = line + strlen(label_key);
+      info->stringlist_labels[labels_read] = __lqt_strdup(pos);
+      labels_read++;
       }
     else if(CHECK_KEYWORD(help_string_key))
       {
@@ -406,6 +421,22 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       {
       pos = line + strlen(module_filename_key);
       codec->module_filename = __lqt_strdup(pos);
+      }
+
+    /* Gettext domain */
+    
+    else if(CHECK_KEYWORD(gettext_domain_key))
+      {
+      pos = line + strlen(gettext_domain_key);
+      codec->gettext_domain = __lqt_strdup(pos);
+      }
+
+    /* Gettext directory */
+    
+    else if(CHECK_KEYWORD(gettext_directory_key))
+      {
+      pos = line + strlen(gettext_directory_key);
+      codec->gettext_directory = __lqt_strdup(pos);
       }
     
     /* Module Index */
@@ -699,6 +730,8 @@ static void write_parameter_info(FILE * output,
       
       for(i = 0; i < info->num_stringlist_options; i++)
         fprintf(output, "%s%s\n", option_key, info->stringlist_options[i]);
+      for(i = 0; i < info->num_stringlist_options; i++)
+        fprintf(output, "%s%s\n", label_key, info->stringlist_labels[i]);
       break;
     case LQT_PARAMETER_SECTION:
       break;
@@ -760,6 +793,7 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
     fprintf(output, "%s%s\n", direction_key, tmp);
 
   fprintf(output, "%s%08x\n", compatibility_key, info->compatibility_flags);
+
   
   
   if(info->num_fourccs)
@@ -803,7 +837,12 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
   fprintf(output, "%s%s\n", module_filename_key, info->module_filename);
   fprintf(output, "%s%d\n", module_index_key, info->module_index);
   fprintf(output, "%s%u\n", module_file_time_key, info->file_time);
-    
+
+  if(info->gettext_domain)
+    fprintf(output, "%s%s\n", gettext_domain_key, info->gettext_domain);
+  if(info->gettext_directory)
+    fprintf(output, "%s%s\n", gettext_directory_key, info->gettext_directory);
+  
   if(fprintf(output, "%s\n", end_codec_key) < 0)
     return 0;
   return 1;

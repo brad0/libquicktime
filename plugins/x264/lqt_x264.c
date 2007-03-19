@@ -101,9 +101,9 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .real_name =   TRS("Ratecontrol method"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Constant quality" },
-      .stringlist_options = (char*[]){ "Constant quality",
-                                       "Average bitrate",
-                                       "CRF based VBR",
+      .stringlist_options = (char*[]){ TRS("Constant quality"),
+                                       TRS("Average bitrate"),
+                                       TRS("CRF based VBR"),
                                        (char*)0 },
       .help_string = TRS("Ratecontrol method:\n"
                      "Constant quality: Specify a quantizer parameter below\n"
@@ -295,10 +295,10 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .real_name =   TRS("Method"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Hexagonal search" },
-      .stringlist_options = (char*[]){ "Diamond search",
-                                       "Hexagonal search",
-                                       "Uneven Multi-Hexagon",
-                                       "Exhaustive search",
+      .stringlist_options = (char*[]){ TRS("Diamond search"),
+                                       TRS("Hexagonal search"),
+                                       TRS("Uneven Multi-Hexagon"),
+                                       TRS("Exhaustive search"),
                                        (char*)0 },
       .help_string = TRS("Motion estimation method\n"
                      "Diamond search: fastest\n"
@@ -388,10 +388,10 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .real_name =   TRS("Direct MV prediction mode"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Spatial" },
-      .stringlist_options = (char*[]){ "None",
-                                       "Spatial",
-                                       "Temporal",
-                                       "Auto",
+      .stringlist_options = (char*[]){ TRS("None"),
+                                       TRS("Spatial"),
+                                       TRS("Temporal"),
+                                       TRS("Auto"),
                                        (char*)0 },
     },
     {
@@ -442,9 +442,9 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .real_name =   TRS("Trellis RD quantization"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Disabled" },
-      .stringlist_options = (char*[]){ "Disabled",
-                                       "Enabled (final)",
-                                       "Enabled (always)",
+      .stringlist_options = (char*[]){ TRS("Disabled"),
+                                       TRS("Enabled (final)"),
+                                       TRS("Enabled (always)"),
                                        (char*)0 },
       .help_string = TRS("Trellis RD quantization. Requires CABAC. Can be enabled "
                      "either for the final encode of a MB or for all mode "

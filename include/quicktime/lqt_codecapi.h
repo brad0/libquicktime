@@ -80,7 +80,8 @@ typedef struct
    */
   
   char ** stringlist_options;
-
+  char ** stringlist_labels;
+  
   char * help_string;
   
   } lqt_parameter_info_static_t;
@@ -112,6 +113,10 @@ typedef struct
   lqt_parameter_info_static_t * encoding_parameters;
   lqt_parameter_info_static_t * decoding_parameters;
   
+  char * gettext_domain;     /*!< First argument to bindtextdomain(). Must be set only for externally packaged codecs */
+  char * gettext_directory;  /*!< Second argument to bindtextdomain(). Must be set only for externally packaged codecs */
+
+
   } lqt_codec_info_static_t;
 
 /*

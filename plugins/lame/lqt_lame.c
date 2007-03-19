@@ -37,7 +37,7 @@ static lqt_parameter_info_static_t encode_parameters_lame[] =
       .real_name =   TRS("Bitrate mode"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "CBR" },
-      .stringlist_options = (char*[]){ "CBR", "ABR", "VBR", (char*)0 },
+      .stringlist_options = (char*[]){ TRS("CBR"), TRS("ABR"), TRS("VBR"), (char*)0 },
       .help_string = TRS("CBR: Constant bitrate\nVBR: Variable bitrate\n"
                          "ABR: Average bitrate")
     },

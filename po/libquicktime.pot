@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2007-03-19 15:11+0100\n"
+"POT-Creation-Date: 2007-03-19 18:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,7 +72,7 @@ msgstr ""
 msgid "Setting parameter %s to %s"
 msgstr ""
 
-#: src/lqt_codecfile.c:900
+#: src/lqt_codecfile.c:939
 #, c-format
 msgid "%s could not be written, deleting imcomplete file"
 msgstr ""
@@ -108,72 +108,72 @@ msgstr ""
 msgid "Unsupported character set in text track, string will be copied verbatim"
 msgstr ""
 
-#: src/lqt_codecinfo.c:430
+#: src/lqt_codecinfo.c:460
 #, c-format
 msgid "dlopen failed for %s: %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:444
+#: src/lqt_codecinfo.c:474
 #, c-format
 msgid "Module %s has no API version and is thus terribly old"
 msgstr ""
 
-#: src/lqt_codecinfo.c:455
+#: src/lqt_codecinfo.c:485
 #, c-format
 msgid "Codec interface version mismatch of module %s: %d [module] != %d [lqt]"
 msgstr ""
 
-#: src/lqt_codecinfo.c:466
+#: src/lqt_codecinfo.c:496
 #, c-format
 msgid "Symbol get_num_codecs not found in %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:475
+#: src/lqt_codecinfo.c:505
 #, c-format
 msgid "Symbol get_codec_info not found in %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:486
+#: src/lqt_codecinfo.c:516
 #, c-format
 msgid "No codecs found in %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:600
+#: src/lqt_codecinfo.c:630
 #, c-format
 msgid "Cannot open plugin directory %s (forgot make install?)"
 msgstr ""
 
-#: src/lqt_codecinfo.c:878
+#: src/lqt_codecinfo.c:908
 #, c-format
 msgid "Stringlist parameter %s has NULL options"
 msgstr ""
 
-#: src/lqt_codecinfo.c:918
+#: src/lqt_codecinfo.c:967
 #, c-format
 msgid "Codec %s has no fourccs defined"
 msgstr ""
 
-#: src/lqt_codecinfo.c:1477
+#: src/lqt_codecinfo.c:1531
 #, c-format
 msgid "lqt_set_default_parameter: No %s codec %s found"
 msgstr ""
 
-#: src/lqt_codecinfo.c:1508
+#: src/lqt_codecinfo.c:1562
 #, c-format
 msgid "lqt_set_default_parameter: No parameter %s for codec %s found"
 msgstr ""
 
-#: src/lqt_codecinfo.c:1567
+#: src/lqt_codecinfo.c:1621
 #, c-format
 msgid "lqt_restore_default_parameters: dlopen failed for %s: %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:1575
+#: src/lqt_codecinfo.c:1629
 #, c-format
 msgid "Symbol %s not found in %s"
 msgstr ""
 
-#: src/lqt_codecinfo.c:1584
+#: src/lqt_codecinfo.c:1638
 #, c-format
 msgid "Couldn't get codec info for %s from_module %s"
 msgstr ""
@@ -342,7 +342,7 @@ msgstr ""
 msgid "MPEG-2/4 AAC encoder (faac based)"
 msgstr ""
 
-#: plugins/faac/faac.c:160
+#: plugins/faac/faac.c:161
 msgid "Setting encode parameters failed, check settings"
 msgstr ""
 
@@ -401,37 +401,37 @@ msgstr ""
 msgid "Decoding Quality"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:53 plugins/dv/lqt_dv.c:103
+#: plugins/dv/lqt_dv.c:52 plugins/dv/lqt_dv.c:99
 msgid "Clamp Luma Values"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:62 plugins/dv/lqt_dv.c:111
+#: plugins/dv/lqt_dv.c:60 plugins/dv/lqt_dv.c:107
 msgid "Clamp Chroma Values"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:71 plugins/dv/lqt_dv.c:119
+#: plugins/dv/lqt_dv.c:68 plugins/dv/lqt_dv.c:115
 msgid "Compensate for 7.5IRE NTSC setup"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:87
+#: plugins/dv/lqt_dv.c:83
 msgid "Is Anamorphic 16x9"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:95
+#: plugins/dv/lqt_dv.c:91
 msgid "VLC Encode Passes"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:131
+#: plugins/dv/lqt_dv.c:127
 msgid "Quasar DV Codec (PAL-Mode)"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:132 plugins/dv/lqt_dv.c:144
+#: plugins/dv/lqt_dv.c:128 plugins/dv/lqt_dv.c:140
 msgid ""
 "Codec for digital video camaras. Based on libdv (http://libdv.sourceforge."
 "net/)."
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:143
+#: plugins/dv/lqt_dv.c:139
 msgid "Quasar DV Codec (NTSC-Mode)"
 msgstr ""
 
@@ -456,7 +456,7 @@ msgstr ""
 msgid "Motion estimation"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:126 plugins/ffmpeg/params.h:603
+#: plugins/ffmpeg/lqt_ffmpeg.c:126 plugins/ffmpeg/params.h:605
 msgid "ME pre-pass"
 msgstr ""
 
@@ -636,87 +636,111 @@ msgstr ""
 msgid "Motion estimation method"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:76
+#: plugins/ffmpeg/params.h:68
+msgid "Zero"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:68
+msgid "Phods"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:68
+msgid "Log"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:69
+msgid "X1"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:69
+msgid "Epzs"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:69
+msgid "Full"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:77
 msgid "GOP size (0 = intra only)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:87
+#: plugins/ffmpeg/params.h:88
 msgid "Quantizer compression"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:93
+#: plugins/ffmpeg/params.h:94
 msgid "Amount of qscale change between easy & hard scenes"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:100
+#: plugins/ffmpeg/params.h:101
 msgid "Quantizer blur"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:106
+#: plugins/ffmpeg/params.h:107
 msgid "Amount of qscale smoothing over time"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:113
+#: plugins/ffmpeg/params.h:114
 msgid "Minimum quantizer scale"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:124
+#: plugins/ffmpeg/params.h:125
 msgid "Maximum quantizer scale"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:135
+#: plugins/ffmpeg/params.h:136
 msgid "Maximum quantizer difference"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:140
+#: plugins/ffmpeg/params.h:141
 msgid "Maximum quantizer difference between frames"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:147
+#: plugins/ffmpeg/params.h:148
 msgid "Max B-Frames"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:152
+#: plugins/ffmpeg/params.h:153
 msgid "Maximum number of B-frames between non B-frames"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:159
+#: plugins/ffmpeg/params.h:160
 msgid "B quantizer factor"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:165
+#: plugins/ffmpeg/params.h:166
 msgid "Quantizer factor between B-frames and non-B-frames"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:172
+#: plugins/ffmpeg/params.h:173
 msgid "Avoid B-frames in high motion scenes"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:182
+#: plugins/ffmpeg/params.h:183
 msgid "Luma elimination threshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:187
+#: plugins/ffmpeg/params.h:188
 msgid ""
 "Single coefficient elimination threshold for luminance. Negative values also "
 "consider dc coefficient. -4 is JVT recommendation"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:195
+#: plugins/ffmpeg/params.h:196
 msgid "Chroma elimination threshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:200
+#: plugins/ffmpeg/params.h:201
 msgid ""
 "Single coefficient elimination threshold for chrominamce. Negative values "
 "also consider dc coefficient. 7 is JVT recommendation"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:208
+#: plugins/ffmpeg/params.h:209
 msgid "Standards compliance"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:213
+#: plugins/ffmpeg/params.h:214
 msgid ""
 "2 = Strictly conform to a older more strict version of the spec or reference "
 "software\n"
@@ -727,11 +751,11 @@ msgid ""
 " -2: Allow non standarized experimental things"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:226
+#: plugins/ffmpeg/params.h:227
 msgid "B quantizer offset"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:232
+#: plugins/ffmpeg/params.h:233
 msgid ""
 "Quantizer offset between B-frames and non-B-frames\n"
 "if > 0 then the last p frame quantizer will be used (q= lastp_q*factor"
@@ -739,41 +763,41 @@ msgid ""
 " if < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:243
+#: plugins/ffmpeg/params.h:244
 msgid "Minimum bitrate (kbps)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:246
+#: plugins/ffmpeg/params.h:247
 msgid "Minimum bitrate (0 means arbitrary)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:253
+#: plugins/ffmpeg/params.h:254
 msgid "Maximum bitrate (kbps)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:256
+#: plugins/ffmpeg/params.h:257
 msgid "Maximum bitrate (0 means arbitrary)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:263
+#: plugins/ffmpeg/params.h:264
 msgid "RC buffer size"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:266
+#: plugins/ffmpeg/params.h:267
 msgid ""
 "Decoder bitstream buffer size in kbits. When encoding with max and/or min "
 "bitrate, this must be specified."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:274
+#: plugins/ffmpeg/params.h:275
 msgid "RC buffer aggressivity"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:286
+#: plugins/ffmpeg/params.h:287
 msgid "I quantizer factor"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:292
+#: plugins/ffmpeg/params.h:293
 msgid ""
 "Quantizer factor between P-frames and I-frames.\n"
 "If > 0 then the last P frame quantizer will be used (q= lastp_q*factor"
@@ -781,84 +805,140 @@ msgid ""
 "If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:303
+#: plugins/ffmpeg/params.h:304
 msgid "I quantizer offset"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:309
+#: plugins/ffmpeg/params.h:310
 msgid "Quantizer offset between P-frames and I-frames"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:316
+#: plugins/ffmpeg/params.h:317
 msgid "Initial RC complexity"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:328
+#: plugins/ffmpeg/params.h:329
 msgid "Luminance masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:334
+#: plugins/ffmpeg/params.h:335
 msgid ""
 "Encode very bright image parts with reduced quality. 0 means disabled, 0-0.3 "
 "is a sane range."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:342
+#: plugins/ffmpeg/params.h:343
 msgid "Temporary complexity masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:348
+#: plugins/ffmpeg/params.h:349
 msgid ""
 "Encode very fast moving image parts with reduced quality. 0 means disabled."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:356
+#: plugins/ffmpeg/params.h:357
 msgid "Spatial complexity masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:362
+#: plugins/ffmpeg/params.h:363
 msgid ""
 "Encode very complex image parts with reduced quality. 0 means disabled, 0-"
 "0.5 is a sane range."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:370
+#: plugins/ffmpeg/params.h:371
 msgid "Inter block masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:376
+#: plugins/ffmpeg/params.h:377
 msgid ""
 "Encode inter blocks with reduced quality (increases the quality of intra "
 "blocks). 0 means disabled, 1 will double the bits allocated for intra blocks."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:385
+#: plugins/ffmpeg/params.h:386
 msgid "Darkness masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:391
+#: plugins/ffmpeg/params.h:392
 msgid ""
 "Encode very dark image parts with reduced quality. 0 means disabled, 0-0.3 "
 "is a sane range."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:398
+#: plugins/ffmpeg/params.h:399
 msgid "Precition method"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:408
+#: plugins/ffmpeg/params.h:402
+msgid "Left"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:402
+msgid "Plane"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:402
+msgid "Median"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:409
 msgid "Minimum MB quantizer"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:419
+#: plugins/ffmpeg/params.h:420
 msgid "Maximum MB quantizer"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:446
+#: plugins/ffmpeg/params.h:427
+msgid "SAD"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:427
+msgid "SSE"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:427
+msgid "SATD"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:427
+msgid "DCT"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:427
+msgid "PSNR"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:428
+msgid "BIT"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:428
+msgid "RD"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:428
+msgid "ZERO"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:428
+msgid "VSAD"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:428
+msgid "VSSE"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:429
+msgid "NSSE"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:448
 msgid "ME compare function"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:450
+#: plugins/ffmpeg/params.h:452
 msgid ""
 "Motion estimation compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -874,15 +954,15 @@ msgid ""
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:468
+#: plugins/ffmpeg/params.h:470
 msgid "Enable chroma ME compare"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:479
+#: plugins/ffmpeg/params.h:481
 msgid "Subpixel ME compare function"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:483
+#: plugins/ffmpeg/params.h:485
 msgid ""
 "Subpixel motion estimation compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -898,15 +978,15 @@ msgid ""
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:501
+#: plugins/ffmpeg/params.h:503
 msgid "Enable chroma subpixel ME compare"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:512
+#: plugins/ffmpeg/params.h:514
 msgid "MB compare function"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:516
+#: plugins/ffmpeg/params.h:518
 msgid ""
 "Macroblock compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -922,15 +1002,15 @@ msgid ""
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:533
+#: plugins/ffmpeg/params.h:535
 msgid "Enable chroma macroblock ME compare"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:544
+#: plugins/ffmpeg/params.h:546
 msgid "ILDCT compare function"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:548
+#: plugins/ffmpeg/params.h:550
 msgid ""
 "Interlaced dct compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -946,23 +1026,23 @@ msgid ""
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:565
+#: plugins/ffmpeg/params.h:567
 msgid "Enable chroma ILDCT ME compare"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:576
+#: plugins/ffmpeg/params.h:578
 msgid "ME diamond size & shape"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:581
+#: plugins/ffmpeg/params.h:583
 msgid "Motion estimation diamond size. Negative means shape adaptive."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:588
+#: plugins/ffmpeg/params.h:590
 msgid "Last predictor count"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:593
+#: plugins/ffmpeg/params.h:595
 msgid ""
 "Amount of motion predictors from the previous frame.\n"
 "0 (default)\n"
@@ -970,7 +1050,7 @@ msgid ""
 "the previous frame."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:608
+#: plugins/ffmpeg/params.h:610
 msgid ""
 "Motion estimation pre-pass\n"
 "0: disabled\n"
@@ -978,11 +1058,11 @@ msgid ""
 "2: always"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:618
+#: plugins/ffmpeg/params.h:620
 msgid "ME pre-pass compare function"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:622
+#: plugins/ffmpeg/params.h:624
 msgid ""
 "Motion estimation pre-pass compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -998,328 +1078,340 @@ msgid ""
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:640
+#: plugins/ffmpeg/params.h:642
 msgid "Enable chroma ME pre-pass compare"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:651
+#: plugins/ffmpeg/params.h:653
 msgid "ME pre-pass diamond size & shape"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:656
+#: plugins/ffmpeg/params.h:658
 msgid "Motion estimation pre-pass diamond size. Negative means shape adaptive."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:664
+#: plugins/ffmpeg/params.h:666
 msgid "Subpel ME quality"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:669
+#: plugins/ffmpeg/params.h:671
 msgid ""
 "Subpel motion estimation refinement quality (for qpel). Higher values mean "
 "higher quality but slower encoding."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:677
+#: plugins/ffmpeg/params.h:679
 msgid "Motion estimation range"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:682
+#: plugins/ffmpeg/params.h:684
 msgid "Motion estimation search range (0 means unlimited)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:689
+#: plugins/ffmpeg/params.h:691
 msgid "MB decision mode"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:700
+#: plugins/ffmpeg/params.h:694
+msgid "Use compare function"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:694
+msgid "Fewest bits"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:695
+msgid "Rate distoration"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:702
 msgid "Scenechange threshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:705
+#: plugins/ffmpeg/params.h:707
 msgid ""
 "Threshold for scene change detection.\n"
 "Negative values mean more sensitivity (more keyframes)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:713
+#: plugins/ffmpeg/params.h:715
 msgid "Minimum lagrange multipler"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:719
+#: plugins/ffmpeg/params.h:721
 msgid ""
 "Minimum Lagrange multiplier for ratecontrol. Should possibly be the same as "
 "minimum quantizer scale."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:727
+#: plugins/ffmpeg/params.h:729
 msgid "Maximum lagrange multipler"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:733
+#: plugins/ffmpeg/params.h:735
 msgid ""
 "Maximum Lagrange multiplier for ratecontrol. Should possibly be the same as "
 "maximum quantizer scale."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:740 plugins/x264/lqt_x264.c:455
+#: plugins/ffmpeg/params.h:742 plugins/x264/lqt_x264.c:455
 msgid "Noise reduction"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:751
+#: plugins/ffmpeg/params.h:753
 msgid "Initial RC buffer occupancy"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:754
+#: plugins/ffmpeg/params.h:756
 msgid ""
 "Number of kilobits which should be loaded into the rc buffer before encoding "
 "starts. Must not be larger than RC buffer size"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:765
+#: plugins/ffmpeg/params.h:767
 msgid "Inter threshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:774
+#: plugins/ffmpeg/params.h:776
 msgid "Quantizer noise shaping"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:779
+#: plugins/ffmpeg/params.h:781
 msgid ""
 "Choose quantization such that noise will be masked by similar-frequency "
 "content in the image"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:787
+#: plugins/ffmpeg/params.h:789
 msgid "ME Theshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:792
+#: plugins/ffmpeg/params.h:794
 msgid ""
 "Motion estimation threshold. under which no motion estimation is performed, "
 "but instead the user specified motion vectors are used"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:800
+#: plugins/ffmpeg/params.h:802
 msgid "MB Theshold"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:805
+#: plugins/ffmpeg/params.h:807
 msgid ""
 "Macroblock threshold. under which the user specified macroblock types will "
 "be used"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:812
+#: plugins/ffmpeg/params.h:814
 msgid "NSSE weight"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:815
+#: plugins/ffmpeg/params.h:817
 msgid ""
 "Noise vs. SSE weight for the NSSE comparsion function. 0 is identical to SSE"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:823
+#: plugins/ffmpeg/params.h:825
 msgid "Border masking"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:829
+#: plugins/ffmpeg/params.h:831
 msgid ""
 "Encode image parts near the border with reduced quality.0 means disabled"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:836
+#: plugins/ffmpeg/params.h:838
 msgid "Minimum MB lagrange multipler"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:842
+#: plugins/ffmpeg/params.h:844
 msgid "Minimum macroblock Lagrange multiplier."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:848
+#: plugins/ffmpeg/params.h:850
 msgid "Maximum MB lagrange multipler"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:854
+#: plugins/ffmpeg/params.h:856
 msgid "Maximum macroblock Lagrange multiplier."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:861
+#: plugins/ffmpeg/params.h:863
 msgid "ME penalty compensation"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:869
+#: plugins/ffmpeg/params.h:871
 msgid "Bidir refine"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:879
+#: plugins/ffmpeg/params.h:881
 msgid "BRD scale"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:891
+#: plugins/ffmpeg/params.h:893
 msgid "Scenechange factor"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:894
+#: plugins/ffmpeg/params.h:896
 msgid "Multiplied by qscale for each frame and added to scene_change_score"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:902
+#: plugins/ffmpeg/params.h:904
 msgid "Fixed quantizer"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:907
+#: plugins/ffmpeg/params.h:909
 msgid ""
 "Quantizer for fixed quality encoding. Lower means better, 1 is not "
 "recommended"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:917
+#: plugins/ffmpeg/params.h:919
 msgid "Use fixed quantizer"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:922
+#: plugins/ffmpeg/params.h:924
 msgid "Use fixed quality encoding"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:929
+#: plugins/ffmpeg/params.h:931
 msgid "4 MV per MB allowed"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:934
+#: plugins/ffmpeg/params.h:936
 msgid ""
 "Allow 4 motion vectors per macroblock (slightly better quality). Works "
 "better if MB decision mode is \"Fewest bits\" or \"Rate distoration\"."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:943
+#: plugins/ffmpeg/params.h:945
 msgid "Use qpel MC"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:948
+#: plugins/ffmpeg/params.h:950
 msgid ""
 "Use 1/4 pixel motion compensation. Warning: QPEL is not supported by all "
 "decoders."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:956
+#: plugins/ffmpeg/params.h:958
 msgid "Use global motion compensation"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:961
+#: plugins/ffmpeg/params.h:963
 msgid "Warning: GMC is not supported by all decoders"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:967
+#: plugins/ffmpeg/params.h:969
 msgid "Use data partitioning"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:972
+#: plugins/ffmpeg/params.h:974
 msgid ""
 "Use data partitioning for more robustness if the video is for transmitting "
 "over unreliable channels"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:980
+#: plugins/ffmpeg/params.h:982
 msgid "Grayscale mode"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:990
+#: plugins/ffmpeg/params.h:992
 msgid "Don't draw edges"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1001
+#: plugins/ffmpeg/params.h:1003
 msgid "Normalize adaptive quantization"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1006
+#: plugins/ffmpeg/params.h:1008
 msgid ""
 "When using masking, try to adjust the per macroblock quantizers to maintain "
 "the desired average"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1013
+#: plugins/ffmpeg/params.h:1015
 msgid "Use alternative scantable"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1024
+#: plugins/ffmpeg/params.h:1026
 msgid "Use trellis quantization"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1029
+#: plugins/ffmpeg/params.h:1031
 msgid "Use trellis quantization (improves quality)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1035
+#: plugins/ffmpeg/params.h:1037
 msgid "Use only bitexact stuff"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1040
+#: plugins/ffmpeg/params.h:1042
 msgid "Use only bitexact stuff (except (i)dct)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1046
+#: plugins/ffmpeg/params.h:1048
 msgid "Advanced intra coding"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1056
+#: plugins/ffmpeg/params.h:1058
 msgid "MPEG-4 AC prediction"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1066
+#: plugins/ffmpeg/params.h:1068
 msgid "Unlimited motion vector"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1076
+#: plugins/ffmpeg/params.h:1078
 msgid "CBP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1081
+#: plugins/ffmpeg/params.h:1083
 msgid "Use rate distortion optimization for cbp"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1087
+#: plugins/ffmpeg/params.h:1089
 msgid "QP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1092
+#: plugins/ffmpeg/params.h:1094
 msgid "Use rate distortion optimization for qp selectioon"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1098
+#: plugins/ffmpeg/params.h:1100
 msgid "Alternative inter vlc"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1109
+#: plugins/ffmpeg/params.h:1111
 msgid "OBMC"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1114
+#: plugins/ffmpeg/params.h:1116
 msgid ""
 "Overlapped block motion compensation (only supported with simple MB decision)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1121
+#: plugins/ffmpeg/params.h:1123
 msgid "Loop filter"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1131
+#: plugins/ffmpeg/params.h:1133
 msgid "Slice struct"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1142
+#: plugins/ffmpeg/params.h:1144
 msgid "Close all GOPs"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1152
+#: plugins/ffmpeg/params.h:1154
 msgid "Allow fast encoding"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1157
+#: plugins/ffmpeg/params.h:1159
 msgid "Allow non spec compliant speedup tricks"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1164
+#: plugins/ffmpeg/params.h:1166
 msgid "Strictly enforce GOP size"
 msgstr ""
 
@@ -1419,6 +1511,18 @@ msgstr ""
 
 #: plugins/x264/lqt_x264.c:101
 msgid "Ratecontrol method"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:104
+msgid "Constant quality"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:105
+msgid "Average bitrate"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:106
+msgid "CRF based VBR"
 msgstr ""
 
 #: plugins/x264/lqt_x264.c:108
@@ -1551,6 +1655,22 @@ msgstr ""
 msgid "Method"
 msgstr ""
 
+#: plugins/x264/lqt_x264.c:298
+msgid "Diamond search"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:299
+msgid "Hexagonal search"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:300
+msgid "Uneven Multi-Hexagon"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:301
+msgid "Exhaustive search"
+msgstr ""
+
 #: plugins/x264/lqt_x264.c:303
 msgid ""
 "Motion estimation method\n"
@@ -1631,6 +1751,22 @@ msgstr ""
 msgid "Direct MV prediction mode"
 msgstr ""
 
+#: plugins/x264/lqt_x264.c:391
+msgid "None"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:392
+msgid "Spatial"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:393
+msgid "Temporal"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:394
+msgid "Auto"
+msgstr ""
+
 #: plugins/x264/lqt_x264.c:404
 msgid "Deblocking filter"
 msgstr ""
@@ -1667,6 +1803,18 @@ msgstr ""
 
 #: plugins/x264/lqt_x264.c:442
 msgid "Trellis RD quantization"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:445
+msgid "Disabled"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:446
+msgid "Enabled (final)"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:447
+msgid "Enabled (always)"
 msgstr ""
 
 #: plugins/x264/lqt_x264.c:449
@@ -1754,67 +1902,79 @@ msgstr ""
 msgid "Palette missing or too small\n"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:65
+msgid "Option 1"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:66
+msgid "Option 2"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:67
+msgid "Option 3"
+msgstr ""
+
 #: plugins/videocodec/lqt_videocodec.c:75
 msgid "String Test"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:84
+#: plugins/videocodec/lqt_videocodec.c:83
 msgid "Stringlist test"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:99
+#: plugins/videocodec/lqt_videocodec.c:98
 msgid "RGB uncompressed"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:100
+#: plugins/videocodec/lqt_videocodec.c:99
 msgid "RGB uncompressed."
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:116
 #: plugins/videocodec/lqt_videocodec.c:117
-#: plugins/videocodec/lqt_videocodec.c:118
 msgid "RGBA uncompressed"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:135
 #: plugins/videocodec/lqt_videocodec.c:136
-#: plugins/videocodec/lqt_videocodec.c:137
 msgid "10 bit packed YUV 4:2:2 (v210)"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:148
 #: plugins/videocodec/lqt_videocodec.c:149
-#: plugins/videocodec/lqt_videocodec.c:150
 msgid "8 bit planar YUV 4:4:4 (v308)"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:161
 #: plugins/videocodec/lqt_videocodec.c:162
-#: plugins/videocodec/lqt_videocodec.c:163
 msgid "8 bit Planar YUVA 4:4:4:4 (v408)"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:174
 #: plugins/videocodec/lqt_videocodec.c:175
-#: plugins/videocodec/lqt_videocodec.c:176
 msgid "10 bit Packed YUV 4:4:4 (v410)"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:187
 #: plugins/videocodec/lqt_videocodec.c:188
-#: plugins/videocodec/lqt_videocodec.c:189
 msgid "8 bit Packed YUV 4:2:2 (yuv2)"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:200
 #: plugins/videocodec/lqt_videocodec.c:201
-#: plugins/videocodec/lqt_videocodec.c:202
 msgid "8 bit Packed YUV 4:2:2 (2vuy)"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:214
+#: plugins/videocodec/lqt_videocodec.c:213
 msgid "YUV 4:2:0 (yuv4)"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:215
+#: plugins/videocodec/lqt_videocodec.c:214
 msgid "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME"
 msgstr ""
 
+#: plugins/videocodec/lqt_videocodec.c:227
 #: plugins/videocodec/lqt_videocodec.c:228
-#: plugins/videocodec/lqt_videocodec.c:229
 msgid "8 bit Planar YUV 4:2:0 (yv12)"
 msgstr ""
 
@@ -1838,12 +1998,12 @@ msgstr ""
 msgid "Lossless video codec (RGB mode)"
 msgstr ""
 
-#: plugins/faad2/faad2.c:141
+#: plugins/faad2/faad2.c:142
 #, c-format
 msgid "faacDecDecode failed %s"
 msgstr ""
 
-#: plugins/faad2/faad2.c:331
+#: plugins/faad2/faad2.c:332
 msgid "No extradata found, decoding is doomed to failure"
 msgstr ""
 
@@ -1861,6 +2021,26 @@ msgstr ""
 
 #: plugins/audiocodec/lqt_audiocodec.c:43
 msgid "Format"
+msgstr ""
+
+#: plugins/audiocodec/lqt_audiocodec.c:46
+msgid "Integer (16 bit)"
+msgstr ""
+
+#: plugins/audiocodec/lqt_audiocodec.c:47
+msgid "Integer (24 bit)"
+msgstr ""
+
+#: plugins/audiocodec/lqt_audiocodec.c:48
+msgid "Integer (32 bit)"
+msgstr ""
+
+#: plugins/audiocodec/lqt_audiocodec.c:49
+msgid "Float (32 bit)"
+msgstr ""
+
+#: plugins/audiocodec/lqt_audiocodec.c:50
+msgid "Float (64 bit)"
 msgstr ""
 
 #: plugins/audiocodec/lqt_audiocodec.c:109
@@ -1949,6 +2129,18 @@ msgstr ""
 
 #: plugins/lame/lqt_lame.c:37
 msgid "Bitrate mode"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:40
+msgid "CBR"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:40
+msgid "ABR"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:40
+msgid "VBR"
 msgstr ""
 
 #: plugins/lame/lqt_lame.c:41

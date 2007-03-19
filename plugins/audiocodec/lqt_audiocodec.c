@@ -43,11 +43,11 @@
     .real_name = TRS("Format"),       \
     .type = LQT_PARAMETER_STRINGLIST, \
     .val_default = { .val_string = "Integer (16 bit)" }, \
-    .stringlist_options = (char*[]){ "Integer (16 bit)", \
-                                     "Integer (24 bit)", \
-                                     "Integer (32 bit)", \
-                                     "Float (32 bit)", \
-                                     "Float (64 bit)", \
+    .stringlist_options = (char*[]){ TRS("Integer (16 bit)"),   \
+                                     TRS("Integer (24 bit)"),   \
+                                     TRS("Integer (32 bit)"),   \
+                                     TRS("Float (32 bit)"),     \
+                                     TRS("Float (64 bit)"),     \
                                      (char*)0 } \
   }
 

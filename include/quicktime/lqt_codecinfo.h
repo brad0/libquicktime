@@ -127,6 +127,7 @@ typedef struct
   
   int num_stringlist_options; /*!< Number of options for \ref LQT_PARAMETER_STRINGLIST */
   char ** stringlist_options; /*!< Options for \ref LQT_PARAMETER_STRINGLIST */
+  char ** stringlist_labels;  /*!< Labels for \ref LQT_PARAMETER_STRINGLIST */
 
   char * help_string; /*!< Detailed help about the parameter */
   
@@ -189,6 +190,9 @@ typedef struct lqt_codec_info_s
   int module_index;          /*!< Index inside the module */
   
   uint32_t file_time;        /*!< File modification time of the module */
+
+  char * gettext_domain;     /*!< First argument to bindtextdomain(). Must be set only for externally packaged codecs */
+  char * gettext_directory;  /*!< Second argument to bindtextdomain(). Must be set only for externally packaged codecs */
   
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
   } lqt_codec_info_t;

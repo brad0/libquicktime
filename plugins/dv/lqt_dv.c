@@ -46,7 +46,6 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
        .val_default =        {DV_QUALITY_BEST},
        .val_min =            0,
        .val_max =            DV_QUALITY_BEST,
-       .stringlist_options = (char**)0
      },
 	 { 
        .name =               "dv_clamp_luma",
@@ -55,7 +54,6 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
        .val_default =        { 0 },
        .val_min =            0,
        .val_max =            1,
-       .stringlist_options = (char**)0
      },
 	 { 
        .name =               "dv_clamp_chroma",
@@ -64,7 +62,6 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
        .val_default =        { 0 },
        .val_min =            0,
        .val_max =            1,
-       .stringlist_options = (char**)0
      },
 	 { 
        .name =               "dv_add_ntsc_setup",
@@ -73,7 +70,6 @@ static lqt_parameter_info_static_t decode_parameters_dv[] =
        .val_default =        { 0 },
        .val_min =            0,
        .val_max =            1,
-       .stringlist_options = (char**)0
      },
      { /* End of parameters */ }
   };

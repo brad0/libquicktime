@@ -35,6 +35,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include <libintl.h>
+
 #define LOG_DOMAIN "codecinfo"
 
 /* Public function (lqt.h) */
@@ -129,6 +131,12 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
           free(p->stringlist_options[i]);
         free(p->stringlist_options);
         }
+      if(p->stringlist_labels)
+        {
+        for(i = 0; i < p->num_stringlist_options; i++)
+          free(p->stringlist_labels[i]);
+        free(p->stringlist_labels);
+        }
       break;
     default: /* Keep gcc quiet */
       break;
@@ -160,6 +168,10 @@ void destroy_codec_info(lqt_codec_info_t * ptr)
   if(ptr->module_filename)        /* Module filename       */
     free(ptr->module_filename);
 
+  if(ptr->gettext_domain)
+    free(ptr->gettext_domain);
+  if(ptr->gettext_directory)
+    free(ptr->gettext_directory);
   
   if(ptr->encoding_parameters)
     {
@@ -208,17 +220,17 @@ static void copy_parameter_value(lqt_parameter_value_t * dst,
 
 static void
 copy_parameter_info(lqt_parameter_info_t * ret,
-                    const lqt_parameter_info_t * info)
+                    const lqt_parameter_info_t * info, const char * gettext_domain)
   {
   int i;
   
   if(info->name)
     ret->name = __lqt_strdup(info->name);
   if(info->real_name)
-    ret->real_name = __lqt_strdup(info->real_name);
+    ret->real_name = __lqt_strdup(dgettext(gettext_domain, info->real_name));
   if(info->help_string)
-    ret->help_string = __lqt_strdup(info->help_string);
-
+    ret->help_string = __lqt_strdup(dgettext(gettext_domain, info->help_string));
+  
   ret->type = info->type;
 
   switch(ret->type)
@@ -238,10 +250,16 @@ copy_parameter_info(lqt_parameter_info_t * ret,
       ret->num_stringlist_options = info->num_stringlist_options;
       ret->stringlist_options = calloc(ret->num_stringlist_options,
                                        sizeof(char*));
-
+      ret->stringlist_labels = calloc(ret->num_stringlist_options,
+                                      sizeof(char*));
+      
       for(i = 0; i < ret->num_stringlist_options; i++)
+        {
         ret->stringlist_options[i] =
           __lqt_strdup(info->stringlist_options[i]);
+        ret->stringlist_labels[i] =
+          __lqt_strdup(dgettext(gettext_domain, info->stringlist_labels[i]));
+        }
 
       break;
     case LQT_PARAMETER_SECTION: /* String with options */
@@ -262,8 +280,20 @@ static lqt_codec_info_t *
 copy_codec_info(const lqt_codec_info_t * info)
   {
   int i;
+  const char * gettext_domain;
   lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
 
+  if(info->gettext_domain && info->gettext_directory)
+    {
+    bindtextdomain(info->gettext_domain, info->gettext_directory);
+    gettext_domain = info->gettext_domain;
+    }
+  else
+    {
+    bindtextdomain(PACKAGE, LOCALE_DIR);
+    gettext_domain = PACKAGE;
+    }
+  
   ret->compatibility_flags = info->compatibility_flags;
     
   if(info->name)
@@ -308,7 +338,7 @@ copy_codec_info(const lqt_codec_info_t * info)
 
     for(i = 0; i < ret->num_encoding_parameters; i++)
       copy_parameter_info(&(ret->encoding_parameters[i]),
-                          &(info->encoding_parameters[i]));
+                          &(info->encoding_parameters[i]), gettext_domain);
     }
 
   ret->num_decoding_parameters = info->num_decoding_parameters;
@@ -319,7 +349,7 @@ copy_codec_info(const lqt_codec_info_t * info)
 
     for(i = 0; i < ret->num_decoding_parameters; i++)
       copy_parameter_info(&(ret->decoding_parameters[i]),
-                          &(info->decoding_parameters[i]));
+                          &(info->decoding_parameters[i]), gettext_domain);
     }
   return ret;
   }
@@ -898,7 +928,26 @@ create_parameter_info(lqt_parameter_info_t * ret,
       for(i = 0; i < ret->num_stringlist_options; i++)
         {
           ret->stringlist_options[i] =
-          __lqt_strdup(info->stringlist_options[i]);
+            __lqt_strdup(info->stringlist_options[i]);
+        }
+
+      /* Labels */
+      ret->stringlist_labels = malloc(ret->num_stringlist_options * sizeof(char *));
+      if(info->stringlist_labels)
+        {
+        for(i = 0; i < ret->num_stringlist_options; i++)
+          {
+          ret->stringlist_labels[i] =
+            __lqt_strdup(info->stringlist_labels[i]);
+          }
+        }
+      else
+        {
+        for(i = 0; i < ret->num_stringlist_options; i++)
+          {
+          ret->stringlist_labels[i] =
+            __lqt_strdup(info->stringlist_options[i]);
+          }
         }
       break;
     default:
@@ -927,6 +976,11 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
   ret->long_name =   __lqt_strdup(template->long_name);
   ret->description = __lqt_strdup(template->description);
 
+  if(template->gettext_domain)
+    ret->gettext_domain = __lqt_strdup(template->gettext_domain);
+  if(template->gettext_directory)
+    ret->gettext_directory = __lqt_strdup(template->gettext_directory);
+  
   ret->type      = template->type;
   ret->direction = template->direction;
 

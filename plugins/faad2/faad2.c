@@ -27,6 +27,7 @@
 #include <quicktime/lqt_codecapi.h>
 #include <faad.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define LOG_DOMAIN "faad2"
 
