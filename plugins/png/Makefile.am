@@ -1,4 +1,5 @@
-AM_CFLAGS = @PNG_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @PNG_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_png.la
 

@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 # These are always here
 
 base_subdirs = audiocodec \

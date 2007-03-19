@@ -1,4 +1,5 @@
-AM_CFLAGS = @VORBIS_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @VORBIS_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_vorbis.la
 

@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 EXTRA_DIST = \
 mainpage.incl \
 api_usage.html \

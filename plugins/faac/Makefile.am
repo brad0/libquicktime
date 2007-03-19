@@ -1,4 +1,5 @@
-AM_CFLAGS = @FAAC_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @FAAC_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_faac.la
 

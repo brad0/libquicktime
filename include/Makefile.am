@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 SUBDIRS = quicktime
 
 noinst_HEADERS = \

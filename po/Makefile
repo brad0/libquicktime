@@ -20,8 +20,8 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /usr/local
-exec_prefix = /usr/local
+prefix = /opt/gmerlin
+exec_prefix = /opt/gmerlin
 datadir = ${prefix}/share
 localedir = $(datadir)/locale
 gettextsrcdir = $(datadir)/gettext/po

@@ -1,4 +1,7 @@
+localedir = $(datadir)/locale
 lib_LTLIBRARIES= libquicktime.la
+
+AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 
 #
 # Library dependencies

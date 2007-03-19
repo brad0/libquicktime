@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 # libquicktime top-level Makefile.am
 
 # aclocal Path

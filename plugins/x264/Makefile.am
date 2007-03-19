@@ -1,4 +1,5 @@
-AM_CFLAGS = @X264_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @X264_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_x264.la
 

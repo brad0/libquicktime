@@ -1,4 +1,5 @@
-AM_CFLAGS = @AVCODEC_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @AVCODEC_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_ffmpeg.la
 

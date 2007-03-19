@@ -1,8 +1,8 @@
-
+localedir = $(datadir)/locale
 noinst_HEADERS = \
 libmjpeg.h 
 
-AM_CFLAGS = @JPEG_CFLAGS@
+AM_CFLAGS = @JPEG_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_mjpeg.la
 

@@ -1,4 +1,5 @@
-AM_CFLAGS = @LIBDV_CFLAGS@
+localedir = $(datadir)/locale
+AM_CFLAGS = @LIBDV_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 pkglib_LTLIBRARIES = lqt_dv.la
 

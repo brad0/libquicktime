@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 libquicktimeincludedir = $(includedir)/lqt
 
 libquicktimeinclude_HEADERS = \

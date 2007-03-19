@@ -1,8 +1,11 @@
+localedir = $(datadir)/locale
 if HAVE_GTK
 gtk_subdirs=gtk
 else
 gtk_subdirs=
 endif
+
+AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 
 SUBDIRS = $(gtk_subdirs)
 

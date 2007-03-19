@@ -1,3 +1,4 @@
+localedir = $(datadir)/locale
 EXTRA_DIST = \
 changelog \
 control \

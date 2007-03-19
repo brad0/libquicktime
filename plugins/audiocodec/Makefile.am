@@ -1,4 +1,5 @@
-
+localedir = $(datadir)/locale
+AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 pkglib_LTLIBRARIES = lqt_audiocodec.la
 
 lqt_audiocodec_la_SOURCES = \
