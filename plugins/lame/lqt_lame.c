@@ -34,55 +34,55 @@ static lqt_parameter_info_static_t encode_parameters_lame[] =
   {
     {
       .name =        "mp3_bitrate_mode",
-      .real_name =   "Bitrate mode",
+      .real_name =   TRS("Bitrate mode"),
       .type =        LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "CBR" },
       .stringlist_options = (char*[]){ "CBR", "ABR", "VBR", (char*)0 },
-      .help_string = "CBR: Constant bitrate\nVBR: Variable bitrate\n"
-                     "ABR: Average bitrate"
+      .help_string = TRS("CBR: Constant bitrate\nVBR: Variable bitrate\n"
+                         "ABR: Average bitrate")
     },
     { 
       .name =        "mp3_bitrate",
-      .real_name =   "Nominal Bitrate (ABR/CBR)",
+      .real_name =   TRS("Nominal Bitrate (ABR/CBR)"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { 256000 },
-      .help_string = "Bitrate in bits per second. For CBR, this must be a "
-                     "valid MP3 bitrate"
+      .help_string = TRS("Bitrate in bits per second. For CBR, this must be a "
+                         "valid MP3 bitrate")
     },
     { 
       .name =        "mp3_bitrate_min",
-      .real_name =   "Minimum Bitrate (ABR)",
+      .real_name =   TRS("Minimum Bitrate (ABR)"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { 64000 },
-      .help_string = "Minimum ABR bitrate in bits per second. This must be a "
-                     "valid MP3 bitrate"
+      .help_string = TRS("Minimum ABR bitrate in bits per second. This must be a "
+                         "valid MP3 bitrate")
     },
     { 
       .name =        "mp3_bitrate_max",
-      .real_name =   "Maximum Bitrate (ABR)",
+      .real_name =   TRS("Maximum Bitrate (ABR)"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { 320000 },
-      .help_string = "Maximum ABR bitrate in bits per second. This must be a "
-                     "valid MP3 bitrate"
+      .help_string = TRS("Maximum ABR bitrate in bits per second. This must be a "
+                         "valid MP3 bitrate")
     },
     {
       .name =        "mp3_quality",
-      .real_name =   "Quality (0 = best)",
+      .real_name =   TRS("Quality (0 = best)"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { 0 },
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 9 },
-      .help_string = "0: Slowest encoding, best quality\n"
-                     "9: Fastest encoding, worst quality"
+      .help_string = TRS("0: Slowest encoding, best quality\n"
+                         "9: Fastest encoding, worst quality")
     },
     {
       .name =        "mp3_quality_vbr",
-      .real_name =   "VBR Quality (0 = best)",
+      .real_name =   TRS("VBR Quality (0 = best)"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { 0 },
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 9 },
-      .help_string = "VBR Quality level. 0: best, 9: worst"
+      .help_string = TRS("VBR Quality level. 0: best, 9: worst")
     },
     { /* End of paramaters */ }
   };
@@ -90,8 +90,8 @@ static lqt_parameter_info_static_t encode_parameters_lame[] =
 static lqt_codec_info_static_t codec_info_lame =
   {
     .name =                "lame",
-    .long_name =           "Lame mp3 encoder",
-    .description =         "Lame mp3 encoder (see http://www.mp3dev.org)",
+    .long_name =           TRS("Lame mp3 encoder"),
+    .description =         TRS("Lame mp3 encoder (see http://www.mp3dev.org)"),
     .fourccs =             fourccs_mp3,
     .wav_ids =             (int[]){ 0x55, LQT_WAV_ID_NONE },
     .type =                LQT_CODEC_AUDIO,

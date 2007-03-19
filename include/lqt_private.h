@@ -33,6 +33,12 @@
 #  define __attribute__(x)
 #endif
 
+/* Translation for static strings
+   this macro does nothing but allows xgettext to extrack statically
+   initialized strings */
+
+#define TRS(s) (s)
+
 #include "lqt_funcprotos.h"
 #include <quicktime/qtprivate.h>
 

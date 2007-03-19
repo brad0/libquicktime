@@ -30,7 +30,7 @@
 #define PARAM_ENDIAN \
   { \
     .name = "pcm_little_endian", \
-    .real_name = "Little endian", \
+    .real_name = TRS("Little endian"),          \
     .type = LQT_PARAMETER_INT, \
     .val_min = { .val_int = 0 }, \
     .val_max = { .val_int = 1 }, \
@@ -40,7 +40,7 @@
 #define PARAM_FORMAT \
   { \
     .name = "pcm_format", \
-    .real_name = "Format", \
+    .real_name = TRS("Format"),       \
     .type = LQT_PARAMETER_STRINGLIST, \
     .val_default = { .val_string = "Integer (16 bit)" }, \
     .stringlist_options = (char*[]){ "Integer (16 bit)", \
@@ -106,9 +106,9 @@ static lqt_parameter_info_static_t lpcm_parameters[] =
 static lqt_codec_info_static_t codec_info_ima4 =
   {
     .name =                "ima4",
-    .long_name =           "ima4",
-    .description =         "The IMA4 compressor reduces 16 bit audio data to \
-1/4 size, with very good quality",
+    .long_name =           TRS("ima4"),
+    .description =         TRS("The IMA4 compressor reduces 16 bit audio data to \
+1/4 size, with very good quality"),
     .fourccs =             fourccs_ima4,
     .wav_ids =             (int[]){ 0x11, LQT_WAV_ID_NONE },
     .type =                LQT_CODEC_AUDIO,
@@ -121,9 +121,9 @@ static lqt_codec_info_static_t codec_info_ima4 =
 static lqt_codec_info_static_t codec_info_raw =
   {
     .name =                "rawaudio",
-    .long_name =           "Raw 8 bit audio",
-    .description =         "Don't use this for anything better than telephone \
-quality",
+    .long_name =           TRS("Raw 8 bit audio"),
+    .description =         TRS("Don't use this for anything better than telephone \
+quality"),
     .fourccs =             fourccs_raw,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -135,9 +135,9 @@ quality",
 static lqt_codec_info_static_t codec_info_twos =
   {
     .name =                "twos",
-    .long_name =           "Twos",
-    .description =         "Twos is the preferred encoding for uncompressed \
-audio",
+    .long_name =           TRS("Twos"),
+    .description =         TRS("Twos is the preferred encoding for uncompressed \
+audio"),
     .fourccs =             fourccs_twos,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -149,8 +149,8 @@ audio",
 static lqt_codec_info_static_t codec_info_in24 =
   {
     .name =                "in24",
-    .long_name =           "24 bit PCM",
-    .description =         "24 bit PCM",
+    .long_name =           TRS("24 bit PCM"),
+    .description =         TRS("24 bit PCM"),
     .fourccs =             fourccs_in24,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -162,8 +162,8 @@ static lqt_codec_info_static_t codec_info_in24 =
 static lqt_codec_info_static_t codec_info_in32 =
   {
     .name =                "in32",
-    .long_name =           "32 bit PCM",
-    .description =         "32 bit PCM",
+    .long_name =           TRS("32 bit PCM"),
+    .description =         TRS("32 bit PCM"),
     .fourccs =             fourccs_in32,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -178,8 +178,8 @@ static lqt_codec_info_static_t codec_info_in32 =
 static lqt_codec_info_static_t codec_info_fl32 =
   {
     .name =                "fl32",
-    .long_name =           "32 bit float",
-    .description =         "32 bit float",
+    .long_name =           TRS("32 bit float"),
+    .description =         TRS("32 bit float"),
     .fourccs =             fourccs_fl32,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -191,8 +191,8 @@ static lqt_codec_info_static_t codec_info_fl32 =
 static lqt_codec_info_static_t codec_info_fl64 =
   {
     .name =                "fl64",
-    .long_name =           "64 bit float",
-    .description =         "64 bit float",
+    .long_name =           TRS("64 bit float"),
+    .description =         TRS("64 bit float"),
     .fourccs =             fourccs_fl64,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -204,8 +204,8 @@ static lqt_codec_info_static_t codec_info_fl64 =
 static lqt_codec_info_static_t codec_info_ulaw =
   {
     .name =                "ulaw",
-    .long_name =           "Ulaw",
-    .description =         "Ulaw",
+    .long_name =           TRS("Ulaw"),
+    .description =         TRS("Ulaw"),
     .fourccs =             fourccs_ulaw,
     .wav_ids =             (int[]){ 0x07, LQT_WAV_ID_NONE },
     .type =                LQT_CODEC_AUDIO,
@@ -233,8 +233,8 @@ static lqt_codec_info_static_t codec_info_alaw =
 static lqt_codec_info_static_t codec_info_sowt =
   {
     .name =                "sowt",
-    .long_name =           "Sowt",
-    .description =         "8/16/24 bit PCM Little endian",
+    .long_name =           TRS("Sowt"),
+    .description =         TRS("8/16/24 bit PCM Little endian"),
     .fourccs =             fourccs_sowt,
     .wav_ids =             (int[]){ 0x01, LQT_WAV_ID_NONE },
     .type =                LQT_CODEC_AUDIO,
@@ -247,8 +247,8 @@ static lqt_codec_info_static_t codec_info_sowt =
 static lqt_codec_info_static_t codec_info_lpcm =
   {
     .name =                "lpcm",
-    .long_name =           "Linear PCM (QT 7)",
-    .description =         "Linear PCM encoder",
+    .long_name =           TRS("Linear PCM (QT 7)"),
+    .description =         TRS("Linear PCM encoder"),
     .fourccs =             fourccs_lpcm,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,

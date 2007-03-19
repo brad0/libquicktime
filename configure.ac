@@ -64,6 +64,13 @@ AC_SYS_LARGEFILE
 
 AC_CACHE_SAVE
 
+dnl
+dnl Gettext
+dnl
+
+AM_GNU_GETTEXT([external])
+
+
 dnl This is necessary for libtool assembler support
 
 AS=gcc
@@ -727,7 +734,8 @@ AC_SUBST(LQT_LIBS)
 
 dnl Write all the makefiles and other stuff
 
-AC_OUTPUT([Makefile \
+AC_OUTPUT([Makefile 
+po/Makefile.in \
 libquicktime.spec \
 libquicktime.pc \
 doc/Makefile \

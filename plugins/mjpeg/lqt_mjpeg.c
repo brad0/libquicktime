@@ -40,7 +40,7 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
   {
     { 
       .name =        "jpeg_quality",
-      .real_name =   "Quality",
+      .real_name =   TRS("Quality"),
       .type =        LQT_PARAMETER_INT,
       .val_default = { .val_int = 95 },
       .val_min =     { .val_int = 1 },
@@ -48,7 +48,7 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
      },
      { 
        .name =        "jpeg_usefloat",
-       .real_name =   "Use float",
+       .real_name =   TRS("Use float"),
        .type =        LQT_PARAMETER_INT,
        .val_default = { .val_int = 0 },
        .val_min =     { .val_int = 0 },
@@ -61,9 +61,9 @@ static lqt_parameter_info_static_t encode_parameters_jpeg[] =
 static lqt_codec_info_static_t codec_info_jpeg =
   {
     .name =                "jpeg",
-    .long_name =           "Jpeg photo",
-    .description =         "This format writes a seperate JPEG photo for \
-every frame in YUV 4:2:0",
+    .long_name =           TRS("JPEG photo"),
+    .description =         TRS("This format writes a seperate JPEG photo for \
+every frame in YUV 4:2:0"),
     .fourccs =             fourccs_jpeg,
     .type =                LQT_CODEC_VIDEO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -76,9 +76,9 @@ every frame in YUV 4:2:0",
 static lqt_codec_info_static_t codec_info_mjpa =
   {
     .name =                "mjpa",
-    .long_name =           "Motion Jpeg A",
-    .description =         "MJPA stores each frame as two JPEGs interlaced \
-and in YUV 4:2:2",
+    .long_name =           TRS("Motion Jpeg A"),
+    .description =         TRS("MJPA stores each frame as two JPEGs interlaced \
+and in YUV 4:2:2"),
     .fourccs =             fourccs_mjpa,
     .type =                LQT_CODEC_VIDEO,
     .direction =           LQT_DIRECTION_BOTH,

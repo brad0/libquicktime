@@ -3,9 +3,9 @@
 # aclocal Path
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = doc src include plugins utils
+SUBDIRS = doc src include plugins utils po
 
-EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4 libquicktime.pc.in cpuinfo.sh Doxyfile
+EXTRA_DIST = config.rpath mkinstalldirs  libquicktime.spec autogen.sh lqt.m4 libquicktime.pc.in cpuinfo.sh Doxyfile
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA=libquicktime.pc

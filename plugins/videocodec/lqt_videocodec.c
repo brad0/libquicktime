@@ -72,7 +72,7 @@ static lqt_parameter_info_static_t dummy_parameters[] =
   {
      {
        .name =               "dummy_string_test",
-       .real_name =          "String Test",
+       .real_name =          TRS("String Test"),
        .type =               LQT_PARAMETER_STRING,
        .val_default =        { (int)"String Test" },
        .val_min =            0,
@@ -81,7 +81,7 @@ static lqt_parameter_info_static_t dummy_parameters[] =
      },
      { 
        .name =               "dummy_stringlist_test",
-       .real_name =          "Stringlist test",
+       .real_name =          TRS("Stringlist test"),
        .type =               LQT_PARAMETER_STRINGLIST,
        .val_default =        { (int)"Option1" },
        .val_min =            0,
@@ -96,8 +96,8 @@ static lqt_parameter_info_static_t dummy_parameters[] =
 static lqt_codec_info_static_t codec_info_raw =
   {
   .name =                "raw",
-  .long_name =           "RGB uncompressed",
-  .description =         "RGB uncompressed.",
+  .long_name =           TRS("RGB uncompressed"),
+  .description =         TRS("RGB uncompressed."),
   .fourccs =             fourccs_raw,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -114,8 +114,8 @@ static lqt_codec_info_static_t codec_info_raw =
 static lqt_codec_info_static_t codec_info_rawalpha =
   {
   .name =                "rawalpha",
-  .long_name =           "RGBA uncompressed",
-  .description =         "RGBA uncompressed",
+  .long_name =           TRS("RGBA uncompressed"),
+  .description =         TRS("RGBA uncompressed"),
   .fourccs =             fourccs_raw,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_ENCODE,
@@ -133,8 +133,8 @@ static lqt_codec_info_static_t codec_info_rawalpha =
 static lqt_codec_info_static_t codec_info_v210 =
   {
   .name =                "v210",
-  .long_name =           "10 bit Packed YUV 4:2:2 (v210)",
-  .description =         "10 bit Packed YUV 4:2:2 (v210)",
+  .long_name =           TRS("10 bit packed YUV 4:2:2 (v210)"),
+  .description =         TRS("10 bit packed YUV 4:2:2 (v210)"),
   .fourccs =             fourccs_v210,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -146,8 +146,8 @@ static lqt_codec_info_static_t codec_info_v210 =
 static lqt_codec_info_static_t codec_info_v308 =
   {
   .name =                "v308",
-  .long_name =           "8 bit Planar YUV 4:4:4 (v308)",
-  .description =         "8 bit Planar YUV 4:4:4 (v308)",
+  .long_name =           TRS("8 bit planar YUV 4:4:4 (v308)"),
+  .description =         TRS("8 bit planar YUV 4:4:4 (v308)"),
   .fourccs =             fourccs_v308,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -159,8 +159,8 @@ static lqt_codec_info_static_t codec_info_v308 =
 static lqt_codec_info_static_t codec_info_v408 =
   {
   .name =                "v408",
-  .long_name =           "8 bit Planar YUVA 4:4:4:4 (v408)",
-  .description =         "8 bit Planar YUVA 4:4:4:4 (v408)",
+  .long_name =           TRS("8 bit Planar YUVA 4:4:4:4 (v408)"),
+  .description =         TRS("8 bit Planar YUVA 4:4:4:4 (v408)"),
   .fourccs =             fourccs_v408,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -172,8 +172,8 @@ static lqt_codec_info_static_t codec_info_v408 =
 static lqt_codec_info_static_t codec_info_v410 =
   {
   .name =                "v410",
-  .long_name =           "10 bit Packed YUV 4:4:4 (v410)",
-  .description =         "10 bit Packed YUV 4:4:4 (v410)",
+  .long_name =           TRS("10 bit Packed YUV 4:4:4 (v410)"),
+  .description =         TRS("10 bit Packed YUV 4:4:4 (v410)"),
   .fourccs =             fourccs_v410,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -185,8 +185,8 @@ static lqt_codec_info_static_t codec_info_v410 =
 static lqt_codec_info_static_t codec_info_yuv2 =
   {
   .name =                "yuv2",
-  .long_name =           "8 bit Packed YUV 4:2:2 (yuv2)",
-  .description =         "8 bit Packed YUV 4:2:2 (yuv2)",
+  .long_name =           TRS("8 bit Packed YUV 4:2:2 (yuv2)"),
+  .description =         TRS("8 bit Packed YUV 4:2:2 (yuv2)"),
   .fourccs =             fourccs_yuv2,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -198,8 +198,8 @@ static lqt_codec_info_static_t codec_info_yuv2 =
 static lqt_codec_info_static_t codec_info_2vuy =
   {
   .name =                "2vuy",
-  .long_name =           "8 bit Packed YUV 4:2:2 (2vuy)",
-  .description =         "8 bit Packed YUV 4:2:2 (2vuy)",
+  .long_name =           TRS("8 bit Packed YUV 4:2:2 (2vuy)"),
+  .description =         TRS("8 bit Packed YUV 4:2:2 (2vuy)"),
   .fourccs =             fourccs_2vuy,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -211,9 +211,9 @@ static lqt_codec_info_static_t codec_info_2vuy =
 static lqt_codec_info_static_t codec_info_yuv4 =
   {
   .name =                "yuv4",
-  .long_name =           "YUV 4:2:0 (yuv4)", 
-  .description =         "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD \
-QUICKTIME",
+  .long_name =           TRS("YUV 4:2:0 (yuv4)"), 
+  .description =         TRS("YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD \
+QUICKTIME"),
   .fourccs =             fourccs_yuv4,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,
@@ -225,8 +225,8 @@ QUICKTIME",
 static lqt_codec_info_static_t codec_info_yv12 =
   {
   .name =                "yv12",
-  .long_name =           "8 bit Planar YUV 4:2:0 (yv12)",
-  .description =         "8 bit Planar YUV 4:2:0 (yv12)",
+  .long_name =           TRS("8 bit Planar YUV 4:2:0 (yv12)"),
+  .description =         TRS("8 bit Planar YUV 4:2:0 (yv12)"),
   .fourccs =             fourccs_yv12,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_BOTH,

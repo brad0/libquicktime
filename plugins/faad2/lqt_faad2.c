@@ -32,8 +32,8 @@ static char * fourccs_faad2[]     = { "mp4a", (char*)0 };
 static lqt_codec_info_static_t codec_info_faad2 =
   {
     .name =                "faad2",
-    .long_name =           "MPEG-2/4 AAC decoder",
-    .description =         "MPEG-2/4 AAC decoder (faad2 based)",
+    .long_name =           TRS("MPEG-2/4 AAC decoder"),
+    .description =         TRS("MPEG-2/4 AAC decoder (faad2 based)"),
     .fourccs =             fourccs_faad2,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_DECODE,

@@ -33,13 +33,13 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
   {
      { 
        .name =        "vorbis_bitrate",
-       .real_name =   "Nominal Bitrate",
+       .real_name =   TRS("Nominal Bitrate"),
        .type =        LQT_PARAMETER_INT,
        .val_default = { .val_int = 128000 },
      },
      { 
        .name =        "vorbis_vbr",
-       .real_name =   "Use variable bitrate",
+       .real_name =   TRS("Use variable bitrate"),
        .type =        LQT_PARAMETER_INT,
        .val_default = { .val_int = 1 },
        .val_min =     { .val_int = 0 },
@@ -47,7 +47,7 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
      },
      {          
        .name =        "vorbis_max_bitrate",
-       .real_name =   "Maximum Bitrate (-1 = no limit)",
+       .real_name =   TRS("Maximum Bitrate (-1 = no limit)"),
        .type =        LQT_PARAMETER_INT,
        .val_default = { .val_int = -1 },
        .val_min =     { .val_int = 0 },
@@ -55,7 +55,7 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
      },
      { 
        .name =        "vorbis_min_bitrate",
-       .real_name =   "Minimum Bitrate (-1 = no limit)",
+       .real_name =   TRS("Minimum Bitrate (-1 = no limit)"),
        .type =        LQT_PARAMETER_INT,
        .val_default = { .val_int = -1 },
        .val_min =     { .val_int = 0 },
@@ -67,8 +67,8 @@ static lqt_parameter_info_static_t encode_parameters_vorbis[] =
 static lqt_codec_info_static_t codec_info_vorbis =
   {
     .name =                "vorbis",
-    .long_name =           "Ogg Vorbis (qt4l compatible)",
-    .description =         "Patent free audio codec (see http://www.vorbis.com)",
+    .long_name =           TRS("Ogg Vorbis (qt4l compatible)"),
+    .description =         TRS("Patent free audio codec (see http://www.vorbis.com)"),
     .fourccs =             fourccs_vorbis,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,
@@ -80,8 +80,8 @@ static lqt_codec_info_static_t codec_info_vorbis =
 static lqt_codec_info_static_t codec_info_vorbis_qt =
   {
     .name =                "vorbis_qt",
-    .long_name =           "Ogg Vorbis (qtcomponents compatible)",
-    .description =         "Patent free audio codec (see http://www.vorbis.com)",
+    .long_name =           TRS("Ogg Vorbis (qtcomponents compatible)"),
+    .description =         TRS("Patent free audio codec (see http://www.vorbis.com)"),
     .fourccs =             fourccs_vorbis_qt,
     .type =                LQT_CODEC_AUDIO,
     .direction =           LQT_DIRECTION_BOTH,

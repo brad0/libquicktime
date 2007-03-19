@@ -44,7 +44,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_AUDIO \
   { \
     .name =        "bit_rate_audio", \
-    .real_name =   "Bit rate (kbps)", \
+    .real_name =   TRS("Bit rate (kbps)"),      \
     .type =        LQT_PARAMETER_INT, \
     .val_default = { .val_int = 128 }, \
   }
@@ -52,7 +52,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_RATECONTROL \
   { \
     .name =      "rate_control", \
-    .real_name = "Rate control", \
+    .real_name = TRS("Rate control"),   \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_BITRATE_VIDEO, \
@@ -66,7 +66,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_QUANTIZER_I \
   { \
     .name =      "quantizer", \
-    .real_name = "Quantizer", \
+    .real_name = TRS("Quantizer"),      \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_QMIN, \
@@ -92,7 +92,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_FRAMETYPES_IP \
   { \
     .name =      "frame_types", \
-    .real_name = "Frame types", \
+    .real_name = TRS("Frame types"),    \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
   PARAM_GOP_SIZE, \
@@ -109,11 +109,11 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_ME \
   { \
     .name =      "motion_estimation", \
-    .real_name = "Motion estimation", \
+    .real_name = TRS("Motion estimation"),      \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
-    PARAM_ME_METHOD, \
-    PARAM_ME_CMP,\
+    PARAM_ME_METHOD,                      \
+    PARAM_ME_CMP,                      \
     PARAM_ME_CMP_CHROMA,\
     PARAM_ME_RANGE,\
     PARAM_ME_THRESHOLD,\
@@ -123,7 +123,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_ME_PRE \
   { \
     .name =      "motion_estimation", \
-    .real_name = "ME pre-pass", \
+    .real_name = TRS("ME pre-pass"),    \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_PRE_ME,\
@@ -134,7 +134,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_QPEL \
   { \
     .name =      "qpel_motion_estimation", \
-    .real_name = "Qpel ME", \
+    .real_name = TRS("Qpel ME"),           \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_FLAG_QPEL, \
@@ -146,7 +146,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_MASKING \
   { \
     .name =      "masking", \
-    .real_name = "Masking", \
+    .real_name = TRS("Masking"),        \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_LUMI_MASKING, \
@@ -160,7 +160,7 @@ int ffmpeg_num_video_codecs = -1;
 #define ENCODE_PARAM_VIDEO_MISC \
   { \
     .name =      "misc", \
-    .real_name = "Misc", \
+    .real_name = TRS("Misc"),           \
     .type =      LQT_PARAMETER_SECTION, \
   }, \
     PARAM_STRICT_STANDARD_COMPLIANCE, \
@@ -298,7 +298,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "mpg1",
-      .name = "Mpeg 1 Video",
+      .name = TRS("FFMPEG Mpeg 1 Video"),
       .fourccs = { "mpg1", "MPG1", "pim1", "PIM1", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE }
     },
@@ -310,7 +310,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_mpeg4,
       .decode_parameters = decode_parameters_video,
       .short_name = "mpg4",
-      .name = "MPEG-4",
+      .name = TRS("FFMPEG MPEG-4"),
       .fourccs = { "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s",
                    "M4S2", "m4s2", "xvid", "XVID", "XviD", "DX50",
                    "dx50", "DIVX", "MP4V", "3IV2", (char *)0 },
@@ -326,7 +326,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "msmpeg4v1",
-      .name = "MSMpeg 4v1",
+      .name = TRS("FFMPEG MSMpeg 4v1"),
       .fourccs = { "DIV1", "div1", "MPG4", "mpg4", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -337,7 +337,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "msmpeg4v2",
-      .name = "MSMpeg 4v2",
+      .name = TRS("FFMPEG MSMpeg 4v2"),
       .fourccs = { "DIV2", "div2", "MP42", "mp42", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -349,7 +349,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_msmpeg4v3,
       .decode_parameters = decode_parameters_video,
       .short_name = "msmpeg4v3",
-      .name = "MSMpeg 4v3 (DivX 3 compatible)",
+      .name = TRS("FFMPEG MSMpeg 4v3 (DivX 3 compatible)"),
       .fourccs = { "DIV3", "mpg3", "MP43", "mp43", "DIV5", "div5", "DIV6",
                    "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                    "3IVD", (char *)0 },
@@ -366,7 +366,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_mpegvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "wmv1",
-      .name = "WMV1",
+      .name = TRS("FFMPEG WMV1"),
       .fourccs = { "WMV1", "wmv1", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -379,7 +379,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_h263,
       .decode_parameters = decode_parameters_video,
       .short_name = "h263",
-      .name = "H263",
+      .name = TRS("FFMPEG H263"),
       .fourccs = { "H263", "h263", "U263", "u263", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -392,7 +392,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "h264",
-      .name = "H264",
+      .name = TRS("FFMPEG H264"),
       .fourccs = { "avc1", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -404,7 +404,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_h263p,
       .decode_parameters = decode_parameters_video,
       .short_name = "h263p",
-      .name = "H263+",
+      .name = TRS("FFMPEG H263+"),
       .fourccs = { "U263", "u263", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -417,7 +417,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "i263",
-      .name = "I263",
+      .name = TRS("FFMPEG I263"),
       .fourccs = { "I263", "i263", "viv1", "VIV1", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -428,7 +428,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "svq1",
-      .name = "Sorenson Video 1",
+      .name = TRS("FFMPEG Sorenson Video 1"),
       .fourccs = { "SVQ1", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -439,7 +439,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "svq3",
-      .name = "Sorenson Video 3",
+      .name = TRS("FFMPEG Sorenson Video 3"),
       .fourccs = { "SVQ3", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -451,7 +451,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_mjpeg,
       .decode_parameters = decode_parameters_video,
       .short_name = "mjpg",
-      .name = "MJPEG",
+      .name = TRS("FFMPEG MJPEG"),
       .fourccs = { "MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_AVI,
@@ -464,7 +464,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .encode_parameters = encode_parameters_mjpeg,
       .short_name = "mjpegb",
-      .name = "MotionJPEG-B",
+      .name = TRS("FFMPEG Motion JPEG-B"),
       .fourccs = { "mjpb", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -477,7 +477,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "TGA",
-      .name = "Targa",
+      .name = TRS("FFMPEG Targa"),
       .fourccs = { "tga ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -489,7 +489,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "TIFF",
-      .name = "TIFF",
+      .name = TRS("FFMPEG TIFF"),
       .fourccs = { "tiff", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -500,7 +500,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "8BPS",
-      .name = "Quicktime Planar RGB (8BPS)",
+      .name = TRS("FFMPEG Quicktime Planar RGB (8BPS)"),
       .fourccs = { "8BPS", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -511,7 +511,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "indeo",
-      .name = "Intel Indeo 3",
+      .name = TRS("FFMPEG Intel Indeo 3"),
       .fourccs = { "IV31", "IV32", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -521,7 +521,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "rpza",
-      .name = "Apple Video",
+      .name = TRS("FFMPEG Apple Video"),
       .fourccs = { "rpza", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -531,7 +531,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "smc",
-      .name = "Apple Graphics",
+      .name = TRS("FFMPEG Apple Graphics"),
       .fourccs = { "smc ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -542,7 +542,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "cinepak",
-      .name = "Cinepak",
+      .name = TRS("FFMPEG Cinepak"),
       .fourccs = { "cvid", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -553,7 +553,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .short_name = "cyuv",
-      .name = "Creative YUV",
+      .name = TRS("FFMPEG Creative YUV"),
       .fourccs = { "CYUV", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -563,7 +563,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "rle",
-      .name = "RLE",
+      .name = TRS("FFMPEG RLE"),
       .fourccs = { "rle ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -573,7 +573,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "wrle",
-      .name = "Microsoft RLE",
+      .name = TRS("FFMPEG Microsoft RLE"),
       .fourccs = { "WRLE", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -585,7 +585,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "dv_ntsc",
-      .name = "DV (NTSC)",
+      .name = TRS("FFMPEG DV (NTSC)"),
       .fourccs = { "dvc ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -599,7 +599,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "dv_pal",
-      .name = "DV (PAL)",
+      .name = TRS("FFMPEG DV (PAL)"),
       .fourccs = { "dvcp", "dvpp", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -613,7 +613,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "dv50_pal",
-      .name = "DVCPRO50 (PAL)",
+      .name = TRS("FFMPEG DVCPRO50 (PAL)"),
       .fourccs = { "dv5p", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -627,7 +627,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "dv50_ntsc",
-      .name = "DVCPRO50 (NTSC)",
+      .name = TRS("FFMPEG DVCPRO50 (NTSC)"),
 	    .fourccs = { "dv5n", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
@@ -646,7 +646,7 @@ struct CODECIDMAP codecidmap_a[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_audio,
       .short_name = "mp3",
-      .name = "MPEG-1/2 audio layer 1/2/3",
+      .name = TRS("FFMPEG MPEG-1/2 audio layer 1/2/3"),
       .fourccs = { ".mp2", ".MP2", "ms\0\x50", "MS\0\x50",".mp3", ".MP3",
                    "ms\0\x55", "MS\0\x55", (char *)0 },
       .wav_ids = { 0x50, 0x55, LQT_WAV_ID_NONE },
@@ -659,7 +659,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encode_parameters = encode_parameters_audio,
       .decode_parameters = decode_parameters_audio,
       .short_name = "mp2",
-      .name = "Mpeg Layer 2 Audio",
+      .name = TRS("FFMPEG Mpeg Layer 2 Audio"),
       .fourccs = { ".mp2", ".MP2", (char *)0 },
       .wav_ids = { 0x55, LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
@@ -673,7 +673,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encode_parameters = encode_parameters_audio,
       .decode_parameters = decode_parameters_audio,
       .short_name = "ac3",
-      .name = "AC3 Audio",
+      .name = TRS("FFMPEG AC3 Audio"),
       .fourccs = { ".ac3", ".AC3", (char *)0 },
       .wav_ids = { 0x2000, LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_AVI,
@@ -687,7 +687,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encode_parameters = encode_parameters_audio,
       .decode_parameters = decode_parameters_audio,
       .short_name = "qdm2",
-      .name = "QDM2 Audio",
+      .name = TRS("FFMPEG QDM2 Audio"),
       .fourccs = { "QDM2", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       //.do_encode = 1,
@@ -700,7 +700,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "alac",
-      .name = "Apple lossless",
+      .name = TRS("FFMPEG Apple lossless"),
       .fourccs = { "alac", (char*)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
@@ -713,7 +713,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "adpcm_ms",
-      .name = "McRowsoft ADPCM",
+      .name = TRS("FFMPEG McRowsoft ADPCM"),
       .fourccs = { "ms\0\x02", "MS\0\x02", (char*)0 },
       .wav_ids = { 0x02, LQT_WAV_ID_NONE },
     },
@@ -726,7 +726,7 @@ struct CODECIDMAP codecidmap_a[] =
       .encoder = NULL,
       .decoder = NULL,
       .short_name = "ima_adpcm_wav",
-      .name = "ADPCM ima WAV",
+      .name = TRS("FFMPEG ADPCM ima WAV"),
       .fourccs = { "ms\0\x11", "MS\0\x11", (char*)0 },
       .wav_ids = { 0x11, LQT_WAV_ID_NONE },
     }
@@ -834,11 +834,9 @@ static void set_codec_info(struct CODECIDMAP * map)
     }
 
   snprintf(ffmpeg_name, 256, "ffmpeg_%s", map->short_name);
-  //  snprintf(ffmpeg_long_name, 50, "FFMPEG %s %s", map->name, capabilities);
-  //  snprintf(ffmpeg_description, 100, "FFMPEG %s %s", map->name, capabilities);
 
-  snprintf(ffmpeg_long_name, 256, "FFMPEG %s", map->name);
-  snprintf(ffmpeg_description, 256, "FFMPEG %s", map->name);
+  snprintf(ffmpeg_long_name, 256, "%s", map->name);
+  snprintf(ffmpeg_description, 256, "%s", map->name);
 
   
   if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
