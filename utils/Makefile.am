@@ -30,7 +30,7 @@ testqt_LDADD=@UTIL_LIBADD@ -lm
 test_codec_SOURCES=test_codec.c
 test_codec_LDADD=@UTIL_LIBADD@
 
-qtinfo_SOURCES=qtinfo.c
+qtinfo_SOURCES=qtinfo.c common.c
 qtinfo_LDADD=@UTIL_LIBADD@
 
 qtstreamize_SOURCES=qtstreamize.c
@@ -59,7 +59,7 @@ qtrechunk_LDADD=@UTIL_LIBADD@
 qtyuv4toyuv_SOURCES=yuv4toyuv.c
 qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
-lqtplay_SOURCES=lqtplay.c
+lqtplay_SOURCES=lqtplay.c common.c
 lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
 	-lXv @GL_LIBS@ -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@ @OSSAUDIO_LIBS@
 
@@ -68,5 +68,4 @@ INCLUDES = -I$(top_srcdir)/include \
 	    @X_CFLAGS@ @ALSA_CFLAGS@
 
 EXTRA_DIST=lqtplay.1 cpuinfo.c
-
-#CFLAGS += -g3 -Werror
+noinst_HEADERS = common.h
