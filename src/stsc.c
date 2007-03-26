@@ -105,7 +105,15 @@ void quicktime_write_stsc(quicktime_t *file, quicktime_stsc_t *stsc)
 {
 	int i, last_same;
 	quicktime_atom_t atom;
-	quicktime_atom_write_header(file, &atom, "stsc");
+
+        /* This can happen, if a stream was created, but no
+           samples have been written. The resulting file will be
+           invalid anyway, just don't let us crash */
+
+        if(!stsc->table) 
+          return;
+        
+        quicktime_atom_write_header(file, &atom, "stsc");
 
 	for(i = 1, last_same = 0; i < stsc->total_entries; i++)
 	{

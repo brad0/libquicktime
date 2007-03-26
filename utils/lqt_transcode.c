@@ -30,11 +30,20 @@
 
 /* Limitation: Handles only 1 audio- and one video stream per file */
 
-#include "lqt_private.h"
+#include <config.h> // ONLY for the PACKAGE macro. Usually, applications never need
+                    // to include config.h
+
+#define _(str) dgettext(PACKAGE, str)
+#include <libintl.h>
+#include <locale.h>
+
+#include <lqt.h>
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+
 
 /* Supported colormodels */
 
@@ -79,10 +88,10 @@ formats[] =
 static void list_formats()
   {
   int i;
-  printf("Supported formats\n");
+  printf(_("Supported formats\n"));
   for(i = 0; i < sizeof(formats)/sizeof(formats[0]); i++)
     {
-    printf("%8s: %s (default codecs: %s/%s)\n", formats[i].name, formats[i].description,
+    printf(_("%8s: %s (default codecs: %s/%s)\n"), formats[i].name, formats[i].description,
            formats[i].default_audio_codec, formats[i].default_video_codec);
     }
   }
@@ -130,14 +139,14 @@ typedef struct
 
 static void print_usage()
   {
-  printf("Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n");
-  printf("       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n\n");
-  printf("       lqt_transcode -lv\n");
-  printf("       List video encoders\n\n");
-  printf("       lqt_transcode -la\n");
-  printf("       List audio encoders\n");
-  printf("       lqt_transcode -lf\n");
-  printf("       List output formats\n");
+  printf(_("Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n"));
+  printf(_("       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n\n"));
+  printf(_("       lqt_transcode -lv\n"));
+  printf(_("       List video encoders\n\n"));
+  printf(_("       lqt_transcode -la\n"));
+  printf(_("       List audio encoders\n"));
+  printf(_("       lqt_transcode -lf\n"));
+  printf(_("       List output formats\n"));
   }
 
 static void list_info(lqt_codec_info_t ** info)
@@ -209,7 +218,7 @@ static int transcode_init(transcode_handle * h,
   h->in_file = quicktime_open(in_file, 1, 0);
   if(!h->in_file)
     {
-    fprintf(stderr, "Cannot open input file %s\n", in_file);
+    fprintf(stderr, _("Cannot open input file %s\n"), in_file);
     return 0;
     }
 
@@ -220,7 +229,7 @@ static int transcode_init(transcode_handle * h,
     extension = strrchr(out_file, '.');
     if(!extension)
       {
-      fprintf(stderr, "Need a file extension when autoguessing output format\n");
+      fprintf(stderr, _("Need a file extension when autoguessing output format\n"));
       return 0;
       }
     extension++;
@@ -236,7 +245,7 @@ static int transcode_init(transcode_handle * h,
     }
   if(type == LQT_FILE_NONE)
     {
-    fprintf(stderr, "Cannot detect output format. Specify a valid extension or use -f <format>\n");
+    fprintf(stderr, _("Cannot detect output format. Specify a valid extension or use -f <format>\n"));
     return 0;
     }
 
@@ -256,7 +265,7 @@ static int transcode_init(transcode_handle * h,
   h->out_file = lqt_open_write(out_file, type);
   if(!h->out_file)
     {
-    fprintf(stderr, "Cannot open output file %s\n", out_file);
+    fprintf(stderr, _("Cannot open output file %s\n"), out_file);
     return 0;
     }
     
@@ -279,7 +288,7 @@ static int transcode_init(transcode_handle * h,
     codec_info = lqt_find_video_codec_by_name(video_codec);
     if(!codec_info)
       {
-      fprintf(stderr, "Unsupported video cocec %s, try -lv\n", video_codec);
+      fprintf(stderr, _("Unsupported video cocec %s, try -lv\n"), video_codec);
       return 0;
       }
 
@@ -303,9 +312,6 @@ static int transcode_init(transcode_handle * h,
       {
       h->colormodel = BC_RGB888;
       }
-    
-    //    fprintf(stderr, "Video stream: %dx%d, Colormodel: %s\n",
-    //            h->width, h->height, lqt_colormodel_to_string(h->colormodel));
     
     h->video_buffer = lqt_rows_alloc(h->width, h->height, h->colormodel, &(h->rowspan), &(h->rowspan_uv));
     
@@ -334,7 +340,7 @@ static int transcode_init(transcode_handle * h,
     codec_info = lqt_find_audio_codec_by_name(audio_codec);
     if(!codec_info)
       {
-      fprintf(stderr, "Unsupported audio codec %s, try -la\n", audio_codec);
+      fprintf(stderr, _("Unsupported audio codec %s, try -la\n"), audio_codec);
       return 0;
       }
 
@@ -408,16 +414,12 @@ static int transcode_iteration(transcode_handle * h)
   int do_audio = 0;
   float progress;
   int64_t frame_time;
-
-  //  fprintf(stderr, "Transcode iteration\n");
   
   if(h->do_audio && h->do_video)
     {
     audio_time = (float)(h->audio_samples_written)/(float)(h->samplerate);
     video_time = (float)(h->video_frames_written * h->frame_duration)/h->timescale;
 
-    //    fprintf(stderr, "Transcode time: %f %f\n", audio_time, video_time);
-    
     if(audio_time < video_time)
       do_audio = 1;
     }
@@ -441,7 +443,6 @@ static int transcode_iteration(transcode_handle * h)
       h->do_audio = 0;
     progress = (float)(h->audio_samples_written)/(float)(h->num_audio_samples);
 
-    //    fprintf(stderr, "Audio iteration %lld %d %d\n", h->audio_samples_written, num_samples, h->samples_per_frame);
     }
   /* Video Iteration */
   else
@@ -462,7 +463,6 @@ static int transcode_iteration(transcode_handle * h)
 
   if(progress > h->progress)
     h->progress = progress;
-  //  fprintf(stderr, "Progress: %f\n", h->progress);
   return 1;
   }
 
@@ -483,7 +483,7 @@ int main(int argc, char ** argv)
   char * qtvr = (char*)0;
   unsigned short qtvr_rows = 0;
   unsigned short qtvr_columns = 0;
-  int i, j;
+  int i;
   lqt_file_type_t type = LQT_FILE_NONE, floataudio = 0;
   transcode_handle handle;
   int progress_written = 0;
@@ -559,7 +559,7 @@ int main(int argc, char ** argv)
       }
     if(type == LQT_FILE_NONE)
       {
-      fprintf(stderr, "Unsupported format %s, try -lf", format);
+      fprintf(stderr, _("Unsupported format %s, try -lf"), format);
       return -1;
       }
     }
@@ -577,18 +577,16 @@ int main(int argc, char ** argv)
     if(i == 10)
       {
       if(progress_written)
-        {
-        for(j = 0; j < 17; j++)
-          putchar(0x08);
-        }
-      printf("%6.2f%% Completed", handle.progress*100.0);
+        putchar('\r');
+      printf(_("%6.2f%% Completed"), handle.progress*100.0);
       fflush(stdout);
       i = 0;
       progress_written = 1;
       }
     i++;
     }
-
+  putchar('\n');
+  
   transcode_cleanup(&handle);
   return 0;
   }

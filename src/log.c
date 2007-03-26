@@ -27,6 +27,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <libintl.h>
+
 static struct
   {
   lqt_log_level_t level;
@@ -69,6 +71,7 @@ void lqt_log(quicktime_t * file, lqt_log_level_t level,
              const char * domain, const char * format, ...)
   {
   char * msg_string;
+  char * format_tr;
   va_list argp; /* arg ptr */
 
 #ifndef HAVE_VASPRINTF
@@ -78,14 +81,18 @@ void lqt_log(quicktime_t * file, lqt_log_level_t level,
   if((!file || !file->log_callback) && !log_callback && !(level & log_mask))
     return;
   
+  lqt_translation_init();
+  
   va_start( argp, format);
 
+  format_tr = dgettext(PACKAGE, format);
+    
 #ifndef HAVE_VASPRINTF
-  len = vsnprintf((char*)0, 0, format, argp);
+  len = vsnprintf((char*)0, 0, format_tr, argp);
   msg_string = malloc(len+1);
-  vsnprintf(msg_string, len+1, format, argp);
+  vsnprintf(msg_string, len+1, format_tr, argp);
 #else
-  vasprintf(&msg_string, format, argp);
+  vasprintf(&msg_string, format_tr, argp);
 #endif
 
   va_end(argp);

@@ -1,5 +1,5 @@
 # Makefile for PO directory in any package using GNU gettext.
-# Copyright (C) 1995-1997, 2000-2004 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
+# Copyright (C) 1995-1997, 2000-2006 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
 #
 # This file can be copied and used freely without restrictions.  It can
 # be used in projects which are not available under the GNU General Public
@@ -8,10 +8,11 @@
 # Please note that the actual code of GNU gettext is covered by the GNU
 # General Public License and is *not* in the public domain.
 #
-# Origin: gettext-0.14
+# Origin: gettext-0.15
 
 PACKAGE = libquicktime
 VERSION = 1.0.0pre1
+PACKAGE_BUGREPORT = 
 
 SHELL = /bin/sh
 
@@ -20,222 +21,237 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /opt/gmerlin
-exec_prefix = /opt/gmerlin
-datadir = ${prefix}/share
-localedir = $(datadir)/locale
+prefix = /opt/gmerlin/
+exec_prefix = /opt/gmerlin/
+datarootdir = ${prefix}/share
+datadir = ${datarootdir}
+localedir = ${datarootdir}/locale
 gettextsrcdir = $(datadir)/gettext/po
 
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
-MKINSTALLDIRS = $(top_builddir)/./mkinstalldirs
-mkinstalldirs = $(SHELL) $(MKINSTALLDIRS)
+mkinstalldirs = $(SHELL) /home/pix/Src/Libquicktime/libquicktime/install-sh -d
+mkdir_p = mkdir -p --
 
-GMSGFMT = /usr/bin/msgfmt
-MSGFMT = /usr/bin/msgfmt
-XGETTEXT = /usr/bin/xgettext
+GMSGFMT_ = /usr/bin/msgfmt
+GMSGFMT_no = /usr/bin/msgfmt
+GMSGFMT_yes = /usr/bin/msgfmt
+GMSGFMT = $(GMSGFMT_$(USE_MSGCTXT))
+MSGFMT_ = /usr/bin/msgfmt
+MSGFMT_no = /usr/bin/msgfmt
+MSGFMT_yes = /usr/bin/msgfmt
+MSGFMT = $(MSGFMT_$(USE_MSGCTXT))
+XGETTEXT_ = /usr/bin/xgettext
+XGETTEXT_no = /usr/bin/xgettext
+XGETTEXT_yes = /usr/bin/xgettext
+XGETTEXT = $(XGETTEXT_$(USE_MSGCTXT))
 MSGMERGE = msgmerge
 MSGMERGE_UPDATE = /usr/bin/msgmerge --update
 MSGINIT = msginit
 MSGCONV = msgconv
 MSGFILTER = msgfilter
 
-POFILES = 
-GMOFILES = 
-UPDATEPOFILES = 
-DUMMYPOFILES = 
+POFILES =  de.po
+GMOFILES =  de.gmo
+UPDATEPOFILES =  de.po-update
+DUMMYPOFILES =  de.nop
 DISTFILES.common = Makefile.in.in remove-potcdate.sin \
 $(DISTFILES.common.extra1) $(DISTFILES.common.extra2) $(DISTFILES.common.extra3)
-DISTFILES = $(DISTFILES.common) Makevars POTFILES.in $(DOMAIN).pot stamp-po \
+DISTFILES = $(DISTFILES.common) Makevars POTFILES.in \
 $(POFILES) $(GMOFILES) \
 $(DISTFILES.extra1) $(DISTFILES.extra2) $(DISTFILES.extra3)
 
 POTFILES = \
-     ../include/colorspace_macros.h \
-     ../include/cmodel_permutation.h \
-     ../include/workarounds.h \
-     ../include/lqt_funcprotos.h \
-     ../include/lqt_codecinfo_private.h \
-     ../include/quicktime/lqt_atoms.h \
-     ../include/quicktime/quicktime.h \
-     ../include/quicktime/qtprivate.h \
-     ../include/quicktime/colormodels.h \
-     ../include/quicktime/lqt_version.h \
-     ../include/quicktime/lqt_codecinfo.h \
-     ../include/quicktime/lqt_qtvr.h \
-     ../include/quicktime/lqt_codecapi.h \
-     ../include/quicktime/lqt.h \
-     ../include/cmodel_default.h \
-     ../include/lqt_codecfile.h \
-     ../include/lqt_fseek.h \
-     ../include/lqt_private.h \
-     ../include/lqt_codecinfo.h \
-     ../include/charset.h \
-     ../include/colorspace_tables.h \
-     ../src/language.c \
-     ../src/workarounds.c \
-     ../src/stts.c \
-     ../src/lqt_quicktime.c \
-     ../src/vmhd.c \
-     ../src/lqt_codecfile.c \
-     ../src/avi_idx1.c \
-     ../src/gmhd.c \
-     ../src/texttrack.c \
-     ../src/mdat.c \
-     ../src/useratoms.c \
-     ../src/lqt_codecinfo.c \
-     ../src/elst.c \
-     ../src/esds.c \
-     ../src/pHdr.c \
-     ../src/dref.c \
-     ../src/smhd.c \
-     ../src/ftab.c \
-     ../src/avi_strl.c \
-     ../src/trak.c \
-     ../src/gama.c \
-     ../src/nloc.c \
-     ../src/edts.c \
-     ../src/vrnp.c \
-     ../src/ctab.c \
-     ../src/pasp.c \
-     ../src/charset.c \
-     ../src/avi_indx.c \
-     ../src/multichannel.c \
-     ../src/colormodels.c \
-     ../src/pano.c \
-     ../src/atom.c \
-     ../src/tref.c \
-     ../src/avi_guid.c \
-     ../src/util.c \
-     ../src/stsd.c \
-     ../src/gmhd_text.c \
-     ../src/chan.c \
-     ../src/stbl.c \
-     ../src/lqt_fseeko.c \
-     ../src/stsc.c \
-     ../src/stco.c \
-     ../src/lqt_bufalloc.c \
-     ../src/avi_ix.c \
-     ../src/mdia.c \
-     ../src/lqt_color.c \
-     ../src/wave.c \
-     ../src/nmhd.c \
-     ../src/avi_riff.c \
-     ../src/stsdtable.c \
-     ../src/minf.c \
-     ../src/imgp.c \
-     ../src/avi_strf.c \
-     ../src/impn.c \
-     ../src/qtatom.c \
-     ../src/lqt_codecs.c \
-     ../src/hdlr.c \
-     ../src/audio.c \
-     ../src/stss.c \
-     ../src/avi_info.c \
-     ../src/tkhd.c \
-     ../src/mdhd.c \
-     ../src/iods.c \
-     ../src/navg.c \
-     ../src/cmodel_default.c \
-     ../src/colr.c \
-     ../src/matrix.c \
-     ../src/cmodel_yuv422.c \
-     ../src/vrsc.c \
-     ../src/ndhd.c \
-     ../src/udta.c \
-     ../src/moov.c \
-     ../src/fiel.c \
-     ../src/log.c \
-     ../src/ctts.c \
-     ../src/gmin.c \
-     ../src/obji.c \
-     ../src/lqt_divx.c \
-     ../src/qtvr.c \
-     ../src/pdat.c \
-     ../src/ftyp.c \
-     ../src/dinf.c \
-     ../src/avi_avih.c \
-     ../src/avi_odml.c \
      ../src/vrni.c \
-     ../src/cmodel_yuv420p.c \
+     ../src/ftyp.c \
+     ../src/avi_riff.c \
+     ../src/util.c \
+     ../src/ftab.c \
+     ../src/useratoms.c \
+     ../src/avi_strh.c \
+     ../src/gmin.c \
+     ../src/vrnp.c \
+     ../src/nloc.c \
+     ../src/wave.c \
+     ../src/workarounds.c \
+     ../src/audio.c \
+     ../src/avi_ix.c \
+     ../src/fiel.c \
+     ../src/clap.c \
+     ../src/stbl.c \
+     ../src/stsd.c \
+     ../src/udta.c \
+     ../src/smhd.c \
+     ../src/vrsc.c \
      ../src/stsz.c \
+     ../src/esds.c \
+     ../src/trak.c \
+     ../src/ctts.c \
+     ../src/stss.c \
+     ../src/gama.c \
+     ../src/ctab.c \
+     ../src/atom.c \
+     ../src/pHdr.c \
+     ../src/avi_strl.c \
+     ../src/tkhd.c \
+     ../src/matrix.c \
+     ../src/lqt_codecs.c \
+     ../src/colormodels.c \
+     ../src/lqt_codecfile.c \
+     ../src/pdat.c \
+     ../src/lqt_quicktime.c \
+     ../src/stsc.c \
+     ../src/texttrack.c \
+     ../src/lqt_qtvr.c \
+     ../src/impn.c \
+     ../src/avi_hdrl.c \
+     ../src/gmhd.c \
+     ../src/obji.c \
+     ../src/mdia.c \
+     ../src/charset.c \
+     ../src/gmhd_text.c \
+     ../src/translation.c \
+     ../src/mvhd.c \
+     ../src/lqt_fseeko.c \
+     ../src/avi_avih.c \
+     ../src/mdat.c \
+     ../src/lqt_divx.c \
      ../src/frma.c \
      ../src/avi_movi.c \
-     ../src/lqt_qtvr.c \
+     ../src/stts.c \
+     ../src/imgp.c \
+     ../src/avi_info.c \
+     ../src/qtvr.c \
+     ../src/hdlr.c \
+     ../src/multichannel.c \
+     ../src/pasp.c \
+     ../src/pano.c \
+     ../src/lqt_color.c \
+     ../src/vmhd.c \
      ../src/enda.c \
-     ../src/mvhd.c \
-     ../src/avi_hdrl.c \
-     ../src/avi_strh.c \
-     ../src/clap.c \
-     ../plugins/faac/lqt_faac.c \
+     ../src/moov.c \
+     ../src/dinf.c \
+     ../src/cmodel_default.c \
+     ../src/stco.c \
+     ../src/lqt_codecinfo.c \
+     ../src/iods.c \
+     ../src/cmodel_yuv422.c \
+     ../src/avi_guid.c \
+     ../src/avi_indx.c \
+     ../src/minf.c \
+     ../src/dref.c \
+     ../src/elst.c \
+     ../src/mdhd.c \
+     ../src/cmodel_yuv420p.c \
+     ../src/language.c \
+     ../src/nmhd.c \
+     ../src/lqt_bufalloc.c \
+     ../src/avi_strf.c \
+     ../src/navg.c \
+     ../src/tref.c \
+     ../src/stsdtable.c \
+     ../src/chan.c \
+     ../src/ndhd.c \
+     ../src/qtatom.c \
+     ../src/avi_odml.c \
+     ../src/colr.c \
+     ../src/log.c \
+     ../src/avi_idx1.c \
+     ../src/edts.c \
+     ../config.h \
+     ../plugins/lame/lqt_lame.c \
+     ../plugins/lame/lame_codec.c \
+     ../plugins/png/lqt_png.c \
+     ../plugins/png/qtpng.c \
      ../plugins/faac/faac.c \
-     ../plugins/vorbis/vorbis.c \
-     ../plugins/vorbis/qtvorbis.h \
-     ../plugins/vorbis/lqt_vorbis.c \
-     ../plugins/dv/dv.c \
-     ../plugins/dv/dv.h \
-     ../plugins/dv/lqt_dv.c \
-     ../plugins/ffmpeg/params.c \
-     ../plugins/ffmpeg/ffmpeg.h \
-     ../plugins/ffmpeg/lqt_ffmpeg.c \
-     ../plugins/ffmpeg/params.h \
-     ../plugins/ffmpeg/video.c \
-     ../plugins/ffmpeg/audio.c \
+     ../plugins/faac/lqt_faac.c \
+     ../plugins/videocodec/yuv2.c \
+     ../plugins/videocodec/videocodec.c \
+     ../plugins/videocodec/lqt_videocodec.c \
+     ../plugins/videocodec/yv12.c \
+     ../plugins/videocodec/v210.c \
+     ../plugins/videocodec/raw.c \
+     ../plugins/videocodec/videocodec.h \
+     ../plugins/videocodec/v410.c \
+     ../plugins/videocodec/yuv4.c \
+     ../plugins/videocodec/v308.c \
+     ../plugins/videocodec/v408.c \
+     ../plugins/audiocodec/alaw_tables.h \
+     ../plugins/audiocodec/pcm.c \
+     ../plugins/audiocodec/ulaw_tables.h \
+     ../plugins/audiocodec/ima4.c \
+     ../plugins/audiocodec/lqt_audiocodec.c \
+     ../plugins/faad2/lqt_faad2.c \
+     ../plugins/faad2/faad2.c \
      ../plugins/x264/x264.c \
      ../plugins/x264/lqt_x264.c \
-     ../plugins/rtjpeg/mmx.h \
-     ../plugins/rtjpeg/lqt_rtjpeg.c \
+     ../plugins/xvid/lqt_xvid.c \
+     ../plugins/xvid/xvid.c \
+     ../plugins/ffmpeg/audio.c \
+     ../plugins/ffmpeg/video.c \
+     ../plugins/ffmpeg/params.h \
+     ../plugins/ffmpeg/lqt_ffmpeg.c \
+     ../plugins/ffmpeg/params.c \
+     ../plugins/ffmpeg/ffmpeg.h \
+     ../plugins/dv/lqt_dv.c \
+     ../plugins/dv/dv.h \
+     ../plugins/dv/dv.c \
+     ../plugins/vorbis/lqt_vorbis.c \
+     ../plugins/vorbis/qtvorbis.h \
+     ../plugins/vorbis/vorbis.c \
+     ../plugins/mjpeg/libmjpeg.h \
+     ../plugins/mjpeg/jpeg.c \
+     ../plugins/mjpeg/lqt_mjpeg.c \
+     ../plugins/mjpeg/libmjpeg.c \
      ../plugins/rtjpeg/RTjpeg.h \
      ../plugins/rtjpeg/RTjpeg.c \
      ../plugins/rtjpeg/rtjpeg_codec.h \
+     ../plugins/rtjpeg/mmx.h \
+     ../plugins/rtjpeg/lqt_rtjpeg.c \
      ../plugins/rtjpeg/rtjpeg_codec.c \
-     ../plugins/mjpeg/libmjpeg.h \
-     ../plugins/mjpeg/lqt_mjpeg.c \
-     ../plugins/mjpeg/libmjpeg.c \
-     ../plugins/mjpeg/jpeg.c \
-     ../plugins/videocodec/videocodec.h \
-     ../plugins/videocodec/v210.c \
-     ../plugins/videocodec/v408.c \
-     ../plugins/videocodec/videocodec.c \
-     ../plugins/videocodec/raw.c \
-     ../plugins/videocodec/yv12.c \
-     ../plugins/videocodec/yuv4.c \
-     ../plugins/videocodec/v308.c \
-     ../plugins/videocodec/yuv2.c \
-     ../plugins/videocodec/lqt_videocodec.c \
-     ../plugins/videocodec/v410.c \
-     ../plugins/png/qtpng.c \
-     ../plugins/png/lqt_png.c \
-     ../plugins/faad2/faad2.c \
-     ../plugins/faad2/lqt_faad2.c \
-     ../plugins/audiocodec/alaw_tables.h \
-     ../plugins/audiocodec/lqt_audiocodec.c \
-     ../plugins/audiocodec/ima4.c \
-     ../plugins/audiocodec/ulaw_tables.h \
-     ../plugins/audiocodec/pcm.c \
-     ../plugins/lame/lame_codec.c \
-     ../plugins/lame/lqt_lame.c \
-     ../config.h \
-     ../utils/cpuinfo.c \
-     ../utils/gtk/lqt_gtk.c \
-     ../utils/gtk/lqt_gtk.h \
-     ../utils/gtk/libquicktime_config.c \
-     ../utils/yuv4toyuv.c \
+     ../include/lqt_fseek.h \
+     ../include/lqt_codecfile.h \
+     ../include/cmodel_default.h \
+     ../include/charset.h \
+     ../include/workarounds.h \
+     ../include/lqt_codecinfo_private.h \
+     ../include/lqt_private.h \
+     ../include/colorspace_macros.h \
+     ../include/lqt_codecinfo.h \
+     ../include/cmodel_permutation.h \
+     ../include/colorspace_tables.h \
+     ../include/quicktime/lqt_version.h \
+     ../include/quicktime/quicktime.h \
+     ../include/quicktime/qtprivate.h \
+     ../include/quicktime/lqt_atoms.h \
+     ../include/quicktime/lqt_codecinfo.h \
+     ../include/quicktime/lqt_qtvr.h \
+     ../include/quicktime/lqt_codecapi.h \
+     ../include/quicktime/colormodels.h \
+     ../include/quicktime/lqt.h \
+     ../include/lqt_funcprotos.h \
      ../utils/qt2text.c \
-     ../utils/qtstreamize.c \
-     ../utils/gen_colorspace_tables.c \
      ../utils/lqtplay.c \
-     ../utils/test_codec.c \
-     ../utils/recover.c \
+     ../utils/qtstreamize.c \
+     ../utils/dump_codecs.c \
+     ../utils/dechunk.c \
+     ../utils/common.h \
+     ../utils/lqt_transcode.c \
      ../utils/qtinfo.c \
      ../utils/testqt.c \
+     ../utils/gen_colorspace_tables.c \
+     ../utils/test_codec.c \
      ../utils/rechunk.c \
-     ../utils/dump_codecs.c \
+     ../utils/common.c \
+     ../utils/cpuinfo.c \
+     ../utils/gtk/lqt_gtk.h \
+     ../utils/gtk/libquicktime_config.c \
+     ../utils/gtk/lqt_gtk.c \
+     ../utils/yuv4toyuv.c \
      ../utils/dump.c \
-     ../utils/lqt_transcode.c \
-     ../utils/dechunk.c
+     ../utils/recover.c
 
-CATALOGS = 
+CATALOGS =  de.gmo
 
 # Makevars gets inserted here. (Don't remove this line!)
 # Makefile variables for PO directory in any package using GNU gettext.
@@ -248,7 +264,7 @@ subdir = po
 top_builddir = ..
 
 # These options get passed to xgettext.
-XGETTEXT_OPTIONS = --keyword="lqt_log:4" --keyword=TRS
+XGETTEXT_OPTIONS = --keyword="lqt_log:4" --keyword=TRS --keyword=_
 
 # This is the copyright holder that gets inserted into the header of the
 # $(DOMAIN).pot file.  Set this to the copyright holder of the surrounding
@@ -303,6 +319,12 @@ all: all-yes
 all-yes: stamp-po
 all-no:
 
+# $(srcdir)/$(DOMAIN).pot is only created when needed. When xgettext finds no
+# internationalized messages, no $(srcdir)/$(DOMAIN).pot is created (because
+# we don't want to bother translators with empty POT files). We assume that
+# LINGUAS is empty in this case, i.e. $(POFILES) and $(GMOFILES) are empty.
+# In this case, stamp-po is a nop (i.e. a phony target).
+
 # stamp-po is a timestamp denoting the last time at which the CATALOGS have
 # been loosely updated. Its purpose is that when a developer or translator
 # checks out the package via CVS, and the $(DOMAIN).pot file is not in CVS,
@@ -312,10 +334,13 @@ all-no:
 # $(POFILES) has been designed to not touch files that don't need to be
 # changed.
 stamp-po: $(srcdir)/$(DOMAIN).pot
-	test -z "$(GMOFILES)" || $(MAKE) $(GMOFILES)
-	@echo "touch stamp-po"
-	@echo timestamp > stamp-poT
-	@mv stamp-poT stamp-po
+	test ! -f $(srcdir)/$(DOMAIN).pot || \
+	  test -z "$(GMOFILES)" || $(MAKE) $(GMOFILES)
+	@test ! -f $(srcdir)/$(DOMAIN).pot || { \
+	  echo "touch stamp-po" && \
+	  echo timestamp > stamp-poT && \
+	  mv stamp-poT stamp-po; \
+	}
 
 # Note: Target 'all' must not depend on target '$(DOMAIN).pot-update',
 # otherwise packages like GCC can not be built if only parts of the source
@@ -324,11 +349,16 @@ stamp-po: $(srcdir)/$(DOMAIN).pot
 # This target rebuilds $(DOMAIN).pot; it is an expensive operation.
 # Note that $(DOMAIN).pot is not touched if it doesn't need to be changed.
 $(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in remove-potcdate.sed
+	if test -n '$(MSGID_BUGS_ADDRESS)' || test '$(PACKAGE_BUGREPORT)' = '@'PACKAGE_BUGREPORT'@'; then \
+	  msgid_bugs_address='$(MSGID_BUGS_ADDRESS)'; \
+	else \
+	  msgid_bugs_address='$(PACKAGE_BUGREPORT)'; \
+	fi; \
 	$(XGETTEXT) --default-domain=$(DOMAIN) --directory=$(top_srcdir) \
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
 	  --copyright-holder='$(COPYRIGHT_HOLDER)' \
-	  --msgid-bugs-address='$(MSGID_BUGS_ADDRESS)'
+	  --msgid-bugs-address="$$msgid_bugs_address"
 	test ! -f $(DOMAIN).po || { \
 	  if test -f $(srcdir)/$(DOMAIN).pot; then \
 	    sed -f remove-potcdate.sed < $(srcdir)/$(DOMAIN).pot > $(DOMAIN).1po && \
@@ -367,7 +397,7 @@ install: install-exec install-data
 install-exec:
 install-data: install-data-yes
 	if test "$(PACKAGE)" = "gettext-tools"; then \
-	  $(mkinstalldirs) $(DESTDIR)$(gettextsrcdir); \
+	  $(mkdir_p) $(DESTDIR)$(gettextsrcdir); \
 	  for file in $(DISTFILES.common) Makevars.template; do \
 	    $(INSTALL_DATA) $(srcdir)/$$file \
 			    $(DESTDIR)$(gettextsrcdir)/$$file; \
@@ -380,13 +410,13 @@ install-data: install-data-yes
 	fi
 install-data-no: all
 install-data-yes: all
-	$(mkinstalldirs) $(DESTDIR)$(datadir)
+	$(mkdir_p) $(DESTDIR)$(datadir)
 	@catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
 	  lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
 	  dir=$(localedir)/$$lang/LC_MESSAGES; \
-	  $(mkinstalldirs) $(DESTDIR)$$dir; \
+	  $(mkdir_p) $(DESTDIR)$$dir; \
 	  if test -r $$cat; then realcat=$$cat; else realcat=$(srcdir)/$$cat; fi; \
 	  $(INSTALL_DATA) $$realcat $(DESTDIR)$$dir/$(DOMAIN).mo; \
 	  echo "installing $$realcat as $(DESTDIR)$$dir/$(DOMAIN).mo"; \
@@ -426,19 +456,19 @@ installdirs: installdirs-exec installdirs-data
 installdirs-exec:
 installdirs-data: installdirs-data-yes
 	if test "$(PACKAGE)" = "gettext-tools"; then \
-	  $(mkinstalldirs) $(DESTDIR)$(gettextsrcdir); \
+	  $(mkdir_p) $(DESTDIR)$(gettextsrcdir); \
 	else \
 	  : ; \
 	fi
 installdirs-data-no:
 installdirs-data-yes:
-	$(mkinstalldirs) $(DESTDIR)$(datadir)
+	$(mkdir_p) $(DESTDIR)$(datadir)
 	@catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
 	  cat=`basename $$cat`; \
 	  lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
 	  dir=$(localedir)/$$lang/LC_MESSAGES; \
-	  $(mkinstalldirs) $(DESTDIR)$$dir; \
+	  $(mkdir_p) $(DESTDIR)$$dir; \
 	  for lc in '' $(EXTRA_LOCALE_CATEGORIES); do \
 	    if test -n "$$lc"; then \
 	      if (cd $(DESTDIR)$(localedir)/$$lang && LC_ALL=C ls -l -d $$lc 2>/dev/null) | grep ' -> ' >/dev/null; then \
@@ -513,10 +543,13 @@ dist distdir:
 	$(MAKE) update-po
 	@$(MAKE) dist2
 # This is a separate target because 'update-po' must be executed before.
-dist2: $(DISTFILES)
+dist2: stamp-po $(DISTFILES)
 	dists="$(DISTFILES)"; \
 	if test "$(PACKAGE)" = "gettext-tools"; then \
 	  dists="$$dists Makevars.template"; \
+	fi; \
+	if test -f $(srcdir)/$(DOMAIN).pot; then \
+	  dists="$$dists $(DOMAIN).pot stamp-po"; \
 	fi; \
 	if test -f $(srcdir)/ChangeLog; then \
 	  dists="$$dists ChangeLog"; \
@@ -529,9 +562,9 @@ dist2: $(DISTFILES)
 	if test -f $(srcdir)/LINGUAS; then dists="$$dists LINGUAS"; fi; \
 	for file in $$dists; do \
 	  if test -f $$file; then \
-	    cp -p $$file $(distdir); \
+	    cp -p $$file $(distdir) || exit 1; \
 	  else \
-	    cp -p $(srcdir)/$$file $(distdir); \
+	    cp -p $(srcdir)/$$file $(distdir) || exit 1; \
 	  fi; \
 	done
 
@@ -578,10 +611,9 @@ $(DUMMYPOFILES):
 update-gmo: Makefile $(GMOFILES)
 	@:
 
-Makefile: Makefile.in.in $(top_builddir)/config.status POTFILES.in
+Makefile: Makefile.in.in Makevars $(top_builddir)/config.status POTFILES.in LINGUAS
 	cd $(top_builddir) \
-	  && CONFIG_FILES=$(subdir)/$@.in CONFIG_HEADERS= \
-	       $(SHELL) ./config.status
+	  && $(SHELL) ./config.status $(subdir)/$@.in po-directories
 
 force:
 

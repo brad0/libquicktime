@@ -30,8 +30,15 @@
 
 */
 
-#include "lqt_private.h"
+#include <lqt.h>
 #include <quicktime/colormodels.h>
+
+#include <config.h> // ONLY for the PACKAGE macro. Usually, applications never need
+                    // to include config.h
+
+#define _(str) dgettext(PACKAGE, str)
+
+#include "common.h"
 
 #include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
@@ -71,6 +78,8 @@
 #include <time.h>
 #include <math.h>
 #include <errno.h>
+#include <libintl.h>
+#include <locale.h>
 
 /* File handle */
 
@@ -234,7 +243,7 @@ static void x11_init(void)
     vinfo_list = XGetVisualInfo(dpy, VisualIDMask, &vinfo, &n);
     vinfo = vinfo_list[0];
     if (vinfo.class != TrueColor || vinfo.depth < 15) {
-	fprintf(stderr,"can't handle visuals != TrueColor, sorry\n");
+	fprintf(stderr,_("can't handle visuals != TrueColor, sorry\n"));
 	exit(1);
     }
 
@@ -277,7 +286,7 @@ static void xv_init(void)
     for (i = 0; i < adaptors; i++) {
 	if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask)) {
 	    if (Success != XvGrabPort(dpy,ai[i].base_id,CurrentTime)) {
-		fprintf(stderr,"INFO: Xvideo port %ld: is busy, skipping\n",
+		fprintf(stderr,_("INFO: Xvideo port %ld: is busy, skipping\n"),
 			ai[i].base_id);
 		continue;
 	    }
@@ -291,7 +300,7 @@ static void xv_init(void)
     /* check image formats */
     fo = XvListImageFormats(dpy, xv_port, &formats);
     for(i = 0; i < formats; i++) {
-	fprintf(stderr, "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s",
+	fprintf(stderr, _("INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s"),
 		xv_port,
 		fo[i].id,
 		(fo[i].id)       & 0xff,
@@ -385,7 +394,7 @@ shm_error:
 
  no_mitshm:
     if (NULL == (ximage_data = malloc(width * height * pixmap_bytes))) {
-	fprintf(stderr,"out of memory\n");
+	fprintf(stderr,_("out of memory\n"));
 	exit(1);
     }
     ximage = XCreateImage(dpy, vinfo.visual, vinfo.depth,
@@ -449,7 +458,7 @@ shm_error:
 
  no_mitshm:
     if (NULL == (ximage_data = malloc(width * height * 2))) {
-	fprintf(stderr,"out of memory\n");
+	fprintf(stderr,_("out of memory\n"));
 	exit(1);
     }
     xvimage = XvCreateImage(dpy, port, format, ximage_data,
@@ -543,24 +552,24 @@ static void gl_init(Widget widget, int iw, int ih)
 			      DefaultScreen(XtDisplay(widget)),
 			      gl_attrib);
     if (!visinfo) {
-	fprintf(stderr,"WARNING: gl: can't get visual (rgb,db)\n");
+	fprintf(stderr,_("WARNING: gl: can't get visual (rgb,db)\n"));
 	return;
     }
     ctx = glXCreateContext(dpy, visinfo, NULL, True);
     glXMakeCurrent(XtDisplay(widget),XtWindow(widget),ctx);
-    fprintf(stderr, "INFO: gl: DRI=%s\n",
-	    glXIsDirect(dpy, ctx) ? "Yes" : "No");
+    fprintf(stderr, _("INFO: gl: DRI=%s\n"),
+	    glXIsDirect(dpy, ctx) ? _("Yes") : _("No"));
     if (!glXIsDirect(dpy, ctx)) {
-        fprintf(stderr, "WARNING: gl: Direct rendering missing\n");
+        fprintf(stderr, _("WARNING: gl: Direct rendering missing\n"));
         return;
     }
 #if 0
     /* check against max size */
     glGetIntegerv(GL_MAX_TEXTURE_SIZE,&i);
-    fprintf(stderr,"INFO: gl: texture max size: %d\n",i);
+    fprintf(stderr,_("INFO: gl: texture max size: %d\n"),i);
     if ((iw > i) || (ih > i))
         {
-        fprintf(stderr, "WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n",
+        fprintf(stderr, _("WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n"),
                 i, i, iw, ih);
         return;
         }
@@ -572,7 +581,7 @@ static void gl_init(Widget widget, int iw, int ih)
     for (i = 0; ih >= (1 << i); i++)
 	;
     gl_texture_height = (1 << i);
-    fprintf(stderr,"INFO: gl: frame=%dx%d, texture=%dx%d\n",iw,ih,
+    fprintf(stderr,_("INFO: gl: frame=%dx%d, texture=%dx%d\n"),iw,ih,
             gl_texture_width,gl_texture_height);
 
     glClearColor (0.0, 0.0, 0.0, 0.0);
@@ -635,7 +644,7 @@ static int alsa_init(char *dev, int channels, int rate)
     tmprate = rate;
     oss_hr = rate;
     if (snd_pcm_open(&pcm_handle, dev, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) {
-	fprintf(stderr, "Error opening PCM device %s\n", dev);
+	fprintf(stderr, _("Error opening PCM device %s\n"), dev);
 	return 1;
     }
     
@@ -643,12 +652,12 @@ static int alsa_init(char *dev, int channels, int rate)
     snd_pcm_hw_params_alloca(&hwparams);
 
     if ((err = snd_pcm_hw_params_any(pcm_handle, hwparams)) < 0) {
-	fprintf(stderr, "Can not configure this PCM device. (%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Can not configure this PCM device. (%s)\n"), snd_strerror(err));
 	return 1;
     }
     
     if ((err = snd_pcm_hw_params_set_access(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
-	fprintf(stderr, "Error setting access. (%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error setting access. (%s)\n"), snd_strerror(err));
 	return 1;
     }
 
@@ -657,24 +666,24 @@ static int alsa_init(char *dev, int channels, int rate)
 
     /* Set sample format */
     if ((err = snd_pcm_hw_params_set_format(pcm_handle, hwparams,  SND_PCM_FORMAT_S16_NE)) < 0) {
-	fprintf(stderr, "Error setting format.(%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error setting format.(%s)\n"), snd_strerror(err));
 	return 1;
     }
     
     /* Set number of channels */ // weird 1 channel mode doesn't work
     if ((err = snd_pcm_hw_params_set_channels(pcm_handle, hwparams, channels)) < 0) {
-	fprintf(stderr, "Error setting channels. %i (%s)\n", channels, snd_strerror(err));
+	fprintf(stderr, _("Error setting channels. %i (%s)\n"), channels, snd_strerror(err));
 	return 1;
     }
     
     /* Set sample rate. If the exact rate is not supported */
     /* by the hardware, use nearest possible rate.         */ 
     if ((err = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, 0)) < 0 ) {
-	fprintf(stderr, "Error setting sample rate (%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error setting sample rate (%s)\n"), snd_strerror(err));
 	return 1;
     }
 
-    if (tmprate != rate) fprintf(stderr,"WARNING: Using %i Hz instead of requested rate %i Hz\n ", tmprate, rate);
+    if (tmprate != rate) fprintf(stderr,_("WARNING: Using %i Hz instead of requested rate %i Hz\n "), tmprate, rate);
     oss_sr = tmprate;
     dir = 0;
     if ((err = snd_pcm_hw_params_set_buffer_time_near(pcm_handle, hwparams, &buffer_time, &dir)) < 0) {
@@ -685,32 +694,32 @@ static int alsa_init(char *dev, int channels, int rate)
     /* period time */
     dir = 0;
     if ((err = snd_pcm_hw_params_set_period_time_near(pcm_handle, hwparams, &period_time, &dir)) < 0) {
-	fprintf(stderr, "Error setting periods.(%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error setting periods.(%s)\n"), snd_strerror(err));
 	return 1;
     }
 
     
     if ((err = snd_pcm_hw_params_get_buffer_size(hwparams, &buffer_size))< 0) {
-                fprintf(stderr, "Unable to get buffer size for playback: %s\n", snd_strerror(err));
+                fprintf(stderr, _("Unable to get buffer size for playback: %s\n"), snd_strerror(err));
                 return 1;
     }
     
     dir = 0;
     err = snd_pcm_hw_params_get_period_size(hwparams, &periodsize, &dir);
     if (err < 0) {
-                fprintf(stderr, "Unable to get period size for playback: %s\n", snd_strerror(err));
+                fprintf(stderr, _("Unable to get period size for playback: %s\n"), snd_strerror(err));
                 return 1;
     }
 
     /* Apply HW parameter settings to */
     /* PCM device and prepare device  */
     if ((err = snd_pcm_hw_params(pcm_handle, hwparams)) < 0) {
-	fprintf(stderr, "Error setting HW params.(%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error setting HW params.(%s)\n"), snd_strerror(err));
 	return 1;
     }
     
     if ((err = snd_pcm_prepare(pcm_handle)) < 0) {
-	fprintf(stderr, "Error in pcm_prepare.(%s)\n", snd_strerror(err));
+	fprintf(stderr, _("Error in pcm_prepare.(%s)\n"), snd_strerror(err));
 	return 1;
     }
     
@@ -745,19 +754,19 @@ oss_setformat(int chan, int rate)
 
     ioctl(oss_fd, SNDCTL_DSP_SETFMT, &hw_afmt);
     if (AFMT_S16_LE != hw_afmt) {
-	fprintf(stderr,"ERROR: can't set sound format\n");
+	fprintf(stderr,_("ERROR: can't set sound format\n"));
 	exit(1);
     }
     ioctl(oss_fd, SNDCTL_DSP_CHANNELS, &hw_chan);
     if (chan != hw_chan) {
-	fprintf(stderr,"ERROR: can't set sound channels\n");
+	fprintf(stderr,_("ERROR: can't set sound channels\n"));
 	exit(1);
     }
     ioctl(oss_fd, SNDCTL_DSP_SPEED, &hw_rate);
     if (rate != hw_rate) {
 	oss_sr = rate;
 	oss_hr = hw_rate;
-	fprintf(stderr,"WARNING: sample rate mismatch (need %d, got %d)\n",
+	fprintf(stderr,_("WARNING: sample rate mismatch (need %d, got %d)\n"),
 		rate,hw_rate);
     }
     return 0;
@@ -774,7 +783,7 @@ static int oss_init(char *dev, int channels, int rate)
 
     oss_fd = open(dev,O_WRONLY | O_NONBLOCK);
     if (-1 == oss_fd) {
-	fprintf(stderr,"WARNING: open %s: %s\n",dev,strerror(errno));
+	fprintf(stderr,_("WARNING: open %s: %s\n"),dev,strerror(errno));
 	return -1;
     }
     oss_setformat(channels,rate);
@@ -824,12 +833,8 @@ static GC qt_gc;
 
 static void qt_init(FILE *fp, char *filename)
 {
-    char *str;
-    int i, j;
     int ipos;
     float minpan, maxpan;
-    const lqt_channel_t * channel_setup;
-    int num_channels;
     /* audio device */
     char *adev_name;
     
@@ -839,71 +844,19 @@ static void qt_init(FILE *fp, char *filename)
     /* open file */
     qt = quicktime_open(filename,1,0);
     if (NULL == qt) {
-	fprintf(fp,"ERROR: can't open file: %s\n",filename);
+	fprintf(fp,_("ERROR: can't open file: %s\n"),filename);
 	exit(1);
     }
-
+    
     /* print misc info */
-    fprintf(fp,"INFO: playing %s\n",filename);
-    str = quicktime_get_copyright(qt);
-    if (str)
-	fprintf(fp,"  copyright: %s\n",str);
-    str = quicktime_get_name(qt);
-    if (str)
-	fprintf(fp,"  name:      %s\n",str);
-    str = quicktime_get_info(qt);
-    if (str)
-	fprintf(fp,"  info:      %s\n",str);
+    fprintf(fp,_("INFO: playing %s\n"),filename);
 
-    str = lqt_get_author(qt);
-    if (str)
-	fprintf(fp,"  author:    %s\n",str);
-
-    str = lqt_get_artist(qt);
-    if (str)
-	fprintf(fp,"  artist:    %s\n",str);
-
-    str = lqt_get_album(qt);
-    if (str)
-        fprintf(fp,"  album:     %s\n",str);
-
-    str = lqt_get_genre(qt);
-    if (str)
-	fprintf(fp,"  genre:     %s\n",str);
-
-    str = lqt_get_track(qt);
-    if (str)
-	fprintf(fp,"  track:     %s\n",str);
-
-    str = lqt_get_comment(qt);
-    if (str)
-	fprintf(fp,"  comment:   %s\n",str);
-    
-    
-    /* print video info */
-    if (quicktime_has_video(qt)) {
-	fprintf(fp,"  video: %d track(s)\n",quicktime_video_tracks(qt));
-	for (i = 0; i < quicktime_video_tracks(qt); i++) {
-	    fprintf(fp,
-		    "    track #%d\n"
-		    "      width : %d\n"
-		    "      height: %d\n"
-		    "      depth : %d bit\n"
-		    "      rate  : %.2f fps\n"
-		    "      codec : %s\n",
-		    i+1,
-		    quicktime_video_width(qt,i),
-		    quicktime_video_height(qt,i),
-		    quicktime_video_depth(qt,i),
-		    quicktime_frame_rate(qt,i),
-		    quicktime_video_compressor(qt,i));
-	}
-    }
+    quicktime_print_info(qt);
     
     qt_isqtvr = lqt_is_qtvr(qt);
     if (qt_isqtvr) {
 	if (qt_isqtvr != QTVR_OBJ && qt_isqtvr != QTVR_PAN) {
-	    fprintf(stderr, "'%s' is no QTVR file or an unsupported variant.\n", filename);
+	    fprintf(stderr, _("'%s' is no QTVR file or an unsupported variant.\n"), filename);
 	    exit(1);
 	}
 	
@@ -911,16 +864,16 @@ static void qt_init(FILE *fp, char *filename)
 	lqt_qtvr_get_pan(qt, &(minpan), &(maxpan), NULL);
 	qtvr_dwidth = lqt_qtvr_get_display_width(qt);
 	qtvr_dheight = lqt_qtvr_get_display_height(qt);
-	fprintf(stderr, "startpos :%i\n", ipos);
-	fprintf(stderr, "movietype :%i\n", lqt_qtvr_get_movietype(qt));
-	fprintf(stderr, "panning :%f %f\n", minpan, maxpan);
-	fprintf(stderr, "rows :%i\n", lqt_qtvr_get_rows(qt));
-	fprintf(stderr, "colums :%i\n", lqt_qtvr_get_columns(qt));
-	fprintf(stderr, "disp width :%i\n", qtvr_dwidth);
-	fprintf(stderr, "disp height :%i\n", qtvr_dheight);
-	fprintf(stderr, "width :%i\n", lqt_qtvr_get_width(qt));
-	fprintf(stderr, "height :%i\n", lqt_qtvr_get_height(qt));
-	fprintf(stderr, "depth :%i\n", lqt_qtvr_get_depth(qt));
+	fprintf(stderr, _("startpos :%i\n"), ipos);
+	fprintf(stderr, _("movietype :%i\n"), lqt_qtvr_get_movietype(qt));
+	fprintf(stderr, _("panning :%f %f\n"), minpan, maxpan);
+	fprintf(stderr, _("rows :%i\n"), lqt_qtvr_get_rows(qt));
+	fprintf(stderr, _("colums :%i\n"), lqt_qtvr_get_columns(qt));
+	fprintf(stderr, _("disp width :%i\n"), qtvr_dwidth);
+	fprintf(stderr, _("disp height :%i\n"), qtvr_dheight);
+	fprintf(stderr, _("width :%i\n"), lqt_qtvr_get_width(qt));
+	fprintf(stderr, _("height :%i\n"), lqt_qtvr_get_height(qt));
+	fprintf(stderr, _("depth :%i\n"), lqt_qtvr_get_depth(qt));
     
 	if (qt_isqtvr == QTVR_PAN) {
 		oh_width = lqt_qtvr_get_height(qt) * qtvr_dwidth / (float)qtvr_dheight;
@@ -931,61 +884,27 @@ static void qt_init(FILE *fp, char *filename)
 			oh_width = floor(oh_width / (float)quicktime_video_width(qt, 0) + 1) *
 							  quicktime_video_width(qt, 0);
 		}
-		fprintf(stderr, "oh_width verz :%i\n",oh_width);
+		fprintf(stderr, _("oh_width verz :%i\n"),oh_width);
 
 	}
     }
-    /* print audio info */
-    if (quicktime_has_audio(qt)) {
-	fprintf(fp,"  audio: %d track(s)\n",quicktime_audio_tracks(qt));
-	for (i = 0; i < quicktime_audio_tracks(qt); i++) {
-          {
-          num_channels = quicktime_track_channels(qt,i);
-          fprintf(fp,
-                  "    track #%d\n"
-                  "      rate  : %ld Hz\n"
-                  "      bits  : %d\n"
-                  "      chans : %d\n"
-                  "      codec : %s\n",
-                  i+1,
-                  quicktime_sample_rate(qt,i),
-                  quicktime_audio_bits(qt,i),
-                  num_channels,
-                  quicktime_audio_compressor(qt,i));
-          channel_setup = lqt_get_channel_setup(qt, i);
-          fprintf(fp, "    channel_setup : ");
-          if(channel_setup)
-            {
-            for(j = 0; j < num_channels; j++)
-              {
-              fprintf(fp, "%s", lqt_channel_to_string(channel_setup[j]));
-              if(j < num_channels - 1)
-                fprintf(fp, ", ");
-              }
-            fprintf(fp, "\n");
-            }
-          else
-            fprintf(fp, "Not available\n");
-          }
-        }
-    }
     /* sanity checks */
     if (!quicktime_has_video(qt)) {
-	fprintf(stderr,"WARNING: no video stream\n");
+	fprintf(stderr,_("WARNING: no video stream\n"));
     } else if (!quicktime_supported_video(qt,0)) {
-	fprintf(stderr,"WARNING: unsupported video codec\n");
+	fprintf(stderr,_("WARNING: unsupported video codec\n"));
     } else {
 	qt_hasvideo = 1;
 	qt_width  = quicktime_video_width(qt,0);
 	qt_height = quicktime_video_height(qt,0);
         qt_timescale = lqt_video_time_scale(qt,0);
-        fprintf(stderr, "Timescale: %d\n", qt_timescale);
+        fprintf(stderr, _("Timescale: %d\n"), qt_timescale);
     }
 
     if (!quicktime_has_audio(qt)) {
-	fprintf(stderr,"WARNING: no audio stream\n");
+	fprintf(stderr,_("WARNING: no audio stream\n"));
     } else if (!quicktime_supported_audio(qt,0)) {
-	fprintf(stderr,"WARNING: unsupported audio codec\n");
+	fprintf(stderr,_("WARNING: unsupported audio codec\n"));
     } else {
 	qt_hasaudio = 1;
 	qt_channels = quicktime_track_channels(qt,0);
@@ -1002,7 +921,7 @@ static void qt_init(FILE *fp, char *filename)
   }
   }
     if (0 == qt_hasvideo && 0 == qt_hasaudio) {
-	fprintf(stderr,"ERROR: no playable stream found\n");
+	fprintf(stderr,_("ERROR: no playable stream found\n"));
 	exit(1);
     }
 }
@@ -1042,11 +961,11 @@ static int qt_init_video(void)
 	switch (qt_cmodel) {
 	case BC_RGB888:
 #ifdef HAVE_GL
-          fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
-		    use_gl ? "OpenGL" : "plain X11");
+          fprintf(stderr,_("INFO: using BC_RGB888 + %s\n"),
+		    use_gl ? _("OpenGL") : _("plain X11"));
 #else
-          fprintf(stderr,"INFO: using BC_RGB888 + %s\n",
-		    "plain X11");
+          fprintf(stderr,_("INFO: using BC_RGB888 + %s\n"),
+		    _("plain X11"));
 #endif
 	    if (qt_isqtvr == QTVR_PAN) {
 		qt_ximage = x11_create_ximage(dpy,qtvr_dwidth,qtvr_dheight);
@@ -1058,7 +977,7 @@ static int qt_init_video(void)
 		qt_rows[i] = qt_frame + qt_width * 3 * i;
 	    break;
 	case BC_YUV422:
-	    fprintf(stderr,"INFO: using BC_YUV422 + Xvideo extention\n");
+	    fprintf(stderr,_("INFO: using BC_YUV422 + Xvideo extention\n"));
 	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 					  xv_port,FOURCC_YUV2);
 	    for (i = 0; i < qt_height; i++)
@@ -1071,7 +990,7 @@ static int qt_init_video(void)
             if(xv_have_YV12)
               {
               fprintf(stderr,
-                      "INFO: using BC_YUV420P + Xvideo extention (YV12)\n");
+                      _("INFO: using BC_YUV420P + Xvideo extention (YV12)\n"));
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
               xv_port,FOURCC_YV12);
               qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
@@ -1081,7 +1000,7 @@ static int qt_init_video(void)
 	    else if(xv_have_I420)
               {
               fprintf(stderr,
-                      "INFO: using BC_YUV420P + Xvideo extention (I420)\n");
+                      _("INFO: using BC_YUV420P + Xvideo extention (I420)\n"));
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 	                                    xv_port,FOURCC_I420);
 	      qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
@@ -1092,7 +1011,7 @@ static int qt_init_video(void)
             lqt_set_row_span_uv(qt,0,qt_xvimage->pitches[1]);
             break;
 	default:
-	    fprintf(stderr,"ERROR: internal error at %s:%d\n",
+	    fprintf(stderr,_("ERROR: internal error at %s:%d\n"),
 		    __FILE__,__LINE__);
 	    exit(1);
 	}
@@ -1245,16 +1164,13 @@ static int qt_frame_decode(void)
 		
 		if (qt_drop) {
 			qt_droptotal += qt_drop;
-			fprintf(stderr,"dropped %d frame(s)\r",qt_droptotal);
+			fprintf(stderr,_("dropped %d frame(s)\r"),qt_droptotal);
 			for (i = 0; i < qt_drop; i++)
 			  	quicktime_read_frame(qt,qt_frame,0);
 			qt_drop = 0;
 		}
 		qt_frame_time = lqt_frame_time(qt, 0);
-	//        fprintf(stderr, "Frame time: %lld\n", qt_frame_time);
 		lqt_decode_video(qt, qt_rows, 0);
-	//        quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
-	//			    qt_cmodel,qt_rows,0);
 
     }
   return 0;
@@ -1298,7 +1214,7 @@ static int qt_frame_blit(void)
 		qt_width,qt_height,swidth,sheight);
 	break;
     default:
-	fprintf(stderr,"ERROR: internal error at %s:%d\n",
+	fprintf(stderr,_("ERROR: internal error at %s:%d\n"),
 		__FILE__,__LINE__);
 	exit(1);
     }
@@ -1321,9 +1237,7 @@ static void qt_frame_delay(struct timeval *start, struct timeval *wait)
     }
     
     msec += (qt_frame_time * 1000) / qt_timescale;
-
-    //    fprintf(stderr, "Time (msec) %ld\n", (qt_frame_time * 1000) / qt_timescale);
-
+    
     if (msec < 0) {
 	qt_drop = -msec * quicktime_frame_rate(qt,0) / 1000;
 	wait->tv_sec  = 0;
@@ -1374,9 +1288,7 @@ static int decode_audio()
     }
   else
     {
-    //    fprintf(stderr, "Decode audio...");
     lqt_decode_audio_track(qt, &qt_audio, (float**)0, AUDIO_BLOCK_SIZE, 0);
-    //    fprintf(stderr, "done\n");
     samples_decoded = lqt_last_audio_position(qt, 0) - last_pos;
     }
   total_samples_decoded += samples_decoded;
@@ -1384,7 +1296,7 @@ static int decode_audio()
   qt_audio_ptr = qt_audio;
   if(samples_decoded < AUDIO_BLOCK_SIZE)
     {
-    fprintf(stderr, "Audio track finished (got %d samples, wanted %d)\n",
+    fprintf(stderr, _("Audio track finished (got %d samples, wanted %d)\n"),
             samples_decoded, AUDIO_BLOCK_SIZE);
     qt_audio_eof = 1;
     }
@@ -1397,14 +1309,11 @@ static int qt_alsa_audio_write()
 #ifdef HAVE_ALSA
     int done = 0;
     int ret = 0;
-    //    fprintf(stderr, "Write alsa %d\n", qt_audio_samples_in_buffer);
     while(!done) {
         /* Decode new audio samples */
         if(!qt_audio_samples_in_buffer)
           decode_audio(AUDIO_BLOCK_SIZE);
-        //        fprintf(stderr, "snd_pcm_writei..");
         ret = snd_pcm_writei(pcm_handle, (void *)(qt_audio_ptr), qt_audio_samples_in_buffer);
-        //        fprintf(stderr, "done %d\n", ret);
         if (ret == -EAGAIN) { 
             ret = 0;
             done = 1;
@@ -1412,10 +1321,10 @@ static int qt_alsa_audio_write()
         }
         else if (ret == -EPIPE) {
             snd_pcm_prepare(pcm_handle);
-            fprintf(stderr, "Warning: buffer underrun\n");
+            fprintf(stderr, _("Warning: buffer underrun\n"));
         }
         else if (ret < 0) {
-            fprintf(stderr, "Warning: %s\n", snd_strerror(ret));
+            fprintf(stderr, _("Warning: %s\n"), snd_strerror(ret));
         }
         else if (ret >= 0)
           done = 1;
@@ -1450,7 +1359,7 @@ static int qt_oss_audio_write(void)
 	qt_hasaudio = 0;
 	break;
     case 0:
-	fprintf(stderr,"write dsp: Huh? no data written?\n");
+	fprintf(stderr,_("write dsp: Huh? no data written?\n"));
 	close(oss_fd);
 	oss_fd = -1;
 	qt_hasaudio = 0;
@@ -1512,18 +1421,18 @@ static void usage(FILE *fp, char *prog)
     p = strrchr(prog,'/');
     if (p) prog = p+1;
     fprintf(fp,
-	    "\n"
-	    "Very simple quicktime movie player for X11.  Just playes\n"
-	    "the movie and nothing else.  No fancy gui, no controls.\n"
-	    "\n"
-	    "You can quit with 'Q' and 'ESC' keys.\n"
-	    "\n"
-	    "usage: %s [ options ] <file>\n"
-	    "options:\n"
-	    "  -noxv   don't use the Xvideo extention\n"
-	    "  -nogl   don't use OpenGL\n"
-	    "  -noalsa don't use Alsa\n"
-	    "\n",
+	    _("\n"
+              "Very simple quicktime movie player for X11.  Just playes\n"
+              "the movie and nothing else.  No fancy gui, no controls.\n"
+              "\n"
+              "You can quit with 'Q' and 'ESC' keys.\n"
+              "\n"
+              "usage: %s [ options ] <file>\n"
+              "options:\n"
+              "  -noxv   don't use the Xvideo extention\n"
+              "  -nogl   don't use OpenGL\n"
+              "  -noalsa don't use Alsa\n"
+              "\n"),
 	    prog);
 }
 
@@ -1571,7 +1480,7 @@ static void resize_ev(Widget widget, XtPointer client_data,
     case MapNotify:
     case ConfigureNotify:
         XtVaGetValues(widget,XtNheight,&sheight,XtNwidth,&swidth,NULL);
-        fprintf(stderr,"INFO: window size is %dx%d\n",swidth,sheight);
+        fprintf(stderr,_("INFO: window size is %dx%d\n"),swidth,sheight);
 #ifdef HAVE_GL
 	      if (use_gl)
 	          gl_resize(widget,swidth,sheight);
@@ -1710,6 +1619,9 @@ int main(int argc, char *argv[])
     struct timeval start,wait;
     //    int audio_frames;
     
+    setlocale(LC_MESSAGES, "");
+    setlocale(LC_CTYPE, "");
+     
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
 				  opt_desc, opt_count,
 				  &argc, argv,
@@ -1760,9 +1672,10 @@ int main(int argc, char *argv[])
 	}
 	else {
 	    /* Decide about the colormodel */
-	    fprintf(stderr, "Stream colormodel %s, ", lqt_colormodel_to_string(lqt_get_cmodel(qt, 0)));
+	    fprintf(stderr, _("Stream colormodel %s, "),
+                    lqt_colormodel_to_string(lqt_get_cmodel(qt, 0)));
 	    qt_cmodel = lqt_get_best_colormodel(qt, 0, qt_cmodels);
-	    fprintf(stderr, "using %s\n", lqt_colormodel_to_string(qt_cmodel));
+	    fprintf(stderr, _("using %s\n"), lqt_colormodel_to_string(qt_cmodel));
 	    /* Set decoding colormodel */
 	    lqt_set_cmodel(qt, 0, qt_cmodel);
 	}
@@ -1864,7 +1777,7 @@ int main(int argc, char *argv[])
 	}
     }
     qt_cleanup();
-    fprintf(stderr, "Decoded %lld samples\n",
+    fprintf(stderr, _("Decoded %lld samples\n"),
             (long long)total_samples_decoded);    
     return 0;
 }

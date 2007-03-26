@@ -1059,6 +1059,11 @@ int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak, long moov_ti
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 
+/* translation.c */
+
+void lqt_translation_init();
+
+
 /* useratoms.c */
 
 uint8_t * quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u, char * name, uint32_t * len);

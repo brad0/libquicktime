@@ -1,5 +1,5 @@
 /*******************************************************************************
- common.c
+ translation.c
 
  libquicktime - A library for reading and writing quicktime/avi/mp4 files.
  http://libquicktime.sourceforge.net
@@ -21,5 +21,24 @@
  with this library; if not, write to the Free Software Foundation, Inc., 51
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
-void quicktime_print_info(quicktime_t * qtfile);
+
+
+#include <lqt_private.h>
+#include <pthread.h>
+#include <libintl.h>
+
+static pthread_mutex_t translation_mutex = PTHREAD_MUTEX_INITIALIZER;
+static int translation_initialized = 0;
+
+void lqt_translation_init()
+  {
+  pthread_mutex_lock(&translation_mutex);
+
+  if(!translation_initialized)
+    {
+    bindtextdomain(PACKAGE, LOCALE_DIR);
+    translation_initialized = 1;
+    }
+  pthread_mutex_unlock(&translation_mutex);
+  }
 

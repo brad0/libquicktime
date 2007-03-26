@@ -103,6 +103,7 @@ stts.c \
 texttrack.c \
 tkhd.c \
 trak.c \
+translation.c \
 tref.c \
 udta.c \
 useratoms.c \

@@ -290,7 +290,7 @@ copy_codec_info(const lqt_codec_info_t * info)
     }
   else
     {
-    bindtextdomain(PACKAGE, LOCALE_DIR);
+    lqt_translation_init();
     gettext_domain = PACKAGE;
     }
   
