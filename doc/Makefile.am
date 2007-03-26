@@ -12,5 +12,6 @@ qt4l_opening.html \
 qt4l_positioning.html \
 qt4l_reading.html \
 qt4l_util.html \
-qt4l_writing.html
+qt4l_writing.html \
+translatorsguide.txt
 

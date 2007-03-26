@@ -1,0 +1,42 @@
+Guide for translators
+=====================
+
+Libquicktime's string translation is a pretty straighforward
+gettextization. Consult the gettext documentation for in-depth
+info.
+
+Here some quick instuction for adding support for a new language xy:
+
+1. Everything important is in the subdirectory po
+
+2. Go there and type
+
+   msginit -l xy
+
+   If you are asked for an email address (for language-specific bugreports), 
+   either enter your own address or (of you are afraid of getting spam),
+   subscribe to libquicktime-devel@lists.sourceforge.net and enter that one.
+   After that, go to the toplevel directory and run autogen.sh followed by
+   configure.
+
+3. The created language file is named xy.po, it's the file you gonna
+   translate. The file structure is pretty simple, entries look like this:
+
+   #: src/lqt_quicktime.c:112
+   msgid "quicktime_make_streamable: no moov atom"
+   msgstr ""
+
+   msgid is the identifier of the message, which is, in turn, the English
+   string. If a string doesn't need a translation, just leave the msgstr
+   empty (gettext will return the untranslated string if no tranlation was found).
+
+4. For testing the translation you need to run autogen.sh (in the toplevel
+   directory) once after the language was initialized. For updating the translation,
+   go to the po/ directory and type:
+
+   make update-gmo
+   make install
+
+5. If you find some spelling error in the English strings (not unlikely), please
+   make a patch for the source files as well
+
