@@ -21,8 +21,8 @@ srcdir = .
 top_srcdir = ..
 
 
-prefix = /opt/gmerlin/
-exec_prefix = /opt/gmerlin/
+prefix = /opt/gmerlin
+exec_prefix = /opt/gmerlin
 datarootdir = ${prefix}/share
 datadir = ${datarootdir}
 localedir = ${datarootdir}/locale
