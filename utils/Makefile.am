@@ -22,7 +22,7 @@ bin_PROGRAMS = $(xbin) qtinfo qtstreamize qtdechunk qtrechunk qtyuv4toyuv qtdump
 man1_MANS = $(xman)
 
 lqt_transcode_SOURCES=lqt_transcode.c
-lqt_transcode_LDADD=@UTIL_LIBADD@ -lm
+lqt_transcode_LDADD=@UTIL_LIBADD@ @LIBINTL@ -lm
 
 testqt_SOURCES=testqt.c
 testqt_LDADD=@UTIL_LIBADD@ -lm
@@ -31,7 +31,7 @@ test_codec_SOURCES=test_codec.c
 test_codec_LDADD=@UTIL_LIBADD@
 
 qtinfo_SOURCES=qtinfo.c common.c
-qtinfo_LDADD=@UTIL_LIBADD@
+qtinfo_LDADD=@UTIL_LIBADD@ @LIBINTL@
 
 qtstreamize_SOURCES=qtstreamize.c
 qtstreamize_LDADD=@UTIL_LIBADD@
@@ -61,7 +61,8 @@ qtyuv4toyuv_LDADD=@UTIL_LIBADD@
 
 lqtplay_SOURCES=lqtplay.c common.c
 lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
-	-lXv @GL_LIBS@ -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@ @OSSAUDIO_LIBS@
+	-lXv @GL_LIBS@ -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@ @OSSAUDIO_LIBS@ \
+	@LIBINTL@
 
 INCLUDES = -I$(top_srcdir)/include \
 	    -I$(top_builddir)/include/quicktime \
