@@ -24,4 +24,5 @@ doc \
 src \
 include \
 plugins \
-utils
+utils \
+po
