@@ -9,6 +9,7 @@
 */
 
 #include <sys/time.h>
+#include <stdlib.h>
 
 #ifdef __MINGW32__
 #include <sys/timeb.h>
