@@ -8,337 +8,393 @@ msgstr ""
 "Project-Id-Version: libquicktime 1.0.0pre1\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
 "POT-Creation-Date: 2007-03-28 01:17+0200\n"
-"PO-Revision-Date: 2007-03-25 21:34+0200\n"
-"Last-Translator: Burkhard Plaum <libquicktime-devel@lists.sourceforge.net>\n"
+"PO-Revision-Date: 2007-04-14 16:08+0100\n"
+"Last-Translator: Stefan Scheffler <stefanscheffler@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/avi_riff.c:130 libquicktime-1.0.0pre1/src/avi_riff.c:130
+#: src/avi_riff.c:130
+#: libquicktime-1.0.0pre1/src/avi_riff.c:130
 msgid "file->total_riffs >= MAX_RIFFS"
 msgstr ""
 
-#: src/audio.c:270 libquicktime-1.0.0pre1/src/audio.c:270
+#: src/audio.c:270
+#: libquicktime-1.0.0pre1/src/audio.c:270
 msgid "Cannot encode samples: Stream format undefined"
-msgstr ""
+msgstr "Kann Samples nicht dekodieren: Streamformat undefiniert"
 
-#: src/audio.c:495 libquicktime-1.0.0pre1/src/audio.c:495
+#: src/audio.c:495
+#: libquicktime-1.0.0pre1/src/audio.c:495
 msgid "Cannot decode samples: Stream format undefined"
-msgstr ""
+msgstr "Kann Samples nicht dekodieren: Stream Format undefiniert"
 
-#: src/stsd.c:74 libquicktime-1.0.0pre1/src/stsd.c:74
+#: src/stsd.c:74
+#: libquicktime-1.0.0pre1/src/stsd.c:74
 msgid "quicktime_stsd_init_qtvr invalid track type supplied."
-msgstr ""
+msgstr "quicktime_stsd_init_qtvr ungültiger Spurtyp übergeben"
 
-#: src/udta.c:146 libquicktime-1.0.0pre1/src/udta.c:146
+#: src/udta.c:146
+#: libquicktime-1.0.0pre1/src/udta.c:146
 #, c-format
-msgid ""
-"Unknown character set for language code %d, will copy the string verbatim"
-msgstr ""
+msgid "Unknown character set for language code %d, will copy the string verbatim"
+msgstr "Unbekannter Zeichensatz für Sprachcode %d, werde den String wörtlich kopieren"
 
-#: src/lqt_codecs.c:38 libquicktime-1.0.0pre1/src/lqt_codecs.c:38
+#: src/lqt_codecs.c:38
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:38
 msgid "quicktime_delete_vcodec_stub called"
-msgstr ""
+msgstr "quicktime_delete_vcodec_stub aufgerufen"
 
-#: src/lqt_codecs.c:45 libquicktime-1.0.0pre1/src/lqt_codecs.c:45
+#: src/lqt_codecs.c:45
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:45
 msgid "quicktime_delete_acodec_stub called"
-msgstr ""
+msgstr "quicktime_delete_acodec_stub aufgerufen"
 
-#: src/lqt_codecs.c:54 libquicktime-1.0.0pre1/src/lqt_codecs.c:54
+#: src/lqt_codecs.c:54
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:54
 msgid "quicktime_decode_video_stub called"
-msgstr ""
+msgstr "quicktime_decode_video_stub aufgerufen"
 
-#: src/lqt_codecs.c:63 libquicktime-1.0.0pre1/src/lqt_codecs.c:63
+#: src/lqt_codecs.c:63
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:63
 msgid "quicktime_encode_video_stub called"
-msgstr ""
+msgstr "quicktime_encode_video_stub aufgerufen"
 
-#: src/lqt_codecs.c:73 libquicktime-1.0.0pre1/src/lqt_codecs.c:73
+#: src/lqt_codecs.c:73
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:73
 msgid "quicktime_decode_audio_stub called"
-msgstr ""
+msgstr "quicktime_decode_audio_stub aufgerufen"
 
-#: src/lqt_codecs.c:83 libquicktime-1.0.0pre1/src/lqt_codecs.c:83
+#: src/lqt_codecs.c:83
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:83
 msgid "quicktime_encode_audio_stub called"
-msgstr ""
+msgstr "quicktime_encode_audio_stub aufgerufen"
 
-#: src/lqt_codecs.c:135 libquicktime-1.0.0pre1/src/lqt_codecs.c:135
+#: src/lqt_codecs.c:135
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:135
 #, c-format
 msgid "Could not find video %s for fourcc %4s"
-msgstr ""
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
 
-#: src/lqt_codecs.c:145 src/lqt_codecs.c:242
+#: src/lqt_codecs.c:145
+#: src/lqt_codecs.c:242
 #: libquicktime-1.0.0pre1/src/lqt_codecs.c:145
 #: libquicktime-1.0.0pre1/src/lqt_codecs.c:242
 #, c-format
 msgid "Loading module %s"
-msgstr ""
+msgstr "Lade Modul %s"
 
-#: src/lqt_codecs.c:152 src/lqt_codecs.c:249
+#: src/lqt_codecs.c:152
+#: src/lqt_codecs.c:249
 #: libquicktime-1.0.0pre1/src/lqt_codecs.c:152
 #: libquicktime-1.0.0pre1/src/lqt_codecs.c:249
 #, c-format
 msgid "Loading module %s failed: %s"
-msgstr ""
+msgstr "Laden des Moduls %s fehlgeschlagen: %s"
 
-#: src/lqt_codecs.c:178 libquicktime-1.0.0pre1/src/lqt_codecs.c:178
+#: src/lqt_codecs.c:178
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:178
 #, c-format
 msgid "Module %s contains no function get_video_codec"
-msgstr ""
+msgstr "Modul %s enthält keine Funktion Namens get_video_codec"
 
-#: src/lqt_codecs.c:232 libquicktime-1.0.0pre1/src/lqt_codecs.c:232
+#: src/lqt_codecs.c:232
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:232
 #, c-format
 msgid "Could not find audio %s for fourcc %4s"
-msgstr ""
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
 
-#: src/lqt_codecs.c:272 libquicktime-1.0.0pre1/src/lqt_codecs.c:272
+#: src/lqt_codecs.c:272
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:272
 #, c-format
 msgid "Module %s contains no function get_audio_codec"
-msgstr ""
+msgstr "Modul %s enthält keine Funktion Namens get_audio_codec" # CHECK Namens gross"
 
-#: src/lqt_codecs.c:538 libquicktime-1.0.0pre1/src/lqt_codecs.c:538
-msgid ""
-"Audio codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
+#: src/lqt_codecs.c:538
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:538
+msgid "Audio codec and container are not known to be compatible. File might be playable by libquicktime only."
+msgstr "Audiocodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise nur mit Libquicktime abspielbar sein."
 
-#: src/lqt_codecs.c:544 libquicktime-1.0.0pre1/src/lqt_codecs.c:544
-msgid ""
-"Video codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
+#: src/lqt_codecs.c:544
+#: libquicktime-1.0.0pre1/src/lqt_codecs.c:544
+msgid "Video codec and container are not known to be compatible. File might be playable by libquicktime only."
+msgstr "Videcodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise nur mit Libquicktime abspielbar sein."
 
-#: src/lqt_codecfile.c:939 libquicktime-1.0.0pre1/src/lqt_codecfile.c:939
+#: src/lqt_codecfile.c:939
+#: libquicktime-1.0.0pre1/src/lqt_codecfile.c:939
 #, c-format
 msgid "%s could not be written, deleting imcomplete file"
-msgstr ""
+msgstr "%s konnte nicht geschrieben werden, Lösche unvollständige Datei."
 
-#: src/lqt_quicktime.c:112 libquicktime-1.0.0pre1/src/lqt_quicktime.c:112
+#: src/lqt_quicktime.c:112
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:112
 msgid "quicktime_make_streamable: no moov atom"
-msgstr ""
+msgstr "quicktime_make_streamable: kein moov Atom"
 
-#: src/lqt_quicktime.c:119 libquicktime-1.0.0pre1/src/lqt_quicktime.c:119
+#: src/lqt_quicktime.c:119
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:119
 msgid "quicktime_make_streamable: no mdat atom"
-msgstr ""
+msgstr "quicktime_make_streamable: kein mdat Atom"
 
-#: src/lqt_quicktime.c:148 libquicktime-1.0.0pre1/src/lqt_quicktime.c:148
+#: src/lqt_quicktime.c:148
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:148
 #, c-format
 msgid "quicktime_make_streamable: cannot open output file: %s"
-msgstr ""
+msgstr "quicktime_make_streamable: Ausgabe Datei, %s, konnte nicht geöffnet werden"
 
-#: src/lqt_quicktime.c:169 libquicktime-1.0.0pre1/src/lqt_quicktime.c:169
+#: src/lqt_quicktime.c:169
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:169
 #, c-format
-msgid ""
-"quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, "
-"start: %lld)"
-msgstr ""
+msgid "quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, start: %lld)"
+msgstr "quicktime_make_streamable: Größe des moov geändert von %lld auf %lld (Pos: %lld, start: %lld)"
 
-#: src/lqt_quicktime.c:525 libquicktime-1.0.0pre1/src/lqt_quicktime.c:525
+#: src/lqt_quicktime.c:525
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:525
 msgid "quicktime_set_framerate shouldn't be called in read mode."
-msgstr ""
+msgstr "quicktime_set_framerate sollte nicht im Lesemodus aufgerufen werden"
 
-#: src/lqt_quicktime.c:701 libquicktime-1.0.0pre1/src/lqt_quicktime.c:701
+#: src/lqt_quicktime.c:701
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:701
 msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
 msgstr ""
 
-#: src/lqt_quicktime.c:922 libquicktime-1.0.0pre1/src/lqt_quicktime.c:922
+#: src/lqt_quicktime.c:922
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:922
 #, c-format
 msgid "lqt_set_cmodel: No track No. %d"
-msgstr ""
+msgstr "lqt_set_cmodel: Kein Track Nr. %d"
 
-#: src/lqt_quicktime.c:1729 libquicktime-1.0.0pre1/src/lqt_quicktime.c:1729
+#: src/lqt_quicktime.c:1729
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:1729
 msgid "read/write mode is not supported"
-msgstr ""
+msgstr "Schreib/Lese Modus nicht unterstützt"
 
-#: src/lqt_quicktime.c:1757 libquicktime-1.0.0pre1/src/lqt_quicktime.c:1757
+#: src/lqt_quicktime.c:1757
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:1757
 msgid "Opening failed (unsupported filetype)"
-msgstr ""
+msgstr "Öffnen fehlgeschlagen (Dateityp nicht unterstützt)"
 
-#: src/lqt_quicktime.c:1912 libquicktime-1.0.0pre1/src/lqt_quicktime.c:1912
+#: src/lqt_quicktime.c:1912
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:1912
 #, c-format
 msgid "Setting parameter %s to %d"
-msgstr ""
+msgstr "Setze Parameter %s zu %d"
 
-#: src/lqt_quicktime.c:1919 libquicktime-1.0.0pre1/src/lqt_quicktime.c:1919
+#: src/lqt_quicktime.c:1919
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:1919
 #, c-format
 msgid "Setting parameter %s to %f"
-msgstr ""
+msgstr "Setze Parameter %s zu %f"
 
-#: src/lqt_quicktime.c:1927 libquicktime-1.0.0pre1/src/lqt_quicktime.c:1927
+#: src/lqt_quicktime.c:1927
+#: libquicktime-1.0.0pre1/src/lqt_quicktime.c:1927
 #, c-format
 msgid "Setting parameter %s to %s"
-msgstr ""
+msgstr "Setze Parameter %s zu %s"
 
-#: src/texttrack.c:50 libquicktime-1.0.0pre1/src/texttrack.c:50
-msgid ""
-"Cannot determine character set of text track, will copy the strings verbatim"
-msgstr ""
+#: src/texttrack.c:50
+#: libquicktime-1.0.0pre1/src/texttrack.c:50
+msgid "Cannot determine character set of text track, will copy the strings verbatim"
+msgstr "Kann Zeichensatz des Texttracks nicht ermitteln, werde die Strings wörtlich kopieren."
 
-#: src/texttrack.c:62 libquicktime-1.0.0pre1/src/texttrack.c:62
+#: src/texttrack.c:62
+#: libquicktime-1.0.0pre1/src/texttrack.c:62
 msgid "Unsupported charset in text track, will copy the strings verbatim"
-msgstr ""
+msgstr "Nicht Unterstützter  Zeichensatz im Texttrack, werde die Strings wörtlich kopieren"
 
-#: src/texttrack.c:246 libquicktime-1.0.0pre1/src/texttrack.c:246
+#: src/texttrack.c:246
+#: libquicktime-1.0.0pre1/src/texttrack.c:246
 msgid "Text track not supported for this file"
-msgstr ""
+msgstr "Diese Art Datei unterstützt keine text Tracks"
 
-#: src/texttrack.c:274 libquicktime-1.0.0pre1/src/texttrack.c:274
+#: src/texttrack.c:274
+#: libquicktime-1.0.0pre1/src/texttrack.c:274
 msgid "Need at least one audio or video stream for chapters"
-msgstr ""
+msgstr "Benötige mindestens einen Audio oder Video Stream für Kapitel"
 
-#: src/texttrack.c:298 libquicktime-1.0.0pre1/src/texttrack.c:298
+#: src/texttrack.c:298
+#: libquicktime-1.0.0pre1/src/texttrack.c:298
 msgid "Subtitles are not supported in AVI files"
-msgstr ""
+msgstr "AVI Dateien unterstützen keine Untertitel"
 
-#: src/texttrack.c:314 libquicktime-1.0.0pre1/src/texttrack.c:314
-msgid ""
-"Subtitles character set could not be determined, string will be copied "
-"verbatim"
-msgstr ""
+#: src/texttrack.c:314
+#: libquicktime-1.0.0pre1/src/texttrack.c:314
+msgid "Subtitles character set could not be determined, string will be copied verbatim"
+msgstr "Untertitel Zeichensatz konnte nicht ermittelt werden, die Strings werden wörtlich kopiert"
 
-#: src/texttrack.c:326 libquicktime-1.0.0pre1/src/texttrack.c:326
+#: src/texttrack.c:326
+#: libquicktime-1.0.0pre1/src/texttrack.c:326
 msgid "Unsupported character set in text track, string will be copied verbatim"
-msgstr ""
+msgstr "Nicht Unterstützter Zeichensatz  im Texttrack, der String wird wörtlich kopiert"
 
-#: src/lqt_qtvr.c:51 src/lqt_qtvr.c:117
+#: src/lqt_qtvr.c:51
+#: src/lqt_qtvr.c:117
 #: libquicktime-1.0.0pre1/src/lqt_qtvr.c:51
 #: libquicktime-1.0.0pre1/src/lqt_qtvr.c:117
 msgid "lqt_qtvr_add_node only single node movies supported."
-msgstr ""
+msgstr "lqt_qtvr_add_node nur Singlenode Filme werden unterstützt." #CHECK single nod"
 
-#: src/charset.c:95 src/charset.c:108 src/charset.c:132
+#: src/charset.c:95
+#: src/charset.c:108
+#: src/charset.c:132
 #: libquicktime-1.0.0pre1/src/charset.c:95
 #: libquicktime-1.0.0pre1/src/charset.c:108
 #: libquicktime-1.0.0pre1/src/charset.c:132
 #, c-format
 msgid "Cannot open iconv for conversion to %s from %s"
-msgstr ""
+msgstr "Konnte iconv für die Umwandlung von %s nach %s nicht öffnen"
 
-#: src/charset.c:167 libquicktime-1.0.0pre1/src/charset.c:167
+#: src/charset.c:167
+#: libquicktime-1.0.0pre1/src/charset.c:167
 msgid "Invalid Multibyte sequence"
-msgstr ""
+msgstr "Ungültige Multibyte Sequenz"
 
-#: src/charset.c:171 libquicktime-1.0.0pre1/src/charset.c:171
+#: src/charset.c:171
+#: libquicktime-1.0.0pre1/src/charset.c:171
 msgid "Incomplete Multibyte sequence"
-msgstr ""
+msgstr "Unvollständige Multibyte Sequenz"
 
-#: src/gmhd_text.c:75 libquicktime-1.0.0pre1/src/gmhd_text.c:75
+#: src/gmhd_text.c:75
+#: libquicktime-1.0.0pre1/src/gmhd_text.c:75
 msgid "More than 36 bytes in the gmhd text atom\n"
-msgstr ""
+msgstr "Mehr als 36 Bytes im gmhd Text Atom\n"
 
-#: src/lqt_color.c:205 libquicktime-1.0.0pre1/src/lqt_color.c:205
+#: src/lqt_color.c:205
+#: libquicktime-1.0.0pre1/src/lqt_color.c:205
 #, c-format
 msgid "Unknown colormodel (%d)\n"
-msgstr ""
+msgstr "Unbekanntes Farbmodell (%d)\n"
 
-#: src/lqt_color.c:239 libquicktime-1.0.0pre1/src/lqt_color.c:239
+#: src/lqt_color.c:239
+#: libquicktime-1.0.0pre1/src/lqt_color.c:239
 msgid "Input colorspace is neither RGB nor YUV, can't predict conversion price"
-msgstr ""
+msgstr "Eingabe Farbmodell ist weder RGB noch YUV, kann Umwandlungskosten nicht Vorrausberechnen." #CHEC"
 
-#: src/lqt_color.c:246 libquicktime-1.0.0pre1/src/lqt_color.c:246
-msgid ""
-"Output colorspace is neither RGB nor YUV, can't predict conversion price"
-msgstr ""
+#: src/lqt_color.c:246
+#: libquicktime-1.0.0pre1/src/lqt_color.c:246
+msgid "Output colorspace is neither RGB nor YUV, can't predict conversion price"
+msgstr "Ausgabe Farbmodell ist weder RGB noch YUV, can Umwandlungskosten nicht Vorrausberechnen."
 
-#: src/moov.c:106 libquicktime-1.0.0pre1/src/moov.c:106
+#: src/moov.c:106
+#: libquicktime-1.0.0pre1/src/moov.c:106
 #, c-format
 msgid "read_cmov: compression '%c%c%c%c' not zlib."
-msgstr ""
+msgstr "read_cmov: Kompression '%c%c%c%c' nicht zlib."
 
-#: src/stco.c:120 libquicktime-1.0.0pre1/src/stco.c:120
+#: src/stco.c:120
+#: libquicktime-1.0.0pre1/src/stco.c:120
 #, c-format
 msgid "quicktime_update_stco chunk must start at 1. chunk=%ld\n"
-msgstr ""
+msgstr "quicktime_update_stco chunk muss bei 1 anfangen. chunk=%ld\n"
 
-#: src/lqt_codecinfo.c:460 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:460
+#: src/lqt_codecinfo.c:460
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:460
 #, c-format
 msgid "dlopen failed for %s: %s"
-msgstr ""
+msgstr "dlopen fehlgeschlagen für %s: %s"
 
-#: src/lqt_codecinfo.c:474 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:474
+#: src/lqt_codecinfo.c:474
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:474
 #, c-format
 msgid "Module %s has no API version and is thus terribly old"
-msgstr ""
+msgstr "Modul %s hat keine API Version und ist deshalb fürchterlich alt"
 
-#: src/lqt_codecinfo.c:485 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:485
+#: src/lqt_codecinfo.c:485
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:485
 #, c-format
 msgid "Codec interface version mismatch of module %s: %d [module] != %d [lqt]"
-msgstr ""
+msgstr "Versionskonflikt mit dem Codecinterface bei Modul %s: %d [Modul] != %d [Lqt]"
 
-#: src/lqt_codecinfo.c:496 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:496
+#: src/lqt_codecinfo.c:496
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:496
 #, c-format
 msgid "Symbol get_num_codecs not found in %s"
-msgstr ""
+msgstr "Symbol get_num_codecs in %s nicht gefunden"
 
-#: src/lqt_codecinfo.c:505 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:505
+#: src/lqt_codecinfo.c:505
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:505
 #, c-format
 msgid "Symbol get_codec_info not found in %s"
-msgstr ""
+msgstr "Symbol get_codec_info in %s nicht gefunden"
 
-#: src/lqt_codecinfo.c:516 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:516
+#: src/lqt_codecinfo.c:516
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:516
 #, c-format
 msgid "No codecs found in %s"
-msgstr ""
+msgstr "Keine Codecs in %s gefunden"
 
-#: src/lqt_codecinfo.c:630 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:630
+#: src/lqt_codecinfo.c:630
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:630
 #, c-format
 msgid "Cannot open plugin directory %s (forgot make install?)"
-msgstr ""
+msgstr "Kann das Plugin Verzeichnis %s nicht finden (make install vergessen?)"
 
-#: src/lqt_codecinfo.c:908 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:908
+#: src/lqt_codecinfo.c:908
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:908
 #, c-format
 msgid "Stringlist parameter %s has NULL options"
-msgstr ""
+msgstr "Parameter der Stringliste %s hat NULL Optionen"
 
-#: src/lqt_codecinfo.c:967 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:967
+#: src/lqt_codecinfo.c:967
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:967
 #, c-format
 msgid "Codec %s has no fourccs defined"
-msgstr ""
+msgstr "Codec %s definiert keine fourcc"
 
-#: src/lqt_codecinfo.c:1531 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1531
+#: src/lqt_codecinfo.c:1531
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1531
 #, c-format
 msgid "lqt_set_default_parameter: No %s codec %s found"
-msgstr ""
+msgstr "lqt_set_default_parameter: Kein %s Codec %s gefunden"
 
-#: src/lqt_codecinfo.c:1562 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1562
+#: src/lqt_codecinfo.c:1562
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1562
 #, c-format
 msgid "lqt_set_default_parameter: No parameter %s for codec %s found"
-msgstr ""
+msgstr "lqt_set_default_parameter: Kein Parameter %s für Codec %s gefunden"
 
-#: src/lqt_codecinfo.c:1621 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1621
+#: src/lqt_codecinfo.c:1621
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1621
 #, c-format
 msgid "lqt_restore_default_parameters: dlopen failed for %s: %s"
-msgstr ""
+msgstr "lqt_restore_default_parameters: dlopen für %s fehlgeschlagen: %s"
 
-#: src/lqt_codecinfo.c:1629 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1629
+#: src/lqt_codecinfo.c:1629
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1629
 #, c-format
 msgid "Symbol %s not found in %s"
-msgstr ""
+msgstr "Symbol %s nicht in %s gefunden"
 
-#: src/lqt_codecinfo.c:1638 libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1638
+#: src/lqt_codecinfo.c:1638
+#: libquicktime-1.0.0pre1/src/lqt_codecinfo.c:1638
 #, c-format
 msgid "Couldn't get codec info for %s from_module %s"
-msgstr ""
+msgstr "Konnte keine Codec info für %s aus Modul %s bekommen"
 
-#: src/lqt_bufalloc.c:114 libquicktime-1.0.0pre1/src/lqt_bufalloc.c:114
+#: src/lqt_bufalloc.c:114
+#: libquicktime-1.0.0pre1/src/lqt_bufalloc.c:114
 #, c-format
 msgid "malloc of %d bytes failed"
-msgstr ""
+msgstr "Malloc von %d Bytes fehlgeschlagen"
 
-#: src/lqt_bufalloc.c:120 libquicktime-1.0.0pre1/src/lqt_bufalloc.c:120
+#: src/lqt_bufalloc.c:120
+#: libquicktime-1.0.0pre1/src/lqt_bufalloc.c:120
 #, c-format
 msgid "could not allocate %d bytes aligned on a %d byte boundary"
-msgstr ""
+msgstr "Konnte keine %d Bytes, ausgerichtet auf %d Byte Grenzen an, reservieren"
 
-#: src/stsdtable.c:304 libquicktime-1.0.0pre1/src/stsdtable.c:304
+#: src/stsdtable.c:304
+#: libquicktime-1.0.0pre1/src/stsdtable.c:304
 #, c-format
 msgid "Skipping unknown atom \"%4s\" inside audio stsd"
-msgstr ""
+msgstr "Überspringe unbekanntes Atom\"%4s\" innerhalb der Audio stsd"
 
 #: plugins/lame/lqt_lame.c:37
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:37
 msgid "Bitrate mode"
-msgstr ""
+msgstr "Bitratenmodus"
 
 #: plugins/lame/lqt_lame.c:40
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:40
@@ -362,43 +418,44 @@ msgid ""
 "VBR: Variable bitrate\n"
 "ABR: Average bitrate"
 msgstr ""
+"CBR: Konstante Bitrate\n"
+"VBR: Variable Bitrate\n"
+"ABR: Durchschnittliche Bitrate"
 
 #: plugins/lame/lqt_lame.c:46
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:46
 msgid "Nominal Bitrate (ABR/CBR)"
-msgstr ""
+msgstr "Nominelle Bitrate (ABR/CBR)"
 
 #: plugins/lame/lqt_lame.c:49
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:49
 msgid "Bitrate in bits per second. For CBR, this must be a valid MP3 bitrate"
-msgstr ""
+msgstr "Bitrate in Bit pro Sekunde. Für CBR muss dies eine zulässige MP3 Bitrate sein"
 
 #: plugins/lame/lqt_lame.c:54
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:54
 msgid "Minimum Bitrate (ABR)"
-msgstr ""
+msgstr "Minimale Bitrate (ABR)"
 
 #: plugins/lame/lqt_lame.c:57
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:57
-msgid ""
-"Minimum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
-msgstr ""
+msgid "Minimum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
+msgstr "Minimale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate sein"
 
 #: plugins/lame/lqt_lame.c:62
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:62
 msgid "Maximum Bitrate (ABR)"
-msgstr ""
+msgstr "Maximale Bitrate (ABR)"
 
 #: plugins/lame/lqt_lame.c:65
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:65
-msgid ""
-"Maximum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
-msgstr ""
+msgid "Maximum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
+msgstr "Maximale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate sein"
 
 #: plugins/lame/lqt_lame.c:70
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:70
 msgid "Quality (0 = best)"
-msgstr ""
+msgstr "Qualität (0 = Beste)"
 
 #: plugins/lame/lqt_lame.c:75
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:75
@@ -406,61 +463,69 @@ msgid ""
 "0: Slowest encoding, best quality\n"
 "9: Fastest encoding, worst quality"
 msgstr ""
+"0: Langsamstes Encodieren, Beste Qualität\n"
+"9: Schnellstes Encodieren, Schlechteste Qualität"
 
 #: plugins/lame/lqt_lame.c:80
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:80
 msgid "VBR Quality (0 = best)"
-msgstr ""
+msgstr "VBR Qualität (0 = Beste)"
 
 #: plugins/lame/lqt_lame.c:85
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:85
 msgid "VBR Quality level. 0: best, 9: worst"
-msgstr ""
+msgstr "VBR Qualitätsstufe 0: Beste, 9: Schlechteste"
 
 #: plugins/lame/lqt_lame.c:93
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:93
 msgid "Lame mp3 encoder"
-msgstr ""
+msgstr "Lame mp3 Codierer"
 
 #: plugins/lame/lqt_lame.c:94
 #: libquicktime-1.0.0pre1/plugins/lame/lqt_lame.c:94
 msgid "Lame mp3 encoder (see http://www.mp3dev.org)"
-msgstr ""
+msgstr "Lame mp3 Codierer (http://www.mp3dev.org)"
 
 #: plugins/lame/lame_codec.c:348
 #: libquicktime-1.0.0pre1/plugins/lame/lame_codec.c:348
 msgid "Ouch: lame created non mp3 data\n"
-msgstr ""
+msgstr "Autsch! Lame hat nicht-mp3 Daten erzeugt\n"
 
 #: plugins/lame/lame_codec.c:501
 #: libquicktime-1.0.0pre1/plugins/lame/lame_codec.c:501
 #, c-format
 msgid "lame_init_params returned %d\n"
-msgstr ""
+msgstr "lame_init_params gab %d zurück\n"
 
-#: plugins/png/lqt_png.c:36 libquicktime-1.0.0pre1/plugins/png/lqt_png.c:36
+#: plugins/png/lqt_png.c:36
+#: libquicktime-1.0.0pre1/plugins/png/lqt_png.c:36
 msgid "Compression Level"
-msgstr ""
+msgstr "Kompressionsstufe"
 
-#: plugins/png/lqt_png.c:51 libquicktime-1.0.0pre1/plugins/png/lqt_png.c:51
+#: plugins/png/lqt_png.c:51
+#: libquicktime-1.0.0pre1/plugins/png/lqt_png.c:51
 msgid "PNG (with alpha)"
-msgstr ""
+msgstr "PNG (mit Alpha)"
 
-#: plugins/png/lqt_png.c:52 libquicktime-1.0.0pre1/plugins/png/lqt_png.c:52
+#: plugins/png/lqt_png.c:52
+#: libquicktime-1.0.0pre1/plugins/png/lqt_png.c:52
 msgid "Lossless video codec (RGBA mode)"
-msgstr ""
+msgstr "Verlustfreier Videocodec (RGBA Modus)"
 
-#: plugins/png/lqt_png.c:64 libquicktime-1.0.0pre1/plugins/png/lqt_png.c:64
+#: plugins/png/lqt_png.c:64
+#: libquicktime-1.0.0pre1/plugins/png/lqt_png.c:64
 msgid "PNG"
 msgstr ""
 
-#: plugins/png/lqt_png.c:65 libquicktime-1.0.0pre1/plugins/png/lqt_png.c:65
+#: plugins/png/lqt_png.c:65
+#: libquicktime-1.0.0pre1/plugins/png/lqt_png.c:65
 msgid "Lossless video codec (RGB mode)"
-msgstr ""
+msgstr "Verlustfreier Videocodec (RGB Modus)"
 
-#: plugins/faac/faac.c:161 libquicktime-1.0.0pre1/plugins/faac/faac.c:161
+#: plugins/faac/faac.c:161
+#: libquicktime-1.0.0pre1/plugins/faac/faac.c:161
 msgid "Setting encode parameters failed, check settings"
-msgstr ""
+msgstr "Setzen der Encoderparameter fehlgeschlagen, prüfe Einstellungen"
 
 #: plugins/faac/lqt_faac.c:37
 #: libquicktime-1.0.0pre1/plugins/faac/lqt_faac.c:37
@@ -470,17 +535,17 @@ msgstr ""
 #: plugins/faac/lqt_faac.c:43
 #: libquicktime-1.0.0pre1/plugins/faac/lqt_faac.c:43
 msgid "VBR Quality"
-msgstr ""
+msgstr "VBR Qualität"
 
 #: plugins/faac/lqt_faac.c:55
 #: libquicktime-1.0.0pre1/plugins/faac/lqt_faac.c:55
 msgid "MPEG-2/4 AAC encoder"
-msgstr ""
+msgstr "MPEG-2/4 AAC Codierer"
 
 #: plugins/faac/lqt_faac.c:56
 #: libquicktime-1.0.0pre1/plugins/faac/lqt_faac.c:56
 msgid "MPEG-2/4 AAC encoder (faac based)"
-msgstr ""
+msgstr "MPEG-2/4 AAC encoder (faac basiert)"
 
 #: plugins/videocodec/lqt_videocodec.c:65
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:65
@@ -500,29 +565,29 @@ msgstr ""
 #: plugins/videocodec/lqt_videocodec.c:75
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:75
 msgid "String Test"
-msgstr ""
+msgstr "String Test"
 
 #: plugins/videocodec/lqt_videocodec.c:83
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:83
 msgid "Stringlist test"
-msgstr ""
+msgstr "Stringlisten Test"
 
 #: plugins/videocodec/lqt_videocodec.c:98
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:98
 msgid "RGB uncompressed"
-msgstr ""
+msgstr "RGB unkomprimiert"
 
 #: plugins/videocodec/lqt_videocodec.c:99
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:99
 msgid "RGB uncompressed."
-msgstr ""
+msgstr "RGB unkomprimiert"
 
 #: plugins/videocodec/lqt_videocodec.c:116
 #: plugins/videocodec/lqt_videocodec.c:117
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:116
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:117
 msgid "RGBA uncompressed"
-msgstr ""
+msgstr "RGB unkomprimiert"
 
 #: plugins/videocodec/lqt_videocodec.c:135
 #: plugins/videocodec/lqt_videocodec.c:136
@@ -574,7 +639,7 @@ msgstr ""
 #: plugins/videocodec/lqt_videocodec.c:214
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:214
 msgid "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME"
-msgstr ""
+msgstr "YUV 4:2:0 (yuv4) CNICHT KOMPATIBEL MIT STANDART QUICKTIME"
 
 #: plugins/videocodec/lqt_videocodec.c:227
 #: plugins/videocodec/lqt_videocodec.c:228
@@ -583,29 +648,31 @@ msgstr ""
 msgid "8 bit Planar YUV 4:2:0 (yv12)"
 msgstr ""
 
-#: plugins/videocodec/raw.c:263 plugins/videocodec/raw.c:272
+#: plugins/videocodec/raw.c:263
+#: plugins/videocodec/raw.c:272
 #: plugins/videocodec/raw.c:281
 #: libquicktime-1.0.0pre1/plugins/videocodec/raw.c:263
 #: libquicktime-1.0.0pre1/plugins/videocodec/raw.c:272
 #: libquicktime-1.0.0pre1/plugins/videocodec/raw.c:281
 msgid "Palette missing or too small"
-msgstr ""
+msgstr "Palette fehlt oder zu klein"
 
 #: plugins/videocodec/raw.c:290
 #: libquicktime-1.0.0pre1/plugins/videocodec/raw.c:290
 msgid "Palette missing or too small\n"
-msgstr ""
+msgstr "Palette fehlt oder zu klein\n"
 
 #: plugins/audiocodec/pcm.c:778
 #: libquicktime-1.0.0pre1/plugins/audiocodec/pcm.c:778
 msgid "EOF at the beginning of track"
-msgstr ""
+msgstr "EOF am Anfang des Tracks"
 
-#: plugins/audiocodec/pcm.c:821 plugins/audiocodec/ima4.c:332
+#: plugins/audiocodec/pcm.c:821
+#: plugins/audiocodec/ima4.c:332
 #: libquicktime-1.0.0pre1/plugins/audiocodec/pcm.c:821
 #: libquicktime-1.0.0pre1/plugins/audiocodec/ima4.c:332
 msgid "Cannot skip backwards"
-msgstr ""
+msgstr "Kann nicht vorwärts spulen" # skippen"
 
 #: plugins/audiocodec/lqt_audiocodec.c:33
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:33
@@ -620,27 +687,27 @@ msgstr ""
 #: plugins/audiocodec/lqt_audiocodec.c:46
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:46
 msgid "Integer (16 bit)"
-msgstr ""
+msgstr "Ganzzahl (16 bit)" # leave this one"
 
 #: plugins/audiocodec/lqt_audiocodec.c:47
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:47
 msgid "Integer (24 bit)"
-msgstr ""
+msgstr "Ganzzahl (24 bit)"
 
 #: plugins/audiocodec/lqt_audiocodec.c:48
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:48
 msgid "Integer (32 bit)"
-msgstr ""
+msgstr "Ganzzahl (32 bit)"
 
 #: plugins/audiocodec/lqt_audiocodec.c:49
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:49
 msgid "Float (32 bit)"
-msgstr ""
+msgstr "Fließkomma (32 bit)"
 
 #: plugins/audiocodec/lqt_audiocodec.c:50
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:50
 msgid "Float (64 bit)"
-msgstr ""
+msgstr "Fließkomma (64 bit)"
 
 #: plugins/audiocodec/lqt_audiocodec.c:109
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:109
@@ -649,10 +716,8 @@ msgstr ""
 
 #: plugins/audiocodec/lqt_audiocodec.c:110
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:110
-msgid ""
-"The IMA4 compressor reduces 16 bit audio data to 1/4 size, with very good "
-"quality"
-msgstr ""
+msgid "The IMA4 compressor reduces 16 bit audio data to 1/4 size, with very good quality"
+msgstr "Der IMA4 Kompressor reduziert die Größe von 16bit Audiodaten auf ein viertel mit sehr guter Qualität"
 
 #: plugins/audiocodec/lqt_audiocodec.c:124
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:124
@@ -662,7 +727,7 @@ msgstr ""
 #: plugins/audiocodec/lqt_audiocodec.c:125
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:125
 msgid "Don't use this for anything better than telephone quality"
-msgstr ""
+msgstr "Nicht verwenden für besseres als Telefon Qualität.\" #erk"
 
 #: plugins/audiocodec/lqt_audiocodec.c:138
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:138
@@ -672,7 +737,7 @@ msgstr ""
 #: plugins/audiocodec/lqt_audiocodec.c:139
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:139
 msgid "Twos is the preferred encoding for uncompressed audio"
-msgstr ""
+msgstr "Twos ist die bevorzugte art uncomprimiertes Audio zu Encodieren"
 
 #: plugins/audiocodec/lqt_audiocodec.c:152
 #: plugins/audiocodec/lqt_audiocodec.c:153
@@ -693,14 +758,14 @@ msgstr ""
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:181
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:182
 msgid "32 bit float"
-msgstr ""
+msgstr "32 bit Fließkomma"
 
 #: plugins/audiocodec/lqt_audiocodec.c:194
 #: plugins/audiocodec/lqt_audiocodec.c:195
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:194
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:195
 msgid "64 bit float"
-msgstr ""
+msgstr "64 bit Fließkomma"
 
 #: plugins/audiocodec/lqt_audiocodec.c:207
 #: plugins/audiocodec/lqt_audiocodec.c:208
@@ -727,120 +792,127 @@ msgstr ""
 #: plugins/audiocodec/lqt_audiocodec.c:251
 #: libquicktime-1.0.0pre1/plugins/audiocodec/lqt_audiocodec.c:251
 msgid "Linear PCM encoder"
-msgstr ""
+msgstr "MPEG-2/4 AAC Codierer (faac basiert)"
 
 #: plugins/faad2/lqt_faad2.c:35
 #: libquicktime-1.0.0pre1/plugins/faad2/lqt_faad2.c:35
 msgid "MPEG-2/4 AAC decoder"
-msgstr ""
+msgstr "MPEG-2/4 AAC Decodierer"
 
 #: plugins/faad2/lqt_faad2.c:36
 #: libquicktime-1.0.0pre1/plugins/faad2/lqt_faad2.c:36
 msgid "MPEG-2/4 AAC decoder (faad2 based)"
-msgstr ""
+msgstr "MPEG-2/4 AAC Decodierer (faad2 basiert)"
 
-#: plugins/faad2/faad2.c:142 libquicktime-1.0.0pre1/plugins/faad2/faad2.c:142
+#: plugins/faad2/faad2.c:142
+#: libquicktime-1.0.0pre1/plugins/faad2/faad2.c:142
 #, c-format
 msgid "faacDecDecode failed %s"
-msgstr ""
+msgstr "faacDecDecode fehler %s"
 
-#: plugins/faad2/faad2.c:332 libquicktime-1.0.0pre1/plugins/faad2/faad2.c:332
+# :P
+#: plugins/faad2/faad2.c:332
+#: libquicktime-1.0.0pre1/plugins/faad2/faad2.c:332
 msgid "No extradata found, decoding is doomed to failure"
-msgstr ""
+msgstr "Keine Extradaten gefunden, das Dekodieren ist zum Fehlschlagen verdammt."
 
-#: plugins/x264/x264.c:543 libquicktime-1.0.0pre1/plugins/x264/x264.c:543
+#: plugins/x264/x264.c:543
+#: libquicktime-1.0.0pre1/plugins/x264/x264.c:543
 msgid "x264_encoder_open failed"
-msgstr ""
+msgstr "x264_encoder_open Fehlgeschlagen"
 
-#: plugins/x264/x264.c:789 libquicktime-1.0.0pre1/plugins/x264/x264.c:789
+#: plugins/x264/x264.c:789
+#: libquicktime-1.0.0pre1/plugins/x264/x264.c:789
 #, c-format
 msgid "Unrecognized parameter %s"
-msgstr ""
+msgstr "Unbekannter Parameter %s"
 
 #: plugins/x264/lqt_x264.c:37
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:37
 msgid "Frame-type options"
-msgstr ""
+msgstr "Frametyp Optionen"
 
 #: plugins/x264/lqt_x264.c:42
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:42
 msgid "Maximum GOP size"
-msgstr ""
+msgstr "Maximale GOP Größe"
 
 #: plugins/x264/lqt_x264.c:48
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:48
 msgid "Minimum GOP size"
-msgstr ""
+msgstr "Minimale GOP Größe"
 
+# ..wechsel
 #: plugins/x264/lqt_x264.c:54
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:54
 msgid "Scenecut threshold"
-msgstr ""
+msgstr "Schwellwert für Scenenwechsel"
 
 #: plugins/x264/lqt_x264.c:57
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:57
 msgid "How aggressively to insert extra I-frames"
-msgstr ""
+msgstr "Wie Aggressiv extra I-Frames eingefügt werden sollen."
 
 #: plugins/x264/lqt_x264.c:61
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:61
 msgid "B-Frames"
-msgstr ""
+msgstr "B-Frames"
 
 #: plugins/x264/lqt_x264.c:66
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:66
 msgid "Number of B-frames between I and P"
-msgstr ""
+msgstr "Anzahl an B-Frames zwischen  I und P"
 
 #: plugins/x264/lqt_x264.c:70
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:70
 msgid "Adaptive B-frame decision"
-msgstr ""
+msgstr "Adaptive B-Frame Entscheidung"
 
+# bias besser?
 #: plugins/x264/lqt_x264.c:78
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:78
 msgid "B-frame bias"
-msgstr ""
+msgstr "B-Frame Tendenz"
 
 #: plugins/x264/lqt_x264.c:83
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:83
 msgid "Influences how often B-frames are used"
-msgstr ""
+msgstr "Beeinflusst wie oft B-Frames verwendet werden"
 
 #: plugins/x264/lqt_x264.c:87
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:87
 msgid "B-frame pyramid"
-msgstr ""
+msgstr "B-Frame Pyramide"
 
 #: plugins/x264/lqt_x264.c:92
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:92
 msgid "Keep some B-frames as references"
-msgstr ""
+msgstr "Behalte einige B-Frames als Referenz."
 
 #: plugins/x264/lqt_x264.c:96
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:96
 msgid "Ratecontrol"
-msgstr ""
+msgstr "Ratensteuerung"
 
 #: plugins/x264/lqt_x264.c:101
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:101
 msgid "Ratecontrol method"
-msgstr ""
+msgstr "Methode der Ratensteuerung"
 
 #: plugins/x264/lqt_x264.c:104
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:104
 msgid "Constant quality"
-msgstr ""
+msgstr "Feste Bitrate"
 
 #: plugins/x264/lqt_x264.c:105
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:105
 msgid "Average bitrate"
-msgstr ""
+msgstr "Durchschnittliche Bitrate"
 
 #: plugins/x264/lqt_x264.c:106
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:106
 msgid "CRF based VBR"
-msgstr ""
+msgstr "CRF basiertes VBR"
 
 #: plugins/x264/lqt_x264.c:108
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:108
@@ -851,90 +923,94 @@ msgid ""
 "CRF based VBR: Specify a rate factor below\n"
 "Selecting 2-pass encoding will force Average bitrate."
 msgstr ""
+"Methode der Ratensteuerung:\n"
+"Konstante Qualität: Quantizer Parameter hierunter angeben\n"
+"Durchschnittliche Bitrate: Bitrate hierrunter angeben\n"
+"CRF basiertes VBR: Ratenfaktor hierrunter angeben\n"
+"2-Pass Codieren erzwingt Durchschnittliche Bitrate"
 
 #: plugins/x264/lqt_x264.c:116
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:116
 msgid "Bitrate"
-msgstr ""
+msgstr "Bitrate"
 
 #: plugins/x264/lqt_x264.c:119
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:119
 msgid "Bitrate in kbit/s. 0 means VBR (recommended)"
-msgstr ""
+msgstr "Bitrate in kbit/s. 0 bedeutet VBR (empfohlen)"
 
-#: plugins/x264/lqt_x264.c:124 plugins/x264/lqt_x264.c:136
+#: plugins/x264/lqt_x264.c:124
+#: plugins/x264/lqt_x264.c:136
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:124
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:136
 msgid "Nominal Quantizer parameter"
-msgstr ""
+msgstr "Nominaler Quantizer Parameter"
 
-#: plugins/x264/lqt_x264.c:129 plugins/x264/lqt_x264.c:141
+#: plugins/x264/lqt_x264.c:129
+#: plugins/x264/lqt_x264.c:141
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:129
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:141
-msgid ""
-"This selects the nominal quantizer to use (1 to 51). Lower values result in "
-"better fidelity, but higher bitrates. 26 is a good default value. 0 means "
-"lossless."
-msgstr ""
+msgid "This selects the nominal quantizer to use (1 to 51). Lower values result in better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
+msgstr "Dies wählt den zu verwendenden Nominalen Quantizer (1 bis 51). Niedrigere Werte sorgen für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein guter Vorgabewert. 0 bedeutet Verlustfrei."
 
 #: plugins/x264/lqt_x264.c:148
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:148
 msgid "Quantizer parameter"
-msgstr ""
+msgstr "Quantizer Parameter"
 
 #: plugins/x264/lqt_x264.c:153
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:153
-msgid ""
-"This selects the quantizer to use (1 to 51). Lower values result in better "
-"fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
-msgstr ""
+msgid "This selects the quantizer to use (1 to 51). Lower values result in better fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
+msgstr "Dies wählt den zu verwendenden Quantizer (1 bis 51). Niedrigere Werte sorgen für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein guter Vorgabewert. 0 bedeutet Verlustfrei."
 
-#: plugins/x264/lqt_x264.c:159 plugins/x264/lqt_x264.c:164
+#: plugins/x264/lqt_x264.c:159
+#: plugins/x264/lqt_x264.c:164
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:159
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:164
 msgid "Minimum quantizer parameter"
-msgstr ""
+msgstr "Minimaler Quantizer Parameter"
 
-#: plugins/x264/lqt_x264.c:168 plugins/x264/lqt_x264.c:173
+#: plugins/x264/lqt_x264.c:168
+#: plugins/x264/lqt_x264.c:173
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:168
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:173
 msgid "Maximum quantizer parameter"
-msgstr ""
+msgstr "Maximaler Quantizer Parameter"
 
 #: plugins/x264/lqt_x264.c:177
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:177
 msgid "Maximum QP step"
-msgstr ""
+msgstr "Maximaler QP Schritt"
 
 #: plugins/x264/lqt_x264.c:182
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:182
 msgid "Maximum quantizer step"
-msgstr ""
+msgstr "Maximaler Quantizer Schritt"
 
 #: plugins/x264/lqt_x264.c:186
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:186
 msgid "Bitrate tolerance"
-msgstr ""
+msgstr "Bitratentoleranz"
 
 #: plugins/x264/lqt_x264.c:192
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:192
 msgid "Allowed variance of average bitrate"
-msgstr ""
+msgstr "Erlaubte Abweichung von der Durchschnittsbitrate"
 
 #: plugins/x264/lqt_x264.c:196
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:196
 msgid "Maximum local bitrate"
-msgstr ""
+msgstr "Maximale Locale Bitrate"
 
 #: plugins/x264/lqt_x264.c:199
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:199
 msgid "Sets a maximum local bitrate in kbits/s."
-msgstr ""
+msgstr "Setzt die maximale locale Bitrate in kbits/s."
 
 #: plugins/x264/lqt_x264.c:203
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:203
 msgid "VBV Buffer size"
-msgstr ""
+msgstr "VBV Puffergröße"
 
 #: plugins/x264/lqt_x264.c:206
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:206
@@ -944,64 +1020,67 @@ msgstr ""
 #: plugins/x264/lqt_x264.c:211
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:211
 msgid "Initial VBV buffer occupancy"
-msgstr ""
+msgstr "Initiale VBV Pufferbelegung"
 
 #: plugins/x264/lqt_x264.c:217
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:217
 msgid "Sets the initial VBV buffer occupancy as a fraction of the buffer size."
-msgstr ""
+msgstr "Setzt die initiale VBV Pufferbelegung als einen bruchteil der Puffergröße"
 
 #: plugins/x264/lqt_x264.c:222
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:222
 msgid "QP factor between I and P"
-msgstr ""
+msgstr "QP Faktor zwischen I und P"
 
 #: plugins/x264/lqt_x264.c:229
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:229
 msgid "QP factor between P and B"
-msgstr ""
+msgstr "QP Faktor zwischen P und B"
 
 #: plugins/x264/lqt_x264.c:236
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:236
 msgid "Partitions"
-msgstr ""
+msgstr "Partitionen"
 
+# transformator?
 #: plugins/x264/lqt_x264.c:241
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:241
 msgid "8x8 transform"
-msgstr ""
+msgstr "8x8 Transformation"
 
 #: plugins/x264/lqt_x264.c:249
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:249
 msgid "8x16, 16x8 and 8x8 P-frame search"
-msgstr ""
+msgstr "8x16, 16x8 und 8x8 P-Frame Suche"
 
 #: plugins/x264/lqt_x264.c:257
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:257
 msgid "8x16, 16x8 and 8x8 B-frame search"
-msgstr ""
+msgstr "8x16, 16x8 und 8x8 B-Frame Suche"
 
 #: plugins/x264/lqt_x264.c:265
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:265
 msgid "4x8, 8x4 and 4x4 P-frame search"
-msgstr ""
+msgstr "4x8, 8x4 und 4x4 P-Frame Suche"
 
 #: plugins/x264/lqt_x264.c:273
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:273
 msgid "8x8 Intra search"
-msgstr ""
+msgstr "8x8 Intrasuche"
 
+# ..or?
 #: plugins/x264/lqt_x264.c:278
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:278
 msgid "8x8 Intra search requires 8x8 transform"
-msgstr ""
+msgstr "8x8 Intrasuche benötigt 8x8 Transformation"
 
 #: plugins/x264/lqt_x264.c:282
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:282
 msgid "4x4 Intra search"
-msgstr ""
+msgstr "4x4 Intrasuche"
 
-#: plugins/x264/lqt_x264.c:290 plugins/ffmpeg/lqt_ffmpeg.c:112
+#: plugins/x264/lqt_x264.c:290
+#: plugins/ffmpeg/lqt_ffmpeg.c:112
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:290
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:112
 msgid "Motion estimation"
@@ -1010,27 +1089,28 @@ msgstr ""
 #: plugins/x264/lqt_x264.c:295
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:295
 msgid "Method"
-msgstr ""
+msgstr "Methode"
 
 #: plugins/x264/lqt_x264.c:298
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:298
 msgid "Diamond search"
-msgstr ""
+msgstr "Diamant Suche"
 
 #: plugins/x264/lqt_x264.c:299
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:299
 msgid "Hexagonal search"
-msgstr ""
+msgstr "Hexagonale Suche"
 
+# what you say?
 #: plugins/x264/lqt_x264.c:300
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:300
 msgid "Uneven Multi-Hexagon"
-msgstr ""
+msgstr "Unebenes Multi-Hexagon"
 
 #: plugins/x264/lqt_x264.c:301
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:301
 msgid "Exhaustive search"
-msgstr ""
+msgstr "Gründliche Suche"
 
 #: plugins/x264/lqt_x264.c:303
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:303
@@ -1041,6 +1121,11 @@ msgid ""
 "Uneven Multi-Hexagon: better but slower\n"
 "Exhaustive search: extremely slow, primarily for testing"
 msgstr ""
+"Motion Estimation Methode\n"
+"Diamond search: schnellste\n"
+"Hexagonal search: Vorgabe\n"
+"Uneven Multi-Hexagon: besser aber langsamer\n"
+"Exhaustive search: extrem langsam, hauptsächlich für Testzwecke"
 
 #: plugins/x264/lqt_x264.c:311
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:311
@@ -1049,8 +1134,7 @@ msgstr ""
 
 #: plugins/x264/lqt_x264.c:316
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:316
-msgid ""
-"Subpixel motion estimation and partition decision quality: 1=fast, 7=best."
+msgid "Subpixel motion estimation and partition decision quality: 1=fast, 7=best."
 msgstr ""
 
 #: plugins/x264/lqt_x264.c:321
@@ -1066,73 +1150,70 @@ msgstr ""
 #: plugins/x264/lqt_x264.c:331
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:331
 msgid "Search range"
-msgstr ""
+msgstr "Suchtiefe"
 
 #: plugins/x264/lqt_x264.c:334
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:334
-msgid ""
-"Maximum distance to search for motion estimation, measured from predicted "
-"position(s). Default of 16 is good for most footage, high motion sequences "
-"may benefit from settings between 24-32."
+msgid "Maximum distance to search for motion estimation, measured from predicted position(s). Default of 16 is good for most footage, high motion sequences may benefit from settings between 24-32."
 msgstr ""
 
 #: plugins/x264/lqt_x264.c:341
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:341
 msgid "Max Ref. frames"
-msgstr ""
+msgstr "Max. Ref. Frames"
 
+# frameref?
 #: plugins/x264/lqt_x264.c:346
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:346
-msgid ""
-"This is effective in Anime, but seems to make little difference in live-"
-"action source material. Some decoders are unable to deal with large frameref "
-"values."
-msgstr ""
+msgid "This is effective in Anime, but seems to make little difference in live-action source material. Some decoders are unable to deal with large frameref values."
+msgstr "Dies ist effectiv bei Anime, allerdings scheint es kaum einen Unterschied bei Live-Action Material zu machen. Einige Decoder haben Probleme mit großen frameref Werten."
 
 #: plugins/x264/lqt_x264.c:352
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:352
 msgid "Chroma motion estimation"
 msgstr ""
 
+# ???
 #: plugins/x264/lqt_x264.c:360
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:360
 msgid "Mixed references"
-msgstr ""
+msgstr "Gemischte Referenzen"
 
 #: plugins/x264/lqt_x264.c:365
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:365
 msgid "Allow each MB partition in P-frames to have it's own reference number"
-msgstr ""
+msgstr "Erlaube jeder MB partition in P-Frames ihre eigene Referenznummer zu haben."
 
 #: plugins/x264/lqt_x264.c:370
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:370
 msgid "Bidirectional ME"
-msgstr ""
+msgstr "Bidirektionale ME"
 
 #: plugins/x264/lqt_x264.c:375
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:375
 msgid "Jointly optimize both MVs in B-frames"
-msgstr ""
+msgstr "Optimiere beide MVs in B-Frames."
 
 #: plugins/x264/lqt_x264.c:379
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:379
 msgid "Weighted biprediction"
 msgstr ""
 
+# wichtung?
 #: plugins/x264/lqt_x264.c:384
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:384
 msgid "Implicit weighting for B-frames"
-msgstr ""
+msgstr "Implizierte Gewichtung für B-Frames."
 
 #: plugins/x264/lqt_x264.c:388
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:388
 msgid "Direct MV prediction mode"
-msgstr ""
+msgstr "Direkter MV Vorhersagemodus."
 
 #: plugins/x264/lqt_x264.c:391
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:391
 msgid "None"
-msgstr ""
+msgstr "Keine"
 
 #: plugins/x264/lqt_x264.c:392
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:392
@@ -1146,29 +1227,33 @@ msgstr ""
 
 #: plugins/x264/lqt_x264.c:394
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:394
+#, fuzzy
 msgid "Auto"
 msgstr ""
 
-#: plugins/x264/lqt_x264.c:399 plugins/ffmpeg/lqt_ffmpeg.c:163
+#: plugins/x264/lqt_x264.c:399
+#: plugins/ffmpeg/lqt_ffmpeg.c:163
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:399
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:163
 msgid "Misc"
-msgstr ""
+msgstr "Verschiedenes"
 
 #: plugins/x264/lqt_x264.c:404
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:404
 msgid "Deblocking filter"
-msgstr ""
+msgstr "Entblockungsfilter"
 
 #: plugins/x264/lqt_x264.c:409
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:409
+#, fuzzy
 msgid "Use deblocking loop filter (increases quality)."
-msgstr ""
+msgstr "Verwende Deblocking Schleifenfilter (verbessert Qualität)"
 
+# intensität?
 #: plugins/x264/lqt_x264.c:413
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:413
 msgid "Deblocking filter strength"
-msgstr ""
+msgstr "Entblockungsfilter Stärke"
 
 #: plugins/x264/lqt_x264.c:418
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:418
@@ -1178,7 +1263,7 @@ msgstr ""
 #: plugins/x264/lqt_x264.c:422
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:422
 msgid "Deblocking filter threshold"
-msgstr ""
+msgstr "Schwellwert für Deblocking-Filter"
 
 #: plugins/x264/lqt_x264.c:427
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:427
@@ -1188,130 +1273,131 @@ msgstr ""
 #: plugins/x264/lqt_x264.c:431
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:431
 msgid "Enable CABAC"
-msgstr ""
+msgstr "Aktiviere CABAC"
 
 #: plugins/x264/lqt_x264.c:436
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:436
-msgid ""
-"Enable CABAC (Context-Adaptive Binary Arithmetic Coding). Slightly slows "
-"down encoding and decoding, but should save 10-15% bitrate."
-msgstr ""
+msgid "Enable CABAC (Context-Adaptive Binary Arithmetic Coding). Slightly slows down encoding and decoding, but should save 10-15% bitrate."
+msgstr "Aktiviere CABAC (Context-Adaptive Binary Arithmetic Coding). Verlangsamt das Codieren und Decodieren etwas, sollte aber um die 10-15% Bitrate einsparen."
 
 #: plugins/x264/lqt_x264.c:442
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:442
 msgid "Trellis RD quantization"
-msgstr ""
+msgstr "Trellis RD Quantisierung"
 
 #: plugins/x264/lqt_x264.c:445
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:445
 msgid "Disabled"
-msgstr ""
+msgstr "Deaktiviert"
 
+# kontext
 #: plugins/x264/lqt_x264.c:446
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:446
 msgid "Enabled (final)"
-msgstr ""
+msgstr "Aktiviert (abschließend)"
 
 #: plugins/x264/lqt_x264.c:447
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:447
 msgid "Enabled (always)"
-msgstr ""
+msgstr "Aktiviert (immer)"
 
 #: plugins/x264/lqt_x264.c:449
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:449
-msgid ""
-"Trellis RD quantization. Requires CABAC. Can be enabled either for the final "
-"encode of a MB or for all mode desisions"
+msgid "Trellis RD quantization. Requires CABAC. Can be enabled either for the final encode of a MB or for all mode desisions"
 msgstr ""
 
-#: plugins/x264/lqt_x264.c:455 plugins/ffmpeg/params.h:742
+#: plugins/x264/lqt_x264.c:455
+#: plugins/ffmpeg/params.h:742
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:455
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:742
 msgid "Noise reduction"
-msgstr ""
+msgstr "Rausch Unterdrückung"
 
 #: plugins/x264/lqt_x264.c:467
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:467
 msgid "H.264 (MPEG4 AVC) encoder"
-msgstr ""
+msgstr "H.264 (MPEG4 AVC) Codierer"
 
 #: plugins/x264/lqt_x264.c:468
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:468
 msgid "Based on the x264 library"
-msgstr ""
+msgstr "Basiert auf der x264 Bibliothek"
 
-#: plugins/ffmpeg/audio.c:368 plugins/ffmpeg/audio.c:541
+#: plugins/ffmpeg/audio.c:368
+#: plugins/ffmpeg/audio.c:541
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:368
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:541
 msgid "avcodec_decode_audio error"
-msgstr ""
+msgstr "avcodec_decode_audio Fehler"
 
 #: plugins/ffmpeg/audio.c:411
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:411
 msgid "Decode header failed"
-msgstr ""
+msgstr "Dekodieren des Kopfes fehlgeschlagen"
 
 #: plugins/ffmpeg/audio.c:416
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:416
 msgid "Huh, frame not decoded?"
-msgstr ""
+msgstr "Huh, Frame nicht dekodiert?"
 
+# :P
 #: plugins/ffmpeg/audio.c:592
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:592
 #, c-format
 msgid "BUUUUG, buffer overflow, %d %d"
-msgstr ""
+msgstr "BUUUUG, Pufferüberlauf, %d %d"
 
-#: plugins/ffmpeg/audio.c:681 plugins/ffmpeg/audio.c:803
+#: plugins/ffmpeg/audio.c:681
+#: plugins/ffmpeg/audio.c:803
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:681
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/audio.c:803
 msgid "Avcodec open failed"
-msgstr ""
+msgstr "Öffnen von Avcodec fehlgeschlagen"
 
 #: plugins/ffmpeg/video.c:356
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/video.c:356
 msgid "No avcC atom present, decoding is likely to fail"
-msgstr ""
+msgstr "Kein avcC Atom vorhanden, das decodieren wird wahrscheinlich fehlschlagen."
 
 #: plugins/ffmpeg/video.c:468
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/video.c:468
 msgid "Skipping corrupted frame"
-msgstr ""
+msgstr "Überspringe beschädigte Frames"
 
 #: plugins/ffmpeg/video.c:662
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/video.c:662
 msgid "Enabling interlaced encoding"
-msgstr ""
+msgstr "Aktiviere Interlaced Codierung"
 
-#: plugins/ffmpeg/params.h:36 plugins/ffmpeg/params.h:45
+#: plugins/ffmpeg/params.h:36
+#: plugins/ffmpeg/params.h:45
 #: plugins/ffmpeg/lqt_ffmpeg.c:47
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:36
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:45
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:47
 msgid "Bit rate (kbps)"
-msgstr ""
+msgstr "Bitrate (kbps)"
 
 #: plugins/ffmpeg/params.h:54
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:54
 msgid "Bitrate tolerance (kbps)"
-msgstr ""
+msgstr "Bitratentoleranz (kbps)"
 
 #: plugins/ffmpeg/params.h:57
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:57
-msgid ""
-"Number of bits the bitstream is allowed to diverge from the reference. "
-"Unused for constant quantizer encoding"
-msgstr ""
+msgid "Number of bits the bitstream is allowed to diverge from the reference. Unused for constant quantizer encoding"
+msgstr "Anzahl an Bits die der Bitstream von der Referenz abweichen darf. Nicht verwendet bei konstantem Quantizer Codieren."
 
 #: plugins/ffmpeg/params.h:65
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:65
 msgid "Motion estimation method"
-msgstr ""
+msgstr "Art der Motion Estimation"
 
+# keine?
 #: plugins/ffmpeg/params.h:68
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:68
 msgid "Zero"
-msgstr ""
+msgstr "Null"
 
 #: plugins/ffmpeg/params.h:68
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:68
@@ -1336,17 +1422,17 @@ msgstr ""
 #: plugins/ffmpeg/params.h:69
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:69
 msgid "Full"
-msgstr ""
+msgstr "Voll"
 
 #: plugins/ffmpeg/params.h:77
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:77
 msgid "GOP size (0 = intra only)"
-msgstr ""
+msgstr "GOP größe (0 = nur intra)"
 
 #: plugins/ffmpeg/params.h:88
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:88
 msgid "Quantizer compression"
-msgstr ""
+msgstr "Quantizer Kompression"
 
 #: plugins/ffmpeg/params.h:94
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:94
@@ -1356,7 +1442,7 @@ msgstr ""
 #: plugins/ffmpeg/params.h:101
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:101
 msgid "Quantizer blur"
-msgstr ""
+msgstr "Quantizer Unschärfe"
 
 #: plugins/ffmpeg/params.h:107
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:107
@@ -1366,22 +1452,22 @@ msgstr ""
 #: plugins/ffmpeg/params.h:114
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:114
 msgid "Minimum quantizer scale"
-msgstr ""
+msgstr "Minimale Quantizer Skalierung"
 
 #: plugins/ffmpeg/params.h:125
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:125
 msgid "Maximum quantizer scale"
-msgstr ""
+msgstr "Maximale Qunatizer Skalierung"
 
 #: plugins/ffmpeg/params.h:136
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:136
 msgid "Maximum quantizer difference"
-msgstr ""
+msgstr "Maximaler Quantizer Unterschied"
 
 #: plugins/ffmpeg/params.h:141
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:141
 msgid "Maximum quantizer difference between frames"
-msgstr ""
+msgstr "Maximaler quantizer Unterschied zwischen Frames"
 
 #: plugins/ffmpeg/params.h:148
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:148
@@ -1391,59 +1477,55 @@ msgstr ""
 #: plugins/ffmpeg/params.h:153
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:153
 msgid "Maximum number of B-frames between non B-frames"
-msgstr ""
+msgstr "Maximale Anzahl an B-Frames zwischen nicht B-Frames"
 
 #: plugins/ffmpeg/params.h:160
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:160
 msgid "B quantizer factor"
-msgstr ""
+msgstr "B Quantizer Faktor"
 
 #: plugins/ffmpeg/params.h:166
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:166
 msgid "Quantizer factor between B-frames and non-B-frames"
-msgstr ""
+msgstr "Quantizer Faktor zwischen B-Frames und nicht B-Frames"
 
 #: plugins/ffmpeg/params.h:173
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:173
 msgid "Avoid B-frames in high motion scenes"
-msgstr ""
+msgstr "Vermeide B-Frames in bewegungsintensiven Szenen"
 
+# vielleicht etwas zu weit hergeholt
 #: plugins/ffmpeg/params.h:183
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:183
 msgid "Luma elimination threshold"
-msgstr ""
+msgstr "Luma Grenzwert"
 
 #: plugins/ffmpeg/params.h:188
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:188
-msgid ""
-"Single coefficient elimination threshold for luminance. Negative values also "
-"consider dc coefficient. -4 is JVT recommendation"
+msgid "Single coefficient elimination threshold for luminance. Negative values also consider dc coefficient. -4 is JVT recommendation"
 msgstr ""
 
 #: plugins/ffmpeg/params.h:196
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:196
 msgid "Chroma elimination threshold"
-msgstr ""
+msgstr "Chroma Grenzwert"
 
 #: plugins/ffmpeg/params.h:201
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:201
-msgid ""
-"Single coefficient elimination threshold for chrominamce. Negative values "
-"also consider dc coefficient. 7 is JVT recommendation"
+msgid "Single coefficient elimination threshold for chrominamce. Negative values also consider dc coefficient. 7 is JVT recommendation"
 msgstr ""
 
+# Standartskonformität
 #: plugins/ffmpeg/params.h:209
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:209
 msgid "Standards compliance"
-msgstr ""
+msgstr "Konformität mit Standarts"
 
 #: plugins/ffmpeg/params.h:214
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:214
 msgid ""
-"2 = Strictly conform to a older more strict version of the spec or reference "
-"software\n"
-" 1: Strictly conform to all the things in the spec no  matter what "
-"consequences\n"
+"2 = Strictly conform to a older more strict version of the spec or reference software\n"
+" 1: Strictly conform to all the things in the spec no  matter what consequences\n"
 " 0: Default\n"
 " -1: Allow inofficial extensions\n"
 " -2: Allow non standarized experimental things"
@@ -1452,142 +1534,136 @@ msgstr ""
 #: plugins/ffmpeg/params.h:227
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:227
 msgid "B quantizer offset"
-msgstr ""
+msgstr "B Quantizer Versatz"
 
 #: plugins/ffmpeg/params.h:233
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:233
 msgid ""
 "Quantizer offset between B-frames and non-B-frames\n"
-"if > 0 then the last p frame quantizer will be used (q= lastp_q*factor"
-"+offset)\n"
+"if > 0 then the last p frame quantizer will be used (q= lastp_q*factor+offset)\n"
 " if < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
 
 #: plugins/ffmpeg/params.h:244
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:244
 msgid "Minimum bitrate (kbps)"
-msgstr ""
+msgstr "Minimale Bitrate (kbps)"
 
 #: plugins/ffmpeg/params.h:247
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:247
 msgid "Minimum bitrate (0 means arbitrary)"
-msgstr ""
+msgstr "Minimale Bitrate (0 bedeutet beliebig)"
 
 #: plugins/ffmpeg/params.h:254
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:254
 msgid "Maximum bitrate (kbps)"
-msgstr ""
+msgstr "Maximale Bitrate (kbps)"
 
 #: plugins/ffmpeg/params.h:257
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:257
 msgid "Maximum bitrate (0 means arbitrary)"
-msgstr ""
+msgstr "Maximale Bitrate (0 bedeutet beliebig)"
 
 #: plugins/ffmpeg/params.h:264
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:264
 msgid "RC buffer size"
-msgstr ""
+msgstr "RC Puffergröße"
 
 #: plugins/ffmpeg/params.h:267
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:267
-msgid ""
-"Decoder bitstream buffer size in kbits. When encoding with max and/or min "
-"bitrate, this must be specified."
-msgstr ""
+msgid "Decoder bitstream buffer size in kbits. When encoding with max and/or min bitrate, this must be specified."
+msgstr "Decoder Bitstream Puffergröße in kbits. Beim Codieren mit Max und/oder Min Bitrate muss dies angegeben werden."
 
 #: plugins/ffmpeg/params.h:275
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:275
 msgid "RC buffer aggressivity"
-msgstr ""
+msgstr "RC Puffer Aggressivität"
 
+# ..ungs..
 #: plugins/ffmpeg/params.h:287
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:287
 msgid "I quantizer factor"
-msgstr ""
+msgstr "I Quantizer Faktor"
 
 #: plugins/ffmpeg/params.h:293
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:293
 msgid ""
 "Quantizer factor between P-frames and I-frames.\n"
-"If > 0 then the last P frame quantizer will be used (q= lastp_q*factor"
-"+offset).\n"
+"If > 0 then the last P frame quantizer will be used (q= lastp_q*factor+offset).\n"
 "If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
 
+# ..ungs..
 #: plugins/ffmpeg/params.h:304
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:304
 msgid "I quantizer offset"
-msgstr ""
+msgstr "I Quantizer Versatz"
 
 #: plugins/ffmpeg/params.h:310
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:310
 msgid "Quantizer offset between P-frames and I-frames"
-msgstr ""
+msgstr "Quantizer Versatz zwischen P-Frames und I-Frames"
 
 #: plugins/ffmpeg/params.h:317
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:317
 msgid "Initial RC complexity"
-msgstr ""
+msgstr "Anfängliche RC Komplexität"
 
 #: plugins/ffmpeg/params.h:329
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:329
 msgid "Luminance masking"
-msgstr ""
+msgstr "Helligkeitsmaskierung"
 
 #: plugins/ffmpeg/params.h:335
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:335
-msgid ""
-"Encode very bright image parts with reduced quality. 0 means disabled, 0-0.3 "
-"is a sane range."
-msgstr ""
+msgid "Encode very bright image parts with reduced quality. 0 means disabled, 0-0.3 is a sane range."
+msgstr "Codiere sehr helle Bild teile mit verringerter Qualität. 0 heißt deaktiviert, 0-0,3 ist ein vernünftiger Bereich."
 
+# geht warscheinlich besser
 #: plugins/ffmpeg/params.h:343
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:343
 msgid "Temporary complexity masking"
-msgstr ""
+msgstr "Maskierung Temporaler Komplexitäten"
 
 #: plugins/ffmpeg/params.h:349
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:349
-msgid ""
-"Encode very fast moving image parts with reduced quality. 0 means disabled."
-msgstr ""
+msgid "Encode very fast moving image parts with reduced quality. 0 means disabled."
+msgstr "Codiere sehr Bewegungsintensive Bild teile mit verringerter Qualität. 0 heißt deakiviert"
 
+# spatial lassen?
 #: plugins/ffmpeg/params.h:357
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:357
 msgid "Spatial complexity masking"
-msgstr ""
+msgstr "Maskierung Regionaler Komplexitäten"
 
 #: plugins/ffmpeg/params.h:363
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:363
-msgid ""
-"Encode very complex image parts with reduced quality. 0 means disabled, 0-"
-"0.5 is a sane range."
-msgstr ""
+msgid "Encode very complex image parts with reduced quality. 0 means disabled, 0-0.5 is a sane range."
+msgstr "Codiere sehr komplexe Bild teile mit verringerter Qualität. 0 heißt deaktiviert, 0-0,5 ist ein vernünftiger Bereich."
 
 #: plugins/ffmpeg/params.h:371
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:371
 msgid "Inter block masking"
-msgstr ""
+msgstr "Interblock Maskierung"
 
+# awkward
 #: plugins/ffmpeg/params.h:377
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:377
-msgid ""
-"Encode inter blocks with reduced quality (increases the quality of intra "
-"blocks). 0 means disabled, 1 will double the bits allocated for intra blocks."
-msgstr ""
+#, fuzzy
+msgid "Encode inter blocks with reduced quality (increases the quality of intra blocks). 0 means disabled, 1 will double the bits allocated for intra blocks."
+msgstr "Codiere Inter Blöcke mit verringerter Qualität (verbessert Qualität von Intra Blöcken). 0 bedeutet deaktiviert. 1 verdoppelt die Anzahl an für Intra Blöcke ausgewiesenen Bits."
 
 #: plugins/ffmpeg/params.h:386
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:386
 msgid "Darkness masking"
-msgstr ""
+msgstr "Dunkelheitsmaskierung"
 
 #: plugins/ffmpeg/params.h:392
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:392
-msgid ""
-"Encode very dark image parts with reduced quality. 0 means disabled, 0-0.3 "
-"is a sane range."
-msgstr ""
+msgid "Encode very dark image parts with reduced quality. 0 means disabled, 0-0.3 is a sane range."
+msgstr "Codiere sehr dunkle Bild teile mit verringerter Qualität. 0 heißt deaktiviert, 0-0,3 ist ein vernünftiger Bereich."
 
+# typo?
 #: plugins/ffmpeg/params.h:399
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:399
 msgid "Precition method"
@@ -1596,7 +1672,7 @@ msgstr ""
 #: plugins/ffmpeg/params.h:402
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:402
 msgid "Left"
-msgstr ""
+msgstr "Links"
 
 #: plugins/ffmpeg/params.h:402
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:402
@@ -1611,17 +1687,17 @@ msgstr ""
 #: plugins/ffmpeg/params.h:409
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:409
 msgid "Minimum MB quantizer"
-msgstr ""
+msgstr "Minimaler MB Quantizer"
 
 #: plugins/ffmpeg/params.h:420
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:420
 msgid "Maximum MB quantizer"
-msgstr ""
+msgstr "Maximaler MB Quantizer"
 
 #: plugins/ffmpeg/params.h:427
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:427
 msgid "SAD"
-msgstr ""
+msgstr "SAD"
 
 #: plugins/ffmpeg/params.h:427
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:427
@@ -1656,7 +1732,7 @@ msgstr ""
 #: plugins/ffmpeg/params.h:428
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:428
 msgid "ZERO"
-msgstr ""
+msgstr "NULL"
 
 #: plugins/ffmpeg/params.h:428
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:428
@@ -1676,8 +1752,9 @@ msgstr ""
 #: plugins/ffmpeg/params.h:448
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:448
 msgid "ME compare function"
-msgstr ""
+msgstr "ME Vergleichsfunktion"
 
+# ratenstreuung ..verzerrung?
 #: plugins/ffmpeg/params.h:452
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:452
 msgid ""
@@ -1694,16 +1771,28 @@ msgid ""
 "VSSE: Sum of squared vertical differences\n"
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
+"Motion estimation Vergleichsfunktion.\n"
+"SAD: Summe der absoluten Unterschiede\n"
+"SSE: Summe aus der Wurzel der Fehler\n"
+"SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
+"DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
+"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"BIT: Anzahl an Bits benötigt für Block\n"
+"RD: Optimale Ratenstreuung (Langsam)\n"
+"ZERO: 0\n"
+"VSAD: Summe der absoluten vertikalen Unterschiede\n"
+"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
 
 #: plugins/ffmpeg/params.h:470
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:470
 msgid "Enable chroma ME compare"
-msgstr ""
+msgstr "Aktiviere Chroma ME Vergleich."
 
 #: plugins/ffmpeg/params.h:481
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:481
 msgid "Subpixel ME compare function"
-msgstr ""
+msgstr "Subpixel ME Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:485
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:485
@@ -1721,16 +1810,28 @@ msgid ""
 "VSSE: Sum of squared vertical differences\n"
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
+"Subpixel Motion Estimation Vergleichsfunktion.\n"
+"SAD: Summe der absoluten Unterschiede\n"
+"SSE: Summe aus der Wurzel der Fehler\n"
+"SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
+"DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
+"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"BIT: Anzahl an Bits benötigt für Block\n"
+"RD: Optimale Ratenstreuung (Langsam)\n"
+"ZERO: 0\n"
+"VSAD: Summe der absoluten vertikalen Unterschiede\n"
+"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
 
 #: plugins/ffmpeg/params.h:503
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:503
 msgid "Enable chroma subpixel ME compare"
-msgstr ""
+msgstr "Aktiviere Chroma subpixel ME Vergleich."
 
 #: plugins/ffmpeg/params.h:514
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:514
 msgid "MB compare function"
-msgstr ""
+msgstr "MB Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:518
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:518
@@ -1748,19 +1849,32 @@ msgid ""
 "VSSE: Sum of squared vertical differences\n"
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
+"Macroblock Vergleichsfunktion.\n"
+"SAD: Summe der absoluten Unterschiede\n"
+"SSE: Summe aus der Wurzel der Fehler\n"
+"SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
+"DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
+"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"BIT: Anzahl an Bits benötigt für Block\n"
+"RD: Optimale Ratenstreuung (Langsam)\n"
+"ZERO: 0\n"
+"VSAD: Summe der absoluten vertikalen Unterschiede\n"
+"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
 
 #: plugins/ffmpeg/params.h:535
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:535
 msgid "Enable chroma macroblock ME compare"
-msgstr ""
+msgstr "Aktiviere Chroma Macroblock ME Vergleich."
 
 #: plugins/ffmpeg/params.h:546
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:546
 msgid "ILDCT compare function"
-msgstr ""
+msgstr "ILDCT Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:550
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:550
+#, fuzzy
 msgid ""
 "Interlaced dct compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -1775,37 +1889,51 @@ msgid ""
 "VSSE: Sum of squared vertical differences\n"
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
+"Interlaced dct Vergleichsfunktion.\n"
+"SAD: Summe der absoluten Unterschiede\n"
+"SSE: Summe aus der Wurzel der Fehler\n"
+"SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
+"DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
+"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"BIT: Anzahl an Bits benötigt für Block\n"
+"RD: Optimale Ratenstreuung (Langsam)\n"
+"ZERO: 0\n"
+"VSAD: Summe der absoluten vertikalen Unterschiede\n"
+"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
 
 #: plugins/ffmpeg/params.h:567
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:567
 msgid "Enable chroma ILDCT ME compare"
-msgstr ""
+msgstr "Aktiviere Chroma ILDCT ME Vergleich."
 
 #: plugins/ffmpeg/params.h:578
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:578
 msgid "ME diamond size & shape"
-msgstr ""
+msgstr "ME Diamantgröße und -form"
 
 #: plugins/ffmpeg/params.h:583
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:583
+#, fuzzy
 msgid "Motion estimation diamond size. Negative means shape adaptive."
-msgstr ""
+msgstr "Motion Estimation Diamantgröße. Negative bedeutet Formadaptiv."
 
+# ???
 #: plugins/ffmpeg/params.h:590
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:590
 msgid "Last predictor count"
-msgstr ""
+msgstr "Anzahl letzter Vorhersager "
 
 #: plugins/ffmpeg/params.h:595
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:595
 msgid ""
 "Amount of motion predictors from the previous frame.\n"
 "0 (default)\n"
-"a Will use 2a+1 x 2a+1 macroblock square of motion vector predictors from "
-"the previous frame."
+"a Will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the previous frame."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:605 plugins/ffmpeg/lqt_ffmpeg.c:126
+#: plugins/ffmpeg/params.h:605
+#: plugins/ffmpeg/lqt_ffmpeg.c:126
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:605
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:126
 msgid "ME pre-pass"
@@ -1819,11 +1947,16 @@ msgid ""
 "1: only after I-frames\n"
 "2: always"
 msgstr ""
+"Motion estimation pre-pass\n"
+"0: deaktiviert\n"
+"1: nur nach I-Frames\n"
+"2: immer"
 
 #: plugins/ffmpeg/params.h:620
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:620
+#, fuzzy
 msgid "ME pre-pass compare function"
-msgstr ""
+msgstr "ME pre-pass Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:624
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:624
@@ -1841,68 +1974,80 @@ msgid ""
 "VSSE: Sum of squared vertical differences\n"
 "NSSE: Noise preserving sum of squared differences"
 msgstr ""
+"Motion estimation pre-pass Vergleichsfunktion.\n"
+"SAD: Summe der absoluten Unterschiede\n"
+"SSE: Summe aus der Wurzel der Fehler\n"
+"SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
+"DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
+"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"BIT: Anzahl an Bits benötigt für Block\n"
+"RD: Optimale Ratenstreuung (Langsam)\n"
+"ZERO: 0\n"
+"VSAD: Summe der absoluten vertikalen Unterschiede\n"
+"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
 
 #: plugins/ffmpeg/params.h:642
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:642
 msgid "Enable chroma ME pre-pass compare"
-msgstr ""
+msgstr "Aktiviere Chroma ME pre-pass Vergleich"
 
 #: plugins/ffmpeg/params.h:653
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:653
 msgid "ME pre-pass diamond size & shape"
-msgstr ""
+msgstr "ME pre-pass Diamantgröße & -form"
 
 #: plugins/ffmpeg/params.h:658
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:658
 msgid "Motion estimation pre-pass diamond size. Negative means shape adaptive."
-msgstr ""
+msgstr "Motion Estimation pre-pass Diamantgröße. Negative Werte bedeuten Formadaptiv."
 
 #: plugins/ffmpeg/params.h:666
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:666
 msgid "Subpel ME quality"
-msgstr ""
+msgstr "Subpel ME Qualität"
 
 #: plugins/ffmpeg/params.h:671
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:671
-msgid ""
-"Subpel motion estimation refinement quality (for qpel). Higher values mean "
-"higher quality but slower encoding."
+msgid "Subpel motion estimation refinement quality (for qpel). Higher values mean higher quality but slower encoding."
 msgstr ""
 
 #: plugins/ffmpeg/params.h:679
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:679
 msgid "Motion estimation range"
-msgstr ""
+msgstr "Reichweite der Motion Estimation"
 
+# suchtiefe
 #: plugins/ffmpeg/params.h:684
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:684
 msgid "Motion estimation search range (0 means unlimited)"
-msgstr ""
+msgstr "Motion Estimation Suchweite "
 
 #: plugins/ffmpeg/params.h:691
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:691
 msgid "MB decision mode"
-msgstr ""
+msgstr "MB Entscheidungdmodus"
 
 #: plugins/ffmpeg/params.h:694
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:694
 msgid "Use compare function"
-msgstr ""
+msgstr "Verwende Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:694
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:694
 msgid "Fewest bits"
-msgstr ""
+msgstr "Wenigste bits"
 
+# streung
 #: plugins/ffmpeg/params.h:695
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:695
 msgid "Rate distoration"
-msgstr ""
+msgstr "Ratenverzerrung"
 
 #: plugins/ffmpeg/params.h:702
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:702
 msgid "Scenechange threshold"
-msgstr ""
+msgstr "Schwellwert für Szenenwechsel"
 
 #: plugins/ffmpeg/params.h:707
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:707
@@ -1910,280 +2055,265 @@ msgid ""
 "Threshold for scene change detection.\n"
 "Negative values mean more sensitivity (more keyframes)"
 msgstr ""
+"Schwellwert für für Erkennung von Szenenwechseln.\n"
+"Negative Werte bedeuten eine höhere Empfindlichkeit (mehr Keyframes)"
 
 #: plugins/ffmpeg/params.h:715
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:715
 msgid "Minimum lagrange multipler"
-msgstr ""
+msgstr "Minimaler Lagrange Multiplikator"
 
 #: plugins/ffmpeg/params.h:721
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:721
-msgid ""
-"Minimum Lagrange multiplier for ratecontrol. Should possibly be the same as "
-"minimum quantizer scale."
+msgid "Minimum Lagrange multiplier for ratecontrol. Should possibly be the same as minimum quantizer scale."
 msgstr ""
 
 #: plugins/ffmpeg/params.h:729
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:729
 msgid "Maximum lagrange multipler"
-msgstr ""
+msgstr "Maximaler Lagrange Multiplikator"
 
 #: plugins/ffmpeg/params.h:735
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:735
-msgid ""
-"Maximum Lagrange multiplier for ratecontrol. Should possibly be the same as "
-"maximum quantizer scale."
+msgid "Maximum Lagrange multiplier for ratecontrol. Should possibly be the same as maximum quantizer scale."
 msgstr ""
 
 #: plugins/ffmpeg/params.h:753
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:753
 msgid "Initial RC buffer occupancy"
-msgstr ""
+msgstr "Anfängliche RC Pufferbelegung"
 
 #: plugins/ffmpeg/params.h:756
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:756
-msgid ""
-"Number of kilobits which should be loaded into the rc buffer before encoding "
-"starts. Must not be larger than RC buffer size"
+msgid "Number of kilobits which should be loaded into the rc buffer before encoding starts. Must not be larger than RC buffer size"
 msgstr ""
 
 #: plugins/ffmpeg/params.h:767
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:767
 msgid "Inter threshold"
-msgstr ""
+msgstr "Inter Schwellwert"
 
+# bessere übersetzungs für noise shaping?
 #: plugins/ffmpeg/params.h:776
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:776
 msgid "Quantizer noise shaping"
-msgstr ""
+msgstr "Quantizer Rauschformung"
 
 #: plugins/ffmpeg/params.h:781
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:781
-msgid ""
-"Choose quantization such that noise will be masked by similar-frequency "
-"content in the image"
-msgstr ""
+msgid "Choose quantization such that noise will be masked by similar-frequency content in the image"
+msgstr "Wähle Quantisierung so dass Rauschen von Bildinhalten mit ähnlichen Frequenzen maskiert wird."
 
 #: plugins/ffmpeg/params.h:789
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:789
 msgid "ME Theshold"
-msgstr ""
+msgstr "ME Schwellwert"
 
 #: plugins/ffmpeg/params.h:794
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:794
-msgid ""
-"Motion estimation threshold. under which no motion estimation is performed, "
-"but instead the user specified motion vectors are used"
+msgid "Motion estimation threshold. under which no motion estimation is performed, but instead the user specified motion vectors are used"
 msgstr ""
 
 #: plugins/ffmpeg/params.h:802
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:802
 msgid "MB Theshold"
-msgstr ""
+msgstr "MB Schwellwert"
 
 #: plugins/ffmpeg/params.h:807
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:807
-msgid ""
-"Macroblock threshold. under which the user specified macroblock types will "
-"be used"
-msgstr ""
+msgid "Macroblock threshold. under which the user specified macroblock types will be used"
+msgstr "Macroblock Schwellwert, unter welchem vom Nutzer gegebene Macroblock Typen verwendet werden."
 
 #: plugins/ffmpeg/params.h:814
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:814
 msgid "NSSE weight"
-msgstr ""
+msgstr "NSSE Gewicht"
 
 #: plugins/ffmpeg/params.h:817
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:817
-msgid ""
-"Noise vs. SSE weight for the NSSE comparsion function. 0 is identical to SSE"
-msgstr ""
+msgid "Noise vs. SSE weight for the NSSE comparsion function. 0 is identical to SSE"
+msgstr "Rausch vs SSE Wichtung für die NSSE Vergleichsfunktion. 0 entspricht SSE"
 
 #: plugins/ffmpeg/params.h:825
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:825
 msgid "Border masking"
-msgstr ""
+msgstr "Randmaskierung"
 
 #: plugins/ffmpeg/params.h:831
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:831
-msgid ""
-"Encode image parts near the border with reduced quality.0 means disabled"
-msgstr ""
+msgid "Encode image parts near the border with reduced quality.0 means disabled"
+msgstr "Codiere Bildteile am Rand mit geringerer Qualität. 0 bedeutet nein."
 
 #: plugins/ffmpeg/params.h:838
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:838
 msgid "Minimum MB lagrange multipler"
-msgstr ""
+msgstr "Minimaler macroblock Lagrange multiplier."
 
 #: plugins/ffmpeg/params.h:844
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:844
 msgid "Minimum macroblock Lagrange multiplier."
-msgstr ""
+msgstr "Minimaler macroblock Lagrange multiplier."
 
 #: plugins/ffmpeg/params.h:850
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:850
 msgid "Maximum MB lagrange multipler"
-msgstr ""
+msgstr "Maximaler MB Lagrange multiplier."
 
 #: plugins/ffmpeg/params.h:856
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:856
 msgid "Maximum macroblock Lagrange multiplier."
-msgstr ""
+msgstr "Maximaler macroblock Lagrange multiplier."
 
+# klingt eigenartig
 #: plugins/ffmpeg/params.h:863
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:863
 msgid "ME penalty compensation"
-msgstr ""
+msgstr "ME Strafenausgleich"
 
 #: plugins/ffmpeg/params.h:871
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:871
+#, fuzzy
 msgid "Bidir refine"
-msgstr ""
+msgstr "Bidir Abstimmung"
 
 #: plugins/ffmpeg/params.h:881
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:881
 msgid "BRD scale"
-msgstr ""
+msgstr "BRD Skala"
 
 #: plugins/ffmpeg/params.h:893
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:893
 msgid "Scenechange factor"
-msgstr ""
+msgstr "Faktor für Szenenwechsel"
 
 #: plugins/ffmpeg/params.h:896
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:896
 msgid "Multiplied by qscale for each frame and added to scene_change_score"
-msgstr ""
+msgstr "Für jeden Frame mit qscale multipliziert und zu scene_change_score hinzuaddiert"
 
 #: plugins/ffmpeg/params.h:904
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:904
 msgid "Fixed quantizer"
-msgstr ""
+msgstr "Fester Quantizer"
 
 #: plugins/ffmpeg/params.h:909
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:909
-msgid ""
-"Quantizer for fixed quality encoding. Lower means better, 1 is not "
-"recommended"
-msgstr ""
+msgid "Quantizer for fixed quality encoding. Lower means better, 1 is not recommended"
+msgstr "Quantizer für Codieren mit fester Qualität. Niedriger heißt besser, 1 ist nicht empfohlen."
 
 #: plugins/ffmpeg/params.h:919
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:919
 msgid "Use fixed quantizer"
-msgstr ""
+msgstr "Verwende festen Quantizer"
 
 #: plugins/ffmpeg/params.h:924
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:924
 msgid "Use fixed quality encoding"
-msgstr ""
+msgstr "Verwende Codieren mit Fester Qualität"
 
 #: plugins/ffmpeg/params.h:931
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:931
 msgid "4 MV per MB allowed"
-msgstr ""
+msgstr "4 MV per MB erlaubt"
 
 #: plugins/ffmpeg/params.h:936
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:936
-msgid ""
-"Allow 4 motion vectors per macroblock (slightly better quality). Works "
-"better if MB decision mode is \"Fewest bits\" or \"Rate distoration\"."
+msgid "Allow 4 motion vectors per macroblock (slightly better quality). Works better if MB decision mode is \"Fewest bits\" or \"Rate distoration\"."
 msgstr ""
 
 #: plugins/ffmpeg/params.h:945
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:945
 msgid "Use qpel MC"
-msgstr ""
+msgstr "Verwende qpel MC"
 
 #: plugins/ffmpeg/params.h:950
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:950
-msgid ""
-"Use 1/4 pixel motion compensation. Warning: QPEL is not supported by all "
-"decoders."
-msgstr ""
+msgid "Use 1/4 pixel motion compensation. Warning: QPEL is not supported by all decoders."
+msgstr "Verwende 1/4 Pixel Motion Compensation. Warnung: QPEL wird nicht von allen Decodern unterstützt."
 
 #: plugins/ffmpeg/params.h:958
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:958
 msgid "Use global motion compensation"
-msgstr ""
+msgstr "Verwende Globale Motion Compensation"
 
 #: plugins/ffmpeg/params.h:963
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:963
 msgid "Warning: GMC is not supported by all decoders"
-msgstr ""
+msgstr "Warnung: GMC wird nicht von allen Decodern unterstützt"
 
 #: plugins/ffmpeg/params.h:969
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:969
 msgid "Use data partitioning"
-msgstr ""
+msgstr "Verwende Datenpartitionierung"
 
 #: plugins/ffmpeg/params.h:974
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:974
-msgid ""
-"Use data partitioning for more robustness if the video is for transmitting "
-"over unreliable channels"
-msgstr ""
+msgid "Use data partitioning for more robustness if the video is for transmitting over unreliable channels"
+msgstr "Verwende Datenpartitionierung für erhöhte Robustheit wenn das Video über unzuverlässige Kanäle übertragen Wird"
 
 #: plugins/ffmpeg/params.h:982
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:982
 msgid "Grayscale mode"
-msgstr ""
+msgstr "Schwarzweß Modus"
 
 #: plugins/ffmpeg/params.h:992
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:992
 msgid "Don't draw edges"
-msgstr ""
+msgstr "Zeichne keine Kanten"
 
 #: plugins/ffmpeg/params.h:1003
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1003
 msgid "Normalize adaptive quantization"
-msgstr ""
+msgstr "Normalisiere adaptive Quantisierung"
 
 #: plugins/ffmpeg/params.h:1008
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1008
-msgid ""
-"When using masking, try to adjust the per macroblock quantizers to maintain "
-"the desired average"
-msgstr ""
+msgid "When using masking, try to adjust the per macroblock quantizers to maintain the desired average"
+msgstr "Bei Verwendung von Maskierung, versuche per Macroblock Quantizer so abzustimmen dass der gewünschte Durchschnitt erhalten bleibt."
 
+# bad!
 #: plugins/ffmpeg/params.h:1015
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1015
 msgid "Use alternative scantable"
-msgstr ""
+msgstr "Verwende alternative Scantabelle"
 
 #: plugins/ffmpeg/params.h:1026
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1026
 msgid "Use trellis quantization"
-msgstr ""
+msgstr "Verwende Trellis Quantisierung"
 
 #: plugins/ffmpeg/params.h:1031
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1031
 msgid "Use trellis quantization (improves quality)"
-msgstr ""
+msgstr "Verwende Trellis Quantisierung (verbessert Qualität)"
 
+# ...
 #: plugins/ffmpeg/params.h:1037
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1037
 msgid "Use only bitexact stuff"
-msgstr ""
+msgstr "Verwende nur Bitgenaues Zeugs"
 
 #: plugins/ffmpeg/params.h:1042
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1042
 msgid "Use only bitexact stuff (except (i)dct)"
-msgstr ""
+msgstr "Verwende nur bitgenaues Zeug (ausser (i)dct)"
 
 #: plugins/ffmpeg/params.h:1048
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1048
 msgid "Advanced intra coding"
-msgstr ""
+msgstr "Fortgeschrittlene Intracodierung"
 
 #: plugins/ffmpeg/params.h:1058
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1058
+#, fuzzy
 msgid "MPEG-4 AC prediction"
-msgstr ""
+msgstr "MPEG-4 AC Vorhersage"
 
+# plural?
 #: plugins/ffmpeg/params.h:1068
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1068
 msgid "Unlimited motion vector"
-msgstr ""
+msgstr "Unbegrenzter Bewegungsvektor"
 
 #: plugins/ffmpeg/params.h:1078
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1078
@@ -2193,7 +2323,7 @@ msgstr ""
 #: plugins/ffmpeg/params.h:1083
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1083
 msgid "Use rate distortion optimization for cbp"
-msgstr ""
+msgstr "Verwende Ratenverzerr Optimierung für cbp"
 
 #: plugins/ffmpeg/params.h:1089
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1089
@@ -2203,12 +2333,12 @@ msgstr ""
 #: plugins/ffmpeg/params.h:1094
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1094
 msgid "Use rate distortion optimization for qp selectioon"
-msgstr ""
+msgstr "Verwende Ratenverzerr Optimierung für QP auswahl"
 
 #: plugins/ffmpeg/params.h:1100
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1100
 msgid "Alternative inter vlc"
-msgstr ""
+msgstr "Alternativer inter-vlc"
 
 #: plugins/ffmpeg/params.h:1111
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1111
@@ -2217,14 +2347,14 @@ msgstr ""
 
 #: plugins/ffmpeg/params.h:1116
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1116
-msgid ""
-"Overlapped block motion compensation (only supported with simple MB decision)"
-msgstr ""
+#, fuzzy
+msgid "Overlapped block motion compensation (only supported with simple MB decision)"
+msgstr "Motioncompensation mit überlappenden Blöcken (Nur unterstützt mit einfacher MB Entscheidung)"
 
 #: plugins/ffmpeg/params.h:1123
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1123
 msgid "Loop filter"
-msgstr ""
+msgstr "Schleifenfilter"
 
 #: plugins/ffmpeg/params.h:1133
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1133
@@ -2234,27 +2364,28 @@ msgstr ""
 #: plugins/ffmpeg/params.h:1144
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1144
 msgid "Close all GOPs"
-msgstr ""
+msgstr "Schließe alle GOPs"
 
 #: plugins/ffmpeg/params.h:1154
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1154
 msgid "Allow fast encoding"
-msgstr ""
+msgstr "Erlaube schnelles Codieren"
 
 #: plugins/ffmpeg/params.h:1159
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1159
 msgid "Allow non spec compliant speedup tricks"
-msgstr ""
+msgstr "Erlaube Beschleunigungstricks die nicht der Spezifikation entsprechen"
 
+# durchsetzung
 #: plugins/ffmpeg/params.h:1166
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1166
 msgid "Strictly enforce GOP size"
-msgstr ""
+msgstr "Strenge Einhaltung der GOP Größe"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:55
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:55
 msgid "Rate control"
-msgstr ""
+msgstr "Ratensteuerung"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:69
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:69
@@ -2264,17 +2395,18 @@ msgstr ""
 #: plugins/ffmpeg/lqt_ffmpeg.c:95
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:95
 msgid "Frame types"
-msgstr ""
+msgstr "Frame Typen"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:137
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:137
+#, fuzzy
 msgid "Qpel ME"
 msgstr ""
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:149
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:149
 msgid "Masking"
-msgstr ""
+msgstr "Maskierung"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:301
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:301
@@ -2299,7 +2431,7 @@ msgstr ""
 #: plugins/ffmpeg/lqt_ffmpeg.c:352
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:352
 msgid "FFMPEG MSMpeg 4v3 (DivX 3 compatible)"
-msgstr ""
+msgstr "FFMPEG MSMpeg 4v3 (DivX 3 kompatibel)"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:369
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:369
@@ -2371,10 +2503,11 @@ msgstr ""
 msgid "FFMPEG Apple Video"
 msgstr ""
 
+# grafiken?
 #: plugins/ffmpeg/lqt_ffmpeg.c:534
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:534
 msgid "FFMPEG Apple Graphics"
-msgstr ""
+msgstr "FFMPEG Apple Grafik"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:545
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:545
@@ -2455,193 +2588,206 @@ msgstr ""
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:1007
 #, c-format
 msgid "Video index too large: %d"
-msgstr ""
+msgstr "Videoindex zu groß: %d"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:1063
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:1063
 #, c-format
 msgid "Audio index too large: %d"
-msgstr ""
+msgstr "Audio Index zu Hoch: %d"
 
-#: plugins/dv/lqt_dv.c:44 libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:44
+#: plugins/dv/lqt_dv.c:44
+#: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:44
 msgid "Decoding Quality"
-msgstr ""
+msgstr "Decodierqualität"
 
-#: plugins/dv/lqt_dv.c:52 plugins/dv/lqt_dv.c:99
+#: plugins/dv/lqt_dv.c:52
+#: plugins/dv/lqt_dv.c:99
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:52
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:99
 msgid "Clamp Luma Values"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:60 plugins/dv/lqt_dv.c:107
+#: plugins/dv/lqt_dv.c:60
+#: plugins/dv/lqt_dv.c:107
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:60
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:107
 msgid "Clamp Chroma Values"
 msgstr ""
 
-#: plugins/dv/lqt_dv.c:68 plugins/dv/lqt_dv.c:115
+# Einstellung
+#: plugins/dv/lqt_dv.c:68
+#: plugins/dv/lqt_dv.c:115
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:68
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:115
 msgid "Compensate for 7.5IRE NTSC setup"
-msgstr ""
+msgstr "Kompensiere für 7.5IRE NTSC Setup"
 
-#: plugins/dv/lqt_dv.c:83 libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:83
+#: plugins/dv/lqt_dv.c:83
+#: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:83
 msgid "Is Anamorphic 16x9"
-msgstr ""
+msgstr "Ist Anamorphes 16x9"
 
-#: plugins/dv/lqt_dv.c:91 libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:91
+#: plugins/dv/lqt_dv.c:91
+#: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:91
 msgid "VLC Encode Passes"
-msgstr ""
+msgstr "VLC Codierschritte"
 
-#: plugins/dv/lqt_dv.c:127 libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:127
+#: plugins/dv/lqt_dv.c:127
+#: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:127
 msgid "Quasar DV Codec (PAL-Mode)"
-msgstr ""
+msgstr "Quasar DV Codec (PAL-Modus)"
 
-#: plugins/dv/lqt_dv.c:128 plugins/dv/lqt_dv.c:140
+#: plugins/dv/lqt_dv.c:128
+#: plugins/dv/lqt_dv.c:140
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:128
 #: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:140
-msgid ""
-"Codec for digital video camaras. Based on libdv (http://libdv.sourceforge."
-"net/)."
-msgstr ""
+msgid "Codec for digital video camaras. Based on libdv (http://libdv.sourceforge.net/)."
+msgstr "Codec für digitale Videokameras. Basiert auf libdv (http://libdv.sourceforge.net/)."
 
-#: plugins/dv/lqt_dv.c:139 libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:139
+#: plugins/dv/lqt_dv.c:139
+#: libquicktime-1.0.0pre1/plugins/dv/lqt_dv.c:139
 msgid "Quasar DV Codec (NTSC-Mode)"
-msgstr ""
+msgstr "Quasar DV Codec (NTSC-Modus)"
 
 #: plugins/vorbis/lqt_vorbis.c:36
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:36
 msgid "Nominal Bitrate"
-msgstr ""
+msgstr "Nominelle Bitrate "
 
 #: plugins/vorbis/lqt_vorbis.c:42
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:42
 msgid "Use variable bitrate"
-msgstr ""
+msgstr "Verwende Variable Bitrate"
 
 #: plugins/vorbis/lqt_vorbis.c:50
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:50
 msgid "Maximum Bitrate (-1 = no limit)"
-msgstr ""
+msgstr "Maximale Bitrate (-1 = unbegrenzt)"
 
 #: plugins/vorbis/lqt_vorbis.c:58
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:58
 msgid "Minimum Bitrate (-1 = no limit)"
-msgstr ""
+msgstr "Minimale Bitrate (-1 = unbegrenzt)"
 
 #: plugins/vorbis/lqt_vorbis.c:70
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:70
 msgid "Ogg Vorbis (qt4l compatible)"
-msgstr ""
+msgstr "Ogg Vorbis (qt4l kompatibel)"
 
-#: plugins/vorbis/lqt_vorbis.c:71 plugins/vorbis/lqt_vorbis.c:84
+#: plugins/vorbis/lqt_vorbis.c:71
+#: plugins/vorbis/lqt_vorbis.c:84
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:71
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:84
 msgid "Patent free audio codec (see http://www.vorbis.com)"
-msgstr ""
+msgstr "Patentfreier Audiocodec (http://www.vorbis.com)"
 
+# qtcomponents eigenname
 #: plugins/vorbis/lqt_vorbis.c:83
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:83
 msgid "Ogg Vorbis (qtcomponents compatible)"
-msgstr ""
+msgstr "Ogg Vorbis (qtcomponents kompatibel)"
 
 #: plugins/vorbis/vorbis.c:175
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:175
 #, c-format
 msgid "Using OVHS Atom, %d bytes"
-msgstr ""
+msgstr "Verwende OVHS Atom, %d bytes"
 
 #: plugins/vorbis/vorbis.c:372
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:372
 msgid "decode: next page failed"
 msgstr ""
 
-#: plugins/vorbis/vorbis.c:377 plugins/vorbis/vorbis.c:391
+#: plugins/vorbis/vorbis.c:377
+#: plugins/vorbis/vorbis.c:391
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:377
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:391
 msgid "decode: next packet failed"
 msgstr ""
 
-#: plugins/vorbis/vorbis.c:385 plugins/vorbis/vorbis.c:397
+#: plugins/vorbis/vorbis.c:385
+#: plugins/vorbis/vorbis.c:397
 #: plugins/vorbis/vorbis.c:406
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:385
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:397
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:406
 msgid "decode: vorbis_synthesis_headerin: not a vorbis header"
-msgstr ""
+msgstr "Decoder: vorbis_synthesis_headerin: ist kein Vorbis Header"
 
 #: plugins/vorbis/vorbis.c:548
 #: libquicktime-1.0.0pre1/plugins/vorbis/vorbis.c:548
 #, c-format
 msgid "Writing OVHS atom %d bytes\n"
-msgstr ""
+msgstr "Schreibe OVHS Atom %d bytes\n"
 
-#: plugins/mjpeg/jpeg.c:174 libquicktime-1.0.0pre1/plugins/mjpeg/jpeg.c:174
-msgid ""
-"Encoding progressive video as interlaced. Motion JPEG-A is not suitable for "
-"progressive video."
-msgstr ""
+#: plugins/mjpeg/jpeg.c:174
+#: libquicktime-1.0.0pre1/plugins/mjpeg/jpeg.c:174
+msgid "Encoding progressive video as interlaced. Motion JPEG-A is not suitable for progressive video."
+msgstr "Codiere progressives Video als Interlaced. Motion JPEG-A ist nur für progressives Video geeignet."
 
 #: plugins/mjpeg/lqt_mjpeg.c:43
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:43
 msgid "Quality"
-msgstr ""
+msgstr "Qualität"
 
 #: plugins/mjpeg/lqt_mjpeg.c:51
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:51
 msgid "Use float"
-msgstr ""
+msgstr "Verwende Fließkomma Zahlen"
 
 #: plugins/mjpeg/lqt_mjpeg.c:64
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:64
 msgid "JPEG photo"
-msgstr ""
+msgstr "JPEG Foto"
 
 #: plugins/mjpeg/lqt_mjpeg.c:65
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:65
 msgid "This format writes a seperate JPEG photo for every frame in YUV 4:2:0"
-msgstr ""
+msgstr "Dieses Format schreibt für jeden Frame ein seperates JPEG Foto in YUV 4:2:0"
 
 #: plugins/mjpeg/lqt_mjpeg.c:79
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:79
 msgid "Motion Jpeg A"
 msgstr ""
 
+# germlish!!!
 #: plugins/mjpeg/lqt_mjpeg.c:80
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:80
 msgid "MJPA stores each frame as two JPEGs interlaced and in YUV 4:2:2"
-msgstr ""
+msgstr "MJPA speichert jeden Frame als zwei interlaced JPEGs in YUV 4:2:2"
 
 #: plugins/mjpeg/libmjpeg.c:539
 #: libquicktime-1.0.0pre1/plugins/mjpeg/libmjpeg.c:539
 msgid "add_huff_table failed badly.\n"
-msgstr ""
+msgstr "add_huff_table schlug fehl.\n"
 
-#: plugins/rtjpeg/RTjpeg.c:2425 plugins/rtjpeg/RTjpeg.c:2461
+#: plugins/rtjpeg/RTjpeg.c:2425
+#: plugins/rtjpeg/RTjpeg.c:2461
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/RTjpeg.c:2425
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/RTjpeg.c:2461
 msgid "RTjpeg: Could not allocate memory"
-msgstr ""
+msgstr "RTjpeg: Konnte keinen Speicher reservieren"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:34
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:34
 msgid "Quality setting"
-msgstr ""
+msgstr "Qualitätseinstellung"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:42
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:42
 msgid "Key frame interval"
-msgstr ""
+msgstr "Keyframe Interval"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:48
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:48
 msgid "Luma quantiser"
-msgstr ""
+msgstr "Luma Quantizer"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:54
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:54
 msgid "Chroma quantiser"
-msgstr ""
+msgstr "Chroma Quantizer"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:63
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:63
@@ -2651,315 +2797,384 @@ msgstr ""
 #: plugins/rtjpeg/lqt_rtjpeg.c:64
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:64
 msgid "RTjpeg - real time lossy codec."
-msgstr ""
+msgstr "RTjpeg - Echtzeit Verlustbehafteter Codec"
 
-#: utils/lqtplay.c:246 libquicktime-1.0.0pre1/utils/lqtplay.c:246
+# verarbeiten? kontext
+#: utils/lqtplay.c:246
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:246
 #, c-format
 msgid "can't handle visuals != TrueColor, sorry\n"
-msgstr ""
+msgstr "Kann keine Visuals != TrueColor verwenden, sorry\n"
 
-#: utils/lqtplay.c:289 libquicktime-1.0.0pre1/utils/lqtplay.c:289
+#: utils/lqtplay.c:289
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:289
 #, c-format
 msgid "INFO: Xvideo port %ld: is busy, skipping\n"
-msgstr ""
+msgstr "INFO: Xvideo port %ld: ist beschäftigt, überspringe\n"
 
-#: utils/lqtplay.c:303 libquicktime-1.0.0pre1/utils/lqtplay.c:303
+#: utils/lqtplay.c:303
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:303
 #, c-format
 msgid "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s"
 msgstr ""
 
-#: utils/lqtplay.c:397 utils/lqtplay.c:461
+# kontext ok?
+#: utils/lqtplay.c:397
+#: utils/lqtplay.c:461
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:397
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:461
 #, c-format
 msgid "out of memory\n"
-msgstr ""
+msgstr "Kein freier Speicher\n"
 
-#: utils/lqtplay.c:555 libquicktime-1.0.0pre1/utils/lqtplay.c:555
+#: utils/lqtplay.c:555
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:555
 #, c-format
 msgid "WARNING: gl: can't get visual (rgb,db)\n"
-msgstr ""
+msgstr "WARNING: gl: kann Visual (rgb,db) nicht bekommen\n"
 
-#: utils/lqtplay.c:560 libquicktime-1.0.0pre1/utils/lqtplay.c:560
+#: utils/lqtplay.c:560
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:560
 #, c-format
 msgid "INFO: gl: DRI=%s\n"
-msgstr ""
+msgstr "INFO: gl: DRI=%s\n"
 
-#: utils/lqtplay.c:561 libquicktime-1.0.0pre1/utils/lqtplay.c:561
+#: utils/lqtplay.c:561
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:561
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
-#: utils/lqtplay.c:561 libquicktime-1.0.0pre1/utils/lqtplay.c:561
+#: utils/lqtplay.c:561
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:561
 msgid "No"
-msgstr ""
+msgstr "Nein"
 
-#: utils/lqtplay.c:563 libquicktime-1.0.0pre1/utils/lqtplay.c:563
+#: utils/lqtplay.c:563
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:563
 #, c-format
 msgid "WARNING: gl: Direct rendering missing\n"
-msgstr ""
+msgstr "WARNUNG: gl: Direct rendering fehlt\n"
 
-#: utils/lqtplay.c:569 libquicktime-1.0.0pre1/utils/lqtplay.c:569
+#: utils/lqtplay.c:569
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:569
 #, c-format
 msgid "INFO: gl: texture max size: %d\n"
-msgstr ""
+msgstr "INFO: gl: Maximale Textur Größe: %d\n"
 
-#: utils/lqtplay.c:572 libquicktime-1.0.0pre1/utils/lqtplay.c:572
+#: utils/lqtplay.c:572
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:572
 #, c-format
 msgid "WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n"
-msgstr ""
+msgstr "WARNUNG: gl: Maximale Texturgröße ist zu klein (erhielt %dx%d, benötige %dx%d)\n"
 
-#: utils/lqtplay.c:584 libquicktime-1.0.0pre1/utils/lqtplay.c:584
+#: utils/lqtplay.c:584
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:584
 #, c-format
 msgid "INFO: gl: frame=%dx%d, texture=%dx%d\n"
-msgstr ""
+msgstr "INFO: gl: Frame=%dx%d, Textur=%dx%d\n"
 
-#: utils/lqtplay.c:647 libquicktime-1.0.0pre1/utils/lqtplay.c:647
+#: utils/lqtplay.c:647
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:647
 #, c-format
 msgid "Error opening PCM device %s\n"
-msgstr ""
+msgstr "Fehler beim öffenen des PCM Geräts %s\n"
 
-#: utils/lqtplay.c:655 libquicktime-1.0.0pre1/utils/lqtplay.c:655
+#: utils/lqtplay.c:655
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:655
 #, c-format
 msgid "Can not configure this PCM device. (%s)\n"
-msgstr ""
+msgstr "Kann dieses PCM Gerät nicht Konfigurieren. (%s)\n"
 
-#: utils/lqtplay.c:660 libquicktime-1.0.0pre1/utils/lqtplay.c:660
+# ???
+#: utils/lqtplay.c:660
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:660
 #, c-format
 msgid "Error setting access. (%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen des Zugriffs. (%s)\n"
 
-#: utils/lqtplay.c:669 libquicktime-1.0.0pre1/utils/lqtplay.c:669
+#: utils/lqtplay.c:669
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:669
 #, c-format
 msgid "Error setting format.(%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen der Formats.(%s)\n"
 
-#: utils/lqtplay.c:675 libquicktime-1.0.0pre1/utils/lqtplay.c:675
+#: utils/lqtplay.c:675
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:675
 #, c-format
 msgid "Error setting channels. %i (%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen der Kanäle. %i (%s)\n"
 
-#: utils/lqtplay.c:682 libquicktime-1.0.0pre1/utils/lqtplay.c:682
+#: utils/lqtplay.c:682
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:682
 #, c-format
 msgid "Error setting sample rate (%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen der Samplerate (%s)\n"
 
-#: utils/lqtplay.c:686 libquicktime-1.0.0pre1/utils/lqtplay.c:686
+#: utils/lqtplay.c:686
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:686
 #, c-format
 msgid ""
 "WARNING: Using %i Hz instead of requested rate %i Hz\n"
 " "
 msgstr ""
+"WARNUNG: Verwende %i Hz statt der angeforderten Rate von %i Hz\n"
+" "
 
-#: utils/lqtplay.c:697 libquicktime-1.0.0pre1/utils/lqtplay.c:697
+# periods lassen?
+#: utils/lqtplay.c:697
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:697
 #, c-format
 msgid "Error setting periods.(%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen der Peroden.(%s)\n"
 
-#: utils/lqtplay.c:703 libquicktime-1.0.0pre1/utils/lqtplay.c:703
+#: utils/lqtplay.c:703
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:703
 #, c-format
 msgid "Unable to get buffer size for playback: %s\n"
-msgstr ""
+msgstr "Kann für die Wiedergabe keine Puffergröße bekommen: %s\n"
 
-#: utils/lqtplay.c:710 libquicktime-1.0.0pre1/utils/lqtplay.c:710
+#: utils/lqtplay.c:710
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:710
 #, c-format
 msgid "Unable to get period size for playback: %s\n"
-msgstr ""
+msgstr "Kann für die Wiedergabe keine Periodengröße bekommen: %s\n"
 
-#: utils/lqtplay.c:717 libquicktime-1.0.0pre1/utils/lqtplay.c:717
+#: utils/lqtplay.c:717
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:717
 #, c-format
 msgid "Error setting HW params.(%s)\n"
-msgstr ""
+msgstr "Fehler beim setzen der HW Parameter.(%s)\n"
 
-#: utils/lqtplay.c:722 libquicktime-1.0.0pre1/utils/lqtplay.c:722
+#: utils/lqtplay.c:722
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:722
 #, c-format
 msgid "Error in pcm_prepare.(%s)\n"
-msgstr ""
+msgstr "Fehler in pcm_prepare.(%s)\n"
 
-#: utils/lqtplay.c:757 libquicktime-1.0.0pre1/utils/lqtplay.c:757
+#: utils/lqtplay.c:757
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:757
 #, c-format
 msgid "ERROR: can't set sound format\n"
-msgstr ""
+msgstr "FEHLER: Kann Audioformat nicht setzen\n"
 
-#: utils/lqtplay.c:762 libquicktime-1.0.0pre1/utils/lqtplay.c:762
+#: utils/lqtplay.c:762
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:762
 #, c-format
 msgid "ERROR: can't set sound channels\n"
-msgstr ""
+msgstr "FEHLER: Kann Audiokanäle nicht setzen\n"
 
-#: utils/lqtplay.c:769 libquicktime-1.0.0pre1/utils/lqtplay.c:769
+#: utils/lqtplay.c:769
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:769
 #, c-format
 msgid "WARNING: sample rate mismatch (need %d, got %d)\n"
-msgstr ""
+msgstr "WARNUNG: Nichtübereinstimmung in Samplerate (brauche %d, erhielt %d)\n"
 
-#: utils/lqtplay.c:786 libquicktime-1.0.0pre1/utils/lqtplay.c:786
+#: utils/lqtplay.c:786
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:786
 #, c-format
 msgid "WARNING: open %s: %s\n"
-msgstr ""
+msgstr "WARNUNG: öffnen %s: %s\n"
 
-#: utils/lqtplay.c:847 libquicktime-1.0.0pre1/utils/lqtplay.c:847
+#: utils/lqtplay.c:847
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:847
 #, c-format
 msgid "ERROR: can't open file: %s\n"
-msgstr ""
+msgstr "FEHLER: Kann Datei %s nicht öffnen\n"
 
-#: utils/lqtplay.c:852 libquicktime-1.0.0pre1/utils/lqtplay.c:852
+#: utils/lqtplay.c:852
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:852
 #, c-format
 msgid "INFO: playing %s\n"
-msgstr ""
+msgstr "INFO: Spiele %s\n"
 
-#: utils/lqtplay.c:859 libquicktime-1.0.0pre1/utils/lqtplay.c:859
+#: utils/lqtplay.c:859
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:859
 #, c-format
 msgid "'%s' is no QTVR file or an unsupported variant.\n"
-msgstr ""
+msgstr "'%s' ist keine QTVR .Datei oder eine nicht Unterstützte Variante\n"
 
-#: utils/lqtplay.c:867 libquicktime-1.0.0pre1/utils/lqtplay.c:867
+#: utils/lqtplay.c:867
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:867
 #, c-format
 msgid "startpos :%i\n"
-msgstr ""
+msgstr "Startposition :%i\n"
 
-#: utils/lqtplay.c:868 libquicktime-1.0.0pre1/utils/lqtplay.c:868
+#: utils/lqtplay.c:868
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:868
 #, c-format
 msgid "movietype :%i\n"
-msgstr ""
+msgstr "Filmtyp :%i\n"
 
-#: utils/lqtplay.c:869 libquicktime-1.0.0pre1/utils/lqtplay.c:869
+#: utils/lqtplay.c:869
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:869
 #, c-format
 msgid "panning :%f %f\n"
-msgstr ""
+msgstr "Schwenk :%f %f\n"
 
-#: utils/lqtplay.c:870 libquicktime-1.0.0pre1/utils/lqtplay.c:870
+# Zeil
+#: utils/lqtplay.c:870
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:870
 #, c-format
 msgid "rows :%i\n"
-msgstr ""
+msgstr "Zeilen :%i\n"
 
-#: utils/lqtplay.c:871 libquicktime-1.0.0pre1/utils/lqtplay.c:871
+#: utils/lqtplay.c:871
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:871
 #, c-format
 msgid "colums :%i\n"
-msgstr ""
+msgstr "Spalten :%i\n"
 
-#: utils/lqtplay.c:872 libquicktime-1.0.0pre1/utils/lqtplay.c:872
+#: utils/lqtplay.c:872
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:872
 #, c-format
 msgid "disp width :%i\n"
-msgstr ""
+msgstr "Anzeige Breite :%i\n"
 
-#: utils/lqtplay.c:873 libquicktime-1.0.0pre1/utils/lqtplay.c:873
+#: utils/lqtplay.c:873
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:873
 #, c-format
 msgid "disp height :%i\n"
-msgstr ""
+msgstr "Anzeige Höhe :%i\n"
 
-#: utils/lqtplay.c:874 libquicktime-1.0.0pre1/utils/lqtplay.c:874
+#: utils/lqtplay.c:874
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:874
 #, c-format
 msgid "width :%i\n"
-msgstr ""
+msgstr "Breite :%i\n"
 
-#: utils/lqtplay.c:875 libquicktime-1.0.0pre1/utils/lqtplay.c:875
+#: utils/lqtplay.c:875
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:875
 #, c-format
 msgid "height :%i\n"
-msgstr ""
+msgstr "Höhe :%i\n"
 
-#: utils/lqtplay.c:876 libquicktime-1.0.0pre1/utils/lqtplay.c:876
+#: utils/lqtplay.c:876
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:876
 #, c-format
 msgid "depth :%i\n"
-msgstr ""
+msgstr "Farbtiefe :%i\n"
 
-#: utils/lqtplay.c:887 libquicktime-1.0.0pre1/utils/lqtplay.c:887
+#: utils/lqtplay.c:887
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:887
 #, c-format
 msgid "oh_width verz :%i\n"
 msgstr ""
 
-#: utils/lqtplay.c:893 libquicktime-1.0.0pre1/utils/lqtplay.c:893
+#: utils/lqtplay.c:893
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:893
 #, c-format
 msgid "WARNING: no video stream\n"
-msgstr ""
+msgstr "WARNUNG: kein Video Stream\n"
 
-#: utils/lqtplay.c:895 libquicktime-1.0.0pre1/utils/lqtplay.c:895
+#: utils/lqtplay.c:895
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:895
 #, c-format
 msgid "WARNING: unsupported video codec\n"
-msgstr ""
+msgstr "WARNUNG: nicht unterstützter Video Codec \n"
 
-#: utils/lqtplay.c:901 libquicktime-1.0.0pre1/utils/lqtplay.c:901
+#: utils/lqtplay.c:901
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:901
 #, c-format
 msgid "Timescale: %d\n"
-msgstr ""
+msgstr "Zeitskala: %d\n"
 
-#: utils/lqtplay.c:905 libquicktime-1.0.0pre1/utils/lqtplay.c:905
+#: utils/lqtplay.c:905
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:905
 #, c-format
 msgid "WARNING: no audio stream\n"
-msgstr ""
+msgstr "WARNUNG: kein Audio Stream\n"
 
-#: utils/lqtplay.c:907 libquicktime-1.0.0pre1/utils/lqtplay.c:907
+#: utils/lqtplay.c:907
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:907
 #, c-format
 msgid "WARNING: unsupported audio codec\n"
-msgstr ""
+msgstr "WARNUNG: Nicht Unterstützter Audiocodec\n"
 
-#: utils/lqtplay.c:924 libquicktime-1.0.0pre1/utils/lqtplay.c:924
+#: utils/lqtplay.c:924
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:924
 #, c-format
 msgid "ERROR: no playable stream found\n"
-msgstr ""
+msgstr "FEHLER: keine Spielbaren Streams gefunden\n"
 
-#: utils/lqtplay.c:964 utils/lqtplay.c:967
+#: utils/lqtplay.c:964
+#: utils/lqtplay.c:967
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:964
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:967
 #, c-format
 msgid "INFO: using BC_RGB888 + %s\n"
-msgstr ""
+msgstr "INFO: Verwende BC_RGB888 + %s\n"
 
-#: utils/lqtplay.c:965 libquicktime-1.0.0pre1/utils/lqtplay.c:965
+#: utils/lqtplay.c:965
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:965
 msgid "OpenGL"
 msgstr ""
 
-#: utils/lqtplay.c:965 utils/lqtplay.c:968
+# ncht übersetzen?
+#: utils/lqtplay.c:965
+#: utils/lqtplay.c:968
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:965
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:968
 msgid "plain X11"
-msgstr ""
+msgstr "Einfaches X11"
 
-#: utils/lqtplay.c:980 libquicktime-1.0.0pre1/utils/lqtplay.c:980
+#: utils/lqtplay.c:980
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:980
 #, c-format
 msgid "INFO: using BC_YUV422 + Xvideo extention\n"
-msgstr ""
+msgstr "INFO: Verwende BC_YUV422 + Xvideo Erweiterung\n"
 
-#: utils/lqtplay.c:993 libquicktime-1.0.0pre1/utils/lqtplay.c:993
+#: utils/lqtplay.c:993
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:993
 #, c-format
 msgid "INFO: using BC_YUV420P + Xvideo extention (YV12)\n"
-msgstr ""
+msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (YV12)\n"
 
-#: utils/lqtplay.c:1003 libquicktime-1.0.0pre1/utils/lqtplay.c:1003
+#: utils/lqtplay.c:1003
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1003
 #, c-format
 msgid "INFO: using BC_YUV420P + Xvideo extention (I420)\n"
-msgstr ""
+msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (I420)\n"
 
-#: utils/lqtplay.c:1014 utils/lqtplay.c:1217
+#: utils/lqtplay.c:1014
+#: utils/lqtplay.c:1217
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:1014
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:1217
 #, c-format
 msgid "ERROR: internal error at %s:%d\n"
-msgstr ""
+msgstr "FEHLER: Interner Fehler bei %s:%d\n"
 
-#: utils/lqtplay.c:1167 libquicktime-1.0.0pre1/utils/lqtplay.c:1167
+#: utils/lqtplay.c:1167
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1167
 #, c-format
 msgid "dropped %d frame(s)\r"
-msgstr ""
+msgstr " %d Frame(s) verworfen\r"
 
-#: utils/lqtplay.c:1299 libquicktime-1.0.0pre1/utils/lqtplay.c:1299
+#: utils/lqtplay.c:1299
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1299
 #, c-format
 msgid "Audio track finished (got %d samples, wanted %d)\n"
-msgstr ""
+msgstr "Audio Track fertig ( %d Samples erhalten, gewollt %d)\n"
 
-#: utils/lqtplay.c:1324 libquicktime-1.0.0pre1/utils/lqtplay.c:1324
+#: utils/lqtplay.c:1324
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1324
 #, c-format
 msgid "Warning: buffer underrun\n"
-msgstr ""
+msgstr "Warnung: Pufferunterlauf\n"
 
-#: utils/lqtplay.c:1327 libquicktime-1.0.0pre1/utils/lqtplay.c:1327
+#: utils/lqtplay.c:1327
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1327
 #, c-format
 msgid "Warning: %s\n"
-msgstr ""
+msgstr "Warnung: %s\n"
 
-#: utils/lqtplay.c:1362 libquicktime-1.0.0pre1/utils/lqtplay.c:1362
+#: utils/lqtplay.c:1362
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1362
 #, c-format
 msgid "write dsp: Huh? no data written?\n"
 msgstr ""
 
-#: utils/lqtplay.c:1424 libquicktime-1.0.0pre1/utils/lqtplay.c:1424
+#: utils/lqtplay.c:1424
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1424
 #, c-format
 msgid ""
 "\n"
@@ -2975,258 +3190,317 @@ msgid ""
 "  -noalsa don't use Alsa\n"
 "\n"
 msgstr ""
+"\n"
+"Sehr einfacher Quicktime Videoplayer für X11. Er spielt\n"
+"den Film ab und nichts sonst. Keine tolle UI und keine Steuerelemente.\n"
+"\n"
+"Sie können ihn mit 'Q' und 'ESC' beenden.\n"
+"\n"
+"Gebrauch: %s [ Optionen ] <Datei>\n"
+"Optionen:\n"
+"  -noxv   Xvideo Erweiterung nicht verwenden\n"
+"  -nogl   OpenGL nicht verwenden\n"
+"  -noalsa Alsa nicht verwenden\n"
+"\n"
 
-#: utils/lqtplay.c:1483 libquicktime-1.0.0pre1/utils/lqtplay.c:1483
+#: utils/lqtplay.c:1483
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1483
 #, c-format
 msgid "INFO: window size is %dx%d\n"
-msgstr ""
+msgstr "INFO: Fenstergröße ist %dx%d\n"
 
-#: utils/lqtplay.c:1675 libquicktime-1.0.0pre1/utils/lqtplay.c:1675
+#: utils/lqtplay.c:1675
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1675
 #, c-format
 msgid "Stream colormodel %s, "
-msgstr ""
+msgstr "Stream Farbmodel %s, "
 
-#: utils/lqtplay.c:1678 libquicktime-1.0.0pre1/utils/lqtplay.c:1678
+#: utils/lqtplay.c:1678
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1678
 #, c-format
 msgid "using %s\n"
-msgstr ""
+msgstr "verwende %s\n"
 
-#: utils/lqtplay.c:1780 libquicktime-1.0.0pre1/utils/lqtplay.c:1780
+#: utils/lqtplay.c:1780
+#: libquicktime-1.0.0pre1/utils/lqtplay.c:1780
 #, c-format
 msgid "Decoded %lld samples\n"
-msgstr ""
+msgstr "%lld Decodiert\n"
 
-#: utils/lqt_transcode.c:91 libquicktime-1.0.0pre1/utils/lqt_transcode.c:91
+#: utils/lqt_transcode.c:91
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:91
 #, c-format
 msgid "Supported formats\n"
-msgstr ""
+msgstr "Unterstützte Formate\n"
 
-#: utils/lqt_transcode.c:94 libquicktime-1.0.0pre1/utils/lqt_transcode.c:94
+#: utils/lqt_transcode.c:94
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:94
 #, c-format
 msgid "%8s: %s (default codecs: %s/%s)\n"
-msgstr ""
+msgstr "%8s: %s (Vorgabe Codec: %s/%s)\n"
 
-#: utils/lqt_transcode.c:142 libquicktime-1.0.0pre1/utils/lqt_transcode.c:142
+#: utils/lqt_transcode.c:142
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:142
+#, c-format
+msgid "Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n"
+msgstr "Gebrauch: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc <video_codec>] <in_file> <out_file>\n"
+
+#: utils/lqt_transcode.c:143
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:143
 #, c-format
 msgid ""
-"Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] "
-"[-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc "
-"<video_codec>] <in_file> <out_file>\n"
-msgstr ""
-
-#: utils/lqt_transcode.c:143 libquicktime-1.0.0pre1/utils/lqt_transcode.c:143
-#, c-format
-msgid ""
-"       Transcode <in_file> to <out_file> using <audio_codec> and "
-"<video_codec>\n"
+"       Transcode <in_file> to <out_file> using <audio_codec> and <video_codec>\n"
 "\n"
 msgstr ""
+"       Transcode <in_file> nach <out_file> unter Verwendung von <audio_codec> und <video_codec>\n"
+"\n"
 
-#: utils/lqt_transcode.c:144 libquicktime-1.0.0pre1/utils/lqt_transcode.c:144
+#: utils/lqt_transcode.c:144
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:144
 #, c-format
 msgid "       lqt_transcode -lv\n"
 msgstr ""
 
-#: utils/lqt_transcode.c:145 libquicktime-1.0.0pre1/utils/lqt_transcode.c:145
+#: utils/lqt_transcode.c:145
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:145
 #, c-format
 msgid ""
 "       List video encoders\n"
 "\n"
 msgstr ""
+"       Liste Audio Codierer\n"
+"\n"
 
-#: utils/lqt_transcode.c:146 libquicktime-1.0.0pre1/utils/lqt_transcode.c:146
+#: utils/lqt_transcode.c:146
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:146
 #, c-format
 msgid "       lqt_transcode -la\n"
 msgstr ""
 
-#: utils/lqt_transcode.c:147 libquicktime-1.0.0pre1/utils/lqt_transcode.c:147
+#: utils/lqt_transcode.c:147
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:147
 #, c-format
 msgid "       List audio encoders\n"
-msgstr ""
+msgstr "       Liste Audio Codierer\n"
 
-#: utils/lqt_transcode.c:148 libquicktime-1.0.0pre1/utils/lqt_transcode.c:148
+#: utils/lqt_transcode.c:148
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:148
 #, c-format
 msgid "       lqt_transcode -lf\n"
 msgstr ""
 
-#: utils/lqt_transcode.c:149 libquicktime-1.0.0pre1/utils/lqt_transcode.c:149
+#: utils/lqt_transcode.c:149
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:149
 #, c-format
 msgid "       List output formats\n"
-msgstr ""
+msgstr "       Liste Ausgabe Formate\n"
 
-#: utils/lqt_transcode.c:221 libquicktime-1.0.0pre1/utils/lqt_transcode.c:221
+#: utils/lqt_transcode.c:221
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:221
 #, c-format
 msgid "Cannot open input file %s\n"
-msgstr ""
+msgstr "Kann Eingabedatei %s nicht öffnen\n"
 
-#: utils/lqt_transcode.c:232 libquicktime-1.0.0pre1/utils/lqt_transcode.c:232
+#: utils/lqt_transcode.c:232
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:232
 #, c-format
 msgid "Need a file extension when autoguessing output format\n"
-msgstr ""
+msgstr "Brauche Dateierweiterung um Ausgabeformat auto-zuerkennen\n"
 
-#: utils/lqt_transcode.c:248 libquicktime-1.0.0pre1/utils/lqt_transcode.c:248
+#: utils/lqt_transcode.c:248
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:248
 #, c-format
-msgid ""
-"Cannot detect output format. Specify a valid extension or use -f <format>\n"
-msgstr ""
+msgid "Cannot detect output format. Specify a valid extension or use -f <format>\n"
+msgstr "Kann Ausgabeformat nicht ermitteln. Geben sie eine zulässige Erweiterung an oder verwenden sie -f <Format>\n"
 
-#: utils/lqt_transcode.c:268 libquicktime-1.0.0pre1/utils/lqt_transcode.c:268
+#: utils/lqt_transcode.c:268
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:268
 #, c-format
 msgid "Cannot open output file %s\n"
-msgstr ""
+msgstr "Kann Ausgabedatei %s nicht öffnen\n"
 
-#: utils/lqt_transcode.c:291 libquicktime-1.0.0pre1/utils/lqt_transcode.c:291
+#: utils/lqt_transcode.c:291
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:291
 #, c-format
 msgid "Unsupported video cocec %s, try -lv\n"
-msgstr ""
+msgstr "Nicht Unterstützter Videocodec %s, versuch -lv\n"
 
-#: utils/lqt_transcode.c:343 libquicktime-1.0.0pre1/utils/lqt_transcode.c:343
+#: utils/lqt_transcode.c:343
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:343
 #, c-format
 msgid "Unsupported audio codec %s, try -la\n"
-msgstr ""
+msgstr "Nicht unterstützter Audiocodec %s, versuch -la\n"
 
-#: utils/lqt_transcode.c:562 libquicktime-1.0.0pre1/utils/lqt_transcode.c:562
+#: utils/lqt_transcode.c:562
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:562
 #, c-format
 msgid "Unsupported format %s, try -lf"
-msgstr ""
+msgstr "Nicht Unterstütztes Format %s, versuch -lf"
 
-#: utils/lqt_transcode.c:581 libquicktime-1.0.0pre1/utils/lqt_transcode.c:581
+#: utils/lqt_transcode.c:581
+#: libquicktime-1.0.0pre1/utils/lqt_transcode.c:581
 #, c-format
 msgid "%6.2f%% Completed"
-msgstr ""
+msgstr "%6.2f%% Fertig"
 
-#: utils/qtinfo.c:49 libquicktime-1.0.0pre1/utils/qtinfo.c:49
+#: utils/qtinfo.c:49
+#: libquicktime-1.0.0pre1/utils/qtinfo.c:49
 #, c-format
 msgid "Couldn't open %s\n"
 msgstr "Konnte %s nicht öffnen\n"
 
-#: utils/qtinfo.c:65 libquicktime-1.0.0pre1/utils/qtinfo.c:65
+#: utils/qtinfo.c:65
+#: libquicktime-1.0.0pre1/utils/qtinfo.c:65
 #, c-format
 msgid "Usage: %s filename...\n"
-msgstr ""
+msgstr "Gebrauch: %s Dateiname...\n"
 
-#: utils/common.c:48 libquicktime-1.0.0pre1/utils/common.c:48
+#: utils/common.c:48
+#: libquicktime-1.0.0pre1/utils/common.c:48
 #, c-format
 msgid "Type: %s\n"
-msgstr ""
+msgstr "Typ: %s\n"
 
-#: utils/common.c:54 libquicktime-1.0.0pre1/utils/common.c:54
+#: utils/common.c:54
+#: libquicktime-1.0.0pre1/utils/common.c:54
 #, c-format
 msgid "    copyright: %s\n"
-msgstr ""
+msgstr "    Copyright: %s\n"
 
-#: utils/common.c:57 libquicktime-1.0.0pre1/utils/common.c:57
+#: utils/common.c:57
+#: libquicktime-1.0.0pre1/utils/common.c:57
 #, c-format
 msgid "    name:      %s\n"
-msgstr ""
+msgstr "    Name:      %s\n"
 
-#: utils/common.c:60 libquicktime-1.0.0pre1/utils/common.c:60
+#: utils/common.c:60
+#: libquicktime-1.0.0pre1/utils/common.c:60
 #, c-format
 msgid "    info:      %s\n"
-msgstr ""
+msgstr "    Info:      %s\n"
 
-#: utils/common.c:64 libquicktime-1.0.0pre1/utils/common.c:64
+#: utils/common.c:64
+#: libquicktime-1.0.0pre1/utils/common.c:64
 #, c-format
 msgid "    author:    %s\n"
-msgstr ""
+msgstr "    Autor:    %s\n"
 
-#: utils/common.c:68 libquicktime-1.0.0pre1/utils/common.c:68
+#: utils/common.c:68
+#: libquicktime-1.0.0pre1/utils/common.c:68
 #, c-format
 msgid "    artist:    %s\n"
-msgstr ""
+msgstr "    Künstler:    %s\n"
 
-#: utils/common.c:72 libquicktime-1.0.0pre1/utils/common.c:72
+#: utils/common.c:72
+#: libquicktime-1.0.0pre1/utils/common.c:72
 #, c-format
 msgid "    album:     %s\n"
-msgstr ""
+msgstr "    Album:     %s\n"
 
-#: utils/common.c:76 libquicktime-1.0.0pre1/utils/common.c:76
+#: utils/common.c:76
+#: libquicktime-1.0.0pre1/utils/common.c:76
 #, c-format
 msgid "    genre:     %s\n"
-msgstr ""
+msgstr "    Genre:     %s\n"
 
-#: utils/common.c:80 libquicktime-1.0.0pre1/utils/common.c:80
+#: utils/common.c:80
+#: libquicktime-1.0.0pre1/utils/common.c:80
 #, c-format
 msgid "    track:     %s\n"
-msgstr ""
+msgstr "    Track:     %s\n"
 
-#: utils/common.c:84 libquicktime-1.0.0pre1/utils/common.c:84
+#: utils/common.c:84
+#: libquicktime-1.0.0pre1/utils/common.c:84
 #, c-format
 msgid "    comment:   %s\n"
-msgstr ""
+msgstr "    Kommentar:   %s\n"
 
-#: utils/common.c:88 libquicktime-1.0.0pre1/utils/common.c:88
+#: utils/common.c:88
+#: libquicktime-1.0.0pre1/utils/common.c:88
 #, c-format
 msgid "  %d audio tracks.\n"
-msgstr ""
+msgstr "  %d Audio Tracks.\n"
 
-#: utils/common.c:92 libquicktime-1.0.0pre1/utils/common.c:92
+#: utils/common.c:92
+#: libquicktime-1.0.0pre1/utils/common.c:92
 #, c-format
 msgid "    %d channels, %d bits, sample rate %ld, length %ld samples, "
-msgstr ""
+msgstr "    %d Kanäle, %d bits, Samplerate %ld, Länge %ld Samples, "
 
-#: utils/common.c:99 libquicktime-1.0.0pre1/utils/common.c:99
+#: utils/common.c:99
+#: libquicktime-1.0.0pre1/utils/common.c:99
 #, c-format
 msgid "wav_id 0x%02x.\n"
 msgstr ""
 
-#: utils/common.c:103 libquicktime-1.0.0pre1/utils/common.c:103
+#: utils/common.c:103
+#: libquicktime-1.0.0pre1/utils/common.c:103
 #, c-format
 msgid "compressor %s.\n"
-msgstr ""
+msgstr "Kompressor %s.\n"
 
-#: utils/common.c:105 libquicktime-1.0.0pre1/utils/common.c:105
+#: utils/common.c:105
+#: libquicktime-1.0.0pre1/utils/common.c:105
 #, c-format
 msgid "    Sample format: %s.\n"
-msgstr ""
+msgstr "    Sample Format: %s.\n"
 
-#: utils/common.c:107 libquicktime-1.0.0pre1/utils/common.c:107
+#: utils/common.c:107
+#: libquicktime-1.0.0pre1/utils/common.c:107
 #, c-format
 msgid "    Channel setup: "
-msgstr ""
+msgstr "    Kanal Setup: "
 
-#: utils/common.c:114 libquicktime-1.0.0pre1/utils/common.c:114
+#: utils/common.c:114
+#: libquicktime-1.0.0pre1/utils/common.c:114
 #, c-format
 msgid ", "
-msgstr ""
+msgstr ", "
 
-#: utils/common.c:116 libquicktime-1.0.0pre1/utils/common.c:116
+#: utils/common.c:116
+#: libquicktime-1.0.0pre1/utils/common.c:116
 #, c-format
 msgid "\n"
-msgstr ""
+msgstr "\n"
 
-#: utils/common.c:119 utils/common.c:124
+#: utils/common.c:119
+#: utils/common.c:124
 #: libquicktime-1.0.0pre1/utils/common.c:119
 #: libquicktime-1.0.0pre1/utils/common.c:124
 #, c-format
 msgid "Not available\n"
-msgstr ""
+msgstr "Nicht Verfügbar\n"
 
-#: utils/common.c:120 libquicktime-1.0.0pre1/utils/common.c:120
+#: utils/common.c:120
+#: libquicktime-1.0.0pre1/utils/common.c:120
 #, c-format
 msgid "    Language: "
-msgstr ""
+msgstr "    Sprache: "
 
-#: utils/common.c:126 utils/common.c:157
+#: utils/common.c:126
+#: utils/common.c:157
 #: libquicktime-1.0.0pre1/utils/common.c:126
 #: libquicktime-1.0.0pre1/utils/common.c:157
 #, c-format
 msgid "    supported.\n"
-msgstr ""
+msgstr "    Unterstützt.\n"
 
-#: utils/common.c:128 utils/common.c:159
+#: utils/common.c:128
+#: utils/common.c:159
 #: libquicktime-1.0.0pre1/utils/common.c:128
 #: libquicktime-1.0.0pre1/utils/common.c:159
 #, c-format
 msgid "    not supported.\n"
-msgstr ""
+msgstr "    Nicht unterstützt.\n"
 
-#: utils/common.c:132 libquicktime-1.0.0pre1/utils/common.c:132
+#: utils/common.c:132
+#: libquicktime-1.0.0pre1/utils/common.c:132
 #, c-format
 msgid "  %d video tracks.\n"
-msgstr ""
+msgstr "  %d Video Tracks. \n"
 
-#: utils/common.c:137 libquicktime-1.0.0pre1/utils/common.c:137
+#: utils/common.c:137
+#: libquicktime-1.0.0pre1/utils/common.c:137
 #, c-format
 msgid ""
 "    %dx%d, depth %d\n"
@@ -3234,59 +3508,77 @@ msgid ""
 "    length %ld frames\n"
 "    compressor %s.\n"
 msgstr ""
+"    %dx%d, Farbtiefe %d\n"
+"    Rate %f [%d:%d] %s\n"
+"    Länge %ld Frames\n"
+"    Kompressor %s.\n"
 
-#: utils/common.c:143 libquicktime-1.0.0pre1/utils/common.c:143
+#: utils/common.c:143
+#: libquicktime-1.0.0pre1/utils/common.c:143
 msgid "constant"
-msgstr ""
+msgstr "Konstant"
 
-#: utils/common.c:143 libquicktime-1.0.0pre1/utils/common.c:143
+#: utils/common.c:143
+#: libquicktime-1.0.0pre1/utils/common.c:143
 msgid "not constant"
-msgstr ""
+msgstr "Nicht Konstant"
 
-#: utils/common.c:147 libquicktime-1.0.0pre1/utils/common.c:147
+#: utils/common.c:147
+#: libquicktime-1.0.0pre1/utils/common.c:147
 #, c-format
 msgid "    Native colormodel:  %s\n"
-msgstr ""
+msgstr "    Natives Farbmodell:  %s\n"
 
-#: utils/common.c:149 libquicktime-1.0.0pre1/utils/common.c:149
+# übersetzung für interlace?
+#: utils/common.c:149
+#: libquicktime-1.0.0pre1/utils/common.c:149
 #, c-format
 msgid "    Interlace mode:     %s\n"
-msgstr ""
+msgstr "    Interlace Modus:     %s\n"
 
-#: utils/common.c:152 libquicktime-1.0.0pre1/utils/common.c:152
+#: utils/common.c:152
+#: libquicktime-1.0.0pre1/utils/common.c:152
 #, c-format
 msgid "    Chroma placement: %s\n"
-msgstr ""
+msgstr "    Chroma Platzierung: %s\n"
 
-#: utils/common.c:154 libquicktime-1.0.0pre1/utils/common.c:154
+#: utils/common.c:154
+#: libquicktime-1.0.0pre1/utils/common.c:154
 #, c-format
 msgid "    Pixel aspect ratio: %d:%d\n"
-msgstr ""
+msgstr "    Pixel Seitenverhältnis: %d:%d\n"
 
-#: utils/common.c:163 libquicktime-1.0.0pre1/utils/common.c:163
+#: utils/common.c:163
+#: libquicktime-1.0.0pre1/utils/common.c:163
 #, c-format
 msgid "  %d text tracks.\n"
-msgstr ""
+msgstr "%d Text Tracks.\n"
 
-#: utils/common.c:166 libquicktime-1.0.0pre1/utils/common.c:166
+#: utils/common.c:166
+#: libquicktime-1.0.0pre1/utils/common.c:166
 #, c-format
 msgid "    timescale: %d, length: %lld, language: "
-msgstr ""
+msgstr "    Zeitskala: %d, Länge: %lld, Sprache: "
 
-#: utils/common.c:171 libquicktime-1.0.0pre1/utils/common.c:171
+#: utils/common.c:171
+#: libquicktime-1.0.0pre1/utils/common.c:171
 #, c-format
 msgid "Not available, "
-msgstr ""
+msgstr "Nicht Verfügbar, "
 
-#: utils/common.c:172 libquicktime-1.0.0pre1/utils/common.c:172
+#: utils/common.c:172
+#: libquicktime-1.0.0pre1/utils/common.c:172
 #, c-format
 msgid "type: %s\n"
-msgstr ""
+msgstr "Typ: %s\n"
 
-#: utils/common.c:172 libquicktime-1.0.0pre1/utils/common.c:172
+#: utils/common.c:172
+#: libquicktime-1.0.0pre1/utils/common.c:172
 msgid "Chapters"
-msgstr ""
+msgstr "Kapitel"
 
-#: utils/common.c:172 libquicktime-1.0.0pre1/utils/common.c:172
+#: utils/common.c:172
+#: libquicktime-1.0.0pre1/utils/common.c:172
 msgid "Subtitles"
-msgstr ""
+msgstr "Untertitel"
+
