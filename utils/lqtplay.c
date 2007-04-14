@@ -1621,7 +1621,9 @@ int main(int argc, char *argv[])
     
     setlocale(LC_MESSAGES, "");
     setlocale(LC_CTYPE, "");
-     
+    
+    bindtextdomain(PACKAGE, LOCALE_DIR);
+         
     app_shell = XtVaAppInitialize(&app_context, "lqtplay",
 				  opt_desc, opt_count,
 				  &argc, argv,
