@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: libquicktime 1.0.0pre1\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
 "POT-Creation-Date: 2007-03-28 01:17+0200\n"
-"PO-Revision-Date: 2007-04-14 16:08+0100\n"
+"PO-Revision-Date: 2007-04-15 22:08+0100\n"
 "Last-Translator: Stefan Scheffler <stefanscheffler@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -639,7 +639,7 @@ msgstr ""
 #: plugins/videocodec/lqt_videocodec.c:214
 #: libquicktime-1.0.0pre1/plugins/videocodec/lqt_videocodec.c:214
 msgid "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME"
-msgstr "YUV 4:2:0 (yuv4) CNICHT KOMPATIBEL MIT STANDART QUICKTIME"
+msgstr "YUV 4:2:0 (yuv4) NICHT KOMPATIBEL MIT STANDARD QUICKTIME"
 
 #: plugins/videocodec/lqt_videocodec.c:227
 #: plugins/videocodec/lqt_videocodec.c:228
@@ -866,7 +866,7 @@ msgstr "Anzahl an B-Frames zwischen  I und P"
 #: plugins/x264/lqt_x264.c:70
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:70
 msgid "Adaptive B-frame decision"
-msgstr "Adaptive B-Frame Entscheidung"
+msgstr "Adaptive B-Frame Wahl"
 
 # bias besser?
 #: plugins/x264/lqt_x264.c:78
@@ -902,7 +902,7 @@ msgstr "Methode der Ratensteuerung"
 #: plugins/x264/lqt_x264.c:104
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:104
 msgid "Constant quality"
-msgstr "Feste Bitrate"
+msgstr "Konstante Qualität"
 
 #: plugins/x264/lqt_x264.c:105
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:105
@@ -1127,25 +1127,26 @@ msgstr ""
 "Uneven Multi-Hexagon: besser aber langsamer\n"
 "Exhaustive search: extrem langsam, hauptsächlich für Testzwecke"
 
+# ich hoff mal das ist korrekt ..entscheidung klingt blöd
 #: plugins/x264/lqt_x264.c:311
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:311
 msgid "Partition decision"
-msgstr ""
+msgstr "Partitionierungswahl"
 
 #: plugins/x264/lqt_x264.c:316
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:316
 msgid "Subpixel motion estimation and partition decision quality: 1=fast, 7=best."
-msgstr ""
+msgstr "Qualität der Subpixel Motion estimation und Partitionierungswahl: 1=schnell, 8=beste"
 
 #: plugins/x264/lqt_x264.c:321
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:321
 msgid "RD based mode decision for B-frames"
-msgstr ""
+msgstr "RD basierte Moduswahl für B-Frames"
 
 #: plugins/x264/lqt_x264.c:326
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:326
 msgid "RD based mode decision for B-frames. Requires partition decision 6."
-msgstr ""
+msgstr "RD basierte Moduswahl für B-Frames. Benötigt Partionierungswahl 6."
 
 #: plugins/x264/lqt_x264.c:331
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:331
@@ -1155,7 +1156,7 @@ msgstr "Suchtiefe"
 #: plugins/x264/lqt_x264.c:334
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:334
 msgid "Maximum distance to search for motion estimation, measured from predicted position(s). Default of 16 is good for most footage, high motion sequences may benefit from settings between 24-32."
-msgstr ""
+msgstr "Maximal abzusuchende Distanz für Motion Compensation, gemessen von der vorhergesagten Postition. Die Vorgabe (16) ist gut für das meiste Material, bewegungsintensive Szenen könnten von einer Einstellung zwischen 24-32 profitieren."
 
 #: plugins/x264/lqt_x264.c:341
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:341
@@ -1197,7 +1198,7 @@ msgstr "Optimiere beide MVs in B-Frames."
 #: plugins/x264/lqt_x264.c:379
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:379
 msgid "Weighted biprediction"
-msgstr ""
+msgstr "Gewichtete Biprediction"
 
 # wichtung?
 #: plugins/x264/lqt_x264.c:384
@@ -1218,12 +1219,12 @@ msgstr "Keine"
 #: plugins/x264/lqt_x264.c:392
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:392
 msgid "Spatial"
-msgstr ""
+msgstr "Räumlich"
 
 #: plugins/x264/lqt_x264.c:393
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:393
 msgid "Temporal"
-msgstr ""
+msgstr "Zeitlich"
 
 #: plugins/x264/lqt_x264.c:394
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:394
@@ -1304,7 +1305,7 @@ msgstr "Aktiviert (immer)"
 #: plugins/x264/lqt_x264.c:449
 #: libquicktime-1.0.0pre1/plugins/x264/lqt_x264.c:449
 msgid "Trellis RD quantization. Requires CABAC. Can be enabled either for the final encode of a MB or for all mode desisions"
-msgstr ""
+msgstr "Trellis RD Quantisierung. Benötigt CABAC. Kann entweder für das endgültige Codieren eines MB oder für alle Moduswahlen aktiviert werden."
 
 #: plugins/x264/lqt_x264.c:455
 #: plugins/ffmpeg/params.h:742
@@ -1436,8 +1437,9 @@ msgstr "Quantizer Kompression"
 
 #: plugins/ffmpeg/params.h:94
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:94
+#, fuzzy
 msgid "Amount of qscale change between easy & hard scenes"
-msgstr ""
+msgstr "Menge der qcale Änderung zwiischen leichten und schweren Szenen"
 
 #: plugins/ffmpeg/params.h:101
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:101
@@ -1446,8 +1448,9 @@ msgstr "Quantizer Unschärfe"
 
 #: plugins/ffmpeg/params.h:107
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:107
+#, fuzzy
 msgid "Amount of qscale smoothing over time"
-msgstr ""
+msgstr "Menge an qscale Glättung über die Zeit"
 
 #: plugins/ffmpeg/params.h:114
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:114
@@ -1503,23 +1506,25 @@ msgstr "Luma Grenzwert"
 #: plugins/ffmpeg/params.h:188
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:188
 msgid "Single coefficient elimination threshold for luminance. Negative values also consider dc coefficient. -4 is JVT recommendation"
-msgstr ""
+msgstr "Schwellwert für die Beseitigung einzelner Luminanz Koeffizienten. Bei negativen Werten werden auch DC Koeffizienten miteinbezogen. Die JVT Empfehlung ist -4"
 
 #: plugins/ffmpeg/params.h:196
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:196
 msgid "Chroma elimination threshold"
 msgstr "Chroma Grenzwert"
 
+# Farbwerte
+# etwas zu wissenschaftlich
 #: plugins/ffmpeg/params.h:201
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:201
 msgid "Single coefficient elimination threshold for chrominamce. Negative values also consider dc coefficient. 7 is JVT recommendation"
-msgstr ""
+msgstr "Schwellwert für die Beseitigung einzelner Chrominanz Koeffizienten. Bei negativen Werten werden auch DC Koeffizienten miteinbezogen. Die JVT Empfehlung ist 7"
 
 # Standartskonformität
 #: plugins/ffmpeg/params.h:209
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:209
 msgid "Standards compliance"
-msgstr "Konformität mit Standarts"
+msgstr "Konformität mit Standards"
 
 #: plugins/ffmpeg/params.h:214
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:214
@@ -1530,6 +1535,11 @@ msgid ""
 " -1: Allow inofficial extensions\n"
 " -2: Allow non standarized experimental things"
 msgstr ""
+"2 = Strenge Entsprechung einer älteren Version der Spezifikation oder Referenzsoftware \n"
+" 1: Strenge Entsprechung aller Teile der Spezifikation unabhängig von den  Konsequenzen\n"
+" 0: Vorgabe\n"
+" -1: Erlaube inoffizielle Erweiterungen\n"
+" -2: Erlaube nicht Standardisierte Sachen"
 
 #: plugins/ffmpeg/params.h:227
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:227
@@ -1543,6 +1553,9 @@ msgid ""
 "if > 0 then the last p frame quantizer will be used (q= lastp_q*factor+offset)\n"
 " if < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
+"Quantizer Versatz zwischen B-Frames und nicht-B-Frames.\n"
+"Wenn > 0 dann wird der letzte P Frame Quantizer verwendet (q= Letzterp_q*Faktor+Versatz).\n"
+"Wenn < 0 dann wird normale Ratensteuerung verwendet (q= -Normal_q*Faktor+Versatz)\n"
 
 #: plugins/ffmpeg/params.h:244
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:244
@@ -1592,6 +1605,9 @@ msgid ""
 "If > 0 then the last P frame quantizer will be used (q= lastp_q*factor+offset).\n"
 "If < 0 then normal ratecontrol will be done (q= -normal_q*factor+offset)\n"
 msgstr ""
+"Quantizer Faktor zwischen P-frames und I-frames.\n"
+"Wenn > 0 dann wird der letzte P Frame Quantizer verwendet (q= Letzterp_q*Faktor+Versatz).\n"
+"Wenn < 0 dann wird normale Ratensteuerung verwendet (q= -Normal_q*Faktor+Versatz)\n"
 
 # ..ungs..
 #: plugins/ffmpeg/params.h:304
@@ -1773,16 +1789,16 @@ msgid ""
 msgstr ""
 "Motion estimation Vergleichsfunktion.\n"
 "SAD: Summe der absoluten Unterschiede\n"
-"SSE: Summe aus der Wurzel der Fehler\n"
+"SSE: Summe aus dem Quadrat der Fehler\n"
 "SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
 "DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
-"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"PSNR: Summe aus dem Quadrat der Quantizer Fehler (niedrige Qualität)\n"
 "BIT: Anzahl an Bits benötigt für Block\n"
 "RD: Optimale Ratenstreuung (Langsam)\n"
 "ZERO: 0\n"
 "VSAD: Summe der absoluten vertikalen Unterschiede\n"
-"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
-"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
+"VSSE: Summe aus dem Quadrat der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus dem Quadrat der Unterschiede"
 
 #: plugins/ffmpeg/params.h:470
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:470
@@ -1812,16 +1828,16 @@ msgid ""
 msgstr ""
 "Subpixel Motion Estimation Vergleichsfunktion.\n"
 "SAD: Summe der absoluten Unterschiede\n"
-"SSE: Summe aus der Wurzel der Fehler\n"
+"SSE: Summe aus dem Quadrat der Fehler\n"
 "SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
 "DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
-"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"PSNR: Summe aus dem Quadrat der Quantizer Fehler (niedrige Qualität)\n"
 "BIT: Anzahl an Bits benötigt für Block\n"
 "RD: Optimale Ratenstreuung (Langsam)\n"
 "ZERO: 0\n"
 "VSAD: Summe der absoluten vertikalen Unterschiede\n"
-"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
-"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
+"VSSE: Summe aus dem Quadrat der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus dem Quadrat der Unterschiede"
 
 #: plugins/ffmpeg/params.h:503
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:503
@@ -1851,16 +1867,16 @@ msgid ""
 msgstr ""
 "Macroblock Vergleichsfunktion.\n"
 "SAD: Summe der absoluten Unterschiede\n"
-"SSE: Summe aus der Wurzel der Fehler\n"
+"SSE: Summe aus dem Quadrat der Fehler\n"
 "SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
 "DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
-"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"PSNR: Summe aus dem Quadrat der Quantizer Fehler (niedrige Qualität)\n"
 "BIT: Anzahl an Bits benötigt für Block\n"
 "RD: Optimale Ratenstreuung (Langsam)\n"
 "ZERO: 0\n"
 "VSAD: Summe der absoluten vertikalen Unterschiede\n"
-"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
-"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
+"VSSE: Summe aus dem Quadrat der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus dem Quadrat der Unterschiede"
 
 #: plugins/ffmpeg/params.h:535
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:535
@@ -1874,7 +1890,6 @@ msgstr "ILDCT Vergleichsfunktion"
 
 #: plugins/ffmpeg/params.h:550
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:550
-#, fuzzy
 msgid ""
 "Interlaced dct compare function.\n"
 "SAD: Sum of absolute differences\n"
@@ -1891,16 +1906,16 @@ msgid ""
 msgstr ""
 "Interlaced dct Vergleichsfunktion.\n"
 "SAD: Summe der absoluten Unterschiede\n"
-"SSE: Summe aus der Wurzel der Fehler\n"
+"SSE: Summe aus dem Quadrat der Fehler\n"
 "SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
 "DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
-"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"PSNR: Summe aus dem Quadrat der Quantizer Fehler (niedrige Qualität)\n"
 "BIT: Anzahl an Bits benötigt für Block\n"
 "RD: Optimale Ratenstreuung (Langsam)\n"
 "ZERO: 0\n"
 "VSAD: Summe der absoluten vertikalen Unterschiede\n"
-"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
-"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
+"VSSE: Summe aus dem Quadrat der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus dem Quadrat der Unterschiede"
 
 #: plugins/ffmpeg/params.h:567
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:567
@@ -1976,16 +1991,16 @@ msgid ""
 msgstr ""
 "Motion estimation pre-pass Vergleichsfunktion.\n"
 "SAD: Summe der absoluten Unterschiede\n"
-"SSE: Summe aus der Wurzel der Fehler\n"
+"SSE: Summe aus dem Quadrat der Fehler\n"
 "SATD: Summe aus den absoluten Hadamard transformierten Unterschieden\n"
 "DCT: Summe aus den absoluten DCT transformierten Unterschieden\n"
-"PSNR: Summe aus der Wurzel der Quantizer Fehler (niedrige Qualität)\n"
+"PSNR: Summe aus dem Quadrat der Quantizer Fehler (niedrige Qualität)\n"
 "BIT: Anzahl an Bits benötigt für Block\n"
 "RD: Optimale Ratenstreuung (Langsam)\n"
 "ZERO: 0\n"
 "VSAD: Summe der absoluten vertikalen Unterschiede\n"
-"VSSE: Summe aus der Wurzel der vertikalen Unterschiede\n"
-"NSSE: Rausch erhaltende Summe aus der Wurzel der Unterschiede"
+"VSSE: Summe aus dem Quadrat der vertikalen Unterschiede\n"
+"NSSE: Rausch erhaltende Summe aus dem Quadrat der Unterschiede"
 
 #: plugins/ffmpeg/params.h:642
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:642
@@ -2010,7 +2025,7 @@ msgstr "Subpel ME Qualität"
 #: plugins/ffmpeg/params.h:671
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:671
 msgid "Subpel motion estimation refinement quality (for qpel). Higher values mean higher quality but slower encoding."
-msgstr ""
+msgstr "Verfeinerungsqualität für Subpel Motion Estimation (für qpel). Höhere Werte bedeuten bessere Qualität aber langsameres Codieren."
 
 #: plugins/ffmpeg/params.h:679
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:679
@@ -2026,7 +2041,7 @@ msgstr "Motion Estimation Suchweite "
 #: plugins/ffmpeg/params.h:691
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:691
 msgid "MB decision mode"
-msgstr "MB Entscheidungdmodus"
+msgstr "MB Wahlmodus"
 
 #: plugins/ffmpeg/params.h:694
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:694
@@ -2036,9 +2051,9 @@ msgstr "Verwende Vergleichsfunktion"
 #: plugins/ffmpeg/params.h:694
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:694
 msgid "Fewest bits"
-msgstr "Wenigste bits"
+msgstr "Wenigste Bits"
 
-# streung
+# klingt blöd
 #: plugins/ffmpeg/params.h:695
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:695
 msgid "Rate distoration"
@@ -2066,7 +2081,7 @@ msgstr "Minimaler Lagrange Multiplikator"
 #: plugins/ffmpeg/params.h:721
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:721
 msgid "Minimum Lagrange multiplier for ratecontrol. Should possibly be the same as minimum quantizer scale."
-msgstr ""
+msgstr "Minimaler Lagrange Multiplikator für Ratensteuerung. Sollte wenn möglich gleich der Minimalen Quantizer Skalierung sein."
 
 #: plugins/ffmpeg/params.h:729
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:729
@@ -2076,7 +2091,7 @@ msgstr "Maximaler Lagrange Multiplikator"
 #: plugins/ffmpeg/params.h:735
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:735
 msgid "Maximum Lagrange multiplier for ratecontrol. Should possibly be the same as maximum quantizer scale."
-msgstr ""
+msgstr "Maximaler Lagrange Multiplikator für Ratensteuerung. Sollte wenn möglich gleich der Maximalen Quantizer Skalierung sein."
 
 #: plugins/ffmpeg/params.h:753
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:753
@@ -2086,7 +2101,7 @@ msgstr "Anfängliche RC Pufferbelegung"
 #: plugins/ffmpeg/params.h:756
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:756
 msgid "Number of kilobits which should be loaded into the rc buffer before encoding starts. Must not be larger than RC buffer size"
-msgstr ""
+msgstr "Anzahl an Kilobits die vor dem Codieren in den RC Puffer geladen werden sollen. Darf nicht mehr als die RC Puffergröße sein."
 
 #: plugins/ffmpeg/params.h:767
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:767
@@ -2112,7 +2127,7 @@ msgstr "ME Schwellwert"
 #: plugins/ffmpeg/params.h:794
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:794
 msgid "Motion estimation threshold. under which no motion estimation is performed, but instead the user specified motion vectors are used"
-msgstr ""
+msgstr "Schwellwert für Motion Estimation, unter welchem keine Motion Compensation durchgeführt wird und stattdessen vom Nutzer gegebene Bewegungsvektoren verwendet werden."
 
 #: plugins/ffmpeg/params.h:802
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:802
@@ -2122,7 +2137,7 @@ msgstr "MB Schwellwert"
 #: plugins/ffmpeg/params.h:807
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:807
 msgid "Macroblock threshold. under which the user specified macroblock types will be used"
-msgstr "Macroblock Schwellwert, unter welchem vom Nutzer gegebene Macroblock Typen verwendet werden."
+msgstr "Macroblock Schwellwert, unter welchem vom Nutzer gegebene Macroblocktypen verwendet werden."
 
 #: plugins/ffmpeg/params.h:814
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:814
@@ -2209,7 +2224,7 @@ msgstr "Verwende festen Quantizer"
 #: plugins/ffmpeg/params.h:924
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:924
 msgid "Use fixed quality encoding"
-msgstr "Verwende Codieren mit Fester Qualität"
+msgstr "Verwende Codieren mit fester Qualität"
 
 #: plugins/ffmpeg/params.h:931
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:931
@@ -2219,7 +2234,7 @@ msgstr "4 MV per MB erlaubt"
 #: plugins/ffmpeg/params.h:936
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:936
 msgid "Allow 4 motion vectors per macroblock (slightly better quality). Works better if MB decision mode is \"Fewest bits\" or \"Rate distoration\"."
-msgstr ""
+msgstr "Erlaube 4 Bewegungsvektoren pro Macroblock (etwas bessere Qualität). Arbeit besser wenn der MB Wahlmodus  \"Wenigste Bits\" oder \"Ratenverzerrung\" ist."
 
 #: plugins/ffmpeg/params.h:945
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:945
@@ -2268,10 +2283,10 @@ msgstr "Normalisiere adaptive Quantisierung"
 
 #: plugins/ffmpeg/params.h:1008
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1008
+#, fuzzy
 msgid "When using masking, try to adjust the per macroblock quantizers to maintain the desired average"
 msgstr "Bei Verwendung von Maskierung, versuche per Macroblock Quantizer so abzustimmen dass der gewünschte Durchschnitt erhalten bleibt."
 
-# bad!
 #: plugins/ffmpeg/params.h:1015
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1015
 msgid "Use alternative scantable"
@@ -2291,17 +2306,17 @@ msgstr "Verwende Trellis Quantisierung (verbessert Qualität)"
 #: plugins/ffmpeg/params.h:1037
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1037
 msgid "Use only bitexact stuff"
-msgstr "Verwende nur Bitgenaues Zeugs"
+msgstr "Verwende nur bitgenaue Sachen"
 
 #: plugins/ffmpeg/params.h:1042
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1042
 msgid "Use only bitexact stuff (except (i)dct)"
-msgstr "Verwende nur bitgenaues Zeug (ausser (i)dct)"
+msgstr "Verwende nur bitgenaue Sachen (ausser (i)dct)"
 
 #: plugins/ffmpeg/params.h:1048
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1048
 msgid "Advanced intra coding"
-msgstr "Fortgeschrittlene Intracodierung"
+msgstr "Fortgeschrittlene Intra Codierung"
 
 #: plugins/ffmpeg/params.h:1058
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1058
@@ -2332,13 +2347,15 @@ msgstr ""
 
 #: plugins/ffmpeg/params.h:1094
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1094
+#, fuzzy
 msgid "Use rate distortion optimization for qp selectioon"
-msgstr "Verwende Ratenverzerr Optimierung für QP auswahl"
+msgstr "Verwende Ratenverzerr Optimierung für QP Auswahl"
 
 #: plugins/ffmpeg/params.h:1100
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1100
+#, fuzzy
 msgid "Alternative inter vlc"
-msgstr "Alternativer inter-vlc"
+msgstr "Alternatives inter vlc"
 
 #: plugins/ffmpeg/params.h:1111
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1111
@@ -2347,9 +2364,8 @@ msgstr ""
 
 #: plugins/ffmpeg/params.h:1116
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1116
-#, fuzzy
 msgid "Overlapped block motion compensation (only supported with simple MB decision)"
-msgstr "Motioncompensation mit überlappenden Blöcken (Nur unterstützt mit einfacher MB Entscheidung)"
+msgstr "Motioncompensation mit überlappenden Blöcken (Nur unterstützt mit einfacher MB Wahl)"
 
 #: plugins/ffmpeg/params.h:1123
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1123
@@ -2374,7 +2390,7 @@ msgstr "Erlaube schnelles Codieren"
 #: plugins/ffmpeg/params.h:1159
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/params.h:1159
 msgid "Allow non spec compliant speedup tricks"
-msgstr "Erlaube Beschleunigungstricks die nicht der Spezifikation entsprechen"
+msgstr "Erlaube Beschleunigungstricks, die nicht der Spezifikation entsprechen"
 
 # durchsetzung
 #: plugins/ffmpeg/params.h:1166
@@ -2395,7 +2411,7 @@ msgstr ""
 #: plugins/ffmpeg/lqt_ffmpeg.c:95
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:95
 msgid "Frame types"
-msgstr "Frame Typen"
+msgstr "Frametypen"
 
 #: plugins/ffmpeg/lqt_ffmpeg.c:137
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:137
@@ -2503,7 +2519,6 @@ msgstr ""
 msgid "FFMPEG Apple Video"
 msgstr ""
 
-# grafiken?
 #: plugins/ffmpeg/lqt_ffmpeg.c:534
 #: libquicktime-1.0.0pre1/plugins/ffmpeg/lqt_ffmpeg.c:534
 msgid "FFMPEG Apple Graphics"
@@ -2658,7 +2673,7 @@ msgstr "Nominelle Bitrate "
 #: plugins/vorbis/lqt_vorbis.c:42
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:42
 msgid "Use variable bitrate"
-msgstr "Verwende Variable Bitrate"
+msgstr "Verwende variable Bitrate"
 
 #: plugins/vorbis/lqt_vorbis.c:50
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:50
@@ -2682,7 +2697,6 @@ msgstr "Ogg Vorbis (qt4l kompatibel)"
 msgid "Patent free audio codec (see http://www.vorbis.com)"
 msgstr "Patentfreier Audiocodec (http://www.vorbis.com)"
 
-# qtcomponents eigenname
 #: plugins/vorbis/lqt_vorbis.c:83
 #: libquicktime-1.0.0pre1/plugins/vorbis/lqt_vorbis.c:83
 msgid "Ogg Vorbis (qtcomponents compatible)"
@@ -2751,7 +2765,6 @@ msgstr "Dieses Format schreibt für jeden Frame ein seperates JPEG Foto in YUV 4
 msgid "Motion Jpeg A"
 msgstr ""
 
-# germlish!!!
 #: plugins/mjpeg/lqt_mjpeg.c:80
 #: libquicktime-1.0.0pre1/plugins/mjpeg/lqt_mjpeg.c:80
 msgid "MJPA stores each frame as two JPEGs interlaced and in YUV 4:2:2"
@@ -2767,7 +2780,7 @@ msgstr "add_huff_table schlug fehl.\n"
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/RTjpeg.c:2425
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/RTjpeg.c:2461
 msgid "RTjpeg: Could not allocate memory"
-msgstr "RTjpeg: Konnte keinen Speicher reservieren"
+msgstr "RTjpeg: Konnte Speicher nicht reservieren"
 
 #: plugins/rtjpeg/lqt_rtjpeg.c:34
 #: libquicktime-1.0.0pre1/plugins/rtjpeg/lqt_rtjpeg.c:34
@@ -2818,14 +2831,13 @@ msgstr "INFO: Xvideo port %ld: ist beschäftigt, überspringe\n"
 msgid "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s"
 msgstr ""
 
-# kontext ok?
 #: utils/lqtplay.c:397
 #: utils/lqtplay.c:461
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:397
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:461
 #, c-format
 msgid "out of memory\n"
-msgstr "Kein freier Speicher\n"
+msgstr "Nicht genügend freier Speicher\n"
 
 #: utils/lqtplay.c:555
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:555
@@ -2853,13 +2865,13 @@ msgstr "Nein"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:563
 #, c-format
 msgid "WARNING: gl: Direct rendering missing\n"
-msgstr "WARNUNG: gl: Direct rendering fehlt\n"
+msgstr "WARNUNG: gl: Direct Rendering fehlt\n"
 
 #: utils/lqtplay.c:569
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:569
 #, c-format
 msgid "INFO: gl: texture max size: %d\n"
-msgstr "INFO: gl: Maximale Textur Größe: %d\n"
+msgstr "INFO: gl: Maximale Texturgröße: %d\n"
 
 #: utils/lqtplay.c:572
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:572
@@ -2885,7 +2897,6 @@ msgstr "Fehler beim öffenen des PCM Geräts %s\n"
 msgid "Can not configure this PCM device. (%s)\n"
 msgstr "Kann dieses PCM Gerät nicht Konfigurieren. (%s)\n"
 
-# ???
 #: utils/lqtplay.c:660
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:660
 #, c-format
@@ -2896,7 +2907,7 @@ msgstr "Fehler beim setzen des Zugriffs. (%s)\n"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:669
 #, c-format
 msgid "Error setting format.(%s)\n"
-msgstr "Fehler beim setzen der Formats.(%s)\n"
+msgstr "Fehler beim setzen des Formats.(%s)\n"
 
 #: utils/lqtplay.c:675
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:675
@@ -2920,12 +2931,11 @@ msgstr ""
 "WARNUNG: Verwende %i Hz statt der angeforderten Rate von %i Hz\n"
 " "
 
-# periods lassen?
 #: utils/lqtplay.c:697
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:697
 #, c-format
 msgid "Error setting periods.(%s)\n"
-msgstr "Fehler beim setzen der Peroden.(%s)\n"
+msgstr "Fehler beim setzen der Perioden.(%s)\n"
 
 #: utils/lqtplay.c:703
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:703
@@ -3028,13 +3038,13 @@ msgstr "Spalten :%i\n"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:872
 #, c-format
 msgid "disp width :%i\n"
-msgstr "Anzeige Breite :%i\n"
+msgstr "Anzeigebreite :%i\n"
 
 #: utils/lqtplay.c:873
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:873
 #, c-format
 msgid "disp height :%i\n"
-msgstr "Anzeige Höhe :%i\n"
+msgstr "Anzeigehöhe :%i\n"
 
 #: utils/lqtplay.c:874
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:874
@@ -3064,13 +3074,13 @@ msgstr ""
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:893
 #, c-format
 msgid "WARNING: no video stream\n"
-msgstr "WARNUNG: kein Video Stream\n"
+msgstr "WARNUNG: kein Videostream\n"
 
 #: utils/lqtplay.c:895
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:895
 #, c-format
 msgid "WARNING: unsupported video codec\n"
-msgstr "WARNUNG: nicht unterstützter Video Codec \n"
+msgstr "WARNUNG: nicht unterstützter Videocodec \n"
 
 #: utils/lqtplay.c:901
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:901
@@ -3082,19 +3092,19 @@ msgstr "Zeitskala: %d\n"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:905
 #, c-format
 msgid "WARNING: no audio stream\n"
-msgstr "WARNUNG: kein Audio Stream\n"
+msgstr "WARNUNG: kein Audiostream\n"
 
 #: utils/lqtplay.c:907
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:907
 #, c-format
 msgid "WARNING: unsupported audio codec\n"
-msgstr "WARNUNG: Nicht Unterstützter Audiocodec\n"
+msgstr "WARNUNG: Nicht unterstützter Audiocodec\n"
 
 #: utils/lqtplay.c:924
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:924
 #, c-format
 msgid "ERROR: no playable stream found\n"
-msgstr "FEHLER: keine Spielbaren Streams gefunden\n"
+msgstr "FEHLER: keine spielbaren Streams gefunden\n"
 
 #: utils/lqtplay.c:964
 #: utils/lqtplay.c:967
@@ -3109,7 +3119,6 @@ msgstr "INFO: Verwende BC_RGB888 + %s\n"
 msgid "OpenGL"
 msgstr ""
 
-# ncht übersetzen?
 #: utils/lqtplay.c:965
 #: utils/lqtplay.c:968
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:965
@@ -3213,7 +3222,7 @@ msgstr "INFO: Fenstergröße ist %dx%d\n"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:1675
 #, c-format
 msgid "Stream colormodel %s, "
-msgstr "Stream Farbmodel %s, "
+msgstr "Stream Farbmodell %s, "
 
 #: utils/lqtplay.c:1678
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:1678
@@ -3225,7 +3234,7 @@ msgstr "verwende %s\n"
 #: libquicktime-1.0.0pre1/utils/lqtplay.c:1780
 #, c-format
 msgid "Decoded %lld samples\n"
-msgstr "%lld Decodiert\n"
+msgstr "%lld Samples decodiert\n"
 
 #: utils/lqt_transcode.c:91
 #: libquicktime-1.0.0pre1/utils/lqt_transcode.c:91
@@ -3268,7 +3277,7 @@ msgid ""
 "       List video encoders\n"
 "\n"
 msgstr ""
-"       Liste Audio Codierer\n"
+"       Liste Audio Codiecs\n"
 "\n"
 
 #: utils/lqt_transcode.c:146
@@ -3529,7 +3538,6 @@ msgstr "Nicht Konstant"
 msgid "    Native colormodel:  %s\n"
 msgstr "    Natives Farbmodell:  %s\n"
 
-# übersetzung für interlace?
 #: utils/common.c:149
 #: libquicktime-1.0.0pre1/utils/common.c:149
 #, c-format
