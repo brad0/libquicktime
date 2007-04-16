@@ -150,8 +150,9 @@ int main(int argc, char ** argv)
   MainWindow * main_window;
     
   gtk_init(&argc, &argv);
+
   bindtextdomain(PACKAGE, LOCALE_DIR);
-  
+  bind_textdomain_codeset(PACKAGE, "UTF-8");
   
   /* No, we don't like commas as decimal separators */
   setlocale(LC_NUMERIC, "C");
