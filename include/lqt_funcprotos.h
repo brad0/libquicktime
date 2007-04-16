@@ -452,7 +452,7 @@ void quicktime_read_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp,
                          quicktime_atom_t *parent_atom);
 void quicktime_write_ftyp(quicktime_t *file, quicktime_ftyp_t *ftyp);
 void quicktime_ftyp_dump(quicktime_ftyp_t *ftyp);
-
+void quicktime_ftyp_delete(quicktime_ftyp_t *ftyp);
 
 /* gama.c */
 

@@ -78,7 +78,8 @@ int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr)
 	{
 		file->total_length = quicktime_get_file_length(path);		
 	}
-      file->presave_buffer = calloc(1, QUICKTIME_PRESAVE);	
+        if(wr)
+          file->presave_buffer = calloc(1, QUICKTIME_PRESAVE);	
 	return 0;
 }
 

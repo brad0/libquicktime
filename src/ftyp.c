@@ -191,3 +191,8 @@ void quicktime_ftyp_dump(quicktime_ftyp_t *ftyp)
   lqt_dump("\n");
   }
 
+void quicktime_ftyp_delete(quicktime_ftyp_t *ftyp)
+  {
+  if(ftyp->compatible_brands)
+    free(ftyp->compatible_brands);
+  }

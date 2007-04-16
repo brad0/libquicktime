@@ -613,6 +613,7 @@ int quicktime_delete(quicktime_t *file)
 
 	quicktime_moov_delete(&(file->moov));
 	quicktime_mdat_delete(&(file->mdat));
+	quicktime_ftyp_delete(&(file->ftyp));
 	return 0;
 }
 
