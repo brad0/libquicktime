@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <locale.h>
 
+#include <libintl.h>
+#define _(str) dgettext(PACKAGE, str)
+
 typedef struct
   {
   
@@ -71,8 +74,6 @@ MainWindow * create_main_window()
   g_signal_connect(G_OBJECT(ret->window), "delete-event",
                    G_CALLBACK(delete_callback), ret);
     
-  //  ret->close_button = gtk_button_new_with_label("Close");
-  //  ret->save_button = gtk_button_new_with_label("Save");
 
   ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
   ret->save_button = gtk_button_new_from_stock(GTK_STOCK_SAVE);
@@ -80,7 +81,7 @@ MainWindow * create_main_window()
   
   ret->notebook = gtk_notebook_new();
 
-  tab_label = gtk_label_new("Audio Codecs");
+  tab_label = gtk_label_new(_("Audio Codecs"));
   gtk_widget_show(tab_label);
 
   ret->audio_browser = lqtgtk_create_codec_browser(LQT_CODEC_AUDIO, 1, 1);
@@ -88,7 +89,7 @@ MainWindow * create_main_window()
   gtk_notebook_append_page(GTK_NOTEBOOK(ret->notebook),
                            ret->audio_browser->widget, tab_label);
       
-  tab_label = gtk_label_new("Video Codecs");
+  tab_label = gtk_label_new(_("Video Codecs"));
   gtk_widget_show(tab_label);
   
   ret->video_browser = lqtgtk_create_codec_browser(LQT_CODEC_VIDEO, 1, 1);
@@ -149,7 +150,9 @@ int main(int argc, char ** argv)
   MainWindow * main_window;
     
   gtk_init(&argc, &argv);
-
+  bindtextdomain(PACKAGE, LOCALE_DIR);
+  
+  
   /* No, we don't like commas as decimal separators */
   setlocale(LC_NUMERIC, "C");
 

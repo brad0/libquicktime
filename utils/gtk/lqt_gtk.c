@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libintl.h>
+#define _(str) dgettext(PACKAGE, str)
+ 
+
 #define GTK_OPTION_MENU(x) x
 
 enum 
@@ -624,8 +628,6 @@ static void browser_button_callback(GtkWidget * w, gpointer data)
     }
   }
 
-static char * list_title = "Installed codecs";
-
 LqtGtkCodecBrowser * lqtgtk_create_codec_browser(lqt_codec_type type,
                                                  int encode, int decode)
   {
@@ -648,7 +650,7 @@ LqtGtkCodecBrowser * lqtgtk_create_codec_browser(lqt_codec_type type,
   renderer   = gtk_cell_renderer_text_new();
   gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(ret->list),
 					      -1,
-					      list_title,
+					      _("Installed codecs"),
 					      renderer,
 					      "text", LQGTK_LIST_CODEC_NAME_COLUMN_ID,
 					      NULL);
@@ -674,11 +676,11 @@ LqtGtkCodecBrowser * lqtgtk_create_codec_browser(lqt_codec_type type,
   gtk_table_attach_defaults(GTK_TABLE(ret->widget), ret->scrolledwindow,
                             0, 1, 0, 4);
   
-  ret->up_button =         gtk_button_new_with_label("Up");
-  ret->down_button =       gtk_button_new_with_label("Down");
+  ret->up_button =         gtk_button_new_with_label(_("Up"));
+  ret->down_button =       gtk_button_new_with_label(_("Down"));
 
-  ret->parameters_button = gtk_button_new_with_label("Parameters...");
-  ret->info_button =       gtk_button_new_with_label("Info...");
+  ret->parameters_button = gtk_button_new_with_label(_("Parameters..."));
+  ret->info_button =       gtk_button_new_with_label(_("Info..."));
 
   g_signal_connect(G_OBJECT(ret->up_button), "clicked",
 		   G_CALLBACK(browser_button_callback),
@@ -819,7 +821,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
     ret->hbox = gtk_hbox_new(0, 5);
     if(codec_info->num_encoding_parameters)
       {
-      ret->encoding_frame = gtk_frame_new("Encoding Options");
+      ret->encoding_frame = gtk_frame_new(_("Encoding Options"));
       
       gtk_container_add(GTK_CONTAINER(ret->encoding_frame),
                        ret->encode_widget->widget);
@@ -828,7 +830,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
       }
     if(codec_info->num_decoding_parameters)
       {
-      ret->decoding_frame = gtk_frame_new("Decoding Options");
+      ret->decoding_frame = gtk_frame_new(_("Decoding Options"));
       gtk_container_add(GTK_CONTAINER(ret->decoding_frame),
                         ret->decode_widget->widget);
       gtk_widget_show(ret->decoding_frame);
@@ -844,7 +846,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
   
   ret->apply_button = gtk_button_new_from_stock(GTK_STOCK_APPLY);
   ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-  ret->restore_button = gtk_button_new_with_label("Restore defaults");
+  ret->restore_button = gtk_button_new_with_label(_("Restore defaults"));
 
   g_signal_connect(G_OBJECT(ret->apply_button),
 		   "clicked",
@@ -968,7 +970,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
 
   ret->real_name = gtk_label_new(info->long_name);
   gtk_misc_set_alignment(GTK_MISC(ret->real_name), 0.0, 0.5);
-  ret->short_name_label = gtk_label_new("Internal name: ");
+  ret->short_name_label = gtk_label_new(_("Internal name: "));
   gtk_misc_set_alignment(GTK_MISC(ret->short_name_label), 0.0, 0.5);
   ret->short_name = gtk_label_new(info->name);
   gtk_misc_set_alignment(GTK_MISC(ret->short_name), 0.0, 0.5);
@@ -977,7 +979,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   
   ret->module_filename = gtk_label_new(info->module_filename);
   gtk_misc_set_alignment(GTK_MISC(ret->module_filename), 0.0, 0.5);
-  ret->module_filename_label = gtk_label_new("Module: ");
+  ret->module_filename_label = gtk_label_new(_("Module: "));
   gtk_misc_set_alignment(GTK_MISC(ret->module_filename_label), 0.0, 0.5);
   
   gtk_widget_show(ret->real_name);
@@ -1051,7 +1053,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
 
   if(ret->fourccs_label)
     {
-    ret->fourccs_frame = gtk_frame_new("Fourccs");
+    ret->fourccs_frame = gtk_frame_new(_("Fourccs"));
     
     gtk_container_add(GTK_CONTAINER(ret->fourccs_frame), ret->fourccs_label);
     gtk_widget_show(ret->fourccs_frame);
@@ -1059,7 +1061,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   
   if(ret->wav_ids_label)
     {
-    ret->wav_ids_frame = gtk_frame_new("WAV Id(s)");
+    ret->wav_ids_frame = gtk_frame_new(_("WAV Id(s)"));
     
     gtk_container_add(GTK_CONTAINER(ret->wav_ids_frame), ret->wav_ids_label);
     gtk_widget_show(ret->wav_ids_frame);
@@ -1145,7 +1147,7 @@ lqtgtk_create_codec_info_window(const lqt_codec_info_t *info)
 
   ret->mainbox = gtk_vbox_new(0, 10);
 
-  ret->close_button = gtk_button_new_with_label("Close");
+  ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
   GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
 
   g_signal_connect(G_OBJECT(ret->close_button), "clicked",
@@ -1208,8 +1210,8 @@ lqtgtk_create_encoder_widget(lqt_codec_type type)
   {
   LqtGtkEncoderWidget * ret = calloc(1, sizeof(LqtGtkEncoderWidget));
   ret->type = type;
-  ret->info_button = gtk_button_new_with_label("Info...");
-  ret->parameters_button = gtk_button_new_with_label("Parameters...");
+  ret->info_button = gtk_button_new_with_label(_("Info..."));
+  ret->parameters_button = gtk_button_new_with_label(_("Parameters..."));
 
   g_signal_connect(G_OBJECT(ret->info_button), "clicked",
 		   G_CALLBACK(encoder_widget_button_callback),

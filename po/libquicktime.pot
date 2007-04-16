@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2007-03-28 01:17+0200\n"
+"POT-Creation-Date: 2007-04-16 21:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2981,17 +2981,17 @@ msgstr ""
 msgid "INFO: window size is %dx%d\n"
 msgstr ""
 
-#: utils/lqtplay.c:1675 libquicktime-1.0.0pre1/utils/lqtplay.c:1675
+#: utils/lqtplay.c:1677 libquicktime-1.0.0pre1/utils/lqtplay.c:1675
 #, c-format
 msgid "Stream colormodel %s, "
 msgstr ""
 
-#: utils/lqtplay.c:1678 libquicktime-1.0.0pre1/utils/lqtplay.c:1678
+#: utils/lqtplay.c:1680 libquicktime-1.0.0pre1/utils/lqtplay.c:1678
 #, c-format
 msgid "using %s\n"
 msgstr ""
 
-#: utils/lqtplay.c:1780 libquicktime-1.0.0pre1/utils/lqtplay.c:1780
+#: utils/lqtplay.c:1782 libquicktime-1.0.0pre1/utils/lqtplay.c:1780
 #, c-format
 msgid "Decoded %lld samples\n"
 msgstr ""
@@ -3289,4 +3289,60 @@ msgstr ""
 
 #: utils/common.c:172 libquicktime-1.0.0pre1/utils/common.c:172
 msgid "Subtitles"
+msgstr ""
+
+#: utils/gtk/libquicktime_config.c:84
+msgid "Audio Codecs"
+msgstr ""
+
+#: utils/gtk/libquicktime_config.c:92
+msgid "Video Codecs"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:653
+msgid "Installed codecs"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:679
+msgid "Up"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:680
+msgid "Down"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:682 utils/gtk/lqt_gtk.c:1214
+msgid "Parameters..."
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:683 utils/gtk/lqt_gtk.c:1213
+msgid "Info..."
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:824
+msgid "Encoding Options"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:833
+msgid "Decoding Options"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:849
+msgid "Restore defaults"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:973
+msgid "Internal name: "
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:982
+msgid "Module: "
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1056
+msgid "Fourccs"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1064
+msgid "WAV Id(s)"
 msgstr ""
