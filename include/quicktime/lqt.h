@@ -330,7 +330,7 @@ void lqt_set_text_bg_color(quicktime_t * file, int track,
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
  *  \param text A null-terminated UTF-8 string
- *  \param timestamp The time associated with this sample
+ *  \param duration The duration associated with this sample
  *  \returns 0 if a the text sample could be written to the file, nonzero else
  */
   
@@ -394,7 +394,8 @@ void lqt_get_text_box(quicktime_t * file, int track,
  *  \param track Track index (starting with 0)
  *  \param text Address of a buffer
  *  \param text_alloc Allocated bytes for this buffer (will be changed)
- *  \param timestamp Returns the timestamp of the track
+ *  \param timestamp Returns the timestamp of the sample
+ *  \param duration Returns the duration  of the sample
  *  \returns 1 if a sample was decoded, 0 if the track is finished
  *
  *  This funtion calls realloc() to make sure there is enough space for
