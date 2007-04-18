@@ -153,7 +153,7 @@ ICONV_LIBS=
 AC_CHECK_LIB(iconv, libiconv_close, ICONV_LIBS="-liconv")
 AC_SUBST(ICONV_LIBS)
 
-AC_SEARCH_LIBS(pthread_create, [gthread pthread c_r])
+AC_SEARCH_LIBS(pthread_create, [pthread c_r])
 
 AC_SUBST(LIBS)
 
