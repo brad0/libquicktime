@@ -1087,6 +1087,7 @@ void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1200,7 +1201,7 @@ void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->decode_audio = encode_pcm;
+  codec_base->encode_audio = encode_pcm;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1249,7 +1250,7 @@ void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
-  codec_base->decode_audio = encode_pcm;
+  codec_base->encode_audio = encode_pcm;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
