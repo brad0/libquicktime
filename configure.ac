@@ -410,8 +410,8 @@ if test x$test_libjpeg = xtrue; then
 
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
-LIBS=-ljpeg
-CFLAGS=""
+LIBS="$LIBS -ljpeg"
+CFLAGS="$CFLAGS"
 
 AC_MSG_CHECKING(for libjpeg)
 AC_TRY_LINK([#include <stdio.h>
@@ -484,8 +484,8 @@ if test "x$with_libpng" != "xno"; then
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
 
-LIBS="-lpng -lm -lz"
-CFLAGS=""
+LIBS="$LIBS -lpng -lm -lz"
+CFLAGS="$CFLAGS"
 
 AC_MSG_CHECKING(for libpng)
 AC_TRY_LINK([#include <png.h>],
