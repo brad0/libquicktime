@@ -543,7 +543,7 @@ void lqtgtk_codec_browser_model_update(GtkTreeModel * model,
     gtk_list_store_append(store, &iter);
     gtk_list_store_set(store, &iter, 
 		       LQGTK_LIST_CODEC_NAME_COLUMN_ID, 
-		       codecs[i]->long_name,
+		       _(codecs[i]->long_name),
 		       LQGTK_LIST_CODEC_INDEX_COLUMN_ID, 
 		       i,
 		       -1);
