@@ -158,21 +158,21 @@ typedef struct
 
 typedef struct
 {
-    int version;
-    int revision;
-    long imagingMode;
-    long imagingValidFlags;
-    long correction;
-    long quality;
-    long directdraw;
-    long imagingProperties[5];
-    long reserved1;
-    long reserved2;
+	uint16_t version;
+	uint16_t revision;
+	uint32_t imagingMode;
+	uint32_t imagingValidFlags;
+	uint32_t correction;
+	uint32_t quality;
+	uint32_t directdraw;
+	uint32_t imagingProperties[6];
+	uint32_t reserved1;
+	uint32_t reserved2;
 } quicktime_impn_t;
 
 typedef struct
 {
-    quicktime_impn_t impn;
+	quicktime_impn_t impn;
 } quicktime_imgp_t;
 
 typedef struct
