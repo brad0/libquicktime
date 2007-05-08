@@ -7,6 +7,10 @@
  Copyright (C) 2002 Heroine Virtual Ltd.
  Copyright (C) 2002-2007 Members of the libquicktime project.
 
+ Modified by Napoleon E. Cornejo
+ May 4, 2007, San Salvador, El Salvador
+ - Validated user home directory in create_filename() 
+
  This library is free software; you can redistribute it and/or modify it under
  the terms of the GNU Lesser General Public License as published by the Free
  Software Foundation; either version 2.1 of the License, or (at your option)
@@ -132,15 +136,26 @@ static void create_filename()
   {
   /* Obtain the home directory */
 
-  char * home_dir;
+  char * fdir;
   
-  home_dir = getenv("HOME");
-    
-  strcpy(filename_buffer, home_dir);
+  /* First look for a system-wide codec file if available.  If not
+     look into users home */
 
-  strcat(filename_buffer, "/.libquicktime_codecs");
+  fdir = getenv("LQT_CODEC_FILE");
+  if (fdir == NULL ) {
+    
+    lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN, 
+                    "no system-wide codec file. Looking in user's home.");
+ 
+    fdir = getenv("HOME");
+    strcpy(filename_buffer, fdir);       
+    strcat(filename_buffer, "/.libquicktime_codecs"); 
   
-  }
+  } else 
+     strcpy(filename_buffer, fdir);
+  
+  
+}
 
 static char * __lqt_strdup(const char * string)
   {
