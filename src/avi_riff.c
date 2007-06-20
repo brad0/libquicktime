@@ -431,7 +431,7 @@ static void indx_build_index(quicktime_t *file)
         if(trak->mdia.minf.is_audio)
           insert_audio_packet(trak,
                               ix->base_offset + ix->table[k].relative_offset,
-                              ix->table[k].size);
+                              ix->table[k].size & 0x7FFFFFFF);
         
         else if(trak->mdia.minf.is_video)
           insert_video_packet(trak,
