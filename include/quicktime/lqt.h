@@ -73,7 +73,7 @@ int lqt_fileno(quicktime_t *file);
  *  \param value Parameter value.
  *
  *  For integer parameters, value must be of the type int*. For string parameters,
- *  use char*.
+ *  use char*.  For floating-point parameters, use float*.
  */
   
 void lqt_set_audio_parameter(quicktime_t *file,int track, char *key,void *value);
@@ -86,7 +86,7 @@ void lqt_set_audio_parameter(quicktime_t *file,int track, char *key,void *value)
  *  \param value Parameter value.
  *
  *  For integer parameters, value must be of the type int*. For string parameters,
- *  use char*.
+ *  use char*.  For floating-point parameters, use float*.
  */
 
 void lqt_set_video_parameter(quicktime_t *file,int track, char *key,void *value);
