@@ -115,7 +115,7 @@ static lqt_codec_info_static_t codec_info_ima4 =
     .direction =           LQT_DIRECTION_BOTH,
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
-    .compatibility_flags = LQT_FILE_AVI | LQT_FILE_QT_OLD | LQT_FILE_QT,
+    .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML | LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
 static lqt_codec_info_static_t codec_info_raw =
@@ -212,7 +212,7 @@ static lqt_codec_info_static_t codec_info_ulaw =
     .direction =           LQT_DIRECTION_BOTH,
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
-    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
   };
 
 static lqt_codec_info_static_t codec_info_alaw =
@@ -226,7 +226,7 @@ static lqt_codec_info_static_t codec_info_alaw =
     .direction =           LQT_DIRECTION_BOTH,
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
-    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
   };
 
 
@@ -241,7 +241,7 @@ static lqt_codec_info_static_t codec_info_sowt =
     .direction =           LQT_DIRECTION_BOTH,
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
-    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
   };
 
 static lqt_codec_info_static_t codec_info_lpcm =

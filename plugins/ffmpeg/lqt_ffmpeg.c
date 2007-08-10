@@ -354,7 +354,7 @@ struct CODECIDMAP codecidmap_v[] =
                    "MPG3", "div6", "div3", "DIV4", "div4", "AP41", "ap41",
                    "3IVD", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_AVI,
+      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
     },
 #if 0
@@ -454,7 +454,7 @@ struct CODECIDMAP codecidmap_v[] =
       .name = TRS("FFMPEG MJPEG"),
       .fourccs = { "MJPG", "mjpg", "JPEG", "jpeg", "dmb1", "AVDJ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_AVI,
+      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
     },
     {
@@ -676,7 +676,7 @@ struct CODECIDMAP codecidmap_a[] =
       .name = TRS("FFMPEG Mpeg Layer 2 Audio"),
       .fourccs = { ".mp2", ".MP2", (char *)0 },
       .wav_ids = { 0x55, LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI,
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
     },
     {
@@ -690,7 +690,7 @@ struct CODECIDMAP codecidmap_a[] =
       .name = TRS("FFMPEG AC3 Audio"),
       .fourccs = { ".ac3", ".AC3", (char *)0 },
       .wav_ids = { 0x2000, LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_AVI,
+      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
     },
     {
