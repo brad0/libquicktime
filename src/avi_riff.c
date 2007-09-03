@@ -494,5 +494,7 @@ void quicktime_riff_dump(quicktime_riff_t * riff)
       quicktime_strl_dump(riff->hdrl.strl[i]);
       i++;
       }
+    if(riff->idx1.table_size)
+      quicktime_idx1_dump(&riff->idx1);
     }
   }

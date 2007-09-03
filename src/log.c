@@ -67,6 +67,24 @@ void lqt_set_log_callback(lqt_log_callback_t cb, void * data)
   log_data = data;
   }
 
+void lqt_logs(quicktime_t * file, lqt_log_level_t level,
+              const char * domain, const char * msg_string)
+  {
+  if(!file || !file->log_callback)
+    {
+    if(log_callback)
+      log_callback(level, domain, msg_string, log_data);
+    else
+      fprintf(stderr, "[%s] %s: %s\n",
+              domain, log_level_to_string(level), msg_string);
+    }
+  else
+    {
+    file->log_callback(level, domain, msg_string, file->log_data);
+    }
+
+  }
+
 void lqt_log(quicktime_t * file, lqt_log_level_t level,
              const char * domain, const char * format, ...)
   {
@@ -96,18 +114,7 @@ void lqt_log(quicktime_t * file, lqt_log_level_t level,
 #endif
 
   va_end(argp);
-
-  if(!file || !file->log_callback)
-    {
-    if(log_callback)
-      log_callback(level, domain, msg_string, log_data);
-    else
-      fprintf(stderr, "[%s] %s: %s\n", domain, log_level_to_string(level), msg_string);
-    }
-  else
-    {
-    file->log_callback(level, domain, msg_string, file->log_data);
-    }
+  lqt_logs(file, level, domain, msg_string);
   free(msg_string);
   }
 

@@ -334,7 +334,7 @@ copy_codec_info(const lqt_codec_info_t * info)
   if(ret->num_encoding_parameters)
     {
     ret->encoding_parameters =
-      calloc(ret->num_encoding_parameters, sizeof(lqt_parameter_info_t));
+      calloc(ret->num_encoding_parameters+1, sizeof(lqt_parameter_info_t));
 
     for(i = 0; i < ret->num_encoding_parameters; i++)
       copy_parameter_info(&(ret->encoding_parameters[i]),

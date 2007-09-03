@@ -100,6 +100,7 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
     quicktime_strl_t *strl = 
       hdrl->strl[current_track++] = 
       quicktime_new_strl();
+    trak->tkhd.track_id = current_track;
     quicktime_init_strl(file, 
                         0, 
                         video_map, 
@@ -114,6 +115,7 @@ void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
     quicktime_strl_t *strl = 
       hdrl->strl[current_track++] = 
       quicktime_new_strl();
+    trak->tkhd.track_id = current_track;
     quicktime_init_strl(file, 
                         audio_map,
                         0,

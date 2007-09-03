@@ -464,6 +464,91 @@ static int set_pass_x264(quicktime_t *file,
   return 1;
   }
 
+static struct
+  {
+  int             x264_level;
+  lqt_log_level_t lqt_level;
+  }
+log_levels[] =
+  {
+    { X264_LOG_ERROR,   LQT_LOG_ERROR   },
+    { X264_LOG_WARNING, LQT_LOG_WARNING },
+    { X264_LOG_INFO,    LQT_LOG_INFO    },
+    { X264_LOG_DEBUG,   LQT_LOG_DEBUG   },
+    { X264_LOG_NONE,    LQT_LOG_WARNING }
+  };
+
+static void
+x264_do_log( void * priv, int i_level, const char *psz, va_list argp)
+  {
+  int i;
+  lqt_log_level_t lqt_level;
+  quicktime_t * file;
+  char * msg_string;
+  
+#ifndef HAVE_VASPRINTF
+  int len;
+#endif
+  
+  for(i = 0; i < sizeof(log_levels) / sizeof(log_levels[0]); i++)
+    {
+    if(log_levels[i].x264_level == i_level)
+      {
+      lqt_level = log_levels[i].lqt_level;
+      break;
+      }
+    }
+  if(i >= sizeof(log_levels) / sizeof(log_levels[0]))
+    {
+    lqt_log(file, LQT_LOG_WARNING,
+            LOG_DOMAIN, "Invalid log level from x264");
+    return;
+    }
+  file = (quicktime_t *)priv;
+  
+#ifndef HAVE_VASPRINTF
+  len = vsnprintf((char*)0, 0, psz, argp);
+  msg_string = malloc(len+1);
+  vsnprintf(msg_string, len+1, psz, argp);
+#else
+  vasprintf(&msg_string, psz, argp);
+#endif
+
+  i = strlen(msg_string);
+   
+  if(msg_string[i-1] == '\n')
+    msg_string[i-1] = '\0';
+     
+  
+  lqt_logs(file, lqt_level, LOG_DOMAIN, msg_string);
+  free(msg_string);
+  }
+
+
+static void set_fiel(quicktime_t * file, int track)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_stsd_table_t *stsd;
+  
+  stsd = vtrack->track->mdia.minf.stbl.stsd.table;
+
+  if(stsd->has_fiel)
+    return;
+  
+  switch(vtrack->interlace_mode)
+    {
+    case LQT_INTERLACE_NONE:
+      lqt_set_fiel(file, track, 1, 0);
+      break;
+    case LQT_INTERLACE_TOP_FIRST:
+      lqt_set_fiel(file, track, 2, 9);
+      break;
+    case LQT_INTERLACE_BOTTOM_FIRST:
+      lqt_set_fiel(file, track, 2, 14);
+      break;
+    }
+  }
+
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
@@ -510,6 +595,20 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->params.i_fps_num = lqt_video_time_scale(file, track);
     codec->params.i_fps_den = lqt_frame_duration(file, track, NULL);
 
+    // Set up logging
+    codec->params.pf_log = x264_do_log;
+    codec->params.p_log_private = file;
+    
+#if X264_BUILD >= 51
+    if(lqt_get_interlace_mode(file, track) != LQT_INTERLACE_NONE)
+      {
+      lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN,
+              "Choosing interlaced encoding");
+      codec->params.b_interlaced = 1;
+      set_fiel(file, track);
+      }
+#endif
+    
     /* Set multipass control */
 
     if(codec->total_passes)

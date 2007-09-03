@@ -54,6 +54,26 @@ void quicktime_delete_idx1(quicktime_idx1_t *idx1)
 	if(idx1->table) free(idx1->table);
 }
 
+void quicktime_idx1_dump(quicktime_idx1_t *idx1)
+{
+	int i;
+        lqt_dump("idx1\n");
+        for(i = 0; i < idx1->table_size; i++)
+	{
+		quicktime_idx1table_t *idx1table = idx1->table + i;
+                lqt_dump("  T: %c%c%c%c, F: %08x, O: %d, S: %d\n",
+                         idx1table->tag[0],
+                         idx1table->tag[1],
+                         idx1table->tag[2],
+                         idx1table->tag[3],
+                         idx1table->flags,
+                         idx1table->offset,
+                         idx1table->size);
+	}
+
+}
+
+
 void quicktime_read_idx1(quicktime_t *file, 
 	quicktime_riff_t *riff,
 	quicktime_atom_t *parent_atom)
@@ -141,8 +161,7 @@ void quicktime_update_idx1table(quicktime_t *file,
 	int size)
 {
 	quicktime_riff_t *riff = file->riff[0];
-	quicktime_hdrl_t *hdrl = &riff->hdrl;
-	quicktime_strl_t *strl = hdrl->strl[trak->tkhd.track_id - 1];
+	quicktime_strl_t *strl = trak->strl;
 	char *tag = strl->tag;
 	quicktime_idx1_t *idx1 = &riff->idx1;
 	quicktime_movi_t *movi = &riff->movi;

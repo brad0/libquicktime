@@ -234,6 +234,7 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, char * key, void * value)
   PARAM_FLAG("ff_flag_4mv",CODEC_FLAG_4MV);
   PARAM_FLAG("ff_flag_qpel",CODEC_FLAG_QPEL);
   PARAM_FLAG("ff_flag_gmc",CODEC_FLAG_GMC);
+  PARAM_FLAG("ff_flag_mv0",CODEC_FLAG_MV0);
   PARAM_FLAG("ff_flag_part",CODEC_FLAG_PART);
   PARAM_FLAG("ff_flag_gray",CODEC_FLAG_GRAY);
   PARAM_FLAG("ff_flag_emu_edge",CODEC_FLAG_EMU_EDGE);

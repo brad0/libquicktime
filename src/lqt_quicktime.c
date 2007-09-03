@@ -1841,19 +1841,22 @@ int quicktime_close(quicktime_t *file)
       quicktime_atom_t junk_atom;
       int64_t position = quicktime_position(file);
 #endif
-      // Finalize last header
-      quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
-      // Finalize the odml header
-      quicktime_finalize_odml(file, &file->riff[0]->hdrl);
-
-      if(file->file_type == LQT_FILE_AVI_ODML)
+      // total_riffs is 0 if no A/V frames have been written
+      if(file->total_riffs)
         {
-        for(i = 0; i < file->moov.total_tracks; i++)
+        // Finalize last header
+        quicktime_finalize_riff(file, file->riff[file->total_riffs - 1]);
+        // Finalize the odml header
+        quicktime_finalize_odml(file, &file->riff[0]->hdrl);
+        
+        if(file->file_type == LQT_FILE_AVI_ODML)
           {
-          quicktime_finalize_indx(file, &file->moov.trak[i]->strl->indx);
+          for(i = 0; i < file->moov.total_tracks; i++)
+            {
+            quicktime_finalize_indx(file, &file->moov.trak[i]->strl->indx);
+            }
           }
         }
-      
       }
     else
       {

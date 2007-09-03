@@ -496,9 +496,7 @@ void quicktime_write_chunk_header(quicktime_t *file,
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
     /* Get tag from first riff strl */
-    quicktime_riff_t *first_riff = file->riff[0];
-    quicktime_hdrl_t *hdrl = &first_riff->hdrl;
-    quicktime_strl_t *strl = hdrl->strl[trak->tkhd.track_id - 1];
+    quicktime_strl_t *strl = trak->strl;
     char *tag = strl->tag;
     
     /* Create new RIFF object at 1 Gig mark */

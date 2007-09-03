@@ -102,6 +102,9 @@ void quicktime_update_idx1table(quicktime_t *file,
                                 int offset,
                                 int size);
 
+void quicktime_idx1_dump(quicktime_idx1_t *idx1);
+
+
 /* avi_indx.c */
 
 void quicktime_finalize_indx(quicktime_t *file, quicktime_indx_t *indx);
@@ -546,6 +549,9 @@ const char * lqt_get_charset_fallback(int mac_code, lqt_file_type_t file_type);
 void lqt_log(quicktime_t * file, lqt_log_level_t level,
              const char * domain, const char * format, ...)
   __attribute__ ((format (printf, 4, 5)));
+
+void lqt_logs(quicktime_t * file, lqt_log_level_t level,
+              const char * domain, const char * str);
 
 /* For dumping strings */
 void lqt_dump(const char * format, ...)  __attribute__ ((format (printf, 1, 2)));

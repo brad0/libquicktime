@@ -83,9 +83,11 @@ void quicktime_init_strl(quicktime_t *file,
     strl->strh.dwScale = trak->mdia.minf.stbl.stts.table[0].sample_duration;
     /* framerate numerator */
     strl->strh.dwRate  = trak->mdia.mdhd.time_scale;
-    //    strl->strh.dwSuggestedBufferSize = 1024 * 1024;
-    strl->strh.dwQuality = -1;
+    strl->strh.dwQuality = 10000;
     //    strl->strh.dwSampleSize = (int)(trak->tkhd.track_width * trak->tkhd.track_height) * 3;
+    strl->strh.rcFrame.right  = trak->tkhd.track_width;
+    strl->strh.rcFrame.bottom = trak->tkhd.track_height;
+    
     strl->is_video = 1;
     }
   else if(atrack)

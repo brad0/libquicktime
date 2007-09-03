@@ -963,6 +963,18 @@ with max and/or min bitrate, this must be specified.") \
        .help_string = TRS("Warning: GMC is not supported by all decoders") \
   }
 
+/** Motion estimation */
+#define PARAM_FLAG_MV0 \
+  { \
+    .name =        "ff_flag_mv0", \
+    .real_name =   TRS("Always try a MB with MV=<0,0>"),       \
+    .type =        LQT_PARAMETER_INT, \
+    .val_default = { .val_int = 0 }, \
+    .val_min =     { .val_int = 0 }, \
+    .val_max =     { .val_int = 1 }, \
+  }
+
+
 #define PARAM_FLAG_PART \
   { \
     .name =        "ff_flag_part", \
@@ -1080,7 +1092,7 @@ with max and/or min bitrate, this must be specified.") \
     .val_default = { .val_int = 0 }, \
     .val_min =     { .val_int = 0 }, \
     .val_max =     { .val_int = 1 }, \
-       .help_string = TRS("Use rate distortion optimization for cbp"),  \
+       .help_string = TRS("Use rate distortion optimization for cbp. This can only be used together with trellis quantization."),  \
   }
 
 #define PARAM_FLAG_QP_RD \
@@ -1091,7 +1103,7 @@ with max and/or min bitrate, this must be specified.") \
     .val_default = { .val_int = 0 }, \
     .val_min =     { .val_int = 0 }, \
     .val_max =     { .val_int = 1 }, \
-       .help_string = TRS("Use rate distortion optimization for qp selectioon"), \
+    .help_string = TRS("Use rate distortion optimization for qp selection. Can only be used if MB decision mode is \"Rate distoration\""), \
   }
 
 #define PARAM_FLAG_H263P_AIV \
