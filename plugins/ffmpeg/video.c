@@ -31,6 +31,10 @@
 
 #define LOG_DOMAIN "ffmpeg_video"
 
+#ifdef HAVE_LIBSWSCALE
+#include <swscale.h>
+#endif
+
 typedef struct
   {
   AVCodecContext * avctx;
@@ -49,6 +53,9 @@ typedef struct
   /* Colormodel */
 
   int do_imgconvert;
+#ifdef HAVE_LIBSWSCALE
+  struct SwsContext *swsContext;
+#endif
     
   //  unsigned char ** tmp_buffer;
   unsigned char ** row_pointers;
@@ -138,12 +145,19 @@ static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
         if(codec->row_pointers) free(codec->row_pointers);
 
         if(codec->frame) free(codec->frame);
+
+#ifdef HAVE_LIBSWSCALE
+        if(codec->swsContext)
+          sws_freeContext(codec->swsContext);
+#endif
+
         
 	free(codec);
 	
 	return 0;
 }
 
+#ifndef HAVE_LIBSWSCALE
 static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_colormodel,
                            int row_span, int row_span_uv)
   {
@@ -186,6 +200,7 @@ static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_color
       break;
     }
   }
+#endif
 
 static enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   {
@@ -262,13 +277,19 @@ static void convert_image_decode_rgba(AVFrame * in_frame,
  *  to a libquicktime special one
  */
 
-static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
+static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
+                                 AVFrame * in_frame, enum PixelFormat in_format,
                                  unsigned char ** out_frame, int out_format,
                                  int width, int height, int row_span, int row_span_uv)
   {
+#ifdef HAVE_LIBSWSCALE
+  uint8_t * out_planes[4];
+  int out_strides[4];
+#else
   AVPicture in_pic;
   AVPicture out_pic;
-
+#endif
+  
   /*
    *  Could someone please tell me, how people can make such a brain dead
    *  RGBA format like in ffmpeg??
@@ -278,6 +299,22 @@ static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
     convert_image_decode_rgba(in_frame, out_frame, width, height);
     return;
     }
+
+#ifdef HAVE_LIBSWSCALE
+  out_planes[0] = out_frame[0];
+  out_planes[1] = out_frame[0];
+  out_planes[2] = out_frame[0];
+  out_planes[3] = (uint8_t*)0;
+
+  out_strides[0] = row_span;
+  out_strides[1] = row_span_uv;
+  out_strides[2] = row_span_uv;
+  out_strides[3] = 0;
+  
+  sws_scale(codec->swsContext,
+            in_frame->data, in_frame->linesize,
+            0, height, out_planes, out_strides);
+#else
   
   memset(&in_pic,  0, sizeof(in_pic));
   memset(&out_pic, 0, sizeof(out_pic));
@@ -293,6 +330,7 @@ static void convert_image_decode(AVFrame * in_frame, enum PixelFormat in_format,
   img_convert(&out_pic, lqt_ffmpeg_get_ffmpeg_colormodel(out_format),
               &in_pic,  in_format,
               width, height);
+#endif
   
   }
 
@@ -482,8 +520,25 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     vtrack->stream_cmodel =
       lqt_ffmpeg_get_lqt_colormodel(codec->avctx->pix_fmt, &exact);
     if(!exact)
+      {
       codec->do_imgconvert = 1;
+      
+#ifdef HAVE_LIBSWSCALE
 
+      if(!((codec->avctx->pix_fmt == PIX_FMT_RGBA32) &&
+           (vtrack->stream_cmodel == BC_RGBA8888)))
+        {
+        codec->swsContext =
+          sws_getContext(width, height,
+                         codec->avctx->pix_fmt,
+                         width, height,
+                         lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel),
+                         0, (SwsFilter*)0,
+                         (SwsFilter*)0,
+                         (double*)0);
+        }
+#endif
+      }
     if(codec->decoder->id == CODEC_ID_DVVIDEO)
       {
       if(vtrack->stream_cmodel == BC_YUV420P)
@@ -530,7 +585,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     }
   else
     {
-    convert_image_decode(codec->frame, codec->avctx->pix_fmt,
+    convert_image_decode(codec, codec->frame, codec->avctx->pix_fmt,
                          row_pointers, vtrack->stream_cmodel,
                          width, height, vtrack->stream_row_span,
                          vtrack->stream_row_span_uv);
@@ -661,7 +716,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
               {
               lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN, "Enabling interlaced encoding");
               codec->avctx->flags |=
-                (CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME);
+                (CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME|CODEC_FLAG_ALT_SCAN);
               }
 #endif
             }

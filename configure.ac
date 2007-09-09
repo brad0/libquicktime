@@ -469,6 +469,40 @@ AC_SUBST(AVCODEC_LIBS)
 AC_SUBST(AVCODEC_CFLAGS)
 
 dnl
+dnl libswscale
+dnl
+
+AH_TEMPLATE([HAVE_LIBSWSCALE],
+            [Do we have libswscale installed?])
+
+have_libswscale=false
+
+LIBSWSCALE_REQUIRED="0.5.0"
+
+AC_ARG_ENABLE(libswscale,
+[AC_HELP_STRING([--disable-libswscale],[Disable libswscale (default: autodetect)])],
+[case "${enableval}" in
+   yes) test_libswscale=true ;;
+   no)  test_libswscale=false ;;
+esac],[test_libswscale=true])
+
+if test x$test_libswscale = xtrue; then
+
+PKG_CHECK_MODULES(LIBSWSCALE, libswscale >= $LIBSWSCALE_REQUIRED,
+                  have_libswscale="true", have_libswscale="false")
+fi
+
+AC_SUBST(LIBSWSCALE_REQUIRED)
+AC_SUBST(LIBSWSCALE_LIBS)
+AC_SUBST(LIBSWSCALE_CFLAGS)
+
+AM_CONDITIONAL(HAVE_LIBSWSCALE, test x$have_libswscale = xtrue)
+
+if test "x$have_libswscale" = "xtrue"; then
+AC_DEFINE([HAVE_LIBSWSCALE])
+fi
+
+dnl
 dnl Check for libpng
 dnl 
 
@@ -585,6 +619,8 @@ dnl FAAD2
 dnl
 FAAD2_REQUIRED="2.0"
 AH_TEMPLATE([HAVE_FAAD2], [Enable FAAD2])
+AH_TEMPLATE([HAVE_NEAACDEC_H], [Use new header file for faad2])
+
 have_faad2="false"
 
 AC_ARG_WITH([faad2], AS_HELP_STRING([--without-faad2], [Build without faad2 library (default: test)]))
@@ -593,16 +629,17 @@ if test $have_gpl = "true"; then
 
 if test "x$with_faad2" != "xno"; then
 
-AC_MSG_CHECKING(for faad2)
-
 OLD_CFLAGS=$CFLAGS
 OLD_LIBS=$LIBS
 
 CFLAGS="$CFLAGS"
 LIBS="$LIBS -lfaad -lm"
 
-  AC_TRY_RUN([
-    #include "faad.h"
+AC_MSG_CHECKING(for neaacdec.h usability for faad2)
+
+
+AC_TRY_RUN([
+    #include <neaacdec.h>
     #include <stdio.h>
     main()
     {
@@ -624,11 +661,48 @@ LIBS="$LIBS -lfaad -lm"
     AC_MSG_RESULT(yes)
     FAAD2_CFLAGS=$CFLAGS
     FAAD2_LIBS=$LIBS
+    AC_DEFINE(HAVE_NEAACDEC_H)
+  ],
+    # program could not be run
+    AC_MSG_RESULT(no)
+)
+
+if test "x$have_faad2" != "xtrue"; then
+
+AC_MSG_CHECKING(for faad.h usability for faad2)
+
+AC_TRY_RUN([
+    #include <faad.h>
+    #include <stdio.h>
+    main()
+    {
+    int faad_major;
+    int faad_minor;
+    faacDecHandle dec;
+
+    if(sscanf(FAAD2_VERSION, "%d.%d", &faad_major, &faad_minor) < 2)
+      return -1;
+    dec = faacDecOpen();
+    if(!dec)
+      return -1;
+    return 0;
+    }
+  ],
+  [
+    # program could be run
+    have_faad2="true"
+    AC_MSG_RESULT(yes)
+    FAAD2_CFLAGS=$CFLAGS
+    FAAD2_LIBS=$LIBS
+    
 
   ],
     # program could not be run
     AC_MSG_RESULT(no)
 )
+
+fi
+
 CFLAGS=$OLD_CFLAGS
 LIBS=$OLD_LIBS
 
@@ -809,6 +883,13 @@ fi
 
 echo -n "libavcodec: "
 if test x$have_libavcodec = "xtrue"; then
+echo "Yes"
+else
+echo "Missing (Go to http://www.ffmpeg.org/)"
+fi
+
+echo -n "libswscale: "
+if test x$have_libswscale = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.ffmpeg.org/)"

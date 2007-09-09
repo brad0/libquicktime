@@ -31,6 +31,14 @@
 
 #define LOG_DOMAIN "ffmpeg_audio"
 
+/* Different decoding functions */
+
+#if LIBAVCODEC_BUILD >= 3349760
+#define DECODE_FUNC avcodec_decode_audio2
+#else
+#define DECODE_FUNC avcodec_decode_audio
+#endif
+
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
 /* MPEG Audio header parsing code */
@@ -355,9 +363,17 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
                                             &packet_samples);
     if(!packet_size)
       return 0;
+
+#if LIBAVCODEC_BUILD >= 3349760
+    bytes_decoded = codec->sample_buffer_alloc -
+      (codec->sample_buffer_end - codec->sample_buffer_start);
+    bytes_decoded *= 2 * track_map->channels;
+#else
+    bytes_decoded = 0;
+#endif
     
     frame_bytes =
-      avcodec_decode_audio(codec->avctx,
+      DECODE_FUNC(codec->avctx,
                            &(codec->sample_buffer[track_map->channels *
                                                   (codec->sample_buffer_end - codec->sample_buffer_start)]),
                            &bytes_decoded,
@@ -528,9 +544,17 @@ static int decode_chunk(quicktime_t * file, int track)
      *  frame_size_ptr is zero. Otherwise, it is the decompressed frame
      *  size in BYTES.
      */
+
+#if LIBAVCODEC_BUILD >= 3349760
+    bytes_decoded = codec->sample_buffer_alloc -
+      (codec->sample_buffer_end - codec->sample_buffer_start);
+    bytes_decoded *= 2 * track_map->channels;
+#else
+    bytes_decoded = 0;
+#endif
     
     frame_bytes =
-      avcodec_decode_audio(codec->avctx,
+      DECODE_FUNC(codec->avctx,
                            &(codec->sample_buffer[track_map->channels *
                                                   (codec->sample_buffer_end - codec->sample_buffer_start)]),
                            &bytes_decoded,
