@@ -35,6 +35,9 @@
 #include <swscale.h>
 #endif
 
+// Enable interlaced encoding (experimental)
+// #define DO_INTERLACE
+
 typedef struct
   {
   AVCodecContext * avctx;
@@ -545,7 +548,11 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
       vtrack->interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
       }
-
+    else if(codec->decoder->id == CODEC_ID_MPEG4)
+      {
+      if(vtrack->stream_cmodel == BC_YUV420P)
+        vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
+      }
     if(codec->avctx->sample_aspect_ratio.num)
       {
       trak->mdia.minf.stbl.stsd.table[0].pasp.hSpacing = codec->avctx->sample_aspect_ratio.num;
@@ -667,6 +674,27 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         if(!row_pointers)
           {
           vtrack->stream_cmodel = codec->encode_colormodel;
+
+          if(codec->encode_colormodel == BC_YUV420P)
+            {
+            if(codec->encoder->id == CODEC_ID_MPEG4)
+              {
+              vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
+#ifndef DO_INTERLACE // Seems not to work yet
+            /* enable interlaced encoding */
+              vtrack->interlace_mode = LQT_INTERLACE_NONE;
+#endif
+              }
+            else if(codec->encoder->id == CODEC_ID_DVVIDEO)
+              {
+              vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
+              }
+#ifndef DO_INTERLACE // Seems not to work yet
+            else
+              /* enable interlaced encoding */
+              vtrack->interlace_mode = LQT_INTERLACE_NONE;
+#endif
+            }
           return 0;
           }
         
@@ -710,7 +738,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
               strncpy(trak->strl->strh.fccHandler, "divx", 4);
               strncpy(trak->strl->strf.bh.biCompression, "DX50", 4);
               }
-#if 0 // Seems not to work yet
+#ifdef DO_INTERLACE // Seems not to work yet
             /* enable interlaced encoding */
             if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
               {
@@ -776,7 +804,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         codec->frame->pts = vtrack->timestamp;
         if(codec->avctx->flags & CODEC_FLAG_QSCALE)
           codec->frame->quality = codec->qscale;
-#if 0
+#ifdef DO_INTERLACE
         if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
           {
           codec->frame->interlaced_frame = 1;
