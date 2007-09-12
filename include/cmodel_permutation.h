@@ -574,6 +574,21 @@ static inline void transfer_RGB161616_to_YUV420P_YUV422P(unsigned char *output_y
 	output_v[output_column / 2] = v;
 }
 
+static inline void transfer_RGB161616_to_YUV422P16(uint16_t *output_y, 
+	uint16_t *output_u, 
+	uint16_t *output_v, 
+	uint16_t *input,
+	int output_column)
+{
+	int y, u, v;
+
+	RGB_48_TO_YUV_16(input[0], input[1], input[2], y, u, v);
+
+	output_y[output_column] = y;
+	output_u[output_column / 2] = u;
+	output_v[output_column / 2] = v;
+}
+
 static inline void transfer_RGB161616_to_YUV444P(unsigned char *output_y, 
 	unsigned char *output_u, 
 	unsigned char *output_v, 
@@ -586,6 +601,21 @@ static inline void transfer_RGB161616_to_YUV444P(unsigned char *output_y,
 	b = input[2] >> 8;
 
 	RGB_24_TO_YUV_8(r, g, b, y, u, v);
+
+	output_y[output_column] = y;
+	output_u[output_column] = u;
+	output_v[output_column] = v;
+}
+
+static inline void transfer_RGB161616_to_YUV444P16(uint16_t *output_y, 
+	uint16_t *output_u, 
+	uint16_t *output_v, 
+	uint16_t *input,
+	int output_column)
+{
+	int y, u, v;
+
+	RGB_48_TO_YUV_16(input[0], input[1], input[2], y, u, v);
 
 	output_y[output_column] = y;
 	output_u[output_column] = u;
@@ -1231,6 +1261,16 @@ static inline void transfer_YUV422P16_to_RGB888(unsigned char *(*output),
 	(*output) += 3;
 }
 
+static inline void transfer_YUV422P16_to_RGB161616(uint16_t *(*output), 
+	uint16_t *input_y,
+	uint16_t *input_u,
+	uint16_t *input_v)
+{
+        int i_tmp;
+	YUV_16_TO_RGB_48(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	(*output) += 3;
+}
+
 static inline void transfer_YUV422P16_to_YUV420P16(uint16_t *input_y,
                                                    uint16_t *input_u,
                                                    uint16_t *input_v,
@@ -1266,6 +1306,16 @@ static inline void transfer_YUV444P16_to_RGB888(unsigned char *(*output),
 {
         int i_tmp;
 	YUV_16_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	(*output) += 3;
+}
+
+static inline void transfer_YUV444P16_to_RGB161616(uint16_t *(*output), 
+	uint16_t *input_y,
+	uint16_t *input_u,
+	uint16_t *input_v)
+{
+        int i_tmp;
+	YUV_16_TO_RGB_48(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
 	(*output) += 3;
 }
 
@@ -1691,6 +1741,16 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_YUV422P16_OUT_HEAD_16   \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                unsigned char *input_row = input_rows[row_table[i]]; \
+		uint16_t *output_y = (uint16_t *)(output_rows[0] + i * out_rowspan); \
+		uint16_t *output_u = (uint16_t *)(output_rows[1] + i * out_rowspan_uv); \
+		uint16_t *output_v = (uint16_t *)(output_rows[2] + i * out_rowspan_uv); \
+                for(j = 0; j < out_w; j++)                        \
+		{
+
 #define TRANSFER_YUV411P_OUT_HEAD \
 	for(i = 0; i < out_h; i++) \
 	{ \
@@ -1710,6 +1770,16 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 		unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
 		unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
 		for(j = 0; j < out_w; j++) \
+		{
+
+#define TRANSFER_YUV444P16_OUT_HEAD_16   \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                unsigned char *input_row = input_rows[row_table[i]]; \
+		uint16_t *output_y = (uint16_t *)(output_rows[0] + i * out_rowspan); \
+		uint16_t *output_u = (uint16_t *)(output_rows[1] + i * out_rowspan_uv); \
+		uint16_t *output_v = (uint16_t *)(output_rows[2] + i * out_rowspan_uv); \
+                for(j = 0; j < out_w; j++)                        \
 		{
 
 #define TRANSFER_YUV420P_IN_HEAD \
@@ -1773,6 +1843,16 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_YUV422P16_IN_HEAD_16   \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t *)(output_rows[i]); \
+		uint16_t * input_y = (uint16_t *)(input_rows[0] + row_table[i] * in_rowspan); \
+		uint16_t * input_u = (uint16_t *)(input_rows[1] + row_table[i] * in_rowspan_uv); \
+		uint16_t * input_v = (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
+                for(j = 0; j < out_w; j++)                        \
+		{
+
 #define TRANSFER_YUV444P_IN_HEAD \
 	for(i = 0; i < out_h; i++) \
 	{ \
@@ -1804,6 +1884,15 @@ static inline void transfer_YUV422_to_YUVJ422P(unsigned char *output_y,
 		for(j = 0; j < out_w; j++) \
 		{
 
+#define TRANSFER_YUV444P16_IN_HEAD_16 \
+	for(i = 0; i < out_h; i++) \
+	{ \
+                uint16_t *output_row = (uint16_t *)(output_rows[i]); \
+		uint16_t *input_y = (uint16_t *)(input_rows[0] + row_table[i] * in_rowspan); \
+		uint16_t *input_u = (uint16_t *)(input_rows[1] + row_table[i] * in_rowspan_uv); \
+		uint16_t *input_v = (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
+		for(j = 0; j < out_w; j++) \
+		{
 
 #define TRANSFER_YUV422_IN_HEAD \
 	for(i = 0; i < out_h; i++) \

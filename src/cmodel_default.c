@@ -425,9 +425,27 @@
 						j); \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_YUV422P16: \
+					TRANSFER_YUV422P16_OUT_HEAD_16 \
+					transfer_RGB161616_to_YUV422P16(output_y, \
+						output_u, \
+						output_v, \
+						(uint16_t*)(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 				case BC_YUV444P: \
 					TRANSFER_YUV444P_OUT_HEAD \
 					transfer_RGB161616_to_YUV444P(output_y, \
+						output_u, \
+						output_v, \
+						(uint16_t*)(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUV444P16: \
+					TRANSFER_YUV444P16_OUT_HEAD_16 \
+					transfer_RGB161616_to_YUV444P16(output_y, \
 						output_u, \
 						output_v, \
 						(uint16_t*)(input), \

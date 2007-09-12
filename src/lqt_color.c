@@ -237,14 +237,14 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
     {
     lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
             "Input colorspace is neither RGB nor YUV, can't predict conversion price");
-    return 6;
+    return 7;
     }
   
   if(!output_is_rgb && !output_is_yuv)
     {
     lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
             "Output colorspace is neither RGB nor YUV, can't predict conversion price");
-    return 6;
+    return 7;
     }
 
   /*
@@ -253,15 +253,25 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
    */
 
   if(input_has_alpha != output_has_alpha)
-    return 5;
+    return 6;
   
   /*
-   *  YUV <-> RGB conversion costs 4
+   *  YUV <-> RGB conversion costs 4-5
    */
   
   if((input_is_yuv && output_is_rgb) ||
      (input_is_rgb && output_is_yuv))
-    return 4;
+    {
+    /* Added check to make sure that staying on the same bit depth
+       is considered as "better" when doing a colorspace conversion. */
+    if(colormodel_get_bits(in_colormodel) !=
+      colormodel_get_bits(out_colormodel))
+      /* With bit conversion: 5   */
+      return 5;
+    else 
+      /* No bit conversion is better: 4   */
+      return 4;
+    }
   
   /*
    *  Alpha blending is a bit more simple
@@ -803,8 +813,8 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_YUVJ420P:     return 0; break;
         case BC_YUVJ422P:     return 0; break;
         case BC_YUVJ444P:     return 0; break;
-        case BC_YUV422P16:    return 0; break;
-        case BC_YUV444P16:    return 0; break;
+        case BC_YUV422P16:    return 1; break;
+        case BC_YUV444P16:    return 1; break;
         }
       break;
     case BC_RGBA16161616:
@@ -1046,7 +1056,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_BGR8888:      return 0; break;
         case BC_RGB888:       return 1; break;
         case BC_RGBA8888:     return 0; break;
-        case BC_RGB161616:    return 0; break;
+        case BC_RGB161616:    return 1; break;
         case BC_RGBA16161616: return 0; break;
         case BC_YUVA8888:     return 0; break;
         case BC_YUV422:       return 0; break;
@@ -1069,7 +1079,7 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_BGR8888:      return 0; break;
         case BC_RGB888:       return 1; break;
         case BC_RGBA8888:     return 0; break;
-        case BC_RGB161616:    return 0; break;
+        case BC_RGB161616:    return 1; break;
         case BC_RGBA16161616: return 0; break;
         case BC_YUVA8888:     return 0; break;
         case BC_YUV422:       return 0; break;
