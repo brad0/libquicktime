@@ -763,8 +763,8 @@ enum_t rc_methods[] =
 
 static int set_parameter(quicktime_t *file, 
                          int track, 
-                         char *key, 
-                         void *value)
+                         const char *key, 
+                         const void *value)
   {
   int found = 0, i;
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;

@@ -156,7 +156,8 @@ enum_t mb_decision[] =
     }
 
 
-void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, char * key, void * value)
+void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,
+                              const void * value)
   {
   int found = 0, i;
 /*

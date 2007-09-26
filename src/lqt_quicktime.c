@@ -239,13 +239,15 @@ new_file.presave_size, new_file.stream);
 
 
 
-void lqt_set_audio_parameter(quicktime_t *file,int stream, char *key,void *value)
+void lqt_set_audio_parameter(quicktime_t *file,int stream, const char *key,
+                             const void *value)
   {
   quicktime_codec_t *codec = (quicktime_codec_t*)file->atracks[stream].codec;
   if(codec->set_parameter) codec->set_parameter(file, stream, key, value);
   }
 
-void lqt_set_video_parameter(quicktime_t *file,int stream, char *key,void *value)
+void lqt_set_video_parameter(quicktime_t *file,int stream, const char *key,
+                             const void *value)
   {
   quicktime_codec_t *codec = (quicktime_codec_t*)file->vtracks[stream].codec;
   if(codec->set_parameter) codec->set_parameter(file, stream, key, value);

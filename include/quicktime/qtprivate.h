@@ -1552,8 +1552,8 @@ typedef struct
                             int track);
 	int (*set_parameter)(quicktime_t *file, 
 		int track, 
-		char *key, 
-		void *value);
+		const char *key, 
+		const void *value);
         /* Set the encoding pass */
         int (*set_pass)(quicktime_t *file, 
 		int track, int pass, int total_passes,

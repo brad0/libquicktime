@@ -159,8 +159,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int set_parameter(quicktime_t *file, 
                          int track, 
-                         char *key, 
-                         void *value)
+                         const char *key, 
+                         const void *value)
 {
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 

@@ -76,7 +76,7 @@ int lqt_fileno(quicktime_t *file);
  *  use char*.  For floating-point parameters, use float*.
  */
   
-void lqt_set_audio_parameter(quicktime_t *file,int track, char *key,void *value);
+void lqt_set_audio_parameter(quicktime_t *file,int track, const char *key,const void *value);
 
 /** \ingroup video
  *  \brief Set a codec parameter for a video track
@@ -89,7 +89,7 @@ void lqt_set_audio_parameter(quicktime_t *file,int track, char *key,void *value)
  *  use char*.  For floating-point parameters, use float*.
  */
 
-void lqt_set_video_parameter(quicktime_t *file,int track, char *key,void *value);
+void lqt_set_video_parameter(quicktime_t *file,int track, const char *key,const void *value);
 
 /** \ingroup video_decode
  *  \brief Get the pixel aspect ratio of a video track

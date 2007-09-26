@@ -610,7 +610,7 @@ static int encode(quicktime_t *file,
 
 
 static int set_parameter(quicktime_t *file, int track, 
-                         char *key, void *value)
+                         const char *key, const void *value)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
   quicktime_mp3_codec_t *codec =

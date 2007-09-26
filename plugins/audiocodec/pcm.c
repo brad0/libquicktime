@@ -930,8 +930,8 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
 
 static int set_parameter_pcm(quicktime_t *file, 
                              int track, 
-                             char *key, 
-                             void *value)
+                             const char *key, 
+                             const void *value)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;

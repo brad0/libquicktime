@@ -324,8 +324,8 @@ static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
 
 static int set_parameter(quicktime_t *file, 
                   int track, 
-                  char *key, 
-                  void *value)
+                  const char *key, 
+                  const void *value)
   {
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
   lqt_ffmpeg_set_parameter(codec->avctx, key, value);

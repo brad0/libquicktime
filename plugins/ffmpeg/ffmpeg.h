@@ -33,7 +33,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack,
 void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
 
-void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, char * key, void * value);
+void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,
+                              const void * value);
 
 
 

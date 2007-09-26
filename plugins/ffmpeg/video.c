@@ -918,8 +918,8 @@ static int flush(quicktime_t *file, int track)
 
 static int set_parameter_video(quicktime_t *file, 
                                int track, 
-                               char *key, 
-                               void *value)
+                               const char *key, 
+                               const void *value)
   {
   quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 #if 1
