@@ -817,6 +817,9 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
                                              codec->buffer_alloc,
                                              codec->frame);
 
+        if(bytes_encoded < 0)
+          return -1;
+        
         if(bytes_encoded)
           {
           vtrack->coded_timestamp = codec->avctx->coded_frame->pts;
@@ -888,6 +891,10 @@ static int flush(quicktime_t *file, int track)
                                              codec->buffer,
                                              codec->buffer_alloc,
                                              (AVFrame*)0);
+
+        if(bytes_encoded < 0)
+          return 0;
+        
         vtrack->coded_timestamp = codec->avctx->coded_frame->pts;
 
         if(bytes_encoded)
