@@ -21,11 +21,18 @@ typedef struct
   lqt_parameter_info_t * parameter_info;
 
   int selected;
+#if GTK_MINOR_VERSION < 12
   GtkTooltips * tooltips;
+#endif
   } LqtGtkParameterWidget;
 
+#if GTK_MINOR_VERSION < 12
 LqtGtkParameterWidget *
 lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips);
+#else
+LqtGtkParameterWidget *
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info);
+#endif
 
 void lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget*);
 
@@ -47,7 +54,9 @@ typedef struct
 
   lqt_parameter_info_t * parameter_info;
   int num_parameters;
+#if GTK_MINOR_VERSION < 12
   GtkTooltips * tooltips;
+#endif
   } LqtGtkCodecConfigWidget;
 
 LqtGtkCodecConfigWidget *

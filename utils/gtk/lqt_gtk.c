@@ -164,9 +164,13 @@ set_combo_tooltip(GtkWidget *widget, gpointer   data)
   //  GtkTooltips *tooltips = (GtkTooltips *)data;
 
   if(GTK_IS_BUTTON (widget))
+#if GTK_MINOR_VERSION < 12
     gtk_tooltips_set_tip(w->tooltips, widget,
                          w->parameter_info->help_string,
                          NULL);
+#else
+  gtk_widget_set_tooltip_text(widget, w->parameter_info->help_string);
+#endif
   }
 
 static void
@@ -179,13 +183,31 @@ realize_combo(GtkWidget *combo, gpointer   data)
                         w);
   }
 
+static void set_tooltip(LqtGtkParameterWidget * widget,
+                        GtkWidget * w)
+  {
+#if GTK_MINOR_VERSION < 12
+  gtk_tooltips_set_tip(w->tooltips, w->widget,
+                       w->parameter_info->help_string,
+                       w->parameter_info->help_string);
+#else
+  gtk_widget_set_tooltip_text(w, widget->parameter_info->help_string);
+#endif
+  }
 
+#if GTK_MINOR_VERSION < 12
 LqtGtkParameterWidget *
 lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips)
+#else
+LqtGtkParameterWidget *
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info)
+#endif
   {
   int i;
   LqtGtkParameterWidget * ret = calloc(1, sizeof(LqtGtkParameterWidget));
+#if GTK_MINOR_VERSION < 12
   ret->tooltips = tooltips;
+#endif
   ret->parameter_info = info;
   
   switch(info->type)
@@ -197,7 +219,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
         {
         ret->widget = gtk_check_button_new_with_label(info->real_name);
         if(info->help_string)
-          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+          set_tooltip(ret, ret->widget);
         }
       /* Integer with limits -> slider */
       else if(info->val_min.val_int < info->val_max.val_int)
@@ -216,7 +238,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
         
         gtk_scale_set_digits(GTK_SCALE(ret->widget), 0);
         if(info->help_string)
-          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+          set_tooltip(ret, ret->widget);
         }
       /* Spinbutton */
       else
@@ -233,7 +255,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
                                           0.0,
                                           0);
         if(info->help_string)
-          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+          set_tooltip(ret, ret->widget);
         }
       break;
     case LQT_PARAMETER_FLOAT:
@@ -260,7 +282,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
                                 GTK_POS_LEFT);
         
         if(info->help_string)
-          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+          set_tooltip(ret, ret->widget);
         }
       /* Spinbutton */
       else
@@ -281,7 +303,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
                                    info->num_digits);
 
         if(info->help_string)
-          gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+          set_tooltip(ret, ret->widget);
         }
       break;
     case LQT_PARAMETER_STRING:
@@ -289,7 +311,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * toolti
       gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
       ret->widget = gtk_entry_new();
       if(info->help_string)
-        gtk_tooltips_set_tip(ret->tooltips, ret->widget, info->help_string, info->help_string);
+        set_tooltip(ret, ret->widget);
       break;
     case LQT_PARAMETER_STRINGLIST:    /* String with options */
       ret->selected = 0;
@@ -341,9 +363,15 @@ lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget * w)
  *  Create Codec config widget
  */
 
+#if GTK_MINOR_VERSION < 12
 static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
                                 LqtGtkParameterWidget ** widgets,
                                 int num_parameters, GtkTooltips * tooltips)
+#else
+static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
+                                LqtGtkParameterWidget ** widgets,
+                                int num_parameters)
+#endif
   {
   int i;
   GtkWidget * ret;
@@ -357,9 +385,13 @@ static GtkWidget * create_table(lqt_parameter_info_t * parameter_info,
     
   for(i = 0; i < num_parameters; i++)
     {
+#if GTK_MINOR_VERSION < 12
     widgets[i] =
       lqtgtk_create_parameter_widget(&parameter_info[i], tooltips);
-
+#else
+    widgets[i] =
+      lqtgtk_create_parameter_widget(&parameter_info[i]);
+#endif
     /* Bool parameters have no labels */
 
     if(widgets[i]->label)
@@ -391,6 +423,7 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
   int parameters_in_section;
   LqtGtkCodecConfigWidget * ret = calloc(1, sizeof(LqtGtkCodecConfigWidget));
 
+#if GTK_MINOR_VERSION < 12
   ret->tooltips = gtk_tooltips_new();
   g_object_ref (G_OBJECT (ret->tooltips));
 
@@ -398,6 +431,7 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
   gtk_object_sink (GTK_OBJECT (ret->tooltips));
 #else
   g_object_ref_sink(G_OBJECT(ret->tooltips));
+#endif
 #endif
   
   if(parameter_info[0].type == LQT_PARAMETER_SECTION)
@@ -433,10 +467,15 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
         }
       
       /* Create table */
+#if GTK_MINOR_VERSION < 12
       table = create_table(&(parameter_info[parameter_index]),
                            &(ret->parameter_widgets[parameter_index - i - 1]),
                            parameters_in_section, ret->tooltips);
-      
+#else
+      table = create_table(&(parameter_info[parameter_index]),
+                           &(ret->parameter_widgets[parameter_index - i - 1]),
+                           parameters_in_section);
+#endif      
       /* Append table */
 
       tab_label = gtk_label_new(parameter_info[parameter_index-1].real_name);
@@ -451,10 +490,15 @@ lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
     ret->widget = notebook;
     }
   else
+#if GTK_MINOR_VERSION < 12
     ret->widget = create_table(parameter_info,
                                ret->parameter_widgets,
                                num_parameters, ret->tooltips);
-  
+#else
+    ret->widget = create_table(parameter_info,
+                               ret->parameter_widgets,
+                               num_parameters);
+#endif
   return ret;
   }
 
