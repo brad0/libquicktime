@@ -187,9 +187,9 @@ static void set_tooltip(LqtGtkParameterWidget * widget,
                         GtkWidget * w)
   {
 #if GTK_MINOR_VERSION < 12
-  gtk_tooltips_set_tip(w->tooltips, w->widget,
-                       w->parameter_info->help_string,
-                       w->parameter_info->help_string);
+  gtk_tooltips_set_tip(widget->tooltips, w,
+                       widget->parameter_info->help_string,
+                       widget->parameter_info->help_string);
 #else
   gtk_widget_set_tooltip_text(w, widget->parameter_info->help_string);
 #endif
