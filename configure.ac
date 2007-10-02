@@ -360,7 +360,7 @@ GTK_REQUIRED="2.4.0"
 AC_ARG_WITH([gtk], AS_HELP_STRING([--without-gtk], [Build without gtk library (default: test)]))
 
 if test "x$with_gtk" != "xno"; then
-AM_PATH_GTK_2_0($GTK_REQUIRED, have_gtk=true, have_gtk=false)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED, have_gtk="true", have_gtk="false")
 fi
 
 AM_CONDITIONAL(HAVE_GTK, test x$have_gtk = xtrue)
@@ -895,7 +895,7 @@ else
 echo "Missing (Go to http://www.ffmpeg.org/)"
 fi
 
-echo -n "gtk >= 2.4.0: "
+echo -n "gtk >= $GTK_REQUIRED: "
 if test x$have_gtk = "xtrue"; then
 echo "Yes"
 else
