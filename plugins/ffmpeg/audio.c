@@ -312,8 +312,7 @@ static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
     {
     if(codec->initialized)
       avcodec_close(codec->avctx);
-    else
-      free(codec->avctx);
+    av_free(codec->avctx);
     }
   if(codec->sample_buffer) free(codec->sample_buffer);
   if(codec->chunk_buffer)  free(codec->chunk_buffer);

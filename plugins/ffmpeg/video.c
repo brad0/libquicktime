@@ -137,17 +137,16 @@ static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
 	if(codec->initialized)
           {
           if(codec->avctx->stats_in)
-            free(codec->avctx->stats_in);
+            av_free(codec->avctx->stats_in);
           avcodec_close(codec->avctx);
           }
-        else
-          free(codec->avctx);
+        av_free(codec->avctx);
         
         if(codec->frame_buffer) free(codec->frame_buffer);
 	if(codec->buffer) free(codec->buffer);
         if(codec->row_pointers) free(codec->row_pointers);
 
-        if(codec->frame) free(codec->frame);
+        if(codec->frame) av_free(codec->frame);
 
 #ifdef HAVE_LIBSWSCALE
         if(codec->swsContext)
