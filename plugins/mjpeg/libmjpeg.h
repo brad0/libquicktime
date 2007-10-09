@@ -155,10 +155,7 @@ extern "C" {
                                       long *field2_offset);
 
   // Get the second field offset from the markers
-  long mjpeg_get_buz_field2(unsigned char *buffer, long buffer_size);
-  long mjpeg_get_lml33_field2(unsigned char *buffer, long buffer_size);
   long mjpeg_get_quicktime_field2(unsigned char *buffer, long buffer_size);
-  long mjpeg_get_field2(unsigned char *buffer, long buffer_size);
 
 #ifdef __cplusplus
 }

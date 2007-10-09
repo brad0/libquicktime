@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
         setlocale(LC_CTYPE, "");
 
         bindtextdomain(PACKAGE, LOCALE_DIR);
-        fprintf(stderr, "Localedir: %s\n", LOCALE_DIR);
 	if(argc < 2) {
 		printf(_("Usage: %s filename...\n"), argv[0]);
 		return 1;

@@ -47,13 +47,16 @@ typedef struct
   
   int have_frame;
   int initialized;
+
+  int quality;
+  int usefloat;
   } quicktime_jpeg_codec_t;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-
-	mjpeg_delete(codec->mjpeg);
+        if(codec->mjpeg)
+          mjpeg_delete(codec->mjpeg);
 	if(codec->buffer)
 		free(codec->buffer);
 	if(codec->temp_video)
@@ -68,7 +71,7 @@ static int decode(quicktime_t *file,
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-  mjpeg_t *mjpeg = codec->mjpeg;
+  mjpeg_t *mjpeg;
   long size, field2_offset;
   int result = 0;
 
@@ -79,12 +82,22 @@ static int decode(quicktime_t *file,
        since this piece is called *before* the interlace mode
        is set by quicktime_init_maps() */
     int nfields, dominance;
-    if(lqt_get_fiel(file, track, &nfields, &dominance) &&
-       (nfields == 2) && (dominance == 6))
-      codec->mjpeg->bottom_first = 1;
+    if(lqt_get_fiel(file, track, &nfields, &dominance))
+      {
+      if((nfields == 2) && (dominance == 6))
+        codec->mjpeg->bottom_first = 1;
+      }
+    else
+      nfields = 1;
+    codec->mjpeg = mjpeg_new(quicktime_video_width(file, track),
+                             quicktime_video_height(file, track),
+                             nfields);
+
     codec->initialized = 1;
     }
   
+  mjpeg = codec->mjpeg;
+   
   if(!codec->have_frame)
     {
     size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
@@ -176,8 +189,12 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                 break;
                 
               }
-            
             }
+          codec->mjpeg = mjpeg_new(quicktime_video_width(file, track),
+                                   quicktime_video_height(file, track),
+                                   (codec->jpeg_type == JPEG_MJPA) ? 2 : 1);
+          mjpeg_set_quality(codec->mjpeg, codec->quality);
+          mjpeg_set_float(codec->mjpeg, codec->usefloat);
           codec->initialized = 1;
           }
         
@@ -218,14 +235,14 @@ static int set_parameter(quicktime_t *file,
 	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 	
 	if(!strcasecmp(key, "jpeg_quality"))
-	{
-		mjpeg_set_quality(codec->mjpeg, *(int*)value);
-	}
+	  {
+          codec->quality = *(int*)value;
+          }
 	else
 	if(!strcasecmp(key, "jpeg_usefloat"))
-	{
-		mjpeg_set_float(codec->mjpeg, *(int*)value);
-	}
+          {
+          codec->usefloat = *(int*)value;
+          }
 	return 0;
 }
 
@@ -233,16 +250,14 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 {
 	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
 	quicktime_jpeg_codec_t *codec;
-	int jpeg_type=0, num_fields = 0;
+	int jpeg_type=0;
 
 	if(quicktime_match_32(compressor, QUICKTIME_JPEG))
           {
           jpeg_type = JPEG_PROGRESSIVE;
-          num_fields = 1;
           }
 	if(quicktime_match_32(compressor, QUICKTIME_MJPA))
           {
-          num_fields = 2;
           jpeg_type = JPEG_MJPA;
           }
 /* Init public items */
@@ -257,9 +272,7 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
 
 /* Init private items */
 	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	codec->mjpeg = mjpeg_new(vtrack->track->tkhd.track_width, 
-                                 vtrack->track->tkhd.track_height, 
-                                 num_fields);
 	codec->jpeg_type = jpeg_type;
-
+        codec->quality = 80;
+        codec->usefloat = 0;
 }

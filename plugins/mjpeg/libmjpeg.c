@@ -1399,22 +1399,3 @@ long mjpeg_get_quicktime_field2(unsigned char *buffer, long buffer_size)
   read_quicktime_markers(buffer, buffer_size, header);
   return header[0].next_offset;
   }
-
-long mjpeg_get_field2(unsigned char *buffer, long buffer_size)
-  {
-  int total_fields = 0;
-  long field2_offset = 0;
-  int i;
-
-  for(i = 0; i < buffer_size; i++)
-    {
-    if(buffer[i] == 0xff && buffer[i + 1] == M_SOI)
-      {
-      total_fields++;
-      field2_offset = i;
-      if(total_fields == 2) break;
-      }
-    }
-  return field2_offset;
-  }
-
