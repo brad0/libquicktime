@@ -289,7 +289,7 @@ fi
 AM_CONDITIONAL(HAVE_X11, test "$no_x" != "yes")
 
 dnl
-dnl OpenGL headers
+dnl OpenGL
 dnl
 
 AH_TEMPLATE([HAVE_GL], [Do we have OpenGL?])
@@ -303,7 +303,7 @@ have_gl="yes"
 AC_CHECK_HEADER([GL/gl.h],[],have_gl="no")
 
 if test "$have_gl" = "yes"; then
-AC_CHECK_HEADER([GL/glu.h],[],have_gl="no")
+AC_CHECK_LIB(GL, glBegin,[],have_gl="no")
 fi
 
 if test "$have_gl" = "yes"; then
@@ -312,7 +312,7 @@ fi
 
 if test "x$have_gl" = "xyes"; then
 AC_DEFINE(HAVE_GL,1)
-GL_LIBS="-lGLU -lGL"
+GL_LIBS="-lGL"
 fi
 
 fi

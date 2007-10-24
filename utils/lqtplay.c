@@ -51,7 +51,6 @@
 
 #ifdef HAVE_GL
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <GL/glx.h>
 #endif
 
@@ -501,7 +500,7 @@ static void gl_resize(Widget widget, int width, int height)
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0, width, 0.0, height);
+    glOrtho(0.0, width, 0.0, height, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
