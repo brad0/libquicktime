@@ -410,6 +410,19 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         extradata_size = trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen;
         }
       }
+    else if(codec->decoder->id == CODEC_ID_FFVHUFF)
+      {
+      user_atom = quicktime_stsd_get_user_atom(trak, "FFVH", &user_atom_len);
+
+      if(!user_atom)
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+                "No FFVH atom present, decoding is likely to fail");
+      else
+        {
+        extradata = user_atom + 8;
+        extradata_size = user_atom_len - 8;
+        }
+      }
 
     if(extradata)
       {
@@ -786,6 +799,11 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 
           if(codec->avctx->max_b_frames > 0)
             vtrack->has_b_frames = 1;
+	  if(codec->encoder->id == CODEC_ID_FFVHUFF)
+            {
+            quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+                                          "FFVH", codec->avctx->extradata, codec->avctx->extradata_size );
+            }
           
           codec->initialized = 1;
 

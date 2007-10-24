@@ -651,6 +651,19 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
       .do_encode = 1
     },
+    {
+      .id = CODEC_ID_FFVHUFF,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "ffvhuff",
+      .name = TRS("FFMPEG modified huffyuv lossless"),
+	    .fourccs = { "FFVH", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = 0,
+      .do_encode = 1
+    },
 };
 
 /* Audio */
