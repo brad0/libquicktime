@@ -13,5 +13,17 @@ qt4l_positioning.html \
 qt4l_reading.html \
 qt4l_util.html \
 qt4l_writing.html \
-translatorsguide.txt
+translatorsguide.txt \
+Doxyfile \
+apiref
+
+apiref:
+	doxygen Doxyfile
+
+html: apiref 
+
+install-data-local:
+	test -z "$(DESTDIR)$(docdir)/apiref" || $(mkdir_p) "$(DESTDIR)$(docdir)/apiref"
+	$(INSTALL_DATA) apiref/* $(DESTDIR)$(docdir)/apiref
+
 
