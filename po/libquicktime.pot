@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2007-04-17 19:49+0200\n"
+"POT-Creation-Date: 2007-10-14 00:44+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -104,7 +104,11 @@ msgid ""
 "playable by libquicktime only."
 msgstr ""
 
-#: src/lqt_codecfile.c:939
+#: src/lqt_codecfile.c:148
+msgid "no system-wide codec file. Looking in user's home."
+msgstr ""
+
+#: src/lqt_codecfile.c:954
 #, c-format
 msgid "%s could not be written, deleting imcomplete file"
 msgstr ""
@@ -129,38 +133,38 @@ msgid ""
 "start: %lld)"
 msgstr ""
 
-#: src/lqt_quicktime.c:525
+#: src/lqt_quicktime.c:527
 msgid "quicktime_set_framerate shouldn't be called in read mode."
 msgstr ""
 
-#: src/lqt_quicktime.c:702
+#: src/lqt_quicktime.c:704
 msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
 msgstr ""
 
-#: src/lqt_quicktime.c:923
+#: src/lqt_quicktime.c:925
 #, c-format
 msgid "lqt_set_cmodel: No track No. %d"
 msgstr ""
 
-#: src/lqt_quicktime.c:1730
+#: src/lqt_quicktime.c:1732
 msgid "read/write mode is not supported"
 msgstr ""
 
-#: src/lqt_quicktime.c:1758
+#: src/lqt_quicktime.c:1760
 msgid "Opening failed (unsupported filetype)"
 msgstr ""
 
-#: src/lqt_quicktime.c:1913
+#: src/lqt_quicktime.c:1918
 #, c-format
 msgid "Setting parameter %s to %d"
 msgstr ""
 
-#: src/lqt_quicktime.c:1920
+#: src/lqt_quicktime.c:1925
 #, c-format
 msgid "Setting parameter %s to %f"
 msgstr ""
 
-#: src/lqt_quicktime.c:1928
+#: src/lqt_quicktime.c:1933
 #, c-format
 msgid "Setting parameter %s to %s"
 msgstr ""
@@ -646,20 +650,28 @@ msgstr ""
 msgid "MPEG-2/4 AAC decoder (faad2 based)"
 msgstr ""
 
-#: plugins/faad2/faad2.c:142
+#: plugins/faad2/faad2.c:171
 #, c-format
 msgid "faacDecDecode failed %s"
 msgstr ""
 
-#: plugins/faad2/faad2.c:332
+#: plugins/faad2/faad2.c:361
 msgid "No extradata found, decoding is doomed to failure"
 msgstr ""
 
-#: plugins/x264/x264.c:543
+#: plugins/x264/x264.c:504
+msgid "Invalid log level from x264"
+msgstr ""
+
+#: plugins/x264/x264.c:606
+msgid "Choosing interlaced encoding"
+msgstr ""
+
+#: plugins/x264/x264.c:642
 msgid "x264_encoder_open failed"
 msgstr ""
 
-#: plugins/x264/x264.c:789
+#: plugins/x264/x264.c:888
 #, c-format
 msgid "Unrecognized parameter %s"
 msgstr ""
@@ -1050,36 +1062,36 @@ msgstr ""
 msgid "Based on the x264 library"
 msgstr ""
 
-#: plugins/ffmpeg/audio.c:368 plugins/ffmpeg/audio.c:541
+#: plugins/ffmpeg/audio.c:383 plugins/ffmpeg/audio.c:564
 msgid "avcodec_decode_audio error"
 msgstr ""
 
-#: plugins/ffmpeg/audio.c:411
+#: plugins/ffmpeg/audio.c:426
 msgid "Decode header failed"
 msgstr ""
 
-#: plugins/ffmpeg/audio.c:416
+#: plugins/ffmpeg/audio.c:431
 msgid "Huh, frame not decoded?"
 msgstr ""
 
-#: plugins/ffmpeg/audio.c:592
+#: plugins/ffmpeg/audio.c:615
 #, c-format
 msgid "BUUUUG, buffer overflow, %d %d"
 msgstr ""
 
-#: plugins/ffmpeg/audio.c:681 plugins/ffmpeg/audio.c:803
+#: plugins/ffmpeg/audio.c:704 plugins/ffmpeg/audio.c:826
 msgid "Avcodec open failed"
 msgstr ""
 
-#: plugins/ffmpeg/video.c:356
+#: plugins/ffmpeg/video.c:396
 msgid "No avcC atom present, decoding is likely to fail"
 msgstr ""
 
-#: plugins/ffmpeg/video.c:468
+#: plugins/ffmpeg/video.c:508
 msgid "Skipping corrupted frame"
 msgstr ""
 
-#: plugins/ffmpeg/video.c:662
+#: plugins/ffmpeg/video.c:744
 msgid "Enabling interlaced encoding"
 msgstr ""
 
@@ -1768,116 +1780,124 @@ msgstr ""
 msgid "Warning: GMC is not supported by all decoders"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:969
+#: plugins/ffmpeg/params.h:970
+msgid "Always try a MB with MV=<0,0>"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:981
 msgid "Use data partitioning"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:974
+#: plugins/ffmpeg/params.h:986
 msgid ""
 "Use data partitioning for more robustness if the video is for transmitting "
 "over unreliable channels"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:982
+#: plugins/ffmpeg/params.h:994
 msgid "Grayscale mode"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:992
+#: plugins/ffmpeg/params.h:1004
 msgid "Don't draw edges"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1003
+#: plugins/ffmpeg/params.h:1015
 msgid "Normalize adaptive quantization"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1008
+#: plugins/ffmpeg/params.h:1020
 msgid ""
 "When using masking, try to adjust the per macroblock quantizers to maintain "
 "the desired average"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1015
+#: plugins/ffmpeg/params.h:1027
 msgid "Use alternative scantable"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1026
+#: plugins/ffmpeg/params.h:1038
 msgid "Use trellis quantization"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1031
+#: plugins/ffmpeg/params.h:1043
 msgid "Use trellis quantization (improves quality)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1037
+#: plugins/ffmpeg/params.h:1049
 msgid "Use only bitexact stuff"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1042
+#: plugins/ffmpeg/params.h:1054
 msgid "Use only bitexact stuff (except (i)dct)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1048
+#: plugins/ffmpeg/params.h:1060
 msgid "Advanced intra coding"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1058
+#: plugins/ffmpeg/params.h:1070
 msgid "MPEG-4 AC prediction"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1068
+#: plugins/ffmpeg/params.h:1080
 msgid "Unlimited motion vector"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1078
+#: plugins/ffmpeg/params.h:1090
 msgid "CBP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1083
-msgid "Use rate distortion optimization for cbp"
+#: plugins/ffmpeg/params.h:1095
+msgid ""
+"Use rate distortion optimization for cbp. This can only be used together "
+"with trellis quantization."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1089
+#: plugins/ffmpeg/params.h:1101
 msgid "QP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1094
-msgid "Use rate distortion optimization for qp selectioon"
+#: plugins/ffmpeg/params.h:1106
+msgid ""
+"Use rate distortion optimization for qp selection. Can only be used if MB "
+"decision mode is \"Rate distoration\""
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1100
+#: plugins/ffmpeg/params.h:1112
 msgid "Alternative inter vlc"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1111
+#: plugins/ffmpeg/params.h:1123
 msgid "OBMC"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1116
+#: plugins/ffmpeg/params.h:1128
 msgid ""
 "Overlapped block motion compensation (only supported with simple MB decision)"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1123
+#: plugins/ffmpeg/params.h:1135
 msgid "Loop filter"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1133
+#: plugins/ffmpeg/params.h:1145
 msgid "Slice struct"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1144
+#: plugins/ffmpeg/params.h:1156
 msgid "Close all GOPs"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1154
+#: plugins/ffmpeg/params.h:1166
 msgid "Allow fast encoding"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1159
+#: plugins/ffmpeg/params.h:1171
 msgid "Allow non spec compliant speedup tricks"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1166
+#: plugins/ffmpeg/params.h:1178
 msgid "Strictly enforce GOP size"
 msgstr ""
 
@@ -1901,152 +1921,156 @@ msgstr ""
 msgid "Masking"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:301
+#: plugins/ffmpeg/lqt_ffmpeg.c:305
 msgid "FFMPEG Mpeg 1 Video"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:313
+#: plugins/ffmpeg/lqt_ffmpeg.c:317
 msgid "FFMPEG MPEG-4"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:329
+#: plugins/ffmpeg/lqt_ffmpeg.c:333
 msgid "FFMPEG MSMpeg 4v1"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:340
+#: plugins/ffmpeg/lqt_ffmpeg.c:344
 msgid "FFMPEG MSMpeg 4v2"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:352
+#: plugins/ffmpeg/lqt_ffmpeg.c:356
 msgid "FFMPEG MSMpeg 4v3 (DivX 3 compatible)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:369
+#: plugins/ffmpeg/lqt_ffmpeg.c:373
 msgid "FFMPEG WMV1"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:382
+#: plugins/ffmpeg/lqt_ffmpeg.c:386
 msgid "FFMPEG H263"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:395
+#: plugins/ffmpeg/lqt_ffmpeg.c:399
 msgid "FFMPEG H264"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:407
+#: plugins/ffmpeg/lqt_ffmpeg.c:411
 msgid "FFMPEG H263+"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:420
+#: plugins/ffmpeg/lqt_ffmpeg.c:424
 msgid "FFMPEG I263"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:431
+#: plugins/ffmpeg/lqt_ffmpeg.c:435
 msgid "FFMPEG Sorenson Video 1"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:442
+#: plugins/ffmpeg/lqt_ffmpeg.c:446
 msgid "FFMPEG Sorenson Video 3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:454
+#: plugins/ffmpeg/lqt_ffmpeg.c:458
 msgid "FFMPEG MJPEG"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:467
+#: plugins/ffmpeg/lqt_ffmpeg.c:471
 msgid "FFMPEG Motion JPEG-B"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:480
+#: plugins/ffmpeg/lqt_ffmpeg.c:484
 msgid "FFMPEG Targa"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:492
+#: plugins/ffmpeg/lqt_ffmpeg.c:496
 msgid "FFMPEG TIFF"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:503
+#: plugins/ffmpeg/lqt_ffmpeg.c:507
 msgid "FFMPEG Quicktime Planar RGB (8BPS)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:514
+#: plugins/ffmpeg/lqt_ffmpeg.c:518
 msgid "FFMPEG Intel Indeo 3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:524
+#: plugins/ffmpeg/lqt_ffmpeg.c:528
 msgid "FFMPEG Apple Video"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:534
+#: plugins/ffmpeg/lqt_ffmpeg.c:538
 msgid "FFMPEG Apple Graphics"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:545
+#: plugins/ffmpeg/lqt_ffmpeg.c:549
 msgid "FFMPEG Cinepak"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:556
+#: plugins/ffmpeg/lqt_ffmpeg.c:560
 msgid "FFMPEG Creative YUV"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:566
+#: plugins/ffmpeg/lqt_ffmpeg.c:570
 msgid "FFMPEG RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:576
+#: plugins/ffmpeg/lqt_ffmpeg.c:580
 msgid "FFMPEG Microsoft RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:588
+#: plugins/ffmpeg/lqt_ffmpeg.c:592
 msgid "FFMPEG DV (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:602
+#: plugins/ffmpeg/lqt_ffmpeg.c:606
 msgid "FFMPEG DV (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:616
+#: plugins/ffmpeg/lqt_ffmpeg.c:620
+msgid "FFMPEG DV (AVI version)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:634
 msgid "FFMPEG DVCPRO50 (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:630
+#: plugins/ffmpeg/lqt_ffmpeg.c:648
 msgid "FFMPEG DVCPRO50 (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:649
+#: plugins/ffmpeg/lqt_ffmpeg.c:667
 msgid "FFMPEG MPEG-1/2 audio layer 1/2/3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:662
+#: plugins/ffmpeg/lqt_ffmpeg.c:680
 msgid "FFMPEG Mpeg Layer 2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:676
+#: plugins/ffmpeg/lqt_ffmpeg.c:694
 msgid "FFMPEG AC3 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:690
+#: plugins/ffmpeg/lqt_ffmpeg.c:708
 msgid "FFMPEG QDM2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:703
+#: plugins/ffmpeg/lqt_ffmpeg.c:721
 msgid "FFMPEG Apple lossless"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:716
+#: plugins/ffmpeg/lqt_ffmpeg.c:734
 msgid "FFMPEG McRowsoft ADPCM"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:729
+#: plugins/ffmpeg/lqt_ffmpeg.c:747
 msgid "FFMPEG ADPCM ima WAV"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1007
+#: plugins/ffmpeg/lqt_ffmpeg.c:1025
 #, c-format
 msgid "Video index too large: %d"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1063
+#: plugins/ffmpeg/lqt_ffmpeg.c:1081
 #, c-format
 msgid "Audio index too large: %d"
 msgstr ""
@@ -2140,7 +2164,7 @@ msgstr ""
 msgid "Writing OVHS atom %d bytes\n"
 msgstr ""
 
-#: plugins/mjpeg/jpeg.c:174
+#: plugins/mjpeg/jpeg.c:187
 msgid ""
 "Encoding progressive video as interlaced. Motion JPEG-A is not suitable for "
 "progressive video."
@@ -2641,7 +2665,7 @@ msgstr ""
 msgid "Couldn't open %s\n"
 msgstr ""
 
-#: utils/qtinfo.c:65
+#: utils/qtinfo.c:64
 #, c-format
 msgid "Usage: %s filename...\n"
 msgstr ""
@@ -2834,50 +2858,50 @@ msgstr ""
 msgid "Video Codecs"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:653
+#: utils/gtk/lqt_gtk.c:697
 msgid "Installed codecs"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:679
+#: utils/gtk/lqt_gtk.c:723
 msgid "Up"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:680
+#: utils/gtk/lqt_gtk.c:724
 msgid "Down"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:682 utils/gtk/lqt_gtk.c:1214
+#: utils/gtk/lqt_gtk.c:726 utils/gtk/lqt_gtk.c:1258
 msgid "Parameters..."
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:683 utils/gtk/lqt_gtk.c:1213
+#: utils/gtk/lqt_gtk.c:727 utils/gtk/lqt_gtk.c:1257
 msgid "Info..."
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:824
+#: utils/gtk/lqt_gtk.c:868
 msgid "Encoding Options"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:833
+#: utils/gtk/lqt_gtk.c:877
 msgid "Decoding Options"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:849
+#: utils/gtk/lqt_gtk.c:893
 msgid "Restore defaults"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:973
+#: utils/gtk/lqt_gtk.c:1017
 msgid "Internal name: "
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:982
+#: utils/gtk/lqt_gtk.c:1026
 msgid "Module: "
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:1056
+#: utils/gtk/lqt_gtk.c:1100
 msgid "Fourccs"
 msgstr ""
 
-#: utils/gtk/lqt_gtk.c:1064
+#: utils/gtk/lqt_gtk.c:1108
 msgid "WAV Id(s)"
 msgstr ""

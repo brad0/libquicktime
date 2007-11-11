@@ -646,7 +646,7 @@ static int alsa_init(char *dev, int channels, int rate)
 	fprintf(stderr, _("Error opening PCM device %s\n"), dev);
 	return 1;
     }
-    
+#if 1
     /* Allocate the snd_pcm_hw_params_t structure on the stack. */
     snd_pcm_hw_params_alloca(&hwparams);
 
@@ -674,14 +674,24 @@ static int alsa_init(char *dev, int channels, int rate)
 	fprintf(stderr, _("Error setting channels. %i (%s)\n"), channels, snd_strerror(err));
 	return 1;
     }
+
+    /* Let Alsa resample */
+    snd_pcm_hw_params_set_rate_resample(pcm_handle, hwparams, 1);
     
     /* Set sample rate. If the exact rate is not supported */
     /* by the hardware, use nearest possible rate.         */ 
-    if ((err = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, 0)) < 0 ) {
+#if 1
+    if ((err = snd_pcm_hw_params_set_rate_near(pcm_handle, hwparams, &tmprate, NULL)) < 0 ) {
 	fprintf(stderr, _("Error setting sample rate (%s)\n"), snd_strerror(err));
 	return 1;
     }
-
+#else
+    
+    if ((err = snd_pcm_hw_params_set_rate(pcm_handle, hwparams, tmprate, 0)) < 0 ) {
+	fprintf(stderr, _("Error setting sample rate (%s)\n"), snd_strerror(err));
+	return 1;
+    }
+#endif
     if (tmprate != rate) fprintf(stderr,_("WARNING: Using %i Hz instead of requested rate %i Hz\n "), tmprate, rate);
     oss_sr = tmprate;
     dir = 0;
@@ -716,6 +726,17 @@ static int alsa_init(char *dev, int channels, int rate)
 	fprintf(stderr, _("Error setting HW params.(%s)\n"), snd_strerror(err));
 	return 1;
     }
+#else /* Simple pcm */
+    snd_spcm_init(pcm_handle,
+                  rate,
+                  channels,
+                  SND_PCM_FORMAT_S16_NE,
+                  SND_PCM_SUBFORMAT_STD,
+                  SND_SPCM_LATENCY_STANDARD,
+                  SND_PCM_ACCESS_RW_INTERLEAVED,
+                  SND_SPCM_XRUN_IGNORE); 		
+    
+#endif
     
     if ((err = snd_pcm_prepare(pcm_handle)) < 0) {
 	fprintf(stderr, _("Error in pcm_prepare.(%s)\n"), snd_strerror(err));
@@ -838,8 +859,10 @@ static void qt_init(FILE *fp, char *filename)
     char *adev_name;
     
     /* default */
-    adev_name = strdup("plughw");
-
+    //    adev_name = strdup("plughw");
+    //adev_name = strdup("plughw:0,0");
+    adev_name = strdup("default");
+    
     /* open file */
     qt = quicktime_open(filename,1,0);
     if (NULL == qt) {

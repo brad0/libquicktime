@@ -1287,7 +1287,7 @@ void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)
     {
     case 8:
       codec->block_align = atrack->channels;
-      atrack->sample_format = LQT_SAMPLE_INT8;
+      atrack->sample_format = LQT_SAMPLE_UINT8;
       codec->encode = encode_8;
       codec->decode = decode_8;
       break;
