@@ -22,7 +22,9 @@ apiref:
 
 html: apiref 
 
-install-data-local:
+all: html
+
+install-data-local: html
 	test -z "$(DESTDIR)$(docdir)/apiref" || $(mkdir_p) "$(DESTDIR)$(docdir)/apiref"
 	$(INSTALL_DATA) apiref/* $(DESTDIR)$(docdir)/apiref
 
