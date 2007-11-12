@@ -890,7 +890,7 @@ void lqt_registry_write()
   
   fprintf(output, "# This is the codec database file for libquicktime\n\
 # It is automatically generated and should not be edited.\n\
-# If you canged it, and your libquicktime program doesn't work\n\
+# If you changed it and your libquicktime program doesn't work\n\
 # anymore, delete it, and you will get a new one\n");
 
   /* Write the sort strings */
