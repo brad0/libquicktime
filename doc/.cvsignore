@@ -1,3 +1,5 @@
 .deps
+libquicktime.tags
+apiref
 Makefile
 Makefile.in
