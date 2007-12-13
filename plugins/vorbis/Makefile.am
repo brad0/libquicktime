@@ -5,7 +5,7 @@ pkglib_LTLIBRARIES = lqt_vorbis.la
 
 lqt_vorbis_la_SOURCES = vorbis.c lqt_vorbis.c
 lqt_vorbis_la_LDFLAGS = -avoid-version -module
-lqt_vorbis_la_LIBADD = @VORBISENC_LIBS@ @VORBIS_LIBS@ @VORBISFILE_LIBS@ @MODULE_LIBADD@
+lqt_vorbis_la_LIBADD = @MODULE_LIBADD@ @VORBISENC_LIBS@ @VORBIS_LIBS@ @VORBISFILE_LIBS@
 
 noinst_HEADERS = qtvorbis.h
 
