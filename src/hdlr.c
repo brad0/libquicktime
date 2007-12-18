@@ -231,11 +231,12 @@ void quicktime_write_hdlr(quicktime_t *file, quicktime_hdlr_t *hdlr)
 	quicktime_write_char32(file, hdlr->component_manufacturer);
 	quicktime_write_int32(file, hdlr->component_flags);
 	quicktime_write_int32(file, hdlr->component_flag_mask);
-
         if(IS_MP4(file->file_type))
-          quicktime_write_data(file, (uint8_t*)hdlr->component_name, strlen(hdlr->component_name)+1);
+          {
+          // quicktime_write_data(file, (uint8_t*)hdlr->component_name, strlen(hdlr->component_name)+1);
+          quicktime_write_int16(file, 0);
+          }
         else
           quicktime_write_pascal(file, hdlr->component_name);
-        
 	quicktime_atom_write_footer(file, &atom);
 }

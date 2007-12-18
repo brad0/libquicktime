@@ -24,11 +24,14 @@
 
 #include "lqt_private.h"
 
-int quicktime_tkhd_init(quicktime_tkhd_t *tkhd)
+int quicktime_tkhd_init(quicktime_tkhd_t *tkhd, lqt_file_type_t type)
 {
 	int i;
 	tkhd->version = 0;
-	tkhd->flags = 15;
+        if(IS_MP4(type))
+          tkhd->flags = 7;
+        else
+          tkhd->flags = 15;
         tkhd->creation_time = quicktime_current_time();
 	tkhd->modification_time = quicktime_current_time();
 	tkhd->track_id = 0;
@@ -37,7 +40,7 @@ int quicktime_tkhd_init(quicktime_tkhd_t *tkhd)
 	for(i = 0; i < 8; i++) tkhd->reserved2[i] = 0;
 	tkhd->layer = 0;
 	tkhd->alternate_group = 0;
-	tkhd->volume = 0.996094;
+	tkhd->volume = 1.0;
 	tkhd->reserved3 = 0;
 	quicktime_matrix_init(&(tkhd->matrix));
 	tkhd->track_width = 0;
@@ -52,7 +55,7 @@ int quicktime_tkhd_delete(quicktime_tkhd_t *tkhd)
 
 void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd)
 {
-	lqt_dump("  track header\n");
+	lqt_dump("  track header (tkhd)\n");
 	lqt_dump("   version %d\n", tkhd->version);
 	lqt_dump("   flags %ld\n", tkhd->flags);
 	lqt_dump("   creation_time %llu\n", tkhd->creation_time);

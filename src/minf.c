@@ -46,7 +46,7 @@ void quicktime_minf_init_qtvr(quicktime_t *file,
   quicktime_stbl_init_qtvr(file, &(minf->stbl), track_type, frame_duration);
   quicktime_hdlr_init_data(&(minf->hdlr));
   minf->has_hdlr = 1;
-  quicktime_dinf_init_all(&(minf->dinf));
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   quicktime_gmhd_init(&(minf->gmhd));
   minf->has_gmhd = 1;
   }
@@ -63,7 +63,7 @@ void quicktime_minf_init_panorama(quicktime_t *file,
   quicktime_hdlr_init_data(&(minf->hdlr));
   minf->has_hdlr = 1;
 
-  quicktime_dinf_init_all(&(minf->dinf));
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   quicktime_gmhd_init(&(minf->gmhd));
   minf->has_gmhd = 1;
   }
@@ -80,10 +80,13 @@ void quicktime_minf_init_video(quicktime_t *file,
   minf->is_video = 1;
   quicktime_vmhd_init_video(file, &(minf->vmhd), frame_w, frame_h, frame_duration, time_scale);
   quicktime_stbl_init_video(file, &(minf->stbl), frame_w, frame_h, frame_duration, time_scale, compressor);
-  quicktime_hdlr_init_data(&(minf->hdlr));
-  minf->has_hdlr = 1;
 
-  quicktime_dinf_init_all(&(minf->dinf));
+  if(!IS_MP4(file->file_type))
+    {
+    quicktime_hdlr_init_data(&(minf->hdlr));
+    minf->has_hdlr = 1;
+    }
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   }
 
 void quicktime_minf_init_audio(quicktime_t *file, 
@@ -96,10 +99,13 @@ void quicktime_minf_init_audio(quicktime_t *file,
   minf->is_audio = 1;
   /* smhd doesn't store anything worth initializing */
   quicktime_stbl_init_audio(file, &(minf->stbl), channels, sample_rate, bits, compressor);
-  quicktime_hdlr_init_data(&(minf->hdlr));
-  minf->has_hdlr = 1;
 
-  quicktime_dinf_init_all(&(minf->dinf));
+  if(!IS_MP4(file->file_type))
+    {
+    quicktime_hdlr_init_data(&(minf->hdlr));
+    minf->has_hdlr = 1;
+    }
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   }
 
 void quicktime_minf_init_text(quicktime_t *file, 
@@ -109,7 +115,7 @@ void quicktime_minf_init_text(quicktime_t *file,
   quicktime_hdlr_init_data(&(minf->hdlr));
   minf->has_hdlr = 1;
 
-  quicktime_dinf_init_all(&(minf->dinf));
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   quicktime_stbl_init_text(file, &(minf->stbl));
   quicktime_gmhd_init(&(minf->gmhd));
   minf->has_gmhd = 1;
@@ -121,7 +127,7 @@ void quicktime_minf_init_tx3g(quicktime_t *file,
                               quicktime_minf_t *minf)
   {
   minf->is_text = 1;
-  quicktime_dinf_init_all(&(minf->dinf));
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
   minf->dinf.dref.table[0].type[0] = 'u';
   minf->dinf.dref.table[0].type[1] = 'r';
   minf->dinf.dref.table[0].type[2] = 'l';
@@ -146,7 +152,7 @@ void quicktime_minf_delete(quicktime_minf_t *minf)
 
 void quicktime_minf_dump(quicktime_minf_t *minf)
   {
-  lqt_dump("   media info\n");
+  lqt_dump("   media info (minf)\n");
   lqt_dump("    is_audio     %d\n", minf->is_audio);
   lqt_dump("    is_audio_vbr %d\n", minf->is_audio_vbr);
   lqt_dump("    is_video     %d\n", minf->is_video);

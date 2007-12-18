@@ -49,7 +49,7 @@ typedef struct
   /* Configuration stuff */
   int bitrate;
   int quality;
-  
+  int object_type;
   } quicktime_faac_codec_t;
 
 
@@ -154,6 +154,7 @@ static int encode(quicktime_t *file,
     enc_config->bitRate = (codec->bitrate * 1000) / track_map->channels;
     enc_config->quantqual = codec->quality;
     enc_config->outputFormat = 0; /* Raw */
+    //    enc_config->aacObjectType = codec->object_type; /* LOW, LTP... */
     enc_config->aacObjectType = LOW; /* LOW, LTP... */
     
     if(!faacEncSetConfiguration(codec->enc, enc_config))
@@ -212,17 +213,28 @@ static int encode(quicktime_t *file,
     
     esds->objectTypeId    = 64; /* MPEG-4 audio */
     esds->streamType      = 0x15; /* from qt4l and Autumns Child.m4a */
-    esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
-
+    //    esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
+    esds->bufferSizeDB    = 6144;
     /* Maybe correct these later? */
     esds->maxBitrate      = 128000;
     esds->avgBitrate      = 128000;
 
     /* No idea if the following is right but other AAC LC files have the same */
-    file->moov.iods.audioProfileId  = 15;
-
+    switch(enc_config->aacObjectType)
+      {
+      case LOW:
+        // "High Quality Audio Profile @ Level 2"
+        file->moov.iods.audioProfileId  = 0x0f;
+        break;
+      case SSR:
+        file->moov.iods.audioProfileId  = 0x0f;
+        break;
+      default:
+        file->moov.iods.audioProfileId  = 0x0f;
+        break;
+      }
     }
-
+  
   /* Encode samples */
   samples_read = 0;
 
@@ -277,6 +289,17 @@ static int set_parameter(quicktime_t *file,
     codec->bitrate = *(int*)value;
   else if(!strcasecmp(key, "faac_quality"))
     codec->quality = *(int*)value;
+  else if(!strcasecmp(key, "faac_object_type"))
+    {
+    if(!strcmp((char*)value, "Low"))
+      codec->object_type = LOW;
+    else if(!strcmp((char*)value, "Main"))
+      codec->object_type = MAIN;
+    else if(!strcmp((char*)value, "SSR"))
+      codec->object_type = SSR;
+    else if(!strcmp((char*)value, "LTP"))
+      codec->object_type = LTP;
+    }
   return 0;
   }
 

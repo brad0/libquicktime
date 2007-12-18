@@ -551,7 +551,7 @@ quicktime_trak_t* quicktime_add_track(quicktime_t *file)
     moov->trak[moov->total_tracks] =
     calloc(1, sizeof(quicktime_trak_t));
 
-  quicktime_trak_init(trak);
+  quicktime_trak_init(trak, file->file_type);
 
   moov->trak[moov->total_tracks]->tkhd.track_id = moov->mvhd.next_track_id;
   
@@ -1633,7 +1633,7 @@ int quicktime_dump(quicktime_t *file)
         if(file->has_ftyp)
           quicktime_ftyp_dump(&(file->ftyp));
 	
-        lqt_dump("movie data\n");
+        lqt_dump("movie data (mdat)\n");
 	lqt_dump(" size %lld\n", file->mdat.atom.size);
 	lqt_dump(" start %lld\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));

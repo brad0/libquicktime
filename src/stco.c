@@ -55,8 +55,11 @@ void quicktime_stco_init_common(quicktime_t *file, quicktime_stco_t *stco)
 void quicktime_stco_dump(quicktime_stco_t *stco)
 {
 	int i;
-	lqt_dump("     chunk offset (stco)\n");
-	lqt_dump("      version %d\n", stco->version);
+        if(stco->co64)
+          lqt_dump("     chunk offset (co64)\n");
+        else
+          lqt_dump("     chunk offset (stco)\n");
+        lqt_dump("      version %d\n", stco->version);
 	lqt_dump("      flags %ld\n", stco->flags);
 	lqt_dump("      total_entries %ld\n", stco->total_entries);
 	for(i = 0; i < stco->total_entries; i++)
@@ -92,23 +95,33 @@ void quicktime_read_stco64(quicktime_t *file, quicktime_stco_t *stco)
 	{
 		stco->table[i].offset = quicktime_read_int64(file);
 	}
+        stco->co64 = 1;
 }
 
 void quicktime_write_stco(quicktime_t *file, quicktime_stco_t *stco)
 {
 	int i;
 	quicktime_atom_t atom;
-//	quicktime_atom_write_header(file, &atom, "stco");
-	quicktime_atom_write_header(file, &atom, "co64");
 
+        if(stco->co64)
+          quicktime_atom_write_header(file, &atom, "co64");
+        else
+          quicktime_atom_write_header(file, &atom, "stco");
+        
 	quicktime_write_char(file, stco->version);
 	quicktime_write_int24(file, stco->flags);
 	quicktime_write_int32(file, stco->total_entries);
-	for(i = 0; i < stco->total_entries; i++)
-	{
-		quicktime_write_int64(file, stco->table[i].offset);
-	}
 
+        if(stco->co64)
+          {
+          for(i = 0; i < stco->total_entries; i++)
+            quicktime_write_int64(file, stco->table[i].offset);
+          }
+        else
+          {
+          for(i = 0; i < stco->total_entries; i++)
+            quicktime_write_int32(file, stco->table[i].offset);
+          }
 	quicktime_atom_write_footer(file, &atom);
 }
 
@@ -128,5 +141,7 @@ void quicktime_update_stco(quicktime_stco_t *stco, long chunk, int64_t offset)
 	
 	stco->table[chunk - 1].offset = offset;
 	if(chunk > stco->total_entries) stco->total_entries = chunk;
+        if(offset >= 0x100000000LL)
+          stco->co64 = 1;
 }
 

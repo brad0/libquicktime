@@ -59,7 +59,7 @@ static quicktime_ftyp_t ftyp_mp4 =
 static quicktime_ftyp_t ftyp_3gp =
   {
     .major_brand =           MK_FOURCC('3','g','p','5'),
-    .minor_version =         0x0,
+    .minor_version =         0x00000200,
     .num_compatible_brands = 5,
     .compatible_brands =     (uint32_t[]){MK_FOURCC('i','s','o','m'),
                                         MK_FOURCC('3','g','p','5'),

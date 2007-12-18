@@ -312,9 +312,18 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
 void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table)
 {
         int tmp_version = file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD) ? table->version : 0;
-	quicktime_write_int16(file, tmp_version);
-	quicktime_write_int16(file, table->revision);
-	quicktime_write_data(file, (uint8_t*)(table->vendor), 4);
+        
+        if(IS_MP4(file->file_type))
+          {
+          quicktime_write_int32(file, 0);
+          quicktime_write_int32(file, 0);
+          }
+        else
+          {
+          quicktime_write_int16(file, tmp_version);
+          quicktime_write_int16(file, table->revision);
+          quicktime_write_data(file, (uint8_t*)(table->vendor), 4);
+          }
 
         if(tmp_version < 2)
           {
@@ -429,6 +438,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
             (bits_per_pixel == 8)))
           {
           quicktime_read_ctab(file, &(table->ctab));
+          table->has_ctab = 1;
           }
         else
           quicktime_default_ctab(&(table->ctab), table->depth);
@@ -439,6 +449,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		if(quicktime_atom_is(&leaf_atom, "ctab"))
 		{
 			quicktime_read_ctab(file, &(table->ctab));
+                table->has_ctab = 1;
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "gama"))
@@ -472,12 +483,12 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		}
 		else
 		if (quicktime_atom_is(&leaf_atom, "esds"))
-		{
-			quicktime_read_esds(file, &(table->esds));
-                        table->has_esds = 1;
-                        quicktime_atom_skip(file, &leaf_atom);
-
-		}
+                  {
+                  printf("esds: %d bytes\n", leaf_atom.size);
+                  quicktime_read_esds(file, &(table->esds));
+                  table->has_esds = 1;
+                  quicktime_atom_skip(file, &leaf_atom);
+                  }
 		else
                 {
                 quicktime_user_atoms_read_atom(file,
@@ -682,7 +693,7 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 	if (table->has_gama)
 		quicktime_gama_dump(&(table->gama));
 
-	if(!table->ctab_id) quicktime_ctab_dump(&(table->ctab));
+	if(table->has_ctab) quicktime_ctab_dump(&(table->ctab));
 	if(table->has_esds) quicktime_esds_dump(&(table->esds));
 	quicktime_user_atoms_dump(&(table->user_atoms));
 }

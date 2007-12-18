@@ -344,20 +344,20 @@ void quicktime_compress_ctts(quicktime_ctts_t *ctts);
 
 void quicktime_dinf_init(quicktime_dinf_t *dinf);
 void quicktime_dinf_delete(quicktime_dinf_t *dinf);
-void quicktime_dinf_init_all(quicktime_dinf_t *dinf);
+void quicktime_dinf_init_all(quicktime_dinf_t *dinf, lqt_file_type_t type);
 void quicktime_dinf_dump(quicktime_dinf_t *dinf);
 void quicktime_read_dinf(quicktime_t *file, quicktime_dinf_t *dinf, quicktime_atom_t *dinf_atom);
 void quicktime_write_dinf(quicktime_t *file, quicktime_dinf_t *dinf);
 
 /* dref.c */
 
-void quicktime_dref_table_init(quicktime_dref_table_t *table);
+void quicktime_dref_table_init(quicktime_dref_table_t *table, lqt_file_type_t type);
 void quicktime_dref_table_delete(quicktime_dref_table_t *table);
 void quicktime_read_dref_table(quicktime_t *file, quicktime_dref_table_t *table);
 void quicktime_write_dref_table(quicktime_t *file, quicktime_dref_table_t *table);
 void quicktime_dref_table_dump(quicktime_dref_table_t *table);
 void quicktime_dref_init(quicktime_dref_t *dref);
-void quicktime_dref_init_all(quicktime_dref_t *dref);
+void quicktime_dref_init_all(quicktime_dref_t *dref, lqt_file_type_t type);
 void quicktime_dref_delete(quicktime_dref_t *dref);
 void quicktime_dref_dump(quicktime_dref_t *dref);
 void quicktime_read_dref(quicktime_t *file, quicktime_dref_t *dref);
@@ -1008,7 +1008,7 @@ void lqt_delete_text_map(quicktime_t * file,
 
 /* tkhd.c */
 
-int quicktime_tkhd_init(quicktime_tkhd_t *tkhd);
+int quicktime_tkhd_init(quicktime_tkhd_t *tkhd, lqt_file_type_t type);
 int quicktime_tkhd_delete(quicktime_tkhd_t *tkhd);
 void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd);
 void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd);
@@ -1018,7 +1018,7 @@ void quicktime_tkhd_init_video(quicktime_t *file, quicktime_tkhd_t *tkhd,
 
 /* trak.c */
 
-int quicktime_trak_init(quicktime_trak_t *trak);
+int quicktime_trak_init(quicktime_trak_t *trak, lqt_file_type_t type);
 int quicktime_trak_init_video(quicktime_t *file, 
                               quicktime_trak_t *trak, 
                               int frame_w, 

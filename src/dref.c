@@ -26,13 +26,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-void quicktime_dref_table_init(quicktime_dref_table_t *table)
+void quicktime_dref_table_init(quicktime_dref_table_t *table, lqt_file_type_t type)
 {
 	table->size = 0;
-	table->type[0] = 'a';
-	table->type[1] = 'l';
-	table->type[2] = 'i';
-	table->type[3] = 's';
+        if(IS_MP4(type))
+          {
+          table->type[0] = 'u';
+          table->type[1] = 'r';
+          table->type[2] = 'l';
+          table->type[3] = ' ';
+          }
+        else
+          {
+          table->type[0] = 'a';
+          table->type[1] = 'l';
+          table->type[2] = 'i';
+          table->type[3] = 's';
+          }
 	table->version = 0;
 	table->flags = 0x0001;
 	table->data_reference = malloc(256);
@@ -88,13 +98,13 @@ void quicktime_dref_init(quicktime_dref_t *dref)
 	dref->table = 0;
 }
 
-void quicktime_dref_init_all(quicktime_dref_t *dref)
+void quicktime_dref_init_all(quicktime_dref_t *dref, lqt_file_type_t type)
 {
 	if(!dref->total_entries)
 	{
 		dref->total_entries = 1;
 		dref->table = (quicktime_dref_table_t *)malloc(sizeof(quicktime_dref_table_t) * dref->total_entries);
-		quicktime_dref_table_init(&(dref->table[0]));
+		quicktime_dref_table_init(&(dref->table[0]), type);
 	}
 }
 
@@ -133,7 +143,7 @@ void quicktime_read_dref(quicktime_t *file, quicktime_dref_t *dref)
 	dref->table = (quicktime_dref_table_t*)malloc(sizeof(quicktime_dref_table_t) * dref->total_entries);
 	for(i = 0; i < dref->total_entries; i++)
 	{
-		quicktime_dref_table_init(&(dref->table[i]));
+		quicktime_dref_table_init(&(dref->table[i]), file->file_type);
 		quicktime_read_dref_table(file, &(dref->table[i]));
 	}
 }

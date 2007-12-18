@@ -446,6 +446,7 @@ typedef struct
 	char compressor_name[32];
 	int depth;
 	int ctab_id;
+        int has_ctab;
 	quicktime_ctab_t ctab;
 
         quicktime_pasp_t pasp;
@@ -620,6 +621,7 @@ typedef struct
 	
 	long entries_allocated;    /* used by the library for allocating a table */
 	quicktime_stco_table_t *table;
+        int co64;
 } quicktime_stco_t;
 
 
@@ -917,6 +919,8 @@ typedef struct
 	/* player controls */
 	char ctyp[4];
 	quicktime_navg_t navg;
+	quicktime_hdlr_t hdlr;
+        int has_hdlr;
 } quicktime_udta_t;
 
 
@@ -927,6 +931,7 @@ typedef struct
 	quicktime_mvhd_t mvhd;
 	quicktime_trak_t *trak[MAXTRACKS];
 	quicktime_udta_t udta;
+        int has_ctab;
 	quicktime_ctab_t ctab;
         int has_iods;
         quicktime_iods_t iods;

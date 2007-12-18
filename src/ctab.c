@@ -49,7 +49,7 @@ int quicktime_ctab_delete(quicktime_ctab_t *ctab)
 void quicktime_ctab_dump(quicktime_ctab_t *ctab)
 {
 	int i;
-	lqt_dump(" color table\n");
+	lqt_dump(" color table (ctab)\n");
 	lqt_dump("  seed %ld\n", ctab->seed);
 	lqt_dump("  flags %ld\n", ctab->flags);
 	lqt_dump("  size %ld\n", ctab->size);

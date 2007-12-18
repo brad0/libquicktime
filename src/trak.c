@@ -25,9 +25,9 @@
 #include "lqt_private.h"
 #include <stdlib.h>
 
-int quicktime_trak_init(quicktime_trak_t *trak)
+int quicktime_trak_init(quicktime_trak_t *trak, lqt_file_type_t type)
 {
-	quicktime_tkhd_init(&(trak->tkhd));
+	quicktime_tkhd_init(&(trak->tkhd), type);
 	quicktime_edts_init(&(trak->edts));
 	quicktime_mdia_init(&(trak->mdia));
 	quicktime_tref_init(&(trak->tref));
@@ -55,8 +55,11 @@ int quicktime_trak_init_video(quicktime_t *file,
                 frame_duration,
                 timescale,
 		compressor);
-	quicktime_edts_init_table(&(trak->edts));
-        trak->has_edts = 1;
+        if(!IS_MP4(file->file_type))
+          {
+          quicktime_edts_init_table(&(trak->edts));
+          trak->has_edts = 1;
+          }
         return 0;
 }
 
@@ -104,9 +107,11 @@ int quicktime_trak_init_audio(quicktime_t *file,
                             sample_rate, 
                             bits, 
                             compressor);
-  quicktime_edts_init_table(&(trak->edts));
-  trak->has_edts = 1;
-
+  if(!IS_MP4(file->file_type))
+    {
+    quicktime_edts_init_table(&(trak->edts));
+    trak->has_edts = 1;
+    }
   return 0;
   }
 
@@ -117,8 +122,12 @@ int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
   trak->tkhd.flags = 3;
   quicktime_mdia_init_text(file, &(trak->mdia), 
                            timescale);
-  quicktime_edts_init_table(&(trak->edts));
-  trak->has_edts = 1;
+
+  if(!IS_MP4(file->file_type))
+    {
+    quicktime_edts_init_table(&(trak->edts));
+    trak->has_edts = 1;
+    }
   return 0;
   }
 
@@ -150,7 +159,7 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
 
 int quicktime_trak_dump(quicktime_trak_t *trak)
 {
-	lqt_dump(" track\n");
+	lqt_dump(" track (trak)\n");
 	quicktime_tkhd_dump(&(trak->tkhd));
 	if(trak->has_edts) quicktime_edts_dump(&(trak->edts));
 	if (trak->has_tref)
@@ -167,7 +176,7 @@ quicktime_trak_t* quicktime_add_trak(quicktime_t *file)
 	if(moov->total_tracks < MAXTRACKS)
 	{
         moov->trak[moov->total_tracks] = calloc(1, sizeof(quicktime_trak_t));
-		quicktime_trak_init(moov->trak[moov->total_tracks]);
+		quicktime_trak_init(moov->trak[moov->total_tracks], file->file_type);
 		moov->total_tracks++;
 	}
 	return moov->trak[moov->total_tracks - 1];

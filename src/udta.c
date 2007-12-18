@@ -30,7 +30,7 @@
 
 #define LOG_DOMAIN "udta"
 
-#define ILST_TYPES (LQT_FILE_M4A|LQT_FILE_MP4|LQT_FILE_3GP)
+#define ILST_TYPES (LQT_FILE_M4A)
 
 // #define DEFAULT_INFO "Made with Libquicktime"
 
@@ -53,6 +53,7 @@ int quicktime_udta_init(quicktime_udta_t *udta)
   
   udta->is_qtvr = 0;
   quicktime_navg_init(&(udta->navg));
+  quicktime_hdlr_init_udta(&(udta->hdlr));
   return 0;
   }
 
@@ -94,14 +95,15 @@ int quicktime_udta_delete(quicktime_udta_t *udta)
     {
     free(udta->album);
     }
-  // Libquicktime: No, no, this makes a memleak
-  // quicktime_udta_init(udta);
+  quicktime_hdlr_delete(&udta->hdlr);
   return 0;
   }
 
 void quicktime_udta_dump(quicktime_udta_t *udta)
   {
   lqt_dump(" user data (udta)\n");
+  if(udta->has_hdlr)
+    quicktime_hdlr_dump(&udta->hdlr);
   if(udta->copyright_len) lqt_dump("  copyright: %s\n", udta->copyright);
   if(udta->name_len)      lqt_dump("  name:      %s\n", udta->name);
   if(udta->info_len)      lqt_dump("  info:      %s\n", udta->info);
@@ -202,7 +204,9 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
       }
     else if(quicktime_atom_is(&leaf_atom, "hdlr"))
       {
-      quicktime_atom_skip(file, &leaf_atom);
+      //      quicktime_atom_skip(file, &leaf_atom);
+      quicktime_read_hdlr(file, &(udta->hdlr), &leaf_atom);
+      udta->has_hdlr = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, copyright_id))
       {
@@ -323,7 +327,6 @@ quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_cha
 void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
   {
   quicktime_atom_t atom, subatom, meta_atom, ilst_atom, data_atom;
-  quicktime_hdlr_t hdlr;
   int tmp;
   int have_ilst = !!(file->file_type & ILST_TYPES);
   lqt_charset_converter_t * cnv = (lqt_charset_converter_t*)0;
@@ -333,9 +336,7 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
     {
     quicktime_atom_write_header(file, &meta_atom, "meta");
     quicktime_write_int32(file, 0); /* Version and flags (probably 0) */
-
-    quicktime_hdlr_init_udta(&hdlr);
-    quicktime_write_hdlr(file, &hdlr);
+    quicktime_write_hdlr(file, &udta->hdlr);
     quicktime_atom_write_header(file, &ilst_atom, "ilst");
     }
         

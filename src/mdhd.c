@@ -43,7 +43,10 @@ void quicktime_mdhd_init_video(quicktime_t *file,
 								int timescale)
   {
   if(IS_MP4(file->file_type))
+    {
     mdhd->language = MP4_DEFAULT_LANGUAGE;
+    mdhd->quality = 0;
+    }
   mdhd->time_scale = timescale;
   mdhd->duration = 0;      /* set this when closing */
   }
@@ -53,7 +56,10 @@ void quicktime_mdhd_init_audio(quicktime_t *file,
                                int sample_rate)
   {
   if(IS_MP4(file->file_type))
+    {
     mdhd->language = MP4_DEFAULT_LANGUAGE;
+    mdhd->quality = 0;
+    }
   mdhd->time_scale = sample_rate;
   mdhd->duration = 0;      /* set this when closing */
   }
@@ -90,7 +96,7 @@ void quicktime_read_mdhd(quicktime_t *file, quicktime_mdhd_t *mdhd)
 
 void quicktime_mdhd_dump(quicktime_mdhd_t *mdhd)
 {
-	lqt_dump("   media header\n");
+	lqt_dump("   media header (mdhd)\n");
 	lqt_dump("    version %d\n", mdhd->version);
 	lqt_dump("    flags %ld\n", mdhd->flags);
 	lqt_dump("    creation_time %lu\n", mdhd->creation_time);

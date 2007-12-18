@@ -34,7 +34,7 @@ int quicktime_mvhd_init(quicktime_mvhd_t *mvhd)
 	mvhd->time_scale = 600;
 	mvhd->duration = 0;
 	mvhd->preferred_rate = 1.0;
-	mvhd->preferred_volume = 0.996094;
+	mvhd->preferred_volume = 1.0;
 	for(i = 0; i < 10; i++) mvhd->reserved[i] = 0;
 	quicktime_matrix_init(&(mvhd->matrix));
 	mvhd->preview_time = 0;
@@ -54,7 +54,7 @@ int quicktime_mvhd_delete(quicktime_mvhd_t *mvhd)
 
 void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 {
-	lqt_dump(" movie header\n");
+	lqt_dump(" movie header (mvhd)\n");
 	lqt_dump("  version %d\n", mvhd->version);
 	lqt_dump("  flags %ld\n", mvhd->flags);
 	lqt_dump("  creation_time %llu\n", mvhd->creation_time);

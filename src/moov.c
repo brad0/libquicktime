@@ -62,7 +62,8 @@ void quicktime_moov_dump(quicktime_moov_t *moov)
           quicktime_iods_dump(&(moov->iods));
         for(i = 0; i < moov->total_tracks; i++)
 		quicktime_trak_dump(moov->trak[i]);
-	quicktime_ctab_dump(&(moov->ctab));
+        if(moov->has_ctab)
+          quicktime_ctab_dump(&(moov->ctab));
         
 }
 
@@ -228,12 +229,13 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		else
 		if(quicktime_atom_is(&leaf_atom, "ctab"))
 		{
-			quicktime_read_ctab(file, &(moov->ctab));
-		}
+                quicktime_read_ctab(file, &(moov->ctab));
+                moov->has_ctab = 1;
+                }
 		else
 		if(quicktime_atom_is(&leaf_atom, "iods"))
 		{
-			quicktime_read_iods(file, &(moov->iods));
+                        quicktime_read_iods(file, &(moov->iods));
 			quicktime_atom_skip(file, &leaf_atom);
                         moov->has_iods = 1;
 		}
@@ -266,7 +268,8 @@ void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
     quicktime_iods_add_track(&(moov->iods), moov->trak[i]);
     }
   moov->mvhd.duration = longest_duration;
-  moov->mvhd.selection_duration = longest_duration;
+  if(!IS_MP4(file->file_type))
+    moov->mvhd.selection_duration = longest_duration;
   }
 
 void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
@@ -287,13 +290,13 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
 		quicktime_atom_write_header(file, &atom, "moov");
 	}
         quicktime_write_mvhd(file, &(moov->mvhd));
-        //        if(moov->has_iods)
-        //          quicktime_write_iods(file, moov);
-	quicktime_write_udta(file, &(moov->udta));
+        if(moov->has_iods)
+          quicktime_write_iods(file, moov);
 	for(i = 0; i < moov->total_tracks; i++)
 	{
 		quicktime_write_trak(file, moov->trak[i], moov->mvhd.time_scale);
 	}
+	quicktime_write_udta(file, &(moov->udta));
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
 
 	quicktime_atom_write_footer(file, &atom);

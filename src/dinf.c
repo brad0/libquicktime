@@ -34,9 +34,9 @@ void quicktime_dinf_delete(quicktime_dinf_t *dinf)
 	quicktime_dref_delete(&(dinf->dref));
 }
 
-void quicktime_dinf_init_all(quicktime_dinf_t *dinf)
+void quicktime_dinf_init_all(quicktime_dinf_t *dinf, lqt_file_type_t type)
 {
-	quicktime_dref_init_all(&(dinf->dref));
+	quicktime_dref_init_all(&(dinf->dref), type);
 }
 
 void quicktime_dinf_dump(quicktime_dinf_t *dinf)

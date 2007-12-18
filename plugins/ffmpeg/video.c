@@ -410,20 +410,27 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         extradata_size = trak->mdia.minf.stbl.stsd.table[0].esds.decoderConfigLen;
         }
       }
-    else if(codec->decoder->id == CODEC_ID_FFVHUFF)
+    else if((user_atom = quicktime_stsd_get_user_atom(trak, "glbl", &user_atom_len)))
+      {
+      extradata = user_atom + 8;
+      extradata_size = user_atom_len - 8;
+      }
+    
+    /* Support for legacy FFVH atom */
+    if(!extradata && (codec->decoder->id == CODEC_ID_FFVHUFF))
       {
       user_atom = quicktime_stsd_get_user_atom(trak, "FFVH", &user_atom_len);
-
+      
       if(!user_atom)
         lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-                "No FFVH atom present, decoding is likely to fail");
+                "Neither FFVH nor glbl atom present, decoding is likely to fail");
       else
         {
         extradata = user_atom + 8;
         extradata_size = user_atom_len - 8;
         }
       }
-
+    
     if(extradata)
       {
       codec->extradata = calloc(1, extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
@@ -764,6 +771,29 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
             {
             strncpy(trak->strl->strh.fccHandler, "div3", 4);
             }
+          else if((codec->encoder->id == CODEC_ID_H263) &&
+                  (file->file_type & (LQT_FILE_MP4|LQT_FILE_3GP)))
+            {
+            uint8_t d263_data[] =
+              { 'l', 'q', 't', ' ', /* Vendor? */
+                0, /* Decoder version */
+                0xa, /* Level */
+                0 /* Profile */ };
+            quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+                                          "d263", d263_data,
+                                          sizeof(d263_data));
+            strncpy(trak->mdia.minf.stbl.stsd.table[0].format,
+                    "s263", 4);
+            }
+          else if(codec->encoder->id == CODEC_ID_FFVHUFF)
+            {
+            if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
+              {
+              codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+              codec->write_global_header = 1;
+              }
+            }
+          
           /* Initialize 2-pass */
           if(codec->total_passes)
             {
@@ -796,18 +826,11 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           codec->buffer = malloc(codec->buffer_alloc);
           if(!codec->buffer)
             return -1;
-
+          
           if(codec->avctx->max_b_frames > 0)
             vtrack->has_b_frames = 1;
-	  if(codec->encoder->id == CODEC_ID_FFVHUFF)
-            {
-            quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
-                                          "FFVH", codec->avctx->extradata, codec->avctx->extradata_size );
-            }
           
           codec->initialized = 1;
-
-          
           
 	}
         //        codec->lqt_colormodel = ffmepg_2_lqt(codec->com.ffcodec_enc);
@@ -862,32 +885,43 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           }
         
         /* Check whether to write the global header */
-        
+
         if(codec->write_global_header && !codec->global_header_written)
           {
-          esds = quicktime_set_esds(trak,
-                                    codec->avctx->extradata,
-                                    codec->avctx->extradata_size);
+          if(codec->encoder->id == CODEC_ID_FFVHUFF)
+            {
+            quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+                                          "glbl",
+                                          codec->avctx->extradata, codec->avctx->extradata_size );
+            }
+          else if(codec->encoder->id == CODEC_ID_MPEG4)
+            {
+            esds = quicktime_set_esds(trak,
+                                      codec->avctx->extradata,
+                                      codec->avctx->extradata_size);
           
-          esds->version         = 0;
-          esds->flags           = 0;
+            esds->version         = 0;
+            esds->flags           = 0;
           
-          esds->esid            = 0;
-          esds->stream_priority = 0;
+            esds->esid            = 0;
+            esds->stream_priority = 0;
           
-          esds->objectTypeId    = 32; /* MPEG-4 video */
-          esds->streamType      = 0x11; /* from qt4l and CDR_Dinner_350k-994.mp4 */
-          esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
+            esds->objectTypeId    = 32; /* MPEG-4 video */
+            esds->streamType      = 0x11; /* from qt4l and CDR_Dinner_350k-994.mp4 */
+            esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
           
-          /* Maybe correct these later? */
-          esds->maxBitrate      = 200000;
-          esds->avgBitrate      = 200000;
+            /* Maybe correct these later? */
+            esds->maxBitrate      = 200000;
+            esds->avgBitrate      = 200000;
+          
+            /* Set iods profile */
+            if(codec->avctx->max_b_frames || (codec->avctx->flags & (CODEC_FLAG_QPEL|CODEC_FLAG_GMC)))
+              file->moov.iods.videoProfileId = 0xf3; // Advanced Simple Profile @ Level 3
+            else
+              file->moov.iods.videoProfileId = 0x03; // Simple Profile @ Level 3
+            }
           codec->global_header_written = 1;
-          
-          /* Set iods profile */
-          file->moov.iods.videoProfileId = 0xf3; // MPEG-4 Adv Simple@L3
           }
-
         return result;
 }
 

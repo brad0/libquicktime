@@ -46,6 +46,17 @@ static lqt_parameter_info_static_t encode_parameters_faac[] =
       .val_max =     { .val_int = 500 },
       .val_default = { .val_int = 100 },
     },
+    {
+      .name        = "object_type",
+      .real_name   = TRS("Object type"),
+      .type        = LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Low" },
+      .stringlist_options = (char*[]){ TRS("Low"),
+                                       TRS("Main"),
+                                       TRS("SSR"),
+                                       TRS("LTP"),
+                                       (char*)0 },
+    },
     { /* End of parameters */ }
   };
 
