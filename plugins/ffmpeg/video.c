@@ -416,21 +416,6 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       extradata_size = user_atom_len - 8;
       }
     
-    /* Support for legacy FFVH atom */
-    if(!extradata && (codec->decoder->id == CODEC_ID_FFVHUFF))
-      {
-      user_atom = quicktime_stsd_get_user_atom(trak, "FFVH", &user_atom_len);
-      
-      if(!user_atom)
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-                "Neither FFVH nor glbl atom present, decoding is likely to fail");
-      else
-        {
-        extradata = user_atom + 8;
-        extradata_size = user_atom_len - 8;
-        }
-      }
-    
     if(extradata)
       {
       codec->extradata = calloc(1, extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
