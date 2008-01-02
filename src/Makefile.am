@@ -7,7 +7,7 @@ AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 # Library dependencies
 # Maybe we need zlib to read compressed quicktime headers
 #
-libquicktime_la_LIBADD = @ICONV_LIBS@ @LIBINTL@
+libquicktime_la_LIBADD = @ICONV_LIBS@ @LTLIBINTL@
 
 libquicktime_la_LDFLAGS = -export-dynamic
 

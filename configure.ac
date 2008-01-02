@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 1.0.1)
+AM_INIT_AUTOMAKE(libquicktime, 1.0.2)
 
 LQT_VERSION=$VERSION
 
@@ -71,6 +71,9 @@ dnl Gettext
 dnl
 
 AM_GNU_GETTEXT([external])
+
+
+PKG_PROG_PKG_CONFIG
 
 
 dnl This is necessary for libtool assembler support
