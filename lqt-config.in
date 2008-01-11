@@ -55,6 +55,7 @@ while test $# -gt 0; do
       echo @PLUGIN_DIR@
       ;;
     --cflags|--plugin-cflags)
+      the_cflags="-I@includedir@/lqt $the_cflags"
       echo_cflags=yes
       ;;
     --libs|--plugin-libs)
