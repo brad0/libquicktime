@@ -56,7 +56,9 @@
 
 #define INT16_TO_INT32(src, dst) dst = src * 0x00010001
 
-#define INT16_TO_FLOAT(src, dst) dst = (float)src / 32767.0
+#define INT16_TO_FLOAT(src, dst) dst = (float)src / 32767.0f
+
+#define INT16_TO_DOUBLE(src, dst) dst = (double)src / 32767.0
 
 /* int32 -> */
 
@@ -75,6 +77,14 @@
 #define FLOAT_TO_INT32(src, dst) tmp = (int64_t)((src) * 2147483647.0); dst = RECLIP(tmp, -2147483648LL, 2147483647LL)
 
 #define FLOAT_TO_FLOAT(src, dst) dst = src
+
+#define FLOAT_TO_DOUBLE(src, dst) dst = src
+
+
+#define DOUBLE_TO_INT16(src, dst) tmp = (int)((src) * 32767.0); dst = RECLIP(tmp, -32768, 32767)
+
+#define DOUBLE_TO_FLOAT(src, dst) dst = src
+
 
 /* Encoding */
 
@@ -153,6 +163,22 @@ static void encode_int16_to_float(int16_t ** in, void * _out, int num_channels, 
     }
   }
 
+static void encode_int16_to_double(int16_t ** in, void * _out, int num_channels, int num_samples)
+  {
+  int i, j;
+  double * out;
+  for(i = 0; i < num_channels; i++)
+    {
+    out = ((double*)_out) + i;
+    for(j = 0; j < num_samples; j++)
+      {
+      INT16_TO_DOUBLE(in[i][j], (*out));
+      out+=num_channels;
+      }
+    }
+  }
+
+
 static void encode_float_to_int8(float ** in, void * _out, int num_channels, int num_samples)
   {
   int i, j, tmp;
@@ -229,6 +255,20 @@ static void encode_float_to_float(float ** in, void * _out, int num_channels, in
     }
   }
 
+static void encode_float_to_double(float ** in, void * _out, int num_channels, int num_samples)
+  {
+  int i, j;
+  double * out;
+  for(i = 0; i < num_channels; i++)
+    {
+    out = ((double*)_out) + i;
+    for(j = 0; j < num_samples; j++)
+      {
+      FLOAT_TO_DOUBLE(in[i][j], (*out));
+      out+=num_channels;
+      }
+    }
+  }
 
 void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in_float, void * out,
                               int num_channels, int num_samples,
@@ -265,6 +305,12 @@ void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in
         encode_int16_to_float(in_int, out, num_channels, num_samples);
       else if(in_float)
         encode_float_to_float(in_float, out, num_channels, num_samples);
+      break;
+    case LQT_SAMPLE_DOUBLE:
+      if(in_int)
+        encode_int16_to_double(in_int, out, num_channels, num_samples);
+      else if(in_float)
+        encode_float_to_double(in_float, out, num_channels, num_samples);
       break;
     case LQT_SAMPLE_UNDEFINED:
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot encode samples: Stream format undefined");
@@ -364,6 +410,24 @@ static void decode_float_to_int16(void * _in, int16_t ** out, int num_channels, 
     }
   }
 
+static void decode_double_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+  {
+  int i, j, tmp;
+  double * in;
+  for(i = 0; i < num_channels; i++)
+    {
+    if(out[i])
+      {
+      in = ((double*)_in) + i;
+      for(j = 0; j < num_samples; j++)
+        {
+        DOUBLE_TO_INT16((*in), out[i][j]);
+        in += num_channels;
+        }
+      }
+    }
+  }
+
 static void decode_int8_to_float(void * _in, float ** out, int num_channels, int num_samples)
   {
   int i, j;
@@ -454,6 +518,24 @@ static void decode_float_to_float(void * _in, float ** out, int num_channels, in
     }
   }
 
+static void decode_double_to_float(void * _in, float ** out, int num_channels, int num_samples)
+  {
+  int i, j;
+  double * in;
+  for(i = 0; i < num_channels; i++)
+    {
+    if(out[i])
+      {
+      in = ((double*)_in) + i;
+      for(j = 0; j < num_samples; j++)
+        {
+        DOUBLE_TO_FLOAT((*in), out[i][j]);
+        in += num_channels;
+        }
+      }
+    }
+  }
+
 void lqt_convert_audio_decode(quicktime_t * file,
                               void * in, int16_t ** out_int, float ** out_float,
                               int num_channels, int num_samples,
@@ -490,6 +572,12 @@ void lqt_convert_audio_decode(quicktime_t * file,
         decode_float_to_int16(in, out_int, num_channels, num_samples);
       if(out_float)
         decode_float_to_float(in, out_float, num_channels, num_samples);
+      break;
+    case LQT_SAMPLE_DOUBLE: /* Float is ALWAYS machine native */
+      if(out_int)
+        decode_double_to_int16(in, out_int, num_channels, num_samples);
+      if(out_float)
+        decode_double_to_float(in, out_float, num_channels, num_samples);
       break;
     case LQT_SAMPLE_UNDEFINED:
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");

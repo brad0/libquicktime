@@ -677,6 +677,9 @@ static int bytes_per_sample(lqt_sample_format_t format)
     case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
       return sizeof(float);
       break;
+    case LQT_SAMPLE_DOUBLE: /* Double is ALWAYS machine native */
+      return sizeof(double);
+      break;
     case LQT_SAMPLE_UNDEFINED:
       return 0;
     }

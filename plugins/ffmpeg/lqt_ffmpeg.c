@@ -386,7 +386,7 @@ struct CODECIDMAP codecidmap_v[] =
       .name = TRS("FFMPEG H263"),
       .fourccs = { "H263", "h263", "U263", "u263", "s263", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 | LQT_FILE_3GP,
       .do_encode = 1,
     },
     {

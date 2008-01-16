@@ -605,7 +605,7 @@ static void decode_fl32_le(quicktime_pcm_codec_t*codec, int num_samples, void **
 static void encode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
   int i;
-  float * input = (float*)_input;
+  double * input = (double*)_input;
 
   for(i = 0; i < num_samples; i++)
     {
@@ -619,7 +619,7 @@ static void encode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void * 
 static void decode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
   {
   int i;
-  float * output = (float*)(*_output);
+  double * output = (double*)(*_output);
   
   for(i = 0; i < num_samples; i++)
     {
@@ -635,7 +635,7 @@ static void decode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void **
 static void encode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
   int i;
-  float * input = (float*)_input;
+  double * input = (double*)_input;
 
   for(i = 0; i < num_samples; i++)
     {
@@ -649,7 +649,7 @@ static void encode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void * 
 static void decode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
   {
   int i;
-  float * output = (float*)(*_output);
+  double * output = (double*)(*_output);
   
   for(i = 0; i < num_samples; i++)
     {
@@ -1257,7 +1257,7 @@ void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
   codec_base->priv = codec;
 
   codec->block_align = 8 * atrack->channels;
-  atrack->sample_format = LQT_SAMPLE_FLOAT;
+  atrack->sample_format = LQT_SAMPLE_DOUBLE;
 
   if(quicktime_get_enda(&(atrack->track->mdia.minf.stbl.stsd.table[0])))
     codec->decode = decode_fl64_le;
@@ -1395,7 +1395,7 @@ static void init_decode_lpcm(quicktime_t * file, int track)
           {
           codec->decode = decode_fl64_be;
           }
-        atrack->sample_format = LQT_SAMPLE_FLOAT;
+        atrack->sample_format = LQT_SAMPLE_DOUBLE;
         break;
       }
     }
@@ -1554,7 +1554,7 @@ static void init_encode_lpcm(quicktime_t * file, int track)
         codec->encode = encode_fl64_le;
         }
       table->sample_size = 64;
-      atrack->sample_format = LQT_SAMPLE_FLOAT;
+      atrack->sample_format = LQT_SAMPLE_DOUBLE;
       break;
     }
   

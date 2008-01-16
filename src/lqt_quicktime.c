@@ -2260,7 +2260,8 @@ sample_formats[] =
     { LQT_SAMPLE_UINT8, "8 bit unsigned" },
     { LQT_SAMPLE_INT16, "16 bit signed" },
     { LQT_SAMPLE_INT32, "32 bit signed" },
-    { LQT_SAMPLE_FLOAT, "Floating point" } /* Float is ALWAYS machine native */
+    { LQT_SAMPLE_FLOAT, "Floating point" }, /* Float is ALWAYS machine native */
+    { LQT_SAMPLE_DOUBLE, "Double precision" } /* Double is ALWAYS machine native */
   };
 
 const char * lqt_sample_format_to_string(lqt_sample_format_t format)
