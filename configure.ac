@@ -380,9 +380,9 @@ have_libdv="false"
 
 LIBDV_REQUIRED="0.102"
 
-AC_ARG_WITH([libdv], AS_HELP_STRING([--without-libdv], [Build without libdv support (default: test)]))
+AC_ARG_WITH([libdv], AS_HELP_STRING([--without-libdv], [Build without libdv support (default: without)]))
 
-if test "x$with_libdv" != "xno"; then
+if test x$with_libdv = xyes; then
 PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true", have_libdv="false")
 fi
 
@@ -852,7 +852,7 @@ echo -n "libdv:      "
 if test x$have_libdv = "xtrue"; then
 echo "Yes"
 else
-echo "Missing (Go to http://libdv.sourceforge.net)"
+echo "Missing / Disabled (Go to http://libdv.sourceforge.net)"
 fi
 
 echo -n "vorbis:     "
