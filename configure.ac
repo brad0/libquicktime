@@ -306,7 +306,7 @@ have_gl="yes"
 AC_CHECK_HEADER([GL/gl.h],[],have_gl="no")
 
 if test "$have_gl" = "yes"; then
-AC_CHECK_LIB(GL, glBegin,[],have_gl="no")
+AC_CHECK_LIB(GL, glBegin,have_gl="yes",have_gl="no")
 fi
 
 if test "$have_gl" = "yes"; then
