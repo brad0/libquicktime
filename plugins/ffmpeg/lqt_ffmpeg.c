@@ -570,6 +570,8 @@ struct CODECIDMAP codecidmap_v[] =
       .name = TRS("FFMPEG RLE"),
       .fourccs = { "rle ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1,
     },
     {
       .id = CODEC_ID_MSRLE,
