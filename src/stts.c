@@ -242,7 +242,9 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
   long sample = 0;
   long i;
 
-  
+  if(stts->total_entries <= 1)
+    return;
+    
   while(sample < stts->total_entries)
     {
     i = 1;
