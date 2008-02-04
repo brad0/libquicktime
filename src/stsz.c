@@ -91,8 +91,10 @@ void quicktime_read_stsz(quicktime_t *file, quicktime_stsz_t *stsz)
 	stsz->sample_size = quicktime_read_int32(file);
 	stsz->total_entries = quicktime_read_int32(file);
 	stsz->entries_allocated = stsz->total_entries;
-	if(!stsz->sample_size)
+        if(!stsz->sample_size)
+          //        if(stsz->total_entries)
 	{
+        //        stsz->sample_size = 0;
 		stsz->table = (quicktime_stsz_table_t*)calloc(sizeof(quicktime_stsz_table_t), stsz->entries_allocated);
 		for(i = 0; i < stsz->total_entries; i++)
 		{

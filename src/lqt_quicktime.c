@@ -2520,10 +2520,17 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   /* Get offset */
   offset = trak->mdia.minf.stbl.stco.table[chunk-1].offset;
   for(i = 0; i < packet; i++)
-    offset += trak->mdia.minf.stbl.stsz.table[first_chunk_packet+i].size;
-
+    {
+    if(trak->mdia.minf.stbl.stsz.table)
+      offset += trak->mdia.minf.stbl.stsz.table[first_chunk_packet+i].size;
+    else
+      offset += trak->mdia.minf.stbl.stsz.sample_size;
+    }
   /* Get packet size */
-  packet_size = trak->mdia.minf.stbl.stsz.table[first_chunk_packet+packet].size;
+  if(trak->mdia.minf.stbl.stsz.table)
+    packet_size = trak->mdia.minf.stbl.stsz.table[first_chunk_packet+packet].size;
+  else
+    packet_size = trak->mdia.minf.stbl.stsz.sample_size;
   
   /* Get number of audio samples */
   if(samples)
