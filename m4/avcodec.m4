@@ -8,7 +8,12 @@ AC_MSG_CHECKING([for build ID in libavcodec, libs: $AVCODEC_LIBS])
 CFLAGS_save=$CFLAGS
 LIBS_save=$LIBS
 
+dnl remove spaces, this breaks if multiple -I options are given
 AVCODEC_CFLAGS=`echo $AVCODEC_CFLAGS | sed 's/ //'`
+
+if test "x$AVCODEC_CFLAGS" = "x"; then
+AVCODEC_CFLAGS="-I/usr/include"
+fi
 
 CFLAGS="$CFLAGS $AVCODEC_CFLAGS"
 
