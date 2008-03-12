@@ -495,6 +495,29 @@ PKG_CHECK_MODULES(LIBSWSCALE, libswscale >= $LIBSWSCALE_REQUIRED,
                   have_libswscale="true", have_libswscale="false")
 fi
 
+if test x$have_libswscale = xtrue; then
+LIBSWSCALE_CFLAGS=`echo $LIBSWSCALE_CFLAGS | sed 's/ //'`
+CFLAGS_save=$CFLAGS
+CFLAGS="$CFLAGS $LIBSWSCALE_CFLAGS"
+found_header="false"
+
+AC_TRY_COMPILE([
+#include <swscale.h>],[],[found_header="true"])
+
+if test $found_header = "false"; then
+AC_TRY_COMPILE([
+#include <swscale/swscale.h>],[], [found_header="true";LIBSWSCALE_CFLAGS="$LIBSWSCALE_CFLAGS/ffmpeg" ],)
+fi
+
+if test $found_header = "false"; then
+AC_TRY_COMPILE([
+#include <libswscale/swscale.h>],[], [found_header="true";LIBSWSCALE_CFLAGS="$LIBSWSCALE_CFLAGS/libswscale" ],)
+fi
+
+CFLAGS="$CFLAGS_save"
+       
+fi
+
 AC_SUBST(LIBSWSCALE_REQUIRED)
 AC_SUBST(LIBSWSCALE_LIBS)
 AC_SUBST(LIBSWSCALE_CFLAGS)
@@ -504,6 +527,9 @@ AM_CONDITIONAL(HAVE_LIBSWSCALE, test x$have_libswscale = xtrue)
 if test "x$have_libswscale" = "xtrue"; then
 AC_DEFINE([HAVE_LIBSWSCALE])
 fi
+
+
+
 
 dnl
 dnl Check for libpng

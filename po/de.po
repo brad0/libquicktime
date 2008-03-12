@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libquicktime 1.0.0pre1\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2008-01-02 21:46+0100\n"
+"POT-Creation-Date: 2008-02-21 20:43+0100\n"
 "PO-Revision-Date: 2007-04-15 22:08+0100\n"
 "Last-Translator: Stefan Scheffler <stefanscheffler@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -15,6 +15,168 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# CHECK single nod"
+#: libquicktime-1.0.2/src/charset.c:95 libquicktime-1.0.2/src/charset.c:108
+#: libquicktime-1.0.2/src/charset.c:132 src/charset.c:95 src/charset.c:108
+#: src/charset.c:132
+#, c-format
+msgid "Cannot open iconv for conversion to %s from %s"
+msgstr "Konnte iconv für die Umwandlung von %s nach %s nicht öffnen"
+
+#: libquicktime-1.0.2/src/charset.c:167 src/charset.c:167
+msgid "Invalid Multibyte sequence"
+msgstr "Ungültige Multibyte Sequenz"
+
+#: libquicktime-1.0.2/src/charset.c:171 src/charset.c:171
+msgid "Incomplete Multibyte sequence"
+msgstr "Unvollständige Multibyte Sequenz"
+
+#: libquicktime-1.0.2/src/audio.c:316 src/audio.c:316
+msgid "Cannot encode samples: Stream format undefined"
+msgstr "Kann Samples nicht dekodieren: Streamformat undefiniert"
+
+#: libquicktime-1.0.2/src/audio.c:583 src/audio.c:583
+msgid "Cannot decode samples: Stream format undefined"
+msgstr "Kann Samples nicht dekodieren: Stream Format undefiniert"
+
+#: libquicktime-1.0.2/src/avi_riff.c:130 src/avi_riff.c:130
+msgid "file->total_riffs >= MAX_RIFFS"
+msgstr ""
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:112 src/lqt_quicktime.c:112
+msgid "quicktime_make_streamable: no moov atom"
+msgstr "quicktime_make_streamable: kein moov Atom"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:119 src/lqt_quicktime.c:119
+msgid "quicktime_make_streamable: no mdat atom"
+msgstr "quicktime_make_streamable: kein mdat Atom"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:148 src/lqt_quicktime.c:148
+#, c-format
+msgid "quicktime_make_streamable: cannot open output file: %s"
+msgstr ""
+"quicktime_make_streamable: Ausgabe Datei, %s, konnte nicht geöffnet werden"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:169 src/lqt_quicktime.c:169
+#, c-format
+msgid ""
+"quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, "
+"start: %lld)"
+msgstr ""
+"quicktime_make_streamable: Größe des moov geändert von %lld auf %lld (Pos: %"
+"lld, start: %lld)"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:527 src/lqt_quicktime.c:527
+msgid "quicktime_set_framerate shouldn't be called in read mode."
+msgstr "quicktime_set_framerate sollte nicht im Lesemodus aufgerufen werden"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:704 src/lqt_quicktime.c:704
+msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
+msgstr ""
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:925 src/lqt_quicktime.c:925
+#, c-format
+msgid "lqt_set_cmodel: No track No. %d"
+msgstr "lqt_set_cmodel: Kein Track Nr. %d"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:1732 src/lqt_quicktime.c:1732
+msgid "read/write mode is not supported"
+msgstr "Schreib/Lese Modus nicht unterstützt"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:1760 src/lqt_quicktime.c:1760
+msgid "Opening failed (unsupported filetype)"
+msgstr "Öffnen fehlgeschlagen (Dateityp nicht unterstützt)"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:1918 src/lqt_quicktime.c:1918
+#, c-format
+msgid "Setting parameter %s to %d"
+msgstr "Setze Parameter %s zu %d"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:1925 src/lqt_quicktime.c:1925
+#, c-format
+msgid "Setting parameter %s to %f"
+msgstr "Setze Parameter %s zu %f"
+
+#: libquicktime-1.0.2/src/lqt_quicktime.c:1933 src/lqt_quicktime.c:1933
+#, c-format
+msgid "Setting parameter %s to %s"
+msgstr "Setze Parameter %s zu %s"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:38 src/lqt_codecs.c:38
+msgid "quicktime_delete_vcodec_stub called"
+msgstr "quicktime_delete_vcodec_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:45 src/lqt_codecs.c:45
+msgid "quicktime_delete_acodec_stub called"
+msgstr "quicktime_delete_acodec_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:54 src/lqt_codecs.c:54
+msgid "quicktime_decode_video_stub called"
+msgstr "quicktime_decode_video_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:63 src/lqt_codecs.c:63
+msgid "quicktime_encode_video_stub called"
+msgstr "quicktime_encode_video_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:73 src/lqt_codecs.c:73
+msgid "quicktime_decode_audio_stub called"
+msgstr "quicktime_decode_audio_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:83 src/lqt_codecs.c:83
+msgid "quicktime_encode_audio_stub called"
+msgstr "quicktime_encode_audio_stub aufgerufen"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:135 src/lqt_codecs.c:135
+#, c-format
+msgid "Could not find video %s for fourcc %4s"
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:145
+#: libquicktime-1.0.2/src/lqt_codecs.c:242 src/lqt_codecs.c:145
+#: src/lqt_codecs.c:242
+#, c-format
+msgid "Loading module %s"
+msgstr "Lade Modul %s"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:152
+#: libquicktime-1.0.2/src/lqt_codecs.c:249 src/lqt_codecs.c:152
+#: src/lqt_codecs.c:249
+#, c-format
+msgid "Loading module %s failed: %s"
+msgstr "Laden des Moduls %s fehlgeschlagen: %s"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:178 src/lqt_codecs.c:178
+#, c-format
+msgid "Module %s contains no function get_video_codec"
+msgstr "Modul %s enthält keine Funktion Namens get_video_codec"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:232 src/lqt_codecs.c:232
+#, c-format
+msgid "Could not find audio %s for fourcc %4s"
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:272 src/lqt_codecs.c:272
+#, c-format
+msgid "Module %s contains no function get_audio_codec"
+msgstr "Modul %s enthält keine Funktion Namens get_audio_codec"
+
+# CHECK Namens gross"
+#: libquicktime-1.0.2/src/lqt_codecs.c:538 src/lqt_codecs.c:538
+msgid ""
+"Audio codec and container are not known to be compatible. File might be "
+"playable by libquicktime only."
+msgstr ""
+"Audiocodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
+"nur mit Libquicktime abspielbar sein."
+
+#: libquicktime-1.0.2/src/lqt_codecs.c:544 src/lqt_codecs.c:544
+msgid ""
+"Video codec and container are not known to be compatible. File might be "
+"playable by libquicktime only."
+msgstr ""
+"Videcodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
+"nur mit Libquicktime abspielbar sein."
 
 #: src/texttrack.c:50
 msgid ""
@@ -141,35 +303,9 @@ msgstr "Überspringe unbekanntes Atom\"%4s\" innerhalb der Audio stsd"
 msgid "read_cmov: compression '%c%c%c%c' not zlib."
 msgstr "read_cmov: Kompression '%c%c%c%c' nicht zlib."
 
-# CHECK single nod"
-#: src/charset.c:95 src/charset.c:108 src/charset.c:132
-#, c-format
-msgid "Cannot open iconv for conversion to %s from %s"
-msgstr "Konnte iconv für die Umwandlung von %s nach %s nicht öffnen"
-
-#: src/charset.c:167
-msgid "Invalid Multibyte sequence"
-msgstr "Ungültige Multibyte Sequenz"
-
-#: src/charset.c:171
-msgid "Incomplete Multibyte sequence"
-msgstr "Unvollständige Multibyte Sequenz"
-
 #: src/lqt_qtvr.c:51 src/lqt_qtvr.c:117
 msgid "lqt_qtvr_add_node only single node movies supported."
 msgstr "lqt_qtvr_add_node nur Singlenode Filme werden unterstützt."
-
-#: src/audio.c:270
-msgid "Cannot encode samples: Stream format undefined"
-msgstr "Kann Samples nicht dekodieren: Streamformat undefiniert"
-
-#: src/audio.c:495
-msgid "Cannot decode samples: Stream format undefined"
-msgstr "Kann Samples nicht dekodieren: Stream Format undefiniert"
-
-#: src/avi_riff.c:130
-msgid "file->total_riffs >= MAX_RIFFS"
-msgstr ""
 
 #: src/lqt_color.c:205
 #, c-format
@@ -196,136 +332,6 @@ msgid ""
 "Unknown character set for language code %d, will copy the string verbatim"
 msgstr ""
 "Unbekannter Zeichensatz für Sprachcode %d, werde den String wörtlich kopieren"
-
-#: src/lqt_quicktime.c:112
-msgid "quicktime_make_streamable: no moov atom"
-msgstr "quicktime_make_streamable: kein moov Atom"
-
-#: src/lqt_quicktime.c:119
-msgid "quicktime_make_streamable: no mdat atom"
-msgstr "quicktime_make_streamable: kein mdat Atom"
-
-#: src/lqt_quicktime.c:148
-#, c-format
-msgid "quicktime_make_streamable: cannot open output file: %s"
-msgstr ""
-"quicktime_make_streamable: Ausgabe Datei, %s, konnte nicht geöffnet werden"
-
-#: src/lqt_quicktime.c:169
-#, c-format
-msgid ""
-"quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, "
-"start: %lld)"
-msgstr ""
-"quicktime_make_streamable: Größe des moov geändert von %lld auf %lld (Pos: %"
-"lld, start: %lld)"
-
-#: src/lqt_quicktime.c:527
-msgid "quicktime_set_framerate shouldn't be called in read mode."
-msgstr "quicktime_set_framerate sollte nicht im Lesemodus aufgerufen werden"
-
-#: src/lqt_quicktime.c:704
-msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
-msgstr ""
-
-#: src/lqt_quicktime.c:925
-#, c-format
-msgid "lqt_set_cmodel: No track No. %d"
-msgstr "lqt_set_cmodel: Kein Track Nr. %d"
-
-#: src/lqt_quicktime.c:1732
-msgid "read/write mode is not supported"
-msgstr "Schreib/Lese Modus nicht unterstützt"
-
-#: src/lqt_quicktime.c:1760
-msgid "Opening failed (unsupported filetype)"
-msgstr "Öffnen fehlgeschlagen (Dateityp nicht unterstützt)"
-
-#: src/lqt_quicktime.c:1918
-#, c-format
-msgid "Setting parameter %s to %d"
-msgstr "Setze Parameter %s zu %d"
-
-#: src/lqt_quicktime.c:1925
-#, c-format
-msgid "Setting parameter %s to %f"
-msgstr "Setze Parameter %s zu %f"
-
-#: src/lqt_quicktime.c:1933
-#, c-format
-msgid "Setting parameter %s to %s"
-msgstr "Setze Parameter %s zu %s"
-
-#: src/lqt_codecs.c:38
-msgid "quicktime_delete_vcodec_stub called"
-msgstr "quicktime_delete_vcodec_stub aufgerufen"
-
-#: src/lqt_codecs.c:45
-msgid "quicktime_delete_acodec_stub called"
-msgstr "quicktime_delete_acodec_stub aufgerufen"
-
-#: src/lqt_codecs.c:54
-msgid "quicktime_decode_video_stub called"
-msgstr "quicktime_decode_video_stub aufgerufen"
-
-#: src/lqt_codecs.c:63
-msgid "quicktime_encode_video_stub called"
-msgstr "quicktime_encode_video_stub aufgerufen"
-
-#: src/lqt_codecs.c:73
-msgid "quicktime_decode_audio_stub called"
-msgstr "quicktime_decode_audio_stub aufgerufen"
-
-#: src/lqt_codecs.c:83
-msgid "quicktime_encode_audio_stub called"
-msgstr "quicktime_encode_audio_stub aufgerufen"
-
-#: src/lqt_codecs.c:135
-#, c-format
-msgid "Could not find video %s for fourcc %4s"
-msgstr "Konnte keinen Video %s für Fourcc %4s finden"
-
-#: src/lqt_codecs.c:145 src/lqt_codecs.c:242
-#, c-format
-msgid "Loading module %s"
-msgstr "Lade Modul %s"
-
-#: src/lqt_codecs.c:152 src/lqt_codecs.c:249
-#, c-format
-msgid "Loading module %s failed: %s"
-msgstr "Laden des Moduls %s fehlgeschlagen: %s"
-
-#: src/lqt_codecs.c:178
-#, c-format
-msgid "Module %s contains no function get_video_codec"
-msgstr "Modul %s enthält keine Funktion Namens get_video_codec"
-
-#: src/lqt_codecs.c:232
-#, c-format
-msgid "Could not find audio %s for fourcc %4s"
-msgstr "Konnte keinen Video %s für Fourcc %4s finden"
-
-#: src/lqt_codecs.c:272
-#, c-format
-msgid "Module %s contains no function get_audio_codec"
-msgstr "Modul %s enthält keine Funktion Namens get_audio_codec"
-
-# CHECK Namens gross"
-#: src/lqt_codecs.c:538
-msgid ""
-"Audio codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
-"Audiocodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
-"nur mit Libquicktime abspielbar sein."
-
-#: src/lqt_codecs.c:544
-msgid ""
-"Video codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
-"Videcodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
-"nur mit Libquicktime abspielbar sein."
 
 #: src/stsd.c:74
 msgid "quicktime_stsd_init_qtvr invalid track type supplied."
@@ -3093,68 +3099,68 @@ msgstr ""
 msgid "FFMPEG RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:580
+#: plugins/ffmpeg/lqt_ffmpeg.c:582
 msgid "FFMPEG Microsoft RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:592
+#: plugins/ffmpeg/lqt_ffmpeg.c:594
 msgid "FFMPEG DV (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:606
+#: plugins/ffmpeg/lqt_ffmpeg.c:608
 msgid "FFMPEG DV (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:620
+#: plugins/ffmpeg/lqt_ffmpeg.c:622
 msgid "FFMPEG DV (AVI version)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:634
+#: plugins/ffmpeg/lqt_ffmpeg.c:636
 msgid "FFMPEG DVCPRO50 (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:648
+#: plugins/ffmpeg/lqt_ffmpeg.c:650
 msgid "FFMPEG DVCPRO50 (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:661
+#: plugins/ffmpeg/lqt_ffmpeg.c:663
 msgid "FFMPEG modified huffyuv lossless"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:680
+#: plugins/ffmpeg/lqt_ffmpeg.c:682
 msgid "FFMPEG MPEG-1/2 audio layer 1/2/3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:693
+#: plugins/ffmpeg/lqt_ffmpeg.c:695
 msgid "FFMPEG Mpeg Layer 2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:707
+#: plugins/ffmpeg/lqt_ffmpeg.c:709
 msgid "FFMPEG AC3 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:721
+#: plugins/ffmpeg/lqt_ffmpeg.c:723
 msgid "FFMPEG QDM2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:734
+#: plugins/ffmpeg/lqt_ffmpeg.c:736
 msgid "FFMPEG Apple lossless"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:747
+#: plugins/ffmpeg/lqt_ffmpeg.c:749
 msgid "FFMPEG McRowsoft ADPCM"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:760
+#: plugins/ffmpeg/lqt_ffmpeg.c:762
 msgid "FFMPEG ADPCM ima WAV"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1038
+#: plugins/ffmpeg/lqt_ffmpeg.c:1040
 #, c-format
 msgid "Video index too large: %d"
 msgstr "Videoindex zu groß: %d"
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1094
+#: plugins/ffmpeg/lqt_ffmpeg.c:1096
 #, c-format
 msgid "Audio index too large: %d"
 msgstr "Audio Index zu Hoch: %d"
