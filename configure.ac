@@ -497,6 +497,11 @@ fi
 
 if test x$have_libswscale = xtrue; then
 LIBSWSCALE_CFLAGS=`echo $LIBSWSCALE_CFLAGS | sed 's/ //'`
+
+if test "x$LIBSWSCALE_CFLAGS" = "x"; then
+LIBSWSCALE_CFLAGS="-I/usr/include"
+fi
+
 CFLAGS_save=$CFLAGS
 CFLAGS="$CFLAGS $LIBSWSCALE_CFLAGS"
 found_header="false"
