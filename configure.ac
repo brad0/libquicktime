@@ -543,41 +543,27 @@ dnl
 AH_TEMPLATE([HAVE_LIBPNG], [Enable png codec])
 
 have_libpng=false
-PNG_REQUIRED="1.0.8"
+PNG_REQUIRED="1.2.23"
 
-AC_ARG_WITH([libpng], AS_HELP_STRING([--without-libpng], [Build without png library (default: test)]))
+AC_ARG_WITH(libpng,
+            AC_HELP_STRING([--without-libpng], [Do not use libpng.]),
+            [], [with_libpng=yes])
 
-if test "x$with_libpng" != "xno"; then
-
-OLD_CFLAGS=$CFLAGS
-OLD_LIBS=$LIBS
-
-LIBS="$LIBS -lpng -lm -lz"
-CFLAGS="$CFLAGS"
-
-AC_MSG_CHECKING(for libpng)
-AC_TRY_LINK([#include <png.h>],
-            [png_structp png_ptr;
-             png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-	                                       (png_voidp)0,
-						NULL, NULL);],
-	    [have_libpng=true])
-
-case $have_libpng in
-  true) AC_DEFINE(HAVE_LIBPNG)
-        AC_MSG_RESULT(yes)
-	PNG_LIBS=$LIBS ;
-	PNG_CFLAGS=$CFLAGS ;;
-  false) AC_MSG_RESULT(no); PNG_LIBS=""; PNG_CFLAGS="";;
-esac
-  
-CFLAGS=$OLD_CFLAGS
-LIBS=$OLD_LIBS
-
+dnl *********************************************************************
+dnl Check for PNG library
+dnl   (creates LIBPNG_CFLAGS, LIBPNG_LIBS)
+dnl *********************************************************************
+have_libpng=false
+if test x$with_libpng != xno ; then
+  PKG_CHECK_MODULES(LIBPNG, [libpng], [have_libpng=true], [have_libpng=false])
+  if test x$have_libpng = xfalse ; then
+    PKG_CHECK_MODULES(LIBPNG, [libpng12], [have_libpng=true], [have_libpng=false])
+  fi
 fi
+AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
-AC_SUBST(PNG_CFLAGS)
-AC_SUBST(PNG_LIBS)
+AC_SUBST(LIBPNG_CFLAGS)
+AC_SUBST(LIBPNG_LIBS)
 AC_SUBST(PNG_REQUIRED)
 
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
