@@ -317,7 +317,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
   uint8_t * extradata = (uint8_t *)0;
   int extradata_size = 0;
   quicktime_stsd_t * stsd;
-  unsigned long samplerate;
+  unsigned long samplerate = 0;
   unsigned char channels;
 
   faacDecConfigurationPtr cfg;

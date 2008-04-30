@@ -435,7 +435,7 @@ static int transcode_iteration(transcode_handle * h)
     //    lqt_decode_audio(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame);
     lqt_decode_audio_track(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame, 0);
     num_samples = lqt_last_audio_position(h->in_file, 0) - h->audio_samples_written;
-    
+    fprintf(stderr, "Num samples: %d\n",num_samples);
     quicktime_encode_audio(h->out_file, h->audio_buffer_i, h->audio_buffer_f, num_samples);
     h->audio_samples_written += num_samples;
 
@@ -585,7 +585,13 @@ int main(int argc, char ** argv)
       }
     i++;
     }
-  putchar('\n');
+  printf(_("%6.2f%% Completed\n"), 100.0);
+  
+  if(handle.audio_samples_written)
+    printf("Transcoded %"PRId64" audio samples\n", handle.audio_samples_written);
+
+  if(handle.video_frames_written)
+    printf("Transcoded %"PRId64" video frames\n", handle.video_frames_written);
   
   transcode_cleanup(&handle);
   return 0;

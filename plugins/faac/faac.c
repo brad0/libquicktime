@@ -45,6 +45,8 @@ typedef struct
 
   int chunk_started;
   quicktime_atom_t chunk_atom;
+
+  int encoder_delay;
   
   /* Configuration stuff */
   int bitrate;
@@ -66,7 +68,7 @@ static int delete_codec(quicktime_audio_map_t *track_map)
   }
 
 static int encode_frame(quicktime_t *file, 
-                        int track)
+                        int track, int num_samples)
   {
   int imax, i;
   int bytes_encoded;
@@ -77,16 +79,25 @@ static int encode_frame(quicktime_t *file,
   /* Normalize input to 16 bit int */
 
   imax = codec->sample_buffer_size * track_map->channels;
-
+  
+  if(!num_samples && (codec->encoder_delay < 0))
+    return 0;
+  
   for(i = 0; i < imax; i++)
     {
     codec->sample_buffer[i] *= 32767.0;
     }
+
+  fprintf(stderr, "%d\n", num_samples);
+  
+  codec->encoder_delay += num_samples;
   
   /* Encode this frame */
   bytes_encoded = faacEncEncode(codec->enc,
                                 (int32_t*)codec->sample_buffer,
-                                codec->sample_buffer_size * track_map->channels,
+                                codec->sample_buffer_size ?
+                                codec->samples_per_frame *
+                                track_map->channels : 0,
                                 codec->chunk_buffer,
                                 codec->chunk_buffer_size);
 
@@ -96,8 +107,9 @@ static int encode_frame(quicktime_t *file,
     {
     return 0;
     }
-  
 
+  codec->encoder_delay -= codec->samples_per_frame;
+  
   /* Write these data */
 
   if(!codec->chunk_started)
@@ -110,8 +122,15 @@ static int encode_frame(quicktime_t *file,
   lqt_start_audio_vbr_frame(file, track);
   result = !quicktime_write_data(file, codec->chunk_buffer,
                                  bytes_encoded);
-  
-  lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame);
+  if(codec->encoder_delay < 0)
+    {
+    fprintf(stderr, "Delay: %d, bytes: %d\n",
+            codec->encoder_delay, bytes_encoded);
+    lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame +
+                               codec->encoder_delay);
+    }
+  else
+    lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame);
   
   return 1;
   }
@@ -202,8 +221,7 @@ static int encode(quicktime_t *file,
                                 0, /* constBytesPerAudioPacket */
                                 codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
 
-    /* Will be switched back to 16 for mp4 by quicktime_write_stsd_audio */
-    trak->mdia.minf.stbl.stsd.table[0].sample_size = 0; 
+    trak->mdia.minf.stbl.stsd.table[0].sample_size = 16;
     
     esds->version         = 0;
     esds->flags           = 0;
@@ -259,7 +277,7 @@ static int encode(quicktime_t *file,
     
     /* Encode one frame, possibly starting a new audio chunk */
     if(codec->sample_buffer_size == codec->samples_per_frame)
-      encode_frame(file, track);
+      encode_frame(file, track, codec->samples_per_frame);
     
     }
 
@@ -321,10 +339,10 @@ static int flush(quicktime_t *file, int track)
       {
       codec->sample_buffer[i] = 0.0;
       }
-    codec->sample_buffer_size = codec->samples_per_frame;
+    //    codec->sample_buffer_size = codec->samples_per_frame;
     }
 
-  while(encode_frame(file, track))
+  while(encode_frame(file, track, codec->sample_buffer_size))
     ;
   
   /* Finalize audio chunk */
