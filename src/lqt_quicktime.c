@@ -166,7 +166,7 @@ int quicktime_make_streamable(char *in_path, char *out_path)
                            quicktime_position(&new_file) - moov_start)
                           {
                           lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
-                                  "quicktime_make_streamable: moov size changed from %lld to %lld (Pos: %lld, start: %lld)",
+                                  "quicktime_make_streamable: moov size changed from %"PRId64" to %"PRId64" (Pos: %"PRId64", start: %"PRId64")",
                                   moov_length, quicktime_position(&new_file) - moov_start,
                                   quicktime_position(&new_file), moov_start);
                           quicktime_set_position(&new_file, moov_start + moov_length);
@@ -1634,8 +1634,8 @@ int quicktime_dump(quicktime_t *file)
           quicktime_ftyp_dump(&(file->ftyp));
 	
         lqt_dump("movie data (mdat)\n");
-	lqt_dump(" size %lld\n", file->mdat.atom.size);
-	lqt_dump(" start %lld\n", file->mdat.atom.start);
+	lqt_dump(" size %"PRId64"\n", file->mdat.atom.size);
+	lqt_dump(" start %"PRId64"\n", file->mdat.atom.start);
 	quicktime_moov_dump(&(file->moov));
 	if (lqt_qtvr_get_object_track(file) >= 0)
 	{

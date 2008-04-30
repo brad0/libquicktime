@@ -211,7 +211,7 @@ void quicktime_indx_dump(quicktime_indx_t *indx)
 
   for(i = 0; i < indx->table_size; i++)
     {
-    lqt_dump("   index_offset: %lld\n", indx->table[i].index_offset);
+    lqt_dump("   index_offset: %"PRId64"\n", indx->table[i].index_offset);
     lqt_dump("   index_size:   %d\n", indx->table[i].index_size);
     lqt_dump("   duration:     %d\n", indx->table[i].duration);
     quicktime_ix_dump(indx->table[i].ix);

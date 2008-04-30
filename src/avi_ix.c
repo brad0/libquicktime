@@ -166,7 +166,7 @@ void quicktime_ix_dump(quicktime_ix_t *ix)
   lqt_dump("   table_size:      %d\n", ix->table_size);
   lqt_dump("   longs_per_entry: %d\n", ix->longs_per_entry);
   lqt_dump("   index_type:      %d\n", ix->index_type);
-  lqt_dump("   base_offset:     %lld\n", ix->base_offset);
+  lqt_dump("   base_offset:     %"PRId64"\n", ix->base_offset);
   lqt_dump("   tag:             %s\n", ix->tag);
   lqt_dump("   chunk_id:        %s\n", ix->chunk_id);
   for(i = 0; i < ix->table_size; i++)

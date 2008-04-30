@@ -57,10 +57,10 @@ void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 	lqt_dump(" movie header (mvhd)\n");
 	lqt_dump("  version %d\n", mvhd->version);
 	lqt_dump("  flags %ld\n", mvhd->flags);
-	lqt_dump("  creation_time %llu\n", mvhd->creation_time);
-	lqt_dump("  modification_time %llu\n", mvhd->modification_time);
+	lqt_dump("  creation_time %"PRIu64"\n", mvhd->creation_time);
+	lqt_dump("  modification_time %"PRIu64"\n", mvhd->modification_time);
 	lqt_dump("  time_scale %ld\n", mvhd->time_scale);
-	lqt_dump("  duration %lld\n", mvhd->duration);
+	lqt_dump("  duration %"PRId64"\n", mvhd->duration);
 	lqt_dump("  preferred_rate %f\n", mvhd->preferred_rate);
 	lqt_dump("  preferred_volume %f\n", mvhd->preferred_volume);
 	quicktime_print_chars("  reserved ", mvhd->reserved, 10);

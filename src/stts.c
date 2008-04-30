@@ -274,3 +274,4 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
     sample++;
     }
   }
+

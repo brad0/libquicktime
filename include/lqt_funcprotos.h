@@ -338,7 +338,7 @@ void quicktime_read_ctts(quicktime_t *file, quicktime_ctts_t *ctts);
 void quicktime_write_ctts(quicktime_t *file, quicktime_ctts_t *ctts);
 void quicktime_update_ctts(quicktime_ctts_t *ctts, long sample, long duration);
 void quicktime_compress_ctts(quicktime_ctts_t *ctts);
-
+void quicktime_fix_ctts(quicktime_ctts_t *ctts);
 
 /* dinf.c */
 

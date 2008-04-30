@@ -612,29 +612,36 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 }
 
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
-{
-	long samples = quicktime_track_samples(file, trak);
-        if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
-          {
-          quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
-          if(trak->mdia.minf.stbl.stts.total_entries == 1)
-            trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
-          }
-        else if(trak->mdia.minf.is_audio_vbr)
-          {
-          quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
-          }
-        else
-          trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
-        
-        if(!trak->mdia.minf.stbl.stsz.total_entries)
-	{
-        // trak->mdia.minf.stbl.stsz.sample_size = 1;
-		trak->mdia.minf.stbl.stsz.total_entries = samples;
-	}
+  {
+  long samples = quicktime_track_samples(file, trak);
+  if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
+    {
+    quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+    if(trak->mdia.minf.stbl.stts.total_entries == 1)
+      trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
+    }
+  else if(trak->mdia.minf.is_audio_vbr)
+    {
+    quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+    }
+  else
+    trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
 
-	return 0;
-}
+  if(trak->mdia.minf.is_video &&
+     IS_MP4(file->file_type) &&
+     trak->mdia.minf.stbl.has_ctts)
+    {
+    quicktime_fix_ctts(&trak->mdia.minf.stbl.ctts);
+    }
+  
+  if(!trak->mdia.minf.stbl.stsz.total_entries)
+    {
+    // trak->mdia.minf.stbl.stsz.sample_size = 1;
+    trak->mdia.minf.stbl.stsz.total_entries = samples;
+    }
+  
+  return 0;
+  }
 
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
 {

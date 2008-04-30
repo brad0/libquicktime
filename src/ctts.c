@@ -134,3 +134,21 @@ void quicktime_compress_ctts(quicktime_ctts_t *ctts)
     }
   
   }
+
+void quicktime_fix_ctts(quicktime_ctts_t *ctts)
+  {
+  int min_ctts = 0, i;
+  for(i = 0; i < ctts->total_entries; i++)
+    {
+    if((int)(ctts->table[i].sample_duration) < min_ctts)
+      min_ctts = (int)(ctts->table[i].sample_duration);
+    }
+  if(!min_ctts)
+    return;
+  min_ctts = -min_ctts;
+  for(i = 0; i < ctts->total_entries; i++)
+    {
+    ctts->table[i].sample_duration = (int)(ctts->table[i].sample_duration) +
+      min_ctts;
+    }
+  }
