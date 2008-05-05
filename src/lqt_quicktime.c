@@ -1934,7 +1934,7 @@ static void apply_default_parameters(quicktime_t * file,
                 parameter_info[j].name,
                 parameter_info[j].val_default.val_string);
         codec->set_parameter(file, track, parameter_info[j].name,
-                             &(parameter_info[j].val_default.val_string));
+                             parameter_info[j].val_default.val_string);
         break;
       case LQT_PARAMETER_SECTION:
         break; /* NOP */

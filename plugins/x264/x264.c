@@ -30,8 +30,8 @@
 
 #define LOG_DOMAIN "x264"
 
-// #define DUMP_CONFIG
-#ifdef DUMP_CONFIG
+#define DUMP_CONFIG
+//#ifdef DUMP_CONFIG
 
 
 static void dump_params(x264_param_t * params)
@@ -109,11 +109,11 @@ static void dump_params(x264_param_t * params)
   lqt_dump("    b_psnr:             %d\n", params->analyse.b_psnr);
 
   lqt_dump("  Rate control:\n");
+  lqt_dump("    i_rc_method:        %d\n", params->rc.i_rc_method);
   lqt_dump("    i_qp_constant:      %d\n", params->rc.i_qp_constant);
   lqt_dump("    i_qp_min:           %d\n", params->rc.i_qp_min);
   lqt_dump("    i_qp_max:           %d\n", params->rc.i_qp_max);
   lqt_dump("    i_qp_step:          %d\n", params->rc.i_qp_step);
-  lqt_dump("    b_cbr:              %d\n", params->rc.b_cbr);
   lqt_dump("    i_bitrate:          %d\n", params->rc.i_bitrate);
 #if X264_BUILD < 54
   lqt_dump("    i_rf_constant:      %d\n", params->rc.i_rf_constant);
@@ -633,6 +633,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         codec->params.rc.b_stat_read = 1;
         }
       }
+
+#ifdef DUMP_CONFIG    
+    dump_params(&codec->params);
+#endif
     
     /* Open encoder */
 
@@ -654,9 +658,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
     file->moov.iods.videoProfileId = 0x15;
     
-#ifdef DUMP_CONFIG    
-    dump_params(&codec->params);
-#endif
     codec->initialized = 1;
     
     }
@@ -713,6 +714,7 @@ static int flush(quicktime_t *file, int track)
 #define ENUMPARAM(name, var, arr) \
   if(!strcasecmp(key, name)) \
     { \
+    fprintf(stderr, "Enum param: %s %s\n", name, (char*)value);\
     for(i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) \
       {                                             \
       if(!strcasecmp((char*)value, arr[i].s))       \
@@ -768,7 +770,10 @@ static int set_parameter(quicktime_t *file,
   {
   int found = 0, i;
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
-
+  if(!strcmp(key, "x264_i_rc_method"))
+    {
+    fprintf(stderr, "Bla\n");
+    }
   INTPARAM("x264_i_keyint_max", codec->params.i_keyint_max);
   INTPARAM("x264_i_keyint_min", codec->params.i_keyint_min);
   INTPARAM("x264_i_scenecut_threshold", codec->params.i_scenecut_threshold);

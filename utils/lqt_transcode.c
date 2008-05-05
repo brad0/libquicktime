@@ -435,7 +435,7 @@ static int transcode_iteration(transcode_handle * h)
     //    lqt_decode_audio(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame);
     lqt_decode_audio_track(h->in_file, h->audio_buffer_i, h->audio_buffer_f, h->samples_per_frame, 0);
     num_samples = lqt_last_audio_position(h->in_file, 0) - h->audio_samples_written;
-    fprintf(stderr, "Num samples: %d\n",num_samples);
+    //    fprintf(stderr, "Num samples: %d\n",num_samples);
     quicktime_encode_audio(h->out_file, h->audio_buffer_i, h->audio_buffer_f, num_samples);
     h->audio_samples_written += num_samples;
 

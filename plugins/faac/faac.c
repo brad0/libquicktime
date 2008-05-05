@@ -87,8 +87,6 @@ static int encode_frame(quicktime_t *file,
     {
     codec->sample_buffer[i] *= 32767.0;
     }
-
-  fprintf(stderr, "%d\n", num_samples);
   
   codec->encoder_delay += num_samples;
   
