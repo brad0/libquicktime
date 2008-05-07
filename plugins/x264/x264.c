@@ -30,8 +30,8 @@
 
 #define LOG_DOMAIN "x264"
 
-#define DUMP_CONFIG
-//#ifdef DUMP_CONFIG
+// #define DUMP_CONFIG
+#ifdef DUMP_CONFIG
 
 
 static void dump_params(x264_param_t * params)
