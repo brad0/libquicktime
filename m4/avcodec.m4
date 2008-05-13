@@ -21,16 +21,16 @@ dnl Look for header
 found_header="false"
 
 AC_TRY_COMPILE([
-#include <avcodec.h>],[],[found_header="true"])
+#include <libavcodec/avcodec.h>],[], [found_header="true";AVCODEC_CFLAGS="$AVCODEC_CFLAGS/libavcodec" ],)
 
 if test $found_header = "false"; then
 AC_TRY_COMPILE([
-#include <ffmpeg/avcodec.h>],[], [found_header="true";AVCODEC_CFLAGS=${AVCODEC_CFLAGS}"/ffmpeg" ],)
+#include <avcodec.h>],[],[found_header="true"])
 fi
 
 if test $found_header = "false"; then
 AC_TRY_COMPILE([
-#include <libavcodec/avcodec.h>],[], [found_header="true";AVCODEC_CFLAGS="$AVCODEC_CFLAGS/libavcodec" ],)
+#include <ffmpeg/avcodec.h>],[], [found_header="true";AVCODEC_CFLAGS=${AVCODEC_CFLAGS}"/ffmpeg" ],)
 fi
 
 CFLAGS="$CFLAGS $AVCODEC_CFLAGS"

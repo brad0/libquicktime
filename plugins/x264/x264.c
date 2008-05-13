@@ -489,7 +489,7 @@ x264_do_log( void * priv, int i_level, const char *psz, va_list argp)
 #ifndef HAVE_VASPRINTF
   int len;
 #endif
-  
+  file = (quicktime_t *)priv;
   for(i = 0; i < sizeof(log_levels) / sizeof(log_levels[0]); i++)
     {
     if(log_levels[i].x264_level == i_level)
@@ -504,8 +504,6 @@ x264_do_log( void * priv, int i_level, const char *psz, va_list argp)
             LOG_DOMAIN, "Invalid log level from x264");
     return;
     }
-  file = (quicktime_t *)priv;
-  
 #ifndef HAVE_VASPRINTF
   len = vsnprintf((char*)0, 0, psz, argp);
   msg_string = malloc(len+1);
@@ -714,7 +712,6 @@ static int flush(quicktime_t *file, int track)
 #define ENUMPARAM(name, var, arr) \
   if(!strcasecmp(key, name)) \
     { \
-    fprintf(stderr, "Enum param: %s %s\n", name, (char*)value);\
     for(i = 0; i < sizeof(arr)/sizeof(arr[0]); i++) \
       {                                             \
       if(!strcasecmp((char*)value, arr[i].s))       \
