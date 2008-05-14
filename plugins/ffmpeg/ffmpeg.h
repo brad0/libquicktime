@@ -26,7 +26,7 @@
 #define QUICKTIME_FFMPEG_H
 
 #include <quicktime/qtprivate.h>
-#include <avcodec.h>
+#include AVCODEC_HEADER
 
 void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);

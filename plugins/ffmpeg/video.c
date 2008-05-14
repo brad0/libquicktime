@@ -32,7 +32,7 @@
 #define LOG_DOMAIN "ffmpeg_video"
 
 #ifdef HAVE_LIBSWSCALE
-#include <swscale.h>
+#include SWSCALE_HEADER
 #endif
 
 // Enable interlaced encoding (experimental)

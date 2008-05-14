@@ -69,7 +69,7 @@ AC_CACHE_SAVE
 dnl
 dnl Gettext
 dnl
-
+AM_GNU_GETTEXT_VERSION(0.14.1)
 AM_GNU_GETTEXT([external])
 
 
@@ -380,7 +380,7 @@ have_libdv="false"
 
 LIBDV_REQUIRED="0.102"
 
-AC_ARG_WITH([libdv], AS_HELP_STRING([--without-libdv], [Build without libdv support (default: without)]))
+AC_ARG_WITH([libdv], AS_HELP_STRING([--with-libdv], [Build without libdv support (default: without)]))
 
 if test x$with_libdv = xyes; then
 PKG_CHECK_MODULES(LIBDV, libdv >= $LIBDV_REQUIRED, have_libdv="true", have_libdv="false")
@@ -461,6 +461,7 @@ if test "x$with_ffmpeg" != "xno"; then
 dnl PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
 ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
 
+
 fi
 
 AVCODEC_REQUIRED=$AVCODEC_VERSION
@@ -477,6 +478,7 @@ dnl
 
 AH_TEMPLATE([HAVE_LIBSWSCALE],
             [Do we have libswscale installed?])
+AH_TEMPLATE([SWSCALE_HEADER], [libswscale header])
 
 have_libswscale=false
 
@@ -495,33 +497,24 @@ PKG_CHECK_MODULES(LIBSWSCALE, libswscale >= $LIBSWSCALE_REQUIRED,
                   have_libswscale="true", have_libswscale="false")
 fi
 
-if test x$have_libswscale = xtrue; then
-LIBSWSCALE_CFLAGS=`echo $LIBSWSCALE_CFLAGS | sed 's/ //'`
-
-if test "x$LIBSWSCALE_CFLAGS" = "x"; then
-LIBSWSCALE_CFLAGS="-I/usr/include"
-fi
-
 CFLAGS_save=$CFLAGS
 CFLAGS="$CFLAGS $LIBSWSCALE_CFLAGS"
 found_header="false"
 
 AC_TRY_COMPILE([
-#include <swscale.h>],[],[found_header="true"])
+#include <swscale.h>],[],[found_header="true";SWSCALE_HEADER="<swscale.h>"])
 
 if test $found_header = "false"; then
 AC_TRY_COMPILE([
-#include <swscale/swscale.h>],[], [found_header="true";LIBSWSCALE_CFLAGS="$LIBSWSCALE_CFLAGS/ffmpeg" ],)
+#include <swscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<swscale/swscale.h>" ],)
 fi
 
 if test $found_header = "false"; then
 AC_TRY_COMPILE([
-#include <libswscale/swscale.h>],[], [found_header="true";LIBSWSCALE_CFLAGS="$LIBSWSCALE_CFLAGS/libswscale" ],)
+#include <libswscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<libswscale/swscale.h>" ],)
 fi
 
 CFLAGS="$CFLAGS_save"
-       
-fi
 
 AC_SUBST(LIBSWSCALE_REQUIRED)
 AC_SUBST(LIBSWSCALE_LIBS)
@@ -531,6 +524,7 @@ AM_CONDITIONAL(HAVE_LIBSWSCALE, test x$have_libswscale = xtrue)
 
 if test "x$have_libswscale" = "xtrue"; then
 AC_DEFINE([HAVE_LIBSWSCALE])
+AC_DEFINE_UNQUOTED(SWSCALE_HEADER, $SWSCALE_HEADER)
 fi
 
 

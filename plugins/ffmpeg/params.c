@@ -24,7 +24,7 @@
 
 #include "lqt_private.h"
 #include "params.h"
-#include <avcodec.h>
+#include AVCODEC_HEADER
 #include <string.h>
 
 typedef struct
