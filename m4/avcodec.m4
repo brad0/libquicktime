@@ -19,7 +19,7 @@ AC_TRY_COMPILE([
 
 if test $found_header = "false"; then
 AC_TRY_COMPILE([
-#include <avcodec.h>],[],[found_header="true";AVCODEC_HEADER="<libavcodec/avcodec.h>"])
+#include <avcodec.h>],[],[found_header="true";AVCODEC_HEADER="<avcodec.h>"])
 fi
 
 if test $found_header = "false"; then
