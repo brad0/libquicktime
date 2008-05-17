@@ -22,7 +22,7 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
-#include <lqt.h>
+#include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 #include <stdio.h>
 #include <locale.h>

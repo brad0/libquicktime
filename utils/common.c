@@ -28,8 +28,8 @@
 #include <config.h> // ONLY for the PACKAGE macro. Usually, applications never need
                     // to include config.h
 
-#include <lqt.h>
-#include <colormodels.h>
+#include <quicktime/lqt.h>
+#include <quicktime/colormodels.h>
 
 #include "common.h"
 

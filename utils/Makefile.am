@@ -67,5 +67,5 @@ INCLUDES = -I$(top_srcdir)/include \
 	    -I$(top_builddir)/include/quicktime \
 	    @X_CFLAGS@ @ALSA_CFLAGS@
 
-EXTRA_DIST=lqtplay.1 cpuinfo.c
+EXTRA_DIST=lqtplay.1 cpuinfo.c recover.c
 noinst_HEADERS = common.h

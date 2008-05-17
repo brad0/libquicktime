@@ -14,8 +14,7 @@ qt4l_reading.html \
 qt4l_util.html \
 qt4l_writing.html \
 translatorsguide.txt \
-Doxyfile \
-apiref
+Doxyfile.in
 
 apiref:
 	doxygen Doxyfile
@@ -24,8 +23,15 @@ html: apiref
 
 all: html
 
-install-data-local: html
+CLEANFILES = libquicktime.tags
+
+install-data-local:
 	test -z "$(DESTDIR)$(docdir)/apiref" || $(mkdir_p) "$(DESTDIR)$(docdir)/apiref"
 	$(INSTALL_DATA) apiref/* $(DESTDIR)$(docdir)/apiref
 
 
+clean-local:
+	-rm -rf apiref
+
+uninstall-local:
+	-rm -rf "$(DESTDIR)$(docdir)/apiref"

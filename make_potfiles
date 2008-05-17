@@ -1,2 +1,2 @@
 #!/bin/sh
-find . -name "*.[ch]" | sed s,^\.\/,, > po/POTFILES.in
+find . -name "*.[ch]" | sed s,^\.\/,, | grep -v ^config\\.h | grep -v lqt_version\\.h > po/POTFILES.in

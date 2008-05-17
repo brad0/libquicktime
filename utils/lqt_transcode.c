@@ -37,7 +37,7 @@
 #include <libintl.h>
 #include <locale.h>
 
-#include <lqt.h>
+#include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
 #include <stdio.h>

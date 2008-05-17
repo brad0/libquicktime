@@ -423,7 +423,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = mainpage.incl ../include/quicktime/quicktime.h ../include/quicktime/colormodels.h ../include/quicktime/lqt.h ../include/quicktime/lqt_codecinfo.h ../include/quicktime/lqt_atoms.h
+INPUT                  = @TOP_SRCDIR@/doc/mainpage.incl @TOP_SRCDIR@/include/quicktime/quicktime.h @TOP_SRCDIR@/include/quicktime/colormodels.h @TOP_SRCDIR@/include/quicktime/lqt.h @TOP_SRCDIR@/include/quicktime/lqt_codecinfo.h @TOP_SRCDIR@/include/quicktime/lqt_atoms.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

@@ -67,6 +67,29 @@ AC_SYS_LARGEFILE
 AC_CACHE_SAVE
 
 dnl
+dnl Doxygen
+dnl
+
+test_doxygen="true"
+have_doxygen="false"
+
+AC_ARG_WITH(doxygen,
+    AC_HELP_STRING([--without-doxygen],
+    [disable documentation generation]),
+    test_doxygen="false")
+
+if test "x$test_doxygen" = "xtrue"; then
+  AC_CHECK_PROG(DOXYGEN, doxygen, "doxygen")
+  if test -z "$DOXYGEN"; then
+    AC_MSG_ERROR([Doxygen not found, use --without-doxygen to disable documentation generation])
+  else
+    have_doxygen="true"
+  fi
+fi
+
+AM_CONDITIONAL(HAVE_DOXYGEN, test "x$have_doxygen" = "xtrue")
+
+dnl
 dnl Gettext
 dnl
 AM_GNU_GETTEXT_VERSION(0.14.1)
@@ -827,6 +850,12 @@ LQT_LIBS="-lquicktime $LIBS"
 AC_SUBST(LQT_CFLAGS)
 AC_SUBST(LQT_LIBS)
 
+dnl Absolute src path for doxygen
+
+TOP_SRCDIR=`cd ${srcdir} && pwd` 
+AC_SUBST(TOP_SRCDIR)
+
+
 dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile 
@@ -834,6 +863,7 @@ po/Makefile.in \
 libquicktime.spec \
 libquicktime.pc \
 doc/Makefile \
+doc/Doxyfile \
 debian/Makefile \
 src/Makefile \
 include/Makefile \

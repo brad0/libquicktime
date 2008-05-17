@@ -26,7 +26,7 @@
 #include <x264.h>
 #include <stdlib.h>
 #include <string.h>
-#include "colormodels.h"
+#include <quicktime/colormodels.h>
 
 #define LOG_DOMAIN "x264"
 

@@ -2,6 +2,8 @@ localedir = $(datadir)/locale
 AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 pkglib_LTLIBRARIES = lqt_videocodec.la
 
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+
 lqt_videocodec_la_SOURCES = \
 raw.c \
 v210.c \
@@ -17,6 +19,5 @@ lqt_videocodec.c
 lqt_videocodec_la_LDFLAGS = -avoid-version -module
 lqt_videocodec_la_LIBADD = @MODULE_LIBADD@
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime
 
 noinst_HEADERS = videocodec.h

@@ -1,5 +1,5 @@
 localedir = $(datadir)/locale
-
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
 if HAVE_LIBSWSCALE
 libswscale_cflags = @LIBSWSCALE_CFLAGS@
 libswscale_libs   = @LIBSWSCALE_LIBS@
@@ -19,4 +19,3 @@ lqt_ffmpeg_la_LIBADD = @MODULE_LIBADD@ @AVCODEC_LIBS@ $(libswscale_libs)
 
 noinst_HEADERS = ffmpeg.h params.h
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime

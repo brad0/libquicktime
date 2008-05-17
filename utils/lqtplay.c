@@ -30,7 +30,7 @@
 
 */
 
-#include <lqt.h>
+#include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
 #include <config.h> // ONLY for the PACKAGE macro. Usually, applications never need

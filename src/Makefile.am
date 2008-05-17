@@ -121,4 +121,4 @@ lqt_codecinfo.c \
 lqt_divx.c \
 lqt_qtvr.c
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/quicktime
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
