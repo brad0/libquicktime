@@ -7,9 +7,11 @@
  *
  * NOTE: Only for the X86 cpu family.
 */
-
+#include <stdio.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 #ifdef __MINGW32__
 #include <sys/timeb.h>
@@ -30,7 +32,6 @@ typedef long long int64_t;
 #include <inttypes.h>
 #endif
 
-#include <stdio.h>
 
 typedef struct cpuid_regs {
 	unsigned int eax;
@@ -43,11 +44,13 @@ static cpuid_regs_t
 cpuid(int func) {
 	cpuid_regs_t regs;
 #define	CPUID	".byte 0x0f, 0xa2; "
-	asm("movl %4,%%eax; " CPUID
-	    "movl %%eax,%0; movl %%ebx,%1; movl %%ecx,%2; movl %%edx,%3"
-		: "=m" (regs.eax), "=m" (regs.ebx), "=m" (regs.ecx), "=m" (regs.edx)
-		: "g" (func)
-		: "%eax", "%ebx", "%ecx", "%edx");
+	asm("push %%ebx; "
+	    "movl %4,%%eax; " CPUID
+	    "movl %%eax,%0; movl %%ebx,%1; movl %%ecx,%2; movl %%edx,%3;"
+	    "pop %%ebx"
+	    : "=m" (regs.eax), "=m" (regs.ebx), "=m" (regs.ecx), "=m" (regs.edx)
+	    : "g" (func)
+	    : "%eax", "%ecx", "%edx");
 	return regs;
 }
 
@@ -80,6 +83,7 @@ main(int argc, char **argv)
 	unsigned max_cpuid;
 	unsigned max_ext_cpuid;
 	unsigned int amd_flags;
+	unsigned int cpuType, cpuModel;
 	char *model_name = "Unknown CPU";
 	int i;
 	char processor_name[49];
@@ -169,12 +173,21 @@ main(int argc, char **argv)
 		int i;
 
 		regs = cpuid(1);
+
+		cpuType = (regs.eax >> 8) & 0xf;
+		cpuModel = (regs.eax >> 4) & 0xf;
+
+		if (cpuType == 0xf)
+		   cpuType = 0xf + ((regs.eax >> 20) & 0xf); // extended family
+		if (cpuType == 0xf || cpuType == 6)
+		   cpuModel |= ((regs.eax >> 16) & 0xf) << 4;
+
 		printf("cpu family\t: %d\n"
 		       "model\t\t: %d\n"
 		       "stepping\t: %d\n" ,
-			(regs.eax >>  8) & 0xf,
-			(regs.eax >>  4) & 0xf,
-			 regs.eax        & 0xf);
+			cpuType,
+			cpuModel,
+			regs.eax        & 0xf);
 		
 		printf("flags\t\t:");
 		for (i = 0; cap[i].bit >= 0; i++) {

@@ -164,7 +164,9 @@ case "$pvendor" in
 			   fi
 			   ;;
 			6) iproc=686
-                           if test "$pmodel" -ge 13; then
+                           if test "$pmodel" -ge 15; then
+                                proc=nocona
+                           elif test "$pmodel" -ge 13; then
                                 proc=pentium-m
 			   elif test "$pmodel" -ge 7; then
 				proc=pentium3
@@ -173,7 +175,7 @@ case "$pvendor" in
 			   else
 				proc=i686
 			   fi
-			   ;;
+                           ;;
 			15) proc=pentium4
 			   ;;
 			*) proc=pentium4
