@@ -666,6 +666,19 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = 0,
       .do_encode = 1
     },
+    {
+      .id = CODEC_ID_DNXHD,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dnxhd",
+      .name = TRS("FFMPEG dnxhd"),
+            .fourccs = { "AVdn", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = 0,
+      .do_encode = 1
+    },
 };
 
 /* Audio */

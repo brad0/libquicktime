@@ -994,7 +994,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
 	if (quicktime_match_32(compressor, "dvc "))
 	   codec->encode_colormodel = BC_YUV411P;
         else if (quicktime_match_32(compressor, "dv5n") ||
-                 quicktime_match_32(compressor, "dv5p"))
+                 quicktime_match_32(compressor, "dv5p") ||
+                 quicktime_match_32(compressor, "AVdn"))
             codec->encode_colormodel = BC_YUV422P;
         else if (quicktime_match_32(compressor, "MJPG"))
           codec->encode_colormodel = BC_YUVJ420P;
