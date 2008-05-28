@@ -361,6 +361,20 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
     },
+    {
+      .id = CODEC_ID_MSMPEG4V3,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_msmpeg4v3,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "msmpeg4v3_wmp",
+      .name = TRS("FFMPEG MSMpeg 4v3 (WMP compatible)"),
+      .fourccs = { "MP43", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+      .do_encode = 1,
+    },
 #if 0
     {
       .id = CODEC_ID_WMV1,
@@ -666,6 +680,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = 0,
       .do_encode = 1
     },
+#if LIBAVCODEC_BUILD >= 3352576
     {
       .id = CODEC_ID_DNXHD,
       .index = -1,
@@ -679,6 +694,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = 0,
       .do_encode = 1
     },
+#endif
 };
 
 /* Audio */

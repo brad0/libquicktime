@@ -752,7 +752,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
               }
 #endif
             }
-          else if((codec->encoder->id == CODEC_ID_MSMPEG4V3) && (trak->strl))
+          else if((codec->encoder->id == CODEC_ID_MSMPEG4V3) && (trak->strl) &&
+                  !strncmp(trak->strl->strf.bh.biCompression, "DIV3", 4))
             {
             strncpy(trak->strl->strh.fccHandler, "div3", 4);
             }
