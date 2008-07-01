@@ -163,7 +163,7 @@ void quicktime_print_info(quicktime_t * qtfile)
   printf(_("  %d text tracks.\n"), n);
   for(i = 0; i < n; i++)
     {
-    printf(_("    timescale: %d, length: %lld, language: "),
+    printf(_("    timescale: %d, length: %"PRId64", language: "),
            lqt_text_time_scale(qtfile, i), lqt_text_samples(qtfile, i)); 
     if(lqt_get_text_language(qtfile, i, language))
       printf("%c%c%c, ", language[0], language[1], language[2]);

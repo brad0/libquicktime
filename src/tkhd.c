@@ -58,11 +58,11 @@ void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd)
 	lqt_dump("  track header (tkhd)\n");
 	lqt_dump("   version %d\n", tkhd->version);
 	lqt_dump("   flags %ld\n", tkhd->flags);
-	lqt_dump("   creation_time %llu\n", tkhd->creation_time);
-	lqt_dump("   modification_time %llu\n", tkhd->modification_time);
+	lqt_dump("   creation_time %"PRIu64"\n", tkhd->creation_time);
+	lqt_dump("   modification_time %"PRIu64"\n", tkhd->modification_time);
 	lqt_dump("   track_id %d\n", tkhd->track_id);
 	lqt_dump("   reserved1 %ld\n", tkhd->reserved1);
-	lqt_dump("   duration %lld\n", tkhd->duration);
+	lqt_dump("   duration %"PRId64"\n", tkhd->duration);
 	quicktime_print_chars("   reserved2 ", tkhd->reserved2, 8);
 	lqt_dump("   layer %d\n", tkhd->layer);
 	lqt_dump("   alternate_group %d\n", tkhd->alternate_group);

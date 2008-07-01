@@ -95,7 +95,7 @@ int main(int argc, char ** argv)
       fprintf(stderr, "Reading text sample %d failed\n", i);
     else
       {
-      printf("Time: %lld (%f seconds), Duration: %lld (%f seconds), String:\n",
+      printf("Time: %"PRId64" (%f seconds), Duration: %"PRId64" (%f seconds), String:\n",
              timestamp,
              (double)(timestamp)/(double)(timescale),
              duration,

@@ -484,7 +484,7 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
 		else
 		if (quicktime_atom_is(&leaf_atom, "esds"))
                   {
-                  printf("esds: %d bytes\n", leaf_atom.size);
+                  // printf("esds: %"PRId64" bytes\n", leaf_atom.size);
                   quicktime_read_esds(file, &(table->esds));
                   table->has_esds = 1;
                   quicktime_atom_skip(file, &leaf_atom);
@@ -676,7 +676,7 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
 	lqt_dump("       height %d\n", table->height);
 	lqt_dump("       dpi_horizontal %f\n", table->dpi_horizontal);
 	lqt_dump("       dpi_vertical %f\n", table->dpi_vertical);
-	lqt_dump("       data_size %lld\n", table->data_size);
+	lqt_dump("       data_size %"PRId64"\n", table->data_size);
 	lqt_dump("       frames_per_sample %d\n", table->frames_per_sample);
 	lqt_dump("       compressor_name %s\n", table->compressor_name);
 	lqt_dump("       depth %d\n", table->depth);
