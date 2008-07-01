@@ -573,6 +573,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   if(!codec->initialized)
     {
+
     codec->work_buffer_size = width * height * 3;
     codec->work_buffer = malloc(codec->work_buffer_size); /* Any smaller value here? */
     
@@ -638,6 +639,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     
     /* Open encoder */
 
+
     codec->enc = x264_encoder_open(&codec->params);
     if(!codec->enc)
       {
@@ -645,6 +647,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       return result;
       }
 
+    
     if(codec->params.i_bframe)
       vtrack->has_b_frames = 1; 
     
@@ -657,6 +660,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     file->moov.iods.videoProfileId = 0x15;
     
     codec->initialized = 1;
+
     
     }
 
