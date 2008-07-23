@@ -1132,6 +1132,21 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
 
+/* tmcd.c */
+
+void quicktime_tmcd_dump(quicktime_tmcd_t *tmcd);
+void quicktime_tmcd_init(quicktime_tmcd_t *tmcd);
+void quicktime_tmcd_delete(quicktime_tmcd_t *tmcd);
+void quicktime_read_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd, quicktime_atom_t *parent_atom);
+void quicktime_write_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd);
+
+/* tcmi.c */
+
+void quicktime_read_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
+void quicktime_write_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_dump(quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_delete(quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_init(quicktime_tcmi_t *tcmi);
 
 /* tref.c */
 

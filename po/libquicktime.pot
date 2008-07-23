@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2008-05-17 15:02+0200\n"
+"POT-Creation-Date: 2008-07-14 19:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,7 +47,7 @@ msgstr ""
 msgid "Unsupported character set in text track, string will be copied verbatim"
 msgstr ""
 
-#: src/stco.c:133
+#: src/stco.c:134
 #, c-format
 msgid "quicktime_update_stco chunk must start at 1. chunk=%ld\n"
 msgstr ""
@@ -499,7 +499,7 @@ msgstr ""
 
 #: utils/common.c:166
 #, c-format
-msgid "    timescale: %d, length: %lld, language: "
+msgid "    timescale: %d, length: %<PRId64>, language: "
 msgstr ""
 
 #: utils/common.c:171
@@ -1019,15 +1019,15 @@ msgstr ""
 msgid "Invalid log level from x264"
 msgstr ""
 
-#: plugins/x264/x264.c:604
+#: plugins/x264/x264.c:605
 msgid "Choosing interlaced encoding"
 msgstr ""
 
-#: plugins/x264/x264.c:644
+#: plugins/x264/x264.c:646
 msgid "x264_encoder_open failed"
 msgstr ""
 
-#: plugins/x264/x264.c:890
+#: plugins/x264/x264.c:891
 #, c-format
 msgid "Unrecognized parameter %s"
 msgstr ""
@@ -2734,140 +2734,148 @@ msgstr ""
 msgid "FFMPEG MSMpeg 4v3 (DivX 3 compatible)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:373
+#: plugins/ffmpeg/lqt_ffmpeg.c:372
+msgid "FFMPEG MSMpeg 4v3 (WMP compatible)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:387
 msgid "FFMPEG WMV1"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:386
+#: plugins/ffmpeg/lqt_ffmpeg.c:400
 msgid "FFMPEG H263"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:399
+#: plugins/ffmpeg/lqt_ffmpeg.c:413
 msgid "FFMPEG H264"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:411
+#: plugins/ffmpeg/lqt_ffmpeg.c:425
 msgid "FFMPEG H263+"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:424
+#: plugins/ffmpeg/lqt_ffmpeg.c:438
 msgid "FFMPEG I263"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:435
+#: plugins/ffmpeg/lqt_ffmpeg.c:449
 msgid "FFMPEG Sorenson Video 1"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:446
+#: plugins/ffmpeg/lqt_ffmpeg.c:460
 msgid "FFMPEG Sorenson Video 3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:458
+#: plugins/ffmpeg/lqt_ffmpeg.c:472
 msgid "FFMPEG MJPEG"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:471
+#: plugins/ffmpeg/lqt_ffmpeg.c:485
 msgid "FFMPEG Motion JPEG-B"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:484
+#: plugins/ffmpeg/lqt_ffmpeg.c:498
 msgid "FFMPEG Targa"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:496
+#: plugins/ffmpeg/lqt_ffmpeg.c:510
 msgid "FFMPEG TIFF"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:507
+#: plugins/ffmpeg/lqt_ffmpeg.c:521
 msgid "FFMPEG Quicktime Planar RGB (8BPS)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:518
+#: plugins/ffmpeg/lqt_ffmpeg.c:532
 msgid "FFMPEG Intel Indeo 3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:528
+#: plugins/ffmpeg/lqt_ffmpeg.c:542
 msgid "FFMPEG Apple Video"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:538
+#: plugins/ffmpeg/lqt_ffmpeg.c:552
 msgid "FFMPEG Apple Graphics"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:549
+#: plugins/ffmpeg/lqt_ffmpeg.c:563
 msgid "FFMPEG Cinepak"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:560
+#: plugins/ffmpeg/lqt_ffmpeg.c:574
 msgid "FFMPEG Creative YUV"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:570
+#: plugins/ffmpeg/lqt_ffmpeg.c:584
 msgid "FFMPEG RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:582
+#: plugins/ffmpeg/lqt_ffmpeg.c:596
 msgid "FFMPEG Microsoft RLE"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:594
+#: plugins/ffmpeg/lqt_ffmpeg.c:608
 msgid "FFMPEG DV (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:608
+#: plugins/ffmpeg/lqt_ffmpeg.c:622
 msgid "FFMPEG DV (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:622
+#: plugins/ffmpeg/lqt_ffmpeg.c:636
 msgid "FFMPEG DV (AVI version)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:636
+#: plugins/ffmpeg/lqt_ffmpeg.c:650
 msgid "FFMPEG DVCPRO50 (PAL)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:650
+#: plugins/ffmpeg/lqt_ffmpeg.c:664
 msgid "FFMPEG DVCPRO50 (NTSC)"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:663
+#: plugins/ffmpeg/lqt_ffmpeg.c:677
 msgid "FFMPEG modified huffyuv lossless"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:682
+#: plugins/ffmpeg/lqt_ffmpeg.c:691
+msgid "FFMPEG dnxhd"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:711
 msgid "FFMPEG MPEG-1/2 audio layer 1/2/3"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:695
+#: plugins/ffmpeg/lqt_ffmpeg.c:724
 msgid "FFMPEG Mpeg Layer 2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:709
+#: plugins/ffmpeg/lqt_ffmpeg.c:738
 msgid "FFMPEG AC3 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:723
+#: plugins/ffmpeg/lqt_ffmpeg.c:752
 msgid "FFMPEG QDM2 Audio"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:736
+#: plugins/ffmpeg/lqt_ffmpeg.c:765
 msgid "FFMPEG Apple lossless"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:749
+#: plugins/ffmpeg/lqt_ffmpeg.c:778
 msgid "FFMPEG McRowsoft ADPCM"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:762
+#: plugins/ffmpeg/lqt_ffmpeg.c:791
 msgid "FFMPEG ADPCM ima WAV"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1040
+#: plugins/ffmpeg/lqt_ffmpeg.c:1069
 #, c-format
 msgid "Video index too large: %d"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:1096
+#: plugins/ffmpeg/lqt_ffmpeg.c:1125
 #, c-format
 msgid "Audio index too large: %d"
 msgstr ""

@@ -792,7 +792,7 @@ int lqt_add_video_track(quicktime_t *file,
  *  \param stats_file Statistics file
  *
  *  This is a purely optional function, which enables multipass encoding.
- *  Multipass transcoding is done by repeatedly opening a quicktime file,
+ *  Multipass encoding is done by repeatedly opening a quicktime file,
  *  encoding video and and closing it again. The stats_file parameter must
  *  always be the same for all passes.
  *

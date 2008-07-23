@@ -1,5 +1,5 @@
 /*******************************************************************************
- gmhd.c
+ tmcd.c
 
  libquicktime - A library for reading and writing quicktime/avi/mp4 files.
  http://libquicktime.sourceforge.net
@@ -24,66 +24,50 @@
 
 #include "lqt_private.h"
 
-void quicktime_gmhd_init(quicktime_gmhd_t *gmhd)
+#include <string.h>
+
+void quicktime_tmcd_init(quicktime_tmcd_t *tmcd)
   {
-  quicktime_gmin_init(&gmhd->gmin);
+  quicktime_tcmi_init(&tmcd->tcmi);
   }
 
-void quicktime_gmhd_delete(quicktime_gmhd_t *gmhd)
+void quicktime_tmcd_delete(quicktime_tmcd_t *tmcd)
   {
-  quicktime_gmin_delete(&gmhd->gmin);
-  quicktime_tmcd_delete(&gmhd->tmcd);
+  quicktime_tcmi_delete(&tmcd->tcmi);
   }
 
-void quicktime_gmhd_dump(quicktime_gmhd_t *gmhd)
+void quicktime_tmcd_dump(quicktime_tmcd_t *tmcd)
   {
-  lqt_dump("     base media header (gmhd)\n");
-  quicktime_gmin_dump(&gmhd->gmin);
-  if(gmhd->has_gmhd_text)
-    quicktime_gmhd_text_dump(&gmhd->gmhd_text);
-  if (gmhd->has_tmcd)
-    quicktime_tmcd_dump(&gmhd->tmcd);
+  lqt_dump("       tmcd\n");
+
+  quicktime_tcmi_dump(&tmcd->tcmi);
   }
 
-void quicktime_read_gmhd(quicktime_t *file,
-                         quicktime_gmhd_t *gmhd,
+void quicktime_read_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd,
                          quicktime_atom_t *parent_atom)
   {
   quicktime_atom_t leaf_atom;
-  
+
   do
     {
     quicktime_atom_read_header(file, &leaf_atom);
-    
-    if(quicktime_atom_is(&leaf_atom, "gmin"))
-      quicktime_read_gmin(file, &gmhd->gmin);
-    else if(quicktime_atom_is(&leaf_atom, "text"))
+	       
+    if(quicktime_atom_is(&leaf_atom, "tcmi"))
       {
-      quicktime_read_gmhd_text(file, &gmhd->gmhd_text, &leaf_atom);
-      gmhd->has_gmhd_text = 1;
-      }
-    else if(quicktime_atom_is(&leaf_atom, "tmcd"))
-      {
-      quicktime_read_tmcd(file, &gmhd->tmcd, &leaf_atom);
-      gmhd->has_tmcd = 1; 
+      quicktime_read_tcmi(file, &tmcd->tcmi);
       }
     else
       quicktime_atom_skip(file, &leaf_atom);
+
     }while(quicktime_position(file) < parent_atom->end);
-  
   }
 
-void quicktime_write_gmhd(quicktime_t *file, quicktime_gmhd_t *gmhd)
+void quicktime_write_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd)
   {
   quicktime_atom_t atom;
-  quicktime_atom_write_header(file, &atom, "gmhd");
-  quicktime_write_gmin(file, &gmhd->gmin);
-  
-  if(gmhd->has_gmhd_text)
-    quicktime_write_gmhd_text(file, &gmhd->gmhd_text);
-  if (gmhd->has_tmcd)
-    quicktime_write_tmcd(file, &gmhd->tmcd);
-  
+
+  quicktime_atom_write_header(file, &atom, "tmcd");
+  quicktime_write_tcmi(file, &tmcd->tcmi);
   quicktime_atom_write_footer(file, &atom);
   }
 

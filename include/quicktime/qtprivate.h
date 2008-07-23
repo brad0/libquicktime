@@ -423,6 +423,19 @@ typedef struct
   quicktime_ftab_t ftab;
   } quicktime_stsd_tx3g_t;
 
+/* Sample description for timecode tracks */
+
+typedef struct
+  {
+  uint32_t reserved2;
+  uint32_t flags;
+  uint32_t timescale;
+  uint32_t frameduration;
+  uint8_t numframes;
+  uint8_t reserved3[3];
+  //  quicktime_atom_t srcref;
+  } quicktime_stsd_tmcd_t;
+
 typedef struct
 {
 	char format[4];
@@ -507,6 +520,8 @@ typedef struct
 
 /* Quicktime tx3g */
         quicktime_stsd_tx3g_t tx3g;
+
+        quicktime_stsd_tmcd_t tmcd;
 
 } quicktime_stsd_table_t;
 
@@ -723,6 +738,22 @@ typedef struct
   uint32_t unk[9];
   } quicktime_gmhd_text_t;
 
+typedef struct
+  {
+  int version;
+  long flags;
+  int font;
+  int face;
+  int size;
+  int txtcolor[3];
+  int bgcolor[3];
+  char fontname[256];
+  } quicktime_tcmi_t;
+
+typedef struct
+  {
+  quicktime_tcmi_t tcmi;
+  } quicktime_tmcd_t;
 
 /* Base (generic) media header */
 
@@ -732,6 +763,10 @@ typedef struct
 
   int has_gmhd_text;
   quicktime_gmhd_text_t gmhd_text;
+  
+  int has_tmcd;
+  quicktime_tmcd_t tmcd;
+  
   } quicktime_gmhd_t;
 
 typedef struct
@@ -765,6 +800,7 @@ typedef struct
 	int is_qtvr;
 	int is_object;
         int is_text;
+        int is_timecode;
 	quicktime_vmhd_t vmhd;
 	quicktime_smhd_t smhd;
 	quicktime_gmhd_t gmhd;

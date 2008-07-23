@@ -104,6 +104,8 @@ texttrack.c \
 tkhd.c \
 trak.c \
 translation.c \
+tcmi.c \
+tmcd.c \
 tref.c \
 udta.c \
 useratoms.c \
