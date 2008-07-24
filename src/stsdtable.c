@@ -207,22 +207,30 @@ quicktime_stsdtable_read_timecode(quicktime_t *file,
                                   quicktime_stsd_table_t *table,
                                   quicktime_atom_t *parent_atom)
   {
-  quicktime_atom_t a;
+  quicktime_atom_t leaf_atom;
   table->tmcd.reserved2 = quicktime_read_int32(file);
   table->tmcd.flags = quicktime_read_int32(file);
   table->tmcd.timescale = quicktime_read_int32(file);
   table->tmcd.frameduration = quicktime_read_int32(file);
   table->tmcd.numframes = quicktime_read_char(file);
-  table->tmcd.reserved3[0] = quicktime_read_char(file);
+  table->tmcd.reserved3 = quicktime_read_char(file);
   //  table->tmcd.reserved3[1] = quicktime_read_char(file);
   //  table->tmcd.reserved3[2] = quicktime_read_char(file);
-  
-  quicktime_atom_read_header(file, &a);
 
-  fprintf(stderr, "Atom type: %c%c%c%c\n", a.type[0], a.type[1], a.type[2], a.type[3]);
+  while(quicktime_position(file) < parent_atom->end)
+    {
+    quicktime_atom_read_header(file, &leaf_atom);
+    if(quicktime_atom_is(&leaf_atom, "name"))
+      {
+      int len = 0;
+      quicktime_read_udta_string(file,
+                                 &(table->tmcd.name),
+                                 &len, 0);
+      }
+    else
+      quicktime_atom_skip(file, &leaf_atom);
+    }
   
-  //  quicktime_atom_dump(a);
-  //    quicktime_atom_skip(file, &table->tmcd.srcref);
   quicktime_atom_skip(file, parent_atom);
   }
 
@@ -230,13 +238,22 @@ static void
 quicktime_write_stsd_timecode(quicktime_t *file,
                               quicktime_stsd_table_t *table)
   {
+  lqt_charset_converter_t * cnv = (lqt_charset_converter_t *)0;
+  quicktime_atom_t child_atom;
   quicktime_write_int32(file, table->tmcd.reserved2);
   quicktime_write_int32(file, table->tmcd.flags);
   quicktime_write_int32(file, table->tmcd.timescale);
   quicktime_write_int32(file, table->tmcd.frameduration);
   quicktime_write_char(file, table->tmcd.numframes);
-  quicktime_write_char(file, table->tmcd.reserved3[0]);
-  /* srcref */
+  quicktime_write_char(file, table->tmcd.reserved3);
+  
+  quicktime_atom_write_header(file, &child_atom, "name");
+  quicktime_write_udta_string(file, table->tmcd.name,
+                              0, &cnv);
+  
+  quicktime_atom_write_footer(file, &child_atom);
+  if(cnv)
+    lqt_charset_converter_destroy(cnv);
   }
 
 static void quicktime_stsdtable_dump_timecode(quicktime_stsd_table_t *table)
@@ -247,7 +264,8 @@ static void quicktime_stsdtable_dump_timecode(quicktime_stsd_table_t *table)
   printf("       frameduration  %d\n", table->tmcd.frameduration);
   printf("       numframes      %d\n", table->tmcd.numframes);
   printf("       reserved3      %02x\n",
-         table->tmcd.reserved3[0]);
+         table->tmcd.reserved3);
+  printf("       name:          %s\n", table->tmcd.name);
   }
 
 /* Audio */
@@ -719,6 +737,9 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
   quicktime_esds_delete(&(table->esds));
   quicktime_ftab_delete(&(table->tx3g.ftab));
   quicktime_user_atoms_delete(&(table->user_atoms));
+  
+  if(table->tmcd.name)
+    free(table->tmcd.name);
   }
 
 void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)

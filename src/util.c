@@ -264,7 +264,7 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
   return result;
   }
 
-int quicktime_write_data(quicktime_t *file, uint8_t *data, int size)
+int quicktime_write_data(quicktime_t *file, const uint8_t *data, int size)
   {
   int data_offset = 0;
   int writes_attempted = 0;

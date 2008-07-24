@@ -432,8 +432,14 @@ typedef struct
   uint32_t timescale;
   uint32_t frameduration;
   uint8_t numframes;
-  uint8_t reserved3[3];
-  //  quicktime_atom_t srcref;
+
+// http://developer.apple.com/documentation/QuickTime/QTFF/QTFFChap3/chapter_4_section_4.html#//apple_ref/doc/uid/TP40000939-CH205-BBCGABGG
+  //  uint8_t reserved3[3];
+
+  // Real life
+  uint8_t reserved3;
+  
+  char * name;
   } quicktime_stsd_tmcd_t;
 
 typedef struct

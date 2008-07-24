@@ -1168,6 +1168,13 @@ void quicktime_udta_dump(quicktime_udta_t *udta);
 int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta, quicktime_atom_t *udta_atom);
 void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta);
 int quicktime_set_udta_string(char **string, int *size, char *new_string);
+int quicktime_read_udta_string(quicktime_t *file,
+                               char **string,
+                               int *size, int ilst);
+
+int
+quicktime_write_udta_string(quicktime_t *file, const char * string,
+                            int ilst, lqt_charset_converter_t ** cnv);
 
 /* vmhd.c */
 
@@ -1231,7 +1238,7 @@ int quicktime_file_close(quicktime_t *file);
 int64_t quicktime_ftell(quicktime_t *file);
 int quicktime_fseek(quicktime_t *file, int64_t offset);
 int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size);
-int quicktime_write_data(quicktime_t *file, uint8_t *data, int size);
+int quicktime_write_data(quicktime_t *file, const uint8_t *data, int size);
 int64_t quicktime_byte_position(quicktime_t *file);
 void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);

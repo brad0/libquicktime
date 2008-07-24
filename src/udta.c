@@ -120,9 +120,9 @@ void quicktime_udta_dump(quicktime_udta_t *udta)
   if(quicktime_match_32(udta->ctyp, "stna")) quicktime_navg_dump(&(udta->navg));
   }
 
-static int quicktime_read_udta_string(quicktime_t *file,
-                                      char **string,
-                                      int *size, int ilst)
+int quicktime_read_udta_string(quicktime_t *file,
+                               char **string,
+                               int *size, int ilst)
   {
   quicktime_atom_t leaf_atom;
   int result;
@@ -141,7 +141,7 @@ static int quicktime_read_udta_string(quicktime_t *file,
     result = quicktime_read_data(file, (uint8_t*)(*string), *size);
 
     charset          = lqt_get_charset(language, file->file_type);
-    charset_fallback = lqt_get_charset(language, file->file_type);
+    charset_fallback = lqt_get_charset_fallback(language, file->file_type);
     if(!charset && !charset_fallback)
       {
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
@@ -290,15 +290,17 @@ int quicktime_read_udta(quicktime_t *file, quicktime_udta_t *udta,
   return result;
   }
 
-static int
-quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_charset_converter_t ** cnv)
+int
+quicktime_write_udta_string(quicktime_t *file, const char * str,
+                            int ilst, lqt_charset_converter_t ** cnv)
   {
   quicktime_atom_t data_atom;
   int new_size;
   int result = 0;
-
+  
   if(!ilst)
     {
+    char * string;
     if(!(*cnv))
       {
       /* Hard wired charsets for Western European languages (probably not good) */
@@ -307,18 +309,19 @@ quicktime_write_udta_string(quicktime_t *file, char ** string, int ilst, lqt_cha
         *cnv = lqt_charset_converter_create(file, "UTF-8", "ISO-8859-1");
       
       }
-    lqt_charset_convert(*cnv, string, -1, &new_size);
+    string = strdup(str);
+    lqt_charset_convert(*cnv, &string, -1, &new_size);
     
     quicktime_write_int16(file, new_size);    /* String size */
     quicktime_write_int16(file, 0);    /* Language code (defaults to english, probably not good) */
-    result = quicktime_write_data(file, (uint8_t*)(*string), new_size);
+    result = quicktime_write_data(file, (uint8_t*)(string), new_size);
     }
   else
     {
     quicktime_atom_write_header(file, &data_atom, "data");
     quicktime_write_int32(file, 0x0000001); /* Version (0x00), flags 0x000001 (text) */
     quicktime_write_int32(file, 0); /* Reserved */
-    result = quicktime_write_data(file, (uint8_t*)(*string), strlen(*string));
+    result = quicktime_write_data(file, (const uint8_t*)(str), strlen(str));
     quicktime_atom_write_footer(file, &data_atom);
     }
   return !result;
@@ -343,42 +346,42 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
   if(udta->copyright_len)
     {
     quicktime_atom_write_header(file, &subatom, copyright_id);
-    quicktime_write_udta_string(file, &udta->copyright, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->copyright, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
   if(udta->name_len)
     {
     quicktime_atom_write_header(file, &subatom, name_id);
-    quicktime_write_udta_string(file, &udta->name, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->name, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
   if(udta->info_len)
     {
     quicktime_atom_write_header(file, &subatom, info_id);
-    quicktime_write_udta_string(file, &udta->info, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->info, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
   if(udta->artist_len)
     {
     quicktime_atom_write_header(file, &subatom, artist_id);
-    quicktime_write_udta_string(file, &udta->artist, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->artist, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
   if(udta->album_len)
     {
     quicktime_atom_write_header(file, &subatom, album_id);
-    quicktime_write_udta_string(file, &udta->album, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->album, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
   if(udta->genre_len)
     {
     quicktime_atom_write_header(file, &subatom, genre_id);
-    quicktime_write_udta_string(file, &udta->genre, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->genre, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
 
@@ -401,7 +404,7 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
     else
       {
       quicktime_atom_write_header(file, &subatom, track_id);
-      quicktime_write_udta_string(file, &udta->track, have_ilst, &cnv);
+      quicktime_write_udta_string(file, udta->track, have_ilst, &cnv);
       quicktime_atom_write_footer(file, &subatom);
       }
     }
@@ -409,13 +412,13 @@ void quicktime_write_udta(quicktime_t *file, quicktime_udta_t *udta)
   if(udta->comment_len)
     {
     quicktime_atom_write_header(file, &subatom, comment_id);
-    quicktime_write_udta_string(file, &udta->comment, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->comment, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
   if(udta->author_len)
     {
     quicktime_atom_write_header(file, &subatom, author_id);
-    quicktime_write_udta_string(file, &udta->author, have_ilst, &cnv);
+    quicktime_write_udta_string(file, udta->author, have_ilst, &cnv);
     quicktime_atom_write_footer(file, &subatom);
     }
   if(udta->is_qtvr)

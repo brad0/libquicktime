@@ -24,6 +24,8 @@
 
 #include "lqt_private.h"
 
+#define TCMI_NAME "Untitled"
+
 void quicktime_tcmi_init(quicktime_tcmi_t *tcmi)
   {
   tcmi->version = 0;
@@ -47,19 +49,18 @@ void quicktime_tcmi_init(quicktime_tcmi_t *tcmi)
 
 void quicktime_tcmi_delete(quicktime_tcmi_t *tcmi)
   {
-  
   }
 
 void quicktime_tcmi_dump(quicktime_tcmi_t *tcmi)
   {
   lqt_dump("         Timecode media info (tcmi)\n");
-  lqt_dump("          version %d\n", tcmi->version);
-  lqt_dump("          flags %ld\n", tcmi->flags);
-  lqt_dump("          font %d\n", tcmi->font);
-  lqt_dump("          face %d\n", tcmi->face);
-  lqt_dump("          size %d\n", tcmi->size);
+  lqt_dump("          version  %d\n", tcmi->version);
+  lqt_dump("          flags    %ld\n", tcmi->flags);
+  lqt_dump("          font     %d\n", tcmi->font);
+  lqt_dump("          face     %d\n", tcmi->face);
+  lqt_dump("          size     %d\n", tcmi->size);
   lqt_dump("          txtcolor %d %d %d\n", tcmi->txtcolor[0], tcmi->txtcolor[1], tcmi->txtcolor[2]);
-  lqt_dump("          bgcolor %d %d %d\n", tcmi->bgcolor[0], tcmi->bgcolor[1], tcmi->bgcolor[2]);
+  lqt_dump("          bgcolor  %d %d %d\n", tcmi->bgcolor[0], tcmi->bgcolor[1], tcmi->bgcolor[2]);
   lqt_dump("          fontname %s\n", tcmi->fontname);
   }
 
@@ -77,6 +78,9 @@ void quicktime_read_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi)
   for (i = 0; i < 3; ++i)
     tcmi->bgcolor[i] = quicktime_read_int16(file);
   quicktime_read_pascal(file, tcmi->fontname);
+
+  
+
   }
 
 void quicktime_write_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi)
