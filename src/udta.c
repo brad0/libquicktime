@@ -315,6 +315,7 @@ quicktime_write_udta_string(quicktime_t *file, const char * str,
     quicktime_write_int16(file, new_size);    /* String size */
     quicktime_write_int16(file, 0);    /* Language code (defaults to english, probably not good) */
     result = quicktime_write_data(file, (uint8_t*)(string), new_size);
+    free(string);
     }
   else
     {
