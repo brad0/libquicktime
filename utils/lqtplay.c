@@ -132,11 +132,11 @@ static unsigned long   lut_blue[256];
 int has_timecodes = 0;
 uint32_t timecode_flags;
 
-static void dump_timecode(uint32_t tc)
+static void dump_timecode(quicktime_t * file, int track, uint32_t tc)
   {
   int sign, hours, minutes, seconds, frames;
   
-  lqt_parse_timecode(tc, &sign, &hours,
+  lqt_parse_timecode(file, track, tc, &sign, &hours,
                      &minutes, &seconds, &frames);
   
   printf("Timecode: %s%02d:%02d:%02d.%02d (0x%08x)\n",
@@ -1228,7 +1228,7 @@ static int qt_frame_decode(void)
 
 #ifdef DUMP_TIMECODES
     if(lqt_read_timecode(qt, 0, &timecode))
-      dump_timecode(timecode);
+      dump_timecode(qt, 0, timecode);
 #endif
     
 

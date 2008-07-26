@@ -542,6 +542,8 @@ int lqt_read_timecode(quicktime_t * file, int track,
                       uint32_t * timecode);
 
 /** \brief Parse a timecode
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
  *  \param tc Timecode
  *  \param sign If non-NULL, returns sign (1 if negative, 0 else)
  *  \param hours If non-NULL, returns hours
@@ -550,7 +552,9 @@ int lqt_read_timecode(quicktime_t * file, int track,
  *  \param frames If non-NULL, returns frames
  */
 
-void lqt_parse_timecode(uint32_t tc, int * sign, int * hours,
+void lqt_parse_timecode(quicktime_t * file,
+                        int track,
+                        uint32_t tc, int * sign, int * hours,
                         int * minutes, int * seconds, int * frames);
   
 /** \brief Make a timecode from components

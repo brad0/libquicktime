@@ -215,9 +215,15 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
     }
   }
 
-void lqt_parse_timecode(uint32_t tc, int * sign, int * hours,
+void lqt_parse_timecode(quicktime_t * file,
+                        int track,
+                        uint32_t tc, int * sign, int * hours,
                         int * minutes, int * seconds, int * frames)
   {
+  quicktime_stsd_tmcd_t * tmcd;
+  tmcd = &file->vtracks[track].timecode_track->mdia.minf.stbl.stsd.table[0].tmcd;
+  
+#if 0
   if(hours)
     *hours =  ((tc & 0xFF000000) >> 24);
   
@@ -229,8 +235,33 @@ void lqt_parse_timecode(uint32_t tc, int * sign, int * hours,
     *seconds = (tc & 0x0000FF00) >> 8;
   if(frames)
     *frames =  (tc & 0x000000FF);
-  }
+#endif
+
+  if(tmcd->flags & LQT_TIMECODE_DROP)
+    {
+    int64_t D, M;
+
+    D = tc / 17982;
+    M = tc % 17982;
+    tc +=  18*D + 2*((M - 2) % 1798);
+    }
+
+  if(frames)
+    *frames  = tc % tmcd->numframes;
+  tc /= tmcd->numframes;
   
+  if(seconds)
+    *seconds = tc % 60;
+  tc /= 60;
+
+  if(minutes)
+    *minutes = tc % 60;
+  tc /= 60;
+
+  if(hours)
+    *hours   = tc % 24;
+  }
+ 
 
 uint32_t lqt_make_timecode(int sign, int hours,
                            int minutes, int seconds, int frames)
