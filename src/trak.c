@@ -63,6 +63,23 @@ int quicktime_trak_init_video(quicktime_t *file,
         return 0;
 }
 
+int quicktime_trak_init_timecode(quicktime_t *file, 
+                                 quicktime_trak_t *trak,
+                                 int time_scale,
+                                 int frame_duration,
+                                 int num_frames,
+                                 int frame_w,
+                                 int frame_h,
+                                 uint32_t flags)
+  {
+  quicktime_tkhd_init_timecode(file, &(trak->tkhd), frame_w, frame_h);
+  quicktime_mdia_init_timecode(file, &(trak->mdia), time_scale, frame_duration,
+                               num_frames, flags);
+  quicktime_edts_init_table(&(trak->edts));
+  return 0;
+  }
+
+
 
 int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int track_type, int width, int height, int frame_duration, int timescale)
 {
@@ -236,88 +253,48 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
   }
 
 int quicktime_write_trak(quicktime_t *file, 
-	quicktime_trak_t *trak, 
-	long moov_time_scale)
-{
-	long duration;
-	long timescale;
-	quicktime_atom_t atom;
-	quicktime_atom_write_header(file, &atom, "trak");
-	quicktime_trak_duration(trak, &duration, &timescale);
-        
-/* get duration in movie's units */
-	trak->tkhd.duration = (long)((float)duration / timescale * moov_time_scale);
-	trak->mdia.mdhd.duration = duration;
-	trak->mdia.mdhd.time_scale = timescale;
+                         quicktime_trak_t *trak)
+  {
+  quicktime_atom_t atom;
+  quicktime_atom_write_header(file, &atom, "trak");
 
-	quicktime_write_tkhd(file, &(trak->tkhd));
-	if (trak->mdia.minf.is_panorama) trak->edts.elst.total_entries = 1;
+  quicktime_write_tkhd(file, &(trak->tkhd));
         
-        if(trak->has_edts) quicktime_write_edts(file, &(trak->edts), trak->tkhd.duration);
-	quicktime_write_mdia(file, &(trak->mdia));
+  if(trak->has_edts)
+    quicktime_write_edts(file, &(trak->edts));
+  quicktime_write_mdia(file, &(trak->mdia));
 	
-	if (trak->has_tref) 
-          quicktime_write_tref(file, &(trak->tref));
-//	if (trak->mdia.minf.is_object) 
-//	    quicktime_write_tref(file, &(trak->tref));
+  if (trak->has_tref) 
+    quicktime_write_tref(file, &(trak->tref));
 	
-	quicktime_atom_write_footer(file, &atom);
+  quicktime_atom_write_footer(file, &atom);
 
-	return 0;
-}
+  return 0;
+  }
 
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
-{
-		quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
-		int i;
-		int64_t total = 0;
-
-	if(file->wr)
-	{
-        if(trak->mdia.minf.is_audio)
-          {
-          for(i = 0; i < stts->total_entries; i++)
-            {
-            total += stts->table[i].sample_count *
-              stts->table[i].sample_duration;
-            }
-          }
-        else
-          {
-          for(i = 0; i < stts->total_entries; i++)
-            {
-            total += stts->table[i].sample_count;
-            }
-          }
-        return total;
-	}
-	else
-	{
-/* get the sample count when reading only */
-                /* Get this from the AVI header */
-                //                if(trak->strl)
-                //                  {
-                //                  total = 
-                //                  }
-                /* LQT: Make this correct for VBR files */
-                if(trak->mdia.minf.is_audio)
-                  {
-                  for(i = 0; i < stts->total_entries; i++)
-                    {
-                    total += stts->table[i].sample_count *
-                      stts->table[i].sample_duration;
-                    }
-                  }
-                else
-                  {
-                  for(i = 0; i < stts->total_entries; i++)
-                    {
-                    total += stts->table[i].sample_count;
-                    }
-                  }
-		return total;
-	}
-}
+  {
+  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+  int i;
+  int64_t total = 0;
+  
+  if(trak->mdia.minf.is_audio)
+    {
+    for(i = 0; i < stts->total_entries; i++)
+      {
+      total += stts->table[i].sample_count *
+        stts->table[i].sample_duration;
+      }
+    }
+  else
+    {
+    for(i = 0; i < stts->total_entries; i++)
+      {
+      total += stts->table[i].sample_count;
+      }
+    }
+  return total;
+  }
 
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk)
 {
@@ -534,95 +511,119 @@ void quicktime_write_chunk_footer(quicktime_t *file,
                                   int current_chunk,
                                   quicktime_atom_t *chunk, 
                                   int samples)
-{
-	int64_t offset = chunk->start;
-	int sample_size = quicktime_position(file) - offset;
+  {
+  int64_t offset = chunk->start;
+  int sample_size = quicktime_position(file) - offset;
 
-// Write AVI footer
-	if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
-          {
-          quicktime_atom_write_footer(file, chunk);
+  // Write AVI footer
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    quicktime_atom_write_footer(file, chunk);
           
-          // Save original index entry for first RIFF only
-          if(file->total_riffs < 2)
-            {
-            quicktime_update_idx1table(file, 
-                                       trak, 
-                                       offset, 
-                                       sample_size);
-            }
+    // Save original index entry for first RIFF only
+    if(file->total_riffs < 2)
+      {
+      quicktime_update_idx1table(file, 
+                                 trak, 
+                                 offset, 
+                                 sample_size);
+      }
           
-          // Save partial index entry
-          if(file->file_type == LQT_FILE_AVI_ODML)
-            quicktime_update_ixtable(file, trak, offset, sample_size);
+    // Save partial index entry
+    if(file->file_type == LQT_FILE_AVI_ODML)
+      quicktime_update_ixtable(file, trak, offset, sample_size);
           
           
-          if(sample_size > trak->strl->strh.dwSuggestedBufferSize)
-            trak->strl->strh.dwSuggestedBufferSize = ((sample_size+15)/16)*16;
-          }
-        if(offset + sample_size > file->mdat.atom.size)
-		file->mdat.atom.size = offset + sample_size;
+    if(sample_size > trak->strl->strh.dwSuggestedBufferSize)
+      trak->strl->strh.dwSuggestedBufferSize = ((sample_size+15)/16)*16;
+    }
+  if(offset + sample_size > file->mdat.atom.size)
+    file->mdat.atom.size = offset + sample_size;
 
-	quicktime_update_stco(&(trak->mdia.minf.stbl.stco), 
-		current_chunk, 
-		offset);
+  quicktime_update_stco(&(trak->mdia.minf.stbl.stco), 
+                        current_chunk, 
+                        offset);
 
-	if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
-          quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-                                current_chunk - 1, 
-                                sample_size);
-        /* Need to increase sample count for VBR (the VBR routines to it
-           themselves) */
-	if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
-          trak->mdia.minf.stbl.stts.table->sample_count += samples;
+  if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
+    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+                          current_chunk - 1, 
+                          sample_size);
+  /* Need to increase sample count for CBR (the VBR routines to it
+     themselves) */
+  if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
+    trak->mdia.minf.stbl.stts.table->sample_count += samples;
         
-	if(trak->mdia.minf.is_panorama) {
-		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-		current_chunk - 1, 
-		sample_size);	
-	}
-	
-	if(trak->mdia.minf.is_qtvr) {
-		quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-		current_chunk - 1, 
-		sample_size);
-	}
-        quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
-                              current_chunk, 
-                              samples);
-        
-}
+  if(trak->mdia.minf.is_panorama)
+    {
+    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+                          current_chunk - 1, 
+                          sample_size);	
+    }
+  
+  if(trak->mdia.minf.is_qtvr)
+    {
+    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+                          current_chunk - 1, 
+                          sample_size);
+    }
+  
+  quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
+                        current_chunk, 
+                        samples);
+  }
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
-	long *duration, 
-	long *timescale)
-{
-	quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
-	int i;
-
-	*duration = 0;
-
-	for(i = 0; i < stts->total_entries; i++)
-	{
-		*duration += stts->table[i].sample_duration * stts->table[i].sample_count;
-	}
-	*timescale = trak->mdia.mdhd.time_scale;
-
-	return 0;
-}
-
-int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak)
+                            int64_t *duration, 
+                            int *timescale)
   {
-  long samples = quicktime_track_samples(file, trak);
-  if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
+  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+  int i;
+  *duration = 0;
+
+  for(i = 0; i < stts->total_entries; i++)
     {
-    quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+    *duration += stts->table[i].sample_duration * stts->table[i].sample_count;
+    }
+  if(timescale)
+    *timescale = trak->mdia.mdhd.time_scale;
+        
+  return 0;
+  }
+
+int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
+                              int moov_time_scale)
+  {
+  int64_t duration;
+  int timescale;
+  quicktime_stts_t * stts;
+  long samples = quicktime_track_samples(file, trak);
+  
+  quicktime_trak_duration(trak, &duration, &timescale);
+  
+  /* get duration in movie's units */
+  trak->tkhd.duration = (long)((float)duration / timescale * moov_time_scale);
+  trak->mdia.mdhd.duration = duration;
+  trak->mdia.mdhd.time_scale = timescale;
+  
+  trak->edts.elst.table[0].duration = trak->tkhd.duration;
+
+  if(trak->mdia.minf.is_panorama)
+    trak->edts.elst.total_entries = 1;
+  
+  stts = &trak->mdia.minf.stbl.stts;
+  
+  quicktime_compress_stsc(&trak->mdia.minf.stbl.stsc);
+  
+  if(trak->mdia.minf.is_video || trak->mdia.minf.is_text ||
+     trak->mdia.minf.is_timecode)
+    {
+    quicktime_compress_stts(stts);
     if(trak->mdia.minf.stbl.stts.total_entries == 1)
       trak->mdia.minf.stbl.stts.table[0].sample_count = samples;
     }
   else if(trak->mdia.minf.is_audio_vbr)
     {
-    quicktime_compress_stts(&(trak->mdia.minf.stbl.stts));
+    quicktime_compress_stts(stts);
     }
   else
     trak->mdia.minf.stbl.stts.table[0].sample_count = samples;

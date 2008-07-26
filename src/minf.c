@@ -139,6 +139,21 @@ void quicktime_minf_init_tx3g(quicktime_t *file,
   
   }
 
+void quicktime_minf_init_timecode(quicktime_t *file,
+                                  quicktime_minf_t *minf,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags)
+  {
+  minf->is_timecode = 1;
+  minf->has_gmhd = 1;
+  quicktime_gmhd_init_timecode(&(minf->gmhd));
+  quicktime_stbl_init_timecode(file, &(minf->stbl), time_scale, frame_duration,
+                               num_frames, flags);
+  quicktime_hdlr_init_data(&(minf->hdlr));
+  quicktime_dinf_init_all(&(minf->dinf), file->file_type);
+  }
 
 void quicktime_minf_delete(quicktime_minf_t *minf)
   {
@@ -157,6 +172,7 @@ void quicktime_minf_dump(quicktime_minf_t *minf)
   lqt_dump("    is_audio_vbr %d\n", minf->is_audio_vbr);
   lqt_dump("    is_video     %d\n", minf->is_video);
   lqt_dump("    is_text      %d\n", minf->is_text);
+  lqt_dump("    is_timecode  %d\n", minf->is_timecode);
   if(minf->is_audio) quicktime_smhd_dump(&(minf->smhd));
   if(minf->is_video) quicktime_vmhd_dump(&(minf->vmhd));
   if(minf->has_gmhd) quicktime_gmhd_dump(&(minf->gmhd));

@@ -645,14 +645,18 @@ int lqt_encode_video(quicktime_t *file,
       quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                             file->vtracks[track].current_position - 1,
                             time - last_time);
-    } 
+    }
+
+  if(file->vtracks[track].timecode_track)
+    lqt_flush_timecode(file, track, time, 0);
+  
   file->vtracks[track].current_position++;
   return 0;
   }
 
 int quicktime_encode_video(quicktime_t *file, 
-	unsigned char **row_pointers, 
-	int track)
+                           unsigned char **row_pointers, 
+                           int track)
   {
   return lqt_encode_video(file, 
                           row_pointers, 
@@ -972,20 +976,30 @@ void quicktime_flush_vcodec(quicktime_t *file, int track)
   {
   int64_t dts, stts_index, stts_count;
   quicktime_stts_t * stts;
-  /* First, we set the final stts */
   stts = &file->vtracks[track].track->mdia.minf.stbl.stts;
 
+  /* First, we set the final stts */
   stts->table[stts->total_entries-1].sample_count++;
   
   while(((quicktime_codec_t*)file->vtracks[track].codec)->flush(file, track))
     {
-    dts = quicktime_sample_to_time(&file->vtracks[track].track->mdia.minf.stbl.stts,
+    dts = quicktime_sample_to_time(stts,
                                    file->vtracks->current_chunk-2,
                                    &stts_index, &stts_count);
     
     quicktime_update_ctts(&file->vtracks[track].track->mdia.minf.stbl.ctts,
                           file->vtracks[track].current_chunk - 2,
                           file->vtracks[track].coded_timestamp - dts);
+    }
+
+  /* Fix stts for timecode track */
+  if(file->vtracks[track].timecode_track &&
+     file->vtracks[track].timecodes_written)
+    {
+    int64_t duration;
+    quicktime_trak_duration(file->vtracks[track].track,
+                            &duration, (int*)0);
+    lqt_flush_timecode(file, track, duration, 1);
     }
   }
 
@@ -1007,7 +1021,7 @@ int quicktime_codecs_flush(quicktime_t *file)
 	{
 		for(i = 0; i < file->total_vtracks && !result; i++)
 		{
-			quicktime_flush_vcodec(file, i);
+                quicktime_flush_vcodec(file, i);
 		}
 	}
 	return result;

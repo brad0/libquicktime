@@ -43,13 +43,12 @@ void quicktime_read_elst_table(quicktime_t *file, quicktime_elst_table_t *table)
 	table->rate = quicktime_read_fixed32(file);
 }
 
-void quicktime_write_elst_table(quicktime_t *file, quicktime_elst_table_t *table, long duration)
-{
-	table->duration = duration;
-	quicktime_write_int32(file, table->duration);
-	quicktime_write_int32(file, table->time);
-	quicktime_write_fixed32(file, table->rate);
-}
+void quicktime_write_elst_table(quicktime_t *file, quicktime_elst_table_t *table)
+  {
+  quicktime_write_int32(file, table->duration);
+  quicktime_write_int32(file, table->time);
+  quicktime_write_fixed32(file, table->rate);
+  }
 
 void quicktime_elst_table_dump(quicktime_elst_table_t *table)
 {
@@ -118,19 +117,16 @@ void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst)
 	}
 }
 
-void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst, long duration)
-{
-	quicktime_atom_t atom;
-	int i;
-	quicktime_atom_write_header(file, &atom, "elst");
-
-	quicktime_write_char(file, elst->version);
-	quicktime_write_int24(file, elst->flags);
-	quicktime_write_int32(file, elst->total_entries);
-	for(i = 0; i < elst->total_entries; i++)
-	{
-		quicktime_write_elst_table(file, elst->table, duration);
-	}
-
-	quicktime_atom_write_footer(file, &atom);
-}
+void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst)
+  {
+  quicktime_atom_t atom;
+  int i;
+  quicktime_atom_write_header(file, &atom, "elst");
+  
+  quicktime_write_char(file, elst->version);
+  quicktime_write_int24(file, elst->flags);
+  quicktime_write_int32(file, elst->total_entries);
+  for(i = 0; i < elst->total_entries; i++)
+    quicktime_write_elst_table(file, &elst->table[i]);
+  quicktime_atom_write_footer(file, &atom);
+  }

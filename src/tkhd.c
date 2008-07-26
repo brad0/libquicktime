@@ -147,3 +147,14 @@ void quicktime_tkhd_init_video(quicktime_t *file,
 	tkhd->track_height = frame_h;
 	tkhd->volume = 0;
 }
+
+void quicktime_tkhd_init_timecode(quicktime_t *file,
+                                  quicktime_tkhd_t *tkhd,
+                                  int frame_w,
+                                  int frame_h)
+  {
+  tkhd->track_width = frame_w;
+  tkhd->track_height = 20;
+  tkhd->matrix.values[7] = frame_h;
+  tkhd->volume = 0;
+  }

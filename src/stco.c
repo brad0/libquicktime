@@ -64,7 +64,7 @@ void quicktime_stco_dump(quicktime_stco_t *stco)
 	lqt_dump("      total_entries %ld\n", stco->total_entries);
 	for(i = 0; i < stco->total_entries; i++)
 	{
-		lqt_dump("       offset %d %"PRIx64" (%"PRIx64")\n",
+		lqt_dump("       offset %d %"PRId64" (%"PRIx64")\n",
                          i, stco->table[i].offset,
                          stco->table[i].offset);
 	}

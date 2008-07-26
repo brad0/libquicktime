@@ -1304,6 +1304,8 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 	quicktime_delete_vcodec(vtrack);
         if(vtrack->temp_frame)
           lqt_rows_free(vtrack->temp_frame);
+        if(vtrack->timecodes)
+          free(vtrack->timecodes);
 	return 0;
 }
 
@@ -1342,7 +1344,7 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 
 void quicktime_init_maps(quicktime_t * file)
   {
-  int i, dom, track;
+  int i, j, k, dom, track;
   /* get tables for all the different tracks */
   file->total_atracks = quicktime_audio_tracks(file);
 
@@ -1397,6 +1399,28 @@ void quicktime_init_maps(quicktime_t * file)
             file->vtracks[i].interlace_mode = LQT_INTERLACE_TOP_FIRST;
           }
         }
+      /* Timecode track */
+      if(file->moov.trak[track]->has_tref)
+        {
+        for(j = 0; j < file->moov.trak[track]->tref.num_references; j++)
+          {
+          /* Track reference has type tmcd */
+          if(quicktime_match_32(file->moov.trak[track]->tref.references[j].type, "tmcd"))
+            {
+            for(k = 0; k < file->moov.total_tracks; k++)
+              {
+              if(file->moov.trak[track]->tref.references[j].tracks[0] ==
+                 file->moov.trak[k]->tkhd.track_id)
+                {
+                file->vtracks[i].timecode_track = file->moov.trak[k];
+                break;
+                }
+              }
+            break;
+            }
+          }
+        }
+      
       }
     }
 

@@ -45,6 +45,21 @@ void quicktime_stsz_init_video(quicktime_t *file, quicktime_stsz_t *stsz)
 	}
 }
 
+void quicktime_stsz_init_timecode(quicktime_stsz_t *stsz)
+  {
+  stsz->sample_size = 4;
+
+#if 0
+  if(!stsz->entries_allocated)
+    {
+    stsz->entries_allocated = 2048;
+		stsz->total_entries = 0;
+		stsz->table = (quicktime_stsz_table_t*)calloc(sizeof(quicktime_stsz_table_t), stsz->entries_allocated);
+    }
+#endif
+  }
+
+
 void quicktime_stsz_init_audio(quicktime_t *file, 
 	quicktime_stsz_t *stsz, 
 	int channels, 
@@ -73,14 +88,14 @@ void quicktime_stsz_dump(quicktime_stsz_t *stsz)
 	lqt_dump("      sample_size %lld\n", (long long)(stsz->sample_size));
 	lqt_dump("      total_entries %ld\n", stsz->total_entries);
 	
-	if(!stsz->sample_size)
-	{
-		for(i = 0; i < stsz->total_entries; i++)
-		{
-			lqt_dump("       sample_size %llx (%lld)\n",
-                               (long long)(stsz->table[i].size), (long long)(stsz->table[i].size));
-		}
-	}
+        if(!stsz->sample_size)
+          {
+          for(i = 0; i < stsz->total_entries; i++)
+            {
+            lqt_dump("       sample_size %llx (%lld)\n",
+                     (long long)(stsz->table[i].size), (long long)(stsz->table[i].size));
+            }
+          }
 }
 
 void quicktime_read_stsz(quicktime_t *file, quicktime_stsz_t *stsz)

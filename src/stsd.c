@@ -28,6 +28,9 @@
 
 #define LOG_DOMAIN "stsd"
 
+/* Tape name in timecode track */
+#define TCMI_NAME "Untitled"
+
 void quicktime_stsd_init(quicktime_stsd_t *stsd)
   {
   stsd->version = 0;
@@ -214,7 +217,28 @@ void quicktime_stsd_init_tx3g(quicktime_t *file,
   quicktime_ftab_init(&tx3g->ftab, 1, "Sans-Serif");
   tx3g->has_ftab = 1;
   }
-                               
+
+void quicktime_stsd_init_timecode(quicktime_t *file,
+				  quicktime_stsd_t *stsd,
+				  int timescale,
+				  int frameduration,
+				  int numframes, uint32_t flags)
+  {
+  quicktime_stsd_table_t *table;
+  quicktime_stsd_init_table(stsd);
+  table = &stsd->table[0];
+  
+  table->format[0] = 't';
+  table->format[1] = 'm';
+  table->format[2] = 'c';
+  table->format[3] = 'd';
+  table->tmcd.timescale     = timescale;
+  table->tmcd.frameduration = frameduration;
+  table->tmcd.numframes     = numframes;
+  table->tmcd.flags         = flags;
+  
+  table->tmcd.name = strdup(TCMI_NAME);
+  }
 
 void quicktime_stsd_delete(quicktime_stsd_t *stsd)
   {

@@ -67,6 +67,19 @@ void quicktime_mdia_init_video(quicktime_t *file,
 	quicktime_hdlr_init_video(&(mdia->hdlr));
 }
 
+void quicktime_mdia_init_timecode(quicktime_t *file,
+                                  quicktime_mdia_t *mdia,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags)
+  {
+  quicktime_mdhd_init_video(file, &(mdia->mdhd), time_scale);
+  quicktime_minf_init_timecode(file, &(mdia->minf), time_scale,
+                               frame_duration, num_frames, flags);
+  quicktime_hdlr_init_timecode(&(mdia->hdlr));
+  }
+
 void quicktime_mdia_init_audio(quicktime_t *file, 
 							quicktime_mdia_t *mdia, 
 							int channels,

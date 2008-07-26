@@ -477,6 +477,100 @@ void lqt_get_text_bg_color(quicktime_t * file, int track,
    @}
 */
 
+/** \defgroup timecodes Timecodes
+    \brief Timecode support
+
+    Timecodes are passed to/from libquicktime in the same format as they are stored in the
+    file: 32 bit unsigned integers. For the meaning of the bits, see the section "Timecode Sample Data"
+    in the Quicktime file format specification.
+    
+    @{
+
+*/
+  
+#define LQT_TIMECODE_DROP    0x0001 //!< Indicates whether the timecode is drop frame
+#define LQT_TIMECODE_24HMAX  0x0002 //!< Indicates whether the timecode wraps after 24 hours
+#define LQT_TIMECODE_NEG_OK  0x0004 //!< Indicates whether negative time values are allowed
+#define LQT_TIMECODE_COUNTER 0x0008 //!< Indicates whether the time value corresponds to a tape counter value
+
+/** \brief Attach a timecode track to a video track
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param flags Zero or more of the LQT_TIMECODE_* flags
+ *
+ *  If the format (e.g. AVI) doesn't support timecode, this
+ *  function emits a warning.
+ *
+ */
+
+void lqt_add_timecode_track(quicktime_t * file, int track,
+                            uint32_t flags);
+
+/** \brief Write a timecode for the next video frame to be encoded
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *
+ *  Call this function @b before encoding the actual video frame.
+ */
+  
+void lqt_write_timecode(quicktime_t * file, int track,
+                        uint32_t timecode);
+
+/** \brief Check, if a video track has timecodes
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param flags If non NULL returns zero or more of the LQT_TIMECODE_* flags
+ *  \returns 1 if timecodes are available, 0 else
+ */
+  
+int lqt_has_timecode_track(quicktime_t * file, int track,
+                           uint32_t * flags);
+
+/** \brief Read the timecode for the next frame to be decoded
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param timecode Returns the timecode if available
+ *  \returns 1 if a timecode is available for this frame, 0 else
+ *
+ *  For frames, which have no timecode attached, you can increment the
+ *  last timecode accordingly in your application.
+ *  Call this function @b before decoding the actual video frame.
+ */
+
+  
+int lqt_read_timecode(quicktime_t * file, int track,
+                      uint32_t * timecode);
+
+/** \brief Parse a timecode
+ *  \param tc Timecode
+ *  \param sign If non-NULL, returns sign (1 if negative, 0 else)
+ *  \param hours If non-NULL, returns hours
+ *  \param minutes If non-NULL, returns minutes
+ *  \param seconds If non-NULL, returns seconds
+ *  \param frames If non-NULL, returns frames
+ */
+
+void lqt_parse_timecode(uint32_t tc, int * sign, int * hours,
+                        int * minutes, int * seconds, int * frames);
+  
+/** \brief Make a timecode from components
+ *  \param sign If non-NULL, returns sign (1 if negative, 0 else)
+ *  \param hours If non-NULL, returns hours
+ *  \param minutes If non-NULL, returns minutes
+ *  \param seconds If non-NULL, returns seconds
+ *  \param frames If non-NULL, returns frames
+ *  \param tc Returns timecode
+ */
+
+uint32_t lqt_make_timecode(int sign, int hours,
+                            int minutes, int seconds, int frames);
+
+  
+/**
+   @}
+*/
+
+  
   
 /***********************************************
  * Advanced colormodel handling.

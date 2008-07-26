@@ -44,6 +44,7 @@ void quicktime_print_info(quicktime_t * qtfile)
   int frame_duration, framerate_constant;
   int pixel_width, pixel_height;
   int cmodel;
+  uint32_t timecode_flags;
   
   printf(_("Type: %s\n"), lqt_file_type_to_string(lqt_get_file_type(qtfile)));
 
@@ -153,6 +154,12 @@ void quicktime_print_info(quicktime_t * qtfile)
     if((pixel_width > 1) || (pixel_height > 1))
       printf(_("    Pixel aspect ratio: %d:%d\n"), pixel_width, pixel_height);
 
+    if(lqt_has_timecode_track(qtfile, i, &timecode_flags))
+      printf(_("    Timecodes available (flags: %08x)\n"), timecode_flags);
+    else
+      printf(_("    No timecodes available\n"));
+      
+    
     if(quicktime_supported_video(qtfile, i))
       printf(_("    supported.\n"));
     else

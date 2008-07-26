@@ -100,50 +100,53 @@ void quicktime_read_stsc(quicktime_t *file, quicktime_stsc_t *stsc)
 	}
 }
 
+void quicktime_compress_stsc(quicktime_stsc_t *stsc)
+  {
+  int i, last_same;
+
+  /* This can happen, if a stream was created, but no
+     samples have been written. The resulting file will be
+     invalid anyway, just don't let us crash */
+  
+  if(!stsc->table) 
+    return;
+
+  for(i = 1, last_same = 0; i < stsc->total_entries; i++)
+    {
+    if(stsc->table[i].samples != stsc->table[last_same].samples)
+      {
+      /* An entry has a different sample count. */
+      last_same++;
+      if(last_same < i)
+        {
+        /* Move it up the list. */
+        stsc->table[last_same] = stsc->table[i];
+        }
+      }
+    }
+  last_same++;
+  stsc->total_entries = last_same;
+  }
 
 void quicktime_write_stsc(quicktime_t *file, quicktime_stsc_t *stsc)
-{
-	int i, last_same;
-	quicktime_atom_t atom;
+  {
+  int i;
+  quicktime_atom_t atom;
+  
+  quicktime_atom_write_header(file, &atom, "stsc");
 
-        /* This can happen, if a stream was created, but no
-           samples have been written. The resulting file will be
-           invalid anyway, just don't let us crash */
+  quicktime_write_char(file, stsc->version);
+  quicktime_write_int24(file, stsc->flags);
+  quicktime_write_int32(file, stsc->total_entries);
+  for(i = 0; i < stsc->total_entries; i++)
+    {
+    quicktime_write_int32(file, stsc->table[i].chunk);
+    quicktime_write_int32(file, stsc->table[i].samples);
+    quicktime_write_int32(file, stsc->table[i].id);
+    }
 
-        if(!stsc->table) 
-          return;
-        
-        quicktime_atom_write_header(file, &atom, "stsc");
-
-	for(i = 1, last_same = 0; i < stsc->total_entries; i++)
-	{
-		if(stsc->table[i].samples != stsc->table[last_same].samples)
-		{
-/* An entry has a different sample count. */
-			last_same++;
-			if(last_same < i)
-			{
-/* Move it up the list. */
-				stsc->table[last_same] = stsc->table[i];
-			}
-		}
-	}
-	last_same++;
-	stsc->total_entries = last_same;
-
-
-	quicktime_write_char(file, stsc->version);
-	quicktime_write_int24(file, stsc->flags);
-	quicktime_write_int32(file, stsc->total_entries);
-	for(i = 0; i < stsc->total_entries; i++)
-	{
-		quicktime_write_int32(file, stsc->table[i].chunk);
-		quicktime_write_int32(file, stsc->table[i].samples);
-		quicktime_write_int32(file, stsc->table[i].id);
-	}
-
-	quicktime_atom_write_footer(file, &atom);
-}
+  quicktime_atom_write_footer(file, &atom);
+  }
 
 int quicktime_update_stsc(quicktime_stsc_t *stsc, long chunk, long samples)
 {

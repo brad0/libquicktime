@@ -30,6 +30,7 @@
 
 */
 
+
 #include <quicktime/lqt.h>
 #include <quicktime/colormodels.h>
 
@@ -85,6 +86,7 @@
 static quicktime_t *qt = NULL;
 
 #define COUNT_SAMPLES
+#define DUMP_TIMECODES
 
 #ifdef COUNT_SAMPLES
 int64_t total_samples_decoded = 0;
@@ -124,6 +126,25 @@ static int oh_width = 0;
 static unsigned long   lut_red[256];
 static unsigned long   lut_green[256];
 static unsigned long   lut_blue[256];
+
+#ifdef DUMP_TIMECODES
+
+int has_timecodes = 0;
+uint32_t timecode_flags;
+
+static void dump_timecode(uint32_t tc)
+  {
+  int sign, hours, minutes, seconds, frames;
+  
+  lqt_parse_timecode(tc, &sign, &hours,
+                     &minutes, &seconds, &frames);
+  
+  printf("Timecode: %s%02d:%02d:%02d.%02d (0x%08x)\n",
+         (sign ? "-" : ""),
+         hours, minutes, seconds, frames, tc);
+  }
+
+#endif
 
 /* Video stuff */
 
@@ -920,6 +941,9 @@ static void qt_init(FILE *fp, char *filename)
 	qt_width  = quicktime_video_width(qt,0);
 	qt_height = quicktime_video_height(qt,0);
         qt_timescale = lqt_video_time_scale(qt,0);
+#ifdef DUMP_TIMECODES
+        has_timecodes = lqt_has_timecode_track(qt, 0, &timecode_flags);
+#endif
         fprintf(stderr, _("Timescale: %d\n"), qt_timescale);
     }
 
@@ -1132,67 +1156,83 @@ static int qt_frame_decode(void)
   int i, j, k1, k2, x2, x, y, i2;
   int pano_width = lqt_qtvr_get_width(qt);
   int pano_height = lqt_qtvr_get_height(qt);
-
-  if (qt_isqtvr == QTVR_OBJ) {
-	/* sanity check and decode  */
-	if (quicktime_video_position(qt, 0) >= 0 &&
-	    quicktime_video_position(qt, 0) < quicktime_video_length(qt,0))
-	    lqt_decode_video(qt, qt_rows, 0);
-	//    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
+#ifdef DUMP_TIMECODES
+  uint32_t timecode;
+#endif
+  if (qt_isqtvr == QTVR_OBJ)
+    {
+    /* sanity check and decode  */
+    if (quicktime_video_position(qt, 0) >= 0 &&
+        quicktime_video_position(qt, 0) < quicktime_video_length(qt,0))
+      lqt_decode_video(qt, qt_rows, 0);
+    //    quicktime_decode_scaled(qt,0,0,qt_width,qt_height,qt_width,qt_height,
     //			    qt_cmodel,qt_rows,0);
     }
-    else if (qt_isqtvr == QTVR_PAN) {
-		float qdist = pow(pano_width / (2 * M_PI), 2);
-		int tilt = ypos + qtvr_dheight / 2 - pano_height / 2;
-		int tmp_row_offset;
-		float hofac, hofac2;
+  else if (qt_isqtvr == QTVR_PAN)
+    {
+    float qdist = pow(pano_width / (2 * M_PI), 2);
+    int tilt = ypos + qtvr_dheight / 2 - pano_height / 2;
+    int tmp_row_offset;
+    float hofac, hofac2;
 		
-		hofac = qtvr_dheight * (qtvr_dheight - pano_height) / (-12 * qdist);
+    hofac = qtvr_dheight * (qtvr_dheight - pano_height) / (-12 * qdist);
 		
-		for (j = 0; j < qtvr_dheight; j++) {
-			tmp_row_offset = (ypos + j) * qtvr_dwidth;
-			for (i = 0; i < qtvr_dwidth; i++) {
-				k2 = i * 3;
-				k1 = (qt_frame_tmp[1][tmp_row_offset + i] * (pano_width + oh_width) +
-					  qt_frame_tmp[0][tmp_row_offset + i] + xpos) * 3;
+    for (j = 0; j < qtvr_dheight; j++)
+      {
+      tmp_row_offset = (ypos + j) * qtvr_dwidth;
+      for (i = 0; i < qtvr_dwidth; i++)
+        {
+        k2 = i * 3;
+        k1 = (qt_frame_tmp[1][tmp_row_offset + i] * (pano_width + oh_width) +
+              qt_frame_tmp[0][tmp_row_offset + i] + xpos) * 3;
 
-				qt_frame_row[k2] = qt_panorama_buffer[k1];
-				qt_frame_row[k2 + 1] = qt_panorama_buffer[k1 + 1];
-				qt_frame_row[k2 + 2] = qt_panorama_buffer[k1 + 2];
-			}
+        qt_frame_row[k2] = qt_panorama_buffer[k1];
+        qt_frame_row[k2 + 1] = qt_panorama_buffer[k1 + 1];
+        qt_frame_row[k2 + 2] = qt_panorama_buffer[k1 + 2];
+        }
+      
+      // Perspective Correction
+      // probably wrong
+      y = j - (qtvr_dheight/2);
+      hofac2 = (((y * tilt) / (qdist * 3)) + 1 - hofac);
+      for (i=0; i < qtvr_dwidth; i++)
+        {
+        x = i - (qtvr_dwidth / 2);
 			
-			// Perspective Correction
-			// probably wrong
-			y = j - (qtvr_dheight/2);
-			hofac2 = (((y * tilt) / (qdist * 3)) + 1 - hofac);
-			for (i=0; i < qtvr_dwidth; i++) {
-				x = i - (qtvr_dwidth / 2);
+        x2 = x * hofac2;
+        i2 =  (qtvr_dwidth / 2) + x2;
 			
-				x2 = x * hofac2;
-				i2 =  (qtvr_dwidth / 2) + x2;
-			
-				k2 = (j * qtvr_dwidth + i) * 3;
-				k1 = i2 * 3;
+        k2 = (j * qtvr_dwidth + i) * 3;
+        k1 = i2 * 3;
 				
-				qt_frame[k2] = qt_frame_row[k1];
-				qt_frame[k2 + 1] = qt_frame_row[k1 + 1];
-				qt_frame[k2 + 2] = qt_frame_row[k1 + 2];
-			}
-		}
+        qt_frame[k2] = qt_frame_row[k1];
+        qt_frame[k2 + 1] = qt_frame_row[k1 + 1];
+        qt_frame[k2 + 2] = qt_frame_row[k1 + 2];
+        }
+      }
     }
-    else {
-		if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
-			return -1;
+  else
+    {
+    if (quicktime_video_position(qt,0) >= quicktime_video_length(qt,0))
+      return -1;
 		
-		if (qt_drop) {
-			qt_droptotal += qt_drop;
-			fprintf(stderr,_("dropped %d frame(s)\r"),qt_droptotal);
-			for (i = 0; i < qt_drop; i++)
-			  	quicktime_read_frame(qt,qt_frame,0);
-			qt_drop = 0;
-		}
-		qt_frame_time = lqt_frame_time(qt, 0);
-		lqt_decode_video(qt, qt_rows, 0);
+    if (qt_drop)
+      {
+      qt_droptotal += qt_drop;
+      fprintf(stderr,_("dropped %d frame(s)\r"),qt_droptotal);
+      for (i = 0; i < qt_drop; i++)
+        quicktime_read_frame(qt,qt_frame,0);
+      qt_drop = 0;
+      }
+    qt_frame_time = lqt_frame_time(qt, 0);
+
+#ifdef DUMP_TIMECODES
+    if(lqt_read_timecode(qt, 0, &timecode))
+      dump_timecode(timecode);
+#endif
+    
+
+    lqt_decode_video(qt, qt_rows, 0);
 
     }
   return 0;

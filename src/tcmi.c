@@ -24,8 +24,6 @@
 
 #include "lqt_private.h"
 
-#define TCMI_NAME "Untitled"
-
 void quicktime_tcmi_init(quicktime_tcmi_t *tcmi)
   {
   tcmi->version = 0;

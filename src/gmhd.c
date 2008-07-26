@@ -29,6 +29,13 @@ void quicktime_gmhd_init(quicktime_gmhd_t *gmhd)
   quicktime_gmin_init(&gmhd->gmin);
   }
 
+void quicktime_gmhd_init_timecode(quicktime_gmhd_t *gmhd)
+  {
+  quicktime_gmin_init(&gmhd->gmin);
+  quicktime_tmcd_init(&gmhd->tmcd);
+  gmhd->has_tmcd = 1;
+  }
+
 void quicktime_gmhd_delete(quicktime_gmhd_t *gmhd)
   {
   quicktime_gmin_delete(&gmhd->gmin);

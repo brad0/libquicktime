@@ -1345,6 +1345,7 @@ typedef struct
 typedef struct
 {
 	quicktime_trak_t *track;
+	quicktime_trak_t *timecode_track;
 	long current_position;   /* current frame in output file */
 	long current_chunk;      /* current chunk in output file */
 
@@ -1373,6 +1374,21 @@ typedef struct
 
         int compatibility_flags; /* Taken from codec info */
 
+// Timecode stuff
+        uint32_t encode_timecode;
+        int has_encode_timecode;
+	long current_timecode_chunk;      /* current chunk in output file */
+
+/* Timestamp of the last encoded timecode */
+        int64_t timecode_timestamp;
+
+/* For decoding, *all* timecodes are read here.
+ * For encoding, this contains a small buffer such that we don't
+   start a new chunk for each timecode. */
+        int timecodes_alloc;
+        int num_timecodes;
+        uint32_t * timecodes;
+        int timecodes_written;
   } quicktime_video_map_t;
 
 /* Text track */

@@ -106,6 +106,15 @@ void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr)
 	strcpy(hdlr->component_name, "Libquicktime Sound Media Handler");
 }
 
+void quicktime_hdlr_init_timecode(quicktime_hdlr_t *hdlr)
+  {
+  hdlr->component_subtype[0] = 't';
+  hdlr->component_subtype[1] = 'm';
+  hdlr->component_subtype[2] = 'c';
+  hdlr->component_subtype[3] = 'd';
+  strcpy(hdlr->component_name, "Libquicktime Time Code Media Handler");
+  }
+
 void quicktime_hdlr_init_text(quicktime_hdlr_t *hdlr)
   {
   hdlr->component_subtype[0] = 't';

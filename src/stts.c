@@ -39,7 +39,7 @@ void quicktime_stts_init_table(quicktime_stts_t *stts)
     {
     stts->total_entries = 1;
     stts->entries_allocated = 1;
-    stts->table = malloc(sizeof(*stts->table) * stts->total_entries);
+    stts->table = calloc(stts->total_entries, sizeof(*stts->table));
     }
   }
 
@@ -49,8 +49,6 @@ void quicktime_stts_init_qtvr(quicktime_t *file,
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
   table = &(stts->table[0]);
-
-  table->sample_count = 0;      /* need to set this when closing */
   table->sample_duration = frame_duration;
   }
 
@@ -60,8 +58,6 @@ void quicktime_stts_init_panorama(quicktime_t *file,
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
   table = &(stts->table[0]);
-
-  table->sample_count = 0;      /* need to set this when closing */
   table->sample_duration = frame_duration;
   }
 
@@ -71,8 +67,6 @@ void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts,
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
   table = &(stts->table[0]);
-
-  table->sample_count = 0;      /* need to set this when closing */
   table->sample_duration = frame_duration;
   stts->default_duration = frame_duration;
   }
@@ -83,9 +77,12 @@ void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts,
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
   table = &(stts->table[0]);
-
-  table->sample_count = 0;     /* need to set this when closing */
   table->sample_duration = 1;
+  }
+
+void quicktime_stts_init_timecode(quicktime_t *file, quicktime_stts_t *stts)
+  {
+  quicktime_stts_init_table(stts);
   }
 
 void quicktime_stts_delete(quicktime_stts_t *stts)

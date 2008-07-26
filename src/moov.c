@@ -249,12 +249,13 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
   {
   int i;
-  long longest_duration = 0;
-  long duration, timescale;
+  int64_t longest_duration = 0;
+  int64_t duration;
+  int timescale;
   /* get the duration from the longest track in the mvhd's timescale */
   for(i = 0; i < moov->total_tracks; i++)
     {
-    quicktime_trak_fix_counts(file, moov->trak[i]);
+    quicktime_trak_fix_counts(file, moov->trak[i], moov->mvhd.time_scale);
     quicktime_trak_duration(moov->trak[i], &duration, &timescale);
     
     duration = (long)((float)duration / timescale * moov->mvhd.time_scale);
@@ -293,9 +294,9 @@ void quicktime_write_moov(quicktime_t *file, quicktime_moov_t *moov)
         if(moov->has_iods)
           quicktime_write_iods(file, moov);
 	for(i = 0; i < moov->total_tracks; i++)
-	{
-		quicktime_write_trak(file, moov->trak[i], moov->mvhd.time_scale);
-	}
+          {
+          quicktime_write_trak(file, moov->trak[i]);
+          }
 	quicktime_write_udta(file, &(moov->udta));
 	/*quicktime_write_ctab(file, &(moov->ctab)); */
 

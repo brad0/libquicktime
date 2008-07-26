@@ -370,7 +370,7 @@ void quicktime_edts_delete(quicktime_edts_t *edts);
 void quicktime_edts_init_table(quicktime_edts_t *edts);
 void quicktime_read_edts(quicktime_t *file, quicktime_edts_t *edts, quicktime_atom_t *edts_atom);
 void quicktime_edts_dump(quicktime_edts_t *edts);
-void quicktime_write_edts(quicktime_t *file, quicktime_edts_t *edts, long duration);
+void quicktime_write_edts(quicktime_t *file, quicktime_edts_t *edts);
 
 /* enda.c */
 
@@ -389,14 +389,14 @@ int quicktime_get_enda(quicktime_stsd_table_t *table);
 void quicktime_elst_table_init(quicktime_elst_table_t *table);
 void quicktime_elst_table_delete(quicktime_elst_table_t *table);
 void quicktime_read_elst_table(quicktime_t *file, quicktime_elst_table_t *table);
-void quicktime_write_elst_table(quicktime_t *file, quicktime_elst_table_t *table, long duration);
+void quicktime_write_elst_table(quicktime_t *file, quicktime_elst_table_t *table);
 void quicktime_elst_table_dump(quicktime_elst_table_t *table);
 void quicktime_elst_init(quicktime_elst_t *elst);
 void quicktime_elst_init_all(quicktime_elst_t *elst);
 void quicktime_elst_delete(quicktime_elst_t *elst);
 void quicktime_elst_dump(quicktime_elst_t *elst);
 void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst);
-void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst, long duration);
+void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst);
 
 /* esds.c */
 
@@ -473,6 +473,8 @@ void quicktime_gmhd_delete(quicktime_gmhd_t *gmhd);
 void quicktime_gmhd_dump(quicktime_gmhd_t *gmhd);
 void quicktime_read_gmhd(quicktime_t *file, quicktime_gmhd_t *gmhd, quicktime_atom_t *parent_atom);
 void quicktime_write_gmhd(quicktime_t *file, quicktime_gmhd_t *gmhd);
+void quicktime_gmhd_init_timecode(quicktime_gmhd_t *gmhd);
+
 
 /* gmhd_text.c */
 
@@ -504,6 +506,8 @@ void quicktime_hdlr_init_audio(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_data(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_text(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_init_tx3g(quicktime_hdlr_t *hdlr);
+void quicktime_hdlr_init_timecode(quicktime_hdlr_t *hdlr);
+
 
 void quicktime_hdlr_init_udta(quicktime_hdlr_t *hdlr);
 void quicktime_hdlr_delete(quicktime_hdlr_t *hdlr);
@@ -636,6 +640,14 @@ void quicktime_mdia_init_tx3g(quicktime_t * file,
                               quicktime_mdia_t * mdia, 
                               int timescale);
 
+void quicktime_mdia_init_timecode(quicktime_t *file,
+                                  quicktime_mdia_t *mdia,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags);
+
+
 /* minf.c */
 
 void quicktime_minf_init(quicktime_minf_t *minf);
@@ -678,6 +690,12 @@ void quicktime_minf_init_text(quicktime_t *file,
 void quicktime_minf_init_tx3g(quicktime_t *file, 
                               quicktime_minf_t *minf);
 
+void quicktime_minf_init_timecode(quicktime_t *file,
+                                  quicktime_minf_t *minf,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags);
 
 /* moov.c */
 
@@ -837,6 +855,12 @@ void quicktime_stbl_init_text(quicktime_t *file,
 void quicktime_stbl_init_tx3g(quicktime_t *file,
                               quicktime_stbl_t *stbl);
 
+void quicktime_stbl_init_timecode(quicktime_t *file,
+                                  quicktime_stbl_t *stbl,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags);
 
 /* stco.c */
 
@@ -860,6 +884,7 @@ void quicktime_stsc_dump(quicktime_stsc_t *stsc);
 void quicktime_read_stsc(quicktime_t *file, quicktime_stsc_t *stsc);
 void quicktime_write_stsc(quicktime_t *file, quicktime_stsc_t *stsc);
 int quicktime_update_stsc(quicktime_stsc_t *stsc, long chunk, long samples);
+void quicktime_compress_stsc(quicktime_stsc_t *stsc);
 
 /* stsd.c */
 
@@ -869,7 +894,6 @@ void quicktime_stsd_delete(quicktime_stsd_t *stsd);
 void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd);
 void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd);
 void quicktime_write_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_t *stsd);
-
 
 /* This function is called by the decoder after the complete minf atom is read (i.e. if we know
    for sure, what kind of stream it is. */
@@ -905,6 +929,12 @@ void quicktime_stsd_init_text(quicktime_t *file,
 
 void quicktime_stsd_init_tx3g(quicktime_t *file,
                               quicktime_stsd_t *stsd);
+
+void quicktime_stsd_init_timecode(quicktime_t *file,
+				  quicktime_stsd_t *stsd,
+				  int timescale,
+				  int frameduration,
+				  int numframes, uint32_t flags);
 
 /* stsdtable.c */
 
@@ -969,9 +999,7 @@ void quicktime_write_stsz(quicktime_t *file, quicktime_stsz_t *stsz);
 void quicktime_update_stsz(quicktime_stsz_t *stsz, 
                            long sample, 
                            long sample_size);
-
-
-
+void quicktime_stsz_init_timecode(quicktime_stsz_t *stsz);
 
 /* stts.c */
 
@@ -979,6 +1007,8 @@ void quicktime_stts_init(quicktime_stts_t *stts);
 void quicktime_stts_init_table(quicktime_stts_t *stts);
 void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int frame_duration);
 void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts, int sample_rate);
+void quicktime_stts_init_timecode(quicktime_t *file, quicktime_stts_t *stts);
+
 void quicktime_stts_delete(quicktime_stts_t *stts);
 void quicktime_stts_dump(quicktime_stts_t *stts);
 void quicktime_read_stts(quicktime_t *file, quicktime_stts_t *stts);
@@ -995,6 +1025,7 @@ int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
 
 int64_t quicktime_sample_to_time(quicktime_stts_t *stts, int64_t sample,
                                  int64_t * stts_index, int64_t * stts_count);
+
 
 
 /* texttrack.c */
@@ -1015,6 +1046,12 @@ void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd);
 void quicktime_write_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd);
 void quicktime_tkhd_init_video(quicktime_t *file, quicktime_tkhd_t *tkhd, 
                                int frame_w, int frame_h);
+
+void quicktime_tkhd_init_timecode(quicktime_t *file,
+                                  quicktime_tkhd_t *tkhd,
+                                  int frame_w,
+                                  int frame_h);
+
 
 /* trak.c */
 
@@ -1048,6 +1085,14 @@ int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
 int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
                              int timescale);
 
+int quicktime_trak_init_timecode(quicktime_t *file, 
+                                 quicktime_trak_t *trak,
+                                 int time_scale,
+                                 int frame_duration,
+                                 int num_frames,
+                                 int frame_w,
+                                 int frame_h,
+                                 uint32_t flags);
 
 int quicktime_trak_init_panorama(quicktime_t *file,
 				 quicktime_trak_t *trak,
@@ -1061,7 +1106,7 @@ int quicktime_trak_dump(quicktime_trak_t *trak);
 quicktime_trak_t* quicktime_add_trak(quicktime_t *file);
 int quicktime_delete_trak(quicktime_moov_t *moov);
 int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_atom_t *trak_atom);
-int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak, long moov_time_scale);
+int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak);
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 
@@ -1125,12 +1170,28 @@ void quicktime_write_chunk_footer(quicktime_t *file,
                                   int samples);
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
-                            long *duration, 
-                            long *timescale);
+                            int64_t *duration, 
+                            int *timescale);
 
-int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak);
+int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
+                              int moov_time_scale);
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
+
+
+/* tcmi.c */
+
+void quicktime_read_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
+void quicktime_write_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_dump(quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_delete(quicktime_tcmi_t *tcmi);
+void quicktime_tcmi_init(quicktime_tcmi_t *tcmi);
+
+/* timecode.c */
+
+void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
+                        int force);
+
 
 /* tmcd.c */
 
@@ -1140,13 +1201,6 @@ void quicktime_tmcd_delete(quicktime_tmcd_t *tmcd);
 void quicktime_read_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd, quicktime_atom_t *parent_atom);
 void quicktime_write_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd);
 
-/* tcmi.c */
-
-void quicktime_read_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
-void quicktime_write_tcmi(quicktime_t *file, quicktime_tcmi_t *tcmi);
-void quicktime_tcmi_dump(quicktime_tcmi_t *tcmi);
-void quicktime_tcmi_delete(quicktime_tcmi_t *tcmi);
-void quicktime_tcmi_init(quicktime_tcmi_t *tcmi);
 
 /* tref.c */
 
@@ -1158,6 +1212,7 @@ int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref,
 void quicktime_write_tref(quicktime_t *file, quicktime_tref_t *tref);
 int quicktime_tref_init_qtvr(quicktime_tref_t *tref, int track_type);
 int quicktime_tref_init_chap(quicktime_tref_t * tref, int track_id);
+int quicktime_tref_init_tmcd(quicktime_tref_t * tref, int track_id);
 
 
 /* udta.c */

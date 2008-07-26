@@ -101,6 +101,7 @@ stss.c \
 stsz.c \
 stts.c \
 texttrack.c \
+timecode.c \
 tkhd.c \
 trak.c \
 translation.c \

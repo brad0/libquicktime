@@ -114,6 +114,21 @@ void quicktime_stbl_init_tx3g(quicktime_t *file,
   /* stts doesn't need to be updated */
   }
 
+void quicktime_stbl_init_timecode(quicktime_t *file,
+                                  quicktime_stbl_t *stbl,
+                                  int time_scale,
+                                  int frame_duration,
+                                  int num_frames,
+                                  uint32_t flags)
+  {
+  quicktime_stsd_init_timecode(file, &(stbl->stsd), time_scale,
+                               frame_duration, num_frames, flags);
+  quicktime_stts_init_timecode(file, &(stbl->stts));
+  quicktime_stsc_init_video(file, &(stbl->stsc));
+  quicktime_stsz_init_timecode(&stbl->stsz);
+  quicktime_stco_init_common(file, &(stbl->stco));
+  }
+
 
 void quicktime_stbl_delete(quicktime_stbl_t *stbl)
 {
@@ -130,7 +145,8 @@ void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
 	lqt_dump("    sample table\n");
 	quicktime_stsd_dump(minf_ptr, &(stbl->stsd));
 	quicktime_stts_dump(&(stbl->stts));
-	quicktime_stss_dump(&(stbl->stss));
+        if(stbl->stss.total_entries)
+          quicktime_stss_dump(&(stbl->stss));
 	quicktime_stsc_dump(&(stbl->stsc));
 	quicktime_stsz_dump(&(stbl->stsz));
 	quicktime_stco_dump(&(stbl->stco));

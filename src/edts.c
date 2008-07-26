@@ -59,10 +59,10 @@ void quicktime_edts_dump(quicktime_edts_t *edts)
 	quicktime_elst_dump(&(edts->elst));
 }
 
-void quicktime_write_edts(quicktime_t *file, quicktime_edts_t *edts, long duration)
+void quicktime_write_edts(quicktime_t *file, quicktime_edts_t *edts)
 {
 	quicktime_atom_t atom;
 	quicktime_atom_write_header(file, &atom, "edts");
-	quicktime_write_elst(file, &(edts->elst), duration);
+	quicktime_write_elst(file, &(edts->elst));
 	quicktime_atom_write_footer(file, &atom);
 }

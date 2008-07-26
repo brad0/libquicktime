@@ -97,6 +97,17 @@ int quicktime_tref_init_chap(quicktime_tref_t * tref, int track_id)
   return 0;
   }
 
+int quicktime_tref_init_tmcd(quicktime_tref_t * tref, int track_id)
+  {
+  quicktime_track_reference_t * ref = add_reference(tref);
+  ref->type[0] = 't';
+  ref->type[1] = 'm';
+  ref->type[2] = 'c';
+  ref->type[3] = 'd';
+  add_track(ref, track_id);
+  return 0;
+  }
+
 
 
 int quicktime_tref_delete(quicktime_tref_t *tref)
