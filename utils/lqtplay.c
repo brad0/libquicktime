@@ -131,12 +131,13 @@ static unsigned long   lut_blue[256];
 
 int has_timecodes = 0;
 uint32_t timecode_flags;
+int timecode_rate;
 
 static void dump_timecode(quicktime_t * file, int track, uint32_t tc)
   {
   int sign, hours, minutes, seconds, frames;
   
-  lqt_parse_timecode(file, track, tc, &sign, &hours,
+  lqt_parse_timecode(timecode_flags, timecode_rate, tc, &sign, &hours,
                      &minutes, &seconds, &frames);
   
   printf("Timecode: %s%02d:%02d:%02d.%02d (0x%08x)\n",
@@ -942,7 +943,7 @@ static void qt_init(FILE *fp, char *filename)
 	qt_height = quicktime_video_height(qt,0);
         qt_timescale = lqt_video_time_scale(qt,0);
 #ifdef DUMP_TIMECODES
-        has_timecodes = lqt_has_timecode_track(qt, 0, &timecode_flags);
+        has_timecodes = lqt_has_timecode_track(qt, 0, &timecode_flags, &timecode_rate);
 #endif
         fprintf(stderr, _("Timescale: %d\n"), qt_timescale);
     }

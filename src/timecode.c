@@ -29,7 +29,7 @@
 #define TIMECODES_PER_CHUNK 16
 
 void lqt_add_timecode_track(quicktime_t * file, int track,
-                            uint32_t flags)
+                            uint32_t flags, int framerate)
   {
   quicktime_video_map_t * vm = file->vtracks + track;
   int time_scale, frame_duration, constant;
@@ -45,7 +45,7 @@ void lqt_add_timecode_track(quicktime_t * file, int track,
   
   vm->timecode_track = quicktime_add_track(file);
   quicktime_trak_init_timecode(file, vm->timecode_track, time_scale, frame_duration,
-                               (int)(fps + 0.5), width, height, flags);
+                               framerate, width, height, flags);
   
   /* reference timecode track */
   quicktime_tref_init_tmcd(&vm->track->tref, vm->timecode_track->tkhd.track_id);
@@ -70,13 +70,17 @@ void lqt_write_timecode(quicktime_t * file, int track,
 
 
 int lqt_has_timecode_track(quicktime_t * file, int track,
-                           uint32_t * flags)
+                           uint32_t * flags, int * framerate)
   {
   quicktime_video_map_t * vm = file->vtracks + track;
 
   if(vm->timecode_track)
     {
-    *flags = vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.flags;
+    if(flags)
+      *flags = vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.flags;
+    if(framerate)
+      *framerate = vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.numframes;
+    
     return 1;
     }
   else
@@ -215,13 +219,11 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
     }
   }
 
-void lqt_parse_timecode(quicktime_t * file,
-                        int track,
+void lqt_parse_timecode(uint32_t flags,
+                        int framerate,
                         uint32_t tc, int * sign, int * hours,
                         int * minutes, int * seconds, int * frames)
   {
-  quicktime_stsd_tmcd_t * tmcd;
-  tmcd = &file->vtracks[track].timecode_track->mdia.minf.stbl.stsd.table[0].tmcd;
   
 #if 0
   if(hours)
@@ -237,7 +239,7 @@ void lqt_parse_timecode(quicktime_t * file,
     *frames =  (tc & 0x000000FF);
 #endif
 
-  if(tmcd->flags & LQT_TIMECODE_DROP)
+  if(flags & LQT_TIMECODE_DROP)
     {
     int64_t D, M;
 
@@ -247,8 +249,8 @@ void lqt_parse_timecode(quicktime_t * file,
     }
 
   if(frames)
-    *frames  = tc % tmcd->numframes;
-  tc /= tmcd->numframes;
+    *frames  = tc % framerate;
+  tc /= framerate;
   
   if(seconds)
     *seconds = tc % 60;

@@ -497,6 +497,7 @@ void lqt_get_text_bg_color(quicktime_t * file, int track,
  *  \param file A quicktime handle
  *  \param track Video track index (starting with 0)
  *  \param flags Zero or more of the LQT_TIMECODE_* flags
+ *  \param framerate The integer framerate
  *
  *  If the format (e.g. AVI) doesn't support timecode, this
  *  function emits a warning.
@@ -504,7 +505,7 @@ void lqt_get_text_bg_color(quicktime_t * file, int track,
  */
 
 void lqt_add_timecode_track(quicktime_t * file, int track,
-                            uint32_t flags);
+                            uint32_t flags, int framerate);
 
 /** \brief Write a timecode for the next video frame to be encoded
  *  \param file A quicktime handle
@@ -520,11 +521,12 @@ void lqt_write_timecode(quicktime_t * file, int track,
  *  \param file A quicktime handle
  *  \param track Video track index (starting with 0)
  *  \param flags If non NULL returns zero or more of the LQT_TIMECODE_* flags
+ *  \param framerate If non NULL returns the integer framerate
  *  \returns 1 if timecodes are available, 0 else
  */
   
 int lqt_has_timecode_track(quicktime_t * file, int track,
-                           uint32_t * flags);
+                           uint32_t * flags, int * framerate);
 
 /** \brief Read the timecode for the next frame to be decoded
  *  \param file A quicktime handle
@@ -552,8 +554,8 @@ int lqt_read_timecode(quicktime_t * file, int track,
  *  \param frames If non-NULL, returns frames
  */
 
-void lqt_parse_timecode(quicktime_t * file,
-                        int track,
+void lqt_parse_timecode(uint32_t format_flags,
+                        int framerate,
                         uint32_t tc, int * sign, int * hours,
                         int * minutes, int * seconds, int * frames);
   

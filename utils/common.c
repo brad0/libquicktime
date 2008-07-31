@@ -45,17 +45,19 @@ void quicktime_print_info(quicktime_t * qtfile)
   int pixel_width, pixel_height;
   int cmodel;
   uint32_t timecode_flags;
+  int timecode_rate;
   
   printf(_("Type: %s\n"), lqt_file_type_to_string(lqt_get_file_type(qtfile)));
 
   
   str = quicktime_get_copyright(qtfile);
-
   if (str)
     printf(_("    copyright: %s\n"),str);
+
   str = quicktime_get_name(qtfile);
   if (str)
     printf(_("    name:      %s\n"),str);
+
   str = quicktime_get_info(qtfile);
   if (str)
     printf(_("    info:      %s\n"),str);
@@ -154,8 +156,9 @@ void quicktime_print_info(quicktime_t * qtfile)
     if((pixel_width > 1) || (pixel_height > 1))
       printf(_("    Pixel aspect ratio: %d:%d\n"), pixel_width, pixel_height);
 
-    if(lqt_has_timecode_track(qtfile, i, &timecode_flags))
-      printf(_("    Timecodes available (flags: %08x)\n"), timecode_flags);
+    if(lqt_has_timecode_track(qtfile, i, &timecode_flags, &timecode_rate))
+      printf(_("    Timecodes available (flags: %08x, rate: %d)\n"), timecode_flags,
+             timecode_rate);
     else
       printf(_("    No timecodes available\n"));
       
