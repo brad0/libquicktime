@@ -135,13 +135,29 @@ int timecode_rate;
 
 static void dump_timecode(quicktime_t * file, int track, uint32_t tc)
   {
-  int sign, hours, minutes, seconds, frames;
+  int hours, minutes, seconds, frames;
+
+  if(timecode_flags & LQT_TIMECODE_DROP)
+    {
+    int64_t D, M;
+
+    D = tc / 17982;
+    M = tc % 17982;
+    tc +=  18*D + 2*((M - 2) / 1798);
+    }
+
+  frames  = tc % timecode_rate;
+  tc /= timecode_rate;
   
-  lqt_parse_timecode(timecode_flags, timecode_rate, tc, &sign, &hours,
-                     &minutes, &seconds, &frames);
+ seconds = tc % 60;
+  tc /= 60;
   
-  printf("Timecode: %s%02d:%02d:%02d.%02d (0x%08x)\n",
-         (sign ? "-" : ""),
+  minutes = tc % 60;
+  tc /= 60;
+  
+  hours   = tc % 24;
+  
+  printf("Timecode: %02d:%02d:%02d.%02d (0x%08x)\n",
          hours, minutes, seconds, frames, tc);
   }
 
