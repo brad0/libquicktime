@@ -676,7 +676,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
       .short_name = "dvcprohd",
-      .name = TRS("FFMPEG DVCPROHD (NTSC)"),
+      .name = TRS("FFMPEG DVCPROHD"),
       .fourccs = { "dvhq", // DVCPRO HD 720p50
                    "dvhp", // DVCPRO HD 720p60
                    "dvh5", // DVCPRO HD 50i produced by FCP
