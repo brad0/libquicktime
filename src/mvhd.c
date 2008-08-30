@@ -57,8 +57,12 @@ void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 	lqt_dump(" movie header (mvhd)\n");
 	lqt_dump("  version %d\n", mvhd->version);
 	lqt_dump("  flags %ld\n", mvhd->flags);
-	lqt_dump("  creation_time %"PRIu64"\n", mvhd->creation_time);
-	lqt_dump("  modification_time %"PRIu64"\n", mvhd->modification_time);
+	lqt_dump("  creation_time ");
+        lqt_dump_time(mvhd->creation_time);
+        lqt_dump("\n");
+	lqt_dump("  modification_time ");
+        lqt_dump_time(mvhd->modification_time);
+        lqt_dump("\n");
 	lqt_dump("  time_scale %ld\n", mvhd->time_scale);
 	lqt_dump("  duration %"PRId64"\n", mvhd->duration);
 	lqt_dump("  preferred_rate %f\n", mvhd->preferred_rate);

@@ -667,6 +667,26 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
       .do_encode = 1
     },
+    /* DVCPRO HD (decoding only for now) */
+    {
+      .id = CODEC_ID_DVVIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .encode_parameters = encode_parameters_dvvideo,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "dvcprohd",
+      .name = TRS("FFMPEG DVCPROHD (NTSC)"),
+      .fourccs = { "dvhq", // DVCPRO HD 720p50
+                   "dvhp", // DVCPRO HD 720p60
+                   "dvh5", // DVCPRO HD 50i produced by FCP
+                   "dvh6", // DVCPRO HD 60i produced by FCP
+                   "dvh3", // DVCPRO HD 30p produced by FCP
+                   (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 1
+    },
     {
       .id = CODEC_ID_FFVHUFF,
       .index = -1,

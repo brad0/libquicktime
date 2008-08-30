@@ -1338,6 +1338,8 @@ int quicktime_match_24(char *input, char *output);
 void lqt_hexdump(uint8_t * data, int len, int linebreak);
 void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak);
 
+void lqt_dump_time(uint64_t t);
+
 /* lqt_quicktime.c */
 
 int quicktime_init(quicktime_t *file);

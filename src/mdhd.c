@@ -99,8 +99,12 @@ void quicktime_mdhd_dump(quicktime_mdhd_t *mdhd)
 	lqt_dump("   media header (mdhd)\n");
 	lqt_dump("    version %d\n", mdhd->version);
 	lqt_dump("    flags %ld\n", mdhd->flags);
-	lqt_dump("    creation_time %lu\n", mdhd->creation_time);
-	lqt_dump("    modification_time %lu\n", mdhd->modification_time);
+	lqt_dump("    creation_time ");
+        lqt_dump_time(mdhd->creation_time);
+        lqt_dump("\n");
+	lqt_dump("    modification_time ");
+        lqt_dump_time(mdhd->modification_time);
+        lqt_dump("\n");
 	lqt_dump("    time_scale %ld\n", mdhd->time_scale);
 	lqt_dump("    duration %ld\n", mdhd->duration);
 	lqt_dump("    language %d\n", mdhd->language);

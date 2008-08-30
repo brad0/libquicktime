@@ -924,3 +924,17 @@ void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak)
   {
   do_hexdump(data, len, linebreak, stdout);  
   }
+
+void lqt_dump_time(uint64_t t)
+  {
+  time_t ti;
+  struct tm tm;
+  /*  2082844800 = seconds between 1/1/04 and 1/1/70 */
+  ti = t - 2082844800;
+  localtime_r(&ti, &tm);
+  tm.tm_mon++;
+  tm.tm_mday++;
+  printf("%04d-%02d-%02d %02d:%02d:%02d (%"PRId64")",
+         tm.tm_year+1900, tm.tm_mon, tm.tm_mday,
+         tm.tm_hour, tm.tm_min, tm.tm_sec, t);
+  }
