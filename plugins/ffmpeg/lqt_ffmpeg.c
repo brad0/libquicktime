@@ -682,6 +682,7 @@ struct CODECIDMAP codecidmap_v[] =
                    "dvh5", // DVCPRO HD 50i produced by FCP
                    "dvh6", // DVCPRO HD 60i produced by FCP
                    "dvh3", // DVCPRO HD 30p produced by FCP
+                   "AVd1", // AVID DV100
                    (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
