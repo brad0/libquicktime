@@ -812,9 +812,15 @@ dnl
 
 AH_TEMPLATE([HAVE_GCC_VISIBILITY], [GCC Visibility support])
 
+AC_ARG_WITH([visibility], AS_HELP_STRING([--without-visibility], [Build without gcc visibility (default: test)]))
+
+if test "x$with_visibility" != "xno"; then
 LQT_TRY_CFLAGS("-fvisibility=hidden",
                COMMON_CFLAGS="$COMMON_CFLAGS -fvisibility=hidden";
 	       AC_DEFINE(HAVE_GCC_VISIBILITY))
+fi
+
+
 
 if test "x${USER_CFLAGS}" = "x"; then
 
