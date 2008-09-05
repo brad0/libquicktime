@@ -93,7 +93,7 @@ void lqt_registry_unlock()
   pthread_mutex_unlock(&codecs_mutex);
   }
 
-int lqt_registry_initialized()
+static int lqt_registry_initialized()
   {
   int ret;
   
@@ -106,7 +106,7 @@ int lqt_registry_initialized()
 
 /* Free memory of parameter info */
 
-void destroy_parameter_info(lqt_parameter_info_t * p)
+static void destroy_parameter_info(lqt_parameter_info_t * p)
   {
   int i;
   if(p->name)
@@ -145,7 +145,7 @@ void destroy_parameter_info(lqt_parameter_info_t * p)
 
 /* Free memory of codec info (public) */
 
-void destroy_codec_info(lqt_codec_info_t * ptr)
+static void destroy_codec_info(lqt_codec_info_t * ptr)
   {
   int i;
 
@@ -829,8 +829,8 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index)
   }
 
 /* Thread save methods of getting codec infos */
-
-lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
+#if 0
+static lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
   {
   const lqt_codec_info_t * info;
   lqt_codec_info_t * ret;
@@ -850,7 +850,7 @@ lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
   return ret;
   }
 
-lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
+static lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
   {
   const lqt_codec_info_t * info;
   lqt_codec_info_t * ret;
@@ -869,7 +869,7 @@ lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
   lqt_registry_unlock();
   return ret;
   }
-
+#endif
 
 
 static void 

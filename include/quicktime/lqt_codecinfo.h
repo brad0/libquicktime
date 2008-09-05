@@ -32,7 +32,11 @@
 #ifndef _LQT_CODEC_INFO_H_
 #define _LQT_CODEC_INFO_H_
 
+#pragma GCC visibility push(default)
+
 #include <inttypes.h>
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -463,5 +467,6 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info);
 }
 #endif /* __cplusplus */
 
+#pragma GCC visibility pop
 
 #endif /* _LQT_CODEC_INFO_H_ */

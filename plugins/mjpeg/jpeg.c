@@ -27,6 +27,7 @@
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
 #include <string.h>
+#include "jpeg.h"
 
 #define LOG_DOMAIN "mjpeg"
 

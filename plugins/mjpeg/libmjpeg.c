@@ -188,7 +188,7 @@ METHODDEF(void) term_destination(j_compress_ptr cinfo)
   dest->engine->output_size = dest->engine->output_allocated - dest->pub.free_in_buffer;
   }
 
-GLOBAL(void) jpeg_buffer_dest(j_compress_ptr cinfo, mjpeg_compressor *engine)
+static GLOBAL(void) jpeg_buffer_dest(j_compress_ptr cinfo, mjpeg_compressor *engine)
   {
   mjpeg_dest_ptr dest;
 
@@ -255,7 +255,7 @@ METHODDEF(void) term_source(j_decompress_ptr cinfo)
   {
   }
 
-GLOBAL(void) jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long bytes)
+static GLOBAL(void) jpeg_buffer_src(j_decompress_ptr cinfo, unsigned char *buffer, long bytes)
   {
   mjpeg_src_ptr src;
 
@@ -739,7 +739,7 @@ static void delete_temps(mjpeg_t *mjpeg)
     }
   }
 
-mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg)
+static mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg)
   {
   mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
@@ -754,7 +754,7 @@ mjpeg_compressor* mjpeg_new_decompressor(mjpeg_t *mjpeg)
   return result;
   }
 
-void mjpeg_delete_decompressor(mjpeg_compressor *engine)
+static void mjpeg_delete_decompressor(mjpeg_compressor *engine)
   {
   /*
    * Must honor the locking protocol to avoid a race condition with
@@ -769,7 +769,7 @@ void mjpeg_delete_decompressor(mjpeg_compressor *engine)
   free(engine);
   }
 
-mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
+static mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   {
   mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
@@ -823,7 +823,7 @@ mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   return result;
   }
 
-void mjpeg_delete_compressor(mjpeg_compressor *engine)
+static void mjpeg_delete_compressor(mjpeg_compressor *engine)
   {
   /*
    * Must honor the locking protocol to avoid a race condition with 
@@ -1141,9 +1141,11 @@ typedef struct
   int data_offset;
   } mjpeg_qt_hdr;
 
+#if 0
+
 #define LML_MARKER_SIZE 0x2c
 #define LML_MARKER_TAG 0xffe3
-void insert_lml33_markers(unsigned char **buffer, 
+static void insert_lml33_markers(unsigned char **buffer, 
                           long *field2_offset, 
                           long *buffer_size, 
                           long *buffer_allocated)
@@ -1164,6 +1166,7 @@ void insert_lml33_markers(unsigned char **buffer,
                  LML_MARKER_SIZE);
     }
   }
+#endif
 
 static void table_offsets(unsigned char *buffer, 
                           long buffer_size, 

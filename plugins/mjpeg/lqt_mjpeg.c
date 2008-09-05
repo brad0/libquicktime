@@ -24,6 +24,7 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
+#include "jpeg.h"
 
 void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
 
@@ -90,9 +91,9 @@ and in YUV 4:2:2"),
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 2; }
+LQT_EXTERN int get_num_codecs() { return 2; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -105,7 +106,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
   }
      
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
   {
   if((index == 0) || (index == 1))
     return quicktime_init_codec_jpeg;

@@ -41,6 +41,7 @@ extern "C" {
 #define QUICKTIME_JPEG_TAG 0x6d6a7067
 
 
+
   struct mjpeg_error_mgr {
   struct jpeg_error_mgr pub;	/* "public" fields */
   jmp_buf setjmp_buffer;	/* for return to caller */

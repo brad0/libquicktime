@@ -9,3 +9,4 @@ lqt_faac_la_SOURCES = faac.c lqt_faac.c
 lqt_faac_la_LDFLAGS = -avoid-version -module
 lqt_faac_la_LIBADD = @FAAC_LIBS@ @MODULE_LIBADD@
 
+noinst_headers = qtfaac.h

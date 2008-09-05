@@ -25,6 +25,8 @@
 #ifndef	_LQT_ATOMS_H_
 #define _LQT_ATOMS_H_
 
+#pragma GCC visibility push(default)
+
 /* Fine tuning of quicktime atoms. Use with caution */
 
 /** \defgroup atoms Fine tuning of quicktime atoms
@@ -202,5 +204,7 @@ int  lqt_set_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
  *  has more detailed information about the 'colr' atom.
  */
 int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
+
+#pragma GCC visibility pop
 
 #endif /* _LQT_ATOMS_H_ */

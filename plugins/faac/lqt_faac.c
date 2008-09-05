@@ -25,7 +25,7 @@
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 
-extern void quicktime_init_codec_faac(quicktime_audio_map_t *atrack);
+#include "qtfaac.h"
 
 static char * fourccs_faac[]     = { "mp4a", (char*)0 };
 
@@ -76,9 +76,9 @@ static lqt_codec_info_static_t codec_info_faac =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 1; }
+LQT_EXTERN int get_num_codecs() { return 1; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -93,7 +93,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
   {
   return quicktime_init_codec_faac;
   }

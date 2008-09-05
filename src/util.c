@@ -890,7 +890,7 @@ int quicktime_match_24(char *input, char *output)
 		return 0;
 }
 
-void do_hexdump(uint8_t * data, int len, int linebreak, FILE * f)
+static void do_hexdump(uint8_t * data, int len, int linebreak, FILE * f)
   {
   int i;
   int bytes_written = 0;

@@ -30,6 +30,8 @@
 #include <string.h>
 #include <strings.h>
 #include <errno.h>
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
 
 #define LOG_DOMAIN "core"
 
@@ -572,7 +574,7 @@ int quicktime_init(quicktime_t *file)
 	return 0;
 }
 
-int quicktime_delete(quicktime_t *file)
+static int quicktime_delete(quicktime_t *file)
 {
 	int i;
 	if(file->total_atracks) 
@@ -941,8 +943,8 @@ void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv)
   {
   file->vtracks[track].io_row_span_uv = row_span_uv;
   }
-
-void quicktime_set_window(quicktime_t *file,
+#if 0
+static void quicktime_set_window(quicktime_t *file,
         int in_x,                    /* Location of input frame to take picture */
         int in_y,
         int in_w,
@@ -960,7 +962,7 @@ void quicktime_set_window(quicktime_t *file,
                 file->out_h = out_h;
         }
 }
-
+#endif
 
 void quicktime_set_depth(quicktime_t *file, int depth, int track)
 {
@@ -1194,7 +1196,8 @@ long quicktime_get_keyframe_before(quicktime_t *file, long frame, int track)
 	return 0;
 }
 
-long quicktime_get_keyframe_after(quicktime_t *file, long frame, int track)
+#if 0
+static long quicktime_get_keyframe_after(quicktime_t *file, long frame, int track)
 {
         quicktime_trak_t *trak = file->vtracks[track].track;
         quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
@@ -1215,7 +1218,7 @@ long quicktime_get_keyframe_after(quicktime_t *file, long frame, int track)
                                                                                                                   
         return 0;
 }
-
+#endif
 
 void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
 {
@@ -1733,11 +1736,12 @@ void quicktime_set_avi(quicktime_t *file, int value)
   if(value)
     file->file_type = LQT_FILE_AVI_ODML;
   }
-                                                                                                                  
-int quicktime_is_avi(quicktime_t *file)
+#if 0                                                                                                                  
+static int quicktime_is_avi(quicktime_t *file)
 {
 return !!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML));
 }
+#endif
 
 static quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_t type,
                             lqt_log_callback_t log_cb, void * log_data)

@@ -27,6 +27,7 @@
 #include <quicktime/lqt_codecapi.h>
 #include <stdlib.h>
 #include <string.h>
+#include "audiocodec.h"
 
 #define LOG_DOMAIN "ima4"
 
@@ -34,7 +35,6 @@
 
 #define BLOCK_SIZE 0x22
 #define SAMPLES_PER_BLOCK 0x40
-
 
 
 typedef struct

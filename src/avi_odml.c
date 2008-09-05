@@ -23,11 +23,11 @@
 *******************************************************************************/ 
 
 #include "lqt_private.h"
-
+#if 0
 void quicktime_read_odml(quicktime_t *file, quicktime_atom_t *parent_atom)
 {
 }
-
+#endif
 
 void quicktime_init_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
 {
@@ -57,8 +57,9 @@ void quicktime_finalize_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
     quicktime_write_int32_le(file, quicktime_track_samples(file, file->vtracks[0].track));
     }
   }
-
+#if 0
 void quicktime_dump_odml(quicktime_t *file, quicktime_hdrl_t *hdrl)
   {
   
   }
+#endif

@@ -1,5 +1,5 @@
 /*******************************************************************************
- lqt_faad2.c
+ jpeg.h
 
  libquicktime - A library for reading and writing quicktime/avi/mp4 files.
  http://libquicktime.sourceforge.net
@@ -21,47 +21,4 @@
  with this library; if not, write to the Free Software Foundation, Inc., 51
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
-
-#include "lqt_private.h"
-#include <quicktime/lqt_codecapi.h>
-#include "faad2.h"
-
-static char * fourccs_faad2[]     = { "mp4a", (char*)0 };
-
-static lqt_codec_info_static_t codec_info_faad2 =
-  {
-    .name =                "faad2",
-    .long_name =           TRS("MPEG-2/4 AAC decoder"),
-    .description =         TRS("MPEG-2/4 AAC decoder (faad2 based)"),
-    .fourccs =             fourccs_faad2,
-    .type =                LQT_CODEC_AUDIO,
-    .direction =           LQT_DIRECTION_DECODE,
-    .encoding_parameters = (lqt_parameter_info_static_t*)0,
-    .decoding_parameters = (lqt_parameter_info_static_t*)0
-  };
-
-
-/* These are called from the plugin loader */
-
-LQT_EXTERN int get_num_codecs() { return 1; }
-
-LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
-  {
-  switch(index)
-    {
-    case 0:
-      return &codec_info_faad2;
-      break;
-    }  
-  return (lqt_codec_info_static_t*)0;
-  }
-     
-/*
- *   Return the actual codec constructor
- */
-
-LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
-  {
-  return quicktime_init_codec_faad2;
-  }
-
+void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);

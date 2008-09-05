@@ -1,6 +1,7 @@
 localedir = $(datadir)/locale
 noinst_HEADERS = \
-libmjpeg.h 
+jpeg.h \
+libmjpeg.h
 
 AM_CFLAGS = @JPEG_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include

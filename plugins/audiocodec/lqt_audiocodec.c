@@ -24,6 +24,7 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
+#include "audiocodec.h"
 
 /* Encoding parameters */
 
@@ -53,23 +54,6 @@
 
 /* Let's define prototypes here */
 
-void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_twos(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack);
-
-void quicktime_init_codec_in24(quicktime_audio_map_t *atrack);
-
-void quicktime_init_codec_in32(quicktime_audio_map_t *atrack);
-
-
-void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack);
-
-void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack);
-
-void quicktime_init_codec_lpcm(quicktime_audio_map_t *atrack);
 
 
 static char * fourccs_ima4[]  = { QUICKTIME_IMA4, (char*)0 };
@@ -260,9 +244,9 @@ static lqt_codec_info_static_t codec_info_lpcm =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 11; }
+LQT_EXTERN int get_num_codecs() { return 11; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -304,7 +288,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
   return (lqt_codec_info_static_t*)0;
   }
      
-extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
   {
   switch(index)
     {

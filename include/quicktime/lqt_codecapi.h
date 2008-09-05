@@ -22,18 +22,21 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/
 
+#ifndef _LQT_CODECAPI_H_
+#define _LQT_CODECAPI_H_
+
+#pragma GCC visibility push(default)
+
+#include <config.h>
 #include <quicktime/lqt_version.h>
+#include <quicktime/lqt.h>
+
 #include <quicktime/qtprivate.h>
 
-/*
- *  Return the codec api version. This function will be defined in every
- *  sourcefile, which includes it. This means, that each module must
- *  have exactly one sourcefile which includes it.
- *  This file will be the lqt_* interface file of the module.
- */
-
-#ifndef LQT_LIBQUICKTIME
-int get_codec_api_version(void) { return LQT_CODEC_API_VERSION; }
+#ifdef HAVE_GCC_VISIBILITY
+#define LQT_EXTERN __attribute__ ((visibility("default"))) 
+#else
+#define LQT_EXTERN extern
 #endif
 
 #define LQT_WAV_ID_NONE -1
@@ -120,6 +123,24 @@ typedef struct
   } lqt_codec_info_static_t;
 
 /*
+ *  Return the codec api version. This function will be defined in every
+ *  sourcefile, which includes it. This means, that each module must
+ *  have exactly one sourcefile which includes it.
+ *  This file will be the lqt_* interface file of the module.
+ */
+
+#ifndef LQT_LIBQUICKTIME
+int get_codec_api_version(void);
+int get_codec_api_version(void) { return LQT_CODEC_API_VERSION; }
+
+/* Declarations for the codec functions */
+LQT_EXTERN int get_num_codecs();
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index);
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index);
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index);
+#endif
+
+/*
  *  Create a lqt_codec_info_t structure from statically defined data
  *
  *  Typically, you will define the lqt_codec_info_static_t as well
@@ -178,10 +199,14 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
 int lqt_audio_is_vbr(quicktime_t * file, int track);
 
 /* Determine the number of VBR packets (=samples) in one chunk */
-int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * samples);
+LQT_EXTERN int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * samples);
 
 /* Read one VBR packet */
-int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int packet,
-                              uint8_t ** buffer, int * buffer_alloc, int * samples);
+int lqt_audio_read_vbr_packet(quicktime_t * file,
+                              int track, long chunk, int packet,
+                              uint8_t ** buffer, int * buffer_alloc,
+                              int * samples);
 
+#pragma GCC visibility pop
 
+#endif // _LQT_CODECAPI_H_

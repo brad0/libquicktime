@@ -7,3 +7,4 @@ lqt_x264_la_SOURCES = x264.c lqt_x264.c
 lqt_x264_la_LDFLAGS = -avoid-version -module
 lqt_x264_la_LIBADD = @X264_LIBS@ @MODULE_LIBADD@
 
+noinst_HEADERS = qtx264.h

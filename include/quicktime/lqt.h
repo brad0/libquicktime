@@ -30,6 +30,9 @@
 #include "lqt_codecinfo.h"
 #include "lqt_qtvr.h"
 
+#pragma GCC visibility push(default)
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -1433,5 +1436,6 @@ void lqt_set_max_riff_size(quicktime_t * file, int size);
 }
 #endif /* __cplusplus */
 
+#pragma GCC visibility pop
   
 #endif

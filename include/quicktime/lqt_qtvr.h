@@ -28,6 +28,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#pragma GCC visibility push(default)
   
 /* QTVR stuff */
 #define QTVR_PANO_HORZ 1
@@ -160,10 +162,13 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file);
 int lqt_qtvr_add_object_node(quicktime_t *file);
 
 int lqt_qtvr_get_panotype(quicktime_t *file);
+
+#pragma GCC visibility pop
   
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
 
   
 #endif

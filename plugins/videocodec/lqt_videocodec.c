@@ -24,18 +24,8 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
+#include "videocodec.h"
 
-void quicktime_init_codec_raw(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack);
-
-void quicktime_init_codec_v210(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v408(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v410(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
 
 static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3", (char*)0 };
 
@@ -236,9 +226,9 @@ static lqt_codec_info_static_t codec_info_yv12 =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 10; }
+LQT_EXTERN int get_num_codecs() { return 10; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -266,7 +256,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
   return (lqt_codec_info_static_t*)0;
   }
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
   {
   switch(index)
     {

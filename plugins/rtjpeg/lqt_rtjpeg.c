@@ -72,9 +72,9 @@ static lqt_codec_info_static_t codec_info_rtjpeg = {
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 1; }
+LQT_EXTERN int get_num_codecs() { return 1; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
 {
 	if(!index)
 		return &codec_info_rtjpeg;
@@ -85,7 +85,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
 {
 	if(index == 0)
 		return quicktime_init_codec_rtjpeg;

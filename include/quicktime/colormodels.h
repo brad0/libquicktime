@@ -25,6 +25,8 @@
 #ifndef COLORMODELS_H
 #define COLORMODELS_H
 
+#pragma GCC visibility push(default)
+
 /** \defgroup color Color handling
 
    Libquicktime has a built in colormodel converter, which can do implicit colormodel
@@ -222,5 +224,7 @@ int cmodel_is_planar(int color_model);
 #ifdef __cplusplus
 }
 #endif
+
+#pragma GCC visibility pop
 
 #endif

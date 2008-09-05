@@ -879,7 +879,7 @@ static lqt_codec_info_static_t codec_info_ffmpeg =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs()
+LQT_EXTERN int get_num_codecs()
 {
 	ffmpeg_map_init();
 	return ffmpeg_num_video_codecs + ffmpeg_num_audio_codecs;
@@ -946,7 +946,7 @@ static struct CODECIDMAP * find_codec(int index)
   return (struct CODECIDMAP *)0;
   }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
 {
 	struct CODECIDMAP * map;
         ffmpeg_map_init();
@@ -970,7 +970,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
 */
 
 #define IFUNC(x) \
-void quicktime_init_video_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
+static void quicktime_init_video_codec_ffmpeg ## x(quicktime_video_map_t *vtrack) \
 { \
 	int i; \
 	for(i = 0; i < ffmpeg_num_video_codecs; i++) { \
@@ -1025,7 +1025,7 @@ IFUNC(40)
 #undef IFUNC
 #define MAX_VIDEO_FUNC 40
 #define IFUNC(x) \
-void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
+static void quicktime_init_audio_codec_ffmpeg ## x(quicktime_audio_map_t *atrack) \
 { \
 	int i; \
 	for(i = 0; i < ffmpeg_num_audio_codecs; i++) { \
@@ -1082,7 +1082,7 @@ IFUNC(40)
      
 #undef IFUNC
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
 {
 	ffmpeg_map_init();
 	if(index > MAX_VIDEO_FUNC) {
@@ -1138,7 +1138,7 @@ extern lqt_init_video_codec_func_t get_video_codec(int index)
 	return (lqt_init_video_codec_func_t)0;
 }
 
-extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
 {
 	ffmpeg_map_init();
 	if(index > MAX_AUDIO_FUNC) {

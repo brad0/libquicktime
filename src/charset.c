@@ -70,7 +70,7 @@ lqt_charset_converter_create(quicktime_t * file, const char * src_charset, const
 
 #define BYTES_INCREMENT 10
 
-int do_convert(lqt_charset_converter_t * cnv, char * in_string, int len, int * out_len,
+static int do_convert(lqt_charset_converter_t * cnv, char * in_string, int len, int * out_len,
                char ** ret, int * ret_alloc)
   {
 

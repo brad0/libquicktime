@@ -83,7 +83,7 @@ static const unsigned char RTjpeg_chrom_quant_tbl[64] = {
     99,  99,  99,  99,  99,  99,  99,  99
  };
  
-int RTjpeg_b2s(int16_t *data, int8_t *strm, uint8_t bt8)
+static int RTjpeg_b2s(int16_t *data, int8_t *strm, uint8_t bt8)
 {
  register int ci, co=1, tmp;
  register int16_t ZZvalue;
@@ -131,7 +131,7 @@ int RTjpeg_b2s(int16_t *data, int8_t *strm, uint8_t bt8)
  return (int)co;
 }
 
-int RTjpeg_s2b(int16_t *data, int8_t *strm, uint8_t bt8, uint32_t *qtbl)
+static int RTjpeg_s2b(int16_t *data, int8_t *strm, uint8_t bt8, uint32_t *qtbl)
 {
  int ci=1, co=1, tmp;
  register int i;
@@ -215,11 +215,11 @@ void RTjpeg_quant(int16_t *block, int32_t *qtbl)
  }
 }
 #else
-void RTjpeg_quant_init(RTjpeg_t *rtj)
+static void RTjpeg_quant_init(RTjpeg_t *rtj)
 {
 }
 
-void RTjpeg_quant(int16_t *block, int32_t *qtbl)
+static void RTjpeg_quant(int16_t *block, int32_t *qtbl)
 {
  int i;
  
@@ -251,7 +251,7 @@ static mmx_t RTjpeg_zero =(mmx_t)(uint64_t)0x0000000000000000LL;
 #define D_MULTIPLY(var,const)  ((int32_t) ((var) * (const)))
 #endif
 
-void RTjpeg_dct_init(RTjpeg_t *rtj)
+static void RTjpeg_dct_init(RTjpeg_t *rtj)
 {
  int i;
  
@@ -262,7 +262,7 @@ void RTjpeg_dct_init(RTjpeg_t *rtj)
  }
 }
 
-void RTjpeg_dctY(RTjpeg_t *rtj, uint8_t *idata, int rskip)
+static void RTjpeg_dctY(RTjpeg_t *rtj, uint8_t *idata, int rskip)
 {
 #ifndef MMX
   int32_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1182,7 +1182,7 @@ void RTjpeg_dctY(RTjpeg_t *rtj, uint8_t *idata, int rskip)
 #define RL(x) ((x)>235) ? 235 : (((x)<16) ? 16 : (x))
 #define MULTIPLY(var,const)  (((int32_t) ((var) * (const)) + 128)>>8)
 
-void RTjpeg_idct_init(RTjpeg_t *rtj)
+static void RTjpeg_idct_init(RTjpeg_t *rtj)
 {
  int i;
  
@@ -1193,7 +1193,7 @@ void RTjpeg_idct_init(RTjpeg_t *rtj)
  }
 }
 
-void RTjpeg_idct(RTjpeg_t *rtj, uint8_t *odata, int16_t *data, int rskip)
+static void RTjpeg_idct(RTjpeg_t *rtj, uint8_t *odata, int16_t *data, int rskip)
 {
 #ifdef MMX
 
@@ -2318,7 +2318,7 @@ This file contains most of the initialisation and control functions
 
 */
 
-inline void RTjpeg_calc_tbls(RTjpeg_t *rtj)
+static inline void RTjpeg_calc_tbls(RTjpeg_t *rtj)
 {
  int i;
  uint64_t qual;
@@ -2586,7 +2586,7 @@ static inline int RTjpeg_compressYUV422(RTjpeg_t *rtj, uint8_t *sp, uint8_t **pl
  return (sp-sb);
 }
 
-inline int RTjpeg_compress8(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
+static inline int RTjpeg_compress8(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
 {
  register uint8_t * bp = planes[0];
  uint8_t * sb;
@@ -2803,7 +2803,7 @@ int RTjpeg_bcomp(int16_t *rblock, int16_t *old, mmx_t *mask)
 }
 
 #else
-int RTjpeg_bcomp(int16_t *rblock, int16_t *old, uint16_t *mask)
+static int RTjpeg_bcomp(int16_t *rblock, int16_t *old, uint16_t *mask)
 {
  int i;
 
@@ -2817,7 +2817,7 @@ int RTjpeg_bcomp(int16_t *rblock, int16_t *old, uint16_t *mask)
 }
 #endif
 
-int RTjpeg_mcompressYUV420(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
+static int RTjpeg_mcompressYUV420(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
 {
  uint8_t * sb;
  int16_t *block;
@@ -2900,7 +2900,7 @@ int RTjpeg_mcompressYUV420(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
 }
 
 
-int RTjpeg_mcompressYUV422(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
+static int RTjpeg_mcompressYUV422(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
 {
  uint8_t * sb;
  int16_t *block;
@@ -2966,7 +2966,7 @@ int RTjpeg_mcompressYUV422(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
  return (sp-sb);
 }
 
-int RTjpeg_mcompress8(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
+static int RTjpeg_mcompress8(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
 {
  register uint8_t * bp = planes[0];
  uint8_t * sb;
@@ -2995,8 +2995,8 @@ int RTjpeg_mcompress8(RTjpeg_t *rtj, uint8_t *sp, unsigned char **planes)
 #endif
  return (sp-sb);
 }
-
-int RTjpeg_nullcompressYUV420(RTjpeg_t *rtj, uint8_t *sp)
+#if 0
+static int RTjpeg_nullcompressYUV420(RTjpeg_t *rtj, uint8_t *sp)
 {
  uint8_t * sb;
  register int i, j, k;
@@ -3013,7 +3013,7 @@ int RTjpeg_nullcompressYUV420(RTjpeg_t *rtj, uint8_t *sp)
  return (sp-sb);
 }
 
-int RTjpeg_nullcompressYUV422(RTjpeg_t *rtj, uint8_t *sp)
+static int RTjpeg_nullcompressYUV422(RTjpeg_t *rtj, uint8_t *sp)
 {
  uint8_t * sb;
  register int i, j, k;
@@ -3029,8 +3029,7 @@ int RTjpeg_nullcompressYUV422(RTjpeg_t *rtj, uint8_t *sp)
  }
  return (sp-sb);
 }
-
-int RTjpeg_nullcompress8(RTjpeg_t *rtj, uint8_t *sp)
+static int RTjpeg_nullcompress8(RTjpeg_t *rtj, uint8_t *sp)
 {
  uint8_t * sb;
  int i, j;
@@ -3045,6 +3044,7 @@ int RTjpeg_nullcompress8(RTjpeg_t *rtj, uint8_t *sp)
  }
  return (sp-sb);
 }
+#endif
 
 #define KcrR 76284
 #define KcrG 53281
@@ -3500,8 +3500,8 @@ int RTjpeg_compress(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
  fh->quality = rtj->Q;
  return ds;
 }
-
-int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp)
+#if 0
+static int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp)
 {
  RTjpeg_frameheader * fh = (RTjpeg_frameheader *)sp;
  int ds = 0;
@@ -3538,7 +3538,7 @@ int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp)
  fh->quality = rtj->Q;
  return ds;
 }
-
+#endif
 void RTjpeg_decompress(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
 {
  RTjpeg_frameheader * fh = (RTjpeg_frameheader *)sp;

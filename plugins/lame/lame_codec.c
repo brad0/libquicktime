@@ -26,6 +26,7 @@
 #include <lame/lame.h>
 #include <stdlib.h>
 #include <string.h>
+#include <lame_codec.h>
 
 #define LOG_DOMAIN "lame"
 

@@ -801,10 +801,20 @@ dnl Build CFLAGS
 dnl
 
 COMMON_CFLAGS=""
-lqt_test_cflags="-finline-functions -Wall -Winline"
+lqt_test_cflags="-finline-functions -Wall -Winline -Wmissing-declarations -Wdeclaration-after-statement"
 for i in $lqt_test_cflags; do
   LQT_TRY_CFLAGS($i, COMMON_CFLAGS="$COMMON_CFLAGS $i") ;
 done
+
+dnl
+dnl GCC Visibility
+dnl
+
+AH_TEMPLATE([HAVE_GCC_VISIBILITY], [GCC Visibility support])
+
+LQT_TRY_CFLAGS("-fvisibility=hidden",
+               COMMON_CFLAGS="$COMMON_CFLAGS -fvisibility=hidden";
+	       AC_DEFINE(HAVE_GCC_VISIBILITY))
 
 if test "x${USER_CFLAGS}" = "x"; then
 

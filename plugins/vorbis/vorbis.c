@@ -269,7 +269,7 @@ static int next_packet(quicktime_t * file, int track)
   return 1;
   }
 
-float ** alloc_sample_buffer(float ** old, int channels, int samples,
+static float ** alloc_sample_buffer(float ** old, int channels, int samples,
                              int * sample_buffer_alloc)
   {
   int i;

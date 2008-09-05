@@ -25,6 +25,9 @@
 #include "lqt_private.h"
 #define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
+
+#include "faad2.h"
+
 #include <string.h>
 #include <stdlib.h>
 

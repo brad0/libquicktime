@@ -32,6 +32,8 @@ extern "C" {
 #include <inttypes.h>
 #include <stddef.h>
 
+#pragma GCC visibility push(default)
+  
 /* Some public enums needed by most subsequent headers */
 
 /**
@@ -1289,7 +1291,8 @@ int64_t quicktime_byte_position(quicktime_t *file);
   
 void quicktime_set_avi(quicktime_t *file, int value);
 
-  
+#pragma GCC visibility pop
+
 
 #ifdef __cplusplus
 }

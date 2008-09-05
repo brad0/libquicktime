@@ -93,9 +93,9 @@ static lqt_codec_info_static_t codec_info_vorbis_qt =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 2; }
+LQT_EXTERN int get_num_codecs() { return 2; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -113,7 +113,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
   {
   return quicktime_init_codec_vorbis;
   }

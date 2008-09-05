@@ -148,9 +148,9 @@ static lqt_codec_info_static_t codec_info_dv_ntsc =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 2; }
+LQT_EXTERN int get_num_codecs() { return 2; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(index == 0)
     return &codec_info_dv_ntsc;
@@ -165,7 +165,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
   {
   if(index < 2)
     return quicktime_init_codec_dv;

@@ -24,6 +24,7 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
+#include "qtpng.h"
 
 void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
 
@@ -73,9 +74,9 @@ static lqt_codec_info_static_t codec_info_png =
 
 /* These are called from the plugin loader */
 
-extern int get_num_codecs() { return 2; }
+LQT_EXTERN int get_num_codecs() { return 2; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   switch(index)
     {
@@ -99,7 +100,7 @@ void quicktime_init_codec_pngalpha(quicktime_video_map_t *vtrack);
  *   Return the actual codec constructor
  */
 
-extern lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
   {
   switch(index)
     {

@@ -28,6 +28,7 @@
 #include <faac.h>
 #include <string.h>
 #include <stdlib.h>
+#include "qtfaac.h"
 
 #define LOG_DOMAIN "faac"
 

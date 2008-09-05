@@ -26,6 +26,7 @@
 #include "params.h"
 #include AVCODEC_HEADER
 #include <string.h>
+#include "ffmpeg.h"
 
 typedef struct
   {

@@ -31,6 +31,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "pcm.h"
+
 #define LOG_DOMAIN "pcm"
 
 #ifndef HAVE_LRINT

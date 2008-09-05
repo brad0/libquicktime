@@ -24,9 +24,7 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
-
-extern void quicktime_init_codec_lame(quicktime_audio_map_t *atrack);
-
+#include "lame_codec.h"
 
 static char * fourccs_mp3[]  = { QUICKTIME_MP3, (char*)0 };
 
@@ -101,9 +99,9 @@ static lqt_codec_info_static_t codec_info_lame =
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML
   };
 
-extern int get_num_codecs() { return 1; }
+LQT_EXTERN int get_num_codecs() { return 1; }
 
-extern lqt_codec_info_static_t * get_codec_info(int index)
+LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
   if(!index)
     return &codec_info_lame;
@@ -115,7 +113,7 @@ extern lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-extern lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
   {
   if(index == 0)
     return quicktime_init_codec_lame;

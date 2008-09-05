@@ -14,5 +14,6 @@ lqt_audiocodec_la_LIBADD = @MODULE_LIBADD@
 
 noinst_HEADERS = \
 alaw_tables.h \
-ulaw_tables.h
+audiocodec.h \
+ulaw_tables.h \
 

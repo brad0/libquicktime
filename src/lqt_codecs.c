@@ -90,7 +90,7 @@ return 0;
 }
 
 
-int quicktime_codec_defaults(quicktime_codec_t *codec)
+static int quicktime_codec_defaults(quicktime_codec_t *codec)
 {
 	codec->delete_vcodec = quicktime_delete_vcodec_stub;
 	codec->delete_acodec = quicktime_delete_acodec_stub;
@@ -966,13 +966,13 @@ int quicktime_writes_cmodel(quicktime_t *file,
 /* Compressors that can only encode a window at a time */
 /* need to flush extra data here. */
 
-int quicktime_flush_acodec(quicktime_t *file, int track)
+static int quicktime_flush_acodec(quicktime_t *file, int track)
 {
 	((quicktime_codec_t*)file->atracks[track].codec)->flush(file, track);
 	return 0;
 };
 
-void quicktime_flush_vcodec(quicktime_t *file, int track)
+static void quicktime_flush_vcodec(quicktime_t *file, int track)
   {
   int64_t dts, stts_index, stts_count;
   quicktime_stts_t * stts;

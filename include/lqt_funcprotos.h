@@ -21,9 +21,15 @@
  with this library; if not, write to the Free Software Foundation, Inc., 51
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/
-
+#include <config.h>
 #include <quicktime/lqt.h>
 #include <quicktime/qtprivate.h>
+
+#ifdef HAVE_GCC_VISIBILITY
+#define LQT_EXTERN __attribute__ ((visibility("default")))
+#else
+#define LQT_EXTERN extern
+#endif
 
 /* Some macros */
 
@@ -212,7 +218,7 @@ void quicktime_strf_dump_video(quicktime_strf_t *strf);
 void quicktime_strf_set_video_extradata(quicktime_strf_t *strf, const uint8_t * data, int len);
 void quicktime_strf_delete_video(quicktime_strf_t *strf);
 
-void quicktime_strf_set_audio_extradata(quicktime_strf_t *strf, const uint8_t * data, int len);
+LQT_EXTERN void quicktime_strf_set_audio_extradata(quicktime_strf_t *strf, const uint8_t * data, int len);
 void quicktime_strf_delete_audio(quicktime_strf_t *strf);
 
 
@@ -269,7 +275,7 @@ void quicktime_write_chan(quicktime_t *file, quicktime_chan_t *chan);
 void quicktime_get_chan(quicktime_audio_map_t * atrack);
 
 /* Set the chan atom of an atrack */
-void quicktime_set_chan(quicktime_audio_map_t * atrack);
+LQT_EXTERN void quicktime_set_chan(quicktime_audio_map_t * atrack);
 
 /* clap.c */
 
@@ -379,10 +385,10 @@ void quicktime_read_enda(quicktime_t *file, quicktime_enda_t *enda,
 void quicktime_write_enda(quicktime_t *file, quicktime_enda_t *enda);
 void quicktime_enda_dump(quicktime_enda_t *enda);
 
-void quicktime_set_enda(quicktime_stsd_table_t *table, int little_endian);
+LQT_EXTERN void quicktime_set_enda(quicktime_stsd_table_t *table, int little_endian);
 
 /* Returns TRUE if little endian */
-int quicktime_get_enda(quicktime_stsd_table_t *table);
+LQT_EXTERN int quicktime_get_enda(quicktime_stsd_table_t *table);
 
 /* elst.c */
 
@@ -413,7 +419,7 @@ int quicktime_read_mp4_descr_length(quicktime_t * file);
    and decoderConfigLen. The esds atom will be returned so the
    other parameters can be set by the encoder */
 
-quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
+LQT_EXTERN quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
                                       uint8_t * decoderConfig,
                                       int decoderConfigLen);
 
@@ -433,7 +439,7 @@ void quicktime_read_frma(quicktime_t *file, quicktime_frma_t *frma,
 
 void quicktime_write_frma(quicktime_t *file, quicktime_frma_t *frma);
 void quicktime_frma_dump(quicktime_frma_t *frma);
-void quicktime_set_frma(quicktime_trak_t * trak, char * codec);
+LQT_EXTERN void quicktime_set_frma(quicktime_trak_t * trak, char * codec);
 
 /* ftab.c */
 
@@ -550,11 +556,11 @@ const char * lqt_get_charset_fallback(int mac_code, lqt_file_type_t file_type);
 
 /* log.c */
 
-void lqt_log(quicktime_t * file, lqt_log_level_t level,
+LQT_EXTERN void lqt_log(quicktime_t * file, lqt_log_level_t level,
              const char * domain, const char * format, ...)
   __attribute__ ((format (printf, 4, 5)));
 
-void lqt_logs(quicktime_t * file, lqt_log_level_t level,
+LQT_EXTERN void lqt_logs(quicktime_t * file, lqt_log_level_t level,
               const char * domain, const char * str);
 
 /* For dumping strings */
@@ -785,6 +791,16 @@ void quicktime_write_pdat(quicktime_t *file, quicktime_pdat_t *pdat);
 /* pHdr */
 
 int quicktime_pHdr_init(quicktime_pHdr_t *pHdr);
+int quicktime_pHdr_init(quicktime_pHdr_t *pHdr);
+int quicktime_pHdr_delete(quicktime_pHdr_t *pHdr);
+void quicktime_pHdr_dump(quicktime_pHdr_t *pHdr);
+
+int quicktime_read_pHdr(quicktime_t *file,
+                        quicktime_pHdr_t *pHdr,
+                        quicktime_atom_t *pHdr_atom);
+
+void quicktime_write_pHdr(quicktime_t *file,
+                          quicktime_pHdr_t *pHdr);
 
 /* qtatom.c */
 
@@ -945,16 +961,17 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
 void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
                                quicktime_atom_t *parent_atom);
 
-void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
+LQT_EXTERN void quicktime_set_stsd_audio_v1(quicktime_stsd_table_t *table,
                                  uint32_t samples_per_packet,
                                  uint32_t bytes_per_packet,
                                  uint32_t bytes_per_frame,
                                  uint32_t bytes_per_sample);
 
-void quicktime_set_stsd_audio_v2(quicktime_stsd_table_t *table,
-                                 uint32_t formatSpecificFlags,
-                                 uint32_t constBytesPerAudioPacket,
-                                 uint32_t constLPCMFramesPerAudioPacket);
+LQT_EXTERN void
+quicktime_set_stsd_audio_v2(quicktime_stsd_table_t *table,
+                            uint32_t formatSpecificFlags,
+                            uint32_t constBytesPerAudioPacket,
+                            uint32_t constLPCMFramesPerAudioPacket);
 
 void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table);
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);
@@ -969,8 +986,8 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table);
 void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table);
 void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quicktime_stsd_table_t *table);
 
-uint8_t * quicktime_stsd_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
-void quicktime_stsd_set_user_atom(quicktime_trak_t * trak, char * name,
+LQT_EXTERN uint8_t * quicktime_stsd_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
+LQT_EXTERN void quicktime_stsd_set_user_atom(quicktime_trak_t * trak, char * name,
                                   uint8_t * data, uint32_t len);
 
 
@@ -1008,6 +1025,9 @@ void quicktime_stts_init_table(quicktime_stts_t *stts);
 void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts, int frame_duration);
 void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts, int sample_rate);
 void quicktime_stts_init_timecode(quicktime_t *file, quicktime_stts_t *stts);
+void quicktime_stts_init_qtvr(quicktime_t *file,
+                              quicktime_stts_t *stts, int frame_duration);
+
 
 void quicktime_stts_delete(quicktime_stts_t *stts);
 void quicktime_stts_dump(quicktime_stts_t *stts);
@@ -1117,11 +1137,13 @@ void lqt_translation_init();
 
 /* useratoms.c */
 
-uint8_t * quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u, char * name, uint32_t * len);
+LQT_EXTERN uint8_t *
+quicktime_user_atoms_get_atom(quicktime_user_atoms_t * u,
+                              char * name, uint32_t * len);
 
-void quicktime_user_atoms_add_atom(quicktime_user_atoms_t * u,
-                                   char * name, uint8_t * data,
-                                   uint32_t len);
+LQT_EXTERN void quicktime_user_atoms_add_atom(quicktime_user_atoms_t * u,
+                                              char * name, uint8_t * data,
+                                              uint32_t len);
 
 void quicktime_user_atoms_read_atom(quicktime_t * file,
                                     quicktime_user_atoms_t * u,
@@ -1144,10 +1166,10 @@ int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak);
 /* For seeking in CBR audio files: Get the chunk index for a specified sample.
    On return, chunk_sample will contain the first sample of the returned chunk */
 
-int quicktime_chunk_of_sample(int64_t *chunk_sample, 
-                              int64_t *chunk, 
-                              quicktime_trak_t *trak, 
-                              int64_t sample);
+LQT_EXTERN int quicktime_chunk_of_sample(int64_t *chunk_sample, 
+                                         int64_t *chunk, 
+                                         quicktime_trak_t *trak, 
+                                         int64_t sample);
 
 int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
 
@@ -1160,14 +1182,14 @@ int64_t quicktime_sample_range_size(quicktime_trak_t *trak,
                                     long sample);
 int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
 
-void quicktime_write_chunk_header(quicktime_t *file, 
-                                  quicktime_trak_t *trak, 
-                                  quicktime_atom_t *chunk);
-void quicktime_write_chunk_footer(quicktime_t *file, 
-                                  quicktime_trak_t *trak,
-                                  int current_chunk,
-                                  quicktime_atom_t *chunk, 
-                                  int samples);
+LQT_EXTERN void quicktime_write_chunk_header(quicktime_t *file, 
+                                             quicktime_trak_t *trak, 
+                                             quicktime_atom_t *chunk);
+LQT_EXTERN void quicktime_write_chunk_footer(quicktime_t *file, 
+                                             quicktime_trak_t *trak,
+                                             int current_chunk,
+                                             quicktime_atom_t *chunk, 
+                                             int samples);
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
                             int64_t *duration, 
@@ -1175,7 +1197,7 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
 
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
                               int moov_time_scale);
-long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
+LQT_EXTERN long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk);
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset);
 
 
@@ -1279,8 +1301,8 @@ void quicktime_write_wave(quicktime_t *file, quicktime_wave_t *wave);
 void quicktime_wave_dump(quicktime_wave_t *wave);
 void quicktime_wave_delete(quicktime_wave_t *wave);
 
-uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
-void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t * data,  uint32_t len);
+LQT_EXTERN uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len);
+LQT_EXTERN void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name, uint8_t * data,  uint32_t len);
 
 
 
@@ -1292,8 +1314,8 @@ int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr);
 int quicktime_file_close(quicktime_t *file);
 int64_t quicktime_ftell(quicktime_t *file);
 int quicktime_fseek(quicktime_t *file, int64_t offset);
-int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size);
-int quicktime_write_data(quicktime_t *file, const uint8_t *data, int size);
+LQT_EXTERN int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size);
+LQT_EXTERN int quicktime_write_data(quicktime_t *file, const uint8_t *data, int size);
 int64_t quicktime_byte_position(quicktime_t *file);
 void quicktime_read_pascal(quicktime_t *file, char *data);
 void quicktime_write_pascal(quicktime_t *file, char *data);
@@ -1332,7 +1354,7 @@ int quicktime_set_position(quicktime_t *file, int64_t position);
 void quicktime_copy_char32(char *output, char *input);
 void quicktime_print_chars(char *desc, uint8_t *input, int len);
 unsigned long quicktime_current_time(void);
-int quicktime_match_32(void *input, void *output);
+LQT_EXTERN int quicktime_match_32(void *input, void *output);
 int quicktime_match_24(char *input, char *output);
 
 void lqt_hexdump(uint8_t * data, int len, int linebreak);
@@ -1362,13 +1384,13 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack);
 void quicktime_init_maps(quicktime_t * file);
 void lqt_update_frame_position(quicktime_video_map_t * track);
 
-void lqt_start_audio_vbr_chunk(quicktime_t * file, int track);
-void lqt_init_vbr_audio(quicktime_t * file, int track);
+LQT_EXTERN void lqt_start_audio_vbr_chunk(quicktime_t * file, int track);
+LQT_EXTERN void lqt_init_vbr_audio(quicktime_t * file, int track);
 
-int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 
-                            int64_t *chunk, 
-                            quicktime_trak_t *trak, 
-                            int64_t sample);
+LQT_EXTERN int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 
+                                       int64_t *chunk, 
+                                       quicktime_trak_t *trak, 
+                                       int64_t sample);
 
 /* Read all the information about the file. */
 /* Requires a MOOV atom be present in the file. */
@@ -1387,8 +1409,8 @@ void lqt_set_default_audio_parameters(quicktime_t * file, int track);
 /* Before and after writing subsequent frames, we must call
    quicktime_write_chunk_[header|footer] */
 
-void lqt_start_audio_vbr_frame(quicktime_t * file, int track);
-void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples);
+LQT_EXTERN void lqt_start_audio_vbr_frame(quicktime_t * file, int track);
+LQT_EXTERN void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples);
 
 /*
  *  Convenience function: Returns an array of chunk sizes
