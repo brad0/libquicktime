@@ -31,7 +31,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "pcm.h"
+#include "audiocodec.h"
 
 #define LOG_DOMAIN "pcm"
 
