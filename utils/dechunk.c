@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int usage(void)
+static int usage(void)
 {
 	printf("usage: dechunk [-f framerate] <input movie> <output prefix>\n");
 	printf("	Movies containing rgb frames are written as ppm images.\n");

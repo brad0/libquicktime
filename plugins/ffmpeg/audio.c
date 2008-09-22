@@ -670,9 +670,11 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
     
     //  priv->ctx->block_align     = s->data.audio.block_align;
     //  priv->ctx->bit_rate        = s->codec_bitrate;
-
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 0, 0)
     codec->avctx->bits_per_sample = quicktime_audio_bits(file, track);
-
+#else
+    codec->avctx->bits_per_coded_sample = quicktime_audio_bits(file, track);
+#endif
     /* Some codecs need extra stuff */
 
     if(codec->decoder->id == CODEC_ID_ALAC)

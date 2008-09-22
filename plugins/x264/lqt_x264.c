@@ -64,6 +64,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_max =     { .val_int = 16 },
       .help_string = TRS("Number of B-frames between I and P"),
     },
+#if X264_BUILD < 63
     {
       .name =        "x264_b_bframe_adaptive",
       .real_name =   TRS("Adaptive B-frame decision"),
@@ -72,6 +73,18 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 1 },
     },
+#else
+    {
+    .name =        "x264_i_bframe_adaptive",
+    .real_name =   TRS("Adaptive B-frame decision"),
+    .type =        LQT_PARAMETER_STRINGLIST,
+    .val_default = { .val_string = "Fast" },
+    .stringlist_options = (char*[]){ TRS("None"),
+                                     TRS("Fast"),
+                                     TRS("Trellis"),
+                                     (char*)0 },
+    },
+#endif
     {
       .name =        "x264_i_bframe_bias",
       .real_name =   TRS("B-frame bias"),

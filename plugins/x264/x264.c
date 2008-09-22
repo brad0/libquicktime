@@ -763,7 +763,15 @@ enum_t rc_methods[] =
     { "Average bitrate",  X264_RC_ABR },
     { "CRF based VBR",    X264_RC_CRF }
   };
-                                     
+
+#if X264_BUILD >= 63
+enum_t bframe_adaptives[] =
+  {
+    { "None",    X264_B_ADAPT_NONE },
+    { "Fast",    X264_B_ADAPT_FAST },
+    { "Trellis", X264_B_ADAPT_TRELLIS }
+  };
+#endif
 
 static int set_parameter(quicktime_t *file, 
                          int track, 
@@ -777,7 +785,11 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_keyint_min", codec->params.i_keyint_min);
   INTPARAM("x264_i_scenecut_threshold", codec->params.i_scenecut_threshold);
   INTPARAM("x264_i_bframe", codec->params.i_bframe);
-  INTPARAM("x264_b_bframe_adaptive", codec->params.b_bframe_adaptive);
+#if X264_BUILD < 63
+  INTPARAM("x264_b_bframe_adaptive", codec->params.b_bframe_adaptives);
+#else
+  ENUMPARAM("x264_i_bframe_adaptive", codec->params.i_bframe_adaptive, bframe_adaptives);
+#endif
   INTPARAM("x264_i_bframe_bias", codec->params.i_bframe_bias);
   INTPARAM("x264_b_bframe_pyramid", codec->params.b_bframe_pyramid);
 

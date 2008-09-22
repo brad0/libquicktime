@@ -1032,7 +1032,9 @@ with max and/or min bitrate, this must be specified.") \
   }
 
 /** Quantizer */
-#define PARAM_FLAG_TRELLIS_QUANT \
+#if LIBAVCODEC_VERSION_INT < ((52<<16)+(0<<8)+0)
+
+#define PARAM_TRELLIS \
   { \
     .name =        "ff_flag_trellis_quant", \
     .real_name =   TRS("Use trellis quantization"),     \
@@ -1042,6 +1044,18 @@ with max and/or min bitrate, this must be specified.") \
     .val_max =     { .val_int = 1 }, \
        .help_string = TRS("Use trellis quantization (improves quality)") \
   }
+#else
+#define PARAM_TRELLIS \
+  { \
+    .name =        "ff_trellis", \
+    .real_name =   TRS("Use trellis quantization"),     \
+    .type =        LQT_PARAMETER_INT, \
+    .val_default = { .val_int = 0 }, \
+    .val_min =     { .val_int = 0 }, \
+    .val_max =     { .val_int = 1 }, \
+       .help_string = TRS("Use trellis quantization (improves quality)") \
+  }
+#endif
 
 #define PARAM_FLAG_BITEXACT \
   { \

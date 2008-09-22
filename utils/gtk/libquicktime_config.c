@@ -37,7 +37,7 @@ typedef struct
     
   } MainWindow;
 
-void update_main_window(MainWindow * w)
+static void update_main_window(MainWindow * w)
   {
   lqtgtk_codec_browser_update(w->audio_browser);
   lqtgtk_codec_browser_update(w->video_browser);
@@ -60,7 +60,7 @@ static gboolean delete_callback(GtkWidget * w, gpointer data)
   return TRUE;
   }
 
-MainWindow * create_main_window()
+static MainWindow * create_main_window()
   {
   GtkWidget * tab_label;
   
@@ -136,7 +136,7 @@ MainWindow * create_main_window()
     
   }
 
-void destroy_main_window(MainWindow * w)
+static void destroy_main_window(MainWindow * w)
   {
   lqtgtk_destroy_codec_browser(w->audio_browser);
   lqtgtk_destroy_codec_browser(w->video_browser);

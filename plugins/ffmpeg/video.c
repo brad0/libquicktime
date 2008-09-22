@@ -377,7 +377,12 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     {
     codec->avctx->width           = width;
     codec->avctx->height          = height;
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 0, 0)
     codec->avctx->bits_per_sample = quicktime_video_depth(file, track);
+#else
+    codec->avctx->bits_per_coded_sample = quicktime_video_depth(file, track);
+#endif
 
     /* Set extradata: It's done differently for each codec */
 

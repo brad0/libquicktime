@@ -29,7 +29,7 @@
 #include <limits.h>
 #include <errno.h>
 
-int usage(void)
+static int usage(void)
 {
 	printf("usage: qtrechunk [-f framerate] [-w width] [-h height] [-c fourcc] [-b bitdepth] [-l file_list | <input frames>] <output movie>\n");
 	printf("	Concatenate input frames into a Quicktime movie.\n\n");
@@ -41,7 +41,7 @@ int usage(void)
 	return 0;
 }
 
-char ** add_frames_from_file(char ** input_frames,
+static char ** add_frames_from_file(char ** input_frames,
                              int * total_input_frames, char * list_filename)
   {
   FILE * input;

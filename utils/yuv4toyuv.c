@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int usage(void)
+static int usage(void)
 {
 	printf("usage: yuv4toyuv <input movie> <output.yuv>\n");
 	printf("	Write a YUV4 encoded movie as a planar YUV 4:2:0 file.\n");
