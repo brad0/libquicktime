@@ -786,7 +786,7 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_scenecut_threshold", codec->params.i_scenecut_threshold);
   INTPARAM("x264_i_bframe", codec->params.i_bframe);
 #if X264_BUILD < 63
-  INTPARAM("x264_b_bframe_adaptive", codec->params.b_bframe_adaptives);
+  INTPARAM("x264_b_bframe_adaptive", codec->params.b_bframe_adaptive);
 #else
   ENUMPARAM("x264_i_bframe_adaptive", codec->params.i_bframe_adaptive, bframe_adaptives);
 #endif
