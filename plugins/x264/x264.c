@@ -880,12 +880,16 @@ static int set_parameter(quicktime_t *file,
   ENUMPARAM("x264_i_me_method", codec->params.analyse.i_me_method, me_methods);
 
   INTPARAM("x264_i_subpel_refine", codec->params.analyse.i_subpel_refine);
+#if X264_BUILD < 65
   INTPARAM("x264_b_bframe_rdo", codec->params.analyse.b_bframe_rdo);
+#endif
   INTPARAM("x264_i_me_range", codec->params.analyse.i_me_range);
   INTPARAM("x264_i_frame_reference", codec->params.i_frame_reference);
   INTPARAM("x264_b_chroma_me", codec->params.analyse.b_chroma_me);
   INTPARAM("x264_b_mixed_references", codec->params.analyse.b_mixed_references);
+#if X264_BUILD < 65
   INTPARAM("x264_b_bidir_me", codec->params.analyse.b_bidir_me);
+#endif
   INTPARAM("x264_b_weighted_bipred", codec->params.analyse.b_weighted_bipred);
     
   ENUMPARAM("x264_i_direct_mv_pred", codec->params.analyse.i_direct_mv_pred, direct_modes);

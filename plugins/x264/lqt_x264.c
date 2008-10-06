@@ -323,11 +323,20 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .real_name =   TRS("Partition decision"),
       .type =        LQT_PARAMETER_INT,
       .val_min =     { .val_int = 1 },
+#if X264_BUILD < 65
       .val_max =     { .val_int = 7 },
+#else
+      .val_max =     { .val_int = 9 },
+#endif
       .val_default = { .val_int = 5 },
       .help_string = TRS("Subpixel motion estimation and partition decision "
+#if X264_BUILD < 65
                          "quality: 1=fast, 7=best.")
+#else
+                         "quality: 1=fast, 9=best.")
+#endif
     },
+#if X264_BUILD < 65
     {
       .name =        "x264_b_bframe_rdo",
       .real_name =   TRS("RD based mode decision for B-frames"),
@@ -338,6 +347,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .help_string = TRS("RD based mode decision for B-frames. Requires partition "
                          "decision 6.")
     },
+#endif
     {
       .name =        "x264_i_me_range",
       .real_name =   TRS("Search range"),
@@ -377,6 +387,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .help_string = TRS("Allow each MB partition in P-frames to have it's own "
                          "reference number")
     },
+#if X264_BUILD < 65
     {
       .name =        "x264_b_bidir_me",
       .real_name =   TRS("Bidirectional ME"),
@@ -386,6 +397,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_default = { .val_int = 0 },
       .help_string = TRS("Jointly optimize both MVs in B-frames")
     },
+#endif
     {
       .name =        "x264_b_weighted_bipred",
       .real_name =   TRS("Weighted biprediction"),
