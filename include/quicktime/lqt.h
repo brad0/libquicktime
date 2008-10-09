@@ -545,7 +545,29 @@ int lqt_has_timecode_track(quicktime_t * file, int track,
   
 int lqt_read_timecode(quicktime_t * file, int track,
                       uint32_t * timecode);
+
+/** \brief Get the tape name stored in a timecode track
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \returns pointer to tape name (might be NULL if no tape name)
+ *
+ *  Returned pointer should remain valid as long as the file is open.
+ *  Do not free it.
+ */
   
+const char * lqt_get_timecode_tape_name(quicktime_t * file, int track);
+
+/** \brief Set the tapename for a timecode track
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param tapename Tape name string
+ *
+ *  A copy is made of the string passed in
+ */
+    
+void lqt_set_timecode_tape_name(quicktime_t * file, int track,
+				const char * tapename);
+
 /**
    @}
 */

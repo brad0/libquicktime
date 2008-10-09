@@ -109,8 +109,10 @@ static uint32_t * cache_timecodes(quicktime_t * file,
 
     num = trak->mdia.minf.stbl.stsc.table[stsc_pos].samples;
 
+/*
     fprintf(stderr, "Reading timecode chunk: num: %d off: %ld samples: %d\n",
             i, trak->mdia.minf.stbl.stco.table[i].offset, num);
+*/
     
     quicktime_set_position(file, trak->mdia.minf.stbl.stco.table[i].offset);
 
@@ -217,5 +219,20 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
     vm->current_timecode_chunk++;
     vm->num_timecodes = 0;
     }
+  }
+
+const char * lqt_get_timecode_tape_name(quicktime_t * file, int track)
+  {
+    quicktime_video_map_t * vm = file->vtracks + track;
+    return vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.name;
+  }
+
+void lqt_set_timecode_tape_name(quicktime_t * file, int track,
+				const char * tapename)
+  {
+  quicktime_video_map_t * vm = file->vtracks + track;
+  if(vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.name)
+    free(vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.name);
+  vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.name = strdup(tapename);
   }
 
