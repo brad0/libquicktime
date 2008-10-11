@@ -93,17 +93,6 @@ void lqt_registry_unlock()
   pthread_mutex_unlock(&codecs_mutex);
   }
 
-static int lqt_registry_initialized()
-  {
-  int ret;
-  
-  lqt_registry_lock();
-  ret = registry_init_done;
-  lqt_registry_unlock();
-  
-  return ret;
-  }
-
 /* Free memory of parameter info */
 
 static void destroy_parameter_info(lqt_parameter_info_t * p)
@@ -721,15 +710,20 @@ void lqt_registry_init()
   lqt_codec_info_t * tmp_file_codecs;
   const char* plugin_dir = PLUGIN_DIR;
 
+  lqt_registry_lock();
+  if(registry_init_done)
+    {
+    lqt_registry_unlock();
+    return;
+    }
+
+  registry_init_done = 1;
+  
   /* Check for environment variable for plugin dir */
   if(getenv("LIBQUICKTIME_PLUGIN_DIR"))
     {
     plugin_dir = getenv("LIBQUICKTIME_PLUGIN_DIR");
     }
-  
-  lqt_registry_lock();
-  
-  registry_init_done = 1;
   
   if(lqt_audio_codecs || lqt_video_codecs)
     {
@@ -829,48 +823,6 @@ const lqt_codec_info_t * lqt_get_video_codec_info(int index)
   }
 
 /* Thread save methods of getting codec infos */
-#if 0
-static lqt_codec_info_t * lqt_get_audio_codec_info_c(int index)
-  {
-  const lqt_codec_info_t * info;
-  lqt_codec_info_t * ret;
-
-  if (!lqt_registry_initialized()) /* also init registry */
-  	lqt_registry_init();
-	
-  lqt_registry_lock();
-
-  info = lqt_get_audio_codec_info(index);
-
-  if(info)
-    ret = copy_codec_info(info);
-  else
-    ret = (lqt_codec_info_t*)0;
-  lqt_registry_unlock();
-  return ret;
-  }
-
-static lqt_codec_info_t * lqt_get_video_codec_info_c(int index)
-  {
-  const lqt_codec_info_t * info;
-  lqt_codec_info_t * ret;
-
-  if (!lqt_registry_initialized()) /* also init registry */
-  	lqt_registry_init();
-
-  lqt_registry_lock();
-
-  info = lqt_get_video_codec_info(index);
-
-  if(info)
-    ret = copy_codec_info(info);
-  else
-    ret = (lqt_codec_info_t*)0;
-  lqt_registry_unlock();
-  return ret;
-  }
-#endif
-
 
 static void 
 create_parameter_info(lqt_parameter_info_t * ret,
@@ -1200,8 +1152,8 @@ lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
 
-  if (!lqt_registry_initialized()) /* also init registry */
-    lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
     
   lqt_registry_lock();
   
@@ -1242,8 +1194,8 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
 
-  if (!lqt_registry_initialized()) /* also init registry */
-  	lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
   
   lqt_registry_lock();
   
@@ -1285,8 +1237,8 @@ lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
 
   lqt_codec_info_t ** ret = (lqt_codec_info_t **)0;
   
-  if (!lqt_registry_initialized()) /* also init registry */
-     lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
   
   lqt_registry_lock();
   
@@ -1331,8 +1283,8 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
   const lqt_codec_info_t * info;
   int num_codecs = 0, num_added = 0, i;
 
-  if (!lqt_registry_initialized()) /* also init registry */
-    lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
 
   lqt_registry_lock();
 
@@ -1402,8 +1354,8 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
   if(!name)
     return ret;
   
-  if (!lqt_registry_initialized()) /* also init registry */
-     lqt_registry_init();
+   /* also init registry */
+  lqt_registry_init();
 
   lqt_registry_lock();
 
@@ -1435,8 +1387,8 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
   if(!name)
     return ret;
   
-  if (!lqt_registry_initialized()) /* also init registry */
-     lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
   
   lqt_registry_lock();
 
@@ -1507,8 +1459,8 @@ void lqt_set_default_parameter(lqt_codec_type type, int encode,
   lqt_codec_info_t * codec_info;
   lqt_parameter_info_t * parameter_info;
   
-  if (!lqt_registry_initialized()) /* also init registry */
-     lqt_registry_init();
+  /* also init registry */
+  lqt_registry_init();
 
   lqt_registry_lock();
 

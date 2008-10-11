@@ -7,4 +7,4 @@ lqt_faad2_la_SOURCES = faad2.c lqt_faad2.c
 lqt_faad2_la_LDFLAGS = -avoid-version -module
 lqt_faad2_la_LIBADD = @FAAD2_LIBS@ @MODULE_LIBADD@
 
-noinst_HEADERS = faad2.h
+noinst_HEADERS = faad2.h 
