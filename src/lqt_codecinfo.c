@@ -1165,8 +1165,8 @@ lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
       {
       if(MATCH_FOURCC(ptr->fourccs[j], fourcc))
         {
-        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
-           (ptr->direction != LQT_DIRECTION_ENCODE))
+        if((encode && (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (!encode && (ptr->direction != LQT_DIRECTION_ENCODE)))
           {
           tmp_ptr = ptr;
           break;
@@ -1207,8 +1207,8 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
       {
       if(ptr->wav_ids[j] == wav_id)
         {
-        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
-           (ptr->direction != LQT_DIRECTION_ENCODE))
+        if((encode && (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (!encode && (ptr->direction != LQT_DIRECTION_ENCODE)))
           {
           tmp_ptr = ptr;
           break;
@@ -1250,8 +1250,8 @@ lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
       {
       if(MATCH_FOURCC(ptr->fourccs[j], fourcc))
         {
-        if(((encode) & (ptr->direction != LQT_DIRECTION_DECODE)) ||
-           (ptr->direction != LQT_DIRECTION_ENCODE))
+        if((encode && (ptr->direction != LQT_DIRECTION_DECODE)) ||
+           (!encode && (ptr->direction != LQT_DIRECTION_ENCODE)))
           {
           tmp_ptr = ptr;
           break;
