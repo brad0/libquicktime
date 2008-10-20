@@ -236,3 +236,18 @@ void lqt_set_timecode_tape_name(quicktime_t * file, int track,
   vm->timecode_track->mdia.minf.stbl.stsd.table[0].tmcd.name = strdup(tapename);
   }
 
+int lqt_get_timecode_track_enabled(quicktime_t * file, int track)
+  {
+    quicktime_video_map_t * vm = file->vtracks + track;
+    return vm->timecode_track->tkhd.flags & 1;
+  }
+
+void lqt_set_timecode_track_enabled(quicktime_t * file, int track,
+				    int enabled)
+  {
+    quicktime_video_map_t * vm = file->vtracks + track;
+    if(enabled)
+      vm->timecode_track->tkhd.flags |= 1;
+    else
+      vm->timecode_track->tkhd.flags &= ~1;
+  }

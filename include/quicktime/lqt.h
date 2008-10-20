@@ -568,6 +568,23 @@ const char * lqt_get_timecode_tape_name(quicktime_t * file, int track);
 void lqt_set_timecode_tape_name(quicktime_t * file, int track,
 				const char * tapename);
 
+/** \brief Get the enabled flag of a timecode track
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \returns 1 if enabled, 0 if not enabled
+ */
+
+int lqt_get_timecode_track_enabled(quicktime_t * file, int track);
+
+/** \brief Enable or disable a timecode track
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param enabled 0=>disable otherwise enable
+ */
+
+void lqt_set_timecode_track_enabled(quicktime_t * file, int track,
+				    int enabled);
+
 /**
    @}
 */
