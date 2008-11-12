@@ -605,7 +605,8 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
   trak->mdia.mdhd.duration = duration;
   trak->mdia.mdhd.time_scale = timescale;
   
-  trak->edts.elst.table[0].duration = trak->tkhd.duration;
+  if(trak->has_edts)
+    trak->edts.elst.table[0].duration = trak->tkhd.duration;
 
   if(trak->mdia.minf.is_panorama)
     trak->edts.elst.total_entries = 1;
