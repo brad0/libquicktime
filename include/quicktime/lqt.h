@@ -505,6 +505,7 @@ void lqt_get_text_bg_color(quicktime_t * file, int track,
  *  If the format (e.g. AVI) doesn't support timecode, this
  *  function emits a warning.
  *
+ *  Since 1.1.0
  */
 
 void lqt_add_timecode_track(quicktime_t * file, int track,
@@ -515,6 +516,8 @@ void lqt_add_timecode_track(quicktime_t * file, int track,
  *  \param track Video track index (starting with 0)
  *
  *  Call this function @b before encoding the actual video frame.
+ *
+ *  Since 1.1.0
  */
   
 void lqt_write_timecode(quicktime_t * file, int track,
@@ -526,6 +529,8 @@ void lqt_write_timecode(quicktime_t * file, int track,
  *  \param flags If non NULL returns zero or more of the LQT_TIMECODE_* flags
  *  \param framerate If non NULL returns the integer framerate
  *  \returns 1 if timecodes are available, 0 else
+ *
+ *  Since 1.1.0
  */
   
 int lqt_has_timecode_track(quicktime_t * file, int track,
@@ -540,6 +545,8 @@ int lqt_has_timecode_track(quicktime_t * file, int track,
  *  For frames, which have no timecode attached, you can increment the
  *  last timecode accordingly in your application.
  *  Call this function @b before decoding the actual video frame.
+ *
+ *  Since 1.1.0
  */
 
   
@@ -553,6 +560,8 @@ int lqt_read_timecode(quicktime_t * file, int track,
  *
  *  Returned pointer should remain valid as long as the file is open.
  *  Do not free it.
+ *
+ *  Since 1.1.0
  */
   
 const char * lqt_get_timecode_tape_name(quicktime_t * file, int track);
@@ -563,6 +572,8 @@ const char * lqt_get_timecode_tape_name(quicktime_t * file, int track);
  *  \param tapename Tape name string
  *
  *  A copy is made of the string passed in
+ *
+ *  Since 1.1.0
  */
     
 void lqt_set_timecode_tape_name(quicktime_t * file, int track,
@@ -572,6 +583,8 @@ void lqt_set_timecode_tape_name(quicktime_t * file, int track,
  *  \param file A quicktime handle
  *  \param track Video track index (starting with 0)
  *  \returns 1 if enabled, 0 if not enabled
+ *
+ *  Since 1.1.0
  */
 
 int lqt_get_timecode_track_enabled(quicktime_t * file, int track);
@@ -580,6 +593,8 @@ int lqt_get_timecode_track_enabled(quicktime_t * file, int track);
  *  \param file A quicktime handle
  *  \param track Video track index (starting with 0)
  *  \param enabled 0=>disable otherwise enable
+ *
+ *  Since 1.1.0
  */
 
 void lqt_set_timecode_track_enabled(quicktime_t * file, int track,
