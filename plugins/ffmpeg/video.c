@@ -557,7 +557,8 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
       vtrack->interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
       }
-    else if(codec->decoder->id == CODEC_ID_MPEG4)
+    else if((codec->decoder->id == CODEC_ID_MPEG4) ||
+            (codec->decoder->id == CODEC_ID_H264))
       {
       if(vtrack->stream_cmodel == BC_YUV420P)
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;

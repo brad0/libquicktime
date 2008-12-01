@@ -195,8 +195,8 @@ typedef struct lqt_codec_info_s
   
   uint32_t file_time;        /*!< File modification time of the module */
 
-  char * gettext_domain;     /*!< First argument to bindtextdomain(). Must be set only for externally packaged codecs */
-  char * gettext_directory;  /*!< Second argument to bindtextdomain(). Must be set only for externally packaged codecs */
+  char * gettext_domain;     /*!< First argument to bindtextdomain()  */
+  char * gettext_directory;  /*!< Second argument to bindtextdomain() */
   
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
   } lqt_codec_info_t;

@@ -1132,7 +1132,7 @@ long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
 
 /* translation.c */
 
-void lqt_translation_init();
+LQT_EXTERN void lqt_translation_init();
 
 
 /* useratoms.c */

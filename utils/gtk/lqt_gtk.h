@@ -28,10 +28,10 @@ typedef struct
 
 #if GTK_MINOR_VERSION < 12
 LqtGtkParameterWidget *
-lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips);
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, GtkTooltips * tooltips, const char * gettext_domain);
 #else
 LqtGtkParameterWidget *
-lqtgtk_create_parameter_widget(lqt_parameter_info_t * info);
+lqtgtk_create_parameter_widget(lqt_parameter_info_t * info, const char * gettext_domain);
 #endif
 
 void lqtgtk_destroy_parameter_widget(LqtGtkParameterWidget*);
@@ -61,7 +61,8 @@ typedef struct
 
 LqtGtkCodecConfigWidget *
 lqtgtk_create_codec_config_widget(lqt_parameter_info_t * parameter_info,
-                                  int num_parameters);
+                                  int num_parameters,
+                                  const char * gettext_domain);
 
 void lqtgtk_destroy_codec_config_widget(LqtGtkCodecConfigWidget *);
 

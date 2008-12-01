@@ -567,6 +567,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   if(!row_pointers)
     {
     vtrack->stream_cmodel = BC_YUV420P;
+    vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
     return 0;
     }
 

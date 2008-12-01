@@ -123,8 +123,6 @@ static int encode_frame(quicktime_t *file,
                                  bytes_encoded);
   if(codec->encoder_delay < 0)
     {
-    fprintf(stderr, "Delay: %d, bytes: %d\n",
-            codec->encoder_delay, bytes_encoded);
     lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame +
                                codec->encoder_delay);
     }
@@ -214,12 +212,19 @@ static int encode(quicktime_t *file,
     mp4a_atom[3] = 0x00;
     
     quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
-
+#if 0
     quicktime_set_stsd_audio_v2(&(trak->mdia.minf.stbl.stsd.table[0]),
                                 0x00000002, /* formatSpecificFlags */
                                 0, /* constBytesPerAudioPacket */
                                 codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
-
+#else
+    quicktime_set_stsd_audio_v1(&(trak->mdia.minf.stbl.stsd.table[0]),
+                                1024, // uint32_t samples_per_packet,
+                                768, // uint32_t bytes_per_packet,
+                                1536, // uint32_t bytes_per_frame,
+                                0 // uint32_t bytes_per_sample
+                                );
+#endif
     trak->mdia.minf.stbl.stsd.table[0].sample_size = 16;
     
     esds->version         = 0;

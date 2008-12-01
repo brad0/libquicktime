@@ -209,16 +209,16 @@ static void copy_parameter_value(lqt_parameter_value_t * dst,
 
 static void
 copy_parameter_info(lqt_parameter_info_t * ret,
-                    const lqt_parameter_info_t * info, const char * gettext_domain)
+                    const lqt_parameter_info_t * info)
   {
   int i;
   
   if(info->name)
     ret->name = __lqt_strdup(info->name);
   if(info->real_name)
-    ret->real_name = __lqt_strdup(dgettext(gettext_domain, info->real_name));
+    ret->real_name = __lqt_strdup(info->real_name);
   if(info->help_string)
-    ret->help_string = __lqt_strdup(dgettext(gettext_domain, info->help_string));
+    ret->help_string = __lqt_strdup(info->help_string);
   
   ret->type = info->type;
 
@@ -247,7 +247,7 @@ copy_parameter_info(lqt_parameter_info_t * ret,
         ret->stringlist_options[i] =
           __lqt_strdup(info->stringlist_options[i]);
         ret->stringlist_labels[i] =
-          __lqt_strdup(dgettext(gettext_domain, info->stringlist_labels[i]));
+          __lqt_strdup(info->stringlist_labels[i]);
         }
 
       break;
@@ -269,19 +269,7 @@ static lqt_codec_info_t *
 copy_codec_info(const lqt_codec_info_t * info)
   {
   int i;
-  const char * gettext_domain;
   lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
-
-  if(info->gettext_domain && info->gettext_directory)
-    {
-    bindtextdomain(info->gettext_domain, info->gettext_directory);
-    gettext_domain = info->gettext_domain;
-    }
-  else
-    {
-    lqt_translation_init();
-    gettext_domain = PACKAGE;
-    }
   
   ret->compatibility_flags = info->compatibility_flags;
     
@@ -291,7 +279,17 @@ copy_codec_info(const lqt_codec_info_t * info)
     ret->long_name = __lqt_strdup(info->long_name);
   if(info->description)
     ret->description = __lqt_strdup(info->description);
+  
+  if(info->gettext_domain)
+    ret->gettext_domain = __lqt_strdup(info->gettext_domain);
+  else
+    ret->gettext_domain = __lqt_strdup(PACKAGE);
 
+  if(info->gettext_directory)
+    ret->gettext_directory = __lqt_strdup(info->gettext_directory);
+  else
+    ret->gettext_directory = __lqt_strdup(LOCALE_DIR);
+  
   if(info->module_filename)
     ret->module_filename = __lqt_strdup(info->module_filename);
 
@@ -327,7 +325,7 @@ copy_codec_info(const lqt_codec_info_t * info)
 
     for(i = 0; i < ret->num_encoding_parameters; i++)
       copy_parameter_info(&(ret->encoding_parameters[i]),
-                          &(info->encoding_parameters[i]), gettext_domain);
+                          &(info->encoding_parameters[i]));
     }
 
   ret->num_decoding_parameters = info->num_decoding_parameters;
@@ -338,7 +336,7 @@ copy_codec_info(const lqt_codec_info_t * info)
 
     for(i = 0; i < ret->num_decoding_parameters; i++)
       copy_parameter_info(&(ret->decoding_parameters[i]),
-                          &(info->decoding_parameters[i]), gettext_domain);
+                          &(info->decoding_parameters[i]));
     }
   return ret;
   }
