@@ -781,7 +781,9 @@ static int set_parameter(quicktime_t *file,
   {
   int found = 0, i;
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
-  
+#if X264_BUILD >= 28
+  INTPARAM("x264_i_threads", codec->params.i_threads);
+#endif
   INTPARAM("x264_i_keyint_max", codec->params.i_keyint_max);
   INTPARAM("x264_i_keyint_min", codec->params.i_keyint_min);
   INTPARAM("x264_i_scenecut_threshold", codec->params.i_scenecut_threshold);

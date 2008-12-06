@@ -482,6 +482,17 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 1<<16 } 
     },
+#if X264_BUILD >= 28
+    {
+      .name =        "x264_i_threads",
+      .real_name =   TRS("Threads"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 1 },
+      // .val_min =     { .val_int =  },
+      // .val_max =     { .val_int = 256 },
+      .help_string = TRS("Number of threads")
+    },
+#endif
     { /* End of parameters */ }
   };
 
