@@ -13,7 +13,6 @@ configure
 depcomp
 install-sh
 libquicktime.pc
-libquicktime.spec
 libtool
 lqt-config
 ltmain.sh
