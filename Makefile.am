@@ -12,7 +12,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = $(DOC_SUBDIRS) src include plugins utils po
 
-EXTRA_DIST = libquicktime.spec autogen.sh lqt.m4 libquicktime.pc.in cpuinfo.sh config.rpath
+EXTRA_DIST = autogen.sh lqt.m4 libquicktime.pc.in cpuinfo.sh config.rpath
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA=libquicktime.pc

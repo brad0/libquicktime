@@ -876,7 +876,6 @@ dnl Write all the makefiles and other stuff
 
 AC_OUTPUT([Makefile 
 po/Makefile.in \
-libquicktime.spec \
 libquicktime.pc \
 doc/Makefile \
 doc/Doxyfile \
