@@ -166,8 +166,8 @@ int ffmpeg_num_video_codecs = -1;
     PARAM_STRICT_STANDARD_COMPLIANCE, \
     PARAM_NOISE_REDUCTION, \
     PARAM_FLAG_GRAY, \
-    PARAM_FLAG_BITEXACT
-    
+    PARAM_FLAG_BITEXACT, \
+    PARAM_THREAD_COUNT
 
 
 #define DECODE_PARAM_AUDIO
@@ -320,7 +320,7 @@ struct CODECIDMAP codecidmap_v[] =
                    "dx50", "DIVX", "MP4V", "3IV2", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
-                             LQT_FILE_3GP,
+                             LQT_FILE_3GP  | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1
     },
     {

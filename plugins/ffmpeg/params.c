@@ -222,6 +222,7 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,
   PARAM_INT_SCALE("ff_rc_initial_buffer_occupancy",rc_initial_buffer_occupancy,1000);
   PARAM_INT("ff_inter_threshold",inter_threshold);
   PARAM_INT("ff_quantizer_noise_shaping",quantizer_noise_shaping);
+  PARAM_INT("ff_thread_count",thread_count);
   PARAM_INT("ff_me_threshold",me_threshold);
   PARAM_INT("ff_mb_threshold",mb_threshold);
   PARAM_INT("ff_nsse_weight",nsse_weight);

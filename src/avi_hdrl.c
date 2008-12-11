@@ -25,13 +25,14 @@
 #include "lqt_private.h"
 
 void quicktime_delete_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
-{
-	int i;
-	for(i = 0; i < file->moov.total_tracks; i++)
-	{
-		quicktime_delete_strl(hdrl->strl[i]);
-	}
-}
+  {
+  int i;
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    if(hdrl->strl[i])
+      quicktime_delete_strl(hdrl->strl[i]);
+    }
+  }
 
 
 void quicktime_read_hdrl(quicktime_t *file, 
@@ -140,9 +141,8 @@ void quicktime_finalize_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
   for(i = 0; i < file->moov.total_tracks; i++)
     {
     quicktime_trak_t *trak = file->moov.trak[i];
-    quicktime_strl_t *strl = trak->strl;
-
-    quicktime_finalize_strl(file, trak, strl);
+    if(trak->strl)
+      quicktime_finalize_strl(file, trak, trak->strl);
     }
 
   if(file->total_vtracks)

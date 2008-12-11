@@ -1068,6 +1068,15 @@ with max and/or min bitrate, this must be specified.") \
        .help_string = TRS("Use only bitexact stuff (except (i)dct)")    \
   }
 
+#define PARAM_THREAD_COUNT \
+  { \
+    .name =        "ff_thread_count", \
+    .real_name =   TRS("Number of threads to launch"),      \
+    .type =        LQT_PARAMETER_INT, \
+    .val_default = { .val_int = 1 }, \
+    .help_string = TRS("Spcify how many threads to launch")    \
+  }
+
 #define PARAM_FLAG_AC_PRED_H263 \
   { \
     .name =        "ff_flag_ac_pred", \
