@@ -170,6 +170,9 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
   quicktime_video_map_t * vm = file->vtracks + track;
   quicktime_stts_t * stts;
 
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    return;
+  
   if(!force)
     {
     if(!vm->has_encode_timecode)
