@@ -210,6 +210,25 @@ int quicktime_delete_trak(quicktime_moov_t *moov)
 	return 0;
 }
 
+static void fix_dirac_track(quicktime_trak_t *trak)
+  {
+  quicktime_stsz_t * stsz;
+  quicktime_stts_t * stts;
+  
+  /* If the last sample is only the sequence end code,
+     we must hide it (the codec will regenerate it) */
+
+  stsz = &trak->mdia.minf.stbl.stsz;
+  stts = &trak->mdia.minf.stbl.stts;
+  
+  if(stsz->table[stsz->total_entries-1].size == 13)
+    {
+    if(stts->table[stts->total_entries-1].sample_count > 1)
+      stts->table[stts->total_entries-1].sample_count--;
+    else
+      stts->total_entries--;
+    }
+  }
 
 int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
                         quicktime_atom_t *trak_atom)
@@ -248,6 +267,10 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
       }
     else quicktime_atom_skip(file, &leaf_atom);
     } while(quicktime_position(file) < trak_atom->end);
+  
+  if(trak->mdia.minf.is_video &&
+     quicktime_match_32(trak->mdia.minf.stbl.stsd.table[0].format, "drac"))
+    fix_dirac_track(trak);
   
   return 0;
   }

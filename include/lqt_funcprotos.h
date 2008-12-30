@@ -1357,7 +1357,7 @@ unsigned long quicktime_current_time(void);
 LQT_EXTERN int quicktime_match_32(void *input, void *output);
 int quicktime_match_24(char *input, char *output);
 
-void lqt_hexdump(uint8_t * data, int len, int linebreak);
+LQT_EXTERN void lqt_hexdump(uint8_t * data, int len, int linebreak);
 void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak);
 
 void lqt_dump_time(uint64_t t);

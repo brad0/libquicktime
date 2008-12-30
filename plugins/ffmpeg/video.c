@@ -344,7 +344,7 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
    doesn't tells us the true colormodel before decoding the first frame */
 
 static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointers,
-                            int track)
+                                   int track)
   {
   uint8_t * user_atom;
   uint32_t user_atom_len;
@@ -366,7 +366,6 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   int extradata_size = 0;
   
   uint8_t * cpy_rows[3];
-
   
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
@@ -458,41 +457,6 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     vtrack->stream_cmodel = LQT_COLORMODEL_NONE;
     codec->initialized = 1;
     }
-
-#if 0
-  /* Check if we must seek */
-  if((quicktime_has_keyframes(file, track)) &&
-     (vtrack->current_position != codec->last_frame + 1))
-    {
-    int64_t frame1, frame2 = vtrack->current_position;
-
-    /* Forget about previously decoded frame */
-    codec->have_frame = 0;
-    
-    frame1 = quicktime_get_keyframe_before(file, vtrack->current_position, track);
-    if((frame1 < codec->last_frame) &&
-       (frame2 > codec->last_frame))
-      frame1 = codec->last_frame + 1;
-    while(frame1 < frame2)
-      {
-      buffer_size = lqt_read_video_frame(file, &codec->buffer,
-                                         &codec->buffer_alloc,
-                                         frame1, track);
-      if(buffer_size > 0)
-        {
-        avcodec_decode_video(codec->avctx,
-                             codec->frame,
-                             &got_pic,
-                             codec->buffer,
-                             buffer_size);
-        }
-      frame1++;
-      }
-    vtrack->current_position = frame2;
-    }
-
-  codec->last_frame = vtrack->current_position;
-#endif
   
   /* Read the frame from file and decode it */
 
@@ -907,7 +871,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
             esds->avgBitrate      = 200000;
           
             /* Set iods profile */
-            if(codec->avctx->max_b_frames || (codec->avctx->flags & (CODEC_FLAG_QPEL|CODEC_FLAG_GMC)))
+            if(codec->avctx->max_b_frames ||
+               (codec->avctx->flags & (CODEC_FLAG_QPEL|CODEC_FLAG_GMC)))
               file->moov.iods.videoProfileId = 0xf3; // Advanced Simple Profile @ Level 3
             else
               file->moov.iods.videoProfileId = 0x03; // Simple Profile @ Level 3

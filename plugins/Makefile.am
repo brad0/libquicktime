@@ -59,7 +59,14 @@ else
 x264_subdirs=
 endif
 
+if HAVE_SCHROEDINGER
+schroedinger_subdirs=schroedinger
+else
+schroedinger_subdirs=
+endif
+
 SUBDIRS = $(base_subdirs) $(jpeg_subdirs) $(dv_subdirs) \
 	$(png_subdirs) $(vorbis_subdirs) $(libavcodec_subdirs) \
-        $(lame_subdirs) $(faad2_subdirs) $(faac_subdirs) $(x264_subdirs) 
+        $(lame_subdirs) $(faad2_subdirs) $(faac_subdirs) $(x264_subdirs) \
+        $(schroedinger_subdirs)
 

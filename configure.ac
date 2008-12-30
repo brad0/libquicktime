@@ -586,6 +586,36 @@ AC_SUBST(PNG_REQUIRED)
 AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
 dnl
+dnl Check for libschroedinger
+dnl 
+
+AH_TEMPLATE([HAVE_SCHROEDINGER], [Enable dirac codec])
+
+have_schroedinger=false
+SCHROEDINGER_REQUIRED="1.0.1"
+
+AC_ARG_WITH(schroedinger,
+            AC_HELP_STRING([--without-schroedinger], [Do not use schroedinger.]),
+            [], [with_schroedinger=yes])
+
+dnl *********************************************************************
+dnl Check for PNG library
+dnl   (creates SCHROEDINGER_CFLAGS, SCHROEDINGER_LIBS)
+dnl *********************************************************************
+have_schroedinger=false
+if test x$with_schroedinger != xno ; then
+  PKG_CHECK_MODULES(SCHROEDINGER, [schroedinger-1.0], [have_schroedinger=true], [have_schroedinger=false])
+fi
+AM_CONDITIONAL(HAVE_SCHROEDINGER, test x$have_schroedinger = xtrue)
+
+AC_SUBST(SCHROEDINGER_CFLAGS)
+AC_SUBST(SCHROEDINGER_LIBS)
+AC_SUBST(PNG_REQUIRED)
+
+AM_CONDITIONAL(HAVE_SCHROEDINGER, test x$have_schroedinger = xtrue)
+
+
+dnl
 dnl faac
 dnl
 
@@ -896,6 +926,7 @@ plugins/vorbis/Makefile \
 plugins/png/Makefile \
 plugins/rtjpeg/Makefile \
 plugins/ffmpeg/Makefile \
+plugins/schroedinger/Makefile \
 plugins/x264/Makefile \
 utils/Makefile \
 utils/gtk/Makefile \
@@ -904,21 +935,21 @@ lqt-config], [chmod a+x lqt-config])
 echo "Configuration: "
 $have_gtk
 
-echo -n "libdv:      "
+echo -n "libdv:        "
 if test x$have_libdv = "xtrue"; then
 echo "Yes"
 else
 echo "Missing / Disabled (Go to http://libdv.sourceforge.net)"
 fi
 
-echo -n "vorbis:     "
+echo -n "vorbis:       "
 if test x$have_vorbis = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.vorbis.com/)"
 fi
 
-echo -n "lame:       "
+echo -n "lame:         "
 if test x$have_lame = "xtrue"; then
 echo "Yes"
 else
@@ -926,28 +957,36 @@ echo "Missing (Go to http://www.mp3dev.org/)"
 fi
 
 
-echo -n "libjpeg:    "
+echo -n "libjpeg:      "
 if test x$have_libjpeg = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.ijg.org/)"
 fi
 
-echo -n "libpng:     "
+echo -n "libpng:       "
 if test x$have_libpng = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.libpng.org/pub/png/libpng.html)"
 fi
 
-echo -n "libavcodec: "
+echo -n "schroedinger: "
+if test x$have_schroedinger = "xtrue"; then
+echo "Yes"
+else
+echo "Missing (Go to http://www.diracvideo.org)"
+fi
+
+
+echo -n "libavcodec:   "
 if test x$have_libavcodec = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.ffmpeg.org/)"
 fi
 
-echo -n "libswscale: "
+echo -n "libswscale:   "
 if test x$have_libswscale = "xtrue"; then
 echo "Yes"
 else
@@ -961,14 +1000,14 @@ else
 echo "Missing (Go to http://www.gtk.org/)"
 fi
 
-echo -n "Alsa        "
+echo -n "Alsa          "
 if test x$have_alsa = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.alsa-project.org/)"
 fi  
 
-echo -n "GPL plugins "
+echo -n "GPL plugins   "
 if test x$have_gpl = "xtrue"; then
 echo "Enabled"
 else
@@ -977,21 +1016,21 @@ fi
 
 if test x$have_gpl = "xtrue"; then
 
-echo -n "faac        "
+echo -n "faac          "
 if test x$have_faac = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.audiocoding.com/)"
 fi  
 
-echo -n "faad2       "
+echo -n "faad2         "
 if test x$have_faad2 = "xtrue"; then
 echo "Yes"
 else
 echo "Missing (Go to http://www.audiocoding.com/)"
 fi  
 
-echo -n "x264        "
+echo -n "x264          "
 if test x$have_x264 = "xtrue"; then
 echo "Yes"
 else
