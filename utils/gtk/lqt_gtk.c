@@ -904,7 +904,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
       gtk_container_add(GTK_CONTAINER(ret->encoding_frame),
                        ret->encode_widget->widget);
       gtk_widget_show(ret->encoding_frame);
-      gtk_box_pack_start_defaults(GTK_BOX(ret->hbox), ret->encoding_frame);
+      gtk_box_pack_start(GTK_BOX(ret->hbox), ret->encoding_frame, TRUE, TRUE, 0);
       }
     if(codec_info->num_decoding_parameters)
       {
@@ -912,7 +912,7 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
       gtk_container_add(GTK_CONTAINER(ret->decoding_frame),
                         ret->decode_widget->widget);
       gtk_widget_show(ret->decoding_frame);
-      gtk_box_pack_start_defaults(GTK_BOX(ret->hbox), ret->decoding_frame);
+      gtk_box_pack_start(GTK_BOX(ret->hbox), ret->decoding_frame, TRUE, TRUE, 0);
       }
     gtk_widget_show(ret->hbox);
     }
@@ -956,20 +956,20 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
   gtk_container_set_border_width(GTK_CONTAINER(ret->mainbox), 10);
 
   if(encode && decode)
-    gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->hbox);
+    gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->hbox, TRUE, TRUE, 0);
   else if(encode)
-    gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox),
-                                ret->encode_widget->widget);
+    gtk_box_pack_start(GTK_BOX(ret->mainbox),
+                                ret->encode_widget->widget, TRUE, TRUE, 0);
   else if(decode)
-    gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox),
-                                ret->decode_widget->widget);
+    gtk_box_pack_start(GTK_BOX(ret->mainbox),
+                                ret->decode_widget->widget, TRUE, TRUE, 0);
     
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->apply_button);
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->close_button);
   gtk_container_add(GTK_CONTAINER(ret->buttonbox), ret->restore_button);
 
   gtk_widget_show(ret->buttonbox);
-  gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->buttonbox);
+  gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->buttonbox, TRUE, TRUE, 0);
   gtk_widget_show(ret->mainbox);
 
   gtk_container_add(GTK_CONTAINER(ret->window), ret->mainbox);
@@ -1248,8 +1248,8 @@ lqtgtk_create_codec_info_window(const lqt_codec_info_t *info)
     
   gtk_widget_show(ret->close_button);
   
-  gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->info_widget->widget);
-  gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->close_button);
+  gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->info_widget->widget, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->close_button, TRUE, TRUE, 0);
   
   gtk_widget_show(ret->mainbox);
   

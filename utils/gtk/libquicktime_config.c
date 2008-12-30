@@ -125,7 +125,7 @@ static MainWindow * create_main_window()
 
   ret->mainbox = gtk_vbox_new(0, 5);
 
-  gtk_box_pack_start_defaults(GTK_BOX(ret->mainbox), ret->notebook);
+  gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->notebook, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(ret->mainbox), ret->buttonbox,
                      FALSE, FALSE, 0);
 
