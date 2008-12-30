@@ -222,8 +222,8 @@ static int decode_picture(quicktime_t *file, int track)
         // p_schro_params->eos_pulled = 1;
         //        schro_decoder_reset (decoder);
         //        outer = 0;
+        return 0;
         break;
-
       case SCHRO_DECODER_ERROR:
         fprintf(stderr, "State: SCHRO_DECODER_ERROR\n");
         return 0;
