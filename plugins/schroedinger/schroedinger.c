@@ -22,7 +22,11 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
-#include "lqt_private.h"
+#include <string.h>
+
+#define LQT_LIBQUICKTIME /* Hack: This prevents multiple compilation of
+                            get_codec_api_version() */
+
 #include "schroedinger.h"
 #include <quicktime/colormodels.h>
 
@@ -66,7 +70,6 @@ static const pixel_format_t * pixelformat_from_schro(SchroVideoFormat *format)
   return NULL;
   }
 
-#if 0
 static const pixel_format_t * pixelformat_from_lqt(int cmodel)
   {
   int i;
@@ -77,7 +80,25 @@ static const pixel_format_t * pixelformat_from_lqt(int cmodel)
     }
   return NULL;
   }
-#endif
+
+SchroChromaFormat lqt_schrodinger_get_chroma_format(int cmodel)
+  {
+  const pixel_format_t * p;
+  p = pixelformat_from_lqt(cmodel);
+  if(p)
+    return p->chroma_format;
+  return 0;
+  }
+
+SchroSignalRange lqt_schrodinger_get_signal_range(int cmodel)
+  {
+  const pixel_format_t * p;
+  p = pixelformat_from_lqt(cmodel);
+  if(p)
+    return p->signal_range;
+  return 0;
+  }
+
 
 int lqt_schrodinger_get_colormodel(SchroVideoFormat *format)
   {
@@ -116,6 +137,16 @@ int lqt_schroedinger_delete(quicktime_video_map_t *vtrack)
   return 0;
   }
 
+static int set_parameter_schroedinger(quicktime_t *file, 
+                               int track, 
+                               const char *key, 
+                               const void *value)
+  {
+  if(!strncmp(key, "enc_", 4))
+    return lqt_schroedinger_set_enc_parameter(file, track, key, value);
+  return 0;
+  }
+
 void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack)
   {
   schroedinger_codec_t *codec;
@@ -139,7 +170,7 @@ void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack)
   ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_schroedinger_encode_video;
   
   ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_schroedinger_decode_video;
-  //  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_video;
+  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_schroedinger;
   
   }
 

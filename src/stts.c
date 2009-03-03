@@ -238,19 +238,21 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
   {
   long sample = 0;
   long i;
-
+  int compress;
+  
   if(stts->total_entries <= 1)
     return;
     
   while(sample < stts->total_entries)
     {
     i = 1;
-
+    compress = 0;
     while(sample + i < stts->total_entries)
       {
-      if(stts->table[sample + i].sample_duration ==  stts->table[sample].sample_duration)
+      if(stts->table[sample + i].sample_duration == stts->table[sample].sample_duration)
         {
-        stts->table[sample].sample_count++;
+        stts->table[sample].sample_count += stts->table[sample + i].sample_count;
+        compress++;
         }
       else
         {
@@ -266,7 +268,7 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
         memmove(&stts->table[sample + 1], &stts->table[sample + i],
                 sizeof(stts->table[sample + i]) * (stts->total_entries - sample - i));
 
-      stts->total_entries -= stts->table[sample].sample_count-1;
+      stts->total_entries -= compress;
       }
     sample++;
     }

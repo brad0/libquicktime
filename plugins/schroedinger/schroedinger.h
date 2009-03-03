@@ -24,8 +24,22 @@
 #include <schroedinger/schro.h>
 // #include <schroedinger/schrodebug.h>
 #include <schroedinger/schrovideoformat.h>
+#include "lqt_private.h"
+#include <quicktime/lqt_codecapi.h>
 
 void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack);
+
+extern lqt_parameter_info_static_t encode_parameters_schroedinger[];
+
+int lqt_schroedinger_set_enc_parameter(quicktime_t *file, 
+                                       int track, 
+                                       const char *key, 
+                                       const void *value);
+
+SchroChromaFormat lqt_schrodinger_get_chroma_format(int cmodel);
+
+SchroSignalRange lqt_schrodinger_get_signal_range(int cmodel);
+
 
 typedef struct
   {

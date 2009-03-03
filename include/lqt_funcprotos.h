@@ -1033,7 +1033,7 @@ void quicktime_stts_delete(quicktime_stts_t *stts);
 void quicktime_stts_dump(quicktime_stts_t *stts);
 void quicktime_read_stts(quicktime_t *file, quicktime_stts_t *stts);
 void quicktime_write_stts(quicktime_t *file, quicktime_stts_t *stts);
-void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration);
+LQT_EXTERN void quicktime_update_stts(quicktime_stts_t *stts, long sample, long duration);
 /* The following function kicks out redundant entries */
 void quicktime_compress_stts(quicktime_stts_t *stts);
 

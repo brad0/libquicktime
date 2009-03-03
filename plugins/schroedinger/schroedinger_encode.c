@@ -22,15 +22,74 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
-#include "lqt_private.h"
-#include "schroedinger.h"
+#define LQT_LIBQUICKTIME /* Hack: This prevents multiple compilation of
+                            get_codec_api_version() */
 
+#include "schroedinger.h"
+#include <quicktime/colormodels.h>
 #include <string.h>
 
 static void copy_frame_8(quicktime_t * file,
                          unsigned char **row_pointers,
                          SchroFrame * frame,
                          int track);
+
+int lqt_schroedinger_set_enc_parameter(quicktime_t *file, 
+                                       int track, 
+                                       const char *key, 
+                                       const void *value)
+  {
+  int i, j;
+  double v;
+  int found = 0;
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  schroedinger_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  
+  /* Find the parameter */
+  i = 0;
+
+  while(encode_parameters_schroedinger[i].name)
+    {
+    if(!strcmp(key, encode_parameters_schroedinger[i].name))
+      break;
+    i++;
+    }
+  if(!encode_parameters_schroedinger[i].name)
+    return 0;
+  switch(encode_parameters_schroedinger[i].type)
+    {
+    case LQT_PARAMETER_INT:
+      v = (double)(*(int*)(value));
+      found = 1;
+      break;
+    case LQT_PARAMETER_FLOAT:
+      v = (double)(*(float*)(value));
+      found = 1;
+      break;
+    case LQT_PARAMETER_STRINGLIST:
+      j = 0;
+      while(encode_parameters_schroedinger[i].stringlist_options[j])
+        {
+        if(!strcmp(encode_parameters_schroedinger[i].stringlist_options[j],
+                   (char*)value))
+          {
+          v = (double)(j);
+          found = 1;
+          break;
+          }
+        j++;
+        }
+      break;
+    default:
+      break;
+    }
+  if(found)
+    {
+    //    fprintf(stderr, "schro_encoder_setting_set_double %s %f\n", key + 4, v);
+    schro_encoder_setting_set_double(codec->enc, key + 4, v);
+    }
+  return 0;
+  }
 
 static int flush_data(quicktime_t *file, int track)
   {
@@ -78,9 +137,37 @@ static int flush_data(quicktime_t *file, int track)
                                        vtrack->current_chunk,
                                        &chunk_atom,
                                        1);
+          codec->enc_buffer_size = 0;
+          
+          if(SCHRO_PARSE_CODE_IS_INTRA(parse_code) &&
+             SCHRO_PARSE_CODE_IS_REFERENCE(parse_code))
+            quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
+          
           vtrack->current_chunk++;
           }
+        else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
+          {
+          quicktime_stts_t * stts;
+          stts = &trak->mdia.minf.stbl.stts;
+          stts->table[stts->total_entries-1].sample_count++;
+          
+          /* Special case: We need to add a final sample to the stream */
+          quicktime_write_chunk_header(file, trak, &chunk_atom);
+          result = !quicktime_write_data(file, codec->enc_buffer,
+                                         codec->enc_buffer_size);
+
+          quicktime_write_chunk_footer(file,
+                                       trak,
+                                       vtrack->current_chunk,
+                                       &chunk_atom,
+                                       1);
+          vtrack->current_chunk++;
+          codec->enc_buffer_size = 0;
+          }
+        
         schro_buffer_unref (enc_buf);
+        if(state == SCHRO_STATE_END_OF_STREAM)
+          return result;
         break;
       case SCHRO_STATE_NEED_FRAME:
         return result;
@@ -92,23 +179,91 @@ static int flush_data(quicktime_t *file, int track)
   return result;
   }
 
+static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * format)
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_stsd_table_t *stsd;
+  schroedinger_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  
+  stsd = vtrack->track->mdia.minf.stbl.stsd.table;
+
+  if(stsd->has_fiel)
+    return;
+  
+  switch(vtrack->interlace_mode)
+    {
+    case LQT_INTERLACE_NONE:
+      lqt_set_fiel(file, track, 1, 0);
+      break;
+    case LQT_INTERLACE_TOP_FIRST:
+      lqt_set_fiel(file, track, 2, 9);
+      schro_encoder_setting_set_double(codec->enc,
+                                       "interlaced_coding", 1);
+      format->interlaced = 1;
+      format->top_field_first = 1;
+      break;
+    case LQT_INTERLACE_BOTTOM_FIRST:
+      lqt_set_fiel(file, track, 2, 14);
+      schro_encoder_setting_set_double(codec->enc,
+                                       "interlaced_coding", 1);
+      format->interlaced = 1;
+      format->top_field_first = 0;
+      break;
+    }
+  }
+
+
 int lqt_schroedinger_encode_video(quicktime_t *file,
                                   unsigned char **row_pointers,
                                   int track)
   {
   SchroFrame * frame;
+  SchroVideoFormat * format;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   schroedinger_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   
   if(!row_pointers)
     {
-    
+    vtrack->stream_cmodel = BC_YUV420P;
+    return 0;
     }
   
   if(!codec->enc_copy_frame)
     {
+    int pixel_width, pixel_height;
     /* Initialize */
     codec->enc_copy_frame = copy_frame_8;
+
+    format = schro_encoder_get_video_format(codec->enc);
+
+    format->width = quicktime_video_width(file, track);
+    format->height = quicktime_video_height(file, track);
+    
+    format->frame_rate_numerator   = lqt_video_time_scale(file, track);
+    format->frame_rate_denominator = lqt_frame_duration(file, track, NULL);
+
+    lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
+    
+    format->aspect_ratio_numerator   = pixel_width;  
+    format->aspect_ratio_denominator = pixel_height;
+
+    set_interlacing(file, track, format);
+    
+    schro_video_format_set_std_signal_range(format,
+                                            lqt_schrodinger_get_signal_range(vtrack->stream_cmodel));
+
+    format->chroma_format =
+      lqt_schrodinger_get_chroma_format(vtrack->stream_cmodel);
+
+    codec->frame_format = lqt_schrodinger_get_frame_format(format);
+    
+    schro_encoder_set_video_format(codec->enc, format);
+
+    free(format);
+    
+    //    schro_debug_set_level(4);
+    
+    schro_encoder_start(codec->enc);
     }
   
   frame = schro_frame_new_and_alloc(NULL,

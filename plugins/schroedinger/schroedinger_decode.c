@@ -22,7 +22,9 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
-#include "lqt_private.h"
+#define LQT_LIBQUICKTIME /* Hack: This prevents multiple compilation of
+                            get_codec_api_version() */
+
 #include "schroedinger.h"
 #include <quicktime/colormodels.h>
 #include <string.h>
