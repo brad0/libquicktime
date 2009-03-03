@@ -124,7 +124,7 @@ static void get_format(quicktime_t *file, int track)
   else
     codec->dec_copy_frame = copy_frame_8;
   
-  codec->dec_frame_format = lqt_schrodinger_get_frame_format(format);
+  codec->frame_format = lqt_schrodinger_get_frame_format(format);
   
   /* Get interlace mode */
   if(format->interlaced)
@@ -199,7 +199,7 @@ static int decode_picture(quicktime_t *file, int track)
         /* Decoder needs a frame - create one and push it in. */
         //        fprintf(stderr, "State: SCHRO_DECODER_NEED_FRAME\n");
         frame = schro_frame_new_and_alloc(NULL,
-                                          codec->dec_frame_format,
+                                          codec->frame_format,
                                           quicktime_video_width(file, track),
                                           quicktime_video_height(file, track));
         schro_decoder_add_output_picture (codec->dec, frame);

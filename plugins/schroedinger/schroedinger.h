@@ -39,11 +39,23 @@ typedef struct
   int dec_delay;
   int dec_eof;
   
-  SchroFrameFormat dec_frame_format;
+  SchroFrameFormat frame_format;
 
   void (*dec_copy_frame)(quicktime_t * file,
                          unsigned char **row_pointers,
                          int track);
+
+  /* Encoder part */
+  SchroEncoder * enc;
+
+  void (*enc_copy_frame)(quicktime_t * file,
+                         unsigned char **row_pointers,
+                         SchroFrame * frame,
+                         int track);
+  
+  uint8_t * enc_buffer;
+  int enc_buffer_alloc;
+  int enc_buffer_size;
   
   } schroedinger_codec_t;
 

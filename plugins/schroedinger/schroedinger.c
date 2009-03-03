@@ -106,7 +106,12 @@ int lqt_schroedinger_delete(quicktime_video_map_t *vtrack)
     schro_decoder_free(codec->dec);
   if(codec->dec_buffer)
     free(codec->dec_buffer);
+  if(codec->enc_buffer)
+    free(codec->enc_buffer);
   
+  if(codec->enc)
+    schro_encoder_free(codec->enc);
+    
   free(codec);
   return 0;
   }
@@ -122,6 +127,9 @@ void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack)
   codec = calloc(1, sizeof(*codec));
   if(!codec)
     return;
+
+  /* Need to create the encoder immediately */
+  codec->enc = schro_encoder_new();
   
   ((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
   ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_schroedinger_delete;
@@ -129,7 +137,6 @@ void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack)
   ((quicktime_codec_t*)vtrack->codec)->resync = lqt_schroedinger_resync;
   
   ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_schroedinger_encode_video;
-  //  ((quicktime_codec_t*)vtrack->codec)->set_pass = set_pass_ffmpeg;
   
   ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_schroedinger_decode_video;
   //  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_video;
