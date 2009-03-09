@@ -204,24 +204,22 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	mjpeg_compress(codec->mjpeg, row_pointers);
 
         if(codec->jpeg_type == JPEG_MJPA) 
-		mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,
-			&codec->mjpeg->output_size,
-			&codec->mjpeg->output_allocated,
-			2,
-			&field2_offset);
+          mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,
+                                         &codec->mjpeg->output_size,
+                                         &codec->mjpeg->output_allocated,
+                                         2,
+                                         &field2_offset);
 
-        quicktime_write_chunk_header(file, trak, &chunk_atom);
-	result = !quicktime_write_data(file, 
+        lqt_write_frame_header(file, track,
+                               vtrack->current_position,
+                               -1, 0);
+        
+        result = !quicktime_write_data(file, 
 				mjpeg_output_buffer(codec->mjpeg), 
 				mjpeg_output_size(codec->mjpeg));
-        quicktime_write_chunk_footer(file, 
-                                     trak,
-                                     vtrack->current_chunk,
-                                     &chunk_atom, 
-                                     1);
 
-	vtrack->current_chunk++;
-	return result;
+        lqt_write_frame_footer(file, track);
+        return result;
 }
 
 

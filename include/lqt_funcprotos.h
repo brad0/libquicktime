@@ -1173,9 +1173,6 @@ LQT_EXTERN int quicktime_chunk_of_sample(int64_t *chunk_sample,
 
 int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
 
-long quicktime_offset_to_chunk(int64_t *chunk_offset, 
-                               quicktime_trak_t *trak, 
-                               int64_t offset);
 
 int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
                                     long chunk_sample, 
@@ -1433,6 +1430,17 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
 int quicktime_delete_vcodec(quicktime_video_map_t *vtrack);
 int quicktime_delete_acodec(quicktime_audio_map_t *vtrack);
 int quicktime_codecs_flush(quicktime_t *file);
+
+LQT_EXTERN void lqt_write_frame_header(quicktime_t * file, int track,
+                                       int pic_num1, int64_t pic_pts, int keyframe);
+
+LQT_EXTERN void lqt_write_frame_footer(quicktime_t * file, int track);
+
+void lqt_video_build_timestamp_tables(quicktime_t * file, int track);
+
+
+LQT_EXTERN void lqt_video_append_timestamp(quicktime_t * file, int track,
+                                           int64_t time, int duration);
 
 /* workarounds.c */
 

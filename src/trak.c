@@ -380,7 +380,7 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
   long chunk2entry;
   long chunk1, chunk2, chunk1samples, range_samples, total = 0;
   
-  chunk1 = 1;
+  chunk1 = 0;
   chunk1samples = 0;
   chunk2entry = 0;
   
@@ -393,7 +393,7 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 
   do
     {
-    chunk2 = table[chunk2entry].chunk;
+    chunk2 = table[chunk2entry].chunk-1;
     *chunk = chunk2 - chunk1;
     range_samples = *chunk * chunk1samples;
 
@@ -412,7 +412,7 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
   if(chunk1samples)
     *chunk = (sample - total) / chunk1samples + chunk1;
   else
-    *chunk = 1;
+    *chunk = 0;
 
   *chunk_sample = total + (*chunk - chunk1) * chunk1samples;
   return 0;
@@ -420,40 +420,21 @@ int quicktime_chunk_of_sample(int64_t *chunk_sample,
 
 int64_t quicktime_chunk_to_offset(quicktime_t *file,
                                   quicktime_trak_t *trak, long chunk)
-{
-	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
-	int64_t result = 0;
+  {
+  quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
+  int64_t result = 0;
 
-	if(trak->mdia.minf.stbl.stco.total_entries && 
-		chunk > trak->mdia.minf.stbl.stco.total_entries)
-		result = table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
-	else
-	if(trak->mdia.minf.stbl.stco.total_entries)
-		result = table[chunk - 1].offset;
-	else
-		result = HEADER_LENGTH * 2;
+  if(trak->mdia.minf.stbl.stco.total_entries && 
+     chunk > trak->mdia.minf.stbl.stco.total_entries)
+    result = table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
+  else
+    if(trak->mdia.minf.stbl.stco.total_entries)
+      result = table[chunk].offset;
+    else
+      result = HEADER_LENGTH * 2;
 
-	return result;
-}
-
-long quicktime_offset_to_chunk(int64_t *chunk_offset, 
-	quicktime_trak_t *trak, 
-	int64_t offset)
-{
-	quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
-	int i;
-
-	for(i = trak->mdia.minf.stbl.stco.total_entries - 1; i >= 0; i--)
-	{
-		if(table[i].offset <= offset)
-		{
-			*chunk_offset = table[i].offset;
-			return i + 1;
-		}
-	}
-	*chunk_offset = HEADER_LENGTH * 2;
-	return 1;
-}
+  return result;
+  }
 
 
 int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
@@ -569,7 +550,7 @@ void quicktime_write_chunk_footer(quicktime_t *file,
 
   if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
     quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-                          current_chunk - 1, 
+                          current_chunk, 
                           sample_size);
   /* Need to increase sample count for CBR (the VBR routines to it
      themselves) */
@@ -579,14 +560,14 @@ void quicktime_write_chunk_footer(quicktime_t *file,
   if(trak->mdia.minf.is_panorama)
     {
     quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-                          current_chunk - 1, 
+                          current_chunk, 
                           sample_size);	
     }
   
   if(trak->mdia.minf.is_qtvr)
     {
     quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
-                          current_chunk - 1, 
+                          current_chunk, 
                           sample_size);
     }
   

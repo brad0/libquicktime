@@ -126,23 +126,24 @@ void quicktime_write_stco(quicktime_t *file, quicktime_stco_t *stco)
 	quicktime_atom_write_footer(file, &atom);
 }
 
-// Chunk starts at 1
 void quicktime_update_stco(quicktime_stco_t *stco, long chunk, int64_t offset)
-{
-        if(chunk <= 0)
-          lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
-                  "quicktime_update_stco chunk must start at 1. chunk=%ld\n",
-                  chunk);
+  {
+  // Chunk starts at 1
+  chunk++;
+  if(chunk <= 0)
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN,
+            "quicktime_update_stco chunk must start at 1. chunk=%ld\n",
+            chunk);
         
-	if(chunk > stco->entries_allocated)
-	{
-		stco->entries_allocated = chunk * 2;
-		stco->table = (quicktime_stco_table_t*)realloc(stco->table, sizeof(quicktime_stco_table_t) * stco->entries_allocated);
-	}
+  if(chunk > stco->entries_allocated)
+    {
+    stco->entries_allocated = chunk * 2;
+    stco->table = (quicktime_stco_table_t*)realloc(stco->table, sizeof(quicktime_stco_table_t) * stco->entries_allocated);
+    }
 	
-	stco->table[chunk - 1].offset = offset;
-	if(chunk > stco->total_entries) stco->total_entries = chunk;
-        if(offset >= 0x100000000LL)
-          stco->co64 = 1;
-}
+  stco->table[chunk - 1].offset = offset;
+  if(chunk > stco->total_entries) stco->total_entries = chunk;
+  if(offset >= 0x100000000LL)
+    stco->co64 = 1;
+  }
 

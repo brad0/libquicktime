@@ -140,67 +140,64 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
-{
-	int result = 0;
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_trak_t *trak = vtrack->track;
-	quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
-	png_structp png_ptr;
-	png_infop info_ptr;
-        quicktime_atom_t chunk_atom;
+  {
+  int result = 0;
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_trak_t *trak = vtrack->track;
+  quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  int height = trak->tkhd.track_height;
+  int width = trak->tkhd.track_width;
+  png_structp png_ptr;
+  png_infop info_ptr;
+  quicktime_atom_t chunk_atom;
 
-        if(!row_pointers)
-          {
-          vtrack->stream_cmodel = source_cmodel(file, track);
-          return 0;
-          }
+  if(!row_pointers)
+    {
+    vtrack->stream_cmodel = source_cmodel(file, track);
+    return 0;
+    }
         
-	codec->buffer_size = 0;
-	codec->buffer_position = 0;
+  codec->buffer_size = 0;
+  codec->buffer_position = 0;
 
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-	info_ptr = png_create_info_struct(png_ptr);
-	png_set_write_fn(png_ptr,
-               codec, 
-			   (png_rw_ptr)write_function,
-               (png_flush_ptr)flush_function);
-	png_set_compression_level(png_ptr, codec->compression_level);
-	png_set_IHDR(png_ptr, 
-		info_ptr, 
-		width, height,
-    	8, 
-		vtrack->stream_cmodel == BC_RGB888 ? 
-		  PNG_COLOR_TYPE_RGB : 
-		  PNG_COLOR_TYPE_RGB_ALPHA, 
-		PNG_INTERLACE_NONE, 
-		PNG_COMPRESSION_TYPE_DEFAULT, 
-		PNG_FILTER_TYPE_DEFAULT);
+  png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+  info_ptr = png_create_info_struct(png_ptr);
+  png_set_write_fn(png_ptr,
+                   codec, 
+                   (png_rw_ptr)write_function,
+                   (png_flush_ptr)flush_function);
+  png_set_compression_level(png_ptr, codec->compression_level);
+  png_set_IHDR(png_ptr, 
+               info_ptr, 
+               width, height,
+               8, 
+               vtrack->stream_cmodel == BC_RGB888 ? 
+               PNG_COLOR_TYPE_RGB : 
+               PNG_COLOR_TYPE_RGB_ALPHA, 
+               PNG_INTERLACE_NONE, 
+               PNG_COMPRESSION_TYPE_DEFAULT, 
+               PNG_FILTER_TYPE_DEFAULT);
 
 #if 0
-        png_write_info(png_ptr, info_ptr);
-	png_write_image(png_ptr, row_pointers);
-	png_write_end(png_ptr, info_ptr);
+  png_write_info(png_ptr, info_ptr);
+  png_write_image(png_ptr, row_pointers);
+  png_write_end(png_ptr, info_ptr);
 #else
-        png_set_rows(png_ptr, info_ptr, row_pointers);
-        png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+  png_set_rows(png_ptr, info_ptr, row_pointers);
+  png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 #endif
-	png_destroy_write_struct(&png_ptr, &info_ptr);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
 
-        quicktime_write_chunk_header(file, trak, &chunk_atom);
-	result = !quicktime_write_data(file, 
-				codec->buffer, 
-				codec->buffer_size);
-        quicktime_write_chunk_footer(file,
-                trak,
-                vtrack->current_chunk,
-                &chunk_atom,
-                1);
-
-	file->vtracks[track].current_chunk++;
-	return result;
-}
+  lqt_write_frame_header(file, track,
+                         vtrack->current_position,
+                         -1, 0);
+        
+  result = !quicktime_write_data(file, 
+                                 codec->buffer, 
+                                 codec->buffer_size);
+  lqt_write_frame_footer(file, track);
+  return result;
+  }
 
 
 static int set_parameter(quicktime_t *file, 

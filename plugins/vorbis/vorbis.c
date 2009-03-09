@@ -183,14 +183,14 @@ static int next_chunk(quicktime_t * file, int track)
 
   if(lqt_audio_is_vbr(file, track))
     {
-    num_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk, &samples);
+    num_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &samples);
     if(!num_packets)
       return 0;
 
     
     for(i = 0; i < num_packets; i++)
       {
-      chunk_size = lqt_audio_read_vbr_packet(file, track, track_map->current_chunk, i,
+      chunk_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
                                              &(codec->chunk_buffer),
                                              &(codec->chunk_buffer_alloc), &samples);
       buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
@@ -201,7 +201,7 @@ static int next_chunk(quicktime_t * file, int track)
   else
     {
     chunk_size = lqt_read_audio_chunk(file,
-                                      track, track_map->current_chunk,
+                                      track, track_map->cur_chunk,
                                       &(codec->chunk_buffer),
                                       &(codec->chunk_buffer_alloc), (int*)0);
     if(chunk_size <= 0)
@@ -214,7 +214,7 @@ static int next_chunk(quicktime_t * file, int track)
     ogg_sync_wrote(&codec->dec_oy, chunk_size);
     }
   
-  track_map->current_chunk++;
+  track_map->cur_chunk++;
   
   return 1;
   }
@@ -419,16 +419,16 @@ static int decode(quicktime_t *file,
 
     if(lqt_audio_is_vbr(file, track))
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->current_chunk),
+                              &(track_map->cur_chunk),
                               track_map->track,
                               track_map->current_position);
     else
       quicktime_chunk_of_sample(&chunk_sample,
-                                &(track_map->current_chunk),
+                                &(track_map->cur_chunk),
                                 track_map->track,
                                 track_map->current_position);
       
-    if(track_map->current_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries)
+    if(track_map->cur_chunk >= file->atracks[track].track->mdia.minf.stbl.stco.total_entries-1)
       {
       return 0;
       }
@@ -738,10 +738,10 @@ static int encode(quicktime_t *file,
     {
     quicktime_write_chunk_footer(file, 
                                  trak,
-                                 track_map->current_chunk,
+                                 track_map->cur_chunk,
                                  &codec->chunk_atom, 
                                  track_map->vbr_num_frames);
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
     codec->chunk_started = 0;
     }
 
@@ -789,14 +789,14 @@ static int flush(quicktime_t *file, int track)
 	
 	if(codec->chunk_started)
 	{
-                quicktime_write_chunk_footer(file, 
-                                             trak,
-                                             track_map->current_chunk,
-                                             &codec->chunk_atom, 
-                                             track_map->vbr_num_frames);
-		track_map->current_chunk++;
-                codec->chunk_started = 0;
-                return 1;
+        quicktime_write_chunk_footer(file, 
+                                     trak,
+                                     track_map->cur_chunk,
+                                     &codec->chunk_atom, 
+                                     track_map->vbr_num_frames);
+        track_map->cur_chunk++;
+        codec->chunk_started = 0;
+        return 1;
 	}
         return 0;
 }

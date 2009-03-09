@@ -149,20 +149,20 @@ void quicktime_write_stsc(quicktime_t *file, quicktime_stsc_t *stsc)
   }
 
 int quicktime_update_stsc(quicktime_stsc_t *stsc, long chunk, long samples)
-{
+  {
+  chunk++;
+  if(chunk > stsc->entries_allocated)
+    {
+    stsc->entries_allocated = chunk * 2;
+    stsc->table =(quicktime_stsc_table_t*)realloc(stsc->table, sizeof(quicktime_stsc_table_t) * stsc->entries_allocated);
+    }
 
-	if(chunk > stsc->entries_allocated)
-	{
-		stsc->entries_allocated = chunk * 2;
-		stsc->table =(quicktime_stsc_table_t*)realloc(stsc->table, sizeof(quicktime_stsc_table_t) * stsc->entries_allocated);
-	}
-
-	stsc->table[chunk - 1].samples = samples;
-	stsc->table[chunk - 1].chunk = chunk;
-	stsc->table[chunk - 1].id = 1;
-	if(chunk > stsc->total_entries) stsc->total_entries = chunk;
-	return 0;
-}
+  stsc->table[chunk - 1].samples = samples;
+  stsc->table[chunk - 1].chunk = chunk;
+  stsc->table[chunk - 1].id = 1;
+  if(chunk > stsc->total_entries) stsc->total_entries = chunk;
+  return 0;
+  }
 
 /* Optimizing while writing doesn't allow seeks during recording so */
 /* entries are created for every chunk and only optimized during */

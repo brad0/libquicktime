@@ -143,7 +143,7 @@ static int decode_chunk(quicktime_t *file, int track)
   quicktime_faad2_codec_t *codec =
     ((quicktime_codec_t*)file->atracks[track].codec)->priv;
   
-  num_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk, &num_samples);
+  num_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
   if(!num_packets)
     return 0;
 
@@ -160,7 +160,7 @@ static int decode_chunk(quicktime_t *file, int track)
   
   for(i = 0; i < num_packets; i++)
     {
-    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->current_chunk, i,
+    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
                                             &(codec->data),
                                             &(codec->data_alloc), &num_samples);
 
@@ -206,7 +206,7 @@ static int decode_chunk(quicktime_t *file, int track)
     codec->sample_buffer_end += frame_info.samples / track_map->channels;
     }
   
-  track_map->current_chunk++;
+  track_map->cur_chunk++;
   return 1;
   }
 
@@ -240,18 +240,18 @@ static int decode(quicktime_t *file,
     if(codec->upsample)
       {
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->current_chunk),
+                              &(track_map->cur_chunk),
                               track_map->track,
                               track_map->current_position / 2);
       chunk_sample *= 2;
       }
     else
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->current_chunk),
+                              &(track_map->cur_chunk),
                               track_map->track,
                               track_map->current_position);
     
-    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
+    if(track_map->cur_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries - 1)
       {
       return 0;
       }

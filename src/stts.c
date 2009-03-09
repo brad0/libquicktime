@@ -100,7 +100,7 @@ void quicktime_stts_dump(quicktime_stts_t *stts)
   lqt_dump("      total_entries %ld\n", stts->total_entries);
   for(i = 0; i < stts->total_entries; i++)
     {
-    lqt_dump("       count %ld duration %ld\n",
+    lqt_dump("       count %d duration %d\n",
              stts->table[i].sample_count, stts->table[i].sample_duration);
     }
   }

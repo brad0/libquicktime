@@ -75,6 +75,15 @@ int lqt_schroedinger_set_enc_parameter(quicktime_t *file,
           {
           v = (double)(j);
           found = 1;
+
+          /* Check if we have B-frames */
+          if(!strcmp(key, "gop_structure"))
+            {
+            if((j == 0) || /* Adaptive */
+               (j == 4) || /* Biref    */
+               (j == 5))   /* Chained biref */
+              codec->enc_b_frames = 1;
+            }
           break;
           }
         j++;
@@ -127,26 +136,35 @@ static int flush_data(quicktime_t *file, int track)
         
         if(SCHRO_PARSE_CODE_IS_PICTURE(parse_code))
           {
+          int pic_num, keyframe;
+          
+          pic_num = (enc_buf->data[13] << 24) |
+            (enc_buf->data[14] << 16) |
+            (enc_buf->data[15] << 8) |
+            (enc_buf->data[16]);
+
+          if(SCHRO_PARSE_CODE_IS_INTRA(parse_code) &&
+             SCHRO_PARSE_CODE_IS_REFERENCE(parse_code))
+            keyframe = 1;
+          else
+            keyframe = 0;
+            
           /* Write the frame */
-          quicktime_write_chunk_header(file, trak, &chunk_atom);
+
+          lqt_write_frame_header(file, track,
+                                 pic_num, -1, keyframe);
+
           result = !quicktime_write_data(file, codec->enc_buffer,
                                          codec->enc_buffer_size);
 
-          quicktime_write_chunk_footer(file,
-                                       trak,
-                                       vtrack->current_chunk,
-                                       &chunk_atom,
-                                       1);
+          lqt_write_frame_footer(file, track);
+          
           codec->enc_buffer_size = 0;
           
-          if(SCHRO_PARSE_CODE_IS_INTRA(parse_code) &&
-             SCHRO_PARSE_CODE_IS_REFERENCE(parse_code))
-            quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
-          
-          vtrack->current_chunk++;
           }
         else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
           {
+#if 0
           quicktime_stts_t * stts;
           stts = &trak->mdia.minf.stbl.stts;
           stts->table[stts->total_entries-1].sample_count++;
@@ -158,11 +176,12 @@ static int flush_data(quicktime_t *file, int track)
 
           quicktime_write_chunk_footer(file,
                                        trak,
-                                       vtrack->current_chunk,
+                                       vtrack->cur_chunk,
                                        &chunk_atom,
                                        1);
-          vtrack->current_chunk++;
+          vtrack->cur_chunk++;
           codec->enc_buffer_size = 0;
+#endif
           }
         
         schro_buffer_unref (enc_buf);
@@ -183,7 +202,6 @@ static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * fo
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_stsd_table_t *stsd;
-  schroedinger_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   
   stsd = vtrack->track->mdia.minf.stbl.stsd.table;
 
@@ -197,15 +215,19 @@ static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * fo
       break;
     case LQT_INTERLACE_TOP_FIRST:
       lqt_set_fiel(file, track, 2, 9);
+#if 0 /* Don't encode field pictures */
       schro_encoder_setting_set_double(codec->enc,
                                        "interlaced_coding", 1);
+#endif
       format->interlaced = 1;
       format->top_field_first = 1;
       break;
     case LQT_INTERLACE_BOTTOM_FIRST:
       lqt_set_fiel(file, track, 2, 14);
+#if 0 /* Don't encode field pictures */
       schro_encoder_setting_set_double(codec->enc,
                                        "interlaced_coding", 1);
+#endif
       format->interlaced = 1;
       format->top_field_first = 0;
       break;

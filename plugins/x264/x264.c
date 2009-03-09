@@ -437,13 +437,13 @@ static int flush_frame(quicktime_t *file, int track,
                                    encoded_size);
     quicktime_write_chunk_footer(file, 
                                  trak, 
-                                 vtrack->current_chunk,
+                                 vtrack->cur_chunk,
                                  &chunk_atom, 
                                  1);
   
     if(pic_out.i_type == X264_TYPE_IDR)
-      quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
-    vtrack->current_chunk++;
+      quicktime_insert_keyframe(file, vtrack->cur_chunk, track);
+    vtrack->cur_chunk++;
     return 1;
     }
   return 0;

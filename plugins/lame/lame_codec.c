@@ -368,7 +368,7 @@ static int write_data(quicktime_t *file, int track,
       result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
       quicktime_write_chunk_footer(file, 
                                    track_map->track, 
-                                   track_map->current_chunk,
+                                   track_map->cur_chunk,
                                    &chunk_atom,
                                    chunk_samples);
       if(file->total_riffs == 1)
@@ -390,7 +390,7 @@ static int write_data(quicktime_t *file, int track,
         lqt_finish_audio_vbr_frame(file, track, chunk_samples);
         quicktime_write_chunk_footer(file, 
                                      track_map->track, 
-                                     track_map->current_chunk,
+                                     track_map->cur_chunk,
                                      &chunk_atom,
                                      track_map->vbr_num_frames);
         codec->samples_written += chunk_samples;
@@ -400,14 +400,14 @@ static int write_data(quicktime_t *file, int track,
         lqt_finish_audio_vbr_frame(file, track, samples);
         quicktime_write_chunk_footer(file, 
                                      track_map->track, 
-                                     track_map->current_chunk,
+                                     track_map->cur_chunk,
                                      &chunk_atom,
                                      track_map->vbr_num_frames);
         codec->samples_written += samples;
         }
       }
     
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
 
     /* Adjust mp3 buffer */
 

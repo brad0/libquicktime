@@ -289,7 +289,7 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
           /* Read first chunk */
           
           codec->chunk_buffer_size =
-            lqt_read_audio_chunk(file, track, file->atracks[track].current_chunk,
+            lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
                                  &(codec->chunk_buffer),
                                  &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
           
@@ -307,13 +307,13 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
           /* Read the chunk */
 
-          if(file->atracks[track].current_chunk != chunk)
+          if(file->atracks[track].cur_chunk != chunk)
             //          if(1)
             {
-            file->atracks[track].current_chunk = chunk;
+            file->atracks[track].cur_chunk = chunk;
 
             codec->chunk_buffer_size =
-              lqt_read_audio_chunk(file, track, file->atracks[track].current_chunk,
+              lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
                                    &(codec->chunk_buffer),
                                    &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
             if(codec->chunk_buffer_size <= 0)
@@ -370,10 +370,10 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
             
             if(!codec->chunk_buffer_size)
               {
-              file->atracks[track].current_chunk++;
+              file->atracks[track].cur_chunk++;
 
               codec->chunk_buffer_size =
-                lqt_read_audio_chunk(file, track, file->atracks[track].current_chunk,
+                lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
                                      &(codec->chunk_buffer),
                                      &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
               
@@ -514,7 +514,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
     result = quicktime_write_data(file, codec->chunk_buffer, chunk_bytes);
     quicktime_write_chunk_footer(file, 
                                  trak,
-                                 track_map->current_chunk,
+                                 track_map->cur_chunk,
                                  &chunk_atom, 
                                  samples_encoded);
 
@@ -523,7 +523,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
     else 
       result = 1; /* defeat fwrite's return */
 
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
     }
   return result;
   }
@@ -558,10 +558,10 @@ static int flush(quicktime_t *file, int track)
     result = quicktime_write_data(file, codec->chunk_buffer, (int)(output_ptr - codec->chunk_buffer));
     quicktime_write_chunk_footer(file,
                                  trak,
-                                 track_map->current_chunk,
+                                 track_map->cur_chunk,
                                  &chunk_atom, 
                                  codec->sample_buffer_size);
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
     return 1;
     }
   return 0;

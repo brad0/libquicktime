@@ -772,7 +772,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     /* Read the first audio chunk */
 
     codec->chunk_buffer_size = read_audio_chunk(file,
-                                                track, file->atracks[track].current_chunk,
+                                                track, file->atracks[track].cur_chunk,
                                                 &(codec->chunk_buffer),
                                                 &(codec->chunk_buffer_alloc));
     if(codec->chunk_buffer_size <= 0)
@@ -798,11 +798,11 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
 
     /* Read the chunk */
     
-    if(file->atracks[track].current_chunk != chunk)
+    if(file->atracks[track].cur_chunk != chunk)
       {
-      file->atracks[track].current_chunk = chunk;
+      file->atracks[track].cur_chunk = chunk;
       codec->chunk_buffer_size = read_audio_chunk(file,
-                                                  track, file->atracks[track].current_chunk,
+                                                  track, file->atracks[track].cur_chunk,
                                                   &(codec->chunk_buffer),
                                                   &(codec->chunk_buffer_alloc));
       if(codec->chunk_buffer_size <= 0)
@@ -835,9 +835,9 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     /* Get new chunk if necessary */
     if(codec->chunk_buffer_ptr - codec->chunk_buffer >= codec->chunk_buffer_size)
       {
-      file->atracks[track].current_chunk++;
+      file->atracks[track].cur_chunk++;
       codec->chunk_buffer_size = read_audio_chunk(file,
-                                                  track, file->atracks[track].current_chunk,
+                                                  track, file->atracks[track].cur_chunk,
                                                   &(codec->chunk_buffer),
                                                   &(codec->chunk_buffer_alloc));
       if(codec->chunk_buffer_size <= 0)
@@ -915,8 +915,8 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
 
   quicktime_write_chunk_header(file, trak, &chunk_atom);
   result = quicktime_write_data(file, codec->chunk_buffer, samples * codec->block_align);
-  quicktime_write_chunk_footer(file, trak, track_map->current_chunk, &chunk_atom, samples);
-  file->atracks[track].current_chunk++;		
+  quicktime_write_chunk_footer(file, trak, track_map->cur_chunk, &chunk_atom, samples);
+  file->atracks[track].cur_chunk++;		
   
   /* defeat fwrite's return */
   if(result) 

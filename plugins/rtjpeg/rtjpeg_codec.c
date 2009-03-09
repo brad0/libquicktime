@@ -143,17 +143,14 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                 
 	i = RTjpeg_compress(codec->compress_struct, codec->write_buffer, codec->rows);
 
-        quicktime_write_chunk_header(file, trak, &chunk_atom);
+        lqt_write_frame_header(file, track,
+                               vtrack->current_position,
+                               -1, 0);
+        
         result = !quicktime_write_data(file, 
 				codec->write_buffer, 
 				i);
-        quicktime_write_chunk_footer(file,
-                trak,
-                vtrack->current_chunk,
-                &chunk_atom,
-                1);
-        
-	file->vtracks[track].current_chunk++;
+        lqt_write_frame_footer(file, track);
 	return result;
 }
 

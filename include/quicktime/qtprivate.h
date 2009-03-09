@@ -543,10 +543,10 @@ typedef struct
 
 /* time to sample */
 typedef struct
-{
-	long sample_count;
-	long sample_duration;
-} quicktime_stts_table_t;
+  {
+  uint32_t sample_count;
+  int32_t sample_duration;
+  } quicktime_stts_table_t;
 
 typedef struct
 {
@@ -561,10 +561,10 @@ typedef struct
 /* Composition time to sample */
 
 typedef struct
-{
-	long sample_count;
-	long sample_duration;
-} quicktime_ctts_table_t;
+  {
+  uint32_t sample_count;
+  int32_t sample_duration;
+  } quicktime_ctts_table_t;
 
 typedef struct
 {
@@ -1309,7 +1309,7 @@ typedef struct
         /* number of audio channels in the track */
         lqt_channel_t * channel_setup;
         int64_t current_position;   /* current sample in output file */
-	int64_t current_chunk;      /* current chunk in output file */
+	int64_t cur_chunk;      /* current chunk in output file */
 
         /* Last position if set by the codec. If last position and current position
            differ, the codec knows, that a seek happened since the last decode call */
@@ -1343,52 +1343,68 @@ typedef struct
 } quicktime_audio_map_t;
 
 typedef struct
-{
-	quicktime_trak_t *track;
-	quicktime_trak_t *timecode_track;
-	long current_position;   /* current frame in output file */
-	long current_chunk;      /* current chunk in output file */
+  {
+  quicktime_trak_t *track;
+  quicktime_trak_t *timecode_track;
+  long current_position;   /* current frame in output file */
+  long cur_chunk;      /* current chunk in output file */
 
-	void *codec;
-/* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
-/* For Encoding: Timestamp of the LAST encoded frame */
-        int64_t timestamp;
+  void *codec;
+  /* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
+  /* For Encoding: Timestamp of the LAST encoded frame */
+  int64_t timestamp;
 
-/* For codecs with B-frames: Timestamp of the just written frame */
-        int has_b_frames; /* Probably needed for encoding only */
-        int64_t coded_timestamp; /* Set by the codec during encoding */
+  /* For codecs with B-frames: Timestamp of the just written frame */
+  int has_b_frames; /* Probably needed for encoding only */
+  int64_t coded_timestamp; /* Set by the codec during encoding */
 
-        int64_t stts_index;
-        int64_t stts_count;
-        int stream_cmodel;  /* Colormodel, which is read/written natively by the codec  */
-        int stream_row_span, stream_row_span_uv;
+  int64_t stts_index;
+  int64_t stts_count;
+  int stream_cmodel;  /* Colormodel, which is read/written natively by the codec  */
+  int stream_row_span, stream_row_span_uv;
 
-        int io_cmodel;      /* Colormodel, which is used by the encode/decode functions */
-        int io_row_span, io_row_span_uv;
+  int io_cmodel;      /* Colormodel, which is used by the encode/decode functions */
+  int io_row_span, io_row_span_uv;
 
-        /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
-        uint8_t ** temp_frame;
+  /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
+  uint8_t ** temp_frame;
 
-        lqt_chroma_placement_t chroma_placement;
-        lqt_interlace_mode_t interlace_mode;
+  lqt_chroma_placement_t chroma_placement;
+  lqt_interlace_mode_t interlace_mode;
 
-        int compatibility_flags; /* Taken from codec info */
+  int compatibility_flags; /* Taken from codec info */
 
-// Timecode stuff
-        uint32_t encode_timecode;
-        int has_encode_timecode;
-	long current_timecode_chunk;      /* current chunk in output file */
+  // Timecode stuff
+  uint32_t encode_timecode;
+  int has_encode_timecode;
+  long current_timecode_chunk;      /* current chunk in output file */
 
-/* Timestamp of the last encoded timecode */
-        int64_t timecode_timestamp;
+  /* Timestamp of the last encoded timecode */
+  int64_t timecode_timestamp;
 
-/* For decoding, *all* timecodes are read here.
- * For encoding, this contains a small buffer such that we don't
+  /* For decoding, *all* timecodes are read here.
+   * For encoding, this contains a small buffer such that we don't
    start a new chunk for each timecode. */
-        int timecodes_alloc;
-        int num_timecodes;
-        uint32_t * timecodes;
-        int timecodes_written;
+  int timecodes_alloc;
+  int num_timecodes;
+  uint32_t * timecodes;
+  int timecodes_written;
+
+  /* Reordering table: We build this table during encoding and
+     generate the stts and ctts atoms at the end */
+
+  int * picture_numbers;
+  int picture_numbers_alloc;
+
+  int64_t * timestamps;
+  int timestamps_alloc;
+
+  int64_t duration;
+
+  /* For encoding */
+  quicktime_atom_t chunk_atom;
+  int keyframe;
+  
   } quicktime_video_map_t;
 
 /* Text track */
@@ -1405,7 +1421,7 @@ typedef struct
   int text_buffer_alloc;
 
   int initialized; /* For encoding only */
-  int64_t current_chunk;
+  int64_t cur_chunk;
   
   } quicktime_text_map_t;
 

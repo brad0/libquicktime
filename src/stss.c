@@ -26,21 +26,21 @@
 #include <stdlib.h>
 
 void quicktime_stss_init(quicktime_stss_t *stss)
-{
-	stss->version = 0;
-	stss->flags = 0;
-	stss->total_entries = 0;
-	stss->entries_allocated = 2;
-	stss->table = (quicktime_stss_table_t*)calloc(1, sizeof(quicktime_stss_table_t) * stss->entries_allocated);
-}
+  {
+  stss->version = 0;
+  stss->flags = 0;
+  stss->total_entries = 0;
+  stss->entries_allocated = 0;
+  stss->table = NULL;
+  }
 
 void quicktime_stss_delete(quicktime_stss_t *stss)
-{
-	if(stss->entries_allocated) free(stss->table);
-	stss->total_entries = 0;
-	stss->entries_allocated = 0;
-	stss->table = 0;
-}
+  {
+  if(stss->table) free(stss->table);
+  stss->total_entries = 0;
+  stss->entries_allocated = 0;
+  stss->table = 0;
+  }
 
 void quicktime_stss_dump(quicktime_stss_t *stss)
 {

@@ -290,10 +290,10 @@ static int encode(quicktime_t *file,
     {
     quicktime_write_chunk_footer(file,
                                  trak,
-                                 track_map->current_chunk,
+                                 track_map->cur_chunk,
                                  &codec->chunk_atom,
                                  track_map->vbr_num_frames);
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
     codec->chunk_started = 0;
     }
   return 0;
@@ -354,10 +354,10 @@ static int flush(quicktime_t *file, int track)
     {
     quicktime_write_chunk_footer(file,
                                  trak,
-                                 track_map->current_chunk,
+                                 track_map->cur_chunk,
                                  &codec->chunk_atom,
                                  track_map->vbr_num_frames);
-    track_map->current_chunk++;
+    track_map->cur_chunk++;
     codec->chunk_started = 0;
     return 1;
     }

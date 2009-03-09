@@ -376,12 +376,12 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 		result = 1;
 	quicktime_write_chunk_footer(file, 
 		trak,
-		vtrack->current_chunk,
+		vtrack->cur_chunk,
 		&chunk_atom, 
 		1);
 
 
-	vtrack->current_chunk++;
+	vtrack->cur_chunk++;
 	return result;
 }
 

@@ -596,16 +596,165 @@ static int do_encode_video(quicktime_t *file,
   return result;
   }
 
+void lqt_write_frame_header(quicktime_t * file, int track,
+                            int pic_num1,
+                            int64_t pic_pts, int keyframe)
+  {
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_trak_t * trak = vtrack->track;
+  int pic_num ;
+  int i;
+  if(pic_num1 >= 0)
+    pic_num = pic_num1;
+  else
+    {
+    for(i = 0; i < vtrack->current_position; i++)
+      {
+      if(vtrack->timestamps[i] == pic_pts)
+        {
+        pic_num = i;
+        break;
+        }
+      }
+    }
+
+  if(vtrack->cur_chunk >= vtrack->picture_numbers_alloc)
+    {
+    vtrack->picture_numbers_alloc += 1024;
+    vtrack->picture_numbers = realloc(vtrack->picture_numbers,
+                                      sizeof(*vtrack->picture_numbers) *
+                                      vtrack->picture_numbers_alloc);
+    }
+  vtrack->picture_numbers[vtrack->cur_chunk] = pic_num;
+  vtrack->keyframe = keyframe;
+  
+  quicktime_write_chunk_header(file, trak, &vtrack->chunk_atom);
+  }
+
+
+void lqt_write_frame_footer(quicktime_t * file, int track)
+  {
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_trak_t * trak = vtrack->track;
+  
+  quicktime_write_chunk_footer(file, 
+                               trak, 
+                               vtrack->cur_chunk,
+                               &vtrack->chunk_atom, 
+                               1);
+
+  if(vtrack->keyframe)
+    quicktime_insert_keyframe(file, vtrack->cur_chunk, track);
+  vtrack->cur_chunk++;
+  }
+
+void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
+  {
+  int i;
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_trak_t * trak = vtrack->track;
+  quicktime_stts_t * stts;
+  quicktime_ctts_t * ctts;
+  quicktime_stts_table_t * stts_tab;
+  int64_t dts;
+  int has_b_frames = 0;
+
+  stts = &trak->mdia.minf.stbl.stts;
+  ctts = &trak->mdia.minf.stbl.ctts;
+  
+  /* Check if we have B-frames */
+  for(i = 0; i < vtrack->cur_chunk-1; i++)
+    {
+    if(vtrack->picture_numbers[i] + 1 !=
+       vtrack->picture_numbers[i+1])
+      {
+      has_b_frames = 1;
+      break;
+      }
+    }
+  
+  /* Build preliminary stts */
+
+  if(stts->table)
+    free(stts->table);
+  
+  stts->table = malloc(vtrack->cur_chunk * sizeof(*stts->table));
+  stts->total_entries = vtrack->cur_chunk;
+  
+  for(i = 0; i < vtrack->cur_chunk-1; i++)
+    {
+    stts->table[i].sample_count = 1;
+    stts->table[i].sample_duration =
+      vtrack->timestamps[i+1] - vtrack->timestamps[i];
+    }
+
+  /* Last entry */
+  stts->table[vtrack->cur_chunk-1].sample_count = 1;
+  stts->table[vtrack->cur_chunk-1].sample_duration =
+    vtrack->duration - vtrack->timestamps[vtrack->cur_chunk-1];
+  
+  if(!has_b_frames)
+    return;
+
+  /* If we have B-frames, reorder stts and build ctts */
+  
+  stts_tab = malloc(vtrack->cur_chunk * sizeof(*stts_tab));
+  ctts->table = malloc(vtrack->cur_chunk * sizeof(*ctts->table));
+  ctts->total_entries = vtrack->cur_chunk;
+  trak->mdia.minf.stbl.has_ctts = 1;
+
+  dts = 0;
+  /* Loop over *coded* pictures */
+  for(i = 0; i < vtrack->cur_chunk; i++)
+    {
+    stts_tab[i].sample_duration = stts->table[vtrack->picture_numbers[i]].sample_duration;
+    stts_tab[i].sample_count = 1;
+
+    /* CTS = PTS - DTS */
+    ctts->table[i].sample_count = 1;
+    ctts->table[i].sample_duration     = vtrack->timestamps[vtrack->picture_numbers[i]] - dts;
+    dts += stts_tab[i].sample_duration;
+    }
+ 
+  }
+
+void lqt_video_append_timestamp(quicktime_t * file, int track,
+                                int64_t time, int duration)
+  {
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  /* Update timestamp table */
+  if(vtrack->current_position >= vtrack->timestamps_alloc)
+    {
+    vtrack->timestamps_alloc += 1024;
+    vtrack->timestamps = realloc(vtrack->timestamps,
+                                 vtrack->timestamps_alloc *
+                                 sizeof(*vtrack->timestamps));
+    }
+  vtrack->timestamps[vtrack->current_position] = time;
+  vtrack->duration = time + duration;
+  }
+
+
 int lqt_encode_video(quicktime_t *file, 
                      unsigned char **row_pointers, 
                      int track, int64_t time)
   {
-  int64_t stts_index, stts_count, dts;
-  int result;
-  /* Must set valid timestamp for encoders */
-  int64_t last_time = file->vtracks[track].timestamp;
-  file->vtracks[track].timestamp = time;
+  return lqt_encode_video_d(file, row_pointers, track, time, -1);
+  }
 
+int lqt_encode_video_d(quicktime_t *file, 
+                     unsigned char **row_pointers, 
+                     int track, int64_t time, int duration)
+  {
+  int result;
+
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  
+  /* Must set valid timestamp for encoders */
+  vtrack->timestamp = time;
+
+  lqt_video_append_timestamp(file, track, time, duration);
+  
   /* B-Frame handling: B-Frame enabled codecs can have a delay */
   /* Here, we use vtrack->current_chunk as index of the actually written
      frame (implicitely assuming, that ther is never more than one frame per chunk),
@@ -617,8 +766,8 @@ int lqt_encode_video(quicktime_t *file,
 
   if(file->io_error)
     return 1;
-  
-  if(file->vtracks[track].has_b_frames)
+#if 0  
+  if(vtrack->has_b_frames)
     {
     file->vtracks[track].track->mdia.minf.stbl.has_ctts = 1;
 
@@ -645,7 +794,7 @@ int lqt_encode_video(quicktime_t *file,
                             file->vtracks[track].current_position - 1,
                             time - last_time);
     }
-
+#endif
   if(file->vtracks[track].timecode_track)
     lqt_flush_timecode(file, track, time, 0);
   
@@ -973,24 +1122,10 @@ static int quicktime_flush_acodec(quicktime_t *file, int track)
 
 static void quicktime_flush_vcodec(quicktime_t *file, int track)
   {
-  int64_t dts, stts_index, stts_count;
-  quicktime_stts_t * stts;
-  stts = &file->vtracks[track].track->mdia.minf.stbl.stts;
-
-  /* First, we set the final stts */
-  stts->table[stts->total_entries-1].sample_count++;
   
   while(((quicktime_codec_t*)file->vtracks[track].codec)->flush(file, track))
-    {
-    dts = quicktime_sample_to_time(stts,
-                                   file->vtracks->current_chunk-2,
-                                   &stts_index, &stts_count);
-    
-    quicktime_update_ctts(&file->vtracks[track].track->mdia.minf.stbl.ctts,
-                          file->vtracks[track].current_chunk - 2,
-                          file->vtracks[track].coded_timestamp - dts);
-    }
-
+    ;
+  
   /* Fix stts for timecode track */
   if(file->vtracks[track].timecode_track &&
      file->vtracks[track].timecodes_written)

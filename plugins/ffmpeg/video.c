@@ -818,26 +818,20 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         
         if(bytes_encoded)
           {
-          vtrack->coded_timestamp = codec->avctx->coded_frame->pts;
-          quicktime_write_chunk_header(file, trak, &chunk_atom);
+          lqt_write_frame_header(file, track,
+                                 -1, codec->avctx->coded_frame->pts,
+                                 codec->avctx->coded_frame->key_frame);
           
           result = !quicktime_write_data(file, 
                                          codec->buffer, 
                                          bytes_encoded);
-          quicktime_write_chunk_footer(file, 
-                                       trak, 
-                                       vtrack->current_chunk,
-                                       &chunk_atom, 
-                                       1);
-          
-          if(codec->avctx->coded_frame->key_frame)
-            quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
-          vtrack->current_chunk++;
 
+          lqt_write_frame_footer(file, track);
+          
           /* Write stats */
           
           if((codec->pass == 1) && codec->avctx->stats_out && codec->stats_file)
-            fprintf(codec->stats_file, codec->avctx->stats_out);
+            fprintf(codec->stats_file, "%s", codec->avctx->stats_out);
           }
         
         /* Check whether to write the global header */
@@ -903,27 +897,20 @@ static int flush(quicktime_t *file, int track)
         if(bytes_encoded < 0)
           return 0;
         
-        vtrack->coded_timestamp = codec->avctx->coded_frame->pts;
-
         if(bytes_encoded)
           {
-          quicktime_write_chunk_header(file, trak, &chunk_atom);
+          lqt_write_frame_header(file, track,
+                                 -1, codec->avctx->coded_frame->pts,
+                                 codec->avctx->coded_frame->key_frame);
           
           result = !quicktime_write_data(file, 
                                          codec->buffer, 
                                          bytes_encoded);
-          quicktime_write_chunk_footer(file, 
-                                       trak, 
-                                       vtrack->current_chunk,
-                                       &chunk_atom, 
-                                       1);
-          
-          if(codec->avctx->coded_frame->key_frame)
-            quicktime_insert_keyframe(file, vtrack->current_chunk-1, track);
-          vtrack->current_chunk++;
 
+          lqt_write_frame_footer(file, track);
+          
           if((codec->pass == 1) && codec->avctx->stats_out && codec->stats_file)
-            fprintf(codec->stats_file, codec->avctx->stats_out);
+            fprintf(codec->stats_file, "%s", codec->avctx->stats_out);
           
           return 1;
           }

@@ -430,7 +430,7 @@ int lqt_add_audio_track(quicktime_t *file,
   file->atracks[file->total_atracks].track = trak;
   file->atracks[file->total_atracks].channels = channels;
   file->atracks[file->total_atracks].current_position = 0;
-  file->atracks[file->total_atracks].current_chunk = 1;
+  file->atracks[file->total_atracks].cur_chunk = 0;
   lqt_set_default_audio_parameters(file, file->total_atracks);
   file->total_atracks++;
   return 0;
@@ -723,7 +723,7 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
   
   file->vtracks[track].current_position = frame;
   quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
-  file->vtracks[track].current_chunk = chunk;
+  file->vtracks[track].cur_chunk = chunk;
   
   file->vtracks[track].timestamp =
     quicktime_sample_to_time(&(trak->mdia.minf.stbl.stts),
@@ -784,7 +784,7 @@ int lqt_read_video_frame(quicktime_t * file,
   
   //  file->vtracks[track].current_position = frame;
   quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
-  file->vtracks[track].current_chunk = chunk;
+  file->vtracks[track].cur_chunk = chunk;
   offset = quicktime_sample_to_offset(file, trak, frame);
   quicktime_set_position(file, offset);
 
@@ -1071,13 +1071,13 @@ int quicktime_write_audio(quicktime_t *file,
         quicktime_write_chunk_header(file, trak, &chunk_atom);
         result = !quicktime_write_data(file, audio_buffer, bytes);
         quicktime_write_chunk_footer(file,
-                                        trak,
-                                        track_map->current_chunk,
-                                        &chunk_atom,
-                                        samples);
+                                     trak,
+                                     track_map->cur_chunk,
+                                     &chunk_atom,
+                                     samples);
                                                                                                                   
 /*      file->atracks[track].current_position += samples; */
-        file->atracks[track].current_chunk++;
+        file->atracks[track].cur_chunk++;
         return result;
 }
 
@@ -1094,7 +1094,7 @@ int quicktime_write_frame(quicktime_t *file,
         result = !quicktime_write_data(file, video_buffer, bytes);
         quicktime_write_chunk_footer(file,
                                         trak,
-                                        vtrack->current_chunk,
+                                        vtrack->cur_chunk,
                                         &chunk_atom,
                                         1);
 
@@ -1104,7 +1104,7 @@ int quicktime_write_frame(quicktime_t *file,
                                 file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
         
         file->vtracks[track].current_position++;
-        file->vtracks[track].current_chunk++;
+        file->vtracks[track].cur_chunk++;
         return result;
 }
 
@@ -1163,7 +1163,7 @@ long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int tr
   bytes = quicktime_frame_size(file, file->vtracks[track].current_position, track);
 
   quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, file->vtracks[track].current_position);
-  file->vtracks[track].current_chunk = chunk;
+  file->vtracks[track].cur_chunk = chunk;
   offset = quicktime_sample_to_offset(file, trak, file->vtracks[track].current_position);
   quicktime_set_position(file, offset);
           
@@ -1221,59 +1221,34 @@ static long quicktime_get_keyframe_after(quicktime_t *file, long frame, int trac
 #endif
 
 void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
-{
-	quicktime_trak_t *trak = file->vtracks[track].track;
-	quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
-	int i;
+  {
+  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
 
-        if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
-          {
-          // Set keyframe flag in idx1 table.
-          if(file->total_riffs == 1)
-            quicktime_set_idx1_keyframe(file, trak, frame);
-          // Set keyframe flag in indx table.
-          if(file->file_type == LQT_FILE_AVI_ODML)
-            {
-            quicktime_set_indx_keyframe(file, trak, frame);
-            }
-          }
-        // Offset 1
-	frame++;
-        
-// Get the keyframe greater or equal to new frame
-	for(i = 0; i < stss->total_entries; i++)
-	{
-		if(stss->table[i].sample >= frame) break;
-	}
-
-// Expand table
-	if(stss->entries_allocated <= stss->total_entries)
-	{
-		stss->entries_allocated *= 2;
-		stss->table = realloc(stss->table, sizeof(quicktime_stss_table_t) * stss->entries_allocated);
-	}
-
-// Insert before existing frame
-	if(i < stss->total_entries)
-	{
-		if(stss->table[i].sample > frame)
-		{
-			int j, k;
-			for(j = stss->total_entries, k = stss->total_entries - 1;
-				k >= i;
-				j--, k--)
-			{
-				stss->table[j] = stss->table[k];
-			}
-			stss->table[i].sample = frame;
-		}
-	}
-	else
-// Insert after last frame
-		stss->table[i].sample = frame;
-
-	stss->total_entries++;
-}
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    // Set keyframe flag in idx1 table.
+    if(file->total_riffs == 1)
+      quicktime_set_idx1_keyframe(file, trak, frame);
+    // Set keyframe flag in indx table.
+    if(file->file_type == LQT_FILE_AVI_ODML)
+      {
+      quicktime_set_indx_keyframe(file, trak, frame);
+      }
+    }
+  
+  // Expand table
+  if(stss->entries_allocated <= stss->total_entries)
+    {
+    stss->entries_allocated += 1024;
+    stss->table = realloc(stss->table,
+                          sizeof(*stss->table) *
+                          stss->entries_allocated);
+    }
+  
+  stss->table[stss->total_entries].sample = frame+1;
+  stss->total_entries++;
+  }
 
 
 int quicktime_has_keyframes(quicktime_t *file, int track)
@@ -1296,7 +1271,7 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 {
 	vtrack->track = trak;
 	vtrack->current_position = 0;
-	vtrack->current_chunk = 1;
+	vtrack->cur_chunk = 0;
         vtrack->io_cmodel = BC_RGB888;
 	quicktime_init_vcodec(vtrack, encode, info);
 	return 0;
@@ -1321,7 +1296,7 @@ int quicktime_init_audio_map(quicktime_t * file,
   atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
   atrack->samplerate = (int)(trak->mdia.minf.stbl.stsd.table[0].samplerate + 0.5);
   atrack->current_position = 0;
-  atrack->current_chunk = 1;
+  atrack->cur_chunk = 0;
 
   if(!encode) 
     {
@@ -1864,7 +1839,10 @@ int quicktime_close(quicktime_t *file)
   if(file->wr)
     {
     quicktime_codecs_flush(file);
-                                                                                                                  
+
+    for(i = 0; i < file->total_vtracks; i++)
+      lqt_video_build_timestamp_tables(file, i);
+    
     if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
       {
 #if 0
@@ -2162,7 +2140,7 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
 
   trak = file->atracks[track].track;
 
-  if(chunk > trak->mdia.minf.stbl.stco.total_entries)
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
     {
     /* Read beyond EOF */
     file->atracks[track].eof = 1;
@@ -2176,9 +2154,9 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
 
   /* Reallocate buffer */
 
-  if(*buffer_alloc < trak->chunk_sizes[chunk-1] + 16 + initial_bytes)
+  if(*buffer_alloc < trak->chunk_sizes[chunk] + 16 + initial_bytes)
     {
-    *buffer_alloc = trak->chunk_sizes[chunk-1] + 32 + initial_bytes;
+    *buffer_alloc = trak->chunk_sizes[chunk] + 32 + initial_bytes;
     *buffer = realloc(*buffer, *buffer_alloc);
     }
   
@@ -2531,14 +2509,14 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   trak = file->atracks[track].track;
   stsc = &(trak->mdia.minf.stbl.stsc);
 
-  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries-1)
     return 0;
     
   i = 0;
   stsc_index = 0;
   first_chunk_packet = 0;
 
-  for(i = 0; i < chunk-1; i++)
+  for(i = 0; i < chunk; i++)
     {
     if((stsc_index < stsc->total_entries-1) && (stsc->table[stsc_index+1].chunk-1 == i))
       stsc_index++;
@@ -2546,7 +2524,7 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
     }
 
   /* Get offset */
-  offset = trak->mdia.minf.stbl.stco.table[chunk-1].offset;
+  offset = trak->mdia.minf.stbl.stco.table[chunk].offset;
   for(i = 0; i < packet; i++)
     {
     if(trak->mdia.minf.stbl.stsz.table)

@@ -899,10 +899,10 @@ void lqt_registry_write()
     {
     codec_info = lqt_audio_codecs;
     
-    fprintf(output, audio_order_key);
+    fprintf(output, "%s", audio_order_key);
     for(i = 0; i < lqt_num_audio_codecs; i++)
       {
-      fprintf(output, codec_info->name);
+      fprintf(output, "%s", codec_info->name);
       if(i == lqt_num_audio_codecs - 1)
         fprintf(output, "\n");
       else
@@ -914,10 +914,10 @@ void lqt_registry_write()
   if(lqt_num_video_codecs)
     {
     codec_info = lqt_video_codecs;
-    fprintf(output, video_order_key);
+    fprintf(output, "%s", video_order_key);
     for(i = 0; i < lqt_num_video_codecs; i++)
       {
-      fprintf(output, codec_info->name);
+      fprintf(output, "%s", codec_info->name);
       if(i == lqt_num_video_codecs - 1)
         fprintf(output, "\n");
       else

@@ -343,7 +343,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
 
-  chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->current_chunk, &num_samples);
+  chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
 
   if(!chunk_packets)
     return 0;
@@ -361,7 +361,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
 
   for(i = 0; i < chunk_packets; i++)
     {
-    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->current_chunk, i,
+    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
                                             &(codec->chunk_buffer), &(codec->chunk_buffer_alloc),
                                             &packet_samples);
     if(!packet_size)
@@ -390,7 +390,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
       }
     codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
     }
-  track_map->current_chunk++;
+  track_map->cur_chunk++;
   return num_samples;
   }
 
@@ -414,7 +414,7 @@ static int decode_chunk(quicktime_t * file, int track)
   /* Read chunk */
   
   chunk_size = lqt_append_audio_chunk(file,
-                                      track, track_map->current_chunk,
+                                      track, track_map->cur_chunk,
                                       &(codec->chunk_buffer),
                                       &(codec->chunk_buffer_alloc),
                                       codec->bytes_in_chunk_buffer);
@@ -453,8 +453,8 @@ static int decode_chunk(quicktime_t * file, int track)
     }
   else
     {
-    num_samples = quicktime_chunk_samples(track_map->track, track_map->current_chunk);
-    track_map->current_chunk++;
+    num_samples = quicktime_chunk_samples(track_map->track, track_map->cur_chunk);
+    track_map->cur_chunk++;
     codec->bytes_in_chunk_buffer += chunk_size;
     }
   
@@ -729,12 +729,12 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
       {
       if(lqt_audio_is_vbr(file, track))
         lqt_chunk_of_sample_vbr(&chunk_sample,
-                                &(track_map->current_chunk),
+                                &(track_map->cur_chunk),
                                 track_map->track,
                                 track_map->current_position);
       else
         quicktime_chunk_of_sample(&chunk_sample,
-                                  &(track_map->current_chunk),
+                                  &(track_map->cur_chunk),
                                   track_map->track,
                                   track_map->current_position);
       codec->sample_buffer_start = chunk_sample;
@@ -903,10 +903,10 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
       result = !quicktime_write_data(file, codec->chunk_buffer, frame_bytes);
       quicktime_write_chunk_footer(file,
                                    trak, 
-                                   file->atracks[track].current_chunk,
+                                   file->atracks[track].cur_chunk,
                                    &chunk_atom, 
                                    samples_encoded);
-      file->atracks[track].current_chunk++;
+      file->atracks[track].cur_chunk++;
       }
     }
   if(codec->samples_in_buffer && samples_done)

@@ -998,6 +998,27 @@ int lqt_read_video_frame(quicktime_t * file,
 int lqt_encode_video(quicktime_t *file, 
                      unsigned char **row_pointers, 
                      int track, int64_t time);
+
+/** \ingroup video_encode
+ *  \brief Encode one video frame
+ *  \param file A quicktime handle
+ *  \param row_pointers Frame (see \ref lqt_rows_alloc)
+ *  \param track Track index (starting with 0)
+ *  \param time Timestamp of the frame in timescale tics
+ *  \param duration Duration of the frame
+ *  \returns 0 if the frame was encoded, 1 else.
+ *
+ *  This is the same as \ref lqt_encode_video except that you can
+ *  pass the duration along with the timestamp. This is really only
+ *  important for the last picture, since all other durations are
+ *  calculated from the timestamp differences.
+ *
+ *  Since 1.1.2
+ */
+  
+int lqt_encode_video_d(quicktime_t *file, 
+                       unsigned char **row_pointers, 
+                       int track, int64_t time, int duration);
   
 /** \ingroup video_decode
  *  \brief Get the duration of the NEXT frame to be decoded

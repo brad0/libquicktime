@@ -417,11 +417,11 @@ static int quicktime_encode_raw(quicktime_t *file,
         
         quicktime_write_chunk_footer(file,
                                      trak,
-                                     vtrack->current_chunk,
+                                     vtrack->cur_chunk,
                                      &chunk_atom,
                                      1);
         
-        vtrack->current_chunk++;
+        vtrack->cur_chunk++;
 	return result;
 }
 

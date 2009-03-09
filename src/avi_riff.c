@@ -288,7 +288,7 @@ static void insert_audio_packet(quicktime_trak_t * trak,
   /* Update stco */
 
   stco = &trak->mdia.minf.stbl.stco;
-  quicktime_update_stco(stco, stco->total_entries + 1, offset);
+  quicktime_update_stco(stco, stco->total_entries, offset);
 
   /* Update stsc */
   
@@ -299,9 +299,9 @@ static void insert_audio_packet(quicktime_trak_t * trak,
   /* stsc will be initialized with 1 entry and zero samples */
 
   if(stsc->table[0].samples == 0)
-    quicktime_update_stsc(stsc, 1, num_samples);
+    quicktime_update_stsc(stsc, 0, num_samples);
   else
-    quicktime_update_stsc(stsc, stsc->total_entries+1, num_samples);
+    quicktime_update_stsc(stsc, stsc->total_entries, num_samples);
 
   /* Update total samples */
 
@@ -342,7 +342,7 @@ static void insert_video_packet(quicktime_trak_t * trak,
   
   /* Update stco */
   
-  quicktime_update_stco(stco, stco->total_entries + 1, offset);
+  quicktime_update_stco(stco, stco->total_entries, offset);
 
   /* Update stss */
 

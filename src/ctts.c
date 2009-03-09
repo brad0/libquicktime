@@ -46,7 +46,7 @@ void quicktime_ctts_dump(quicktime_ctts_t *ctts)
   lqt_dump("      total_entries %ld\n", ctts->total_entries);
   for(i = 0; i < ctts->total_entries; i++)
     {
-    lqt_dump("       count %ld duration %ld\n", ctts->table[i].sample_count,
+    lqt_dump("       count %d duration %d\n", ctts->table[i].sample_count,
            ctts->table[i].sample_duration);
     }
   }

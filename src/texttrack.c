@@ -38,7 +38,7 @@ void lqt_init_text_map(quicktime_t * file,
   const char * charset;
   const char * charset_fallback;
   map->track = trak;
-  map->current_chunk = 1;
+  map->cur_chunk = 0;
   if(!encode)
     {
     charset          = lqt_get_charset(trak->mdia.mdhd.language, file->file_type);
@@ -360,12 +360,12 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     quicktime_write_int16(file, 0);
     }
   
-  quicktime_write_chunk_footer(file, trak, ttrack->current_chunk,
+  quicktime_write_chunk_footer(file, trak, ttrack->cur_chunk,
                                &chunk_atom, 1);
 
   quicktime_update_stts(&trak->mdia.minf.stbl.stts, ttrack->current_position, duration);
   
-  ttrack->current_chunk++;
+  ttrack->cur_chunk++;
   ttrack->current_position++;
   return 0;
   }
