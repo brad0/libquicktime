@@ -1278,14 +1278,21 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 }
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
-{
-	quicktime_delete_vcodec(vtrack);
-        if(vtrack->temp_frame)
-          lqt_rows_free(vtrack->temp_frame);
-        if(vtrack->timecodes)
-          free(vtrack->timecodes);
-	return 0;
-}
+  {
+  quicktime_delete_vcodec(vtrack);
+  if(vtrack->temp_frame)
+    lqt_rows_free(vtrack->temp_frame);
+  if(vtrack->timecodes)
+    free(vtrack->timecodes);
+  if(vtrack->timestamps)
+    free(vtrack->timestamps);
+  if(vtrack->picture_numbers)
+    free(vtrack->picture_numbers);
+        
+        
+        
+  return 0;
+  }
 
 int quicktime_init_audio_map(quicktime_t * file,
                              quicktime_audio_map_t *atrack, quicktime_trak_t *trak, int encode, lqt_codec_info_t * info)

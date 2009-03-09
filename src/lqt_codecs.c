@@ -692,6 +692,9 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
   stts->table[vtrack->cur_chunk-1].sample_count = 1;
   stts->table[vtrack->cur_chunk-1].sample_duration =
     vtrack->duration - vtrack->timestamps[vtrack->cur_chunk-1];
+
+  if(stts->table[vtrack->cur_chunk-1].sample_duration <= 0)
+    stts->table[vtrack->cur_chunk-1].sample_duration = stts->default_duration;
   
   if(!has_b_frames)
     return;
@@ -715,7 +718,9 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
     ctts->table[i].sample_duration     = vtrack->timestamps[vtrack->picture_numbers[i]] - dts;
     dts += stts_tab[i].sample_duration;
     }
- 
+  
+  free(stts->table);
+  stts->table = stts_tab;
   }
 
 void lqt_video_append_timestamp(quicktime_t * file, int track,
@@ -743,8 +748,8 @@ int lqt_encode_video(quicktime_t *file,
   }
 
 int lqt_encode_video_d(quicktime_t *file, 
-                     unsigned char **row_pointers, 
-                     int track, int64_t time, int duration)
+                       unsigned char **row_pointers, 
+                       int track, int64_t time, int duration)
   {
   int result;
 
@@ -806,10 +811,15 @@ int quicktime_encode_video(quicktime_t *file,
                            unsigned char **row_pointers, 
                            int track)
   {
-  return lqt_encode_video(file, 
-                          row_pointers, 
-                          track, file->vtracks[track].timestamp +
-                          file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
+  int result;
+  
+  result = lqt_encode_video_d(file, 
+                              row_pointers, 
+                              track, file->vtracks[track].timestamp,
+                              file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
+  file->vtracks[track].timestamp +=
+    file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
+  return result;
   }
 
 static int bytes_per_sample(lqt_sample_format_t format)
