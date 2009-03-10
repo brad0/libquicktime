@@ -933,7 +933,6 @@ void lqt_dump_time(uint64_t t)
   ti = t - 2082844800;
   localtime_r(&ti, &tm);
   tm.tm_mon++;
-  tm.tm_mday++;
   printf("%04d-%02d-%02d %02d:%02d:%02d (%"PRId64")",
          tm.tm_year+1900, tm.tm_mon, tm.tm_mday,
          tm.tm_hour, tm.tm_min, tm.tm_sec, t);
