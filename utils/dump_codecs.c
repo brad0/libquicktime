@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
 
   /* Print header */
 
-  printf(header);
+  printf("%s", header);
   
   /* Print audio codecs */
 
@@ -77,7 +77,7 @@ int main(int argc, char ** argv)
     i++;
     }
   lqt_destroy_codec_info(codecs);
-  printf(middle);
+  printf("%s", middle);
 
   codecs = lqt_query_registry(0, 1, 1, 1);
 
@@ -101,7 +101,7 @@ int main(int argc, char ** argv)
     i++;
     }
   lqt_destroy_codec_info(codecs);
-  printf(footer);
+  printf("%s", footer);
 
   return 0;
   

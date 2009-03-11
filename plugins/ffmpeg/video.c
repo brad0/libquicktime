@@ -643,7 +643,6 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 	int height = trak->tkhd.track_height;
 	int width = trak->tkhd.track_width;
-        quicktime_atom_t chunk_atom;
         int stats_len;
         if(!row_pointers)
           {
@@ -783,9 +782,6 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           if(!codec->buffer)
             return -1;
           
-          if(codec->avctx->max_b_frames > 0)
-            vtrack->has_b_frames = 1;
-          
           codec->initialized = 1;
           
 	}
@@ -881,9 +877,7 @@ static int flush(quicktime_t *file, int track)
         int result = 0;
 	int bytes_encoded;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_trak_t *trak = vtrack->track;
 	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-        quicktime_atom_t chunk_atom;
 
         /* Do nothing if we didn't encode anything yet */
         if(!codec->initialized)

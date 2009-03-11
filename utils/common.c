@@ -112,7 +112,7 @@ void quicktime_print_info(quicktime_t * qtfile)
     {
     for(j = 0; j < channels; j++)
       {
-      printf(lqt_channel_to_string(channel_setup[j]));
+      printf("%s", lqt_channel_to_string(channel_setup[j]));
       if(j < channels-1)
         printf(_(", "));
       }

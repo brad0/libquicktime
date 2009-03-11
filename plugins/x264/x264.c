@@ -397,7 +397,6 @@ static int flush_frame(quicktime_t *file, int track,
                        x264_picture_t * pic_in)
   {
   int result;
-  quicktime_atom_t chunk_atom;
   x264_nal_t *nal;
   int nnal;
   x264_picture_t pic_out;
@@ -405,7 +404,7 @@ static int flush_frame(quicktime_t *file, int track,
 
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-  quicktime_trak_t *trak = vtrack->track;
+
   pic_out.i_pts = 0;
   /* Encode frames, get nals */
   if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out))
@@ -425,25 +424,18 @@ static int flush_frame(quicktime_t *file, int track,
   if(encoded_size < 0)
     return 0;
 
-  vtrack->coded_timestamp =   pic_out.i_pts;
-
-
   if(encoded_size)
     {
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
-  
+    lqt_write_frame_header(file, track,
+                           -1, pic_out.i_pts,
+                           pic_out.i_type == X264_TYPE_IDR);
+    
     result = !quicktime_write_data(file, 
                                    codec->work_buffer_1, 
                                    encoded_size);
-    quicktime_write_chunk_footer(file, 
-                                 trak, 
-                                 vtrack->cur_chunk,
-                                 &chunk_atom, 
-                                 1);
-  
-    if(pic_out.i_type == X264_TYPE_IDR)
-      quicktime_insert_keyframe(file, vtrack->cur_chunk, track);
-    vtrack->cur_chunk++;
+
+    lqt_write_frame_footer(file, track);
+    
     return 1;
     }
   return 0;
@@ -648,10 +640,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "x264_encoder_open failed");
       return result;
       }
-
-    
-    if(codec->params.i_bframe)
-      vtrack->has_b_frames = 1; 
     
     /* Encode global header */
     avcc = create_avcc_atom(codec, &avcc_size);

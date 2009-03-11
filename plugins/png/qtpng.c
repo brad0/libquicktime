@@ -149,7 +149,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   int width = trak->tkhd.track_width;
   png_structp png_ptr;
   png_infop info_ptr;
-  quicktime_atom_t chunk_atom;
 
   if(!row_pointers)
     {

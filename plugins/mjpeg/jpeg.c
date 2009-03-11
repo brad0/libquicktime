@@ -151,7 +151,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	quicktime_trak_t *trak = vtrack->track;
 	int result = 0;
 	long field2_offset;
-        quicktime_atom_t chunk_atom;
 
         if(!row_pointers)
           {

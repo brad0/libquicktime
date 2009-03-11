@@ -1045,6 +1045,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
   char * tmp2;
 
   const char * gettext_domain;
+  LqtGtkCodecInfoWidget * ret;
 
   if(info->gettext_domain && info->gettext_directory)
     {
@@ -1057,8 +1058,7 @@ lqtgtk_create_codec_info_widget(const lqt_codec_info_t * info)
     lqt_translation_init();
     gettext_domain = PACKAGE;
     }
-  
-  LqtGtkCodecInfoWidget * ret = calloc(1, sizeof(LqtGtkCodecInfoWidget));
+  ret = calloc(1, sizeof(LqtGtkCodecInfoWidget));  
 
   ret->real_name = gtk_label_new(TR_DOM(info->long_name));
   gtk_misc_set_alignment(GTK_MISC(ret->real_name), 0.0, 0.5);

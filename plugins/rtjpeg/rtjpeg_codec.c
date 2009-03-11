@@ -97,7 +97,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int result = 0;
 	int i;
-        quicktime_atom_t chunk_atom;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
 	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;

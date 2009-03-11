@@ -108,8 +108,6 @@ static int flush_data(quicktime_t *file, int track)
   SchroBuffer *enc_buf;
   int presentation_frame;
   int parse_code;
-  quicktime_atom_t chunk_atom;
-  quicktime_trak_t *trak = vtrack->track;
   int result = 0;
   
   while(1)
