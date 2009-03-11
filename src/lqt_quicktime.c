@@ -2497,18 +2497,21 @@ int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * s
 
   for(i = 0; i < stsc->total_entries; i++)
     {
-    if(((i < stsc->total_entries - 1) && (stsc->table[i+1].chunk > chunk)) ||
+    if(((i < stsc->total_entries - 1) && (stsc->table[i+1].chunk > chunk+1)) ||
        (i == stsc->total_entries - 1))
       {
-      start_sample += (chunk - stsc->table[i].chunk) * stsc->table[i].samples;
+      start_sample +=
+        (chunk - stsc->table[i].chunk) * stsc->table[i].samples;
       result = stsc->table[i].samples;
       break;
       }
     else
-      start_sample += (stsc->table[i+1].chunk - stsc->table[i].chunk) * stsc->table[i].samples;
+      start_sample +=
+        (stsc->table[i+1].chunk - stsc->table[i].chunk) * stsc->table[i].samples;
     }
   if(samples)
-    *samples = get_uncompressed_samples(&(trak->mdia.minf.stbl.stts), start_sample, start_sample + result);
+    *samples = get_uncompressed_samples(&(trak->mdia.minf.stbl.stts),
+                                        start_sample, start_sample + result);
   
   return result;
   }
@@ -2527,7 +2530,7 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   trak = file->atracks[track].track;
   stsc = &(trak->mdia.minf.stbl.stsc);
 
-  if(chunk >= trak->mdia.minf.stbl.stco.total_entries-1)
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
     return 0;
     
   i = 0;
@@ -2559,7 +2562,8 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   /* Get number of audio samples */
   if(samples)
     *samples = get_uncompressed_samples(&trak->mdia.minf.stbl.stts,
-                                        first_chunk_packet+packet, first_chunk_packet+packet+1);
+                                        first_chunk_packet+packet,
+                                        first_chunk_packet+packet+1);
   
   /* Read the data */
   if(*buffer_alloc < packet_size+16)
