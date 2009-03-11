@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #include "lqt_private.h"
 
 #define TIMECODES_PER_CHUNK 16
@@ -54,8 +53,7 @@ void lqt_add_timecode_track(quicktime_t * file, int track,
   vm->track->has_tref = 1;
 
   vm->timecodes = malloc(TIMECODES_PER_CHUNK * sizeof(*vm->timecodes));
-  vm->timecodes_alloc = TIMECODES_PER_CHUNK;
-  vm->current_timecode_chunk = 1;
+  vm->cur_timecode_chunk = 0;
   }
   
 void lqt_write_timecode(quicktime_t * file, int track,
@@ -174,7 +172,7 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
 
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     return;
-  
+
   if(!force)
     {
     if(!vm->has_encode_timecode)
@@ -195,7 +193,7 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
                             time - vm->timecode_timestamp);
       vm->timecode_timestamp = time;
       }
-        
+    
     vm->timecodes_written++;
     }
   else
@@ -211,7 +209,7 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
   
   /* Write chunk */
   if(vm->num_timecodes &&
-     ((vm->num_timecodes >= vm->timecodes_alloc) || force))
+     ((vm->num_timecodes >= TIMECODES_PER_CHUNK) || force))
     {
     quicktime_atom_t chunk_atom;
     quicktime_write_chunk_header(file, vm->timecode_track, &chunk_atom);
@@ -219,9 +217,9 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
     for(i = 0; i < vm->num_timecodes; i++)
       quicktime_write_int32(file, vm->timecodes[i]);
     
-    quicktime_write_chunk_footer(file, vm->timecode_track, vm->current_timecode_chunk,
+    quicktime_write_chunk_footer(file, vm->timecode_track, vm->cur_timecode_chunk,
                                  &chunk_atom, vm->num_timecodes);
-    vm->current_timecode_chunk++;
+    vm->cur_timecode_chunk++;
     vm->num_timecodes = 0;
     }
   }

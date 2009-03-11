@@ -1848,8 +1848,19 @@ int quicktime_close(quicktime_t *file)
     quicktime_codecs_flush(file);
 
     for(i = 0; i < file->total_vtracks; i++)
+      {
       lqt_video_build_timestamp_tables(file, i);
-    
+
+      /* Fix stts for timecode track */
+      if(file->vtracks[i].timecode_track &&
+         file->vtracks[i].timecodes_written)
+        {
+        int64_t duration;
+        quicktime_trak_duration(file->vtracks[i].track,
+                                &duration, (int*)0);
+        lqt_flush_timecode(file, i, duration, 1);
+        }
+      }
     if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
       {
 #if 0

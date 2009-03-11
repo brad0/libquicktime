@@ -1373,7 +1373,7 @@ typedef struct
   // Timecode stuff
   uint32_t encode_timecode;
   int has_encode_timecode;
-  long current_timecode_chunk;      /* current chunk in output file */
+  long cur_timecode_chunk;      /* current chunk in output file */
 
   /* Timestamp of the last encoded timecode */
   int64_t timecode_timestamp;
@@ -1381,7 +1381,6 @@ typedef struct
   /* For decoding, *all* timecodes are read here.
    * For encoding, this contains a small buffer such that we don't
    start a new chunk for each timecode. */
-  int timecodes_alloc;
   int num_timecodes;
   uint32_t * timecodes;
   int timecodes_written;
