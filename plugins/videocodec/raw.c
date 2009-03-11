@@ -382,7 +382,9 @@ static int quicktime_encode_raw(quicktime_t *file,
             codec->bytes_per_line++;
           }
         
-        quicktime_write_chunk_header(file, trak, &chunk_atom);
+        lqt_write_frame_header(file, track,
+                               vtrack->current_position,
+                               -1, 0);
 
         if(vtrack->stream_cmodel == BC_RGBA8888)
           {
@@ -414,15 +416,8 @@ static int quicktime_encode_raw(quicktime_t *file,
               result = !quicktime_write_data(file, &padd, 1);
             }
           }
-        
-        quicktime_write_chunk_footer(file,
-                                     trak,
-                                     vtrack->cur_chunk,
-                                     &chunk_atom,
-                                     1);
-        
-        vtrack->cur_chunk++;
-	return result;
+        lqt_write_frame_footer(file, track);
+        return result;
 }
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)

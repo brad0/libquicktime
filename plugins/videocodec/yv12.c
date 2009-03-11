@@ -143,9 +143,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 	y_size = codec->coded_w;
 	uv_size = codec->coded_w / 2;
-        
-	quicktime_write_chunk_header(file, trak, &chunk_atom);
 
+        lqt_write_frame_header(file, track,
+                               vtrack->current_position,
+                               -1, 0);
+        
         /* Y */
         src_ptr = row_pointers[0];
         for(i = 0; i < codec->coded_h; i++)
@@ -175,14 +177,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
           if(result)
             return result;
           }
-        
-        quicktime_write_chunk_footer(file, 
-		trak,
-		vtrack->cur_chunk,
-		&chunk_atom, 
-		1);
-
-	vtrack->cur_chunk++;
+        lqt_write_frame_footer(file, track);
 	return result;
 }
 

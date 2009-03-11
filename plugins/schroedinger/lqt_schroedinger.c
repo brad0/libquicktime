@@ -126,13 +126,13 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_default = { .val_int = 30 },
     },
     { 
-      .name =        "enc_misc",
-      .real_name =   TRS("Misc"),
+      .name =        "enc_wavelets",
+      .real_name =   TRS("Wavelets"),
       .type =        LQT_PARAMETER_SECTION,
     },
     {
       .name = "enc_intra_wavelet",
-      .real_name = "Intra wavelet",
+      .real_name = TRS("Intra wavelet"),
       .type = LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Deslauriers-Debuc (9,3)" },
       .stringlist_options = (char *[]){ TRS("Deslauriers-Debuc (9,3)"),
@@ -146,7 +146,7 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
     },
     {
       .name = "enc_inter_wavelet",
-      .real_name = "Inter wavelet",
+      .real_name = TRS("Inter wavelet"),
       .type = LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "LeGall (5,3)" },
       .stringlist_options = (char *[]){ TRS("Deslauriers-Debuc (9,3)"),
@@ -157,6 +157,31 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
                                         TRS("Fidelity"),
                                         TRS("Daubechies (9,7)"),
                                         (char *)0 },
+    },
+    { 
+      .name =        "enc_filter",
+      .real_name =   TRS("Filter"),
+      .type =        LQT_PARAMETER_SECTION,
+    },
+    {
+      .name = "enc_filtering",
+      .real_name = TRS("Filter"),
+      .type = LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "None" },
+      .stringlist_options = (char *[]){ TRS("None"),
+                                        TRS("Center weighted median"),
+                                        TRS("Gaussian"),
+                                        TRS("Add noise"),
+                                        TRS("Adaptive Gaussian"),
+                                        (char *)0 },
+    },
+    {
+      .name = "enc_filter_value",
+      .real_name = TRS("Filter value"),
+      .type = LQT_PARAMETER_FLOAT,
+      .val_default = { .val_float = 5.0 },
+      .val_min =     { .val_float = 0.0 },
+      .val_max =     { .val_float = 100.0 },
     },
     { /* End of parameters */ }
   };
