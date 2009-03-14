@@ -742,11 +742,12 @@ static int read_audio_chunk(quicktime_t * file, int track,
                             long chunk,
                             uint8_t ** buffer, int * buffer_alloc)
   {
-  int bytes, samples, bytes_from_samples;
+  int bytes, samples = 0, bytes_from_samples;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
-
+  
   bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
+
   bytes_from_samples = samples * codec->block_align;
   if(bytes > bytes_from_samples)
     return bytes_from_samples;
@@ -854,6 +855,10 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     
     if(samples_to_decode > samples_in_chunk)
       samples_to_decode = samples_in_chunk;
+
+    if(!samples_to_decode) // EOF
+      break;
+
     codec->decode(codec, samples_to_decode * track_map->channels, &output);
     samples_decoded += samples_to_decode;
     }

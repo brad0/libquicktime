@@ -144,6 +144,9 @@ static int decode_chunk(quicktime_t *file, int track)
     ((quicktime_codec_t*)file->atracks[track].codec)->priv;
   
   num_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
+
+  // fprintf(stderr, "Num packets %ld, %d\n", track_map->cur_chunk, num_packets);
+
   if(!num_packets)
     return 0;
 
@@ -164,6 +167,8 @@ static int decode_chunk(quicktime_t *file, int track)
                                             &(codec->data),
                                             &(codec->data_alloc), &num_samples);
 
+    // fprintf(stderr, "Packet size %d, %d\n", i, packet_size);
+    
     if(codec->upsample)
       num_samples *= 2;
 

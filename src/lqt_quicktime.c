@@ -2114,7 +2114,7 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
 
   trak = file->atracks[track].track;
 
-  if(chunk > trak->mdia.minf.stbl.stco.total_entries)
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
     {
     /* Read beyond EOF */
     file->atracks[track].eof = 1;

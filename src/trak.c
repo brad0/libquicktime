@@ -650,35 +650,35 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
   }
 
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
-{
-	long result, current_chunk;
-	quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
-	quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
-	quicktime_stsd_t *stsd = &(trak->mdia.minf.stbl.stsd);
-	long i = stsc->total_entries - 1;
+  {
+  long result, current_chunk;
+  quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
+  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+  quicktime_stsd_t *stsd = &(trak->mdia.minf.stbl.stsd);
+  long i = stsc->total_entries - 1;
 
-        if(!stsc->total_entries)
-          return 0;
-	do
-	{
-		current_chunk = stsc->table[i].chunk;
-		result = stsc->table[i].samples;
-		i--;
-	}while(i >= 0 && current_chunk > chunk);
-        /* LQT: Multiply with duration */
-        if(stsd->table[0].compression_id == -2)
-          result *= stts->table[0].sample_duration;
-	return result;
-}
+  if(!stsc->total_entries)
+    return 0;
+  do
+    {
+    current_chunk = stsc->table[i].chunk - 1;
+    result = stsc->table[i].samples;
+    i--;
+    }while(i >= 0 && current_chunk > chunk);
+  /* LQT: Multiply with duration */
+  if(stsd->table[0].compression_id == -2)
+    result *= stts->table[0].sample_duration;
+  return result;
+  }
 
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset)
-{
-	quicktime_stco_t *stco = &(trak->mdia.minf.stbl.stco);
-	int i;
+  {
+  quicktime_stco_t *stco = &(trak->mdia.minf.stbl.stco);
+  int i;
 
-	for(i = 0; i < stco->total_entries; i++)
-	{
-		stco->table[i].offset += offset;
-	}
-	return 0;
-}
+  for(i = 0; i < stco->total_entries; i++)
+    {
+    stco->table[i].offset += offset;
+    }
+  return 0;
+  }
