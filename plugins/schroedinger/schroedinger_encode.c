@@ -162,22 +162,16 @@ static int flush_data(quicktime_t *file, int track)
           }
         else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
           {
-#if 0
-          quicktime_stts_t * stts;
-          stts = &trak->mdia.minf.stbl.stts;
-          stts->table[stts->total_entries-1].sample_count++;
-          
+#if 1
           /* Special case: We need to add a final sample to the stream */
-          quicktime_write_chunk_header(file, trak, &chunk_atom);
+
+          lqt_video_append_timestamp(file, track, vtrack->duration, 1);
+          
+          lqt_write_frame_header(file, track, vtrack->current_position, -1, 0);
           result = !quicktime_write_data(file, codec->enc_buffer,
                                          codec->enc_buffer_size);
-
-          quicktime_write_chunk_footer(file,
-                                       trak,
-                                       vtrack->cur_chunk,
-                                       &chunk_atom,
-                                       1);
-          vtrack->cur_chunk++;
+          lqt_write_frame_footer(file, track);
+          vtrack->current_position++;
           codec->enc_buffer_size = 0;
 #endif
           }
