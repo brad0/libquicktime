@@ -162,10 +162,18 @@ static int flush_data(quicktime_t *file, int track)
           }
         else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
           {
-#if 1
           /* Special case: We need to add a final sample to the stream */
-
-          lqt_video_append_timestamp(file, track, vtrack->duration, 1);
+          
+          if(vtrack->duration <= vtrack->timestamps[vtrack->current_position-1])
+            {
+            quicktime_trak_t * trak = vtrack->track;
+            quicktime_stts_t * stts = &trak->mdia.minf.stbl.stts;
+            lqt_video_append_timestamp(file, track,
+                                       vtrack->timestamps[vtrack->current_position-1] +
+                                       stts->default_duration, 1);
+            }
+          else
+            lqt_video_append_timestamp(file, track, vtrack->duration, 1);
           
           lqt_write_frame_header(file, track, vtrack->current_position, -1, 0);
           result = !quicktime_write_data(file, codec->enc_buffer,
@@ -173,7 +181,6 @@ static int flush_data(quicktime_t *file, int track)
           lqt_write_frame_footer(file, track);
           vtrack->current_position++;
           codec->enc_buffer_size = 0;
-#endif
           }
         
         schro_buffer_unref (enc_buf);
