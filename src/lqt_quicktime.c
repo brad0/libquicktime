@@ -2128,9 +2128,9 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
     *samples = quicktime_chunk_samples(trak, chunk);
   /* Reallocate buffer */
 
-  if(*buffer_alloc < trak->chunk_sizes[chunk-1] + 16)
+  if(*buffer_alloc < trak->chunk_sizes[chunk] + 16)
     {
-    *buffer_alloc = trak->chunk_sizes[chunk-1] + 32;
+    *buffer_alloc = trak->chunk_sizes[chunk] + 32;
     *buffer = realloc(*buffer, *buffer_alloc);
     }
   
@@ -2140,11 +2140,11 @@ int lqt_read_audio_chunk(quicktime_t * file, int track,
 
   quicktime_set_position(file, offset);
 
-  result = quicktime_read_data(file, *buffer, trak->chunk_sizes[chunk-1]);
+  result = quicktime_read_data(file, *buffer, trak->chunk_sizes[chunk]);
 
-  memset((*buffer) + trak->chunk_sizes[chunk-1], 0, 16);
+  memset((*buffer) + trak->chunk_sizes[chunk], 0, 16);
   
-  return result ? trak->chunk_sizes[chunk-1] : 0;
+  return result ? trak->chunk_sizes[chunk] : 0;
   }
 
 int lqt_append_audio_chunk(quicktime_t * file, int track,
@@ -2184,11 +2184,11 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
 
   quicktime_set_position(file, offset);
 
-  result = quicktime_read_data(file, (*buffer) + initial_bytes, trak->chunk_sizes[chunk-1]);
+  result = quicktime_read_data(file, (*buffer) + initial_bytes, trak->chunk_sizes[chunk]);
 
-  memset((*buffer) + initial_bytes + trak->chunk_sizes[chunk-1], 0, 16);
+  memset((*buffer) + initial_bytes + trak->chunk_sizes[chunk], 0, 16);
   
-  return result ? trak->chunk_sizes[chunk-1] : 0;
+  return result ? trak->chunk_sizes[chunk] : 0;
   }
 
 
