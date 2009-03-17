@@ -161,6 +161,8 @@ static void destroy_codec_info(lqt_codec_info_t * ptr)
     free(ptr->gettext_domain);
   if(ptr->gettext_directory)
     free(ptr->gettext_directory);
+  if(ptr->encoding_colormodels)
+    free(ptr->encoding_colormodels);
   
   if(ptr->encoding_parameters)
     {
@@ -306,6 +308,15 @@ copy_codec_info(const lqt_codec_info_t * info)
       ret->fourccs[i] = __lqt_fourccdup(info->fourccs[i]);
     }
 
+  ret->num_encoding_colormodels = info->num_encoding_colormodels;
+  if(ret->num_encoding_colormodels)
+    {
+    ret->encoding_colormodels = malloc(ret->num_encoding_colormodels *
+                                       sizeof(*ret->encoding_colormodels));
+    for(i = 0; i < ret->num_encoding_colormodels; i++)
+      ret->encoding_colormodels[i] = info->encoding_colormodels[i];
+    }
+  
   ret->num_wav_ids = info->num_wav_ids;
   if(ret->num_wav_ids)
     {
@@ -950,6 +961,26 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
   for(i = 0; i < ret->num_fourccs; i++)
     ret->fourccs[i] = __lqt_fourccdup(template->fourccs[i]);
 
+  /* Copy supported encoding colormodels */
+
+  ret->num_encoding_colormodels = 0;
+
+  if(template->encoding_colormodels)
+    {
+    while(1)
+      {
+      if(template->encoding_colormodels[ret->num_encoding_colormodels] != LQT_COLORMODEL_NONE)
+        ret->num_encoding_colormodels++;
+      else
+        break;
+      }
+
+    ret->encoding_colormodels =
+      malloc(ret->num_encoding_colormodels * sizeof(*ret->encoding_colormodels));
+    for(i = 0; i < ret->num_encoding_colormodels; i++)
+      ret->encoding_colormodels[i] = template->encoding_colormodels[i];
+    }
+  
   /* Copy wav_ids */
 
   ret->num_wav_ids = 0;
@@ -1410,7 +1441,7 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
   }
 
 /*
- *  Get infos about the Codecs of a file
+ *  Get infos about the codecs of a file
  *  To be called after quicktime_open() when reading
  *  or quicktime_set_audio()/quicktime_set_video() when writing
  */

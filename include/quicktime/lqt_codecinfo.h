@@ -197,6 +197,9 @@ typedef struct lqt_codec_info_s
 
   char * gettext_domain;     /*!< First argument to bindtextdomain()  */
   char * gettext_directory;  /*!< Second argument to bindtextdomain() */
+
+  int num_encoding_colormodels; /*!< Number of supported encoding colormodels (since 1.1.2) */
+  int * encoding_colormodels;  /*!< Supported encoding colormodels (since 1.1.2) */
   
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
   } lqt_codec_info_t;

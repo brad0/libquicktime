@@ -922,7 +922,32 @@ int lqt_get_cmodel(quicktime_t * file, int track)
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
   {
   if((track < file->total_vtracks) && (track >= 0))
+    {
     file->vtracks[track].io_cmodel = colormodel;
+
+    /* Check if we can encode this colormodel directly */
+    if(file->wr && !file->encoding_started)
+      {
+      lqt_codec_info_t ** info;
+      int i;
+      char * name = ((quicktime_codec_t*)(file->vtracks[track].codec))->codec_name;
+      
+      info = lqt_find_video_codec_by_name(name);
+
+      if((*info)->encoding_colormodels)
+        {
+        for(i = 0; i < (*info)->num_encoding_colormodels; i++)
+          {
+          if((*info)->encoding_colormodels[i] == colormodel)
+            {
+            file->vtracks[track].stream_cmodel = colormodel;
+            break;
+            }
+          }
+        }
+      lqt_destroy_codec_info(info);
+      }
+    }
   else
     lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_cmodel: No track No. %d", track);
   }

@@ -119,7 +119,8 @@ typedef struct
   char * gettext_domain;     /*!< First argument to bindtextdomain(). Must be set only for externally packaged codecs */
   char * gettext_directory;  /*!< Second argument to bindtextdomain(). Must be set only for externally packaged codecs */
 
-
+  int * encoding_colormodels;
+  
   } lqt_codec_info_static_t;
 
 /*
