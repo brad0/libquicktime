@@ -25,6 +25,7 @@
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 #include "jpeg.h"
+#include <quicktime/colormodels.h>
 
 void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
 
@@ -71,7 +72,7 @@ every frame in YUV 4:2:0"),
     .encoding_parameters = encode_parameters_jpeg,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-    
+    .encoding_colormodels = (int[]){ BC_YUVJ420P, BC_YUVJ422P, BC_YUVJ444P, LQT_COLORMODEL_NONE },
   };
 
 static lqt_codec_info_static_t codec_info_mjpa =

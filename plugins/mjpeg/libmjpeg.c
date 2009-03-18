@@ -796,16 +796,35 @@ static mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   switch(mjpeg->fields)
     {
     case 1:
-      mjpeg->jpeg_color_model = BC_YUVJ420P;
-      result->jpeg_compress.comp_info[0].h_samp_factor = 2;
-      result->jpeg_compress.comp_info[0].v_samp_factor = 2;
-      result->jpeg_compress.comp_info[1].h_samp_factor = 1;
-      result->jpeg_compress.comp_info[1].v_samp_factor = 1;
-      result->jpeg_compress.comp_info[2].h_samp_factor = 1;
-      result->jpeg_compress.comp_info[2].v_samp_factor = 1;
+      if(mjpeg->jpeg_color_model == BC_YUVJ420P)
+        {
+        result->jpeg_compress.comp_info[0].h_samp_factor = 2;
+        result->jpeg_compress.comp_info[0].v_samp_factor = 2;
+        result->jpeg_compress.comp_info[1].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[1].v_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].v_samp_factor = 1;
+        }
+      else if(mjpeg->jpeg_color_model == BC_YUVJ422P)
+        {
+        result->jpeg_compress.comp_info[0].h_samp_factor = 2;
+        result->jpeg_compress.comp_info[0].v_samp_factor = 1;
+        result->jpeg_compress.comp_info[1].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[1].v_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].v_samp_factor = 1;
+        }
+      else if(mjpeg->jpeg_color_model == BC_YUVJ444P)
+        {
+        result->jpeg_compress.comp_info[0].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[0].v_samp_factor = 1;
+        result->jpeg_compress.comp_info[1].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[1].v_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].h_samp_factor = 1;
+        result->jpeg_compress.comp_info[2].v_samp_factor = 1;
+        }
       break;
     case 2:
-      mjpeg->jpeg_color_model = BC_YUVJ422P;
       result->jpeg_compress.comp_info[0].h_samp_factor = 2;
       result->jpeg_compress.comp_info[0].v_samp_factor = 1;
       result->jpeg_compress.comp_info[1].h_samp_factor = 1;
@@ -974,7 +993,7 @@ int mjpeg_get_fields(mjpeg_t *mjpeg)
 
 mjpeg_t* mjpeg_new(int w, 
                    int h, 
-                   int fields)
+                   int fields, int cmodel)
   {
   mjpeg_t *result = calloc(1, sizeof(*result));
   
@@ -985,11 +1004,17 @@ mjpeg_t* mjpeg_new(int w,
   result->use_float = 0;
   
   // Calculate coded dimensions
+  result->jpeg_color_model = cmodel;
 
   result->coded_w = (w % 16) ? w + (16 - (w % 16)) : w;
-  result->coded_w_uv = result->coded_w / 2;
+
+  if(result->jpeg_color_model == BC_YUVJ444P)
+    result->coded_w_uv = result->coded_w;
+  else
+    result->coded_w_uv = result->coded_w / 2;
   
   result->coded_h = (h % 16) ? h + (16 - (h % 16)) : h;
+
   
   return result;
   }

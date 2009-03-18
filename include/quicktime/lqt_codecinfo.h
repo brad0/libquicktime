@@ -159,6 +159,12 @@ typedef enum
   } lqt_codec_direction;
 
 /** \ingroup codec_registry
+    \brief compatibility flags contain this for obsolete/unmaintained codecs
+*/
+
+#define LQT_CODEC_OBSOLETE (1<<24)
+  
+/** \ingroup codec_registry
     \brief Structure describing a codec
 */
   

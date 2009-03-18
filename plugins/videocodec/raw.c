@@ -231,209 +231,208 @@ static int source_cmodel(quicktime_t *file, int track)
 }
 
 static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers, int track)
-{
-	int result = 0;
-	quicktime_trak_t *trak = file->vtracks[track].track;
-	int frame_depth = quicktime_video_depth(file, track);
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
-	long bytes;
-	int i;
-	unsigned char *ptr;
-        quicktime_ctab_t * ctab;
-	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  {
+  int result = 0;
+  quicktime_trak_t *trak = file->vtracks[track].track;
+  int frame_depth = quicktime_video_depth(file, track);
+  int height = trak->tkhd.track_height;
+  int width = trak->tkhd.track_width;
+  long bytes;
+  int i;
+  unsigned char *ptr;
+  quicktime_ctab_t * ctab;
+  quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
         
-        if(!row_pointers)
+  if(!row_pointers)
+    {
+    file->vtracks[track].stream_cmodel = source_cmodel(file, track);
+    return 0;
+    }
+        
+  ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
+                
+        
+  if(!codec->scanline_func)
+    {
+    switch(frame_depth)
+      {
+      case 1: /* 1 bpp palette */
+        codec->bytes_per_line = width / 8;
+        codec->scanline_func = scanline_raw_1;
+        if(ctab->size < 2)
           {
-          file->vtracks[track].stream_cmodel = source_cmodel(file, track);
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
           return 0;
           }
-        
-        ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
-                
-        
-        if(!codec->scanline_func)
+        break;
+      case 2: /* 2 bpp palette */
+        codec->bytes_per_line = width / 4;
+        codec->scanline_func = scanline_raw_2;
+        if(ctab->size < 4)
           {
-          switch(frame_depth)
-            {
-            case 1: /* 1 bpp palette */
-              codec->bytes_per_line = width / 8;
-              codec->scanline_func = scanline_raw_1;
-              if(ctab->size < 2)
-                {
-                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
-                return 0;
-                }
-              break;
-            case 2: /* 2 bpp palette */
-              codec->bytes_per_line = width / 4;
-              codec->scanline_func = scanline_raw_2;
-              if(ctab->size < 4)
-                {
-                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
-                return 0;
-                }
-              break;
-            case 4: /* 4 bpp palette */
-              codec->bytes_per_line = width / 2;
-              codec->scanline_func = scanline_raw_4;
-              if(ctab->size < 16)
-                {
-                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
-                return 0;
-                }
-              break;
-            case 8: /* 8 bpp palette */
-              codec->bytes_per_line = width;
-              codec->scanline_func = scanline_raw_8;
-              if(ctab->size < 256)
-                {
-                lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small\n");
-                return 0;
-                }
-              break;
-            case 16: /* RGB565 */
-              codec->bytes_per_line = width * 2;
-              codec->scanline_func = scanline_raw_16;
-              break;
-            case 24: /* 24 RGB */
-              codec->bytes_per_line = width * 3;
-              codec->scanline_func = scanline_raw_24;
-              break;
-            case 32: /* 32 ARGB */
-              codec->bytes_per_line = width * 4;
-              codec->scanline_func = scanline_raw_32;
-              break;
-            case 34: /* 2 bit gray */
-              codec->bytes_per_line = width / 4;
-              //              codec->scanline_func = scanline_raw_2_gray;
-              codec->scanline_func = scanline_raw_2;
-              break;
-            case 36: /* 4 bit gray */
-              codec->bytes_per_line = width / 2;
-              //              codec->scanline_func = scanline_raw_4_gray;
-              codec->scanline_func = scanline_raw_4;
-              break;
-            case 40: /* 8 bit gray */
-              codec->bytes_per_line = width;
-              //              codec->scanline_func = scanline_raw_8_gray;
-              codec->scanline_func = scanline_raw_8;
-              break;
-            }
-          if(codec->bytes_per_line & 1)
-            codec->bytes_per_line++;
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
+          return 0;
           }
+        break;
+      case 4: /* 4 bpp palette */
+        codec->bytes_per_line = width / 2;
+        codec->scanline_func = scanline_raw_4;
+        if(ctab->size < 16)
+          {
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small");
+          return 0;
+          }
+        break;
+      case 8: /* 8 bpp palette */
+        codec->bytes_per_line = width;
+        codec->scanline_func = scanline_raw_8;
+        if(ctab->size < 256)
+          {
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Palette missing or too small\n");
+          return 0;
+          }
+        break;
+      case 16: /* RGB565 */
+        codec->bytes_per_line = width * 2;
+        codec->scanline_func = scanline_raw_16;
+        break;
+      case 24: /* 24 RGB */
+        codec->bytes_per_line = width * 3;
+        codec->scanline_func = scanline_raw_24;
+        break;
+      case 32: /* 32 ARGB */
+        codec->bytes_per_line = width * 4;
+        codec->scanline_func = scanline_raw_32;
+        break;
+      case 34: /* 2 bit gray */
+        codec->bytes_per_line = width / 4;
+        //              codec->scanline_func = scanline_raw_2_gray;
+        codec->scanline_func = scanline_raw_2;
+        break;
+      case 36: /* 4 bit gray */
+        codec->bytes_per_line = width / 2;
+        //              codec->scanline_func = scanline_raw_4_gray;
+        codec->scanline_func = scanline_raw_4;
+        break;
+      case 40: /* 8 bit gray */
+        codec->bytes_per_line = width;
+        //              codec->scanline_func = scanline_raw_8_gray;
+        codec->scanline_func = scanline_raw_8;
+        break;
+      }
+    if(codec->bytes_per_line & 1)
+      codec->bytes_per_line++;
+    }
                 
 
 
-/* Read data */
+  /* Read data */
 
-        bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                     file->vtracks[track].current_position, NULL, track);
+  bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
+                               file->vtracks[track].current_position, NULL, track);
 
-        if(bytes <= 0)
-          return -1;
+  if(bytes <= 0)
+    return -1;
         
-        /* Do conversion of the scanlines */
+  /* Do conversion of the scanlines */
 
-        ptr = codec->buffer;
+  ptr = codec->buffer;
 
-        for(i = 0; i < height; i++)
-          {
-          codec->scanline_func(ptr, row_pointers[i], width, ctab);
-          ptr += codec->bytes_per_line;
-          }
-	return result;
-}
+  for(i = 0; i < height; i++)
+    {
+    codec->scanline_func(ptr, row_pointers[i], width, ctab);
+    ptr += codec->bytes_per_line;
+    }
+  return result;
+  }
 
 static int quicktime_encode_raw(quicktime_t *file, 
-	unsigned char **row_pointers, 
-	int track)
-{
-        int i, j;
-        uint8_t * in_ptr, *out_ptr;
-        uint8_t padd = 0;
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_trak_t *trak = vtrack->track;
-	int result = 0;
-	int height = trak->tkhd.track_height;
-	int width = trak->tkhd.track_width;
-	int depth = quicktime_video_depth(file, track);
-        quicktime_atom_t chunk_atom;
-	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+                                unsigned char **row_pointers, 
+                                int track)
+  {
+  int i, j;
+  uint8_t * in_ptr, *out_ptr;
+  uint8_t padd = 0;
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_trak_t *trak = vtrack->track;
+  int result = 0;
+  int height = trak->tkhd.track_height;
+  int width = trak->tkhd.track_width;
+  quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
         
-        if(!row_pointers)
-          {
-          if(depth == 32)
-            vtrack->stream_cmodel = BC_RGBA8888;
-          else
-            vtrack->stream_cmodel = BC_RGB888;
-          return 0;
-          }
+  if(!row_pointers)
+    {
+    return 0;
+    }
 
-        if(!codec->bytes_per_line)
-          {
-          if(depth == 32)
-            codec->bytes_per_line = width * 4;
-          else
-            codec->bytes_per_line = width * 3;
+  if(!codec->bytes_per_line)
+    {
+    if(vtrack->stream_cmodel == BC_RGBA8888)
+      {
+      vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
+      codec->bytes_per_line = width * 4;
+      }
+    else
+      {
+      vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 24;
+      codec->bytes_per_line = width * 3;
+      }
+    
+    if(codec->bytes_per_line & 1)
+      codec->bytes_per_line++;
+    }
+  
+  lqt_write_frame_header(file, track,
+                         vtrack->current_position,
+                         -1, 0);
 
-          if(codec->bytes_per_line & 1)
-            codec->bytes_per_line++;
-          }
-        
-        lqt_write_frame_header(file, track,
-                               vtrack->current_position,
-                               -1, 0);
+  if(vtrack->stream_cmodel == BC_RGBA8888)
+    {
+    if(!codec->buffer)
+      codec->buffer = calloc(codec->bytes_per_line, 1);
 
-        if(vtrack->stream_cmodel == BC_RGBA8888)
-          {
-          if(!codec->buffer)
-            codec->buffer = calloc(codec->bytes_per_line, 1);
-
-          for(i = 0; i < height; i++)
-            {
-            in_ptr = row_pointers[i];
-            out_ptr = codec->buffer;
-            for(j = 0; j < width; j++)
-              {
-              out_ptr[1] = in_ptr[0]; /* R */
-              out_ptr[2] = in_ptr[1]; /* G */
-              out_ptr[3] = in_ptr[2]; /* B */
-              out_ptr[0] = in_ptr[3]; /* A */
-              out_ptr += 4;
-              in_ptr  += 4;
-              }
-            result = !quicktime_write_data(file, codec->buffer, codec->bytes_per_line);
-            }
-          }
-        else /* BC_RGB888 */
-          {
-          for(i = 0; i < height; i++)
-            {
-            result = !quicktime_write_data(file, row_pointers[i], width * 3);
-            if(width & 1)
-              result = !quicktime_write_data(file, &padd, 1);
-            }
-          }
-        lqt_write_frame_footer(file, track);
-        return result;
-}
+    for(i = 0; i < height; i++)
+      {
+      in_ptr = row_pointers[i];
+      out_ptr = codec->buffer;
+      for(j = 0; j < width; j++)
+        {
+        out_ptr[1] = in_ptr[0]; /* R */
+        out_ptr[2] = in_ptr[1]; /* G */
+        out_ptr[3] = in_ptr[2]; /* B */
+        out_ptr[0] = in_ptr[3]; /* A */
+        out_ptr += 4;
+        in_ptr  += 4;
+        }
+      result = !quicktime_write_data(file, codec->buffer, codec->bytes_per_line);
+      }
+    }
+  else /* BC_RGB888 */
+    {
+    for(i = 0; i < height; i++)
+      {
+      result = !quicktime_write_data(file, row_pointers[i], width * 3);
+      if(width & 1)
+        result = !quicktime_write_data(file, &padd, 1);
+      }
+    }
+  lqt_write_frame_footer(file, track);
+  return result;
+  }
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
-{
-        quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+  {
+  quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
  
-        codec_base->priv = calloc(1, sizeof(quicktime_raw_codec_t));
-        codec_base->delete_vcodec = quicktime_delete_codec_raw;
-        codec_base->decode_video = quicktime_decode_raw;
-        codec_base->encode_video = quicktime_encode_raw;
-        codec_base->decode_audio = 0;
-        codec_base->encode_audio = 0;
-}
+  codec_base->priv = calloc(1, sizeof(quicktime_raw_codec_t));
+  codec_base->delete_vcodec = quicktime_delete_codec_raw;
+  codec_base->decode_video = quicktime_decode_raw;
+  codec_base->encode_video = quicktime_encode_raw;
+  vtrack->stream_cmodel = BC_RGB888;
+  }
 
 void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack)
   {
-  vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
   quicktime_init_codec_raw(vtrack);
+  vtrack->stream_cmodel = BC_RGBA8888;
   }

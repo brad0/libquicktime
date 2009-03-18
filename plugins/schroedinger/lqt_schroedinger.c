@@ -25,6 +25,7 @@
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 #include "schroedinger.h"
+#include <quicktime/colormodels.h>
 
 
 static char * fourccs_dirac[]  = { "drac", (char*)0 };
@@ -126,6 +127,42 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_default = { .val_int = 30 },
     },
     { 
+      .name =        "enc_me",
+      .real_name =   TRS("Motion estimation"),
+      .type =        LQT_PARAMETER_SECTION,
+    },
+    {
+      .name =        "enc_mv_precision",
+      .real_name =   TRS("MV Precision"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     0 },
+      .val_min     = { .val_int =     3 },
+      .val_max     = { .val_int =     0 },
+    },
+    {
+      .name =        "enc_motion_block_size",
+      .real_name =   TRS("Block size"),
+      .type =        LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Automatic" },
+      .stringlist_options = (char *[]){ TRS("Automatic"),
+                                        TRS("Small"),
+                                        TRS("Medium"),
+                                        TRS("Large"),
+                                        (char *)0 },
+      
+    },
+    {
+      .name =        "enc_motion_block_overlap",
+      .real_name =   TRS("Block overlap"),
+      .type =        LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Automatic" },
+      .stringlist_options = (char *[]){ TRS("Automatic"),
+                                        TRS("None"),
+                                        TRS("Partial"),
+                                        TRS("Full"),
+                                        (char *)0 },
+    },
+    { 
       .name =        "enc_wavelets",
       .real_name =   TRS("Wavelets"),
       .type =        LQT_PARAMETER_SECTION,
@@ -198,7 +235,9 @@ static lqt_codec_info_static_t codec_info_schroedinger =
     .encoding_parameters = encode_parameters_schroedinger,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-    
+    .encoding_colormodels = (int[]) { BC_YUV420P, BC_YUV422P, BC_YUV444P,
+                                      BC_YUVJ420P, BC_YUVJ422P, BC_YUVJ444P,
+                                      LQT_COLORMODEL_NONE },
   };
 
 /* These are called from the plugin loader */

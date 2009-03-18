@@ -130,7 +130,7 @@ static lqt_codec_info_static_t codec_info_dv_pal =
     .type =                LQT_CODEC_VIDEO,
     .direction =           LQT_DIRECTION_ENCODE,
     .encoding_parameters = encode_parameters_dv,
-    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_CODEC_OBSOLETE
   };
 
 static lqt_codec_info_static_t codec_info_dv_ntsc =
@@ -142,7 +142,7 @@ static lqt_codec_info_static_t codec_info_dv_ntsc =
     .type =                LQT_CODEC_VIDEO,
     .direction =           LQT_DIRECTION_ENCODE,
     .encoding_parameters = encode_parameters_dv,
-    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT
+    .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_CODEC_OBSOLETE
   };
 
 

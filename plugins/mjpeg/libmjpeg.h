@@ -119,7 +119,7 @@ extern "C" {
 
 
   // Entry points
-  mjpeg_t* mjpeg_new(int w, int h, int fields);
+  mjpeg_t* mjpeg_new(int w, int h, int fields, int cmodel);
   void mjpeg_delete(mjpeg_t *mjpeg);
 
   void mjpeg_set_quality(mjpeg_t *mjpeg, int quality);

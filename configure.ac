@@ -39,7 +39,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="9"
+LQT_CODEC_API_VERSION="10"
 
 if test "x$have_gpl" = "xtrue"; then
   LQT_CODEC_API_VERSION="($LQT_CODEC_API_VERSION|0x10000)"

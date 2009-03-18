@@ -87,7 +87,7 @@ static int decode(quicktime_t *file,
       nfields = 1;
     codec->mjpeg = mjpeg_new(quicktime_video_width(file, track),
                              quicktime_video_height(file, track),
-                             nfields);
+                             nfields, LQT_COLORMODEL_NONE);
     if((nfields == 2) && (dominance == 6))
       codec->mjpeg->bottom_first = 1;
 
@@ -145,129 +145,127 @@ static void resync(quicktime_t *file, int track)
   }
      
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
-{
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	quicktime_trak_t *trak = vtrack->track;
-	int result = 0;
-	long field2_offset;
+  {
+  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_trak_t *trak = vtrack->track;
+  int result = 0;
+  long field2_offset;
 
-        if(!row_pointers)
-          {
-          if(codec->jpeg_type == JPEG_PROGRESSIVE)
-            vtrack->stream_cmodel = BC_YUVJ420P;
-          else
-            vtrack->stream_cmodel = BC_YUVJ422P;
-          return 0;
-          }
+  if(!row_pointers)
+    {
+    if(codec->jpeg_type == JPEG_PROGRESSIVE)
+      vtrack->stream_cmodel = BC_YUVJ420P;
+    else
+      vtrack->stream_cmodel = BC_YUVJ422P;
+    return 0;
+    }
         
-        if(!codec->initialized)
-          {
-          /* Quicktime for Windows must have this information. */
-          if((codec->jpeg_type == JPEG_MJPA) &&
-             !trak->mdia.minf.stbl.stsd.table[0].has_fiel)
-            {
-            switch(vtrack->interlace_mode)
-              {
-              case LQT_INTERLACE_TOP_FIRST:
-                lqt_set_fiel(file, track, 2, 1);
-                break;
-              case LQT_INTERLACE_BOTTOM_FIRST:
-                lqt_set_fiel(file, track, 2, 6);
-                break;
-              case LQT_INTERLACE_NONE:
-                lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-                        "Encoding progressive video as interlaced. Motion JPEG-A is not suitable for progressive video.");
-                lqt_set_fiel(file, track, 2, 1);
-                break;
+  if(!codec->initialized)
+    {
+    /* Quicktime for Windows must have this information. */
+    if((codec->jpeg_type == JPEG_MJPA) &&
+       !trak->mdia.minf.stbl.stsd.table[0].has_fiel)
+      {
+      switch(vtrack->interlace_mode)
+        {
+        case LQT_INTERLACE_TOP_FIRST:
+          lqt_set_fiel(file, track, 2, 1);
+          break;
+        case LQT_INTERLACE_BOTTOM_FIRST:
+          lqt_set_fiel(file, track, 2, 6);
+          break;
+        case LQT_INTERLACE_NONE:
+          lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                  "Encoding progressive video as interlaced. Motion JPEG-A is not suitable for progressive video.");
+          lqt_set_fiel(file, track, 2, 1);
+          break;
                 
-              }
-            }
-          codec->mjpeg = mjpeg_new(quicktime_video_width(file, track),
-                                   quicktime_video_height(file, track),
-                                   (codec->jpeg_type == JPEG_MJPA) ? 2 : 1);
-          // Bottom first needs special treatment */
-          if(vtrack->interlace_mode == LQT_INTERLACE_BOTTOM_FIRST)
-            codec->mjpeg->bottom_first = 1;
+        }
+      }
+    codec->mjpeg = mjpeg_new(quicktime_video_width(file, track),
+                             quicktime_video_height(file, track),
+                             (codec->jpeg_type == JPEG_MJPA) ? 2 : 1, vtrack->stream_cmodel);
+    // Bottom first needs special treatment */
+    if(vtrack->interlace_mode == LQT_INTERLACE_BOTTOM_FIRST)
+      codec->mjpeg->bottom_first = 1;
           
-          mjpeg_set_quality(codec->mjpeg, codec->quality);
-          mjpeg_set_float(codec->mjpeg, codec->usefloat);
-          codec->initialized = 1;
-          }
+    mjpeg_set_quality(codec->mjpeg, codec->quality);
+    mjpeg_set_float(codec->mjpeg, codec->usefloat);
+    codec->initialized = 1;
+    }
         
-        if(file->vtracks[track].stream_row_span) 
-          mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
-        else
-          mjpeg_set_rowspan(codec->mjpeg, 0, 0);
+  if(file->vtracks[track].stream_row_span) 
+    mjpeg_set_rowspan(codec->mjpeg, file->vtracks[track].stream_row_span, file->vtracks[track].stream_row_span_uv);
+  else
+    mjpeg_set_rowspan(codec->mjpeg, 0, 0);
                 
-	mjpeg_compress(codec->mjpeg, row_pointers);
+  mjpeg_compress(codec->mjpeg, row_pointers);
 
-        if(codec->jpeg_type == JPEG_MJPA) 
-          mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,
-                                         &codec->mjpeg->output_size,
-                                         &codec->mjpeg->output_allocated,
-                                         2,
-                                         &field2_offset);
+  if(codec->jpeg_type == JPEG_MJPA) 
+    mjpeg_insert_quicktime_markers(&codec->mjpeg->output_data,
+                                   &codec->mjpeg->output_size,
+                                   &codec->mjpeg->output_allocated,
+                                   2,
+                                   &field2_offset);
 
-        lqt_write_frame_header(file, track,
-                               vtrack->current_position,
-                               -1, 0);
+  lqt_write_frame_header(file, track,
+                         vtrack->current_position,
+                         -1, 0);
         
-        result = !quicktime_write_data(file, 
-				mjpeg_output_buffer(codec->mjpeg), 
-				mjpeg_output_size(codec->mjpeg));
+  result = !quicktime_write_data(file, 
+                                 mjpeg_output_buffer(codec->mjpeg), 
+                                 mjpeg_output_size(codec->mjpeg));
 
-        lqt_write_frame_footer(file, track);
-        return result;
-}
+  lqt_write_frame_footer(file, track);
+  return result;
+  }
 
 
 static int set_parameter(quicktime_t *file, 
-		int track, 
-		const char *key, 
-		const void *value)
-{
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+                         int track, 
+                         const char *key, 
+                         const void *value)
+  {
+  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
 	
-	if(!strcasecmp(key, "jpeg_quality"))
-	  {
-          codec->quality = *(int*)value;
-          }
-	else
-	if(!strcasecmp(key, "jpeg_usefloat"))
-          {
-          codec->usefloat = *(int*)value;
-          }
-	return 0;
-}
+  if(!strcasecmp(key, "jpeg_quality"))
+    {
+    codec->quality = *(int*)value;
+    }
+  else
+    if(!strcasecmp(key, "jpeg_usefloat"))
+      {
+      codec->usefloat = *(int*)value;
+      }
+  return 0;
+  }
 
 void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
-{
-	char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
-	quicktime_jpeg_codec_t *codec;
-	int jpeg_type=0;
+  {
+  char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+  quicktime_jpeg_codec_t *codec;
+  int jpeg_type=0;
 
-	if(quicktime_match_32(compressor, QUICKTIME_JPEG))
-          {
-          jpeg_type = JPEG_PROGRESSIVE;
-          }
-	if(quicktime_match_32(compressor, QUICKTIME_MJPA))
-          {
-          jpeg_type = JPEG_MJPA;
-          }
-/* Init public items */
-	((quicktime_codec_t*)vtrack->codec)->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-	((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
-	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
-	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
-	((quicktime_codec_t*)vtrack->codec)->resync = resync;
+  if(quicktime_match_32(compressor, QUICKTIME_JPEG))
+    {
+    jpeg_type = JPEG_PROGRESSIVE;
+    }
+  if(quicktime_match_32(compressor, QUICKTIME_MJPA))
+    {
+    jpeg_type = JPEG_MJPA;
+    }
+  /* Init public items */
+  ((quicktime_codec_t*)vtrack->codec)->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
+  ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
+  ((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
+  ((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
+  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
+  ((quicktime_codec_t*)vtrack->codec)->resync = resync;
 
-/* Init private items */
-	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	codec->jpeg_type = jpeg_type;
-        codec->quality = 80;
-        codec->usefloat = 0;
-}
+  /* Init private items */
+  codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  codec->jpeg_type = jpeg_type;
+  codec->quality = 80;
+  codec->usefloat = 0;
+  }

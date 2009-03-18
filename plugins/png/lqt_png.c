@@ -24,6 +24,8 @@
 
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
+#include <quicktime/colormodels.h>
+
 #include "qtpng.h"
 
 void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
@@ -56,7 +58,7 @@ static lqt_codec_info_static_t codec_info_pngalpha =
   .direction =           LQT_DIRECTION_ENCODE,
   .encoding_parameters = encode_parameters_png,
   .decoding_parameters = (lqt_parameter_info_static_t*)0,
-  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_CODEC_OBSOLETE,
   };
 
 static lqt_codec_info_static_t codec_info_png =
@@ -70,6 +72,9 @@ static lqt_codec_info_static_t codec_info_png =
   .encoding_parameters = encode_parameters_png,
   .decoding_parameters = (lqt_parameter_info_static_t*)0,
   .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .encoding_colormodels = (int[]) { BC_RGB888,
+                                    BC_RGBA8888,
+                                    LQT_COLORMODEL_NONE},
   };
 
 /* These are called from the plugin loader */

@@ -75,15 +75,6 @@ int lqt_schroedinger_set_enc_parameter(quicktime_t *file,
           {
           v = (double)(j);
           found = 1;
-
-          /* Check if we have B-frames */
-          if(!strcmp(key, "gop_structure"))
-            {
-            if((j == 0) || /* Adaptive */
-               (j == 4) || /* Biref    */
-               (j == 5))   /* Chained biref */
-              codec->enc_b_frames = 1;
-            }
           break;
           }
         j++;

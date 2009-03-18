@@ -25,6 +25,7 @@
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 #include "videocodec.h"
+#include <quicktime/colormodels.h>
 
 
 static char * fourccs_raw[]  = { QUICKTIME_RAW, "raw3", (char*)0 };
@@ -98,13 +99,14 @@ static lqt_codec_info_static_t codec_info_raw =
   .decoding_parameters = (lqt_parameter_info_static_t*)0,
 #endif
   .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .encoding_colormodels = (int[]){ BC_RGB888, BC_RGBA8888, LQT_COLORMODEL_NONE },
   };
 
 static lqt_codec_info_static_t codec_info_rawalpha =
   {
   .name =                "rawalpha",
-  .long_name =           TRS("RGBA uncompressed"),
-  .description =         TRS("RGBA uncompressed"),
+  .long_name =           TRS("RGBA uncompressed with alpha"),
+  .description =         TRS("RGBA uncompressed with alpha"),
   .fourccs =             fourccs_raw,
   .type =                LQT_CODEC_VIDEO,
   .direction =           LQT_DIRECTION_ENCODE,
@@ -115,7 +117,7 @@ static lqt_codec_info_static_t codec_info_rawalpha =
   .encoding_parameters = (lqt_parameter_info_static_t*)0,
   .decoding_parameters = (lqt_parameter_info_static_t*)0,
 #endif
-  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_CODEC_OBSOLETE,
   };
 
 
