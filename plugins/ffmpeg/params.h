@@ -1205,3 +1205,13 @@ with max and/or min bitrate, this must be specified.") \
     .val_max =     { .val_int = 1 }, \
   }
 
+/** Coder type */
+#define PARAM_FFV1_CODER_TYPE \
+  { \
+    .name =        "ff_coder_type", \
+    .real_name =   TRS("Coder type"),     \
+    .type =        LQT_PARAMETER_STRINGLIST, \
+    .val_default = { .val_string = "VLC" }, \
+    .stringlist_options = (char *[]){ TRS("VLC"), TRS("Arithmetic"), \
+                                      (char *)0 }  \
+  }

@@ -711,7 +711,13 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
 
   if(stts->table[vtrack->cur_chunk-1].sample_duration <= 0)
     stts->table[vtrack->cur_chunk-1].sample_duration = stts->default_duration;
+
+  /* If all frames are keyframes, disable stss */
+
+  if(trak->mdia.minf.stbl.stss.total_entries == vtrack->cur_chunk)
+    trak->mdia.minf.stbl.stss.total_entries = 0;
   
+  /* If we have no B-frames, exit here */
   if(!has_b_frames)
     return;
 

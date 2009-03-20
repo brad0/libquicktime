@@ -25,43 +25,43 @@
 #include "lqt_private.h"
 
 void quicktime_stbl_init(quicktime_stbl_t *stbl)
-{
-	stbl->version = 0;
-	stbl->flags = 0;
-	quicktime_stsd_init(&(stbl->stsd));
-	quicktime_stts_init(&(stbl->stts));
-	quicktime_stss_init(&(stbl->stss));
-	quicktime_stsc_init(&(stbl->stsc));
-	quicktime_stsz_init(&(stbl->stsz));
-	quicktime_stco_init(&(stbl->stco));
-}
+  {
+  stbl->version = 0;
+  stbl->flags = 0;
+  quicktime_stsd_init(&(stbl->stsd));
+  quicktime_stts_init(&(stbl->stts));
+  quicktime_stss_init(&(stbl->stss));
+  quicktime_stsc_init(&(stbl->stsc));
+  quicktime_stsz_init(&(stbl->stsz));
+  quicktime_stco_init(&(stbl->stco));
+  }
 
 
 void quicktime_stbl_init_qtvr(quicktime_t *file,
-								quicktime_stbl_t *stbl,
-								int track_type,
-								int frame_duration)
-{
-	quicktime_stsd_init_qtvr(file, &(stbl->stsd), track_type);
-	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
-	quicktime_stsc_init_video(file, &(stbl->stsc));
-	quicktime_stsz_init_video(file, &(stbl->stsz));
-	quicktime_stco_init_common(file, &(stbl->stco));
-}
+                              quicktime_stbl_t *stbl,
+                              int track_type,
+                              int frame_duration)
+  {
+  quicktime_stsd_init_qtvr(file, &(stbl->stsd), track_type);
+  quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
+  quicktime_stsc_init_video(file, &(stbl->stsc));
+  quicktime_stsz_init_video(file, &(stbl->stsz));
+  quicktime_stco_init_common(file, &(stbl->stco));
+  }
 
 
 void quicktime_stbl_init_panorama(quicktime_t *file,
-								quicktime_stbl_t *stbl,
-								int width,
-								int height,
-								int frame_duration)
-{
-	quicktime_stsd_init_panorama(file, &(stbl->stsd), width, height);
-	quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
-	quicktime_stsc_init_video(file, &(stbl->stsc));
-	quicktime_stsz_init_video(file, &(stbl->stsz));
-	quicktime_stco_init_common(file, &(stbl->stco));
-}
+                                  quicktime_stbl_t *stbl,
+                                  int width,
+                                  int height,
+                                  int frame_duration)
+  {
+  quicktime_stsd_init_panorama(file, &(stbl->stsd), width, height);
+  quicktime_stts_init_video(file, &(stbl->stts), frame_duration);
+  quicktime_stsc_init_video(file, &(stbl->stsc));
+  quicktime_stsz_init_video(file, &(stbl->stsz));
+  quicktime_stco_init_common(file, &(stbl->stco));
+  }
 
 
 void quicktime_stbl_init_video(quicktime_t *file, 
@@ -89,9 +89,9 @@ void quicktime_stbl_init_audio(quicktime_t *file,
 {
 	quicktime_stsd_init_audio(file, &(stbl->stsd), 
 		channels, 
-		sample_rate, 
-		bits, 
-		compressor);
+                                  sample_rate, 
+                                  bits, 
+                                  compressor);
 	quicktime_stts_init_audio(file, &(stbl->stts), sample_rate);
 	quicktime_stsc_init_audio(file, &(stbl->stsc), sample_rate);
 	quicktime_stsz_init_audio(file, &(stbl->stsz), channels, bits, compressor);
@@ -131,29 +131,29 @@ void quicktime_stbl_init_timecode(quicktime_t *file,
 
 
 void quicktime_stbl_delete(quicktime_stbl_t *stbl)
-{
-	quicktime_stsd_delete(&(stbl->stsd));
-	quicktime_stts_delete(&(stbl->stts));
-	quicktime_stss_delete(&(stbl->stss));
-	quicktime_stsc_delete(&(stbl->stsc));
-	quicktime_stsz_delete(&(stbl->stsz));
-	quicktime_stco_delete(&(stbl->stco));
-}
+  {
+  quicktime_stsd_delete(&(stbl->stsd));
+  quicktime_stts_delete(&(stbl->stts));
+  quicktime_stss_delete(&(stbl->stss));
+  quicktime_stsc_delete(&(stbl->stsc));
+  quicktime_stsz_delete(&(stbl->stsz));
+  quicktime_stco_delete(&(stbl->stco));
+  }
 
 void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
-{
-	lqt_dump("    sample table\n");
-	quicktime_stsd_dump(minf_ptr, &(stbl->stsd));
-	quicktime_stts_dump(&(stbl->stts));
-        if(stbl->stss.total_entries)
-          quicktime_stss_dump(&(stbl->stss));
-	quicktime_stsc_dump(&(stbl->stsc));
-	quicktime_stsz_dump(&(stbl->stsz));
-	quicktime_stco_dump(&(stbl->stco));
-        if(stbl->has_ctts)
-          quicktime_ctts_dump(&(stbl->ctts));
+  {
+  lqt_dump("    sample table\n");
+  quicktime_stsd_dump(minf_ptr, &(stbl->stsd));
+  quicktime_stts_dump(&(stbl->stts));
+  if(stbl->stss.total_entries)
+    quicktime_stss_dump(&(stbl->stss));
+  quicktime_stsc_dump(&(stbl->stsc));
+  quicktime_stsz_dump(&(stbl->stsz));
+  quicktime_stco_dump(&(stbl->stco));
+  if(stbl->has_ctts)
+    quicktime_ctts_dump(&(stbl->ctts));
         
-}
+  }
 
 int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
                         quicktime_stbl_t *stbl, quicktime_atom_t *parent_atom)
@@ -215,20 +215,20 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
   }
 
 void quicktime_write_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_stbl_t *stbl)
-{
-	quicktime_atom_t atom;
-	quicktime_atom_write_header(file, &atom, "stbl");
+  {
+  quicktime_atom_t atom;
+  quicktime_atom_write_header(file, &atom, "stbl");
 
-	quicktime_write_stsd(file, minf, &(stbl->stsd));
-	quicktime_write_stts(file, &(stbl->stts));
-	quicktime_write_stss(file, &(stbl->stss));
-	quicktime_write_stsc(file, &(stbl->stsc));
-	quicktime_write_stsz(file, &(stbl->stsz));
-	quicktime_write_stco(file, &(stbl->stco));
-        if(stbl->has_ctts)
-          quicktime_write_ctts(file, &(stbl->ctts));
+  quicktime_write_stsd(file, minf, &(stbl->stsd));
+  quicktime_write_stts(file, &(stbl->stts));
+  quicktime_write_stss(file, &(stbl->stss));
+  quicktime_write_stsc(file, &(stbl->stsc));
+  quicktime_write_stsz(file, &(stbl->stsz));
+  quicktime_write_stco(file, &(stbl->stco));
+  if(stbl->has_ctts)
+    quicktime_write_ctts(file, &(stbl->ctts));
         
-	quicktime_atom_write_footer(file, &atom);
-}
+  quicktime_atom_write_footer(file, &atom);
+  }
 
 

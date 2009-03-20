@@ -142,6 +142,15 @@ enum_t mb_decision[] =
     { "Rate distoration",     FF_MB_DECISION_RD }
   };
 
+enum_t coder_type[] =
+  {
+    { "VLC",                  FF_CODER_TYPE_VLC },
+    { "Arithmetic",           FF_CODER_TYPE_AC },
+    { "Raw",                  FF_CODER_TYPE_RAW },
+    { "RLE",                  FF_CODER_TYPE_RLE },
+    { "Deflate",              FF_CODER_TYPE_DEFLATE },
+  };
+
 #define PARAM_ENUM(name, var, arr) \
   if(!strcasecmp(key, name)) \
     { \
@@ -260,5 +269,6 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,
   PARAM_FLAG("ff_flag_closed_gop",CODEC_FLAG_CLOSED_GOP);
   PARAM_FLAG2("ff_flag2_fast",CODEC_FLAG2_FAST);
   PARAM_FLAG2("ff_flag2_strict_gop",CODEC_FLAG2_STRICT_GOP);
+  PARAM_ENUM("ff_coder_type",coder_type,coder_type);
   
   }

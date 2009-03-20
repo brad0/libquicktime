@@ -2865,7 +2865,7 @@ msgstr ""
 
 #: plugins/ffmpeg/params.h:994
 msgid "Grayscale mode"
-msgstr "Schwarzweß Modus"
+msgstr "Graustufen Modus"
 
 #: plugins/ffmpeg/params.h:1004
 msgid "Don't draw edges"

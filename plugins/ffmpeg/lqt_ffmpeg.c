@@ -32,6 +32,7 @@
 #include "params.h"
 #include <quicktime/lqt_codecapi.h>
 #include <stdio.h>
+#include <quicktime/colormodels.h>
 
 #define LOG_DOMAIN "ffmpeg"
 
@@ -258,6 +259,11 @@ static lqt_parameter_info_static_t encode_parameters_mjpeg[] = {
   { /* End of parameters */ }
 };
 
+static lqt_parameter_info_static_t encode_parameters_ffv1[] = {
+  PARAM_FFV1_CODER_TYPE,
+  { /* End of parameters */ }
+};
+
 static lqt_parameter_info_static_t encode_parameters_audio[] = {
   ENCODE_PARAM_AUDIO,
   { /* End of parameters */ }
@@ -288,7 +294,8 @@ struct CODECIDMAP {
  *  We explicitely allow, if encoding is allowed.
  *  This prevents the spreading of broken files
  */
-        int   do_encode; 
+        int   do_encode;
+        int   * encoding_colormodels;
   };
 
 /* Video; tables from mplayers config... */
@@ -713,6 +720,21 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = 0,
       .do_encode = 1
     },
+    {
+      .id = CODEC_ID_FFV1,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .encode_parameters = encode_parameters_ffv1,
+      .short_name = "ffv1",
+      .name = TRS("FFMPEG codec #1 (lossless)"),
+      .fourccs = { "FFV1", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = 0,
+      .do_encode = 1,
+      .encoding_colormodels = (int[]){ BC_YUV420P, BC_YUV444P, BC_YUV422P, BC_YUV411P, LQT_COLORMODEL_NONE },
+    },
 #if LIBAVCODEC_BUILD >= 3352576
     {
       .id = CODEC_ID_DNXHD,
@@ -917,6 +939,7 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.encoding_parameters = map->encode_parameters;
     codec_info_ffmpeg.decoding_parameters = NULL;
     codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
+    codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
 
     //    capabilities = "Encoder";
     }
@@ -932,7 +955,6 @@ static void set_codec_info(struct CODECIDMAP * map)
 
   snprintf(ffmpeg_long_name, 256, "%s", map->name);
   snprintf(ffmpeg_description, 256, "%s", map->name);
-
   
   if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
      (map->decoder && (map->decoder->type == CODEC_TYPE_VIDEO))){
@@ -959,18 +981,18 @@ static struct CODECIDMAP * find_codec(int index)
   }
 
 LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
-{
-	struct CODECIDMAP * map;
-        ffmpeg_map_init();
-	map = find_codec(index);
-        //        memset(&codec_info_ffmpeg, 0, sizeof(codec_info_ffmpeg));
-        if(map)
-          {
-          set_codec_info(map);
-          return &codec_info_ffmpeg;
-          }
-	return NULL;
-}
+  {
+  struct CODECIDMAP * map;
+  ffmpeg_map_init();
+  map = find_codec(index);
+  //        memset(&codec_info_ffmpeg, 0, sizeof(codec_info_ffmpeg));
+  if(map)
+    {
+    set_codec_info(map);
+    return &codec_info_ffmpeg;
+    }
+  return NULL;
+  }
 
 /*
  *   Return the actual codec constructor

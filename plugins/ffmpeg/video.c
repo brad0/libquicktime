@@ -74,8 +74,6 @@ typedef struct
 
   int have_frame;
 
-  int encode_colormodel;
-
   int write_global_header;
   int global_header_written;
 
@@ -663,9 +661,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         int stats_len;
         if(!row_pointers)
           {
-          vtrack->stream_cmodel = codec->encode_colormodel;
-
-          if(codec->encode_colormodel == BC_YUV420P)
+          if(vtrack->stream_cmodel == BC_YUV420P)
             {
             if(codec->encoder->id == CODEC_ID_MPEG4)
               {
@@ -702,9 +698,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 
           if(codec->avctx->flags & CODEC_FLAG_QSCALE)
             codec->avctx->global_quality = codec->qscale;
-          
-          
-          
+                              
           codec->avctx->width = width;
           codec->avctx->height = height;
                 
@@ -962,19 +956,19 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
         codec->avctx = avcodec_alloc_context();
         
 	if (quicktime_match_32(compressor, "dvc "))
-	   codec->encode_colormodel = BC_YUV411P;
+	   vtrack->stream_cmodel = BC_YUV411P;
         else if (quicktime_match_32(compressor, "dv5n") ||
                  quicktime_match_32(compressor, "dv5p") ||
                  quicktime_match_32(compressor, "AVdn"))
-            codec->encode_colormodel = BC_YUV422P;
+          vtrack->stream_cmodel = BC_YUV422P;
         else if (quicktime_match_32(compressor, "MJPG"))
-          codec->encode_colormodel = BC_YUVJ420P;
+          vtrack->stream_cmodel = BC_YUVJ420P;
         else if (quicktime_match_32(compressor, "rle "))
-          codec->encode_colormodel = BC_RGB888;
+          vtrack->stream_cmodel = BC_RGB888;
         //        else if(quicktime_match_32(compressor, "dvcp"))
         //          codec->encode_colormodel = BC_YUV411P;
         else
-          codec->encode_colormodel = BC_YUV420P;
+          vtrack->stream_cmodel = BC_YUV420P;
         
 	codec->encoder = encoder;
 	codec->decoder = decoder;
