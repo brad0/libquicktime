@@ -24,6 +24,7 @@
 #include <schroedinger/schro.h>
 // #include <schroedinger/schrodebug.h>
 #include <schroedinger/schrovideoformat.h>
+#include <schroedinger/schroversion.h>
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 

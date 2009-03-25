@@ -48,6 +48,9 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
                                         TRS("Lossless"),
                                         TRS("Constant lambda"),
                                         TRS("Constant error"),
+#if SCHRO_CHECK_VERSION(1,0,6)
+                                        TRS("Constant quality"),
+#endif
                                         (char *)0 },
     },
     {
@@ -91,9 +94,9 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_max     = { .val_float =      100.0 },
       .num_digits  = 2,
     },
-#if 0
+#if SCHRO_CHECK_VERSION(1,0,6)
     {
-      .name      = "quality",
+      .name      = "enc_quality",
       .real_name = TRS("Quality"),
       .type = LQT_PARAMETER_FLOAT,
       .val_default = { .val_float =        7.0 },
@@ -126,6 +129,17 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .type = LQT_PARAMETER_INT,
       .val_default = { .val_int = 30 },
     },
+#if SCHRO_CHECK_VERSION(1,0,6)
+    {
+      .name      = "enc_open_gop",
+      .real_name = TRS("Open GOPs"),
+      .type = LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 1 },
+      .help_string = TRS("Choose whether GOPs should be open or closed. Closed GOPs improve seeking accuracy for buggy decoders, open GOPs have a slightly better compression"),
+    },
+#endif
     { 
       .name =        "enc_me",
       .real_name =   TRS("Motion estimation"),
@@ -162,6 +176,25 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
                                         TRS("Full"),
                                         (char *)0 },
     },
+#if SCHRO_CHECK_VERSION(1,0,6)
+    {
+      .name      = "enc_enable_global_motion",
+      .real_name = TRS("Enable GMC"),
+      .type = LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 0 },
+      .help_string = TRS("Enable global motion estimation"),
+    },
+    {
+      .name      = "enc_enable_phasecorr_estimation",
+      .real_name = TRS("Enable phasecorrelation estimation"),
+      .type = LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 0 },
+    },
+#endif
     { 
       .name =        "enc_wavelets",
       .real_name =   TRS("Wavelets"),
@@ -220,6 +253,29 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_min =     { .val_float = 0.0 },
       .val_max =     { .val_float = 100.0 },
     },
+#if SCHRO_CHECK_VERSION(1,0,6)
+    { 
+      .name =        "enc_misc",
+      .real_name =   TRS("Misc"),
+      .type =        LQT_PARAMETER_SECTION,
+    },
+    {
+      .name      = "enc_enable_multiquant",
+      .real_name = TRS("Enable multiquant"),
+      .type = LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 1 },
+    },
+    {
+      .name      = "enc_enable_dc_multiquant",
+      .real_name = TRS("Enable DC multiquant"),
+      .type = LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 0 },
+    },
+#endif
     { /* End of parameters */ }
   };
 
