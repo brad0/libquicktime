@@ -1126,30 +1126,25 @@ int quicktime_write_frame(quicktime_t *file,
                           int64_t bytes, int track)
   {
   int result = 0;
-  quicktime_atom_t chunk_atom;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
-  quicktime_trak_t *trak = vtrack->track;
-                                                                                                                  
-  quicktime_write_chunk_header(file, trak, &chunk_atom);
+  
+  lqt_video_append_timestamp(file, track, vtrack->timestamp,
+                             file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
+  vtrack->timestamp += file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
+
+  lqt_write_frame_header(file, track, file->vtracks[track].current_position,
+                         -1, 0 /* int keyframe */ );
+  
   result = !quicktime_write_data(file, video_buffer, bytes);
-  quicktime_write_chunk_footer(file,
-                               trak,
-                               vtrack->cur_chunk,
-                               &chunk_atom,
-                               1);
 
-  if(file->vtracks[track].current_position)
-    quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
-                          file->vtracks[track].current_position-1,
-                          file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
-
+  lqt_write_frame_footer(file, track);
+  
   if(file->vtracks[track].timecode_track)
     lqt_flush_timecode(file, track,
                        file->vtracks[track].current_position*
                        (int64_t)file->vtracks[track].track->mdia.minf.stbl.stts.default_duration, 0);
   
   file->vtracks[track].current_position++;
-  file->vtracks[track].cur_chunk++;
   return result;
   }
 
