@@ -1127,7 +1127,12 @@ int quicktime_write_frame(quicktime_t *file,
           quicktime_update_stts(&file->vtracks[track].track->mdia.minf.stbl.stts,
                                 file->vtracks[track].current_position-1,
                                 file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
-        
+
+        if(file->vtracks[track].timecode_track)
+          lqt_flush_timecode(file, track,
+                             file->vtracks[track].current_position*
+                             (int64_t)file->vtracks[track].track->mdia.minf.stbl.stts.default_duration, 0);
+ 
         file->vtracks[track].current_position++;
         file->vtracks[track].cur_chunk++;
         return result;
