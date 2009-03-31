@@ -592,7 +592,7 @@ dnl
 AH_TEMPLATE([HAVE_SCHROEDINGER], [Enable dirac codec])
 
 have_schroedinger=false
-SCHROEDINGER_REQUIRED="1.0.1"
+SCHROEDINGER_REQUIRED="1.0.5"
 
 AC_ARG_WITH(schroedinger,
             AC_HELP_STRING([--without-schroedinger], [Do not use schroedinger.]),
@@ -600,7 +600,7 @@ AC_ARG_WITH(schroedinger,
 
 have_schroedinger=false
 if test x$with_schroedinger != xno ; then
-  PKG_CHECK_MODULES(SCHROEDINGER, [schroedinger-1.0], [have_schroedinger=true], [have_schroedinger=false])
+  PKG_CHECK_MODULES(SCHROEDINGER, schroedinger-1.0 >= $SCHROEDINGER_REQUIRED, [have_schroedinger=true], [have_schroedinger=false])
 fi
 
 AC_SUBST(SCHROEDINGER_CFLAGS)
