@@ -24,7 +24,13 @@
 #include <schroedinger/schro.h>
 // #include <schroedinger/schrodebug.h>
 #include <schroedinger/schrovideoformat.h>
+
+#ifdef HAVE_SCHROEDINGER_SCHROVERSION_H
 #include <schroedinger/schroversion.h>
+#else
+#define SCHRO_CHECK_VERSION(a,b,c) 0
+#endif
+
 #include "lqt_private.h"
 #include <quicktime/lqt_codecapi.h>
 

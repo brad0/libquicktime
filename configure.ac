@@ -598,22 +598,22 @@ AC_ARG_WITH(schroedinger,
             AC_HELP_STRING([--without-schroedinger], [Do not use schroedinger.]),
             [], [with_schroedinger=yes])
 
-dnl *********************************************************************
-dnl Check for PNG library
-dnl   (creates SCHROEDINGER_CFLAGS, SCHROEDINGER_LIBS)
-dnl *********************************************************************
 have_schroedinger=false
 if test x$with_schroedinger != xno ; then
   PKG_CHECK_MODULES(SCHROEDINGER, [schroedinger-1.0], [have_schroedinger=true], [have_schroedinger=false])
 fi
-AM_CONDITIONAL(HAVE_SCHROEDINGER, test x$have_schroedinger = xtrue)
 
 AC_SUBST(SCHROEDINGER_CFLAGS)
 AC_SUBST(SCHROEDINGER_LIBS)
-AC_SUBST(PNG_REQUIRED)
+AC_SUBST(SCHROEDINGER_REQUIRED)
+
+AC_CHECK_HEADERS(schroedinger/schroversion.h,,,$SCHROEDINGER_CFLAGS)
 
 AM_CONDITIONAL(HAVE_SCHROEDINGER, test x$have_schroedinger = xtrue)
 
+if test x$have_schroedinger = xtrue; then
+AC_DEFINE(HAVE_SCHROEDINGER)
+fi
 
 dnl
 dnl faac
