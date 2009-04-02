@@ -258,7 +258,7 @@ void quicktime_finalize_moov(quicktime_t *file, quicktime_moov_t *moov)
     quicktime_trak_fix_counts(file, moov->trak[i], moov->mvhd.time_scale);
     quicktime_trak_duration(moov->trak[i], &duration, &timescale);
     
-    duration = (long)((float)duration / timescale * moov->mvhd.time_scale);
+    duration = (long)((double)duration / timescale * moov->mvhd.time_scale + 0.5);
     
     if(duration > longest_duration)
       {

@@ -606,7 +606,7 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
   quicktime_trak_duration(trak, &duration, &timescale);
   
   /* get duration in movie's units */
-  trak->tkhd.duration = (long)((float)duration / timescale * moov_time_scale);
+  trak->tkhd.duration = (long)((double)duration / timescale * moov_time_scale + 0.5);
   trak->mdia.mdhd.duration = duration;
   trak->mdia.mdhd.time_scale = timescale;
   
