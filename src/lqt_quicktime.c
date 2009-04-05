@@ -1019,9 +1019,14 @@ void quicktime_set_depth(quicktime_t *file, int depth, int track)
 double quicktime_frame_rate(quicktime_t *file, int track)
   {
   if(file->total_vtracks > track)
-    return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
-      file->vtracks[track].track->mdia.minf.stbl.stts.table[0].sample_duration;
-
+    {
+    if(file->vtracks[track].track->mdia.minf.stbl.stts.table)
+      return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
+        file->vtracks[track].track->mdia.minf.stbl.stts.table[0].sample_duration;
+    else
+      return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
+        file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
+    }
   return 0;
   }
 

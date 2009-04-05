@@ -667,8 +667,9 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
 
   stts = &trak->mdia.minf.stbl.stts;
   ctts = &trak->mdia.minf.stbl.ctts;
-#if 0
-  fprintf (stderr, "Build timestamp tables %ld frames\n", vtrack->cur_chunk);
+#if 1
+  fprintf (stderr, "Build timestamp tables %ld frames %d\n",
+           vtrack->cur_chunk, stts->default_duration);
   for(i = 0; i < vtrack->cur_chunk; i++)
     {
     fprintf(stderr, "PTS[%d]: %ld\n", i, vtrack->timestamps[i]);
@@ -692,10 +693,16 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
   /* Build preliminary stts */
 
   if(stts->table)
+    {
     free(stts->table);
+    stts->table = NULL;
+    }
+  stts->total_entries = vtrack->cur_chunk;
+
+  if(!stts->total_entries)
+    return;
   
   stts->table = malloc(vtrack->cur_chunk * sizeof(*stts->table));
-  stts->total_entries = vtrack->cur_chunk;
   
   for(i = 0; i < vtrack->cur_chunk-1; i++)
     {
