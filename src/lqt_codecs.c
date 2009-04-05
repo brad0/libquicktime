@@ -667,7 +667,7 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
 
   stts = &trak->mdia.minf.stbl.stts;
   ctts = &trak->mdia.minf.stbl.ctts;
-#if 1
+#if 0
   fprintf (stderr, "Build timestamp tables %ld frames %d\n",
            vtrack->cur_chunk, stts->default_duration);
   for(i = 0; i < vtrack->cur_chunk; i++)
