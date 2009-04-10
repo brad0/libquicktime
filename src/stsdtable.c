@@ -520,56 +520,51 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
       quicktime_read_ctab(file, &(table->ctab));
       table->has_ctab = 1;
       }
+    else if(quicktime_atom_is(&leaf_atom, "gama"))
+      {
+      quicktime_read_gama(file, &(table->gama));
+      table->has_gama = 1;
+      }
+    else if(quicktime_atom_is(&leaf_atom, "fiel"))
+      {
+      quicktime_read_fiel(file, &(table->fiel));
+      table->has_fiel = 1;
+      }
+    else if(quicktime_atom_is(&leaf_atom, "pasp"))
+      {
+      quicktime_read_pasp(file, &(table->pasp));
+      table->has_pasp = 1;
+      }
+    else if(quicktime_atom_is(&leaf_atom, "clap"))
+      {
+      quicktime_read_clap(file, &(table->clap));
+      table->has_clap = 1;
+      }
+    else if (quicktime_atom_is(&leaf_atom, "colr"))
+      {
+      quicktime_read_colr(file, &(table->colr));
+      table->has_colr = 1;
+      }
+    else if(quicktime_atom_is(&leaf_atom, "esds"))
+      {
+      // printf("esds: %"PRId64" bytes\n", leaf_atom.size);
+      quicktime_read_esds(file, &(table->esds));
+      table->has_esds = 1;
+      quicktime_atom_skip(file, &leaf_atom);
+      }
     else
-      if(quicktime_atom_is(&leaf_atom, "gama"))
-        {
-        quicktime_read_gama(file, &(table->gama));
-        table->has_gama = 1;
-        }
-      else
-        if(quicktime_atom_is(&leaf_atom, "fiel"))
-          {
-          quicktime_read_fiel(file, &(table->fiel));
-          table->has_fiel = 1;
-          }
-        else
-          if (quicktime_atom_is(&leaf_atom, "pasp"))
-            {
-            quicktime_read_pasp(file, &(table->pasp));
-            table->has_pasp = 1;
-            }
-          else
-            if (quicktime_atom_is(&leaf_atom, "clap"))
-              {
-              quicktime_read_clap(file, &(table->clap));
-              table->has_clap = 1;
-              }
-            else
-              if (quicktime_atom_is(&leaf_atom, "colr"))
-		{
-                quicktime_read_colr(file, &(table->colr));
-                table->has_colr = 1;
-		}
-              else
-		if (quicktime_atom_is(&leaf_atom, "esds"))
-                  {
-                  // printf("esds: %"PRId64" bytes\n", leaf_atom.size);
-                  quicktime_read_esds(file, &(table->esds));
-                  table->has_esds = 1;
-                  quicktime_atom_skip(file, &leaf_atom);
-                  }
-		else
-                  {
-                  quicktime_user_atoms_read_atom(file,
-                                                 &table->user_atoms,
-                                                 &leaf_atom);
-                  }
+      {
+      quicktime_user_atoms_read_atom(file,
+                                     &table->user_atoms,
+                                     &leaf_atom);
+      }
     quicktime_atom_skip(file, &leaf_atom);
     }
   }
 
 
-void quicktime_write_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table)
+void quicktime_write_stsd_video(quicktime_t *file,
+                                quicktime_stsd_table_t *table)
   {
   int compressor_name_len, i;
   compressor_name_len = strlen(table->compressor_name);
