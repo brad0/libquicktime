@@ -570,6 +570,7 @@ void quicktime_write_stsd_video(quicktime_t *file,
   compressor_name_len = strlen(table->compressor_name);
   if(file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD))
     {
+    int terminate = 0;
     quicktime_write_int16(file, table->version);
     quicktime_write_int16(file, table->revision);
     quicktime_write_data(file, (uint8_t*)table->vendor, 4);
@@ -587,15 +588,32 @@ void quicktime_write_stsd_video(quicktime_t *file,
     quicktime_write_int16(file, table->ctab_id);
 
     if (table->has_pasp)
+      {
       quicktime_write_pasp(file, &(table->pasp));
+      terminate = 1;
+      }
     if (table->has_clap)
+      {
       quicktime_write_clap(file, &(table->clap));
+      terminate = 1;
+      }
     if (table->has_colr)
+      {
       quicktime_write_colr(file, &(table->colr));
+      terminate = 1;
+      }
     if (table->has_fiel)
+      {
       quicktime_write_fiel(file, &(table->fiel));
+      terminate = 1;
+      }
     if (table->has_gama)
+      {
       quicktime_write_gama(file, &(table->gama));
+      terminate = 1;
+      }
+    if(terminate)
+      quicktime_write_int32(file, 0);
     }
   else /* Different stsd formats for mp4 variants */
     {
