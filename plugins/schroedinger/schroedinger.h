@@ -78,6 +78,8 @@ typedef struct
   int enc_buffer_alloc;
   int enc_buffer_size;
 
+  int enc_eof; /* Don't write EOS twice */
+  
   } schroedinger_codec_t;
 
 int lqt_schroedinger_delete(quicktime_video_map_t *vtrack);

@@ -128,42 +128,42 @@ colormodels[] =
   };
 
 static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
-{
-	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  {
+  quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
           
-        if(codec->extradata)
-          free(codec->extradata);
+  if(codec->extradata)
+    free(codec->extradata);
 
-        if(codec->stats_filename)
-          free(codec->stats_filename);
+  if(codec->stats_filename)
+    free(codec->stats_filename);
         
-        if(codec->stats_file)
-          fclose(codec->stats_file);
+  if(codec->stats_file)
+    fclose(codec->stats_file);
         
-	if(codec->initialized)
-          {
-          if(codec->avctx->stats_in)
-            av_free(codec->avctx->stats_in);
-          avcodec_close(codec->avctx);
-          }
-        av_free(codec->avctx);
+  if(codec->initialized)
+    {
+    if(codec->avctx->stats_in)
+      av_free(codec->avctx->stats_in);
+    avcodec_close(codec->avctx);
+    }
+  av_free(codec->avctx);
         
-        if(codec->frame_buffer) free(codec->frame_buffer);
-	if(codec->buffer) free(codec->buffer);
-        if(codec->row_pointers) free(codec->row_pointers);
+  if(codec->frame_buffer) free(codec->frame_buffer);
+  if(codec->buffer) free(codec->buffer);
+  if(codec->row_pointers) free(codec->row_pointers);
 
-        if(codec->frame) av_free(codec->frame);
+  if(codec->frame) av_free(codec->frame);
 
 #ifdef HAVE_LIBSWSCALE
-        if(codec->swsContext)
-          sws_freeContext(codec->swsContext);
+  if(codec->swsContext)
+    sws_freeContext(codec->swsContext);
 #endif
 
         
-	free(codec);
+  free(codec);
 	
-	return 0;
-}
+  return 0;
+  }
 
 #ifndef HAVE_LIBSWSCALE
 static void fill_avpicture(AVPicture * ret, unsigned char ** rows, int lqt_colormodel,

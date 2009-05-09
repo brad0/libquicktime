@@ -932,6 +932,7 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.decoding_parameters = map->decode_parameters;
     //    capabilities = "Codec";
     codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
+    codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
     }
   else if(map->encoder)
     {

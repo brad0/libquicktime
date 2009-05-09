@@ -29,6 +29,8 @@
 #include <quicktime/colormodels.h>
 #include <string.h>
 
+#define LOG_DOMAIN "schroenc"
+
 static void copy_frame_8(quicktime_t * file,
                          unsigned char **row_pointers,
                          SchroFrame * frame,
@@ -112,6 +114,9 @@ static int flush_data(quicktime_t *file, int track)
         enc_buf = schro_encoder_pull(codec->enc, &presentation_frame);
         parse_code = enc_buf->data[4];
 
+        //        fprintf(stderr, "Parse code: %d, state: %d\n",
+        //                parse_code, state);
+        
         /* Append to enc_buffer */
         if(codec->enc_buffer_alloc < codec->enc_buffer_size + enc_buf->length)
           {
@@ -153,24 +158,33 @@ static int flush_data(quicktime_t *file, int track)
           }
         else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
           {
-          /* Special case: We need to add a final sample to the stream */
           
-          if(vtrack->duration <= vtrack->timestamps[vtrack->current_position-1])
+          if(!codec->enc_eof)
             {
-            quicktime_trak_t * trak = vtrack->track;
-            quicktime_stts_t * stts = &trak->mdia.minf.stbl.stts;
-            lqt_video_append_timestamp(file, track,
-                                       vtrack->timestamps[vtrack->current_position-1] +
-                                       stts->default_duration, 1);
+            /* Special case: We need to add a final sample to the stream */
+          
+            if(vtrack->duration <= vtrack->timestamps[vtrack->current_position-1])
+              {
+              quicktime_trak_t * trak = vtrack->track;
+              quicktime_stts_t * stts = &trak->mdia.minf.stbl.stts;
+              lqt_video_append_timestamp(file, track,
+                                         vtrack->timestamps[vtrack->current_position-1] +
+                                         stts->default_duration, 1);
+              }
+            else
+              lqt_video_append_timestamp(file, track, vtrack->duration, 1);
+          
+            lqt_write_frame_header(file, track, vtrack->current_position, -1, 0);
+            result = !quicktime_write_data(file, codec->enc_buffer,
+                                           codec->enc_buffer_size);
+            lqt_write_frame_footer(file, track);
+            vtrack->current_position++;
+            codec->enc_eof = 1;
             }
           else
-            lqt_video_append_timestamp(file, track, vtrack->duration, 1);
+            lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
+                    "Discarding redundant sequence end code");
           
-          lqt_write_frame_header(file, track, vtrack->current_position, -1, 0);
-          result = !quicktime_write_data(file, codec->enc_buffer,
-                                         codec->enc_buffer_size);
-          lqt_write_frame_footer(file, track);
-          vtrack->current_position++;
           codec->enc_buffer_size = 0;
           }
         
@@ -202,6 +216,9 @@ static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * fo
     {
     case LQT_INTERLACE_NONE:
       lqt_set_fiel(file, track, 1, 0);
+      format->interlaced = 0;
+      format->top_field_first = 0;
+      
       break;
     case LQT_INTERLACE_TOP_FIRST:
       lqt_set_fiel(file, track, 2, 9);
@@ -223,7 +240,6 @@ static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * fo
       break;
     }
   }
-
 
 int lqt_schroedinger_encode_video(quicktime_t *file,
                                   unsigned char **row_pointers,
@@ -250,6 +266,11 @@ int lqt_schroedinger_encode_video(quicktime_t *file,
 
     format->width = quicktime_video_width(file, track);
     format->height = quicktime_video_height(file, track);
+
+    format->clean_width = format->width;
+    format->clean_height = format->height;
+    format->left_offset = 0;
+    format->top_offset = 0;
     
     format->frame_rate_numerator   = lqt_video_time_scale(file, track);
     format->frame_rate_denominator = lqt_frame_duration(file, track, NULL);
