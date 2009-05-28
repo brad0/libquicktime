@@ -33,7 +33,7 @@
 
 /* Different decoding functions */
 
-#if LIBAVCODEC_BUILD >= 3349760
+#if LIBAVCODEC_BUILD >= ((51<<16)+(29<<8)+0)
 #define DECODE_FUNC avcodec_decode_audio2
 #else
 #define DECODE_FUNC avcodec_decode_audio
@@ -90,25 +90,25 @@ static int mpeg_samplerates[3][3] = {
 /* Header detection stolen from the mpg123 plugin of xmms */
 
 static int header_check(uint32_t head)
-{
-        if ((head & 0xffe00000) != 0xffe00000)
-                return 0;
-        if (!((head >> 17) & 3))
-                return 0;
-        if (((head >> 12) & 0xf) == 0xf)
-                return 0;
-        if (!((head >> 12) & 0xf))
-                return 0;
-        if (((head >> 10) & 0x3) == 0x3)
-                return 0;
-        if (((head >> 19) & 1) == 1 &&
-            ((head >> 17) & 3) == 3 &&
-            ((head >> 16) & 1) == 1)
-                return 0;
-        if ((head & 0xffff0000) == 0xfffe0000)
-                return 0;
-        return 1;
-}
+  {
+  if ((head & 0xffe00000) != 0xffe00000)
+    return 0;
+  if (!((head >> 17) & 3))
+    return 0;
+  if (((head >> 12) & 0xf) == 0xf)
+    return 0;
+  if (!((head >> 12) & 0xf))
+    return 0;
+  if (((head >> 10) & 0x3) == 0x3)
+    return 0;
+  if (((head >> 19) & 1) == 1 &&
+      ((head >> 17) & 3) == 3 &&
+      ((head >> 16) & 1) == 1)
+    return 0;
+  if ((head & 0xffff0000) == 0xfffe0000)
+    return 0;
+  return 1;
+  }
 
 typedef enum
   {
@@ -300,9 +300,10 @@ typedef struct
   int have_mpeg_header;
 
   uint8_t * extradata;
-    
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+  AVPacket pkt;
+#endif
   } quicktime_ffmpeg_audio_codec_t;
-
 
 static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   {
@@ -375,7 +376,17 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
     bytes_decoded = 0;
 #endif
 
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+    codec->pkt.data = codec->chunk_buffer;
+    codec->pkt.size = packet_size + FF_INPUT_BUFFER_PADDING_SIZE;
     
+    frame_bytes = avcodec_decode_audio3(codec->avctx,
+                                        &(codec->sample_buffer[track_map->channels *
+                                                               (codec->sample_buffer_end -
+                                                                codec->sample_buffer_start)]),
+                                        &bytes_decoded,
+                                        &codec->pkt);
+#else
     frame_bytes =
       DECODE_FUNC(codec->avctx,
                   &(codec->sample_buffer[track_map->channels *
@@ -383,6 +394,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
                   &bytes_decoded,
                   codec->chunk_buffer,
                   packet_size + FF_INPUT_BUFFER_PADDING_SIZE);
+#endif
     if(frame_bytes < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio error");
@@ -558,14 +570,25 @@ static int decode_chunk(quicktime_t * file, int track)
     bytes_decoded = 0;
 #endif
 
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+    codec->pkt.data = &(codec->chunk_buffer[bytes_used]);
+    codec->pkt.size = codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE;
     
     frame_bytes =
+      avcodec_decode_audio3(codec->avctx,
+                            &(codec->sample_buffer[track_map->channels *
+                                                   (codec->sample_buffer_end - codec->sample_buffer_start)]),
+                            &bytes_decoded,
+                            &codec->pkt);
+#else
+    frame_bytes =
       DECODE_FUNC(codec->avctx,
-                           &(codec->sample_buffer[track_map->channels *
-                                                  (codec->sample_buffer_end - codec->sample_buffer_start)]),
-                           &bytes_decoded,
-                           &(codec->chunk_buffer[bytes_used]),
-                           codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
+                  &(codec->sample_buffer[track_map->channels *
+                                         (codec->sample_buffer_end - codec->sample_buffer_start)]),
+                  &bytes_decoded,
+                  &(codec->chunk_buffer[bytes_used]),
+                  codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
+#endif
     if(frame_bytes < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio error");

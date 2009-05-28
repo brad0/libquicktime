@@ -84,7 +84,10 @@ typedef struct
   int pass;
   char * stats_filename;
   FILE * stats_file;
-  
+
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+  AVPacket pkt;
+#endif
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -482,7 +485,20 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
                                          NULL, track);
 
       codec->decoding_delay++;
-      
+
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+      codec->pkt.data = codec->buffer;
+      codec->pkt.size = buffer_size;
+      if(avcodec_decode_video2(codec->avctx,
+                              codec->frame,
+                              &got_pic,
+                              &codec->pkt) < 0)
+        {
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Skipping corrupted frame");
+        continue;
+        }
+#else
+    
       if(avcodec_decode_video(codec->avctx,
                               codec->frame,
                               &got_pic,
@@ -492,7 +508,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Skipping corrupted frame");
         continue;
         }
-      
+#endif      
       if(got_pic)
         codec->decoding_delay--;
       
@@ -619,11 +635,20 @@ static void resync_ffmpeg(quicktime_t *file, int track)
                                          frame, NULL, track);
       if(buffer_size > 0)
         {
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+        codec->pkt.data = codec->buffer;
+        codec->pkt.size = buffer_size;
+        avcodec_decode_video2(codec->avctx,
+                              codec->frame,
+                              &got_pic,
+                              &codec->pkt);
+#else
         avcodec_decode_video(codec->avctx,
                              codec->frame,
                              &got_pic,
                              codec->buffer,
                              buffer_size);
+#endif
         }
       frame++;
       }
