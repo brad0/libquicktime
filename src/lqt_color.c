@@ -510,10 +510,10 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
       *rowspan = bytes_per_line;
 
     if(*rowspan_uv <= 0)
-      *rowspan_uv = *rowspan / sub_h;
+      *rowspan_uv = (*rowspan + sub_h - 1) / sub_h;
 
     y_size = *rowspan * height;
-    uv_size = (*rowspan_uv * height)/sub_v;
+    uv_size = (*rowspan_uv * (height + sub_v - 1))/sub_v;
 
     video_buffer    = malloc(3 * sizeof(unsigned char*));
     video_buffer[0] = malloc(y_size + 2 * uv_size);
@@ -546,7 +546,7 @@ void lqt_get_default_rowspan(int colormodel, int width, int * rowspan, int * row
 
   if(lqt_colormodel_is_planar(colormodel))
     {
-    *rowspan_uv = bytes_per_line / sub_h;
+    *rowspan_uv = (bytes_per_line + sub_h - 1) / sub_h;
     }
   }
 
@@ -582,18 +582,18 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
 
     src_ptr = in_rows[1];
     dst_ptr = out_rows[1];
-    for(i = 0; i < height/sub_v; i++)
+    for(i = 0; i < (height + sub_v - 1)/sub_v; i++)
       {
-      memcpy(dst_ptr, src_ptr, width/sub_h);
+      memcpy(dst_ptr, src_ptr, (width + sub_h - 1)/sub_h);
       src_ptr += in_rowspan_uv;
       dst_ptr += out_rowspan_uv;
       }
 
     src_ptr = in_rows[2];
     dst_ptr = out_rows[2];
-    for(i = 0; i < height/sub_v; i++)
+    for(i = 0; i < (height + sub_v - 1)/sub_v; i++)
       {
-      memcpy(dst_ptr, src_ptr, width/sub_h);
+      memcpy(dst_ptr, src_ptr, (width + sub_h - 1)/sub_h);
       src_ptr += in_rowspan_uv;
       dst_ptr += out_rowspan_uv;
       }
