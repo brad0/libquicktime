@@ -5,6 +5,6 @@ pkglib_LTLIBRARIES = lqt_faad2.la
 
 lqt_faad2_la_SOURCES = faad2.c lqt_faad2.c
 lqt_faad2_la_LDFLAGS = -avoid-version -module
-lqt_faad2_la_LIBADD = @FAAD2_LIBS@ @MODULE_LIBADD@
+lqt_faad2_la_LIBADD = @MODULE_LIBADD@ @FAAD2_LIBS@
 
 noinst_HEADERS = faad2.h 

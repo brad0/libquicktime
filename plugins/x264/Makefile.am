@@ -5,6 +5,6 @@ pkglib_LTLIBRARIES = lqt_x264.la
 
 lqt_x264_la_SOURCES = x264.c lqt_x264.c
 lqt_x264_la_LDFLAGS = -avoid-version -module
-lqt_x264_la_LIBADD = @X264_LIBS@ @MODULE_LIBADD@
+lqt_x264_la_LIBADD = @MODULE_LIBADD@ @X264_LIBS@
 
 noinst_HEADERS = qtx264.h

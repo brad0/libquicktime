@@ -14,5 +14,5 @@ lqt_mjpeg.c \
 libmjpeg.c
 
 lqt_mjpeg_la_LDFLAGS = -avoid-version -module
-lqt_mjpeg_la_LIBADD = @JPEG_LIBS@ @MODULE_LIBADD@
+lqt_mjpeg_la_LIBADD = @MODULE_LIBADD@ @JPEG_LIBS@
 
