@@ -112,7 +112,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int bytes = width * height * 3;
 	int result = 0;
 	int i, j;
-	quicktime_atom_t chunk_atom;
 
         if(!row_pointers)
           {
@@ -147,15 +146,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
             }
           }
         
-	quicktime_write_chunk_header(file, trak, &chunk_atom);
+        lqt_write_frame_header(file, track,
+                               vtrack->current_position,
+                               -1, 0);
 	result = !quicktime_write_data(file, codec->buffer, bytes);
-	quicktime_write_chunk_footer(file, 
-		trak,
-		vtrack->cur_chunk,
-		&chunk_atom, 
-		1);
-
-	vtrack->cur_chunk++;
+        lqt_write_frame_footer(file, track);
 	
 	return result;
 }
