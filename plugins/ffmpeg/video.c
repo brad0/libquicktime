@@ -632,7 +632,8 @@ static void resync_ffmpeg(quicktime_t *file, int track)
       {
       buffer_size = lqt_read_video_frame(file, &codec->buffer,
                                          &codec->buffer_alloc,
-                                         frame, NULL, track);
+                                         frame + codec->decoding_delay,
+                                         NULL, track);
       if(buffer_size > 0)
         {
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
@@ -649,6 +650,11 @@ static void resync_ffmpeg(quicktime_t *file, int track)
                              codec->buffer,
                              buffer_size);
 #endif
+        if(!got_pic)
+          {
+          codec->decoding_delay++;
+          frame--;
+          }
         }
       frame++;
       }
