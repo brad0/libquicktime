@@ -909,7 +909,6 @@ po/Makefile.in \
 libquicktime.pc \
 doc/Makefile \
 doc/Doxyfile \
-debian/Makefile \
 src/Makefile \
 include/Makefile \
 include/quicktime/Makefile \

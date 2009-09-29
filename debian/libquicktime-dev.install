@@ -1,8 +1,0 @@
-debian/tmp/usr/include/lqt/* usr/include/lqt
-debian/tmp/usr/lib/*.la usr/lib
-debian/tmp/usr/lib/*.a usr/lib
-debian/tmp/usr/lib/libquicktime/*.la usr/lib/libquicktime
-debian/tmp/usr/lib/libquicktime/*.a usr/lib/libquicktime
-debian/tmp/usr/lib/*.so usr/lib
-debian/tmp/usr/bin/lqt-config usr/bin
-debian/tmp/usr/share/aclocal/* usr/share/aclocal
