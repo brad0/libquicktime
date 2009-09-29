@@ -23,8 +23,6 @@ _cc_minor=`echo $cc_version | cut -d'.' -f2`
 
 if test $_cc_major -ge 4; then
   _opt_mcpu="-mtune"
-elif test $_cc_major -ge 3 -a $_cc_minor -ge 4; then
-  _opt_mcpu="-mtune"
 else
   _opt_mcpu="-mcpu"
 fi
@@ -146,6 +144,9 @@ case "$pvendor" in
 			    # synonym for 'k8'
 			   proc=k8
 			   ;;
+			16)
+			   proc=barcelona
+			   ;;
 			*) proc=athlon-xp
 			   ;;
 		esac
@@ -164,7 +165,9 @@ case "$pvendor" in
 			   fi
 			   ;;
 			6) iproc=686
-                           if test "$pmodel" -ge 15; then
+                           if test "$pmodel" -ge 23; then
+                                proc=core2
+                           elif test "$pmodel" -ge 15; then
                                 proc=nocona
                            elif test "$pmodel" -ge 13; then
                                 proc=pentium-m
@@ -225,6 +228,11 @@ if test "$proc" = "k6"; then
     fi
 fi
 
+# Seems some variants of gcc accept 'core2' instead of 'nocona'.
+if test "$proc" = "core2"; then
+        do_cc  -march=$proc $_opt_mcpu=$proc || proc=nocona
+fi
+
 if test "$proc" = "pentium4" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon"; then
 	do_cc -march=$proc $_opt_mcpu=$proc || proc=i686
 fi
@@ -241,7 +249,7 @@ if test "$proc" = "i386" ; then
 	do_cc -march=$proc $_opt_mcpu=$proc || proc=error
 fi
 if test "$proc" = "error" ; then
-	echo "Your $_cc does not even support \"i386\" for '-march' and $_opt_mcpu."
+	echo "Your $CC does not even support \"i386\" for '-march' and $_opt_mcpu."
 	_mcpu=""
 	_march=""
 elif test "$proc" = "i586-i686"; then
@@ -314,7 +322,7 @@ fi
 if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
 	case "$proc" in
 	     970*) if test $IsDarwin = yes; then
-		      _march="$_opt_mcpu=G5 -mpowerpc64 -mpowerpc-gpopt -falign-loops=16" _mcpu='-mtune=G5'
+		      _march="$_opt_mcpu=G5 -mpowerpc64 -mpowerpc-gpopt -falign-loops=16 -force_cpusubtype_ALL" _mcpu='-mtune=G5'
 		   else
 		      _march="$_opt_mcpu=970" _mcpu='-mtune=970'
 		   fi
