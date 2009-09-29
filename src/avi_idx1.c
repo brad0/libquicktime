@@ -84,6 +84,12 @@ void quicktime_read_idx1(quicktime_t *file,
 
 // Allocate table.
 	idx1->table_size = (parent_atom->end - quicktime_position(file)) / 16;
+
+        if(idx1->table_size <= 0)
+          {
+          idx1->table_size = 0;
+          return;
+          }
 	idx1->table_allocation = idx1->table_size;
 	idx1->table = calloc(sizeof(quicktime_idx1table_t), idx1->table_size);
 
