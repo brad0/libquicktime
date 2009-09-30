@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libquicktime 1.0.0pre1\n"
 "Report-Msgid-Bugs-To: libquicktime-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2008-10-01 23:52+0200\n"
+"POT-Creation-Date: 2009-09-30 18:11+0200\n"
 "PO-Revision-Date: 2007-04-15 22:08+0100\n"
 "Last-Translator: Stefan Scheffler <stefanscheffler@gmx.net>\n"
 "Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
@@ -16,1696 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/texttrack.c:50
-msgid ""
-"Cannot determine character set of text track, will copy the strings verbatim"
-msgstr ""
-"Kann Zeichensatz des Texttracks nicht ermitteln, werde die Strings wörtlich "
-"kopieren."
-
-#: src/texttrack.c:62
-msgid "Unsupported charset in text track, will copy the strings verbatim"
-msgstr ""
-"Nicht Unterstützter  Zeichensatz im Texttrack, werde die Strings wörtlich "
-"kopieren"
-
-#: src/texttrack.c:246
-msgid "Text track not supported for this file"
-msgstr "Diese Art Datei unterstützt keine text Tracks"
-
-#: src/texttrack.c:274
-msgid "Need at least one audio or video stream for chapters"
-msgstr "Benötige mindestens einen Audio oder Video Stream für Kapitel"
-
-#: src/texttrack.c:298
-msgid "Subtitles are not supported in AVI files"
-msgstr "AVI Dateien unterstützen keine Untertitel"
-
-#: src/texttrack.c:314
-msgid ""
-"Subtitles character set could not be determined, string will be copied "
-"verbatim"
-msgstr ""
-"Untertitel Zeichensatz konnte nicht ermittelt werden, die Strings werden "
-"wörtlich kopiert"
-
-#: src/texttrack.c:326
-msgid "Unsupported character set in text track, string will be copied verbatim"
-msgstr ""
-"Nicht Unterstützter Zeichensatz  im Texttrack, der String wird wörtlich "
-"kopiert"
-
-#: src/stco.c:134
-#, c-format
-msgid "quicktime_update_stco chunk must start at 1. chunk=%ld\n"
-msgstr "quicktime_update_stco chunk muss bei 1 anfangen. chunk=%ld\n"
-
-#: src/lqt_codecinfo.c:460
-#, c-format
-msgid "dlopen failed for %s: %s"
-msgstr "dlopen fehlgeschlagen für %s: %s"
-
-#: src/lqt_codecinfo.c:474
-#, c-format
-msgid "Module %s has no API version and is thus terribly old"
-msgstr "Modul %s hat keine API Version und ist deshalb fürchterlich alt"
-
-#: src/lqt_codecinfo.c:485
-#, c-format
-msgid "Codec interface version mismatch of module %s: %d [module] != %d [lqt]"
-msgstr ""
-"Versionskonflikt mit dem Codecinterface bei Modul %s: %d [Modul] != %d [Lqt]"
-
-#: src/lqt_codecinfo.c:496
-#, c-format
-msgid "Symbol get_num_codecs not found in %s"
-msgstr "Symbol get_num_codecs in %s nicht gefunden"
-
-#: src/lqt_codecinfo.c:505
-#, c-format
-msgid "Symbol get_codec_info not found in %s"
-msgstr "Symbol get_codec_info in %s nicht gefunden"
-
-#: src/lqt_codecinfo.c:516
-#, c-format
-msgid "No codecs found in %s"
-msgstr "Keine Codecs in %s gefunden"
-
-#: src/lqt_codecinfo.c:630
-#, c-format
-msgid "Cannot open plugin directory %s (forgot make install?)"
-msgstr "Kann das Plugin Verzeichnis %s nicht finden (make install vergessen?)"
-
-#: src/lqt_codecinfo.c:908
-#, c-format
-msgid "Stringlist parameter %s has NULL options"
-msgstr "Parameter der Stringliste %s hat NULL Optionen"
-
-#: src/lqt_codecinfo.c:967
-#, c-format
-msgid "Codec %s has no fourccs defined"
-msgstr "Codec %s definiert keine fourcc"
-
-#: src/lqt_codecinfo.c:1531
-#, c-format
-msgid "lqt_set_default_parameter: No %s codec %s found"
-msgstr "lqt_set_default_parameter: Kein %s Codec %s gefunden"
-
-#: src/lqt_codecinfo.c:1562
-#, c-format
-msgid "lqt_set_default_parameter: No parameter %s for codec %s found"
-msgstr "lqt_set_default_parameter: Kein Parameter %s für Codec %s gefunden"
-
-#: src/lqt_codecinfo.c:1621
-#, c-format
-msgid "lqt_restore_default_parameters: dlopen failed for %s: %s"
-msgstr "lqt_restore_default_parameters: dlopen für %s fehlgeschlagen: %s"
-
-#: src/lqt_codecinfo.c:1629
-#, c-format
-msgid "Symbol %s not found in %s"
-msgstr "Symbol %s nicht in %s gefunden"
-
-#: src/lqt_codecinfo.c:1638
-#, c-format
-msgid "Couldn't get codec info for %s from_module %s"
-msgstr "Konnte keine Codec info für %s aus Modul %s bekommen"
-
-#: src/stsdtable.c:373
-#, c-format
-msgid "Skipping unknown atom \"%4s\" inside audio stsd"
-msgstr "Überspringe unbekanntes Atom\"%4s\" innerhalb der Audio stsd"
-
-#: src/moov.c:107
-#, c-format
-msgid "read_cmov: compression '%c%c%c%c' not zlib."
-msgstr "read_cmov: Kompression '%c%c%c%c' nicht zlib."
-
-# CHECK single nod"
-#: src/charset.c:95 src/charset.c:108 src/charset.c:132
-#, c-format
-msgid "Cannot open iconv for conversion to %s from %s"
-msgstr "Konnte iconv für die Umwandlung von %s nach %s nicht öffnen"
-
-#: src/charset.c:167
-msgid "Invalid Multibyte sequence"
-msgstr "Ungültige Multibyte Sequenz"
-
-#: src/charset.c:171
-msgid "Incomplete Multibyte sequence"
-msgstr "Unvollständige Multibyte Sequenz"
-
-#: src/lqt_qtvr.c:51 src/lqt_qtvr.c:117
-msgid "lqt_qtvr_add_node only single node movies supported."
-msgstr "lqt_qtvr_add_node nur Singlenode Filme werden unterstützt."
-
-#: src/audio.c:316
-msgid "Cannot encode samples: Stream format undefined"
-msgstr "Kann Samples nicht dekodieren: Streamformat undefiniert"
-
-#: src/audio.c:583
-msgid "Cannot decode samples: Stream format undefined"
-msgstr "Kann Samples nicht dekodieren: Stream Format undefiniert"
-
-#: src/avi_riff.c:130
-msgid "file->total_riffs >= MAX_RIFFS"
-msgstr ""
-
-#: src/lqt_color.c:205
-#, c-format
-msgid "Unknown colormodel (%d)\n"
-msgstr "Unbekanntes Farbmodell (%d)\n"
-
-#: src/lqt_color.c:239
-msgid "Input colorspace is neither RGB nor YUV, can't predict conversion price"
-msgstr ""
-"Eingabe Farbmodell ist weder RGB noch YUV, kann Umwandlungskosten nicht "
-"Vorrausberechnen."
-
-# CHEC"
-#: src/lqt_color.c:246
-msgid ""
-"Output colorspace is neither RGB nor YUV, can't predict conversion price"
-msgstr ""
-"Ausgabe Farbmodell ist weder RGB noch YUV, can Umwandlungskosten nicht "
-"Vorrausberechnen."
-
-#: src/udta.c:148
-#, c-format
-msgid ""
-"Unknown character set for language code %d, will copy the string verbatim"
-msgstr ""
-"Unbekannter Zeichensatz für Sprachcode %d, werde den String wörtlich kopieren"
-
-#: src/lqt_quicktime.c:114
-msgid "quicktime_make_streamable: no moov atom"
-msgstr "quicktime_make_streamable: kein moov Atom"
-
-#: src/lqt_quicktime.c:121
-msgid "quicktime_make_streamable: no mdat atom"
-msgstr "quicktime_make_streamable: kein mdat Atom"
-
-#: src/lqt_quicktime.c:150
-#, c-format
-msgid "quicktime_make_streamable: cannot open output file: %s"
-msgstr ""
-"quicktime_make_streamable: Ausgabe Datei, %s, konnte nicht geöffnet werden"
-
-#: src/lqt_quicktime.c:171
-#, fuzzy, c-format
-msgid ""
-"quicktime_make_streamable: moov size changed from %<PRId64> to %<PRId64> "
-"(Pos: %<PRId64>, start: %<PRId64>)"
-msgstr ""
-"quicktime_make_streamable: Größe des moov geändert von %lld auf %lld (Pos: %"
-"lld, start: %lld)"
-
-#: src/lqt_quicktime.c:529
-msgid "quicktime_set_framerate shouldn't be called in read mode."
-msgstr "quicktime_set_framerate sollte nicht im Lesemodus aufgerufen werden"
-
-#: src/lqt_quicktime.c:706
-msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
-msgstr ""
-
-#: src/lqt_quicktime.c:927
-#, c-format
-msgid "lqt_set_cmodel: No track No. %d"
-msgstr "lqt_set_cmodel: Kein Track Nr. %d"
-
-#: src/lqt_quicktime.c:1760
-msgid "read/write mode is not supported"
-msgstr "Schreib/Lese Modus nicht unterstützt"
-
-#: src/lqt_quicktime.c:1788
-msgid "Opening failed (unsupported filetype)"
-msgstr "Öffnen fehlgeschlagen (Dateityp nicht unterstützt)"
-
-#: src/lqt_quicktime.c:1946
-#, c-format
-msgid "Setting parameter %s to %d"
-msgstr "Setze Parameter %s zu %d"
-
-#: src/lqt_quicktime.c:1953
-#, c-format
-msgid "Setting parameter %s to %f"
-msgstr "Setze Parameter %s zu %f"
-
-#: src/lqt_quicktime.c:1961
-#, c-format
-msgid "Setting parameter %s to %s"
-msgstr "Setze Parameter %s zu %s"
-
-#: src/lqt_codecs.c:38
-msgid "quicktime_delete_vcodec_stub called"
-msgstr "quicktime_delete_vcodec_stub aufgerufen"
-
-#: src/lqt_codecs.c:45
-msgid "quicktime_delete_acodec_stub called"
-msgstr "quicktime_delete_acodec_stub aufgerufen"
-
-#: src/lqt_codecs.c:54
-msgid "quicktime_decode_video_stub called"
-msgstr "quicktime_decode_video_stub aufgerufen"
-
-#: src/lqt_codecs.c:63
-msgid "quicktime_encode_video_stub called"
-msgstr "quicktime_encode_video_stub aufgerufen"
-
-#: src/lqt_codecs.c:73
-msgid "quicktime_decode_audio_stub called"
-msgstr "quicktime_decode_audio_stub aufgerufen"
-
-#: src/lqt_codecs.c:83
-msgid "quicktime_encode_audio_stub called"
-msgstr "quicktime_encode_audio_stub aufgerufen"
-
-#: src/lqt_codecs.c:135
-#, c-format
-msgid "Could not find video %s for fourcc %4s"
-msgstr "Konnte keinen Video %s für Fourcc %4s finden"
-
-#: src/lqt_codecs.c:145 src/lqt_codecs.c:242
-#, c-format
-msgid "Loading module %s"
-msgstr "Lade Modul %s"
-
-#: src/lqt_codecs.c:152 src/lqt_codecs.c:249
-#, c-format
-msgid "Loading module %s failed: %s"
-msgstr "Laden des Moduls %s fehlgeschlagen: %s"
-
-#: src/lqt_codecs.c:178
-#, c-format
-msgid "Module %s contains no function get_video_codec"
-msgstr "Modul %s enthält keine Funktion Namens get_video_codec"
-
-#: src/lqt_codecs.c:232
-#, c-format
-msgid "Could not find audio %s for fourcc %4s"
-msgstr "Konnte keinen Video %s für Fourcc %4s finden"
-
-#: src/lqt_codecs.c:272
-#, c-format
-msgid "Module %s contains no function get_audio_codec"
-msgstr "Modul %s enthält keine Funktion Namens get_audio_codec"
-
-# CHECK Namens gross"
-#: src/lqt_codecs.c:538
-msgid ""
-"Audio codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
-"Audiocodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
-"nur mit Libquicktime abspielbar sein."
-
-#: src/lqt_codecs.c:544
-msgid ""
-"Video codec and container are not known to be compatible. File might be "
-"playable by libquicktime only."
-msgstr ""
-"Videcodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
-"nur mit Libquicktime abspielbar sein."
-
-#: src/stsd.c:77
-msgid "quicktime_stsd_init_qtvr invalid track type supplied."
-msgstr "quicktime_stsd_init_qtvr ungültiger Spurtyp übergeben"
-
-#: src/lqt_codecfile.c:148
-msgid "no system-wide codec file. Looking in user's home."
-msgstr ""
-
-#: src/lqt_codecfile.c:954
-#, c-format
-msgid "%s could not be written, deleting imcomplete file"
-msgstr "%s konnte nicht geschrieben werden, Lösche unvollständige Datei."
-
-#: src/gmhd_text.c:75
-msgid "More than 36 bytes in the gmhd text atom\n"
-msgstr "Mehr als 36 Bytes im gmhd Text Atom\n"
-
-#: src/lqt_bufalloc.c:114
-#, c-format
-msgid "malloc of %d bytes failed"
-msgstr "Malloc von %d Bytes fehlgeschlagen"
-
-#: src/lqt_bufalloc.c:120
-#, c-format
-msgid "could not allocate %d bytes aligned on a %d byte boundary"
-msgstr ""
-"Konnte keine %d Bytes, ausgerichtet auf %d Byte Grenzen an, reservieren"
-
-#: utils/qtinfo.c:49
-#, c-format
-msgid "Couldn't open %s\n"
-msgstr "Konnte %s nicht öffnen\n"
-
-#: utils/qtinfo.c:64
-#, c-format
-msgid "Usage: %s filename...\n"
-msgstr "Gebrauch: %s Dateiname...\n"
-
-#: utils/common.c:50
-#, c-format
-msgid "Type: %s\n"
-msgstr "Typ: %s\n"
-
-#: utils/common.c:55
-#, c-format
-msgid "    copyright: %s\n"
-msgstr "    Copyright: %s\n"
-
-#: utils/common.c:59
-#, c-format
-msgid "    name:      %s\n"
-msgstr "    Name:      %s\n"
-
-#: utils/common.c:63
-#, c-format
-msgid "    info:      %s\n"
-msgstr "    Info:      %s\n"
-
-#: utils/common.c:67
-#, c-format
-msgid "    author:    %s\n"
-msgstr "    Autor:    %s\n"
-
-#: utils/common.c:71
-#, c-format
-msgid "    artist:    %s\n"
-msgstr "    Künstler:    %s\n"
-
-#: utils/common.c:75
-#, c-format
-msgid "    album:     %s\n"
-msgstr "    Album:     %s\n"
-
-#: utils/common.c:79
-#, c-format
-msgid "    genre:     %s\n"
-msgstr "    Genre:     %s\n"
-
-#: utils/common.c:83
-#, c-format
-msgid "    track:     %s\n"
-msgstr "    Track:     %s\n"
-
-#: utils/common.c:87
-#, c-format
-msgid "    comment:   %s\n"
-msgstr "    Kommentar:   %s\n"
-
-#: utils/common.c:91
-#, c-format
-msgid "  %d audio tracks.\n"
-msgstr "  %d Audio Tracks.\n"
-
-#: utils/common.c:95
-#, c-format
-msgid "    %d channels, %d bits, sample rate %ld, length %ld samples, "
-msgstr "    %d Kanäle, %d bits, Samplerate %ld, Länge %ld Samples, "
-
-#: utils/common.c:102
-#, c-format
-msgid "wav_id 0x%02x.\n"
-msgstr ""
-
-#: utils/common.c:106
-#, c-format
-msgid "compressor %s.\n"
-msgstr "Kompressor %s.\n"
-
-#: utils/common.c:108
-#, c-format
-msgid "    Sample format: %s.\n"
-msgstr "    Sample Format: %s.\n"
-
-#: utils/common.c:110
-#, c-format
-msgid "    Channel setup: "
-msgstr "    Kanal Setup: "
-
-#: utils/common.c:117
-#, c-format
-msgid ", "
-msgstr ", "
-
-#: utils/common.c:119
-#, c-format
-msgid "\n"
-msgstr "\n"
-
-#: utils/common.c:122 utils/common.c:127
-#, c-format
-msgid "Not available\n"
-msgstr "Nicht Verfügbar\n"
-
-#: utils/common.c:123
-#, c-format
-msgid "    Language: "
-msgstr "    Sprache: "
-
-#: utils/common.c:129 utils/common.c:167
-#, c-format
-msgid "    supported.\n"
-msgstr "    Unterstützt.\n"
-
-#: utils/common.c:131 utils/common.c:169
-#, c-format
-msgid "    not supported.\n"
-msgstr "    Nicht unterstützt.\n"
-
-#: utils/common.c:135
-#, c-format
-msgid "  %d video tracks.\n"
-msgstr "  %d Video Tracks. \n"
-
-#: utils/common.c:140
-#, c-format
-msgid ""
-"    %dx%d, depth %d\n"
-"    rate %f [%d:%d] %s\n"
-"    length %ld frames\n"
-"    compressor %s.\n"
-msgstr ""
-"    %dx%d, Farbtiefe %d\n"
-"    Rate %f [%d:%d] %s\n"
-"    Länge %ld Frames\n"
-"    Kompressor %s.\n"
-
-#: utils/common.c:146
-msgid "constant"
-msgstr "Konstant"
-
-#: utils/common.c:146
-msgid "not constant"
-msgstr "Nicht Konstant"
-
-#: utils/common.c:150
-#, c-format
-msgid "    Native colormodel:  %s\n"
-msgstr "    Natives Farbmodell:  %s\n"
-
-#: utils/common.c:152
-#, c-format
-msgid "    Interlace mode:     %s\n"
-msgstr "    Interlace Modus:     %s\n"
-
-#: utils/common.c:155
-#, c-format
-msgid "    Chroma placement: %s\n"
-msgstr "    Chroma Platzierung: %s\n"
-
-#: utils/common.c:157
-#, c-format
-msgid "    Pixel aspect ratio: %d:%d\n"
-msgstr "    Pixel Seitenverhältnis: %d:%d\n"
-
-#: utils/common.c:160
-#, c-format
-msgid "    Timecodes available (flags: %08x, rate: %d)\n"
-msgstr ""
-
-#: utils/common.c:163
-#, fuzzy, c-format
-msgid "    No timecodes available\n"
-msgstr "Nicht Verfügbar\n"
-
-#: utils/common.c:173
-#, c-format
-msgid "  %d text tracks.\n"
-msgstr "%d Text Tracks.\n"
-
-#: utils/common.c:176
-#, fuzzy, c-format
-msgid "    timescale: %d, length: %<PRId64>, language: "
-msgstr "    Zeitskala: %d, Länge: %lld, Sprache: "
-
-#: utils/common.c:181
-#, c-format
-msgid "Not available, "
-msgstr "Nicht Verfügbar, "
-
-#: utils/common.c:182
-#, c-format
-msgid "type: %s\n"
-msgstr "Typ: %s\n"
-
-#: utils/common.c:182
-msgid "Chapters"
-msgstr "Kapitel"
-
-#: utils/common.c:182
-msgid "Subtitles"
-msgstr "Untertitel"
-
-# verarbeiten? kontext
-#: utils/lqtplay.c:283
-#, c-format
-msgid "can't handle visuals != TrueColor, sorry\n"
-msgstr "Kann keine Visuals != TrueColor verwenden, sorry\n"
-
-#: utils/lqtplay.c:326
-#, c-format
-msgid "INFO: Xvideo port %ld: is busy, skipping\n"
-msgstr "INFO: Xvideo port %ld: ist beschäftigt, überspringe\n"
-
-#: utils/lqtplay.c:340
-#, c-format
-msgid "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s"
-msgstr ""
-
-#: utils/lqtplay.c:434 utils/lqtplay.c:498
-#, c-format
-msgid "out of memory\n"
-msgstr "Nicht genügend freier Speicher\n"
-
-#: utils/lqtplay.c:592
-#, c-format
-msgid "WARNING: gl: can't get visual (rgb,db)\n"
-msgstr "WARNING: gl: kann Visual (rgb,db) nicht bekommen\n"
-
-#: utils/lqtplay.c:597
-#, c-format
-msgid "INFO: gl: DRI=%s\n"
-msgstr "INFO: gl: DRI=%s\n"
-
-#: utils/lqtplay.c:598
-msgid "Yes"
-msgstr "Ja"
-
-#: utils/lqtplay.c:598
-msgid "No"
-msgstr "Nein"
-
-#: utils/lqtplay.c:600
-#, c-format
-msgid "WARNING: gl: Direct rendering missing\n"
-msgstr "WARNUNG: gl: Direct Rendering fehlt\n"
-
-#: utils/lqtplay.c:606
-#, c-format
-msgid "INFO: gl: texture max size: %d\n"
-msgstr "INFO: gl: Maximale Texturgröße: %d\n"
-
-#: utils/lqtplay.c:609
-#, c-format
-msgid "WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n"
-msgstr ""
-"WARNUNG: gl: Maximale Texturgröße ist zu klein (erhielt %dx%d, benötige %dx%"
-"d)\n"
-
-#: utils/lqtplay.c:621
-#, c-format
-msgid "INFO: gl: frame=%dx%d, texture=%dx%d\n"
-msgstr "INFO: gl: Frame=%dx%d, Textur=%dx%d\n"
-
-#: utils/lqtplay.c:684
-#, c-format
-msgid "Error opening PCM device %s\n"
-msgstr "Fehler beim öffenen des PCM Geräts %s\n"
-
-#: utils/lqtplay.c:692
-#, c-format
-msgid "Can not configure this PCM device. (%s)\n"
-msgstr "Kann dieses PCM Gerät nicht Konfigurieren. (%s)\n"
-
-#: utils/lqtplay.c:697
-#, c-format
-msgid "Error setting access. (%s)\n"
-msgstr "Fehler beim setzen des Zugriffs. (%s)\n"
-
-#: utils/lqtplay.c:706
-#, c-format
-msgid "Error setting format.(%s)\n"
-msgstr "Fehler beim setzen des Formats.(%s)\n"
-
-#: utils/lqtplay.c:712
-#, c-format
-msgid "Error setting channels. %i (%s)\n"
-msgstr "Fehler beim setzen der Kanäle. %i (%s)\n"
-
-#: utils/lqtplay.c:723 utils/lqtplay.c:729
-#, c-format
-msgid "Error setting sample rate (%s)\n"
-msgstr "Fehler beim setzen der Samplerate (%s)\n"
-
-#: utils/lqtplay.c:733
-#, c-format
-msgid ""
-"WARNING: Using %i Hz instead of requested rate %i Hz\n"
-" "
-msgstr ""
-"WARNUNG: Verwende %i Hz statt der angeforderten Rate von %i Hz\n"
-" "
-
-#: utils/lqtplay.c:744
-#, c-format
-msgid "Error setting periods.(%s)\n"
-msgstr "Fehler beim setzen der Perioden.(%s)\n"
-
-#: utils/lqtplay.c:750
-#, c-format
-msgid "Unable to get buffer size for playback: %s\n"
-msgstr "Kann für die Wiedergabe keine Puffergröße bekommen: %s\n"
-
-#: utils/lqtplay.c:757
-#, c-format
-msgid "Unable to get period size for playback: %s\n"
-msgstr "Kann für die Wiedergabe keine Periodengröße bekommen: %s\n"
-
-#: utils/lqtplay.c:764
-#, c-format
-msgid "Error setting HW params.(%s)\n"
-msgstr "Fehler beim setzen der HW Parameter.(%s)\n"
-
-#: utils/lqtplay.c:780
-#, c-format
-msgid "Error in pcm_prepare.(%s)\n"
-msgstr "Fehler in pcm_prepare.(%s)\n"
-
-#: utils/lqtplay.c:815
-#, c-format
-msgid "ERROR: can't set sound format\n"
-msgstr "FEHLER: Kann Audioformat nicht setzen\n"
-
-#: utils/lqtplay.c:820
-#, c-format
-msgid "ERROR: can't set sound channels\n"
-msgstr "FEHLER: Kann Audiokanäle nicht setzen\n"
-
-#: utils/lqtplay.c:827
-#, c-format
-msgid "WARNING: sample rate mismatch (need %d, got %d)\n"
-msgstr "WARNUNG: Nichtübereinstimmung in Samplerate (brauche %d, erhielt %d)\n"
-
-#: utils/lqtplay.c:844
-#, c-format
-msgid "WARNING: open %s: %s\n"
-msgstr "WARNUNG: öffnen %s: %s\n"
-
-#: utils/lqtplay.c:907
-#, c-format
-msgid "ERROR: can't open file: %s\n"
-msgstr "FEHLER: Kann Datei %s nicht öffnen\n"
-
-#: utils/lqtplay.c:912
-#, c-format
-msgid "INFO: playing %s\n"
-msgstr "INFO: Spiele %s\n"
-
-#: utils/lqtplay.c:919
-#, c-format
-msgid "'%s' is no QTVR file or an unsupported variant.\n"
-msgstr "'%s' ist keine QTVR .Datei oder eine nicht Unterstützte Variante\n"
-
-#: utils/lqtplay.c:927
-#, c-format
-msgid "startpos :%i\n"
-msgstr "Startposition :%i\n"
-
-#: utils/lqtplay.c:928
-#, c-format
-msgid "movietype :%i\n"
-msgstr "Filmtyp :%i\n"
-
-#: utils/lqtplay.c:929
-#, c-format
-msgid "panning :%f %f\n"
-msgstr "Schwenk :%f %f\n"
-
-# Zeil
-#: utils/lqtplay.c:930
-#, c-format
-msgid "rows :%i\n"
-msgstr "Zeilen :%i\n"
-
-#: utils/lqtplay.c:931
-#, c-format
-msgid "colums :%i\n"
-msgstr "Spalten :%i\n"
-
-#: utils/lqtplay.c:932
-#, c-format
-msgid "disp width :%i\n"
-msgstr "Anzeigebreite :%i\n"
-
-#: utils/lqtplay.c:933
-#, c-format
-msgid "disp height :%i\n"
-msgstr "Anzeigehöhe :%i\n"
-
-#: utils/lqtplay.c:934
-#, c-format
-msgid "width :%i\n"
-msgstr "Breite :%i\n"
-
-#: utils/lqtplay.c:935
-#, c-format
-msgid "height :%i\n"
-msgstr "Höhe :%i\n"
-
-#: utils/lqtplay.c:936
-#, c-format
-msgid "depth :%i\n"
-msgstr "Farbtiefe :%i\n"
-
-#: utils/lqtplay.c:947
-#, c-format
-msgid "oh_width verz :%i\n"
-msgstr ""
-
-#: utils/lqtplay.c:953
-#, c-format
-msgid "WARNING: no video stream\n"
-msgstr "WARNUNG: kein Videostream\n"
-
-#: utils/lqtplay.c:955
-#, c-format
-msgid "WARNING: unsupported video codec\n"
-msgstr "WARNUNG: nicht unterstützter Videocodec \n"
-
-#: utils/lqtplay.c:964
-#, c-format
-msgid "Timescale: %d\n"
-msgstr "Zeitskala: %d\n"
-
-#: utils/lqtplay.c:968
-#, c-format
-msgid "WARNING: no audio stream\n"
-msgstr "WARNUNG: kein Audiostream\n"
-
-#: utils/lqtplay.c:970
-#, c-format
-msgid "WARNING: unsupported audio codec\n"
-msgstr "WARNUNG: Nicht unterstützter Audiocodec\n"
-
-#: utils/lqtplay.c:987
-#, c-format
-msgid "ERROR: no playable stream found\n"
-msgstr "FEHLER: keine spielbaren Streams gefunden\n"
-
-#: utils/lqtplay.c:1027 utils/lqtplay.c:1030
-#, c-format
-msgid "INFO: using BC_RGB888 + %s\n"
-msgstr "INFO: Verwende BC_RGB888 + %s\n"
-
-#: utils/lqtplay.c:1028
-msgid "OpenGL"
-msgstr ""
-
-#: utils/lqtplay.c:1028 utils/lqtplay.c:1031
-msgid "plain X11"
-msgstr "Einfaches X11"
-
-#: utils/lqtplay.c:1043
-#, c-format
-msgid "INFO: using BC_YUV422 + Xvideo extention\n"
-msgstr "INFO: Verwende BC_YUV422 + Xvideo Erweiterung\n"
-
-#: utils/lqtplay.c:1056
-#, c-format
-msgid "INFO: using BC_YUV420P + Xvideo extention (YV12)\n"
-msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (YV12)\n"
-
-#: utils/lqtplay.c:1066
-#, c-format
-msgid "INFO: using BC_YUV420P + Xvideo extention (I420)\n"
-msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (I420)\n"
-
-#: utils/lqtplay.c:1077 utils/lqtplay.c:1296
-#, c-format
-msgid "ERROR: internal error at %s:%d\n"
-msgstr "FEHLER: Interner Fehler bei %s:%d\n"
-
-#: utils/lqtplay.c:1239
-#, c-format
-msgid "dropped %d frame(s)\r"
-msgstr " %d Frame(s) verworfen\r"
-
-#: utils/lqtplay.c:1378
-#, c-format
-msgid "Audio track finished (got %d samples, wanted %d)\n"
-msgstr "Audio Track fertig ( %d Samples erhalten, gewollt %d)\n"
-
-#: utils/lqtplay.c:1403
-#, c-format
-msgid "Warning: buffer underrun\n"
-msgstr "Warnung: Pufferunterlauf\n"
-
-#: utils/lqtplay.c:1406
-#, c-format
-msgid "Warning: %s\n"
-msgstr "Warnung: %s\n"
-
-#: utils/lqtplay.c:1441
-#, c-format
-msgid "write dsp: Huh? no data written?\n"
-msgstr ""
-
-#: utils/lqtplay.c:1503
-#, c-format
-msgid ""
-"\n"
-"Very simple quicktime movie player for X11.  Just playes\n"
-"the movie and nothing else.  No fancy gui, no controls.\n"
-"\n"
-"You can quit with 'Q' and 'ESC' keys.\n"
-"\n"
-"usage: %s [ options ] <file>\n"
-"options:\n"
-"  -noxv   don't use the Xvideo extention\n"
-"  -nogl   don't use OpenGL\n"
-"  -noalsa don't use Alsa\n"
-"\n"
-msgstr ""
-"\n"
-"Sehr einfacher Quicktime Videoplayer für X11. Er spielt\n"
-"den Film ab und nichts sonst. Keine tolle UI und keine Steuerelemente.\n"
-"\n"
-"Sie können ihn mit 'Q' und 'ESC' beenden.\n"
-"\n"
-"Gebrauch: %s [ Optionen ] <Datei>\n"
-"Optionen:\n"
-"  -noxv   Xvideo Erweiterung nicht verwenden\n"
-"  -nogl   OpenGL nicht verwenden\n"
-"  -noalsa Alsa nicht verwenden\n"
-"\n"
-
-#: utils/lqtplay.c:1562
-#, c-format
-msgid "INFO: window size is %dx%d\n"
-msgstr "INFO: Fenstergröße ist %dx%d\n"
-
-#: utils/lqtplay.c:1756
-#, c-format
-msgid "Stream colormodel %s, "
-msgstr "Stream Farbmodell %s, "
-
-#: utils/lqtplay.c:1759
-#, c-format
-msgid "using %s\n"
-msgstr "verwende %s\n"
-
-#: utils/lqtplay.c:1861
-#, c-format
-msgid "Decoded %lld samples\n"
-msgstr "%lld Samples decodiert\n"
-
-#: utils/gtk/libquicktime_config.c:84
-msgid "Audio Codecs"
-msgstr ""
-
-#: utils/gtk/libquicktime_config.c:92
-msgid "Video Codecs"
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:697
-msgid "Installed codecs"
-msgstr "Installierte Codecs"
-
-#: utils/gtk/lqt_gtk.c:723
-msgid "Up"
-msgstr "Hoch"
-
-#: utils/gtk/lqt_gtk.c:724
-msgid "Down"
-msgstr "Runter"
-
-#: utils/gtk/lqt_gtk.c:726 utils/gtk/lqt_gtk.c:1258
-msgid "Parameters..."
-msgstr "Parameter..."
-
-#: utils/gtk/lqt_gtk.c:727 utils/gtk/lqt_gtk.c:1257
-msgid "Info..."
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:868
-msgid "Encoding Options"
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:877
-#, fuzzy
-msgid "Decoding Options"
-msgstr "Decodierqualität"
-
-#: utils/gtk/lqt_gtk.c:893
-msgid "Restore defaults"
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:1017
-msgid "Internal name: "
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:1026
-msgid "Module: "
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:1100
-msgid "Fourccs"
-msgstr ""
-
-#: utils/gtk/lqt_gtk.c:1108
-msgid "WAV Id(s)"
-msgstr ""
-
-#: utils/lqt_transcode.c:91
-#, c-format
-msgid "Supported formats\n"
-msgstr "Unterstützte Formate\n"
-
-#: utils/lqt_transcode.c:94
-#, c-format
-msgid "%8s: %s (default codecs: %s/%s)\n"
-msgstr "%8s: %s (Vorgabe Codec: %s/%s)\n"
-
-#: utils/lqt_transcode.c:142
-#, c-format
-msgid ""
-"Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] "
-"[-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc "
-"<video_codec>] <in_file> <out_file>\n"
-msgstr ""
-"Gebrauch: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|"
-"pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-"
-"vc <video_codec>] <in_file> <out_file>\n"
-
-#: utils/lqt_transcode.c:143
-#, c-format
-msgid ""
-"       Transcode <in_file> to <out_file> using <audio_codec> and "
-"<video_codec>\n"
-"\n"
-msgstr ""
-"       Transcode <in_file> nach <out_file> unter Verwendung von "
-"<audio_codec> und <video_codec>\n"
-"\n"
-
-#: utils/lqt_transcode.c:144
-#, c-format
-msgid "       lqt_transcode -lv\n"
-msgstr ""
-
-#: utils/lqt_transcode.c:145
-#, c-format
-msgid ""
-"       List video encoders\n"
-"\n"
-msgstr ""
-"       Liste Audio Codiecs\n"
-"\n"
-
-#: utils/lqt_transcode.c:146
-#, c-format
-msgid "       lqt_transcode -la\n"
-msgstr ""
-
-#: utils/lqt_transcode.c:147
-#, c-format
-msgid "       List audio encoders\n"
-msgstr "       Liste Audio Codierer\n"
-
-#: utils/lqt_transcode.c:148
-#, c-format
-msgid "       lqt_transcode -lf\n"
-msgstr ""
-
-#: utils/lqt_transcode.c:149
-#, c-format
-msgid "       List output formats\n"
-msgstr "       Liste Ausgabe Formate\n"
-
-#: utils/lqt_transcode.c:221
-#, c-format
-msgid "Cannot open input file %s\n"
-msgstr "Kann Eingabedatei %s nicht öffnen\n"
-
-#: utils/lqt_transcode.c:232
-#, c-format
-msgid "Need a file extension when autoguessing output format\n"
-msgstr "Brauche Dateierweiterung um Ausgabeformat auto-zuerkennen\n"
-
-#: utils/lqt_transcode.c:248
-#, c-format
-msgid ""
-"Cannot detect output format. Specify a valid extension or use -f <format>\n"
-msgstr ""
-"Kann Ausgabeformat nicht ermitteln. Geben sie eine zulässige Erweiterung an "
-"oder verwenden sie -f <Format>\n"
-
-#: utils/lqt_transcode.c:268
-#, c-format
-msgid "Cannot open output file %s\n"
-msgstr "Kann Ausgabedatei %s nicht öffnen\n"
-
-#: utils/lqt_transcode.c:291
-#, c-format
-msgid "Unsupported video cocec %s, try -lv\n"
-msgstr "Nicht Unterstützter Videocodec %s, versuch -lv\n"
-
-#: utils/lqt_transcode.c:343
-#, c-format
-msgid "Unsupported audio codec %s, try -la\n"
-msgstr "Nicht unterstützter Audiocodec %s, versuch -la\n"
-
-#: utils/lqt_transcode.c:562
-#, c-format
-msgid "Unsupported format %s, try -lf"
-msgstr "Nicht Unterstütztes Format %s, versuch -lf"
-
-#: utils/lqt_transcode.c:581
-#, c-format
-msgid "%6.2f%% Completed"
-msgstr "%6.2f%% Fertig"
-
-#: utils/lqt_transcode.c:588
-#, fuzzy, c-format
-msgid "%6.2f%% Completed\n"
-msgstr "%6.2f%% Fertig"
-
-#: plugins/x264/x264.c:505
-msgid "Invalid log level from x264"
-msgstr ""
-
-#: plugins/x264/x264.c:606
-#, fuzzy
-msgid "Choosing interlaced encoding"
-msgstr "Aktiviere Interlaced Codierung"
-
-#: plugins/x264/x264.c:647
-msgid "x264_encoder_open failed"
-msgstr "x264_encoder_open Fehlgeschlagen"
-
-#: plugins/x264/x264.c:904
-#, c-format
-msgid "Unrecognized parameter %s"
-msgstr "Unbekannter Parameter %s"
-
-#: plugins/x264/lqt_x264.c:36
-msgid "Frame-type options"
-msgstr "Frametyp Optionen"
-
-#: plugins/x264/lqt_x264.c:41
-msgid "Maximum GOP size"
-msgstr "Maximale GOP Größe"
-
-#: plugins/x264/lqt_x264.c:47
-msgid "Minimum GOP size"
-msgstr "Minimale GOP Größe"
-
-# ..wechsel
-#: plugins/x264/lqt_x264.c:53
-msgid "Scenecut threshold"
-msgstr "Schwellwert für Scenenwechsel"
-
-#: plugins/x264/lqt_x264.c:56
-msgid "How aggressively to insert extra I-frames"
-msgstr "Wie Aggressiv extra I-Frames eingefügt werden sollen."
-
-#: plugins/x264/lqt_x264.c:60
-msgid "B-Frames"
-msgstr "B-Frames"
-
-#: plugins/x264/lqt_x264.c:65
-msgid "Number of B-frames between I and P"
-msgstr "Anzahl an B-Frames zwischen  I und P"
-
-#: plugins/x264/lqt_x264.c:70 plugins/x264/lqt_x264.c:79
-msgid "Adaptive B-frame decision"
-msgstr "Adaptive B-Frame Wahl"
-
-#: plugins/x264/lqt_x264.c:82 plugins/x264/lqt_x264.c:403
-msgid "None"
-msgstr "Keine"
-
-#: plugins/x264/lqt_x264.c:83
-msgid "Fast"
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:84
-msgid "Trellis"
-msgstr ""
-
-# bias besser?
-#: plugins/x264/lqt_x264.c:90
-msgid "B-frame bias"
-msgstr "B-Frame Tendenz"
-
-#: plugins/x264/lqt_x264.c:95
-msgid "Influences how often B-frames are used"
-msgstr "Beeinflusst wie oft B-Frames verwendet werden"
-
-#: plugins/x264/lqt_x264.c:99
-msgid "B-frame pyramid"
-msgstr "B-Frame Pyramide"
-
-#: plugins/x264/lqt_x264.c:104
-msgid "Keep some B-frames as references"
-msgstr "Behalte einige B-Frames als Referenz."
-
-#: plugins/x264/lqt_x264.c:108
-msgid "Ratecontrol"
-msgstr "Ratensteuerung"
-
-#: plugins/x264/lqt_x264.c:113
-msgid "Ratecontrol method"
-msgstr "Methode der Ratensteuerung"
-
-#: plugins/x264/lqt_x264.c:116
-msgid "Constant quality"
-msgstr "Konstante Qualität"
-
-#: plugins/x264/lqt_x264.c:117
-msgid "Average bitrate"
-msgstr "Durchschnittliche Bitrate"
-
-#: plugins/x264/lqt_x264.c:118
-msgid "CRF based VBR"
-msgstr "CRF basiertes VBR"
-
-#: plugins/x264/lqt_x264.c:120
-msgid ""
-"Ratecontrol method:\n"
-"Constant quality: Specify a quantizer parameter below\n"
-"Average bitrate: Specify a bitrate below\n"
-"CRF based VBR: Specify a rate factor below\n"
-"Selecting 2-pass encoding will force Average bitrate."
-msgstr ""
-"Methode der Ratensteuerung:\n"
-"Konstante Qualität: Quantizer Parameter hierunter angeben\n"
-"Durchschnittliche Bitrate: Bitrate hierrunter angeben\n"
-"CRF basiertes VBR: Ratenfaktor hierrunter angeben\n"
-"2-Pass Codieren erzwingt Durchschnittliche Bitrate"
-
-#: plugins/x264/lqt_x264.c:128
-msgid "Bitrate"
-msgstr "Bitrate"
-
-#: plugins/x264/lqt_x264.c:131
-msgid "Bitrate in kbit/s. 0 means VBR (recommended)"
-msgstr "Bitrate in kbit/s. 0 bedeutet VBR (empfohlen)"
-
-#: plugins/x264/lqt_x264.c:136 plugins/x264/lqt_x264.c:148
-msgid "Nominal Quantizer parameter"
-msgstr "Nominaler Quantizer Parameter"
-
-#: plugins/x264/lqt_x264.c:141 plugins/x264/lqt_x264.c:153
-msgid ""
-"This selects the nominal quantizer to use (1 to 51). Lower values result in "
-"better fidelity, but higher bitrates. 26 is a good default value. 0 means "
-"lossless."
-msgstr ""
-"Dies wählt den zu verwendenden Nominalen Quantizer (1 bis 51). Niedrigere "
-"Werte sorgen für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein "
-"guter Vorgabewert. 0 bedeutet Verlustfrei."
-
-#: plugins/x264/lqt_x264.c:160
-msgid "Quantizer parameter"
-msgstr "Quantizer Parameter"
-
-#: plugins/x264/lqt_x264.c:165
-msgid ""
-"This selects the quantizer to use (1 to 51). Lower values result in better "
-"fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
-msgstr ""
-"Dies wählt den zu verwendenden Quantizer (1 bis 51). Niedrigere Werte sorgen "
-"für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein guter "
-"Vorgabewert. 0 bedeutet Verlustfrei."
-
-#: plugins/x264/lqt_x264.c:171 plugins/x264/lqt_x264.c:176
-msgid "Minimum quantizer parameter"
-msgstr "Minimaler Quantizer Parameter"
-
-#: plugins/x264/lqt_x264.c:180 plugins/x264/lqt_x264.c:185
-msgid "Maximum quantizer parameter"
-msgstr "Maximaler Quantizer Parameter"
-
-#: plugins/x264/lqt_x264.c:189
-msgid "Maximum QP step"
-msgstr "Maximaler QP Schritt"
-
-#: plugins/x264/lqt_x264.c:194
-msgid "Maximum quantizer step"
-msgstr "Maximaler Quantizer Schritt"
-
-#: plugins/x264/lqt_x264.c:198
-msgid "Bitrate tolerance"
-msgstr "Bitratentoleranz"
-
-#: plugins/x264/lqt_x264.c:204
-msgid "Allowed variance of average bitrate"
-msgstr "Erlaubte Abweichung von der Durchschnittsbitrate"
-
-#: plugins/x264/lqt_x264.c:208
-msgid "Maximum local bitrate"
-msgstr "Maximale Locale Bitrate"
-
-#: plugins/x264/lqt_x264.c:211
-msgid "Sets a maximum local bitrate in kbits/s."
-msgstr "Setzt die maximale locale Bitrate in kbits/s."
-
-#: plugins/x264/lqt_x264.c:215
-msgid "VBV Buffer size"
-msgstr "VBV Puffergröße"
-
-#: plugins/x264/lqt_x264.c:218
-msgid "Averaging period for the maximum local bitrate. Measured in kbits."
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:223
-msgid "Initial VBV buffer occupancy"
-msgstr "Initiale VBV Pufferbelegung"
-
-#: plugins/x264/lqt_x264.c:229
-msgid "Sets the initial VBV buffer occupancy as a fraction of the buffer size."
-msgstr ""
-"Setzt die initiale VBV Pufferbelegung als einen bruchteil der Puffergröße"
-
-#: plugins/x264/lqt_x264.c:234
-msgid "QP factor between I and P"
-msgstr "QP Faktor zwischen I und P"
-
-#: plugins/x264/lqt_x264.c:241
-msgid "QP factor between P and B"
-msgstr "QP Faktor zwischen P und B"
-
-#: plugins/x264/lqt_x264.c:248
-msgid "Partitions"
-msgstr "Partitionen"
-
-# transformator?
-#: plugins/x264/lqt_x264.c:253
-msgid "8x8 transform"
-msgstr "8x8 Transformation"
-
-#: plugins/x264/lqt_x264.c:261
-msgid "8x16, 16x8 and 8x8 P-frame search"
-msgstr "8x16, 16x8 und 8x8 P-Frame Suche"
-
-#: plugins/x264/lqt_x264.c:269
-msgid "8x16, 16x8 and 8x8 B-frame search"
-msgstr "8x16, 16x8 und 8x8 B-Frame Suche"
-
-#: plugins/x264/lqt_x264.c:277
-msgid "4x8, 8x4 and 4x4 P-frame search"
-msgstr "4x8, 8x4 und 4x4 P-Frame Suche"
-
-#: plugins/x264/lqt_x264.c:285
-msgid "8x8 Intra search"
-msgstr "8x8 Intrasuche"
-
-# ..or?
-#: plugins/x264/lqt_x264.c:290
-msgid "8x8 Intra search requires 8x8 transform"
-msgstr "8x8 Intrasuche benötigt 8x8 Transformation"
-
-#: plugins/x264/lqt_x264.c:294
-msgid "4x4 Intra search"
-msgstr "4x4 Intrasuche"
-
-#: plugins/x264/lqt_x264.c:302 plugins/ffmpeg/lqt_ffmpeg.c:112
-msgid "Motion estimation"
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:307
-msgid "Method"
-msgstr "Methode"
-
-#: plugins/x264/lqt_x264.c:310
-msgid "Diamond search"
-msgstr "Diamant Suche"
-
-#: plugins/x264/lqt_x264.c:311
-msgid "Hexagonal search"
-msgstr "Hexagonale Suche"
-
-# what you say?
-#: plugins/x264/lqt_x264.c:312
-msgid "Uneven Multi-Hexagon"
-msgstr "Unebenes Multi-Hexagon"
-
-#: plugins/x264/lqt_x264.c:313
-msgid "Exhaustive search"
-msgstr "Gründliche Suche"
-
-#: plugins/x264/lqt_x264.c:315
-msgid ""
-"Motion estimation method\n"
-"Diamond search: fastest\n"
-"Hexagonal search: default setting\n"
-"Uneven Multi-Hexagon: better but slower\n"
-"Exhaustive search: extremely slow, primarily for testing"
-msgstr ""
-"Motion Estimation Methode\n"
-"Diamond search: schnellste\n"
-"Hexagonal search: Vorgabe\n"
-"Uneven Multi-Hexagon: besser aber langsamer\n"
-"Exhaustive search: extrem langsam, hauptsächlich für Testzwecke"
-
-# ich hoff mal das ist korrekt ..entscheidung klingt blöd
-#: plugins/x264/lqt_x264.c:323
-msgid "Partition decision"
-msgstr "Partitionierungswahl"
-
-#: plugins/x264/lqt_x264.c:328
-msgid ""
-"Subpixel motion estimation and partition decision quality: 1=fast, 7=best."
-msgstr ""
-"Qualität der Subpixel Motion estimation und Partitionierungswahl: 1=schnell, "
-"8=beste"
-
-#: plugins/x264/lqt_x264.c:333
-msgid "RD based mode decision for B-frames"
-msgstr "RD basierte Moduswahl für B-Frames"
-
-#: plugins/x264/lqt_x264.c:338
-msgid "RD based mode decision for B-frames. Requires partition decision 6."
-msgstr "RD basierte Moduswahl für B-Frames. Benötigt Partionierungswahl 6."
-
-#: plugins/x264/lqt_x264.c:343
-msgid "Search range"
-msgstr "Suchtiefe"
-
-#: plugins/x264/lqt_x264.c:346
-msgid ""
-"Maximum distance to search for motion estimation, measured from predicted "
-"position(s). Default of 16 is good for most footage, high motion sequences "
-"may benefit from settings between 24-32."
-msgstr ""
-"Maximal abzusuchende Distanz für Motion Compensation, gemessen von der "
-"vorhergesagten Postition. Die Vorgabe (16) ist gut für das meiste Material, "
-"bewegungsintensive Szenen könnten von einer Einstellung zwischen 24-32 "
-"profitieren."
-
-#: plugins/x264/lqt_x264.c:353
-msgid "Max Ref. frames"
-msgstr "Max. Ref. Frames"
-
-# frameref?
-#: plugins/x264/lqt_x264.c:358
-msgid ""
-"This is effective in Anime, but seems to make little difference in live-"
-"action source material. Some decoders are unable to deal with large frameref "
-"values."
-msgstr ""
-"Dies ist effectiv bei Anime, allerdings scheint es kaum einen Unterschied "
-"bei Live-Action Material zu machen. Einige Decoder haben Probleme mit großen "
-"frameref Werten."
-
-#: plugins/x264/lqt_x264.c:364
-msgid "Chroma motion estimation"
-msgstr ""
-
-# ???
-#: plugins/x264/lqt_x264.c:372
-msgid "Mixed references"
-msgstr "Gemischte Referenzen"
-
-#: plugins/x264/lqt_x264.c:377
-msgid "Allow each MB partition in P-frames to have it's own reference number"
-msgstr ""
-"Erlaube jeder MB partition in P-Frames ihre eigene Referenznummer zu haben."
-
-#: plugins/x264/lqt_x264.c:382
-msgid "Bidirectional ME"
-msgstr "Bidirektionale ME"
-
-#: plugins/x264/lqt_x264.c:387
-msgid "Jointly optimize both MVs in B-frames"
-msgstr "Optimiere beide MVs in B-Frames."
-
-#: plugins/x264/lqt_x264.c:391
-msgid "Weighted biprediction"
-msgstr "Gewichtete Biprediction"
-
-# wichtung?
-#: plugins/x264/lqt_x264.c:396
-msgid "Implicit weighting for B-frames"
-msgstr "Implizierte Gewichtung für B-Frames."
-
-#: plugins/x264/lqt_x264.c:400
-msgid "Direct MV prediction mode"
-msgstr "Direkter MV Vorhersagemodus."
-
-#: plugins/x264/lqt_x264.c:404
-msgid "Spatial"
-msgstr "Räumlich"
-
-#: plugins/x264/lqt_x264.c:405
-msgid "Temporal"
-msgstr "Zeitlich"
-
-#: plugins/x264/lqt_x264.c:406
-msgid "Auto"
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:411 plugins/ffmpeg/lqt_ffmpeg.c:163
-msgid "Misc"
-msgstr "Verschiedenes"
-
-#: plugins/x264/lqt_x264.c:416
-msgid "Deblocking filter"
-msgstr "Entblockungsfilter"
-
-#: plugins/x264/lqt_x264.c:421
-#, fuzzy
-msgid "Use deblocking loop filter (increases quality)."
-msgstr "Verwende Deblocking Schleifenfilter (verbessert Qualität)"
-
-# intensität?
-#: plugins/x264/lqt_x264.c:425
-msgid "Deblocking filter strength"
-msgstr "Entblockungsfilter Stärke"
-
-#: plugins/x264/lqt_x264.c:430
-msgid "Loop filter AlphaC0 parameter"
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:434
-msgid "Deblocking filter threshold"
-msgstr "Schwellwert für Deblocking-Filter"
-
-#: plugins/x264/lqt_x264.c:439
-msgid "Loop filter Beta parameter"
-msgstr ""
-
-#: plugins/x264/lqt_x264.c:443
-msgid "Enable CABAC"
-msgstr "Aktiviere CABAC"
-
-#: plugins/x264/lqt_x264.c:448
-msgid ""
-"Enable CABAC (Context-Adaptive Binary Arithmetic Coding). Slightly slows "
-"down encoding and decoding, but should save 10-15% bitrate."
-msgstr ""
-"Aktiviere CABAC (Context-Adaptive Binary Arithmetic Coding). Verlangsamt das "
-"Codieren und Decodieren etwas, sollte aber um die 10-15% Bitrate einsparen."
-
-#: plugins/x264/lqt_x264.c:454
-msgid "Trellis RD quantization"
-msgstr "Trellis RD Quantisierung"
-
-#: plugins/x264/lqt_x264.c:457
-msgid "Disabled"
-msgstr "Deaktiviert"
-
-# kontext
-#: plugins/x264/lqt_x264.c:458
-msgid "Enabled (final)"
-msgstr "Aktiviert (abschließend)"
-
-#: plugins/x264/lqt_x264.c:459
-msgid "Enabled (always)"
-msgstr "Aktiviert (immer)"
-
-#: plugins/x264/lqt_x264.c:461
-msgid ""
-"Trellis RD quantization. Requires CABAC. Can be enabled either for the final "
-"encode of a MB or for all mode desisions"
-msgstr ""
-"Trellis RD Quantisierung. Benötigt CABAC. Kann entweder für das endgültige "
-"Codieren eines MB oder für alle Moduswahlen aktiviert werden."
-
-#: plugins/x264/lqt_x264.c:467 plugins/ffmpeg/params.h:742
-msgid "Noise reduction"
-msgstr "Rausch Unterdrückung"
-
-#: plugins/x264/lqt_x264.c:479
-msgid "H.264 (MPEG4 AVC) encoder"
-msgstr "H.264 (MPEG4 AVC) Codierer"
-
-#: plugins/x264/lqt_x264.c:480
-msgid "Based on the x264 library"
-msgstr "Basiert auf der x264 Bibliothek"
-
-#: plugins/faac/lqt_faac.c:37
-msgid "Bitrate (kbps, 0 = VBR)"
-msgstr ""
-
-#: plugins/faac/lqt_faac.c:43
-msgid "VBR Quality"
-msgstr "VBR Qualität"
-
-#: plugins/faac/lqt_faac.c:51
-msgid "Object type"
-msgstr ""
-
-#: plugins/faac/lqt_faac.c:54
-msgid "Low"
-msgstr ""
-
-#: plugins/faac/lqt_faac.c:55
-#, fuzzy
-msgid "Main"
-msgstr "Maskierung"
-
-#: plugins/faac/lqt_faac.c:56
-msgid "SSR"
-msgstr ""
-
-#: plugins/faac/lqt_faac.c:57
-msgid "LTP"
-msgstr ""
-
-#: plugins/faac/lqt_faac.c:66
-msgid "MPEG-2/4 AAC encoder"
-msgstr "MPEG-2/4 AAC Codierer"
-
-#: plugins/faac/lqt_faac.c:67
-msgid "MPEG-2/4 AAC encoder (faac based)"
-msgstr "MPEG-2/4 AAC encoder (faac basiert)"
-
-#: plugins/faac/faac.c:180
-msgid "Setting encode parameters failed, check settings"
-msgstr "Setzen der Encoderparameter fehlgeschlagen, prüfe Einstellungen"
-
-#: plugins/rtjpeg/RTjpeg.c:2425 plugins/rtjpeg/RTjpeg.c:2461
-msgid "RTjpeg: Could not allocate memory"
-msgstr "RTjpeg: Konnte Speicher nicht reservieren"
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:34
-msgid "Quality setting"
-msgstr "Qualitätseinstellung"
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:42
-msgid "Key frame interval"
-msgstr "Keyframe Interval"
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:48
-msgid "Luma quantiser"
-msgstr "Luma Quantizer"
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:54
-msgid "Chroma quantiser"
-msgstr "Chroma Quantizer"
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:63
-msgid "RTjpeg"
-msgstr ""
-
-#: plugins/rtjpeg/lqt_rtjpeg.c:64
-msgid "RTjpeg - real time lossy codec."
-msgstr "RTjpeg - Echtzeit Verlustbehafteter Codec"
-
-#: plugins/lame/lame_codec.c:349
-msgid "Ouch: lame created non mp3 data\n"
-msgstr "Autsch! Lame hat nicht-mp3 Daten erzeugt\n"
-
-#: plugins/lame/lame_codec.c:502
-#, c-format
-msgid "lame_init_params returned %d\n"
-msgstr "lame_init_params gab %d zurück\n"
-
-#: plugins/lame/lqt_lame.c:35
-msgid "Bitrate mode"
-msgstr "Bitratenmodus"
-
-#: plugins/lame/lqt_lame.c:38
-msgid "CBR"
-msgstr ""
-
-#: plugins/lame/lqt_lame.c:38
-msgid "ABR"
-msgstr ""
-
-#: plugins/lame/lqt_lame.c:38
-msgid "VBR"
-msgstr ""
-
-#: plugins/lame/lqt_lame.c:39
-msgid ""
-"CBR: Constant bitrate\n"
-"VBR: Variable bitrate\n"
-"ABR: Average bitrate"
-msgstr ""
-"CBR: Konstante Bitrate\n"
-"VBR: Variable Bitrate\n"
-"ABR: Durchschnittliche Bitrate"
-
-#: plugins/lame/lqt_lame.c:44
-msgid "Nominal Bitrate (ABR/CBR)"
-msgstr "Nominelle Bitrate (ABR/CBR)"
-
-#: plugins/lame/lqt_lame.c:47
-msgid "Bitrate in bits per second. For CBR, this must be a valid MP3 bitrate"
-msgstr ""
-"Bitrate in Bit pro Sekunde. Für CBR muss dies eine zulässige MP3 Bitrate sein"
-
-#: plugins/lame/lqt_lame.c:52
-msgid "Minimum Bitrate (ABR)"
-msgstr "Minimale Bitrate (ABR)"
-
-#: plugins/lame/lqt_lame.c:55
-msgid ""
-"Minimum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
-msgstr ""
-"Minimale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate "
-"sein"
-
-#: plugins/lame/lqt_lame.c:60
-msgid "Maximum Bitrate (ABR)"
-msgstr "Maximale Bitrate (ABR)"
-
-#: plugins/lame/lqt_lame.c:63
-msgid ""
-"Maximum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
-msgstr ""
-"Maximale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate "
-"sein"
-
-#: plugins/lame/lqt_lame.c:68
-msgid "Quality (0 = best)"
-msgstr "Qualität (0 = Beste)"
-
-#: plugins/lame/lqt_lame.c:73
-msgid ""
-"0: Slowest encoding, best quality\n"
-"9: Fastest encoding, worst quality"
-msgstr ""
-"0: Langsamstes Encodieren, Beste Qualität\n"
-"9: Schnellstes Encodieren, Schlechteste Qualität"
-
-#: plugins/lame/lqt_lame.c:78
-msgid "VBR Quality (0 = best)"
-msgstr "VBR Qualität (0 = Beste)"
-
-#: plugins/lame/lqt_lame.c:83
-msgid "VBR Quality level. 0: best, 9: worst"
-msgstr "VBR Qualitätsstufe 0: Beste, 9: Schlechteste"
-
-#: plugins/lame/lqt_lame.c:91
-msgid "Lame mp3 encoder"
-msgstr "Lame mp3 Codierer"
-
-#: plugins/lame/lqt_lame.c:92
-msgid "Lame mp3 encoder (see http://www.mp3dev.org)"
-msgstr "Lame mp3 Codierer (http://www.mp3dev.org)"
-
-#: plugins/audiocodec/pcm.c:780
-msgid "EOF at the beginning of track"
-msgstr "EOF am Anfang des Tracks"
-
-#: plugins/audiocodec/pcm.c:823 plugins/audiocodec/ima4.c:332
+#: plugins/audiocodec/ima4.c:332 plugins/audiocodec/pcm.c:824
 msgid "Cannot skip backwards"
 msgstr "Kann nicht vorwärts spulen"
 
@@ -1808,6 +119,10 @@ msgstr ""
 msgid "Linear PCM encoder"
 msgstr "MPEG-2/4 AAC Codierer (faac basiert)"
 
+#: plugins/audiocodec/pcm.c:781
+msgid "EOF at the beginning of track"
+msgstr "EOF am Anfang des Tracks"
+
 #: plugins/dv/lqt_dv.c:44
 msgid "Decoding Quality"
 msgstr "Decodierqualität"
@@ -1849,135 +164,54 @@ msgstr ""
 msgid "Quasar DV Codec (NTSC-Mode)"
 msgstr "Quasar DV Codec (NTSC-Modus)"
 
-#: plugins/mjpeg/lqt_mjpeg.c:44
-msgid "Quality"
-msgstr "Qualität"
+#: plugins/faac/faac.c:178
+msgid "Setting encode parameters failed, check settings"
+msgstr "Setzen der Encoderparameter fehlgeschlagen, prüfe Einstellungen"
 
-#: plugins/mjpeg/lqt_mjpeg.c:52
-msgid "Use float"
-msgstr "Verwende Fließkomma Zahlen"
-
-#: plugins/mjpeg/lqt_mjpeg.c:65
-msgid "JPEG photo"
-msgstr "JPEG Foto"
-
-#: plugins/mjpeg/lqt_mjpeg.c:66
-msgid "This format writes a seperate JPEG photo for every frame in YUV 4:2:0"
-msgstr ""
-"Dieses Format schreibt für jeden Frame ein seperates JPEG Foto in YUV 4:2:0"
-
-#: plugins/mjpeg/lqt_mjpeg.c:80
-msgid "Motion Jpeg A"
+#: plugins/faac/lqt_faac.c:37
+msgid "Bitrate (kbps, 0 = VBR)"
 msgstr ""
 
-#: plugins/mjpeg/lqt_mjpeg.c:81
-msgid "MJPA stores each frame as two JPEGs interlaced and in YUV 4:2:2"
-msgstr "MJPA speichert jeden Frame als zwei interlaced JPEGs in YUV 4:2:2"
+#: plugins/faac/lqt_faac.c:43
+msgid "VBR Quality"
+msgstr "VBR Qualität"
 
-#: plugins/mjpeg/jpeg.c:181
-msgid ""
-"Encoding progressive video as interlaced. Motion JPEG-A is not suitable for "
-"progressive video."
-msgstr ""
-"Codiere progressives Video als Interlaced. Motion JPEG-A ist nur für "
-"progressives Video geeignet."
-
-#: plugins/mjpeg/libmjpeg.c:539
-msgid "add_huff_table failed badly.\n"
-msgstr "add_huff_table schlug fehl.\n"
-
-#: plugins/videocodec/raw.c:264 plugins/videocodec/raw.c:273
-#: plugins/videocodec/raw.c:282
-msgid "Palette missing or too small"
-msgstr "Palette fehlt oder zu klein"
-
-#: plugins/videocodec/raw.c:291
-msgid "Palette missing or too small\n"
-msgstr "Palette fehlt oder zu klein\n"
-
-#: plugins/videocodec/lqt_videocodec.c:55
-msgid "Option 1"
+#: plugins/faac/lqt_faac.c:51
+msgid "Object type"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:56
-msgid "Option 2"
+#: plugins/faac/lqt_faac.c:54
+msgid "Low"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:57
-msgid "Option 3"
+#: plugins/faac/lqt_faac.c:55
+#, fuzzy
+msgid "Main"
+msgstr "Maskierung"
+
+#: plugins/faac/lqt_faac.c:56
+msgid "SSR"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:65
-msgid "String Test"
-msgstr "String Test"
-
-#: plugins/videocodec/lqt_videocodec.c:73
-msgid "Stringlist test"
-msgstr "Stringlisten Test"
-
-#: plugins/videocodec/lqt_videocodec.c:88
-msgid "RGB uncompressed"
-msgstr "RGB unkomprimiert"
-
-#: plugins/videocodec/lqt_videocodec.c:89
-msgid "RGB uncompressed."
-msgstr "RGB unkomprimiert"
-
-#: plugins/videocodec/lqt_videocodec.c:106
-#: plugins/videocodec/lqt_videocodec.c:107
-msgid "RGBA uncompressed"
-msgstr "RGB unkomprimiert"
-
-#: plugins/videocodec/lqt_videocodec.c:125
-#: plugins/videocodec/lqt_videocodec.c:126
-msgid "10 bit packed YUV 4:2:2 (v210)"
+#: plugins/faac/lqt_faac.c:57
+msgid "LTP"
 msgstr ""
 
-#: plugins/videocodec/lqt_videocodec.c:138
-#: plugins/videocodec/lqt_videocodec.c:139
-msgid "8 bit planar YUV 4:4:4 (v308)"
-msgstr ""
+#: plugins/faac/lqt_faac.c:66
+msgid "MPEG-2/4 AAC encoder"
+msgstr "MPEG-2/4 AAC Codierer"
 
-#: plugins/videocodec/lqt_videocodec.c:151
-#: plugins/videocodec/lqt_videocodec.c:152
-msgid "8 bit Planar YUVA 4:4:4:4 (v408)"
-msgstr ""
+#: plugins/faac/lqt_faac.c:67
+msgid "MPEG-2/4 AAC encoder (faac based)"
+msgstr "MPEG-2/4 AAC encoder (faac basiert)"
 
-#: plugins/videocodec/lqt_videocodec.c:164
-#: plugins/videocodec/lqt_videocodec.c:165
-msgid "10 bit Packed YUV 4:4:4 (v410)"
-msgstr ""
-
-#: plugins/videocodec/lqt_videocodec.c:177
-#: plugins/videocodec/lqt_videocodec.c:178
-msgid "8 bit Packed YUV 4:2:2 (yuv2)"
-msgstr ""
-
-#: plugins/videocodec/lqt_videocodec.c:190
-#: plugins/videocodec/lqt_videocodec.c:191
-msgid "8 bit Packed YUV 4:2:2 (2vuy)"
-msgstr ""
-
-#: plugins/videocodec/lqt_videocodec.c:203
-msgid "YUV 4:2:0 (yuv4)"
-msgstr ""
-
-#: plugins/videocodec/lqt_videocodec.c:204
-msgid "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME"
-msgstr "YUV 4:2:0 (yuv4) NICHT KOMPATIBEL MIT STANDARD QUICKTIME"
-
-#: plugins/videocodec/lqt_videocodec.c:217
-#: plugins/videocodec/lqt_videocodec.c:218
-msgid "8 bit Planar YUV 4:2:0 (yv12)"
-msgstr ""
-
-#: plugins/faad2/faad2.c:174
+#: plugins/faad2/faad2.c:179
 #, c-format
 msgid "faacDecDecode failed %s"
 msgstr "faacDecDecode fehler %s"
 
 # :P
-#: plugins/faad2/faad2.c:364
+#: plugins/faad2/faad2.c:369
 msgid "No extradata found, decoding is doomed to failure"
 msgstr ""
 "Keine Extradaten gefunden, das Dekodieren ist zum Fehlschlagen verdammt."
@@ -1990,30 +224,242 @@ msgstr "MPEG-2/4 AAC Decodierer"
 msgid "MPEG-2/4 AAC decoder (faad2 based)"
 msgstr "MPEG-2/4 AAC Decodierer (faad2 basiert)"
 
-#: plugins/png/lqt_png.c:37
-msgid "Compression Level"
-msgstr "Kompressionsstufe"
+#: plugins/ffmpeg/audio.c:400 plugins/ffmpeg/audio.c:594
+msgid "avcodec_decode_audio error"
+msgstr "avcodec_decode_audio Fehler"
 
-#: plugins/png/lqt_png.c:52
-msgid "PNG (with alpha)"
-msgstr "PNG (mit Alpha)"
+#: plugins/ffmpeg/audio.c:444
+msgid "Decode header failed"
+msgstr "Dekodieren des Kopfes fehlgeschlagen"
 
-#: plugins/png/lqt_png.c:53
-msgid "Lossless video codec (RGBA mode)"
-msgstr "Verlustfreier Videocodec (RGBA Modus)"
+#: plugins/ffmpeg/audio.c:449
+msgid "Huh, frame not decoded?"
+msgstr "Huh, Frame nicht dekodiert?"
 
-#: plugins/png/lqt_png.c:65
-msgid "PNG"
-msgstr ""
+# :P
+#: plugins/ffmpeg/audio.c:645
+#, c-format
+msgid "BUUUUG, buffer overflow, %d %d"
+msgstr "BUUUUG, Pufferüberlauf, %d %d"
 
-#: plugins/png/lqt_png.c:66
-msgid "Lossless video codec (RGB mode)"
-msgstr "Verlustfreier Videocodec (RGB Modus)"
+#: plugins/ffmpeg/audio.c:737 plugins/ffmpeg/audio.c:865
+msgid "Avcodec open failed"
+msgstr "Öffnen von Avcodec fehlgeschlagen"
 
-#: plugins/ffmpeg/params.h:36 plugins/ffmpeg/params.h:45
-#: plugins/ffmpeg/lqt_ffmpeg.c:47
+#: plugins/ffmpeg/lqt_ffmpeg.c:48 plugins/ffmpeg/params.h:36
+#: plugins/ffmpeg/params.h:45
 msgid "Bit rate (kbps)"
 msgstr "Bitrate (kbps)"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:56 plugins/schroedinger/lqt_schroedinger.c:37
+#: plugins/schroedinger/lqt_schroedinger.c:42
+msgid "Rate control"
+msgstr "Ratensteuerung"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:70
+msgid "Quantizer"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:96 plugins/schroedinger/lqt_schroedinger.c:110
+msgid "Frame types"
+msgstr "Frametypen"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:113 plugins/x264/lqt_x264.c:302
+#: plugins/schroedinger/lqt_schroedinger.c:145
+msgid "Motion estimation"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:127 plugins/ffmpeg/params.h:605
+msgid "ME pre-pass"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:138
+msgid "Qpel ME"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:150
+msgid "Masking"
+msgstr "Maskierung"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:164 plugins/x264/lqt_x264.c:423
+#: plugins/schroedinger/lqt_schroedinger.c:259
+msgid "Misc"
+msgstr "Verschiedenes"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:312
+msgid "FFMPEG Mpeg 1 Video"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:324
+msgid "FFMPEG MPEG-4"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:340
+msgid "FFMPEG MSMpeg 4v1"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:351
+msgid "FFMPEG MSMpeg 4v2"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:363
+msgid "FFMPEG MSMpeg 4v3 (DivX 3 compatible)"
+msgstr "FFMPEG MSMpeg 4v3 (DivX 3 kompatibel)"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:379
+#, fuzzy
+msgid "FFMPEG MSMpeg 4v3 (WMP compatible)"
+msgstr "FFMPEG MSMpeg 4v3 (DivX 3 kompatibel)"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:394
+msgid "FFMPEG WMV1"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:406 plugins/ffmpeg/lqt_ffmpeg.c:419
+msgid "FFMPEG H263"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:432
+msgid "FFMPEG H264"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:444
+msgid "FFMPEG H263+"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:457
+msgid "FFMPEG I263"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:468
+msgid "FFMPEG Sorenson Video 1"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:479
+msgid "FFMPEG Sorenson Video 3"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:491
+msgid "FFMPEG MJPEG"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:504
+msgid "FFMPEG Motion JPEG-B"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:517
+msgid "FFMPEG Targa"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:529
+msgid "FFMPEG TIFF"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:540
+msgid "FFMPEG Quicktime Planar RGB (8BPS)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:551
+msgid "FFMPEG Intel Indeo 3"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:561
+msgid "FFMPEG Apple Video"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:571
+msgid "FFMPEG Apple Graphics"
+msgstr "FFMPEG Apple Grafik"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:582
+msgid "FFMPEG Cinepak"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:593
+msgid "FFMPEG Creative YUV"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:603
+msgid "FFMPEG RLE"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:615
+msgid "FFMPEG Microsoft RLE"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:627
+msgid "FFMPEG DV (NTSC)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:641
+msgid "FFMPEG DV (PAL)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:655
+msgid "FFMPEG DV (AVI version)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:669
+msgid "FFMPEG DVCPRO50 (PAL)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:683
+msgid "FFMPEG DVCPRO50 (NTSC)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:698
+msgid "FFMPEG DVCPROHD"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:717
+msgid "FFMPEG modified huffyuv lossless"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:731
+msgid "FFMPEG codec #1 (lossless)"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:746
+msgid "FFMPEG dnxhd"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:766
+msgid "FFMPEG MPEG-1/2 audio layer 1/2/3"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:779
+msgid "FFMPEG Mpeg Layer 2 Audio"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:793
+msgid "FFMPEG AC3 Audio"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:807
+msgid "FFMPEG QDM2 Audio"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:820
+msgid "FFMPEG Apple lossless"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:833
+msgid "FFMPEG McRowsoft ADPCM"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:846
+msgid "FFMPEG ADPCM ima WAV"
+msgstr ""
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:1125
+#, c-format
+msgid "Video index too large: %d"
+msgstr "Videoindex zu groß: %d"
+
+#: plugins/ffmpeg/lqt_ffmpeg.c:1181
+#, c-format
+msgid "Audio index too large: %d"
+msgstr "Audio Index zu Hoch: %d"
 
 #: plugins/ffmpeg/params.h:54
 msgid "Bitrate tolerance (kbps)"
@@ -2052,7 +498,7 @@ msgstr ""
 msgid "Epzs"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:69
+#: plugins/ffmpeg/params.h:69 plugins/schroedinger/lqt_schroedinger.c:176
 msgid "Full"
 msgstr "Voll"
 
@@ -2546,10 +992,6 @@ msgid ""
 "the previous frame."
 msgstr ""
 
-#: plugins/ffmpeg/params.h:605 plugins/ffmpeg/lqt_ffmpeg.c:126
-msgid "ME pre-pass"
-msgstr ""
-
 #: plugins/ffmpeg/params.h:610
 msgid ""
 "Motion estimation pre-pass\n"
@@ -2681,6 +1123,10 @@ msgid ""
 msgstr ""
 "Maximaler Lagrange Multiplikator für Ratensteuerung. Sollte wenn möglich "
 "gleich der Maximalen Quantizer Skalierung sein."
+
+#: plugins/ffmpeg/params.h:742 plugins/x264/lqt_x264.c:479
+msgid "Noise reduction"
+msgstr "Rausch Unterdrückung"
 
 #: plugins/ffmpeg/params.h:753
 msgid "Initial RC buffer occupancy"
@@ -2906,307 +1352,379 @@ msgid "Use only bitexact stuff (except (i)dct)"
 msgstr "Verwende nur bitgenaue Sachen (ausser (i)dct)"
 
 #: plugins/ffmpeg/params.h:1074
+msgid "Number of threads to launch"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:1077
+msgid "Spcify how many threads to launch"
+msgstr ""
+
+#: plugins/ffmpeg/params.h:1083
 msgid "Advanced intra coding"
 msgstr "Fortgeschrittlene Intra Codierung"
 
-#: plugins/ffmpeg/params.h:1084
+#: plugins/ffmpeg/params.h:1093
 #, fuzzy
 msgid "MPEG-4 AC prediction"
 msgstr "MPEG-4 AC Vorhersage"
 
 # plural?
-#: plugins/ffmpeg/params.h:1094
+#: plugins/ffmpeg/params.h:1103
 msgid "Unlimited motion vector"
 msgstr "Unbegrenzter Bewegungsvektor"
 
-#: plugins/ffmpeg/params.h:1104
+#: plugins/ffmpeg/params.h:1113
 msgid "CBP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1109
+#: plugins/ffmpeg/params.h:1118
 #, fuzzy
 msgid ""
 "Use rate distortion optimization for cbp. This can only be used together "
 "with trellis quantization."
 msgstr "Verwende Ratenverzerr Optimierung für QP Auswahl"
 
-#: plugins/ffmpeg/params.h:1115
+#: plugins/ffmpeg/params.h:1124
 msgid "QP RD"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1120
+#: plugins/ffmpeg/params.h:1129
 #, fuzzy
 msgid ""
 "Use rate distortion optimization for qp selection. Can only be used if MB "
 "decision mode is \"Rate distoration\""
 msgstr "Verwende Ratenverzerr Optimierung für QP Auswahl"
 
-#: plugins/ffmpeg/params.h:1126
+#: plugins/ffmpeg/params.h:1135
 #, fuzzy
 msgid "Alternative inter vlc"
 msgstr "Alternatives inter vlc"
 
-#: plugins/ffmpeg/params.h:1137
+#: plugins/ffmpeg/params.h:1146
 msgid "OBMC"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1142
+#: plugins/ffmpeg/params.h:1151
 msgid ""
 "Overlapped block motion compensation (only supported with simple MB decision)"
 msgstr ""
 "Motioncompensation mit überlappenden Blöcken (Nur unterstützt mit einfacher "
 "MB Wahl)"
 
-#: plugins/ffmpeg/params.h:1149
+#: plugins/ffmpeg/params.h:1158
 msgid "Loop filter"
 msgstr "Schleifenfilter"
 
-#: plugins/ffmpeg/params.h:1159
+#: plugins/ffmpeg/params.h:1168
 msgid "Slice struct"
 msgstr ""
 
-#: plugins/ffmpeg/params.h:1170
+#: plugins/ffmpeg/params.h:1179
 msgid "Close all GOPs"
 msgstr "Schließe alle GOPs"
 
-#: plugins/ffmpeg/params.h:1180
+#: plugins/ffmpeg/params.h:1189
 msgid "Allow fast encoding"
 msgstr "Erlaube schnelles Codieren"
 
-#: plugins/ffmpeg/params.h:1185
+#: plugins/ffmpeg/params.h:1194
 msgid "Allow non spec compliant speedup tricks"
 msgstr "Erlaube Beschleunigungstricks, die nicht der Spezifikation entsprechen"
 
 # durchsetzung
-#: plugins/ffmpeg/params.h:1192
+#: plugins/ffmpeg/params.h:1201
 msgid "Strictly enforce GOP size"
 msgstr "Strenge Einhaltung der GOP Größe"
 
-#: plugins/ffmpeg/audio.c:388 plugins/ffmpeg/audio.c:571
-msgid "avcodec_decode_audio error"
-msgstr "avcodec_decode_audio Fehler"
-
-#: plugins/ffmpeg/audio.c:432
-msgid "Decode header failed"
-msgstr "Dekodieren des Kopfes fehlgeschlagen"
-
-#: plugins/ffmpeg/audio.c:437
-msgid "Huh, frame not decoded?"
-msgstr "Huh, Frame nicht dekodiert?"
-
-# :P
-#: plugins/ffmpeg/audio.c:622
-#, c-format
-msgid "BUUUUG, buffer overflow, %d %d"
-msgstr "BUUUUG, Pufferüberlauf, %d %d"
-
-#: plugins/ffmpeg/audio.c:714 plugins/ffmpeg/audio.c:842
-msgid "Avcodec open failed"
-msgstr "Öffnen von Avcodec fehlgeschlagen"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:55
-msgid "Rate control"
-msgstr "Ratensteuerung"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:69
-msgid "Quantizer"
+#: plugins/ffmpeg/params.h:1212
+msgid "Coder type"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:95
-msgid "Frame types"
-msgstr "Frametypen"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:137
-msgid "Qpel ME"
+#: plugins/ffmpeg/params.h:1215
+msgid "VLC"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:149
-msgid "Masking"
-msgstr "Maskierung"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:305
-msgid "FFMPEG Mpeg 1 Video"
+#: plugins/ffmpeg/params.h:1215
+msgid "Arithmetic"
 msgstr ""
 
-#: plugins/ffmpeg/lqt_ffmpeg.c:317
-msgid "FFMPEG MPEG-4"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:333
-msgid "FFMPEG MSMpeg 4v1"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:344
-msgid "FFMPEG MSMpeg 4v2"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:356
-msgid "FFMPEG MSMpeg 4v3 (DivX 3 compatible)"
-msgstr "FFMPEG MSMpeg 4v3 (DivX 3 kompatibel)"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:372
-#, fuzzy
-msgid "FFMPEG MSMpeg 4v3 (WMP compatible)"
-msgstr "FFMPEG MSMpeg 4v3 (DivX 3 kompatibel)"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:387
-msgid "FFMPEG WMV1"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:400
-msgid "FFMPEG H263"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:413
-msgid "FFMPEG H264"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:425
-msgid "FFMPEG H263+"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:438
-msgid "FFMPEG I263"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:449
-msgid "FFMPEG Sorenson Video 1"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:460
-msgid "FFMPEG Sorenson Video 3"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:472
-msgid "FFMPEG MJPEG"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:485
-msgid "FFMPEG Motion JPEG-B"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:498
-msgid "FFMPEG Targa"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:510
-msgid "FFMPEG TIFF"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:521
-msgid "FFMPEG Quicktime Planar RGB (8BPS)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:532
-msgid "FFMPEG Intel Indeo 3"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:542
-msgid "FFMPEG Apple Video"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:552
-msgid "FFMPEG Apple Graphics"
-msgstr "FFMPEG Apple Grafik"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:563
-msgid "FFMPEG Cinepak"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:574
-msgid "FFMPEG Creative YUV"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:584
-msgid "FFMPEG RLE"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:596
-msgid "FFMPEG Microsoft RLE"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:608
-msgid "FFMPEG DV (NTSC)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:622
-msgid "FFMPEG DV (PAL)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:636
-msgid "FFMPEG DV (AVI version)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:650
-msgid "FFMPEG DVCPRO50 (PAL)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:664
-msgid "FFMPEG DVCPRO50 (NTSC)"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:679
-msgid "FFMPEG DVCPROHD"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:698
-msgid "FFMPEG modified huffyuv lossless"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:712
-msgid "FFMPEG dnxhd"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:732
-msgid "FFMPEG MPEG-1/2 audio layer 1/2/3"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:745
-msgid "FFMPEG Mpeg Layer 2 Audio"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:759
-msgid "FFMPEG AC3 Audio"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:773
-msgid "FFMPEG QDM2 Audio"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:786
-msgid "FFMPEG Apple lossless"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:799
-msgid "FFMPEG McRowsoft ADPCM"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:812
-msgid "FFMPEG ADPCM ima WAV"
-msgstr ""
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:1090
-#, c-format
-msgid "Video index too large: %d"
-msgstr "Videoindex zu groß: %d"
-
-#: plugins/ffmpeg/lqt_ffmpeg.c:1146
-#, c-format
-msgid "Audio index too large: %d"
-msgstr "Audio Index zu Hoch: %d"
-
-#: plugins/ffmpeg/video.c:401
+#: plugins/ffmpeg/video.c:413
 msgid "No avcC atom present, decoding is likely to fail"
 msgstr ""
 "Kein avcC Atom vorhanden, das decodieren wird wahrscheinlich fehlschlagen."
 
-#: plugins/ffmpeg/video.c:518
+#: plugins/ffmpeg/video.c:497 plugins/ffmpeg/video.c:508
 msgid "Skipping corrupted frame"
 msgstr "Überspringe beschädigte Frames"
 
-#: plugins/ffmpeg/video.c:754
+#: plugins/ffmpeg/video.c:760
 msgid "Enabling interlaced encoding"
 msgstr "Aktiviere Interlaced Codierung"
+
+#: plugins/lame/lame_codec.c:349
+msgid "Ouch: lame created non mp3 data\n"
+msgstr "Autsch! Lame hat nicht-mp3 Daten erzeugt\n"
+
+#: plugins/lame/lame_codec.c:502
+#, c-format
+msgid "lame_init_params returned %d\n"
+msgstr "lame_init_params gab %d zurück\n"
+
+#: plugins/lame/lqt_lame.c:35
+msgid "Bitrate mode"
+msgstr "Bitratenmodus"
+
+#: plugins/lame/lqt_lame.c:38
+msgid "CBR"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:38
+msgid "ABR"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:38
+msgid "VBR"
+msgstr ""
+
+#: plugins/lame/lqt_lame.c:39
+msgid ""
+"CBR: Constant bitrate\n"
+"VBR: Variable bitrate\n"
+"ABR: Average bitrate"
+msgstr ""
+"CBR: Konstante Bitrate\n"
+"VBR: Variable Bitrate\n"
+"ABR: Durchschnittliche Bitrate"
+
+#: plugins/lame/lqt_lame.c:44
+msgid "Nominal Bitrate (ABR/CBR)"
+msgstr "Nominelle Bitrate (ABR/CBR)"
+
+#: plugins/lame/lqt_lame.c:47
+msgid "Bitrate in bits per second. For CBR, this must be a valid MP3 bitrate"
+msgstr ""
+"Bitrate in Bit pro Sekunde. Für CBR muss dies eine zulässige MP3 Bitrate sein"
+
+#: plugins/lame/lqt_lame.c:52
+msgid "Minimum Bitrate (ABR)"
+msgstr "Minimale Bitrate (ABR)"
+
+#: plugins/lame/lqt_lame.c:55
+msgid ""
+"Minimum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
+msgstr ""
+"Minimale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate "
+"sein"
+
+#: plugins/lame/lqt_lame.c:60
+msgid "Maximum Bitrate (ABR)"
+msgstr "Maximale Bitrate (ABR)"
+
+#: plugins/lame/lqt_lame.c:63
+msgid ""
+"Maximum ABR bitrate in bits per second. This must be a valid MP3 bitrate"
+msgstr ""
+"Maximale Bitrate in Bit pro Sekunde. Dies muss eine zulässige MP3 Bitrate "
+"sein"
+
+#: plugins/lame/lqt_lame.c:68
+msgid "Quality (0 = best)"
+msgstr "Qualität (0 = Beste)"
+
+#: plugins/lame/lqt_lame.c:73
+msgid ""
+"0: Slowest encoding, best quality\n"
+"9: Fastest encoding, worst quality"
+msgstr ""
+"0: Langsamstes Encodieren, Beste Qualität\n"
+"9: Schnellstes Encodieren, Schlechteste Qualität"
+
+#: plugins/lame/lqt_lame.c:78
+msgid "VBR Quality (0 = best)"
+msgstr "VBR Qualität (0 = Beste)"
+
+#: plugins/lame/lqt_lame.c:83
+msgid "VBR Quality level. 0: best, 9: worst"
+msgstr "VBR Qualitätsstufe 0: Beste, 9: Schlechteste"
+
+#: plugins/lame/lqt_lame.c:91
+msgid "Lame mp3 encoder"
+msgstr "Lame mp3 Codierer"
+
+#: plugins/lame/lqt_lame.c:92
+msgid "Lame mp3 encoder (see http://www.mp3dev.org)"
+msgstr "Lame mp3 Codierer (http://www.mp3dev.org)"
+
+#: plugins/mjpeg/jpeg.c:180
+msgid ""
+"Encoding progressive video as interlaced. Motion JPEG-A is not suitable for "
+"progressive video."
+msgstr ""
+"Codiere progressives Video als Interlaced. Motion JPEG-A ist nur für "
+"progressives Video geeignet."
+
+#: plugins/mjpeg/libmjpeg.c:539
+msgid "add_huff_table failed badly.\n"
+msgstr "add_huff_table schlug fehl.\n"
+
+#: plugins/mjpeg/lqt_mjpeg.c:45 plugins/schroedinger/lqt_schroedinger.c:100
+msgid "Quality"
+msgstr "Qualität"
+
+#: plugins/mjpeg/lqt_mjpeg.c:53
+msgid "Use float"
+msgstr "Verwende Fließkomma Zahlen"
+
+#: plugins/mjpeg/lqt_mjpeg.c:66
+msgid "JPEG photo"
+msgstr "JPEG Foto"
+
+#: plugins/mjpeg/lqt_mjpeg.c:67
+msgid "This format writes a seperate JPEG photo for every frame in YUV 4:2:0"
+msgstr ""
+"Dieses Format schreibt für jeden Frame ein seperates JPEG Foto in YUV 4:2:0"
+
+#: plugins/mjpeg/lqt_mjpeg.c:81
+msgid "Motion Jpeg A"
+msgstr ""
+
+#: plugins/mjpeg/lqt_mjpeg.c:82
+msgid "MJPA stores each frame as two JPEGs interlaced and in YUV 4:2:2"
+msgstr "MJPA speichert jeden Frame als zwei interlaced JPEGs in YUV 4:2:2"
+
+#: plugins/png/lqt_png.c:39
+msgid "Compression Level"
+msgstr "Kompressionsstufe"
+
+#: plugins/png/lqt_png.c:54
+msgid "PNG (with alpha)"
+msgstr "PNG (mit Alpha)"
+
+#: plugins/png/lqt_png.c:55
+msgid "Lossless video codec (RGBA mode)"
+msgstr "Verlustfreier Videocodec (RGBA Modus)"
+
+#: plugins/png/lqt_png.c:67
+msgid "PNG"
+msgstr ""
+
+#: plugins/png/lqt_png.c:68
+msgid "Lossless video codec (RGB mode)"
+msgstr "Verlustfreier Videocodec (RGB Modus)"
+
+#: plugins/rtjpeg/RTjpeg.c:2425 plugins/rtjpeg/RTjpeg.c:2461
+msgid "RTjpeg: Could not allocate memory"
+msgstr "RTjpeg: Konnte Speicher nicht reservieren"
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:34
+msgid "Quality setting"
+msgstr "Qualitätseinstellung"
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:42
+msgid "Key frame interval"
+msgstr "Keyframe Interval"
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:48
+msgid "Luma quantiser"
+msgstr "Luma Quantizer"
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:54
+msgid "Chroma quantiser"
+msgstr "Chroma Quantizer"
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:63
+msgid "RTjpeg"
+msgstr ""
+
+#: plugins/rtjpeg/lqt_rtjpeg.c:64
+msgid "RTjpeg - real time lossy codec."
+msgstr "RTjpeg - Echtzeit Verlustbehafteter Codec"
+
+#: plugins/videocodec/lqt_videocodec.c:56
+msgid "Option 1"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:57
+msgid "Option 2"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:58
+msgid "Option 3"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:66
+msgid "String Test"
+msgstr "String Test"
+
+#: plugins/videocodec/lqt_videocodec.c:74
+msgid "Stringlist test"
+msgstr "Stringlisten Test"
+
+#: plugins/videocodec/lqt_videocodec.c:89
+msgid "RGB uncompressed"
+msgstr "RGB unkomprimiert"
+
+#: plugins/videocodec/lqt_videocodec.c:90
+msgid "RGB uncompressed."
+msgstr "RGB unkomprimiert"
+
+#: plugins/videocodec/lqt_videocodec.c:108
+#: plugins/videocodec/lqt_videocodec.c:109
+#, fuzzy
+msgid "RGBA uncompressed with alpha"
+msgstr "RGB unkomprimiert"
+
+#: plugins/videocodec/lqt_videocodec.c:127
+#: plugins/videocodec/lqt_videocodec.c:128
+msgid "10 bit packed YUV 4:2:2 (v210)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:140
+#: plugins/videocodec/lqt_videocodec.c:141
+msgid "8 bit planar YUV 4:4:4 (v308)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:153
+#: plugins/videocodec/lqt_videocodec.c:154
+msgid "8 bit Planar YUVA 4:4:4:4 (v408)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:166
+#: plugins/videocodec/lqt_videocodec.c:167
+msgid "10 bit Packed YUV 4:4:4 (v410)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:179
+#: plugins/videocodec/lqt_videocodec.c:180
+msgid "8 bit Packed YUV 4:2:2 (yuv2)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:192
+#: plugins/videocodec/lqt_videocodec.c:193
+msgid "8 bit Packed YUV 4:2:2 (2vuy)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:205
+msgid "YUV 4:2:0 (yuv4)"
+msgstr ""
+
+#: plugins/videocodec/lqt_videocodec.c:206
+msgid "YUV 4:2:0 (yuv4) NOT COMPATIBLE WITH STANDARD QUICKTIME"
+msgstr "YUV 4:2:0 (yuv4) NICHT KOMPATIBEL MIT STANDARD QUICKTIME"
+
+#: plugins/videocodec/lqt_videocodec.c:219
+#: plugins/videocodec/lqt_videocodec.c:220
+msgid "8 bit Planar YUV 4:2:0 (yv12)"
+msgstr ""
+
+#: plugins/videocodec/raw.c:264 plugins/videocodec/raw.c:273
+#: plugins/videocodec/raw.c:282
+msgid "Palette missing or too small"
+msgstr "Palette fehlt oder zu klein"
+
+#: plugins/videocodec/raw.c:291
+msgid "Palette missing or too small\n"
+msgstr "Palette fehlt oder zu klein\n"
 
 #: plugins/vorbis/lqt_vorbis.c:36
 msgid "Nominal Bitrate"
@@ -3258,6 +1776,1764 @@ msgstr "Decoder: vorbis_synthesis_headerin: ist kein Vorbis Header"
 #, c-format
 msgid "Writing OVHS atom %d bytes\n"
 msgstr "Schreibe OVHS Atom %d bytes\n"
+
+#: plugins/x264/lqt_x264.c:36
+msgid "Frame-type options"
+msgstr "Frametyp Optionen"
+
+#: plugins/x264/lqt_x264.c:41
+msgid "Maximum GOP size"
+msgstr "Maximale GOP Größe"
+
+#: plugins/x264/lqt_x264.c:47
+msgid "Minimum GOP size"
+msgstr "Minimale GOP Größe"
+
+# ..wechsel
+#: plugins/x264/lqt_x264.c:53
+msgid "Scenecut threshold"
+msgstr "Schwellwert für Scenenwechsel"
+
+#: plugins/x264/lqt_x264.c:56
+msgid "How aggressively to insert extra I-frames"
+msgstr "Wie Aggressiv extra I-Frames eingefügt werden sollen."
+
+#: plugins/x264/lqt_x264.c:60
+msgid "B-Frames"
+msgstr "B-Frames"
+
+#: plugins/x264/lqt_x264.c:65
+msgid "Number of B-frames between I and P"
+msgstr "Anzahl an B-Frames zwischen  I und P"
+
+#: plugins/x264/lqt_x264.c:70 plugins/x264/lqt_x264.c:79
+msgid "Adaptive B-frame decision"
+msgstr "Adaptive B-Frame Wahl"
+
+#: plugins/x264/lqt_x264.c:82 plugins/x264/lqt_x264.c:415
+#: plugins/schroedinger/lqt_schroedinger.c:174
+#: plugins/schroedinger/lqt_schroedinger.c:241
+msgid "None"
+msgstr "Keine"
+
+#: plugins/x264/lqt_x264.c:83
+msgid "Fast"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:84
+msgid "Trellis"
+msgstr ""
+
+# bias besser?
+#: plugins/x264/lqt_x264.c:90
+msgid "B-frame bias"
+msgstr "B-Frame Tendenz"
+
+#: plugins/x264/lqt_x264.c:95
+msgid "Influences how often B-frames are used"
+msgstr "Beeinflusst wie oft B-Frames verwendet werden"
+
+#: plugins/x264/lqt_x264.c:99
+msgid "B-frame pyramid"
+msgstr "B-Frame Pyramide"
+
+#: plugins/x264/lqt_x264.c:104
+msgid "Keep some B-frames as references"
+msgstr "Behalte einige B-Frames als Referenz."
+
+#: plugins/x264/lqt_x264.c:108
+msgid "Ratecontrol"
+msgstr "Ratensteuerung"
+
+#: plugins/x264/lqt_x264.c:113
+msgid "Ratecontrol method"
+msgstr "Methode der Ratensteuerung"
+
+#: plugins/x264/lqt_x264.c:116 plugins/schroedinger/lqt_schroedinger.c:52
+msgid "Constant quality"
+msgstr "Konstante Qualität"
+
+#: plugins/x264/lqt_x264.c:117
+msgid "Average bitrate"
+msgstr "Durchschnittliche Bitrate"
+
+#: plugins/x264/lqt_x264.c:118
+msgid "CRF based VBR"
+msgstr "CRF basiertes VBR"
+
+#: plugins/x264/lqt_x264.c:120
+msgid ""
+"Ratecontrol method:\n"
+"Constant quality: Specify a quantizer parameter below\n"
+"Average bitrate: Specify a bitrate below\n"
+"CRF based VBR: Specify a rate factor below\n"
+"Selecting 2-pass encoding will force Average bitrate."
+msgstr ""
+"Methode der Ratensteuerung:\n"
+"Konstante Qualität: Quantizer Parameter hierunter angeben\n"
+"Durchschnittliche Bitrate: Bitrate hierrunter angeben\n"
+"CRF basiertes VBR: Ratenfaktor hierrunter angeben\n"
+"2-Pass Codieren erzwingt Durchschnittliche Bitrate"
+
+#: plugins/x264/lqt_x264.c:128 plugins/schroedinger/lqt_schroedinger.c:58
+msgid "Bitrate"
+msgstr "Bitrate"
+
+#: plugins/x264/lqt_x264.c:131
+msgid "Bitrate in kbit/s. 0 means VBR (recommended)"
+msgstr "Bitrate in kbit/s. 0 bedeutet VBR (empfohlen)"
+
+#: plugins/x264/lqt_x264.c:136 plugins/x264/lqt_x264.c:148
+msgid "Nominal Quantizer parameter"
+msgstr "Nominaler Quantizer Parameter"
+
+#: plugins/x264/lqt_x264.c:141 plugins/x264/lqt_x264.c:153
+msgid ""
+"This selects the nominal quantizer to use (1 to 51). Lower values result in "
+"better fidelity, but higher bitrates. 26 is a good default value. 0 means "
+"lossless."
+msgstr ""
+"Dies wählt den zu verwendenden Nominalen Quantizer (1 bis 51). Niedrigere "
+"Werte sorgen für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein "
+"guter Vorgabewert. 0 bedeutet Verlustfrei."
+
+#: plugins/x264/lqt_x264.c:160
+msgid "Quantizer parameter"
+msgstr "Quantizer Parameter"
+
+#: plugins/x264/lqt_x264.c:165
+msgid ""
+"This selects the quantizer to use (1 to 51). Lower values result in better "
+"fidelity, but higher bitrates. 26 is a good default value. 0 means lossless."
+msgstr ""
+"Dies wählt den zu verwendenden Quantizer (1 bis 51). Niedrigere Werte sorgen "
+"für bessere Qualität, jedoch auch höhere Bitraten. 26 ist ein guter "
+"Vorgabewert. 0 bedeutet Verlustfrei."
+
+#: plugins/x264/lqt_x264.c:171 plugins/x264/lqt_x264.c:176
+msgid "Minimum quantizer parameter"
+msgstr "Minimaler Quantizer Parameter"
+
+#: plugins/x264/lqt_x264.c:180 plugins/x264/lqt_x264.c:185
+msgid "Maximum quantizer parameter"
+msgstr "Maximaler Quantizer Parameter"
+
+#: plugins/x264/lqt_x264.c:189
+msgid "Maximum QP step"
+msgstr "Maximaler QP Schritt"
+
+#: plugins/x264/lqt_x264.c:194
+msgid "Maximum quantizer step"
+msgstr "Maximaler Quantizer Schritt"
+
+#: plugins/x264/lqt_x264.c:198
+msgid "Bitrate tolerance"
+msgstr "Bitratentoleranz"
+
+#: plugins/x264/lqt_x264.c:204
+msgid "Allowed variance of average bitrate"
+msgstr "Erlaubte Abweichung von der Durchschnittsbitrate"
+
+#: plugins/x264/lqt_x264.c:208
+msgid "Maximum local bitrate"
+msgstr "Maximale Locale Bitrate"
+
+#: plugins/x264/lqt_x264.c:211
+msgid "Sets a maximum local bitrate in kbits/s."
+msgstr "Setzt die maximale locale Bitrate in kbits/s."
+
+#: plugins/x264/lqt_x264.c:215
+msgid "VBV Buffer size"
+msgstr "VBV Puffergröße"
+
+#: plugins/x264/lqt_x264.c:218
+msgid "Averaging period for the maximum local bitrate. Measured in kbits."
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:223
+msgid "Initial VBV buffer occupancy"
+msgstr "Initiale VBV Pufferbelegung"
+
+#: plugins/x264/lqt_x264.c:229
+msgid "Sets the initial VBV buffer occupancy as a fraction of the buffer size."
+msgstr ""
+"Setzt die initiale VBV Pufferbelegung als einen bruchteil der Puffergröße"
+
+#: plugins/x264/lqt_x264.c:234
+msgid "QP factor between I and P"
+msgstr "QP Faktor zwischen I und P"
+
+#: plugins/x264/lqt_x264.c:241
+msgid "QP factor between P and B"
+msgstr "QP Faktor zwischen P und B"
+
+#: plugins/x264/lqt_x264.c:248
+msgid "Partitions"
+msgstr "Partitionen"
+
+# transformator?
+#: plugins/x264/lqt_x264.c:253
+msgid "8x8 transform"
+msgstr "8x8 Transformation"
+
+#: plugins/x264/lqt_x264.c:261
+msgid "8x16, 16x8 and 8x8 P-frame search"
+msgstr "8x16, 16x8 und 8x8 P-Frame Suche"
+
+#: plugins/x264/lqt_x264.c:269
+msgid "8x16, 16x8 and 8x8 B-frame search"
+msgstr "8x16, 16x8 und 8x8 B-Frame Suche"
+
+#: plugins/x264/lqt_x264.c:277
+msgid "4x8, 8x4 and 4x4 P-frame search"
+msgstr "4x8, 8x4 und 4x4 P-Frame Suche"
+
+#: plugins/x264/lqt_x264.c:285
+msgid "8x8 Intra search"
+msgstr "8x8 Intrasuche"
+
+# ..or?
+#: plugins/x264/lqt_x264.c:290
+msgid "8x8 Intra search requires 8x8 transform"
+msgstr "8x8 Intrasuche benötigt 8x8 Transformation"
+
+#: plugins/x264/lqt_x264.c:294
+msgid "4x4 Intra search"
+msgstr "4x4 Intrasuche"
+
+#: plugins/x264/lqt_x264.c:307
+msgid "Method"
+msgstr "Methode"
+
+#: plugins/x264/lqt_x264.c:310
+msgid "Diamond search"
+msgstr "Diamant Suche"
+
+#: plugins/x264/lqt_x264.c:311
+msgid "Hexagonal search"
+msgstr "Hexagonale Suche"
+
+# what you say?
+#: plugins/x264/lqt_x264.c:312
+msgid "Uneven Multi-Hexagon"
+msgstr "Unebenes Multi-Hexagon"
+
+#: plugins/x264/lqt_x264.c:313
+msgid "Exhaustive search"
+msgstr "Gründliche Suche"
+
+#: plugins/x264/lqt_x264.c:315
+msgid ""
+"Motion estimation method\n"
+"Diamond search: fastest\n"
+"Hexagonal search: default setting\n"
+"Uneven Multi-Hexagon: better but slower\n"
+"Exhaustive search: extremely slow, primarily for testing"
+msgstr ""
+"Motion Estimation Methode\n"
+"Diamond search: schnellste\n"
+"Hexagonal search: Vorgabe\n"
+"Uneven Multi-Hexagon: besser aber langsamer\n"
+"Exhaustive search: extrem langsam, hauptsächlich für Testzwecke"
+
+# ich hoff mal das ist korrekt ..entscheidung klingt blöd
+#: plugins/x264/lqt_x264.c:323
+msgid "Partition decision"
+msgstr "Partitionierungswahl"
+
+#: plugins/x264/lqt_x264.c:332
+msgid ""
+"Subpixel motion estimation and partition decision quality: 1=fast, 7=best."
+msgstr ""
+"Qualität der Subpixel Motion estimation und Partitionierungswahl: 1=schnell, "
+"8=beste"
+
+#: plugins/x264/lqt_x264.c:342
+msgid "RD based mode decision for B-frames"
+msgstr "RD basierte Moduswahl für B-Frames"
+
+#: plugins/x264/lqt_x264.c:347
+msgid "RD based mode decision for B-frames. Requires partition decision 6."
+msgstr "RD basierte Moduswahl für B-Frames. Benötigt Partionierungswahl 6."
+
+#: plugins/x264/lqt_x264.c:353
+msgid "Search range"
+msgstr "Suchtiefe"
+
+#: plugins/x264/lqt_x264.c:356
+msgid ""
+"Maximum distance to search for motion estimation, measured from predicted "
+"position(s). Default of 16 is good for most footage, high motion sequences "
+"may benefit from settings between 24-32."
+msgstr ""
+"Maximal abzusuchende Distanz für Motion Compensation, gemessen von der "
+"vorhergesagten Postition. Die Vorgabe (16) ist gut für das meiste Material, "
+"bewegungsintensive Szenen könnten von einer Einstellung zwischen 24-32 "
+"profitieren."
+
+#: plugins/x264/lqt_x264.c:363
+msgid "Max Ref. frames"
+msgstr "Max. Ref. Frames"
+
+# frameref?
+#: plugins/x264/lqt_x264.c:368
+msgid ""
+"This is effective in Anime, but seems to make little difference in live-"
+"action source material. Some decoders are unable to deal with large frameref "
+"values."
+msgstr ""
+"Dies ist effectiv bei Anime, allerdings scheint es kaum einen Unterschied "
+"bei Live-Action Material zu machen. Einige Decoder haben Probleme mit großen "
+"frameref Werten."
+
+#: plugins/x264/lqt_x264.c:374
+msgid "Chroma motion estimation"
+msgstr ""
+
+# ???
+#: plugins/x264/lqt_x264.c:382
+msgid "Mixed references"
+msgstr "Gemischte Referenzen"
+
+#: plugins/x264/lqt_x264.c:387
+msgid "Allow each MB partition in P-frames to have it's own reference number"
+msgstr ""
+"Erlaube jeder MB partition in P-Frames ihre eigene Referenznummer zu haben."
+
+#: plugins/x264/lqt_x264.c:393
+msgid "Bidirectional ME"
+msgstr "Bidirektionale ME"
+
+#: plugins/x264/lqt_x264.c:398
+msgid "Jointly optimize both MVs in B-frames"
+msgstr "Optimiere beide MVs in B-Frames."
+
+#: plugins/x264/lqt_x264.c:403
+msgid "Weighted biprediction"
+msgstr "Gewichtete Biprediction"
+
+# wichtung?
+#: plugins/x264/lqt_x264.c:408
+msgid "Implicit weighting for B-frames"
+msgstr "Implizierte Gewichtung für B-Frames."
+
+#: plugins/x264/lqt_x264.c:412
+msgid "Direct MV prediction mode"
+msgstr "Direkter MV Vorhersagemodus."
+
+#: plugins/x264/lqt_x264.c:416
+msgid "Spatial"
+msgstr "Räumlich"
+
+#: plugins/x264/lqt_x264.c:417
+msgid "Temporal"
+msgstr "Zeitlich"
+
+#: plugins/x264/lqt_x264.c:418
+msgid "Auto"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:428
+msgid "Deblocking filter"
+msgstr "Entblockungsfilter"
+
+#: plugins/x264/lqt_x264.c:433
+#, fuzzy
+msgid "Use deblocking loop filter (increases quality)."
+msgstr "Verwende Deblocking Schleifenfilter (verbessert Qualität)"
+
+# intensität?
+#: plugins/x264/lqt_x264.c:437
+msgid "Deblocking filter strength"
+msgstr "Entblockungsfilter Stärke"
+
+#: plugins/x264/lqt_x264.c:442
+msgid "Loop filter AlphaC0 parameter"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:446
+msgid "Deblocking filter threshold"
+msgstr "Schwellwert für Deblocking-Filter"
+
+#: plugins/x264/lqt_x264.c:451
+msgid "Loop filter Beta parameter"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:455
+msgid "Enable CABAC"
+msgstr "Aktiviere CABAC"
+
+#: plugins/x264/lqt_x264.c:460
+msgid ""
+"Enable CABAC (Context-Adaptive Binary Arithmetic Coding). Slightly slows "
+"down encoding and decoding, but should save 10-15% bitrate."
+msgstr ""
+"Aktiviere CABAC (Context-Adaptive Binary Arithmetic Coding). Verlangsamt das "
+"Codieren und Decodieren etwas, sollte aber um die 10-15% Bitrate einsparen."
+
+#: plugins/x264/lqt_x264.c:466
+msgid "Trellis RD quantization"
+msgstr "Trellis RD Quantisierung"
+
+#: plugins/x264/lqt_x264.c:469
+msgid "Disabled"
+msgstr "Deaktiviert"
+
+# kontext
+#: plugins/x264/lqt_x264.c:470
+msgid "Enabled (final)"
+msgstr "Aktiviert (abschließend)"
+
+#: plugins/x264/lqt_x264.c:471
+msgid "Enabled (always)"
+msgstr "Aktiviert (immer)"
+
+#: plugins/x264/lqt_x264.c:473
+msgid ""
+"Trellis RD quantization. Requires CABAC. Can be enabled either for the final "
+"encode of a MB or for all mode desisions"
+msgstr ""
+"Trellis RD Quantisierung. Benötigt CABAC. Kann entweder für das endgültige "
+"Codieren eines MB oder für alle Moduswahlen aktiviert werden."
+
+#: plugins/x264/lqt_x264.c:488
+msgid "Threads"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:493
+msgid "Number of threads"
+msgstr ""
+
+#: plugins/x264/lqt_x264.c:502
+msgid "H.264 (MPEG4 AVC) encoder"
+msgstr "H.264 (MPEG4 AVC) Codierer"
+
+#: plugins/x264/lqt_x264.c:503
+msgid "Based on the x264 library"
+msgstr "Basiert auf der x264 Bibliothek"
+
+#: plugins/x264/x264.c:497
+msgid "Invalid log level from x264"
+msgstr ""
+
+#: plugins/x264/x264.c:599
+#, fuzzy
+msgid "Choosing interlaced encoding"
+msgstr "Aktiviere Interlaced Codierung"
+
+#: plugins/x264/x264.c:640
+msgid "x264_encoder_open failed"
+msgstr "x264_encoder_open Fehlgeschlagen"
+
+#: plugins/x264/x264.c:899
+#, c-format
+msgid "Unrecognized parameter %s"
+msgstr "Unbekannter Parameter %s"
+
+#: plugins/schroedinger/lqt_schroedinger.c:45
+#, fuzzy
+msgid "Constant noise threshold"
+msgstr "Inter Schwellwert"
+
+#: plugins/schroedinger/lqt_schroedinger.c:46
+#, fuzzy
+msgid "Constant bitrate"
+msgstr "Konstante Qualität"
+
+#: plugins/schroedinger/lqt_schroedinger.c:47
+msgid "Low delay"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:48
+msgid "Lossless"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:49
+#, fuzzy
+msgid "Constant lambda"
+msgstr "Konstante Qualität"
+
+#: plugins/schroedinger/lqt_schroedinger.c:50
+#, fuzzy
+msgid "Constant error"
+msgstr "Konstant"
+
+#: plugins/schroedinger/lqt_schroedinger.c:65
+#, fuzzy
+msgid "Minimum bitrate"
+msgstr "Minimale Bitrate (kbps)"
+
+#: plugins/schroedinger/lqt_schroedinger.c:71
+#, fuzzy
+msgid "Maximum bitrate"
+msgstr "Maximale Locale Bitrate"
+
+#: plugins/schroedinger/lqt_schroedinger.c:78
+#, fuzzy
+msgid "Buffer size"
+msgstr "VBV Puffergröße"
+
+#: plugins/schroedinger/lqt_schroedinger.c:84
+msgid "Buffer level"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:90
+#, fuzzy
+msgid "Noise Threshold"
+msgstr "ME Schwellwert"
+
+#: plugins/schroedinger/lqt_schroedinger.c:115
+msgid "GOP Stucture"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:118
+msgid "Adaptive"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:119
+msgid "Intra only"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:120
+msgid "Backref"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:121
+msgid "Chained backref"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:122
+#, fuzzy
+msgid "Biref"
+msgstr "Bitrate"
+
+#: plugins/schroedinger/lqt_schroedinger.c:123
+msgid "Chained biref"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:128
+#, fuzzy
+msgid "GOP size"
+msgstr "Maximale GOP Größe"
+
+#: plugins/schroedinger/lqt_schroedinger.c:135
+msgid "Open GOPs"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:140
+msgid ""
+"Choose whether GOPs should be open or closed. Closed GOPs improve seeking "
+"accuracy for buggy decoders, open GOPs have a slightly better compression"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:150
+#, fuzzy
+msgid "MV Precision"
+msgstr "MB Wahlmodus"
+
+#: plugins/schroedinger/lqt_schroedinger.c:158
+msgid "Block size"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:161
+#: plugins/schroedinger/lqt_schroedinger.c:173
+msgid "Automatic"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:162
+msgid "Small"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:163
+msgid "Medium"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:164
+msgid "Large"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:170
+msgid "Block overlap"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:175
+#, fuzzy
+msgid "Partial"
+msgstr "Räumlich"
+
+#: plugins/schroedinger/lqt_schroedinger.c:182
+#, fuzzy
+msgid "Enable GMC"
+msgstr "Aktiviere CABAC"
+
+#: plugins/schroedinger/lqt_schroedinger.c:187
+#, fuzzy
+msgid "Enable global motion estimation"
+msgstr "Verwende Globale Motion Compensation"
+
+#: plugins/schroedinger/lqt_schroedinger.c:191
+msgid "Enable phasecorrelation estimation"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:200
+msgid "Wavelets"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:205
+msgid "Intra wavelet"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:208
+#: plugins/schroedinger/lqt_schroedinger.c:222
+msgid "Deslauriers-Debuc (9,3)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:209
+#: plugins/schroedinger/lqt_schroedinger.c:223
+msgid "LeGall (5,3)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:210
+#: plugins/schroedinger/lqt_schroedinger.c:224
+msgid "Deslauriers-Debuc (13,5)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:211
+#: plugins/schroedinger/lqt_schroedinger.c:225
+msgid "Haar (no shift)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:212
+#: plugins/schroedinger/lqt_schroedinger.c:226
+msgid "Haar (single shift)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:213
+#: plugins/schroedinger/lqt_schroedinger.c:227
+msgid "Fidelity"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:214
+#: plugins/schroedinger/lqt_schroedinger.c:228
+msgid "Daubechies (9,7)"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:219
+msgid "Inter wavelet"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:233
+#: plugins/schroedinger/lqt_schroedinger.c:238
+msgid "Filter"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:242
+msgid "Center weighted median"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:243
+msgid "Gaussian"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:244
+msgid "Add noise"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:245
+#, fuzzy
+msgid "Adaptive Gaussian"
+msgstr "Adaptive B-Frame Wahl"
+
+#: plugins/schroedinger/lqt_schroedinger.c:250
+msgid "Filter value"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:264
+msgid "Enable multiquant"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:272
+msgid "Enable DC multiquant"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:286
+msgid "Dirac video"
+msgstr ""
+
+#: plugins/schroedinger/lqt_schroedinger.c:287
+msgid "Dirac codec based on libschroedinger"
+msgstr ""
+
+#: plugins/schroedinger/schroedinger_encode.c:186
+msgid "Discarding redundant sequence end code"
+msgstr ""
+
+#: src/audio.c:316
+msgid "Cannot encode samples: Stream format undefined"
+msgstr "Kann Samples nicht dekodieren: Streamformat undefiniert"
+
+#: src/audio.c:583
+msgid "Cannot decode samples: Stream format undefined"
+msgstr "Kann Samples nicht dekodieren: Stream Format undefiniert"
+
+#: src/avi_riff.c:130
+msgid "file->total_riffs >= MAX_RIFFS"
+msgstr ""
+
+# CHECK single nod"
+#: src/charset.c:95 src/charset.c:108 src/charset.c:132
+#, c-format
+msgid "Cannot open iconv for conversion to %s from %s"
+msgstr "Konnte iconv für die Umwandlung von %s nach %s nicht öffnen"
+
+#: src/charset.c:167
+msgid "Invalid Multibyte sequence"
+msgstr "Ungültige Multibyte Sequenz"
+
+#: src/charset.c:171
+msgid "Incomplete Multibyte sequence"
+msgstr "Unvollständige Multibyte Sequenz"
+
+#: src/gmhd_text.c:75
+msgid "More than 36 bytes in the gmhd text atom\n"
+msgstr "Mehr als 36 Bytes im gmhd Text Atom\n"
+
+#: src/lqt_bufalloc.c:114
+#, c-format
+msgid "malloc of %d bytes failed"
+msgstr "Malloc von %d Bytes fehlgeschlagen"
+
+#: src/lqt_bufalloc.c:120
+#, c-format
+msgid "could not allocate %d bytes aligned on a %d byte boundary"
+msgstr ""
+"Konnte keine %d Bytes, ausgerichtet auf %d Byte Grenzen an, reservieren"
+
+#: src/lqt_codecfile.c:154
+msgid "no system-wide codec file. Looking in user's home."
+msgstr ""
+
+#: src/lqt_codecfile.c:996
+#, c-format
+msgid "%s could not be written, deleting imcomplete file"
+msgstr "%s konnte nicht geschrieben werden, Lösche unvollständige Datei."
+
+#: src/lqt_codecinfo.c:458
+#, c-format
+msgid "dlopen failed for %s: %s"
+msgstr "dlopen fehlgeschlagen für %s: %s"
+
+#: src/lqt_codecinfo.c:472
+#, c-format
+msgid "Module %s has no API version and is thus terribly old"
+msgstr "Modul %s hat keine API Version und ist deshalb fürchterlich alt"
+
+#: src/lqt_codecinfo.c:483
+#, c-format
+msgid "Codec interface version mismatch of module %s: %d [module] != %d [lqt]"
+msgstr ""
+"Versionskonflikt mit dem Codecinterface bei Modul %s: %d [Modul] != %d [Lqt]"
+
+#: src/lqt_codecinfo.c:494
+#, c-format
+msgid "Symbol get_num_codecs not found in %s"
+msgstr "Symbol get_num_codecs in %s nicht gefunden"
+
+#: src/lqt_codecinfo.c:503
+#, c-format
+msgid "Symbol get_codec_info not found in %s"
+msgstr "Symbol get_codec_info in %s nicht gefunden"
+
+#: src/lqt_codecinfo.c:514
+#, c-format
+msgid "No codecs found in %s"
+msgstr "Keine Codecs in %s gefunden"
+
+#: src/lqt_codecinfo.c:628
+#, c-format
+msgid "Cannot open plugin directory %s (forgot make install?)"
+msgstr "Kann das Plugin Verzeichnis %s nicht finden (make install vergessen?)"
+
+#: src/lqt_codecinfo.c:869
+#, c-format
+msgid "Stringlist parameter %s has NULL options"
+msgstr "Parameter der Stringliste %s hat NULL Optionen"
+
+#: src/lqt_codecinfo.c:928
+#, c-format
+msgid "Codec %s has no fourccs defined"
+msgstr "Codec %s definiert keine fourcc"
+
+#: src/lqt_codecinfo.c:1512
+#, c-format
+msgid "lqt_set_default_parameter: No %s codec %s found"
+msgstr "lqt_set_default_parameter: Kein %s Codec %s gefunden"
+
+#: src/lqt_codecinfo.c:1543
+#, c-format
+msgid "lqt_set_default_parameter: No parameter %s for codec %s found"
+msgstr "lqt_set_default_parameter: Kein Parameter %s für Codec %s gefunden"
+
+#: src/lqt_codecinfo.c:1602
+#, c-format
+msgid "lqt_restore_default_parameters: dlopen failed for %s: %s"
+msgstr "lqt_restore_default_parameters: dlopen für %s fehlgeschlagen: %s"
+
+#: src/lqt_codecinfo.c:1610
+#, c-format
+msgid "Symbol %s not found in %s"
+msgstr "Symbol %s nicht in %s gefunden"
+
+#: src/lqt_codecinfo.c:1619
+#, c-format
+msgid "Couldn't get codec info for %s from_module %s"
+msgstr "Konnte keine Codec info für %s aus Modul %s bekommen"
+
+#: src/lqt_codecs.c:38
+msgid "quicktime_delete_vcodec_stub called"
+msgstr "quicktime_delete_vcodec_stub aufgerufen"
+
+#: src/lqt_codecs.c:45
+msgid "quicktime_delete_acodec_stub called"
+msgstr "quicktime_delete_acodec_stub aufgerufen"
+
+#: src/lqt_codecs.c:54
+msgid "quicktime_decode_video_stub called"
+msgstr "quicktime_decode_video_stub aufgerufen"
+
+#: src/lqt_codecs.c:63
+msgid "quicktime_encode_video_stub called"
+msgstr "quicktime_encode_video_stub aufgerufen"
+
+#: src/lqt_codecs.c:73
+msgid "quicktime_decode_audio_stub called"
+msgstr "quicktime_decode_audio_stub aufgerufen"
+
+#: src/lqt_codecs.c:83
+msgid "quicktime_encode_audio_stub called"
+msgstr "quicktime_encode_audio_stub aufgerufen"
+
+#: src/lqt_codecs.c:134
+#, c-format
+msgid "Could not find video %s for fourcc %4s"
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
+
+#: src/lqt_codecs.c:144 src/lqt_codecs.c:241
+#, c-format
+msgid "Loading module %s"
+msgstr "Lade Modul %s"
+
+#: src/lqt_codecs.c:151 src/lqt_codecs.c:248
+#, c-format
+msgid "Loading module %s failed: %s"
+msgstr "Laden des Moduls %s fehlgeschlagen: %s"
+
+#: src/lqt_codecs.c:177
+#, c-format
+msgid "Module %s contains no function get_video_codec"
+msgstr "Modul %s enthält keine Funktion Namens get_video_codec"
+
+#: src/lqt_codecs.c:231
+#, c-format
+msgid "Could not find audio %s for fourcc %4s"
+msgstr "Konnte keinen Video %s für Fourcc %4s finden"
+
+#: src/lqt_codecs.c:271
+#, c-format
+msgid "Module %s contains no function get_audio_codec"
+msgstr "Modul %s enthält keine Funktion Namens get_audio_codec"
+
+# CHECK Namens gross"
+#: src/lqt_codecs.c:537
+msgid ""
+"Audio codec and container are not known to be compatible. File might be "
+"playable by libquicktime only."
+msgstr ""
+"Audiocodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
+"nur mit Libquicktime abspielbar sein."
+
+#: src/lqt_codecs.c:543
+msgid ""
+"Video codec and container are not known to be compatible. File might be "
+"playable by libquicktime only."
+msgstr ""
+"Videcodec und Behälter sind nicht Kompatibel. Die Datei wird möglicherweise "
+"nur mit Libquicktime abspielbar sein."
+
+#: src/lqt_color.c:205
+#, c-format
+msgid "Unknown colormodel (%d)\n"
+msgstr "Unbekanntes Farbmodell (%d)\n"
+
+#: src/lqt_color.c:239
+msgid "Input colorspace is neither RGB nor YUV, can't predict conversion price"
+msgstr ""
+"Eingabe Farbmodell ist weder RGB noch YUV, kann Umwandlungskosten nicht "
+"Vorrausberechnen."
+
+# CHEC"
+#: src/lqt_color.c:246
+msgid ""
+"Output colorspace is neither RGB nor YUV, can't predict conversion price"
+msgstr ""
+"Ausgabe Farbmodell ist weder RGB noch YUV, can Umwandlungskosten nicht "
+"Vorrausberechnen."
+
+#: src/lqt_qtvr.c:51 src/lqt_qtvr.c:117
+msgid "lqt_qtvr_add_node only single node movies supported."
+msgstr "lqt_qtvr_add_node nur Singlenode Filme werden unterstützt."
+
+#: src/lqt_quicktime.c:114
+msgid "quicktime_make_streamable: no moov atom"
+msgstr "quicktime_make_streamable: kein moov Atom"
+
+#: src/lqt_quicktime.c:121
+msgid "quicktime_make_streamable: no mdat atom"
+msgstr "quicktime_make_streamable: kein mdat Atom"
+
+#: src/lqt_quicktime.c:150
+#, c-format
+msgid "quicktime_make_streamable: cannot open output file: %s"
+msgstr ""
+"quicktime_make_streamable: Ausgabe Datei, %s, konnte nicht geöffnet werden"
+
+#: src/lqt_quicktime.c:171
+#, fuzzy, c-format
+msgid ""
+"quicktime_make_streamable: moov size changed from %<PRId64> to %<PRId64> "
+"(Pos: %<PRId64>, start: %<PRId64>)"
+msgstr ""
+"quicktime_make_streamable: Größe des moov geändert von %lld auf %lld (Pos: %"
+"lld, start: %lld)"
+
+#: src/lqt_quicktime.c:543
+msgid "quicktime_set_framerate shouldn't be called in read mode."
+msgstr "quicktime_set_framerate sollte nicht im Lesemodus aufgerufen werden"
+
+#: src/lqt_quicktime.c:721
+msgid "quicktime_set_audio_position: track >= file->total_atracks\n"
+msgstr ""
+
+#: src/lqt_quicktime.c:969
+#, c-format
+msgid "lqt_set_cmodel: No track No. %d"
+msgstr "lqt_set_cmodel: Kein Track Nr. %d"
+
+#: src/lqt_quicktime.c:1764
+msgid "read/write mode is not supported"
+msgstr "Schreib/Lese Modus nicht unterstützt"
+
+#: src/lqt_quicktime.c:1792
+msgid "Opening failed (unsupported filetype)"
+msgstr "Öffnen fehlgeschlagen (Dateityp nicht unterstützt)"
+
+#: src/lqt_quicktime.c:1965
+#, c-format
+msgid "Setting parameter %s to %d"
+msgstr "Setze Parameter %s zu %d"
+
+#: src/lqt_quicktime.c:1972
+#, c-format
+msgid "Setting parameter %s to %f"
+msgstr "Setze Parameter %s zu %f"
+
+#: src/lqt_quicktime.c:1980
+#, c-format
+msgid "Setting parameter %s to %s"
+msgstr "Setze Parameter %s zu %s"
+
+#: src/moov.c:107
+#, c-format
+msgid "read_cmov: compression '%c%c%c%c' not zlib."
+msgstr "read_cmov: Kompression '%c%c%c%c' nicht zlib."
+
+#: src/stco.c:135
+#, c-format
+msgid "quicktime_update_stco chunk must start at 1. chunk=%ld\n"
+msgstr "quicktime_update_stco chunk muss bei 1 anfangen. chunk=%ld\n"
+
+#: src/stsd.c:77
+msgid "quicktime_stsd_init_qtvr invalid track type supplied."
+msgstr "quicktime_stsd_init_qtvr ungültiger Spurtyp übergeben"
+
+#: src/stsdtable.c:373
+#, c-format
+msgid "Skipping unknown atom \"%4s\" inside audio stsd"
+msgstr "Überspringe unbekanntes Atom\"%4s\" innerhalb der Audio stsd"
+
+#: src/texttrack.c:50
+msgid ""
+"Cannot determine character set of text track, will copy the strings verbatim"
+msgstr ""
+"Kann Zeichensatz des Texttracks nicht ermitteln, werde die Strings wörtlich "
+"kopieren."
+
+#: src/texttrack.c:62
+msgid "Unsupported charset in text track, will copy the strings verbatim"
+msgstr ""
+"Nicht Unterstützter  Zeichensatz im Texttrack, werde die Strings wörtlich "
+"kopieren"
+
+#: src/texttrack.c:246
+msgid "Text track not supported for this file"
+msgstr "Diese Art Datei unterstützt keine text Tracks"
+
+#: src/texttrack.c:274
+msgid "Need at least one audio or video stream for chapters"
+msgstr "Benötige mindestens einen Audio oder Video Stream für Kapitel"
+
+#: src/texttrack.c:298
+msgid "Subtitles are not supported in AVI files"
+msgstr "AVI Dateien unterstützen keine Untertitel"
+
+#: src/texttrack.c:314
+msgid ""
+"Subtitles character set could not be determined, string will be copied "
+"verbatim"
+msgstr ""
+"Untertitel Zeichensatz konnte nicht ermittelt werden, die Strings werden "
+"wörtlich kopiert"
+
+#: src/texttrack.c:326
+msgid "Unsupported character set in text track, string will be copied verbatim"
+msgstr ""
+"Nicht Unterstützter Zeichensatz  im Texttrack, der String wird wörtlich "
+"kopiert"
+
+#: src/udta.c:148
+#, c-format
+msgid ""
+"Unknown character set for language code %d, will copy the string verbatim"
+msgstr ""
+"Unbekannter Zeichensatz für Sprachcode %d, werde den String wörtlich kopieren"
+
+#: utils/gtk/libquicktime_config.c:84
+msgid "Audio Codecs"
+msgstr ""
+
+#: utils/gtk/libquicktime_config.c:92
+msgid "Video Codecs"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:716
+msgid "Installed codecs"
+msgstr "Installierte Codecs"
+
+#: utils/gtk/lqt_gtk.c:742
+msgid "Up"
+msgstr "Hoch"
+
+#: utils/gtk/lqt_gtk.c:743
+msgid "Down"
+msgstr "Runter"
+
+#: utils/gtk/lqt_gtk.c:745 utils/gtk/lqt_gtk.c:1306
+msgid "Parameters..."
+msgstr "Parameter..."
+
+#: utils/gtk/lqt_gtk.c:746 utils/gtk/lqt_gtk.c:1305
+msgid "Info..."
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:902
+msgid "Encoding Options"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:911
+#, fuzzy
+msgid "Decoding Options"
+msgstr "Decodierqualität"
+
+#: utils/gtk/lqt_gtk.c:927
+msgid "Restore defaults"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1065
+msgid "Internal name: "
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1074
+msgid "Module: "
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1148
+msgid "Fourccs"
+msgstr ""
+
+#: utils/gtk/lqt_gtk.c:1156
+msgid "WAV Id(s)"
+msgstr ""
+
+#: utils/common.c:50
+#, c-format
+msgid "Type: %s\n"
+msgstr "Typ: %s\n"
+
+#: utils/common.c:55
+#, c-format
+msgid "    copyright: %s\n"
+msgstr "    Copyright: %s\n"
+
+#: utils/common.c:59
+#, c-format
+msgid "    name:      %s\n"
+msgstr "    Name:      %s\n"
+
+#: utils/common.c:63
+#, c-format
+msgid "    info:      %s\n"
+msgstr "    Info:      %s\n"
+
+#: utils/common.c:67
+#, c-format
+msgid "    author:    %s\n"
+msgstr "    Autor:    %s\n"
+
+#: utils/common.c:71
+#, c-format
+msgid "    artist:    %s\n"
+msgstr "    Künstler:    %s\n"
+
+#: utils/common.c:75
+#, c-format
+msgid "    album:     %s\n"
+msgstr "    Album:     %s\n"
+
+#: utils/common.c:79
+#, c-format
+msgid "    genre:     %s\n"
+msgstr "    Genre:     %s\n"
+
+#: utils/common.c:83
+#, c-format
+msgid "    track:     %s\n"
+msgstr "    Track:     %s\n"
+
+#: utils/common.c:87
+#, c-format
+msgid "    comment:   %s\n"
+msgstr "    Kommentar:   %s\n"
+
+#: utils/common.c:91
+#, c-format
+msgid "  %d audio tracks.\n"
+msgstr "  %d Audio Tracks.\n"
+
+#: utils/common.c:95
+#, c-format
+msgid "    %d channels, %d bits, sample rate %ld, length %ld samples, "
+msgstr "    %d Kanäle, %d bits, Samplerate %ld, Länge %ld Samples, "
+
+#: utils/common.c:102
+#, c-format
+msgid "wav_id 0x%02x.\n"
+msgstr ""
+
+#: utils/common.c:106
+#, c-format
+msgid "compressor %s.\n"
+msgstr "Kompressor %s.\n"
+
+#: utils/common.c:108
+#, c-format
+msgid "    Sample format: %s.\n"
+msgstr "    Sample Format: %s.\n"
+
+#: utils/common.c:110
+#, c-format
+msgid "    Channel setup: "
+msgstr "    Kanal Setup: "
+
+#: utils/common.c:117
+#, c-format
+msgid ", "
+msgstr ", "
+
+#: utils/common.c:119
+#, c-format
+msgid "\n"
+msgstr "\n"
+
+#: utils/common.c:122 utils/common.c:127
+#, c-format
+msgid "Not available\n"
+msgstr "Nicht Verfügbar\n"
+
+#: utils/common.c:123
+#, c-format
+msgid "    Language: "
+msgstr "    Sprache: "
+
+#: utils/common.c:129 utils/common.c:167
+#, c-format
+msgid "    supported.\n"
+msgstr "    Unterstützt.\n"
+
+#: utils/common.c:131 utils/common.c:169
+#, c-format
+msgid "    not supported.\n"
+msgstr "    Nicht unterstützt.\n"
+
+#: utils/common.c:135
+#, c-format
+msgid "  %d video tracks.\n"
+msgstr "  %d Video Tracks. \n"
+
+#: utils/common.c:140
+#, c-format
+msgid ""
+"    %dx%d, depth %d\n"
+"    rate %f [%d:%d] %s\n"
+"    length %ld frames\n"
+"    compressor %s.\n"
+msgstr ""
+"    %dx%d, Farbtiefe %d\n"
+"    Rate %f [%d:%d] %s\n"
+"    Länge %ld Frames\n"
+"    Kompressor %s.\n"
+
+#: utils/common.c:146
+msgid "constant"
+msgstr "Konstant"
+
+#: utils/common.c:146
+msgid "not constant"
+msgstr "Nicht Konstant"
+
+#: utils/common.c:150
+#, c-format
+msgid "    Native colormodel:  %s\n"
+msgstr "    Natives Farbmodell:  %s\n"
+
+#: utils/common.c:152
+#, c-format
+msgid "    Interlace mode:     %s\n"
+msgstr "    Interlace Modus:     %s\n"
+
+#: utils/common.c:155
+#, c-format
+msgid "    Chroma placement: %s\n"
+msgstr "    Chroma Platzierung: %s\n"
+
+#: utils/common.c:157
+#, c-format
+msgid "    Pixel aspect ratio: %d:%d\n"
+msgstr "    Pixel Seitenverhältnis: %d:%d\n"
+
+#: utils/common.c:160
+#, c-format
+msgid "    Timecodes available (flags: %08x, rate: %d)\n"
+msgstr ""
+
+#: utils/common.c:163
+#, fuzzy, c-format
+msgid "    No timecodes available\n"
+msgstr "Nicht Verfügbar\n"
+
+#: utils/common.c:173
+#, c-format
+msgid "  %d text tracks.\n"
+msgstr "%d Text Tracks.\n"
+
+#: utils/common.c:176
+#, fuzzy, c-format
+msgid "    timescale: %d, length: %<PRId64>, language: "
+msgstr "    Zeitskala: %d, Länge: %lld, Sprache: "
+
+#: utils/common.c:181
+#, c-format
+msgid "Not available, "
+msgstr "Nicht Verfügbar, "
+
+#: utils/common.c:182
+#, c-format
+msgid "type: %s\n"
+msgstr "Typ: %s\n"
+
+#: utils/common.c:182
+msgid "Chapters"
+msgstr "Kapitel"
+
+#: utils/common.c:182
+msgid "Subtitles"
+msgstr "Untertitel"
+
+#: utils/lqt_transcode.c:91
+#, c-format
+msgid "Supported formats\n"
+msgstr "Unterstützte Formate\n"
+
+#: utils/lqt_transcode.c:94
+#, c-format
+msgid "%8s: %s (default codecs: %s/%s)\n"
+msgstr "%8s: %s (Vorgabe Codec: %s/%s)\n"
+
+#: utils/lqt_transcode.c:142
+#, c-format
+msgid ""
+"Usage: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|pano>] "
+"[-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-vc "
+"<video_codec>] <in_file> <out_file>\n"
+msgstr ""
+"Gebrauch: lqt_transcode [[-avi]|[-f <format>]] [-floataudio] [-qtvr <obj|"
+"pano>] [-qtvr_columns <columns>] [-qtvr_rows <rows>] [-ac <audio_codec>] [-"
+"vc <video_codec>] <in_file> <out_file>\n"
+
+#: utils/lqt_transcode.c:143
+#, c-format
+msgid ""
+"       Transcode <in_file> to <out_file> using <audio_codec> and "
+"<video_codec>\n"
+"\n"
+msgstr ""
+"       Transcode <in_file> nach <out_file> unter Verwendung von "
+"<audio_codec> und <video_codec>\n"
+"\n"
+
+#: utils/lqt_transcode.c:144
+#, c-format
+msgid "       lqt_transcode -lv\n"
+msgstr ""
+
+#: utils/lqt_transcode.c:145
+#, c-format
+msgid ""
+"       List video encoders\n"
+"\n"
+msgstr ""
+"       Liste Audio Codiecs\n"
+"\n"
+
+#: utils/lqt_transcode.c:146
+#, c-format
+msgid "       lqt_transcode -la\n"
+msgstr ""
+
+#: utils/lqt_transcode.c:147
+#, c-format
+msgid "       List audio encoders\n"
+msgstr "       Liste Audio Codierer\n"
+
+#: utils/lqt_transcode.c:148
+#, c-format
+msgid "       lqt_transcode -lf\n"
+msgstr ""
+
+#: utils/lqt_transcode.c:149
+#, c-format
+msgid "       List output formats\n"
+msgstr "       Liste Ausgabe Formate\n"
+
+#: utils/lqt_transcode.c:221
+#, c-format
+msgid "Cannot open input file %s\n"
+msgstr "Kann Eingabedatei %s nicht öffnen\n"
+
+#: utils/lqt_transcode.c:232
+#, c-format
+msgid "Need a file extension when autoguessing output format\n"
+msgstr "Brauche Dateierweiterung um Ausgabeformat auto-zuerkennen\n"
+
+#: utils/lqt_transcode.c:248
+#, c-format
+msgid ""
+"Cannot detect output format. Specify a valid extension or use -f <format>\n"
+msgstr ""
+"Kann Ausgabeformat nicht ermitteln. Geben sie eine zulässige Erweiterung an "
+"oder verwenden sie -f <Format>\n"
+
+#: utils/lqt_transcode.c:268
+#, c-format
+msgid "Cannot open output file %s\n"
+msgstr "Kann Ausgabedatei %s nicht öffnen\n"
+
+#: utils/lqt_transcode.c:291
+#, c-format
+msgid "Unsupported video cocec %s, try -lv\n"
+msgstr "Nicht Unterstützter Videocodec %s, versuch -lv\n"
+
+#: utils/lqt_transcode.c:343
+#, c-format
+msgid "Unsupported audio codec %s, try -la\n"
+msgstr "Nicht unterstützter Audiocodec %s, versuch -la\n"
+
+#: utils/lqt_transcode.c:562
+#, c-format
+msgid "Unsupported format %s, try -lf"
+msgstr "Nicht Unterstütztes Format %s, versuch -lf"
+
+#: utils/lqt_transcode.c:581
+#, c-format
+msgid "%6.2f%% Completed"
+msgstr "%6.2f%% Fertig"
+
+#: utils/lqt_transcode.c:588
+#, fuzzy, c-format
+msgid "%6.2f%% Completed\n"
+msgstr "%6.2f%% Fertig"
+
+# verarbeiten? kontext
+#: utils/lqtplay.c:283
+#, c-format
+msgid "can't handle visuals != TrueColor, sorry\n"
+msgstr "Kann keine Visuals != TrueColor verwenden, sorry\n"
+
+#: utils/lqtplay.c:326
+#, c-format
+msgid "INFO: Xvideo port %ld: is busy, skipping\n"
+msgstr "INFO: Xvideo port %ld: ist beschäftigt, überspringe\n"
+
+#: utils/lqtplay.c:340
+#, c-format
+msgid "INFO: Xvideo port %d: 0x%x (%c%c%c%c) %s"
+msgstr ""
+
+#: utils/lqtplay.c:434 utils/lqtplay.c:498
+#, c-format
+msgid "out of memory\n"
+msgstr "Nicht genügend freier Speicher\n"
+
+#: utils/lqtplay.c:592
+#, c-format
+msgid "WARNING: gl: can't get visual (rgb,db)\n"
+msgstr "WARNING: gl: kann Visual (rgb,db) nicht bekommen\n"
+
+#: utils/lqtplay.c:597
+#, c-format
+msgid "INFO: gl: DRI=%s\n"
+msgstr "INFO: gl: DRI=%s\n"
+
+#: utils/lqtplay.c:598
+msgid "Yes"
+msgstr "Ja"
+
+#: utils/lqtplay.c:598
+msgid "No"
+msgstr "Nein"
+
+#: utils/lqtplay.c:600
+#, c-format
+msgid "WARNING: gl: Direct rendering missing\n"
+msgstr "WARNUNG: gl: Direct Rendering fehlt\n"
+
+#: utils/lqtplay.c:606
+#, c-format
+msgid "INFO: gl: texture max size: %d\n"
+msgstr "INFO: gl: Maximale Texturgröße: %d\n"
+
+#: utils/lqtplay.c:609
+#, c-format
+msgid "WARNING: gl: Maximum texture size too small (got %dx%d, needed %dx%d)\n"
+msgstr ""
+"WARNUNG: gl: Maximale Texturgröße ist zu klein (erhielt %dx%d, benötige %dx%"
+"d)\n"
+
+#: utils/lqtplay.c:621
+#, c-format
+msgid "INFO: gl: frame=%dx%d, texture=%dx%d\n"
+msgstr "INFO: gl: Frame=%dx%d, Textur=%dx%d\n"
+
+#: utils/lqtplay.c:684
+#, c-format
+msgid "Error opening PCM device %s\n"
+msgstr "Fehler beim öffenen des PCM Geräts %s\n"
+
+#: utils/lqtplay.c:692
+#, c-format
+msgid "Can not configure this PCM device. (%s)\n"
+msgstr "Kann dieses PCM Gerät nicht Konfigurieren. (%s)\n"
+
+#: utils/lqtplay.c:697
+#, c-format
+msgid "Error setting access. (%s)\n"
+msgstr "Fehler beim setzen des Zugriffs. (%s)\n"
+
+#: utils/lqtplay.c:706
+#, c-format
+msgid "Error setting format.(%s)\n"
+msgstr "Fehler beim setzen des Formats.(%s)\n"
+
+#: utils/lqtplay.c:712
+#, c-format
+msgid "Error setting channels. %i (%s)\n"
+msgstr "Fehler beim setzen der Kanäle. %i (%s)\n"
+
+#: utils/lqtplay.c:723 utils/lqtplay.c:729
+#, c-format
+msgid "Error setting sample rate (%s)\n"
+msgstr "Fehler beim setzen der Samplerate (%s)\n"
+
+#: utils/lqtplay.c:733
+#, c-format
+msgid ""
+"WARNING: Using %i Hz instead of requested rate %i Hz\n"
+" "
+msgstr ""
+"WARNUNG: Verwende %i Hz statt der angeforderten Rate von %i Hz\n"
+" "
+
+#: utils/lqtplay.c:744
+#, c-format
+msgid "Error setting periods.(%s)\n"
+msgstr "Fehler beim setzen der Perioden.(%s)\n"
+
+#: utils/lqtplay.c:750
+#, c-format
+msgid "Unable to get buffer size for playback: %s\n"
+msgstr "Kann für die Wiedergabe keine Puffergröße bekommen: %s\n"
+
+#: utils/lqtplay.c:757
+#, c-format
+msgid "Unable to get period size for playback: %s\n"
+msgstr "Kann für die Wiedergabe keine Periodengröße bekommen: %s\n"
+
+#: utils/lqtplay.c:764
+#, c-format
+msgid "Error setting HW params.(%s)\n"
+msgstr "Fehler beim setzen der HW Parameter.(%s)\n"
+
+#: utils/lqtplay.c:780
+#, c-format
+msgid "Error in pcm_prepare.(%s)\n"
+msgstr "Fehler in pcm_prepare.(%s)\n"
+
+#: utils/lqtplay.c:815
+#, c-format
+msgid "ERROR: can't set sound format\n"
+msgstr "FEHLER: Kann Audioformat nicht setzen\n"
+
+#: utils/lqtplay.c:820
+#, c-format
+msgid "ERROR: can't set sound channels\n"
+msgstr "FEHLER: Kann Audiokanäle nicht setzen\n"
+
+#: utils/lqtplay.c:827
+#, c-format
+msgid "WARNING: sample rate mismatch (need %d, got %d)\n"
+msgstr "WARNUNG: Nichtübereinstimmung in Samplerate (brauche %d, erhielt %d)\n"
+
+#: utils/lqtplay.c:844
+#, c-format
+msgid "WARNING: open %s: %s\n"
+msgstr "WARNUNG: öffnen %s: %s\n"
+
+#: utils/lqtplay.c:907
+#, c-format
+msgid "ERROR: can't open file: %s\n"
+msgstr "FEHLER: Kann Datei %s nicht öffnen\n"
+
+#: utils/lqtplay.c:912
+#, c-format
+msgid "INFO: playing %s\n"
+msgstr "INFO: Spiele %s\n"
+
+#: utils/lqtplay.c:919
+#, c-format
+msgid "'%s' is no QTVR file or an unsupported variant.\n"
+msgstr "'%s' ist keine QTVR .Datei oder eine nicht Unterstützte Variante\n"
+
+#: utils/lqtplay.c:927
+#, c-format
+msgid "startpos :%i\n"
+msgstr "Startposition :%i\n"
+
+#: utils/lqtplay.c:928
+#, c-format
+msgid "movietype :%i\n"
+msgstr "Filmtyp :%i\n"
+
+#: utils/lqtplay.c:929
+#, c-format
+msgid "panning :%f %f\n"
+msgstr "Schwenk :%f %f\n"
+
+# Zeil
+#: utils/lqtplay.c:930
+#, c-format
+msgid "rows :%i\n"
+msgstr "Zeilen :%i\n"
+
+#: utils/lqtplay.c:931
+#, c-format
+msgid "colums :%i\n"
+msgstr "Spalten :%i\n"
+
+#: utils/lqtplay.c:932
+#, c-format
+msgid "disp width :%i\n"
+msgstr "Anzeigebreite :%i\n"
+
+#: utils/lqtplay.c:933
+#, c-format
+msgid "disp height :%i\n"
+msgstr "Anzeigehöhe :%i\n"
+
+#: utils/lqtplay.c:934
+#, c-format
+msgid "width :%i\n"
+msgstr "Breite :%i\n"
+
+#: utils/lqtplay.c:935
+#, c-format
+msgid "height :%i\n"
+msgstr "Höhe :%i\n"
+
+#: utils/lqtplay.c:936
+#, c-format
+msgid "depth :%i\n"
+msgstr "Farbtiefe :%i\n"
+
+#: utils/lqtplay.c:947
+#, c-format
+msgid "oh_width verz :%i\n"
+msgstr ""
+
+#: utils/lqtplay.c:953
+#, c-format
+msgid "WARNING: no video stream\n"
+msgstr "WARNUNG: kein Videostream\n"
+
+#: utils/lqtplay.c:955
+#, c-format
+msgid "WARNING: unsupported video codec\n"
+msgstr "WARNUNG: nicht unterstützter Videocodec \n"
+
+#: utils/lqtplay.c:964
+#, c-format
+msgid "Timescale: %d\n"
+msgstr "Zeitskala: %d\n"
+
+#: utils/lqtplay.c:968
+#, c-format
+msgid "WARNING: no audio stream\n"
+msgstr "WARNUNG: kein Audiostream\n"
+
+#: utils/lqtplay.c:970
+#, c-format
+msgid "WARNING: unsupported audio codec\n"
+msgstr "WARNUNG: Nicht unterstützter Audiocodec\n"
+
+#: utils/lqtplay.c:987
+#, c-format
+msgid "ERROR: no playable stream found\n"
+msgstr "FEHLER: keine spielbaren Streams gefunden\n"
+
+#: utils/lqtplay.c:1027 utils/lqtplay.c:1030
+#, c-format
+msgid "INFO: using BC_RGB888 + %s\n"
+msgstr "INFO: Verwende BC_RGB888 + %s\n"
+
+#: utils/lqtplay.c:1028
+msgid "OpenGL"
+msgstr ""
+
+#: utils/lqtplay.c:1028 utils/lqtplay.c:1031
+msgid "plain X11"
+msgstr "Einfaches X11"
+
+#: utils/lqtplay.c:1043
+#, c-format
+msgid "INFO: using BC_YUV422 + Xvideo extention\n"
+msgstr "INFO: Verwende BC_YUV422 + Xvideo Erweiterung\n"
+
+#: utils/lqtplay.c:1056
+#, c-format
+msgid "INFO: using BC_YUV420P + Xvideo extention (YV12)\n"
+msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (YV12)\n"
+
+#: utils/lqtplay.c:1066
+#, c-format
+msgid "INFO: using BC_YUV420P + Xvideo extention (I420)\n"
+msgstr "INFO: Verwende BC_YUV420P + Xvideo Erweiterung (I420)\n"
+
+#: utils/lqtplay.c:1077 utils/lqtplay.c:1296
+#, c-format
+msgid "ERROR: internal error at %s:%d\n"
+msgstr "FEHLER: Interner Fehler bei %s:%d\n"
+
+#: utils/lqtplay.c:1239
+#, c-format
+msgid "dropped %d frame(s)\r"
+msgstr " %d Frame(s) verworfen\r"
+
+#: utils/lqtplay.c:1378
+#, c-format
+msgid "Audio track finished (got %d samples, wanted %d)\n"
+msgstr "Audio Track fertig ( %d Samples erhalten, gewollt %d)\n"
+
+#: utils/lqtplay.c:1403
+#, c-format
+msgid "Warning: buffer underrun\n"
+msgstr "Warnung: Pufferunterlauf\n"
+
+#: utils/lqtplay.c:1406
+#, c-format
+msgid "Warning: %s\n"
+msgstr "Warnung: %s\n"
+
+#: utils/lqtplay.c:1441
+#, c-format
+msgid "write dsp: Huh? no data written?\n"
+msgstr ""
+
+#: utils/lqtplay.c:1503
+#, c-format
+msgid ""
+"\n"
+"Very simple quicktime movie player for X11.  Just playes\n"
+"the movie and nothing else.  No fancy gui, no controls.\n"
+"\n"
+"You can quit with 'Q' and 'ESC' keys.\n"
+"\n"
+"usage: %s [ options ] <file>\n"
+"options:\n"
+"  -noxv   don't use the Xvideo extention\n"
+"  -nogl   don't use OpenGL\n"
+"  -noalsa don't use Alsa\n"
+"\n"
+msgstr ""
+"\n"
+"Sehr einfacher Quicktime Videoplayer für X11. Er spielt\n"
+"den Film ab und nichts sonst. Keine tolle UI und keine Steuerelemente.\n"
+"\n"
+"Sie können ihn mit 'Q' und 'ESC' beenden.\n"
+"\n"
+"Gebrauch: %s [ Optionen ] <Datei>\n"
+"Optionen:\n"
+"  -noxv   Xvideo Erweiterung nicht verwenden\n"
+"  -nogl   OpenGL nicht verwenden\n"
+"  -noalsa Alsa nicht verwenden\n"
+"\n"
+
+#: utils/lqtplay.c:1562
+#, c-format
+msgid "INFO: window size is %dx%d\n"
+msgstr "INFO: Fenstergröße ist %dx%d\n"
+
+#: utils/lqtplay.c:1756
+#, c-format
+msgid "Stream colormodel %s, "
+msgstr "Stream Farbmodell %s, "
+
+#: utils/lqtplay.c:1759
+#, c-format
+msgid "using %s\n"
+msgstr "verwende %s\n"
+
+#: utils/lqtplay.c:1861
+#, c-format
+msgid "Decoded %lld samples\n"
+msgstr "%lld Samples decodiert\n"
+
+#: utils/qtinfo.c:49
+#, c-format
+msgid "Couldn't open %s\n"
+msgstr "Konnte %s nicht öffnen\n"
+
+#: utils/qtinfo.c:64
+#, c-format
+msgid "Usage: %s filename...\n"
+msgstr "Gebrauch: %s Dateiname...\n"
 
 #~ msgid "Use rate distortion optimization for cbp"
 #~ msgstr "Verwende Ratenverzerr Optimierung für cbp"

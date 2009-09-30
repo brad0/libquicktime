@@ -7,10 +7,11 @@ lqt.h  \
 lqt_atoms.h \
 lqt_codecinfo.h \
 lqt_codecapi.h \
-lqt_version.h \
 lqt_qtvr.h \
 quicktime.h
 
+nodist_libquicktimeinclude_HEADERS = \
+lqt_version.h
 
 noinst_HEADERS = \
 qtprivate.h
