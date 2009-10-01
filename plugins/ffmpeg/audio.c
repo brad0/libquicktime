@@ -731,7 +731,10 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
 
     
     //    memcpy(&(codec->com.ffcodec_enc), &(codec->com.params), sizeof(AVCodecContext));
-    
+   
+    codec->avctx->codec_id = codec->decoder->id;
+    codec->avctx->codec_type = codec->decoder->type;
+ 
     if(avcodec_open(codec->avctx, codec->decoder) != 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Avcodec open failed");
@@ -859,6 +862,9 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
     {
     codec->avctx->sample_rate = track_map->samplerate;
     codec->avctx->channels = channels;
+
+    codec->avctx->codec_id = codec->encoder->id;
+    codec->avctx->codec_type = codec->encoder->type;
 
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       {
