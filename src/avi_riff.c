@@ -351,7 +351,7 @@ static void insert_video_packet(quicktime_trak_t * trak,
     stss = &trak->mdia.minf.stbl.stss;
     if(stss->entries_allocated <= stss->total_entries)
       {
-      stss->entries_allocated *= 2;
+      stss->entries_allocated += 16;
       stss->table = realloc(stss->table, 
                             sizeof(quicktime_stss_table_t) * stss->entries_allocated);
       }
