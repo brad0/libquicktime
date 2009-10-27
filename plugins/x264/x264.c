@@ -67,7 +67,11 @@ static void dump_params(x264_param_t * params)
   lqt_dump("  i_bframe:                    %d\n", params->i_bframe);          // 0.. X264_BFRAME_MAX
   lqt_dump("  b_bframe_adaptive:           %d\n", params->b_bframe_adaptive);
   lqt_dump("  i_bframe_bias:               %d\n", params->i_bframe_bias);
+#if X264_BUILD >= 78
+  lqt_dump("  i_bframe_pyramid:            %d\n", params->i_bframe_pyramid);
+#else
   lqt_dump("  b_bframe_pyramid:            %d\n", params->b_bframe_pyramid);
+#endif
   
   lqt_dump("  b_deblocking_filter:         %d\n", params->b_deblocking_filter);
   lqt_dump("  i_deblocking_filter_alphac0: %d\n", params->i_deblocking_filter_alphac0); // -6..6
@@ -174,14 +178,21 @@ encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal)
   {
   uint8_t *p = buf;
   int i;
+#if X264_BUILD < 76
   int s;
+#endif
   
   for(i = 0; i < nnal; i++)
     {
+#if X264_BUILD >= 76
+    memcpy(p, nals[i].p_payload, nals[i].i_payload);
+    p+=nals[i].i_payload;
+#else
     s = x264_nal_encode(p, &size, 1, nals + i);
     if(s < 0)
       return -1;
     p += s;
+#endif
     }
   
   return p - buf;
@@ -407,7 +418,11 @@ static int flush_frame(quicktime_t *file, int track,
 
   pic_out.i_pts = 0;
   /* Encode frames, get nals */
+#if X264_BUILD >= 76
+  if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out)<0)
+#else
   if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out))
+#endif
     return 0;
   
   /* Encode nals -> get h264 stream */
@@ -782,7 +797,11 @@ static int set_parameter(quicktime_t *file,
   ENUMPARAM("x264_i_bframe_adaptive", codec->params.i_bframe_adaptive, bframe_adaptives);
 #endif
   INTPARAM("x264_i_bframe_bias", codec->params.i_bframe_bias);
+#if X264_BUILD >= 78
+  INTPARAM("x264_i_bframe_pyramid", codec->params.i_bframe_pyramid);
+#else
   INTPARAM("x264_b_bframe_pyramid", codec->params.b_bframe_pyramid);
+#endif
 
   ENUMPARAM("x264_i_rc_method", codec->params.rc.i_rc_method, rc_methods);
   INTPARAM("x264_i_bitrate", codec->params.rc.i_bitrate);

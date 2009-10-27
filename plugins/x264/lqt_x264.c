@@ -94,6 +94,17 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_max =     { .val_int = 100 },
       .help_string = TRS("Influences how often B-frames are used"),
     },
+#if X264_BUILD >= 78
+    {
+      .name =        "x264_i_bframe_pyramid",
+      .real_name =   TRS("B-frame pyramid"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 0 },
+      .val_min =     { .val_int = 0 },
+      .val_max =     { .val_int = 2 },
+      .help_string = TRS("Keep some B-frames as references")
+    },
+#else
     {
       .name =        "x264_b_bframe_pyramid",
       .real_name =   TRS("B-frame pyramid"),
@@ -103,6 +114,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_max =     { .val_int = 1 },
       .help_string = TRS("Keep some B-frames as references")
     },
+#endif
     {
       .name =        "x264_ratecontrol",
       .real_name =   TRS("Ratecontrol"),
