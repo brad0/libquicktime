@@ -219,14 +219,12 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_trak_t *trak = vtrack->track;
   quicktime_yuv2_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   int result = 1;
   int width = vtrack->track->tkhd.track_width;
   int height = vtrack->track->tkhd.track_height;
   int64_t bytes;
   unsigned char *buffer;
-  quicktime_atom_t chunk_atom;
 
   if(!row_pointers)
     {

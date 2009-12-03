@@ -106,7 +106,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         uint8_t *in_y, *in_u, *in_v, *out_ptr;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_v308_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	quicktime_trak_t *trak = vtrack->track;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
 	int bytes = width * height * 3;

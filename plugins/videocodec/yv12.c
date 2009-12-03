@@ -126,10 +126,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
-	quicktime_trak_t *trak = vtrack->track;
 	int result = 0;
 	int y_size, uv_size;
-	quicktime_atom_t chunk_atom;
         int i;
         uint8_t * src_ptr;
         
