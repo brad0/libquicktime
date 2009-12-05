@@ -142,6 +142,100 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_default = { .val_int = 0 },
       .help_string = TRS("Bitrate in kbit/s. 0 means VBR (recommended)")
     },
+    {
+      .name =        "x264_f_rate_tolerance",
+      .real_name =   TRS("Bitrate tolerance"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .val_default = { .val_float = 1.0 },
+      .val_min =     { .val_float = 0.0 },
+      .val_max =     { .val_float = 100.0 },
+      .num_digits =  1,
+      .help_string = TRS("Allowed variance of average bitrate")
+    },
+    {
+      .name =        "x264_i_vbv_max_bitrate",
+      .real_name =   TRS("Maximum local bitrate"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 0 },
+      .help_string = TRS("Sets a maximum local bitrate in kbits/s.")
+    },
+    {
+      .name =        "x264_i_vbv_buffer_size",
+      .real_name =   TRS("VBV Buffer size"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 0 },
+      .help_string = TRS("Averaging period for the maximum local bitrate. "
+                         "Measured in kbits.")
+    },
+    {
+      .name =        "x264_f_vbv_buffer_init",
+      .real_name =   TRS("Initial VBV buffer occupancy"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_default = { .val_float = 0.9 },
+      .val_min =     { .val_float = 0.0 },
+      .val_max =     { .val_float = 1.0 },
+      .help_string = TRS("Sets the initial VBV buffer occupancy as a fraction of "
+                         "the buffer size.")
+    },
+#if X264_BUILD >= 69
+    {
+      .name =        "x264_b_psy",
+      .real_name =   TRS("Psy optimizations"),
+      .type =        LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 1 },
+      .help_string = TRS("Psychovisual optimization"),
+    },
+#endif
+    
+#if X264_BUILD >= 63
+    {
+      .name =        "x264_f_psy_rd",
+      .real_name =   TRS("Psy RD strength"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_min     = { .val_float = 0.0 },
+      .val_max     = { .val_float = 10.0 },
+      .val_default = { .val_float = 1.0 },
+      .help_string = TRS("Strength of psychovisual optimization: RD (requires Partition decision >= 6)"),
+    },
+    {
+      .name =        "x264_f_psy_trellis",
+      .real_name =   TRS("Psy trellis strength"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_min     = { .val_float = 0.0 },
+      .val_max     = { .val_float = 10.0 },
+      .val_default = { .val_float = 0.0 },
+      .help_string = TRS("Strength of psychovisual optimization (requires trellis)"),
+    },
+#endif
+#if X264_BUILD >= 69
+    {
+      .name =        "x264_b_mb_tree",
+      .real_name =   TRS("Macroblock-tree ratecontrol"),
+      .type =        LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 1 },
+      .val_default = { .val_int = 1 },
+    },
+    {
+      .name =        "x264_i_lookahead",
+      .real_name =   TRS("Lookahead"),
+      .type =        LQT_PARAMETER_INT,
+      .val_min     = { .val_int = 0 },
+      .val_max     = { .val_int = 250 },
+      .val_default = { .val_int = 40 },
+      .help_string = TRS("Number of frames for frametype lookahead"),
+    },
+#endif
+    {
+      .name =        "x264_quantizer",
+      .real_name =   TRS("Quantizer"),
+      .type =        LQT_PARAMETER_SECTION
+    },
 #if X264_BUILD < 54
     {
       .name =        "x264_i_rf_constant",
@@ -206,42 +300,6 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .help_string = TRS("Maximum quantizer step")
     },
     {
-      .name =        "x264_f_rate_tolerance",
-      .real_name =   TRS("Bitrate tolerance"),
-      .type =        LQT_PARAMETER_FLOAT,
-      .val_default = { .val_float = 1.0 },
-      .val_min =     { .val_float = 0.0 },
-      .val_max =     { .val_float = 100.0 },
-      .num_digits =  1,
-      .help_string = TRS("Allowed variance of average bitrate")
-    },
-    {
-      .name =        "x264_i_vbv_max_bitrate",
-      .real_name =   TRS("Maximum local bitrate"),
-      .type =        LQT_PARAMETER_INT,
-      .val_default = { .val_int = 0 },
-      .help_string = TRS("Sets a maximum local bitrate in kbits/s.")
-    },
-    {
-      .name =        "x264_i_vbv_buffer_size",
-      .real_name =   TRS("VBV Buffer size"),
-      .type =        LQT_PARAMETER_INT,
-      .val_default = { .val_int = 0 },
-      .help_string = TRS("Averaging period for the maximum local bitrate. "
-                         "Measured in kbits.")
-    },
-    {
-      .name =        "x264_f_vbv_buffer_init",
-      .real_name =   TRS("Initial VBV buffer occupancy"),
-      .type =        LQT_PARAMETER_FLOAT,
-      .num_digits =  2,
-      .val_default = { .val_float = 0.9 },
-      .val_min =     { .val_float = 0.0 },
-      .val_max =     { .val_float = 1.0 },
-      .help_string = TRS("Sets the initial VBV buffer occupancy as a fraction of "
-                         "the buffer size.")
-    },
-    {
       .name =        "x264_f_ip_factor",
       .real_name =   TRS("QP factor between I and P"),
       .type =        LQT_PARAMETER_FLOAT,
@@ -255,6 +313,33 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .num_digits =  2,
       .val_default = { .val_float = 1.30 },
     },
+#if X264_BUILD >= 62
+    {
+      .name =        "x264_i_aq_mode",
+      .real_name =   TRS("Adaptive quantization"),
+      .type =        LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "None" },
+      .stringlist_options = (char*[]){ TRS("None"),
+                                       TRS("Variance AQ (complexity mask)"),
+#if X264_BUILD >= 69
+                                       TRS("Autovariance AQ (experimental)"),
+#endif
+                                       (char*)0 },
+    },
+    {
+      .name =        "x264_f_aq_strength",
+      .real_name =   TRS("AQ strength"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_min     = { .val_float = 0.5 },
+      .val_max     = { .val_float = 1.5 },
+      .val_default = { .val_float = 1.0 },
+      .help_string = TRS("Adaptive quantization strength:\n"
+                         "Reduces blocking and blurring in flat and\n"
+                         "textured areas"),
+    },
+#endif
+    
     {
       .name =        "x264_partitions",
       .real_name =   TRS("Partitions"),
@@ -323,6 +408,10 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
                                        TRS("Hexagonal search"),
                                        TRS("Uneven Multi-Hexagon"),
                                        TRS("Exhaustive search"),
+#if X264_BUILD > 57
+                                       TRS("Hadamard exhaustive search (slow)"),
+#endif
+
                                        (char*)0 },
       .help_string = TRS("Motion estimation method\n"
                      "Diamond search: fastest\n"

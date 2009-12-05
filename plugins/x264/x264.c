@@ -111,6 +111,16 @@ static void dump_params(x264_param_t * params)
   lqt_dump("    i_trellis:          %d\n", params->analyse.i_trellis);         // 0..2
   lqt_dump("    b_fast_pskip:       %d\n", params->analyse.b_fast_pskip);
   lqt_dump("    i_noise_reduction:  %d\n", params->analyse.i_noise_reduction); // 0..1<<16
+#if X264_BUILD >= 63
+  lqt_dump("    f_psy_rd            %.2f\n", params->analyse.f_psy_rd);
+  lqt_dump("    f_psy_trellis       %.2f\n", params->analyse.f_psy_trellis);
+#endif
+
+#if X264_BUILD >= 69
+  lqt_dump("    b_psy:              %d\n", params->analyse.b_psy);
+#endif  
+
+
   lqt_dump("    b_psnr:             %d\n", params->analyse.b_psnr);
 
   lqt_dump("  Rate control:\n");
@@ -131,7 +141,14 @@ static void dump_params(x264_param_t * params)
   lqt_dump("    f_vbv_buffer_init:  %f\n", params->rc.f_vbv_buffer_init);
   lqt_dump("    f_ip_factor:        %f\n", params->rc.f_ip_factor);
   lqt_dump("    f_pb_factor:        %f\n", params->rc.f_pb_factor);
-  
+#if X264_BUILD >= 62
+  lqt_dump("    i_aq_mode:          %d\n", params->rc.i_aq_mode);
+  lqt_dump("    f_aq_strength:      %f\n", params->rc.f_aq_strength);
+#endif  
+#if X264_BUILD >= 69
+  lqt_dump("    b_mb_tree:          %d\n", params->rc.b_mb_tree);
+  lqt_dump("    i_lookahead:        %d\n", params->rc.i_lookahead);
+#endif  
   }
 
 #endif // DUMP_CONFIG
@@ -167,8 +184,19 @@ static int delete_codec(quicktime_video_map_t *vtrack)
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
   if(codec->enc)
     x264_encoder_close(codec->enc);
-  if(codec->stats_filename)
+  
+  if(codec->stats_filename && (codec->pass == codec->total_passes))
+    {
+    char * mbtree_file = malloc(strlen(codec->stats_filename) + 8);
+
+    strcpy(mbtree_file, codec->stats_filename);
+    strcat(mbtree_file, ".mbtree");
+
+    remove(mbtree_file);
+    free(mbtree_file);
+    
     free(codec->stats_filename);
+    }
   free(codec);
   return 0;
   }
@@ -622,7 +650,12 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     if(codec->total_passes)
       {
       /* Force ABR */
-      codec->params.rc.i_rc_method = X264_RC_ABR;
+      if(codec->params.rc.i_rc_method != X264_RC_ABR)
+        {
+        lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN,
+              "Forcing average bitrate for multipass encoding");
+        codec->params.rc.i_rc_method = X264_RC_ABR;
+        }
 #if X264_BUILD < 54
       codec->params.rc.i_rf_constant = 0;
 #else
@@ -642,6 +675,15 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         }
       }
 
+    /* Sanity check for bitrate */
+    if((codec->params.rc.i_rc_method == X264_RC_ABR) &&
+       (!codec->params.rc.i_bitrate))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "Need non-zero bitrate for this mode");
+      return 1;
+      }
+    
 #ifdef DUMP_CONFIG    
     dump_params(&codec->params);
 #endif
@@ -653,7 +695,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     if(!codec->enc)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "x264_encoder_open failed");
-      return result;
+      return 1;
       }
     
     /* Encode global header */
@@ -743,7 +785,10 @@ enum_t me_methods[] =
     { "Diamond search",       X264_ME_DIA },
     { "Hexagonal search",     X264_ME_HEX },
     { "Uneven Multi-Hexagon", X264_ME_UMH },
-    { "Exhaustive search",    X264_ME_ESA }
+    { "Exhaustive search",    X264_ME_ESA },
+#if X264_BUILD > 57
+    { "Hadamard exhaustive search (slow)", X264_ME_TESA },
+#endif
   };
 
 enum_t trellis[] =
@@ -776,6 +821,19 @@ enum_t bframe_adaptives[] =
     { "Trellis", X264_B_ADAPT_TRELLIS }
   };
 #endif
+
+#if X264_BUILD >= 62
+enum_t aq_modes[] =
+  {
+    { "None",      X264_AQ_NONE },
+    { "Variance AQ (complexity mask)",  X264_AQ_VARIANCE },
+#if X264_BUILD >= 69
+    { "Autovariance AQ (experimental)", X264_AQ_AUTOVARIANCE },
+#endif
+
+  };
+#endif
+
 
 static int set_parameter(quicktime_t *file, 
                          int track, 
@@ -821,6 +879,17 @@ static int set_parameter(quicktime_t *file,
   FLOATPARAM("x264_f_vbv_buffer_init", codec->params.rc.f_vbv_buffer_init);
   FLOATPARAM("x264_f_ip_factor", codec->params.rc.f_ip_factor);
   FLOATPARAM("x264_f_pb_factor", codec->params.rc.f_pb_factor);
+
+#if X264_BUILD >= 62
+  ENUMPARAM("x264_i_aq_mode", codec->params.rc.i_aq_mode, aq_modes);
+  FLOATPARAM("x264_f_aq_strength", codec->params.rc.f_aq_strength);
+#endif  
+
+#if X264_BUILD >= 69
+  INTPARAM("x264_b_mb_tree", codec->params.rc.b_mb_tree);
+  INTPARAM("x264_i_lookahead", codec->params.rc.i_lookahead);
+#endif  
+  
   INTPARAM("x264_analyse_8x8_transform", codec->params.analyse.b_transform_8x8);
 
   if(!strcasecmp(key, "x264_analyse_psub16x16"))
@@ -912,6 +981,11 @@ static int set_parameter(quicktime_t *file,
   ENUMPARAM("x264_i_trellis", codec->params.analyse.i_trellis, trellis);
 
   INTPARAM("x264_i_noise_reduction", codec->params.analyse.i_noise_reduction);
+
+#if X264_BUILD >= 63
+  FLOATPARAM("x264_f_psy_rd", codec->params.analyse.f_psy_rd);
+  FLOATPARAM("x264_f_psy_trellis", codec->params.analyse.f_psy_trellis);
+#endif
   
   if(!found)
     lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
