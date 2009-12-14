@@ -708,6 +708,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     
     codec->initialized = 1;
 
+    fprintf(stderr, "Created extradata: %d bytes\n", avcc_size);
+    lqt_hexdump(avcc, avcc_size, 16);
     
     }
 

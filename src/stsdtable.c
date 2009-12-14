@@ -567,10 +567,10 @@ void quicktime_write_stsd_video(quicktime_t *file,
                                 quicktime_stsd_table_t *table)
   {
   int compressor_name_len, i;
+  int terminate = 0;
   compressor_name_len = strlen(table->compressor_name);
   if(file->file_type & (LQT_FILE_QT|LQT_FILE_QT_OLD))
     {
-    int terminate = 0;
     quicktime_write_int16(file, table->version);
     quicktime_write_int16(file, table->revision);
     quicktime_write_data(file, (uint8_t*)table->vendor, 4);
@@ -612,8 +612,6 @@ void quicktime_write_stsd_video(quicktime_t *file,
       quicktime_write_gama(file, &(table->gama));
       terminate = 1;
       }
-    if(terminate)
-      quicktime_write_int32(file, 0);
     }
   else /* Different stsd formats for mp4 variants */
     {
@@ -635,11 +633,14 @@ void quicktime_write_stsd_video(quicktime_t *file,
     quicktime_write_int16(file, 24);
     quicktime_write_int16(file, -1);
     }
-    
   quicktime_write_user_atoms(file,
                              &table->user_atoms);
+  
   if(table->has_esds)
     quicktime_write_esds(file, &table->esds);
+  
+  if(terminate)
+    quicktime_write_int32(file, 0);
   }
 
 void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf,
