@@ -707,10 +707,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     file->moov.iods.videoProfileId = 0x15;
     
     codec->initialized = 1;
-
-    fprintf(stderr, "Created extradata: %d bytes\n", avcc_size);
-    lqt_hexdump(avcc, avcc_size, 16);
-    
     }
 
   /* Encode picture */
