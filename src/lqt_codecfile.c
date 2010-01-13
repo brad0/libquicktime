@@ -154,6 +154,9 @@ static void create_filename()
                     "no system-wide codec file. Looking in user's home.");
  
     fdir = getenv("HOME");
+    if(!fdir)
+      return;
+
     strcpy(filename_buffer, fdir);       
     strcat(filename_buffer, "/.libquicktime_codecs"); 
   
@@ -618,7 +621,10 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   
   if(*filename_buffer == '\0')
     create_filename();
-  
+
+  if(*filename_buffer == '\0')
+    return NULL;
+
   input = fopen(filename_buffer, "r");
  
   if(!input)
