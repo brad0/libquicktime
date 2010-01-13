@@ -35,6 +35,8 @@
 #include SWSCALE_HEADER
 #endif
 
+enum qt_ffmpeg_vertical_alignment { ALIGN_TOP, ALIGN_BOTTOM };
+
 // Enable interlaced encoding (experimental)
 // #define DO_INTERLACE
 
@@ -88,6 +90,11 @@ typedef struct
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
   AVPacket pkt;
 #endif
+
+  /* Encoded frames may be larger than the display size.
+     If so, this field defines which part of a frame to display. */
+  enum qt_ffmpeg_vertical_alignment v_frame_alignment;
+
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -256,13 +263,13 @@ static int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
 
 static void convert_image_decode_rgba(AVFrame * in_frame,
                                       unsigned char ** out_frame,
-                                      int width, int height)
+                                      int width, int height, int y_shift)
   {
   uint32_t r, g, b; // , a;
   uint32_t * src_ptr;
   uint8_t * dst_ptr;
   int i, j;
-  for(i = 0; i < height; i++)
+  for(i = y_shift; i < height + y_shift; i++)
     {
     src_ptr = (uint32_t*)(in_frame->data[0] + i * in_frame->linesize[0]);
     dst_ptr = out_frame[i];
@@ -291,7 +298,8 @@ static void convert_image_decode_rgba(AVFrame * in_frame,
 static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
                                  AVFrame * in_frame, enum PixelFormat in_format,
                                  unsigned char ** out_frame, int out_format,
-                                 int width, int height, int row_span, int row_span_uv)
+                                 int width, int height, int row_span, int row_span_uv,
+                                 int y_shift)
   {
 #ifdef HAVE_LIBSWSCALE
   uint8_t * out_planes[4];
@@ -311,7 +319,7 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
   if((in_format == PIX_FMT_RGB32) && (out_format == BC_RGBA8888))
 #endif
     {
-    convert_image_decode_rgba(in_frame, out_frame, width, height);
+    convert_image_decode_rgba(in_frame, out_frame, width, height, y_shift);
     return;
     }
 
@@ -328,15 +336,15 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
   
   sws_scale(codec->swsContext,
             in_frame->data, in_frame->linesize,
-            0, height, out_planes, out_strides);
+            y_shift, height, out_planes, out_strides);
 #else
   
   memset(&in_pic,  0, sizeof(in_pic));
   memset(&out_pic, 0, sizeof(out_pic));
   
-  in_pic.data[0]      = in_frame->data[0];
-  in_pic.data[1]      = in_frame->data[1];
-  in_pic.data[2]      = in_frame->data[2];
+  in_pic.data[0]      = in_frame->data[0] + y_shift * in_frame->linesize[0];
+  in_pic.data[1]      = in_frame->data[1] + y_shift * in_frame->linesize[1];
+  in_pic.data[2]      = in_frame->data[2] + y_shift * in_frame->linesize[2];
   in_pic.linesize[0]  = in_frame->linesize[0];
   in_pic.linesize[1]  = in_frame->linesize[1];
   in_pic.linesize[2]  = in_frame->linesize[2];
@@ -379,6 +387,8 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   int extradata_size = 0;
   
   uint8_t * cpy_rows[3];
+  
+  int y_shift = 0;
   
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
@@ -574,6 +584,10 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     return 1;
     }
 
+  if (codec->v_frame_alignment == ALIGN_BOTTOM) {
+    y_shift = codec->avctx->height - height;
+  }
+
   /*
    * Check for the colormodel
    * There are 2 possible cases:
@@ -589,9 +603,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   
   if(!codec->do_imgconvert)
     {
-    cpy_rows[0] = codec->frame->data[0];
-    cpy_rows[1] = codec->frame->data[1];
-    cpy_rows[2] = codec->frame->data[2];
+    cpy_rows[0] = codec->frame->data[0] + codec->frame->linesize[0] * y_shift;
+    cpy_rows[1] = codec->frame->data[1] + codec->frame->linesize[1] * y_shift;
+    cpy_rows[2] = codec->frame->data[2] + codec->frame->linesize[2] * y_shift;
 
     lqt_rows_copy(row_pointers, cpy_rows, width, height,
                   codec->frame->linesize[0], codec->frame->linesize[1],
@@ -603,7 +617,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     convert_image_decode(codec, codec->frame, codec->avctx->pix_fmt,
                          row_pointers, vtrack->stream_cmodel,
                          width, height, vtrack->stream_row_span,
-                         vtrack->stream_row_span_uv);
+                         vtrack->stream_row_span_uv, y_shift);
     }
   codec->have_frame = 0;
   return result;
@@ -1007,6 +1021,22 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
         //          codec->encode_colormodel = BC_YUV411P;
         else
           vtrack->stream_cmodel = BC_YUV420P;
+    
+    // Determine vertical frame alignment.
+    {
+      static char const* const bottom_align_codecs[] = {
+        "mx3p", "mx3n", "mx4p", "mx4n", "mx5p", "mx5n"
+      };
+      int i;
+      codec->v_frame_alignment = ALIGN_TOP;
+      for (i = 0; i < sizeof(bottom_align_codecs)/
+                      sizeof(bottom_align_codecs[0]); ++i) {
+        if (quicktime_match_32(compressor, (char*)bottom_align_codecs[i])) {
+          codec->v_frame_alignment = ALIGN_BOTTOM;
+          break;
+        }
+      }
+    }    
         
 	codec->encoder = encoder;
 	codec->decoder = decoder;

@@ -750,6 +750,19 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1
     },
 #endif
+    {
+      .id = CODEC_ID_MPEG2VIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "imx",
+      .name = TRS("FFMPEG IMX"),
+      .fourccs = { "mx3p", "mx3n", "mx4p", "mx4n", "mx5p", "mx5n", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .do_encode = 0
+    },
 };
 
 /* Audio */
