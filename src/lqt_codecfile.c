@@ -5,7 +5,7 @@
  http://libquicktime.sourceforge.net
 
  Copyright (C) 2002 Heroine Virtual Ltd.
- Copyright (C) 2002-2007 Members of the libquicktime project.
+ Copyright (C) 2002-2010 Members of the libquicktime project.
 
  Modified by Napoleon E. Cornejo
  May 4, 2007, San Salvador, El Salvador
