@@ -16,3 +16,6 @@ lqt_schroedinger_la_LIBADD = @MODULE_LIBADD@ @SCHROEDINGER_LIBS@
 
 noinst_HEADERS = schroedinger.h
 
+EXTRA_DIST = extract_settings.c
+
+
