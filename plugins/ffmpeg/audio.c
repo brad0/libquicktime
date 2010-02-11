@@ -885,6 +885,20 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
 								);
 #endif
     codec->chunk_buffer = malloc(codec->chunk_buffer_alloc);
+
+    if(trak->strl)
+      {
+      /* strh stuff */
+      trak->strl->strh.dwRate = codec->avctx->bit_rate / 8;
+      trak->strl->strh.dwScale = 1;
+      trak->strl->strh.dwSampleSize = 1;
+      /* WAVEFORMATEX stuff */
+      
+      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
+      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->avctx->bit_rate / 8;
+      trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+      }
+
     }
 
   /* Allocate sample buffer if necessary */
