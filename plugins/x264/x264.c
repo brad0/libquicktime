@@ -440,7 +440,8 @@ static int flush_frame(quicktime_t *file, int track,
   int nnal;
   x264_picture_t pic_out;
   int encoded_size;
-
+  char * ptr;
+  
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
 
@@ -456,14 +457,19 @@ static int flush_frame(quicktime_t *file, int track,
   /* Encode nals -> get h264 stream */
   encoded_size = encode_nals(codec->work_buffer,
                              codec->work_buffer_size, nal, nnal);
+
+  if(!vtrack->track->strl)
+    {
+    /* Reformat nals */
+    encoded_size = avc_parse_nal_units(codec->work_buffer,
+                                       encoded_size,
+                                       &codec->work_buffer_1,
+                                       &codec->work_buffer_alloc_1);
+    ptr = codec->work_buffer_1;
+    }
+  else
+    ptr = codec->work_buffer;
   
-  /* Reformat nals */
-  encoded_size = avc_parse_nal_units(codec->work_buffer,
-                                     encoded_size,
-                                     &codec->work_buffer_1,
-                                     &codec->work_buffer_alloc_1);
-
-
   if(encoded_size < 0)
     return 0;
 
@@ -473,10 +479,8 @@ static int flush_frame(quicktime_t *file, int track,
                            -1, pic_out.i_pts,
                            pic_out.i_type == X264_TYPE_IDR);
     
-    result = !quicktime_write_data(file, 
-                                   codec->work_buffer_1, 
-                                   encoded_size);
-
+    result = !quicktime_write_data(file, ptr, encoded_size);
+    
     lqt_write_frame_footer(file, track);
     
     return 1;
@@ -614,9 +618,14 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     codec->work_buffer_size = width * height * 3;
     codec->work_buffer = malloc(codec->work_buffer_size); /* Any smaller value here? */
     
-    /* We want a global header */
-    codec->params.b_repeat_headers = 0;
-
+    if(!trak->strl) /* Global header for MOV */
+      codec->params.b_repeat_headers = 0;
+    else /* Tweak fourccs for AVI */
+      {
+      strncpy(trak->strl->strh.fccHandler, "H264", 4);
+      strncpy(trak->strl->strf.bh.biCompression, "H264", 4);
+      }
+    
     /* Don't output psnr statistics */
     codec->params.analyse.b_psnr = 0;
     
