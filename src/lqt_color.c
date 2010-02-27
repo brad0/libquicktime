@@ -570,6 +570,224 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
                     out_rowspan_uv, colormodel, 0, 0, 0, 0);
   }
 
+void lqt_rows_clear(uint8_t **rows,
+                    int width, int height, int rowspan, int rowspan_uv, int colormodel)
+  {
+  int i, j, bytes_per_element, bytes_per_line;
+  uint8_t * ptr;
+  uint16_t * ptr_16;
+  uint8_t * ptr_start;
+  int sub_h, sub_v;
+
+  bytes_per_element = get_bytes_per_element(colormodel);
+  bytes_per_line = bytes_per_element * width;
+  switch(colormodel)
+    {
+    case BC_RGB565:
+    case BC_BGR565:
+    case BC_BGR888:
+    case BC_BGR8888:
+    case BC_RGB888:
+    case BC_RGB161616:
+    case BC_RGBA8888:
+    case BC_RGBA16161616:
+      if(rows[1])
+        {
+        for(i = 0; i < height; i++)
+          memset(rows[i], 0, bytes_per_line);
+        }
+      else
+        {
+        ptr = rows[0];
+        for(i = 0; i < height; i++)
+          {
+          memset(ptr, 0, bytes_per_line);
+          ptr += rowspan;
+          }
+        }
+      break;
+    case BC_YUVA8888:
+      if(rows[1])
+        {
+        for(i = 0; i < height; i++)
+          {
+          ptr = rows[i];
+          for(j = 0; j < width; j++)
+            {
+            ptr[0] = 0x10;
+            ptr[1] = 0x80;
+            ptr[2] = 0x80;
+            ptr[3] = 0x00;
+            ptr += 4;
+            }
+          }
+        }
+      else
+        {
+        ptr_start = rows[0];
+        for(i = 0; i < height; i++)
+          {
+          ptr = ptr_start;
+
+          for(j = 0; j < width; j++)
+            {
+            ptr[0] = 0x10;
+            ptr[1] = 0x80;
+            ptr[2] = 0x80;
+            ptr[3] = 0x00;
+            ptr += 4;
+            }
+          
+          ptr_start += rowspan;
+          }
+        }
+      break;
+    case BC_YUV422:
+      if(rows[1])
+        {
+        for(i = 0; i < height; i++)
+          {
+          ptr = rows[i];
+          for(j = 0; j < width; j++)
+            {
+            ptr[0] = 0x10;
+            ptr[1] = 0x80;
+            ptr += 2;
+            }
+          }
+        }
+      else
+        {
+        ptr_start = rows[0];
+        for(i = 0; i < height; i++)
+          {
+          ptr = ptr_start;
+          for(j = 0; j < width; j++)
+            {
+            ptr[0] = 0x10;
+            ptr[1] = 0x80;
+            ptr += 2;
+            }
+          ptr_start += rowspan;
+          }
+        }
+      break;
+    case BC_YUV420P:
+    case BC_YUV422P:
+    case BC_YUV444P:
+    case BC_YUV411P:
+      lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
+      /* Y */
+      ptr = rows[0];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x10, width);
+        ptr += rowspan;
+        }
+
+      width /= sub_h;
+      height /= sub_v;
+      
+      /* U */
+      ptr = rows[1];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x80, width);
+        ptr += rowspan_uv;
+        }
+
+      /* V */
+      ptr = rows[2];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x80, width);
+        ptr += rowspan_uv;
+        }
+      
+      break;
+    case BC_YUVJ420P:
+    case BC_YUVJ422P:
+    case BC_YUVJ444P:
+      lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
+      /* Y */
+      ptr = rows[0];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x00, width);
+        ptr += rowspan;
+        }
+
+      width /= sub_h;
+      height /= sub_v;
+      
+      /* U */
+      ptr = rows[1];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x80, width);
+        ptr += rowspan_uv;
+        }
+
+      /* V */
+      ptr = rows[2];
+      for(i = 0; i < height; i++)
+        {
+        memset(ptr, 0x80, width);
+        ptr += rowspan_uv;
+        }
+      break;
+    case BC_YUV422P16:
+    case BC_YUV444P16:
+
+      lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
+
+      /* Y */
+      ptr_start = rows[0];
+      for(i = 0; i < height; i++)
+        {
+        ptr_16 = (uint16_t*)ptr_start;
+        for(j = 0; j < width; j++)
+          {
+          *ptr_16 = 0x1000;
+          ptr_16++;
+          }
+        ptr_start += rowspan;
+        }
+
+      width /= sub_h;
+      height /= sub_v; // Unneccesary actually
+
+      /* U */
+      ptr_start = rows[1];
+      for(i = 0; i < height; i++)
+        {
+        ptr_16 = (uint16_t*)ptr_start;
+        for(j = 0; j < width; j++)
+          {
+          *ptr_16 = 0x1000;
+          ptr_16++;
+          }
+        ptr_start += rowspan;
+        }
+      
+      /* V */
+      ptr_start = rows[2];
+      for(i = 0; i < height; i++)
+        {
+        ptr_16 = (uint16_t*)ptr_start;
+        for(j = 0; j < width; j++)
+          {
+          *ptr_16 = 0x1000;
+          ptr_16++;
+          }
+        ptr_start += rowspan;
+        }
+      
+      
+      break;
+    }
+  }
+
 void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
                        int width, int height, int in_rowspan,
                        int in_rowspan_uv, int out_rowspan,

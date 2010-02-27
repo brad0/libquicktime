@@ -830,6 +830,23 @@ void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
                        int in_rowspan_uv, int out_rowspan,
                        int out_rowspan_uv, int colormodel, int src_x, int src_y, int dst_x, int dst_y);
   
+/** \ingroup video
+ * \brief Clear a video frame.
+ * \param rows Frame
+ * \param width Width of the frame
+ * \param height Height of the frame
+ * \param rowspan Rowspan for the luma plane of theframe
+ * \param rowspan_uv Rowspan for the chroma planes of the frame
+ * \param colormodel The colormodel of the frame
+ *
+ * This will set the colors to black and alpha (if available) to
+ * completely transparent.
+ * 
+ */
+
+void lqt_rows_clear(uint8_t **rows,
+                    int width, int height, int rowspan, int rowspan_uv, int colormodel);
+
   
 /** \ingroup video
  *  \brief Free a frame allocated by \ref lqt_rows_alloc
