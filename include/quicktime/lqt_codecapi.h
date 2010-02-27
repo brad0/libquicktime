@@ -89,6 +89,12 @@ typedef struct
   
   } lqt_parameter_info_static_t;
 
+typedef struct
+  {
+  int width;
+  int height;
+  } lqt_image_size_static_t;
+
 /*
  *   This holds the parts of the codec_info structure,
  *   which can be defined statically in the codec source
@@ -120,6 +126,8 @@ typedef struct
   char * gettext_directory;  /*!< Second argument to bindtextdomain(). Must be set only for externally packaged codecs */
 
   int * encoding_colormodels;
+  
+  lqt_image_size_static_t * image_sizes;
   
   } lqt_codec_info_static_t;
 

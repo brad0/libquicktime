@@ -175,8 +175,9 @@ int ffmpeg_num_video_codecs = -1;
     .name = "imx_bitrate",                        \
     .real_name = TRS("Bitrate (Mbps)"),                \
     .type = LQT_PARAMETER_STRINGLIST, \
-    .stringlist_options = (char *[]){ TRS("30"), TRS("40"), TRS("50"), \
-                          (char *)0 } \
+    .val_default = { .val_string =  "50" },             \
+    .stringlist_options = (char *[]){ "30", "40", "50", \
+                                      (char *)0 }       \
   }
 
 #define DECODE_PARAM_AUDIO
@@ -292,25 +293,66 @@ static lqt_parameter_info_static_t decode_parameters_audio[] = {
   { /* End of parameters */ }
 };
 
-struct CODECIDMAP {
-	int id;
-	int index;
-	AVCodec *encoder;
-	AVCodec *decoder;
-        lqt_parameter_info_static_t * encode_parameters;
-        lqt_parameter_info_static_t * decode_parameters;
-	char *short_name;
-	char *name;
-	char *fourccs[MAX_FOURCCS];
-        int   wav_ids[MAX_WAV_IDS];
-        int compatibility_flags;
-/*
- *  We explicitely allow, if encoding is allowed.
- *  This prevents the spreading of broken files
- */
-        int   do_encode;
-        int   * encoding_colormodels;
+struct CODECIDMAP
+  {
+  int id;
+  int index;
+  AVCodec *encoder;
+  AVCodec *decoder;
+  lqt_parameter_info_static_t * encode_parameters;
+  lqt_parameter_info_static_t * decode_parameters;
+  lqt_image_size_static_t     * image_sizes;
+  
+  char *short_name;
+  char *name;
+  char *fourccs[MAX_FOURCCS];
+  int   wav_ids[MAX_WAV_IDS];
+  int compatibility_flags;
+  /*
+   *  We explicitely allow, if encoding is allowed.
+   *  This prevents the spreading of broken files
+   */
+  int   do_encode;
+  int   * encoding_colormodels;
   };
+
+/* Image sizes */
+
+static lqt_image_size_static_t image_sizes_imx[] =
+  {
+    { 720, 576 }, // PAL without VBI
+    { 720, 608 }, // PAL with VBi
+    { 720, 486 }, // NTSC without VBI
+    { 720, 512 }, // NTSC with VBi
+    { /* End */ },
+  };
+
+#if 0 // TODO: Simpify DV encoders
+static lqt_image_size_static_t image_sizes_dv[] =
+  {
+    { 720, 575 }, // PAL
+    { 720, 480 }, // NTSC
+    { /* End */ },
+  };
+#endif
+
+static lqt_image_size_static_t image_sizes_h263[] =
+  {
+    {  128, 96 }, // sub-QCIF
+    {  176, 144 }, // QCIF
+    {  352, 288 }, // CIF
+    {  704, 576 }, // 4CIF
+    { 1408, 1152 }, // 16CIF
+    { /* End */ },
+  };
+
+static lqt_image_size_static_t image_sizes_dnxhd[] =
+  {
+    { 1920, 1080 },
+    { 1280,  720 },
+    { /* End */ },
+  };
+
 
 /* Video; tables from mplayers config... */
 
@@ -429,6 +471,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .encode_parameters = encode_parameters_h263,
       .decode_parameters = decode_parameters_video,
+      .image_sizes = image_sizes_h263,
       .short_name = "h263",
       .name = TRS("FFMPEG H263"),
       .fourccs = { "H263", "h263", "s263", (char *)0 },
@@ -756,6 +799,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
+      .image_sizes = image_sizes_dnxhd,
       .short_name = "dnxhd",
       .name = TRS("FFMPEG dnxhd"),
             .fourccs = { "AVdn", (char *)0 },
@@ -771,6 +815,7 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
       .encode_parameters = encode_parameters_imx,
+      .image_sizes = image_sizes_imx,
       .short_name = "imx",
       .name = TRS("FFMPEG IMX"),
       .fourccs = { "mx3p", "mx3n", "mx4p", "mx4n", "mx5p", "mx5n", (char *)0 },
@@ -953,6 +998,7 @@ static void set_codec_info(struct CODECIDMAP * map)
 
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
+  codec_info_ffmpeg.image_sizes = map->image_sizes;
   if(map->encoder && map->decoder)
     {
     codec_info_ffmpeg.direction = LQT_DIRECTION_BOTH;

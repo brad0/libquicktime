@@ -823,6 +823,8 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
  * \param src_y Y offset in the source frame
  * \param dst_x X offset in the destination frame
  * \param dst_y Y offset in the destination frame
+ *
+ * Since 1.2.0
  */
 
 void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
@@ -841,6 +843,8 @@ void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
  *
  * This will set the colors to black and alpha (if available) to
  * completely transparent.
+ *
+ * Since 1.2.0
  * 
  */
 

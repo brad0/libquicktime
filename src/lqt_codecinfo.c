@@ -177,6 +177,8 @@ static void destroy_codec_info(lqt_codec_info_t * ptr)
       destroy_parameter_info(&(ptr->decoding_parameters[i]));
     free(ptr->decoding_parameters);
     }
+  if(ptr->image_sizes)
+    free(ptr->image_sizes);
   free(ptr);
   }
 
@@ -270,7 +272,7 @@ copy_parameter_info(lqt_parameter_info_t * ret,
 static lqt_codec_info_t *
 copy_codec_info(const lqt_codec_info_t * info)
   {
-  int i;
+  int i, len;
   lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
   
   ret->compatibility_flags = info->compatibility_flags;
@@ -311,20 +313,27 @@ copy_codec_info(const lqt_codec_info_t * info)
   ret->num_encoding_colormodels = info->num_encoding_colormodels;
   if(ret->num_encoding_colormodels)
     {
-    ret->encoding_colormodels = malloc(ret->num_encoding_colormodels *
-                                       sizeof(*ret->encoding_colormodels));
-    for(i = 0; i < ret->num_encoding_colormodels; i++)
-      ret->encoding_colormodels[i] = info->encoding_colormodels[i];
+    len = ret->num_encoding_colormodels * sizeof(*ret->encoding_colormodels);
+    ret->encoding_colormodels = malloc(len);
+    memcpy(ret->encoding_colormodels, info->encoding_colormodels, len);
     }
   
   ret->num_wav_ids = info->num_wav_ids;
   if(ret->num_wav_ids)
     {
-    ret->wav_ids = malloc(ret->num_wav_ids * sizeof(int));
-    for(i = 0; i < ret->num_wav_ids; i++)
-      ret->wav_ids[i] = info->wav_ids[i];
-    
+    len = ret->num_wav_ids * sizeof(*ret->wav_ids);
+    ret->wav_ids = malloc(len);
+    memcpy(ret->wav_ids, info->wav_ids, len);
     }
+
+  ret->num_image_sizes = info->num_image_sizes;
+  if(ret->num_image_sizes)
+    {
+    len = ret->num_image_sizes * sizeof(*ret->image_sizes);
+    ret->image_sizes = malloc(len);
+    memcpy(ret->image_sizes, info->image_sizes, len);
+    }
+
   
   
   ret->num_encoding_parameters = info->num_encoding_parameters;
@@ -999,10 +1008,29 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
       ret->wav_ids[i] = template->wav_ids[i];
     }
 
+  /* Copy image_sizes */
+
+  ret->num_image_sizes = 0;
+
+  if(template->image_sizes)
+    {
+    while(template->image_sizes[ret->num_image_sizes].width)
+      ret->num_image_sizes++;
+
+    if(ret->num_image_sizes)
+      {
+      ret->image_sizes = malloc(ret->num_image_sizes *
+                                sizeof(*ret->image_sizes));
+      for(i = 0; i < ret->num_image_sizes; i++)
+        {
+        ret->image_sizes[i].width = template->image_sizes[i].width;
+        ret->image_sizes[i].height = template->image_sizes[i].height;
+        }
+      }
+    }
   
-  /* Copy encoding colormodels */
-    
-    
+  /* Copy encoding parameters */
+  
   if(template->encoding_parameters)
     {
     ret->num_encoding_parameters = 0;

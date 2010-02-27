@@ -159,6 +159,22 @@ typedef enum
   } lqt_codec_direction;
 
 /** \ingroup codec_registry
+    \brief Image size
+
+    Some codecs only support a limited set of image sizes,
+    which are contained in this struct.
+
+    Since 1.2.0
+*/
+  
+typedef struct
+  {
+  int width;
+  int height;
+  } lqt_image_size_t;
+
+  
+/** \ingroup codec_registry
     \brief compatibility flags contain this for obsolete/unmaintained codecs
 */
 
@@ -206,6 +222,10 @@ typedef struct lqt_codec_info_s
 
   int num_encoding_colormodels; /*!< Number of supported encoding colormodels (since 1.1.2) */
   int * encoding_colormodels;  /*!< Supported encoding colormodels (since 1.1.2) */
+
+  int num_image_sizes; /*!< Number of supported image sizes (since 1.2.0) */
+
+  lqt_image_size_t * image_sizes; /*!< Image sizes (since 1.2.0) */
   
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
   } lqt_codec_info_t;

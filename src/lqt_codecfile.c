@@ -127,6 +127,12 @@ num_encoding_colormodels_key = "NumEncodingColormodels: ";
 static const char *
 encoding_colormodel_key =      "EncodingColormodel: "; 	 
 
+static const char *
+num_image_sizes_key = "NumImageSizes: "; 	 
+
+static const char *
+image_size_key =      "ImageSize: "; 	 
+
 /* Codec order */
 
 static const char * audio_order_key = "AudioOrder: ";
@@ -376,6 +382,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
   int encoding_parameters_read = 0;
   int decoding_parameters_read = 0;
   int encoding_colormodels_read = 0;
+  int image_sizes_read = 0;
   
   uint32_t tmp_fourcc;
   
@@ -557,6 +564,31 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       codec->encoding_colormodels[encoding_colormodels_read] =
         lqt_string_to_colormodel(pos);
       encoding_colormodels_read++; 
+      }
+
+    /* Number of image sizes */ 	 
+    
+    else if(CHECK_KEYWORD(num_image_sizes_key))
+      {
+      pos = line + strlen(num_image_sizes_key);
+      codec->num_image_sizes = atoi(pos);
+      if(codec->num_image_sizes)
+        codec->image_sizes =
+          malloc(codec->num_image_sizes *
+                 sizeof(*codec->image_sizes));
+      else 	 
+        codec->image_sizes = NULL; 	 
+      } 	 
+
+    /* Image size */ 	 
+
+    else if(CHECK_KEYWORD(image_size_key)) 	 
+      {
+      pos = line + strlen(image_size_key);
+
+      sscanf(pos, "%d %d", &codec->image_sizes[image_sizes_read].width,
+             &codec->image_sizes[image_sizes_read].height);
+      image_sizes_read++; 
       }
     
     /* Number of parameters */
@@ -893,6 +925,18 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
       {
       fprintf(output, "%s%s\n", encoding_colormodel_key,
               lqt_colormodel_to_string(info->encoding_colormodels[i]));
+      }
+    }
+
+  if((info->type == LQT_CODEC_VIDEO) &&
+     (info->direction != LQT_DIRECTION_DECODE))
+    {
+    fprintf(output, "%s%d\n", num_image_sizes_key,
+            info->num_image_sizes);
+    for(i = 0; i < info->num_image_sizes; i++)
+      {
+      fprintf(output, "%s%d %d\n", image_size_key,
+              info->image_sizes[i].width, info->image_sizes[i].height);
       }
     }
   
