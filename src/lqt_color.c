@@ -457,7 +457,7 @@ int lqt_get_colormodel(int index)
   return colormodel_table[index].colormodel;
   }
 
-static int get_bytes_per_line(int colormodel, int width)
+static int get_bytes_per_element(int colormodel)
   {
   switch(colormodel)
     {
@@ -466,27 +466,32 @@ static int get_bytes_per_line(int colormodel, int width)
     case BC_YUV422:
     case BC_YUV422P16:
     case BC_YUV444P16:
-      return width * 2;
+      return 2;
       break;
     case BC_BGR888:
     case BC_RGB888:
-      return width * 3;
+      return 3;
       break;
     case BC_BGR8888:
     case BC_RGBA8888:
     case BC_YUVA8888:
-      return width * 4;
+      return 4;
       break;
-      
     case BC_RGB161616:
-      return width * 6;
+      return 6;
       break;
     case BC_RGBA16161616:
-      return width * 8;
+      return 8;
       break;
     default:
-      return width;
+      return 1;
     }
+  
+  }
+
+static int get_bytes_per_line(int colormodel, int width)
+  {
+  return get_bytes_per_element(colormodel) * width;
   }
 
 /* Allocate and free row_pointers for use with libquicktime */
@@ -559,41 +564,63 @@ void lqt_rows_free(uint8_t ** rows)
 void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan,
                    int in_rowspan_uv, int out_rowspan, int out_rowspan_uv, int colormodel)
   {
+  lqt_rows_copy_sub(out_rows, in_rows,
+                    width, height, in_rowspan,
+                    in_rowspan_uv, out_rowspan,
+                    out_rowspan_uv, colormodel, 0, 0, 0, 0);
+  }
+
+void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
+                       int width, int height, int in_rowspan,
+                       int in_rowspan_uv, int out_rowspan,
+                       int out_rowspan_uv, int colormodel, int src_x, int src_y, int dst_x, int dst_y)
+  {
   uint8_t * src_ptr, *dst_ptr;
   int i;
   int sub_h = 0, sub_v = 0;
-
-  int bytes_per_line;
+  
+  int bytes_per_line, bytes_per_element;
+  
+  bytes_per_line = get_bytes_per_line(colormodel, width);
+  bytes_per_element = get_bytes_per_element(colormodel);
+  
   if(lqt_colormodel_is_planar(colormodel))
     {
     lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
 
+    /* Align */
+    src_x /= sub_h;
+    src_x *= sub_h;
+
+    src_y /= sub_v;
+    src_y *= sub_v;
+    
     /* Luma plane */
-        
-    src_ptr = in_rows[0];
-    dst_ptr = out_rows[0];
+    
+    src_ptr = in_rows[0] + src_x * bytes_per_element + src_y * in_rowspan;
+    dst_ptr = out_rows[0] + src_x * bytes_per_element + dst_y * out_rowspan;
     for(i = 0; i < height; i++)
       {
-      memcpy(dst_ptr, src_ptr, width);
+      memcpy(dst_ptr, src_ptr, bytes_per_line);
       src_ptr += in_rowspan;
       dst_ptr += out_rowspan;
       }
     /* Chroma planes */
 
-    src_ptr = in_rows[1];
-    dst_ptr = out_rows[1];
+    src_ptr = in_rows[1] + src_x/sub_h * bytes_per_element + src_y * in_rowspan_uv;
+    dst_ptr = out_rows[1] + dst_x/sub_h * bytes_per_element + dst_y * out_rowspan_uv;
     for(i = 0; i < (height + sub_v - 1)/sub_v; i++)
       {
-      memcpy(dst_ptr, src_ptr, (width + sub_h - 1)/sub_h);
+      memcpy(dst_ptr, src_ptr, (bytes_per_line + sub_h - 1)/sub_h);
       src_ptr += in_rowspan_uv;
       dst_ptr += out_rowspan_uv;
       }
-
-    src_ptr = in_rows[2];
-    dst_ptr = out_rows[2];
+    
+    src_ptr = in_rows[2] + src_x/sub_h * bytes_per_element + src_y * in_rowspan_uv;
+    dst_ptr = out_rows[2] + dst_x/sub_h * bytes_per_element + dst_y * out_rowspan_uv;
     for(i = 0; i < (height + sub_v - 1)/sub_v; i++)
       {
-      memcpy(dst_ptr, src_ptr, (width + sub_h - 1)/sub_h);
+      memcpy(dst_ptr, src_ptr, (bytes_per_line + sub_h - 1)/sub_h);
       src_ptr += in_rowspan_uv;
       dst_ptr += out_rowspan_uv;
       }
@@ -605,37 +632,36 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
        We test rows[1] to check this and handle all 4 combinations
        separately */
     
-    bytes_per_line = get_bytes_per_line(colormodel, width);
-    
     if(in_rows[1] && out_rows[1])
       {
       for(i = 0; i < height; i++)
-        memcpy(out_rows[i], in_rows[i], bytes_per_line);
+        memcpy(out_rows[i + dst_y] + dst_x * bytes_per_element,
+               in_rows[i + src_y] + src_x * bytes_per_element, bytes_per_line);
       }
     else if(in_rows[1])
       {
-      dst_ptr = out_rows[0];
+      dst_ptr = out_rows[0] + dst_y * bytes_per_line + dst_x * bytes_per_element;
       
       for(i = 0; i < height; i++)
         {
-        memcpy(dst_ptr, in_rows[i], bytes_per_line);
+        memcpy(dst_ptr, in_rows[i + src_y] + src_x * bytes_per_element, bytes_per_line);
         dst_ptr += out_rowspan;
         }
       }
     else if(out_rows[1])
       {
-      src_ptr = in_rows[0];
+      src_ptr = in_rows[0] + src_y * bytes_per_line + src_x * bytes_per_element;
       
       for(i = 0; i < height; i++)
         {
-        memcpy(out_rows[i], src_ptr, bytes_per_line);
+        memcpy(out_rows[i + dst_y] + dst_x * bytes_per_element, src_ptr, bytes_per_line);
         src_ptr += in_rowspan;
         }
       }
     else
       {
-      src_ptr = in_rows[0];
-      dst_ptr = out_rows[0];
+      src_ptr = in_rows[0] + src_y * bytes_per_line + src_x * bytes_per_element;
+      dst_ptr = out_rows[0] + dst_y * bytes_per_line + dst_x * bytes_per_element;
       
       for(i = 0; i < height; i++)
         {
@@ -646,6 +672,7 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
       }
     }
   }
+
 
 // for i in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do for j in BC_RGB565 BC_BGR565 BC_BGR888 BC_BGR8888 BC_RGB888 BC_RGBA8888 BC_RGB161616 BC_RGBA16161616 BC_YUVA8888 BC_YUV422 BC_YUV420P BC_YUV422P BC_YUV444P BC_YUV411P BC_YUVJ420P BC_YUVJ422P BC_YUVJ444P BC_YUV422P16 BC_YUV444P16; do echo $i"_to_"$j.png; gthumb $i"_to_"$j.png; done; done
 

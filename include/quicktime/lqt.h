@@ -808,7 +808,29 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
 void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height, int in_rowspan, int in_rowspan_uv,
                    int out_rowspan, int out_rowspan_uv, int colormodel);
   
+/** \ingroup video
+ * \brief Copy a subrectangle video frame.
+ * \param out_rows Destination frame
+ * \param in_rows Source frame
+ * \param width Width of the frame
+ * \param height Height of the frame
+ * \param in_rowspan Rowspan for the luma plane of the input frame
+ * \param in_rowspan_uv Rowspan for the chroma planes of the input frame
+ * \param out_rowspan Rowspan for the luma plane of the output frame
+ * \param out_rowspan_uv Rowspan for the chroma planes of the output frame
+ * \param colormodel The colormodel of the frames
+ * \param src_x X offset in the source frame
+ * \param src_y Y offset in the source frame
+ * \param dst_x X offset in the destination frame
+ * \param dst_y Y offset in the destination frame
+ */
 
+void lqt_rows_copy_sub(uint8_t **out_rows, uint8_t **in_rows,
+                       int width, int height, int in_rowspan,
+                       int in_rowspan_uv, int out_rowspan,
+                       int out_rowspan_uv, int colormodel, int src_x, int src_y, int dst_x, int dst_y);
+  
+  
 /** \ingroup video
  *  \brief Free a frame allocated by \ref lqt_rows_alloc
  *  \param rows The frame to be freed

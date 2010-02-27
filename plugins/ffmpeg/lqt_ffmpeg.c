@@ -170,6 +170,14 @@ int ffmpeg_num_video_codecs = -1;
     PARAM_FLAG_BITEXACT, \
     PARAM_THREAD_COUNT
 
+#define ENCODE_PARAM_IMX \
+  { \
+    .name = "imx_bitrate",                        \
+    .real_name = TRS("Bitrate (Mbps)"),                \
+    .type = LQT_PARAMETER_STRINGLIST, \
+    .stringlist_options = (char *[]){ TRS("30"), TRS("40"), TRS("50"), \
+                          (char *)0 } \
+  }
 
 #define DECODE_PARAM_AUDIO
 
@@ -263,6 +271,12 @@ static lqt_parameter_info_static_t encode_parameters_ffv1[] = {
   PARAM_FFV1_CODER_TYPE,
   { /* End of parameters */ }
 };
+
+static lqt_parameter_info_static_t encode_parameters_imx[] = {
+  ENCODE_PARAM_IMX,
+  { /* End of parameters */ }
+};
+
 
 static lqt_parameter_info_static_t encode_parameters_audio[] = {
   ENCODE_PARAM_AUDIO,
@@ -756,12 +770,13 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
+      .encode_parameters = encode_parameters_imx,
       .short_name = "imx",
       .name = TRS("FFMPEG IMX"),
       .fourccs = { "mx3p", "mx3n", "mx4p", "mx4n", "mx5p", "mx5n", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-      .do_encode = 0
+      .do_encode = 1
     },
 };
 
