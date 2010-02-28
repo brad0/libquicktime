@@ -479,7 +479,11 @@ int lqt_set_video(quicktime_t *file,
   int i;
 
   for(i = 0; i < tracks; i++)
-    lqt_add_video_track(file, frame_w, frame_h, frame_duration, timescale, info);
+    {
+    if(lqt_add_video_track(file, frame_w, frame_h,
+                           frame_duration, timescale, info))
+      return 1;
+    }
   return 0;
   }
 
@@ -508,6 +512,26 @@ int lqt_add_video_track(quicktime_t *file,
   {
   char * compressor = info->fourccs[0];
   quicktime_trak_t *trak;
+
+  /* Check if the image size is supported */
+
+  if(info->num_image_sizes)
+    {
+    int i;
+    for(i = 0; i < info->num_image_sizes; i++)
+      {
+      if((frame_w == info->image_sizes[i].width) &&
+         (frame_h == info->image_sizes[i].height))
+        break;
+      }
+    if(i >= info->num_image_sizes)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "Adding video track failed, unsupported image size");
+      return 1;
+      }
+    }
+  
   if(!file->total_vtracks)
     quicktime_mhvd_init_video(file, &(file->moov.mvhd), timescale);
   file->vtracks = realloc(file->vtracks, (file->total_vtracks+1) *
