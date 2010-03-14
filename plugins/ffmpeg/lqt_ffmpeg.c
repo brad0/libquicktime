@@ -662,6 +662,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
       .do_encode = 1,
+      .encoding_colormodels = (int[]){ BC_RGB888, BC_RGBA8888, LQT_COLORMODEL_NONE },
     },
     {
       .id = CODEC_ID_MSRLE,

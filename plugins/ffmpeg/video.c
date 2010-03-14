@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define LOG_DOMAIN "ffmpeg_video"
 
@@ -286,6 +287,35 @@ static void convert_image_decode_rgba(AVFrame * in_frame,
       dst_ptr[3] = 0xff;
       dst_ptr += 4;
       src_ptr++;
+      }
+    }
+  }
+
+/* Convert RR GG BB AA -> AA RR GG BB */
+static void convert_rgba_to_argb(uint8_t const* src, int src_bytes_per_line,
+                                 uint8_t* dst, int dst_bytes_per_line,
+                                 int rows, int cols)
+  {
+  int i, j;
+  uint32_t const* src_line = (uint32_t const*)src;
+  uint32_t* dst_line = (uint32_t*)dst;
+  int const src_stride = src_bytes_per_line / 4;
+  int const dst_stride = dst_bytes_per_line / 4;
+
+  assert(src_bytes_per_line % 4 == 0);
+  assert(dst_bytes_per_line % 4 == 0);
+
+  for(i = 0; i < rows; ++i, src_line += src_stride, dst_line += dst_stride)
+    {
+    for(j = 0; j < cols; ++j)
+      {
+#ifdef WORDS_BIGENDIAN
+      /* RR GG BB AA -> 0xRRGGBBAA -> 0xAARRGGBB -> AA RR GG BB */
+      dst_line[j] = (src_line[j] << 24) | (src_line[j] >> 8);
+#else
+      /* RR GG BB AA -> 0xAABBGGRR -> 0xBBGGRRAA -> AA RR GG BB */
+      dst_line[j] = (src_line[j] >> 24) | (src_line[j] << 8);
+#endif
       }
     }
   }
@@ -877,6 +907,17 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         codec->write_global_header = 1;
         }
       }
+    else if(codec->encoder->id == CODEC_ID_QTRLE)
+      {
+        if(vtrack->stream_cmodel == BC_RGBA8888)
+          {
+          /* Libquicktime doesn't natively support a color model equivalent
+             to PIX_FMT_ARGB, which is required for QTRLE with alpha channel.
+             So, we use BC_RGBA8888 and do ad hoc conversion below. */
+          codec->avctx->pix_fmt = PIX_FMT_ARGB;
+          vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
+          }
+      }
     else if(codec->is_imx)
       init_imx_encoder(file, track);
     
@@ -922,7 +963,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     }
   //        codec->lqt_colormodel = ffmepg_2_lqt(codec->com.ffcodec_enc);
 
-  if(codec->y_offset)
+  if(codec->y_offset != 0 || codec->avctx->pix_fmt == PIX_FMT_ARGB)
     {
     if(!codec->tmp_rows)
       {
@@ -935,15 +976,24 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
                      codec->avctx->width, codec->avctx->height,
                      codec->tmp_row_span, codec->tmp_row_span_uv, vtrack->stream_cmodel);
       }
-    lqt_rows_copy_sub(codec->tmp_rows, row_pointers,
-                      width, height,
-                      vtrack->stream_row_span,
-                      vtrack->stream_row_span_uv,
-                      codec->tmp_row_span,
-                      codec->tmp_row_span_uv,
-                      vtrack->stream_cmodel,
-                      0, 0, 0, codec->y_offset);
 
+    if(codec->y_offset)
+      {
+      lqt_rows_copy_sub(codec->tmp_rows, row_pointers,
+                        width, height,
+                        vtrack->stream_row_span,
+                        vtrack->stream_row_span_uv,
+                        codec->tmp_row_span,
+                        codec->tmp_row_span_uv,
+                        vtrack->stream_cmodel,
+                        0, 0, 0, codec->y_offset);
+       }
+    else if(codec->avctx->pix_fmt == PIX_FMT_ARGB)
+       {
+       convert_rgba_to_argb(row_pointers[0], vtrack->stream_row_span,
+                            codec->tmp_rows[0], codec->tmp_row_span,
+                            codec->avctx->height, codec->avctx->width);
+       }
     codec->frame->data[0] = codec->tmp_rows[0];
     codec->frame->data[1] = codec->tmp_rows[1];
     codec->frame->data[2] = codec->tmp_rows[2];
