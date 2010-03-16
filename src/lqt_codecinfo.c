@@ -313,7 +313,8 @@ copy_codec_info(const lqt_codec_info_t * info)
   ret->num_encoding_colormodels = info->num_encoding_colormodels;
   if(ret->num_encoding_colormodels)
     {
-    len = ret->num_encoding_colormodels * sizeof(*ret->encoding_colormodels);
+    /* +1 to copy the terminating LQT_COLORMODEL_NODE */
+    len = (ret->num_encoding_colormodels + 1) * sizeof(*ret->encoding_colormodels);
     ret->encoding_colormodels = malloc(len);
     memcpy(ret->encoding_colormodels, info->encoding_colormodels, len);
     }

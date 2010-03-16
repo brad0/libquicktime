@@ -966,27 +966,19 @@ void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
     {
     file->vtracks[track].io_cmodel = colormodel;
 
-    /* Check if we can encode this colormodel directly */
+    /* Maybe switch the encoding colormodel to better match the IO one. */
     if(file->wr && !file->encoding_started)
       {
-      lqt_codec_info_t ** info;
-      int i;
       char * name = ((quicktime_codec_t*)(file->vtracks[track].codec))->codec_name;
-      
-      info = lqt_find_video_codec_by_name(name);
-
-      if((*info)->encoding_colormodels)
-        {
-        for(i = 0; i < (*info)->num_encoding_colormodels; i++)
-          {
-          if((*info)->encoding_colormodels[i] == colormodel)
-            {
-            file->vtracks[track].stream_cmodel = colormodel;
-            break;
-            }
-          }
-        }
+      lqt_codec_info_t ** info = lqt_find_video_codec_by_name(name);
+      int encoding_cmodel = lqt_get_best_target_colormodel(
+              colormodel, (*info)->encoding_colormodels);
       lqt_destroy_codec_info(info);
+
+      if (encoding_cmodel != LQT_COLORMODEL_NONE)
+        {
+        file->vtracks[track].stream_cmodel = encoding_cmodel;
+        }
       }
     }
   else

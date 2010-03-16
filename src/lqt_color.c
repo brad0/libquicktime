@@ -297,128 +297,88 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track)
   return file->vtracks[track].stream_cmodel;
   }
 
-static int
-lqt_get_best_colormodel_decode(quicktime_t * file, int track, int * supported)
+int
+lqt_get_best_target_colormodel(int source, int const* target_options)
   {
+  int conversion_price = 0, best_conversion_price = 10;
   int ret = LQT_COLORMODEL_NONE;
+  int i;
 
-  int index;
+  if (!target_options) {
+    /* Undocumented behavior, but from inside libquicktime we rely on it. */
+    return ret;
+  }
 
-  int best_conversion_price;
-  int conversion_price;
-  
-  int decoder_colormodel = LQT_COLORMODEL_NONE;
-
-  decoder_colormodel = lqt_get_decoder_colormodel(file, track);
-  
-  /* Check, if the decoder colormodel is directly supported */
-
-  if(decoder_colormodel != LQT_COLORMODEL_NONE)
+  for(i = 0; target_options[i] != LQT_COLORMODEL_NONE; ++i)
     {
-    index = 0;
-    while(supported[index] != LQT_COLORMODEL_NONE)
+    if (target_options[i] == source)
+      return source;
+
+    if(lqt_colormodel_has_conversion(source, target_options[i]))
       {
-      if(decoder_colormodel == supported[index])
+      conversion_price = get_conversion_price(source, target_options[i]);
+
+      if(conversion_price < best_conversion_price)
         {
-        ret = supported[index];
-        break;
+        best_conversion_price = conversion_price;
+        ret = target_options[i];
         }
-      else
-        index++;
       }
     }
-  else
-    ret = BC_RGB888;
-  
 
-  if(ret == LQT_COLORMODEL_NONE)
-    {
-    index = 0;
-
-    best_conversion_price = 10;
-
-    while(supported[index] != LQT_COLORMODEL_NONE)
-      {
-      if(quicktime_reads_cmodel(file, supported[index], track))
-        {
-        conversion_price
-          = get_conversion_price(decoder_colormodel, supported[index]);
-        if(conversion_price < best_conversion_price)
-          {
-          best_conversion_price = conversion_price;
-          ret = supported[index];
-          }
-        }
-      index++;
-      }
-    }
-  if(ret == LQT_COLORMODEL_NONE)
-    ret = BC_RGB888;
   return ret;
   }
 
-static int
-lqt_get_best_colormodel_encode(quicktime_t * file, int track,
-                               int * supported)
+int
+lqt_get_best_source_colormodel(int const* source_options, int target)
   {
-  int index_supported;
-
   int conversion_price = 0, best_conversion_price = 10;
   int ret = LQT_COLORMODEL_NONE;
-  
-  index_supported = 0;
+  int i;
 
+  if (!source_options) {
+    /* Undocumented behavior, but from inside libquicktime we rely on it. */
+    return ret;
+  }
 
-  while(supported[index_supported] != LQT_COLORMODEL_NONE)
+  for(i = 0; source_options[i] != LQT_COLORMODEL_NONE; ++i)
     {
-    if(file->vtracks[track].stream_cmodel == supported[index_supported])
-      {
-      ret = file->vtracks[track].stream_cmodel;
-      break;
-      }
-    index_supported++;
-    }
-  
-  if(ret == LQT_COLORMODEL_NONE)
-    {
-    index_supported = 0;
+    if(source_options[i] == target)
+      return target;
 
-    best_conversion_price = 10;
-    
-    while(supported[index_supported] != LQT_COLORMODEL_NONE)
+    if(lqt_colormodel_has_conversion(source_options[i], target))
       {
-      if(quicktime_writes_cmodel(file, supported[index_supported], track))
-        {
-        conversion_price =
-          get_conversion_price(file->vtracks[track].stream_cmodel,
-                               supported[index_supported]);
+      conversion_price = get_conversion_price(source_options[i], target);
         
-        if(conversion_price < best_conversion_price) 
-          {
-          best_conversion_price = conversion_price;
-          ret = supported[index_supported];
-          }
+      if(conversion_price < best_conversion_price)
+        {
+        best_conversion_price = conversion_price;
+        ret = source_options[i];
         }
-      index_supported++;
       }
     }
   
-  if(ret == LQT_COLORMODEL_NONE)
-    {
-    ret = BC_RGB888;
-    }
   return ret;
   }
 
 int lqt_get_best_colormodel(quicktime_t * file, int track,
                             int * supported)
   {
+  int ret;
   if((track >= file->total_vtracks) || (track < 0))
     return LQT_COLORMODEL_NONE;
   if(file->wr)
-    return lqt_get_best_colormodel_encode(file, track, supported);
+    ret = lqt_get_best_source_colormodel(supported, file->vtracks[track].stream_cmodel);
   else
-    return lqt_get_best_colormodel_decode(file, track, supported);
+    ret = lqt_get_best_target_colormodel(file->vtracks[track].stream_cmodel, supported);
+
+  if(ret == LQT_COLORMODEL_NONE)
+    {
+    /* Backwards compatibility. */
+    ret = BC_RGB888;
+    }
+
+  return ret;
   }
 
 static const int num_colormodels =

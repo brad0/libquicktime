@@ -745,6 +745,32 @@ int lqt_get_colormodel(int index);
 
 int lqt_get_decoder_colormodel(quicktime_t * file, int track);
 
+/** \ingroup color
+ *  \brief Select a source colormodel from a provided list that is best
+ *         for conversion into a specified target colormodel.
+ *  \param source_options An array of source colormodels to select from.
+ *         Must be terminated with LQT_COLORMODEL_NODE.
+ *  \param target The target colormodel.
+ *  \return A colormodel from \p source_options or LQT_COLORMODEL_NONE,
+ *          if none of the source colormodels can be converted to the
+ *          target one.
+ */
+
+int lqt_get_best_source_colormodel(int const* source_options, int target);
+
+/** \ingroup color
+ *  \brief Select a target colormodel from a provided list that is best
+ *         for conversion from a specified source colormodel.
+ *  \param source The source colormodel.
+ *  \param target_options An array of target colormodels to select from.
+ *         Must be terminated with LQT_COLORMODEL_NODE.
+ *  \return A colormodel from \p target_options or LQT_COLORMODEL_NONE,
+ *          if the source colormodel can't be converted to any of the
+ *          target ones.
+ */
+
+int lqt_get_best_target_colormodel(int source, int const* target_options);
+
 /** \ingroup video
  *  \brief Get the best colormodel out of a list of supported colormodels
  *  \param file A quicktime handle
