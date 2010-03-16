@@ -41,7 +41,11 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .name =        "enc_rate_control",
       .real_name =   TRS("Rate control"),
       .type =        LQT_PARAMETER_STRINGLIST,
+#if SCHRO_CHECK_VERSION(1,0,9)
+      .val_default = { .val_string = "Constant quality" },
+#else
       .val_default = { .val_string = "Constant noise threshold" },
+#endif
       .stringlist_options = (char *[]){ TRS("Constant noise threshold"),
                                         TRS("Constant bitrate"),
                                         TRS("Low delay"), 
@@ -99,10 +103,24 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .name      = "enc_quality",
       .real_name = TRS("Quality"),
       .type = LQT_PARAMETER_FLOAT,
+#if SCHRO_CHECK_VERSION(1,0,9)
+      .val_default = { .val_float =        5.0 },
+#else
       .val_default = { .val_float =        7.0 },
+#endif
       .val_min     = { .val_float =        0.0 },
       .val_max     = { .val_float =       10.0 },
       .num_digits  = 2,
+    },
+#endif
+#if SCHRO_CHECK_VERSION(1,0,9)
+    {
+      .name =        "enc_enable_rdo_cbr",
+      .real_name =   TRS("rdo cbr"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     1 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
     },
 #endif
     { 
@@ -176,6 +194,17 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
                                         TRS("Full"),
                                         (char *)0 },
     },
+#if SCHRO_CHECK_VERSION(1,0,9)
+    {
+      .name =        "enc_enable_chroma_me",
+      .real_name =   TRS("Enable chroma ME"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     0 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+#endif
+
 #if SCHRO_CHECK_VERSION(1,0,6)
     {
       .name      = "enc_enable_global_motion",
@@ -193,6 +222,56 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_min     = { .val_int = 0 },
       .val_max     = { .val_int = 1 },
       .val_default = { .val_int = 0 },
+    },
+#endif
+#if SCHRO_CHECK_VERSION(1,0,9)
+    {
+      .name =        "enc_enable_hierarchical_estimation",
+      .real_name =   TRS("Hierarchical estimation"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     1 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_enable_phasecorr_estimation",
+      .real_name =   TRS("Phasecorr estimation"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     0 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_enable_bigblock_estimation",
+      .real_name =   TRS("Bigblock estimation"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     1 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_enable_global_motion",
+      .real_name =   TRS("Global motion estimation"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     0 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_enable_deep_estimation",
+      .real_name =   TRS("Deep estimation"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     1 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_enable_scene_change_detection",
+      .real_name =   TRS("Scene change detection"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     1 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
     },
 #endif
     { 
@@ -259,6 +338,32 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .real_name =   TRS("Misc"),
       .type =        LQT_PARAMETER_SECTION,
     },
+#if SCHRO_CHECK_VERSION(1,0,9)
+    {
+      .name = "enc_force_profile",
+      .real_name = TRS("Force profile"),
+      .type = LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Auto" },
+      .stringlist_options = (char *[]){ TRS("Auto"),
+                                        TRS("VC-2 low delay"),
+                                        TRS("VC-2 simple"),
+                                        TRS("VC-2 main"),
+                                        TRS("Main"),
+                                        (char *)0 },
+    },
+    {
+      .name = "enc_codeblock_size",
+      .real_name = TRS("Codeblock size"),
+      .type = LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Auto" },
+      .stringlist_options = (char *[]){ TRS("Auto"),
+                                        TRS("Small"),
+                                        TRS("Medium"),
+                                        TRS("Large"),
+                                        TRS("Full"),
+                                        (char *)0 },
+    },
+#endif
     {
       .name      = "enc_enable_multiquant",
       .real_name = TRS("Enable multiquant"),
@@ -275,6 +380,34 @@ lqt_parameter_info_static_t encode_parameters_schroedinger[] =
       .val_max     = { .val_int = 1 },
       .val_default = { .val_int = 0 },
     },
+#if SCHRO_CHECK_VERSION(1,0,9)
+    {
+      .name =        "enc_enable_noarith",
+      .real_name =   TRS("Disable arithmetic coding"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     0 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     1 },
+    },
+    {
+      .name =        "enc_downsample_levels",
+      .real_name =   TRS("Downsample levels"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     5 },
+      .val_min     = { .val_int =     2 },
+      .val_max     = { .val_int =     8 },
+    },
+    {
+      .name =        "enc_transform_depth",
+      .real_name =   TRS("Transform depth"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int =     3 },
+      .val_min     = { .val_int =     0 },
+      .val_max     = { .val_int =     6 },
+    },
+#endif
+
+
 #endif
     { /* End of parameters */ }
   };

@@ -1,7 +1,6 @@
 /*
  *  Compile this file with
- *  gcc -g `pkg-config --cflags schroedinger-1.0` extract_settings.c \
- *    `pkg-config --libs schroedinger-1.0`
+ *  gcc -g `pkg-config --cflags schroedinger-1.0` extract_settings.c `pkg-config --libs schroedinger-1.0`
  */
 
 #include <schroedinger/schro.h>
