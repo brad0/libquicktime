@@ -641,7 +641,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .name =        "x264_i_trellis",
       .real_name =   TRS("Trellis RD quantization"),
       .type =        LQT_PARAMETER_STRINGLIST,
-      .val_default = { .val_string = "Disabled" },
+      .val_default = { .val_string = "Enabled (final)" },
       .stringlist_options = (char*[]){ TRS("Disabled"),
                                        TRS("Enabled (final)"),
                                        TRS("Enabled (always)"),
