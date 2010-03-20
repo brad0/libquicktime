@@ -32,7 +32,7 @@ static char * fourccs_x264[]  = { "avc1", (char*)0 };
 static lqt_parameter_info_static_t encode_parameters_x264[] =
   {
     {
-      .name =        "x264_frame_type",
+      .name =        "x264_sec_frame_type",
       .real_name =   TRS("Frame-type options"),
       .type =        LQT_PARAMETER_SECTION
     },
@@ -94,7 +94,19 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_max =     { .val_int = 100 },
       .help_string = TRS("Influences how often B-frames are used"),
     },
-#if X264_BUILD >= 78
+#if X264_BUILD >= 88
+    {
+      .name =        "x264_i_bframe_pyramid",
+      .real_name =   TRS("B-frame pyramid"),
+      .type =        LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Normal" },
+      .stringlist_options = (char*[]){ TRS("None"),
+                                       TRS("Strict"),
+                                       TRS("Normal"),
+                                       (char*)0 },
+      .help_string = TRS("Keep some B-frames as references")
+    },
+#elif X264_BUILD >= 78
     {
       .name =        "x264_i_bframe_pyramid",
       .real_name =   TRS("B-frame pyramid"),
@@ -116,7 +128,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
     },
 #endif
     {
-      .name =        "x264_ratecontrol",
+      .name =        "x264_sec_ratecontrol",
       .real_name =   TRS("Ratecontrol"),
       .type =        LQT_PARAMETER_SECTION
     },
@@ -124,15 +136,15 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .name =        "x264_i_rc_method",
       .real_name =   TRS("Ratecontrol method"),
       .type =        LQT_PARAMETER_STRINGLIST,
-      .val_default = { .val_string = "Constant quality" },
+      .val_default = { .val_string = "CRF based VBR" },
       .stringlist_options = (char*[]){ TRS("Constant quality"),
-                                       TRS("Average bitrate"),
                                        TRS("CRF based VBR"),
+                                       TRS("Average bitrate"),
                                        (char*)0 },
       .help_string = TRS("Ratecontrol method:\n"
                      "Constant quality: Specify a quantizer parameter below\n"
-                     "Average bitrate: Specify a bitrate below\n"
                      "CRF based VBR: Specify a rate factor below\n"
+                     "Average bitrate: Specify a bitrate below\n"
                          "Selecting 2-pass encoding will force Average bitrate."),
     },
     {
@@ -232,7 +244,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
     },
 #endif
     {
-      .name =        "x264_quantizer",
+      .name =        "x264_sec_quantizer",
       .real_name =   TRS("Quantizer"),
       .type =        LQT_PARAMETER_SECTION
     },
@@ -253,7 +265,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .name =        "x264_f_rf_constant",
       .real_name =   TRS("Nominal Quantizer parameter"),
       .type =        LQT_PARAMETER_FLOAT,
-      .val_default = { .val_float = 26.0 },
+      .val_default = { .val_float = 23.0 },
       .val_min =     { .val_float = 0.0 },
       .val_max =     { .val_float = 51.0 },
       .help_string = TRS("This selects the nominal quantizer to use (1 to 51). "
@@ -265,14 +277,14 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .name =        "x264_i_qp_constant",
       .real_name =   TRS("Quantizer parameter"),
       .type =        LQT_PARAMETER_INT,
-      .val_default = { .val_int = 26 },
+      .val_default = { .val_int = 23 },
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 51 },
       .help_string = TRS("This selects the quantizer to use (1 to 51). Lower "
                      "values result in better fidelity, but higher bitrates. "
                          "26 is a good default value. 0 means lossless.")
     },
-{
+    {
       .name =        "x264_i_qp_min",
       .real_name =   TRS("Minimum quantizer parameter"),
       .type =        LQT_PARAMETER_INT,
@@ -318,7 +330,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .name =        "x264_i_aq_mode",
       .real_name =   TRS("Adaptive quantization"),
       .type =        LQT_PARAMETER_STRINGLIST,
-      .val_default = { .val_string = "None" },
+      .val_default = { .val_string = "Variance AQ (complexity mask)" },
       .stringlist_options = (char*[]){ TRS("None"),
                                        TRS("Variance AQ (complexity mask)"),
 #if X264_BUILD >= 69
@@ -339,9 +351,56 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
                          "textured areas"),
     },
 #endif
-    
+
+#if X264_BUILD >= 88
     {
-      .name =        "x264_partitions",
+      .name =        "x264_f_qcompress",
+      .real_name =   TRS("QP curve compression"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_min     = { .val_float = 0.0 },
+      .val_max     = { .val_float = 1.0 },
+      .val_default = { .val_float = 0.6 },
+      .help_string = TRS("Only for 2-pass encoding"),
+    },
+    {
+      .name =        "x264_f_qblur",
+      .real_name =   TRS("QP Reduce fluctuations in QP (after curve compression)"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_default = { .val_float = 0.5 },
+      .help_string = TRS("Only for 2-pass encoding"),
+    },
+    {
+      .name =        "x264_f_complexity_blur",
+      .real_name =   TRS("Temporally blur complexity"),
+      .type =        LQT_PARAMETER_FLOAT,
+      .num_digits =  2,
+      .val_default = { .val_float = 20 },
+      .help_string = TRS("Only for 2-pass encoding"),
+    },
+    {
+      .name =        "x264_i_chroma_qp_offset",
+      .real_name =   TRS("QP difference between chroma and luma"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 0 },
+    },
+    {
+      .name =        "x264_i_luma_deadzone_0",
+      .real_name =   TRS("Inter luma quantization deadzone"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 21 },
+    },
+    {
+      .name =        "x264_i_luma_deadzone_1",
+      .real_name =   TRS("Intra luma quantization deadzone"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 11 },
+    },
+#endif
+
+    {
+      .name =        "x264_sec_partitions",
       .real_name =   TRS("Partitions"),
       .type =        LQT_PARAMETER_SECTION,
     },
@@ -395,7 +454,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_max =     { .val_int = 1 },
     },
     {
-      .name =        "x264_me",
+      .name =        "x264_sec_me",
       .real_name =   TRS("Motion estimation"),
       .type =        LQT_PARAMETER_SECTION,
     },
@@ -429,7 +488,11 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
 #else
       .val_max =     { .val_int = 9 },
 #endif
+#if X264_BUILD < 88
       .val_default = { .val_int = 5 },
+#else
+      .val_default = { .val_int = 7 },
+#endif
       .help_string = TRS("Subpixel motion estimation and partition decision "
 #if X264_BUILD < 65
                          "quality: 1=fast, 7=best.")
@@ -476,7 +539,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .type =        LQT_PARAMETER_INT,
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 1 },
-      .val_default = { .val_int = 0 },
+      .val_default = { .val_int = 1 },
     },
     {
       .name =        "x264_b_mixed_references",
@@ -484,7 +547,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .type =        LQT_PARAMETER_INT,
       .val_min =     { .val_int = 0 },
       .val_max =     { .val_int = 1 },
-      .val_default = { .val_int = 0 },
+      .val_default = { .val_int = 1 },
       .help_string = TRS("Allow each MB partition in P-frames to have it's own "
                          "reference number")
     },
@@ -508,6 +571,18 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       .val_default = { .val_int = 0 },
       .help_string = TRS("Implicit weighting for B-frames")
     },
+#if X264_BUILD >= 88
+    {
+      .name =        "x264_i_weighted_pred",
+      .real_name =   TRS("Weighted prediction for P-frames"),
+      .type =        LQT_PARAMETER_STRINGLIST,
+      .val_default = { .val_string = "Smart analysis" },
+      .stringlist_options = (char*[]){ TRS("Disabled"),
+                                       TRS("Blind offset"),
+                                       TRS("Smart analysis"),
+                                       (char*)0 },
+    },
+#endif
     {
       .name =        "x264_i_direct_mv_pred",
       .real_name =   TRS("Direct MV prediction mode"),
@@ -520,7 +595,7 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
                                        (char*)0 },
     },
     {
-      .name =        "x264_misc",
+      .name =        "x264_sec_misc",
       .real_name =   TRS("Misc"),
       .type =        LQT_PARAMETER_SECTION,
     },
@@ -592,6 +667,24 @@ static lqt_parameter_info_static_t encode_parameters_x264[] =
       // .val_min =     { .val_int =  },
       // .val_max =     { .val_int = 256 },
       .help_string = TRS("Number of threads")
+    },
+#endif
+#if X264_BUILD >= 88
+    {
+      .name =        "x264_b_fast_pskip",
+      .real_name =   TRS("early SKIP detection on P-frames"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 1 },
+      .val_min =     { .val_int = 0 },
+      .val_max =     { .val_int = 1 },
+    },
+    {
+      .name =        "x264_b_dct_decimate",
+      .real_name =   TRS("Transform coefficient thresholding on P-frames"),
+      .type =        LQT_PARAMETER_INT,
+      .val_default = { .val_int = 1 },
+      .val_min =     { .val_int = 0 },
+      .val_max =     { .val_int = 1 },
     },
 #endif
     { /* End of parameters */ }

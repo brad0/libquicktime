@@ -440,7 +440,7 @@ static int flush_frame(quicktime_t *file, int track,
   int nnal;
   x264_picture_t pic_out;
   int encoded_size;
-  char * ptr;
+  uint8_t * ptr;
   
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_x264_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
@@ -841,6 +841,21 @@ enum_t aq_modes[] =
   };
 #endif
 
+#if X264_BUILD >= 88
+enum_t b_pyramid_modes[] =
+  {
+    { "None",   X264_B_PYRAMID_NONE },
+    { "Strict", X264_B_PYRAMID_STRICT },
+    { "Normal", X264_B_PYRAMID_NORMAL },
+  };
+
+enum_t weighted_pred_modes[] =
+  {
+    { "Disabled",       X264_WEIGHTP_NONE },
+    { "Blind offset",   X264_WEIGHTP_BLIND },
+    { "Smart analysis", X264_WEIGHTP_SMART },
+  };
+#endif
 
 static int set_parameter(quicktime_t *file, 
                          int track, 
@@ -864,6 +879,11 @@ static int set_parameter(quicktime_t *file,
   INTPARAM("x264_i_bframe_bias", codec->params.i_bframe_bias);
 #if X264_BUILD >= 78
   INTPARAM("x264_i_bframe_pyramid", codec->params.i_bframe_pyramid);
+#elif X264_BUILD >= 88
+  ENUMPARAM("x264_i_bframe_pyramid", codec->params.i_bframe_pyramid, b_pyramid_modes);
+  ENUMPARAM("x264_i_weighted_pred", codec->params.analyse.i_weighted_pred, weighted_pred_modes);
+  INTPARAM("x264_b_fast_pskip", codec->params.analyse.b_fast_pskip);
+  INTPARAM("x264_b_dct_decimate", codec->params.analyse.b_dct_decimate);
 #else
   INTPARAM("x264_b_bframe_pyramid", codec->params.b_bframe_pyramid);
 #endif
@@ -877,6 +897,7 @@ static int set_parameter(quicktime_t *file,
 #else
   FLOATPARAM("x264_f_rf_constant", codec->params.rc.f_rf_constant);
 #endif
+  
   INTPARAM("x264_i_qp_min", codec->params.rc.i_qp_min);
   INTPARAM("x264_i_qp_max", codec->params.rc.i_qp_max);
   INTPARAM("x264_i_qp_step", codec->params.rc.i_qp_step);
@@ -899,6 +920,16 @@ static int set_parameter(quicktime_t *file,
   
   INTPARAM("x264_analyse_8x8_transform", codec->params.analyse.b_transform_8x8);
 
+#if X264_BUILD >= 88
+  FLOATPARAM("x264_f_qcompress", codec->params.rc.f_qcompress);
+  FLOATPARAM("x264_f_qblur", codec->params.rc.f_qblur);
+  FLOATPARAM("x264_f_complexity_blur", codec->params.rc.f_complexity_blur);
+  INTPARAM("x264_i_chroma_qp_offset", codec->params.analyse.i_chroma_qp_offset);
+
+  INTPARAM("x264_i_luma_deadzone_0", codec->params.analyse.i_luma_deadzone[0]);
+  INTPARAM("x264_i_luma_deadzone_1", codec->params.analyse.i_luma_deadzone[1]);
+#endif
+  
   if(!strcasecmp(key, "x264_analyse_psub16x16"))
     {
     if(*(int*)(value))
@@ -992,6 +1023,10 @@ static int set_parameter(quicktime_t *file,
 #if X264_BUILD >= 63
   FLOATPARAM("x264_f_psy_rd", codec->params.analyse.f_psy_rd);
   FLOATPARAM("x264_f_psy_trellis", codec->params.analyse.f_psy_trellis);
+#endif
+#if X264_BUILD >= 69
+  INTPARAM("x264_b_psy", codec->params.analyse.b_psy);
+  
 #endif
   
   if(!found)

@@ -26,7 +26,7 @@
 
 #define LQT_LIBQUICKTIME /* Hack: This prevents multiple compilation of
                             get_codec_api_version() */
-
+#include "lqt_private.h"
 #include "schroedinger.h"
 #include <quicktime/colormodels.h>
 
