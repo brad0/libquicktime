@@ -42,14 +42,15 @@ avi_riff.c \
 avi_strf.c \
 avi_strh.c \
 avi_strl.c \
+chan.c \
 charset.c \
-colr.c \
 clap.c \
 cmodel_default.c \
 cmodel_yuv420p.c \
 cmodel_yuv422.c \
 colormodels.c \
-chan.c \
+colr.c \
+compression.c \
 ctab.c \
 ctts.c \
 dinf.c \

@@ -25,14 +25,14 @@
 // #include <schroedinger/schrodebug.h>
 #include <schroedinger/schrovideoformat.h>
 
+#include "lqt_private.h"
+#include <quicktime/lqt_codecapi.h>
+
 #ifdef HAVE_SCHROEDINGER_SCHROVERSION_H
 #include <schroedinger/schroversion.h>
 #else
 #define SCHRO_CHECK_VERSION(a,b,c) 0
 #endif
-
-#include "lqt_private.h"
-#include <quicktime/lqt_codecapi.h>
 
 void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack);
 

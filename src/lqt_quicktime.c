@@ -1331,8 +1331,8 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
     free(vtrack->timestamps);
   if(vtrack->picture_numbers)
     free(vtrack->picture_numbers);
-        
-        
+  
+  lqt_compression_info_free(&vtrack->ci);
         
   return 0;
   }
@@ -1367,6 +1367,7 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
     free(atrack->sample_buffer);
   if(atrack->channel_setup)
     free(atrack->channel_setup);
+  lqt_compression_info_free(&atrack->ci);
   return 0;
   }
 

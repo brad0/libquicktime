@@ -1,0 +1,117 @@
+/*******************************************************************************
+ compression.h
+
+ libquicktime - A library for reading and writing quicktime/avi/mp4 files.
+ http://libquicktime.sourceforge.net
+
+ Copyright (C) 2002 Heroine Virtual Ltd.
+ Copyright (C) 2002-2010 Members of the libquicktime project.
+
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation; either version 2.1 of the License, or (at your option)
+ any later version.
+
+ This library is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License along
+ with this library; if not, write to the Free Software Foundation, Inc., 51
+ Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*******************************************************************************/
+
+#ifndef _LQT_COMPRESSION_H_
+#define _LQT_COMPRESSION_H_
+
+
+typedef enum
+  {
+    LQT_COMPRESSION_UNDEFINED = 0,  // Undefined/unsupported
+
+    /* Audio */
+    LQT_COMPRESSION_ALAW      = 1,
+    LQT_COMPRESSION_ULAW,
+    LQT_COMPRESSION_MP3_CBR,
+    LQT_COMPRESSION_MP3_VBR,
+    LQT_COMPRESSION_AC3,
+    LQT_COMPRESSION_AAC,
+
+    /* Video */
+    LQT_COMPRESSION_JPEG = 0x10000, //!< JPEG image
+    LQT_COMPRESSION_PNG,            //!< PNG image
+    LQT_COMPRESSION_TIFF,           //!< TIFF image
+    LQT_COMPRESSION_TGA,            //!< TGA image
+    LQT_COMPRESSION_MPEG4_ASP,      //!< MPEG-4 ASP (a.k.a. Divx4)
+    LQT_COMPRESSION_H264,           //!< H.264 (Annex B)
+    LQT_COMPRESSION_DIRAC,          //!< Complete DIRAC frames
+
+  } lqt_compression_id_t;
+
+#define LQT_COMPRESSION_HAS_P_FRAMES (1<<0) //!< Not all frames are keyframes
+#define LQT_COMPRESSION_HAS_B_FRAMES (1<<1) //!< Frames don't appear in presentation order 
+
+typedef struct
+  {
+  lqt_compression_id_t id;
+  int flags;
+  int global_header_len;
+  uint8_t * global_header;
+
+  /* Audio format */
+  int samplerate;
+  int num_channels;
+
+  /* Video format */
+  int width;
+  int height;
+  int pixel_width;
+  int pixel_height;
+  
+  } lqt_compression_info_t;
+
+
+
+typedef struct
+  {
+  int data_len;      //!< Length of data
+  int data_alloc;    //!< Allocated size for data
+  uint8_t * data;    //!< Data
+  
+  int header_size;   //!< Size of prepended global header (if any)
+
+  int64_t timestamp; //!< Presentation time
+  int duration;      //!< Duration of that packet when decompressed
+  
+  } lqt_packet_t;
+
+/* Housekeeping */
+
+void lqt_compression_info_free(lqt_compression_info_t * info);
+
+void lqt_packet_alloc(lqt_packet_t * packet, int bytes);
+void lqt_packet_free(lqt_packet_t * packet);
+
+
+/* Reading */
+
+const lqt_compression_info_t * lqt_get_audio_compression_info(quicktime_t * file, int track);
+const lqt_compression_info_t * lqt_get_video_compression_info(quicktime_t * file, int track);
+
+int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track);
+int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track);
+
+/* Writing */
+
+int lqt_writes_audio_compressed(quicktime_t * file, const lqt_compression_info_t * info);
+int lqt_writes_video_compressed(quicktime_t * file, const lqt_compression_info_t * info);
+
+int lqt_add_audio_track_compressed(quicktime_t * file, const lqt_compression_info_t * info);
+int lqt_add_video_track_compressed(quicktime_t * file, const lqt_compression_info_t * info);
+
+int lqt_write_audio_packet(quicktime_t * file, lqt_packet_t * p, int track);
+int lqt_write_video_packet(quicktime_t * file, lqt_packet_t * p, int track);
+
+
+#endif // _LQT_COMPRESSION_H_

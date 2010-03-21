@@ -3,6 +3,7 @@ libquicktimeincludedir = $(includedir)/lqt
 
 libquicktimeinclude_HEADERS = \
 colormodels.h \
+compression.h \
 lqt.h  \
 lqt_atoms.h \
 lqt_codecinfo.h \

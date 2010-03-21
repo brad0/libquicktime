@@ -1300,47 +1300,49 @@ typedef struct
 
 /* table of pointers to every track */
 typedef struct
-{
-	quicktime_trak_t *track; /* real quicktime track corresponding to this table */
-	int channels;
+  {
+  quicktime_trak_t *track; /* real quicktime track corresponding to this table */
+  int channels;
 
-        int samplerate;
+  int samplerate;
 
-        /* number of audio channels in the track */
-        lqt_channel_t * channel_setup;
-        int64_t current_position;   /* current sample in output file */
-	int64_t cur_chunk;      /* current chunk in output file */
+  /* number of audio channels in the track */
+  lqt_channel_t * channel_setup;
+  int64_t current_position;   /* current sample in output file */
+  int64_t cur_chunk;      /* current chunk in output file */
 
-        /* Last position if set by the codec. If last position and current position
-           differ, the codec knows, that a seek happened since the last decode call */
-        int64_t last_position;
-	void *codec;
+  /* Last position if set by the codec. If last position and current position
+     differ, the codec knows, that a seek happened since the last decode call */
+  int64_t last_position;
+  void *codec;
 
-        int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
+  int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
 
-/* Another API enhancement: Codecs only deliver samples in the format specified by
-   sample_format. The usual decode() functions will convert them to int16_t or float */
+  /* Another API enhancement: Codecs only deliver samples in the format specified by
+     sample_format. The usual decode() functions will convert them to int16_t or float */
    
-        lqt_sample_format_t sample_format; /* Set by the codec */
+  lqt_sample_format_t sample_format; /* Set by the codec */
 
-        uint8_t * sample_buffer;
-        int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
+  uint8_t * sample_buffer;
+  int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
 
-/* VBR stuff */
-        int vbr_num_frames; /* Frames written since start of chunk */
-        int64_t vbr_frame_start;
-        int64_t vbr_frames_written;
+  /* VBR stuff */
+  int vbr_num_frames; /* Frames written since start of chunk */
+  int64_t vbr_frame_start;
+  int64_t vbr_frames_written;
 
-        /* The total samples are calculated while initializing, but they MIGHT
-           be changed by the faad decoder, in the case resampling happens. */
-        int64_t total_samples;
+  /* The total samples are calculated while initializing, but they MIGHT
+     be changed by the faad decoder, in the case resampling happens. */
+  int64_t total_samples;
 
-/* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
-        int wav_id;
+  /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
+  int wav_id;
 
-        int compatibility_flags; /* Taken from codec info */
+  int compatibility_flags; /* Taken from codec info */
 
-} quicktime_audio_map_t;
+  lqt_compression_info_t ci;
+  
+  } quicktime_audio_map_t;
 
 typedef struct
   {
@@ -1399,6 +1401,8 @@ typedef struct
   /* For encoding */
   quicktime_atom_t chunk_atom;
   int keyframe;
+
+  lqt_compression_info_t ci;
   
   } quicktime_video_map_t;
 
