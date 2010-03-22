@@ -27,9 +27,9 @@
 
 #include "quicktime.h"
 #include "lqt_atoms.h"
+#include "compression.h"
 #include "lqt_codecinfo.h"
 #include "lqt_qtvr.h"
-#include "compression.h"
 
 #pragma GCC visibility push(default)
 

@@ -62,21 +62,6 @@ static int source_cmodel(quicktime_t *file, int track)
     return BC_RGBA8888;
   }
 
-#if 0
-void quicktime_set_png(quicktime_t *file, int compression_level)
-  {
-  int i;
-
-  for(i = 0; i < file->total_vtracks; i++)
-    {
-    if(quicktime_match_32(quicktime_video_compressor(file, i), QUICKTIME_PNG))
-      {
-      quicktime_png_codec_t *codec = ((quicktime_codec_t*)file->vtracks[i].codec)->priv;
-      codec->compression_level = compression_level;
-      }
-    }
-  }
-#endif
 
 static void read_function(png_structp png_ptr, png_bytep data, png_uint_32 length)
   {

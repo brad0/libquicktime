@@ -227,6 +227,8 @@ typedef struct lqt_codec_info_s
 
   lqt_image_size_t * image_sizes; /*!< Image sizes (since 1.2.0) */
   
+  lqt_compression_id_t compression_id; /*!< Supported compression ID */
+  
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
   } lqt_codec_info_t;
 

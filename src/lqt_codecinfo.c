@@ -334,8 +334,6 @@ copy_codec_info(const lqt_codec_info_t * info)
     ret->image_sizes = malloc(len);
     memcpy(ret->image_sizes, info->image_sizes, len);
     }
-
-  
   
   ret->num_encoding_parameters = info->num_encoding_parameters;
   
@@ -359,6 +357,7 @@ copy_codec_info(const lqt_codec_info_t * info)
       copy_parameter_info(&(ret->decoding_parameters[i]),
                           &(info->decoding_parameters[i]));
     }
+  ret->compression_id = info->compression_id;
   return ret;
   }
 
@@ -1089,6 +1088,9 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
     {
     ret->decoding_parameters = (lqt_parameter_info_t*)0;
     }
+
+  ret->compression_id = template->compression_id;
+  
   return ret;
   }
 
@@ -1167,6 +1169,10 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
     lqt_dump("%s (0x%08x)\n", info->fourccs[i],
             LQT_STRING_2_FOURCC(info->fourccs[i]));
 
+  if(info->compression_id != LQT_COMPRESSION_NONE)
+    lqt_dump("Compression ID: %s\n",
+             lqt_compression_id_to_string(info->compression_id));
+  
   if(!info->num_encoding_parameters)
     {
     lqt_dump("No settable parameters for encoding\n");

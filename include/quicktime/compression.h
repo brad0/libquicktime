@@ -28,13 +28,13 @@
 
 typedef enum
   {
-    LQT_COMPRESSION_UNDEFINED = 0,  // Undefined/unsupported
+    LQT_COMPRESSION_NONE = 0,  // Undefined/unsupported
 
     /* Audio */
     LQT_COMPRESSION_ALAW      = 1,
     LQT_COMPRESSION_ULAW,
-    LQT_COMPRESSION_MP3_CBR,
-    LQT_COMPRESSION_MP3_VBR,
+    LQT_COMPRESSION_MP2,
+    LQT_COMPRESSION_MP3,
     LQT_COMPRESSION_AC3,
     LQT_COMPRESSION_AAC,
 
@@ -59,6 +59,8 @@ typedef struct
   int global_header_len;
   uint8_t * global_header;
 
+  int bitrate;
+  
   /* Audio format */
   int samplerate;
   int num_channels;
@@ -87,6 +89,10 @@ typedef struct
   } lqt_packet_t;
 
 /* Housekeeping */
+
+const char * lqt_compression_id_to_string(lqt_compression_id_t id);
+lqt_compression_id_t lqt_compression_id_from_string(const char * str);
+
 
 void lqt_compression_info_free(lqt_compression_info_t * info);
 

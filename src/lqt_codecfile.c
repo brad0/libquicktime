@@ -83,6 +83,7 @@ static const char * num_wav_ids_key     = "NumWavIds: ";
 static const char * wav_ids_key         = "WavIds: ";
 
 static const char * compatibility_key   = "Compatibility: ";
+static const char * compression_id_key  = "CompressionID: ";
 
 /* Module filename and module index */
 
@@ -427,6 +428,15 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
         codec->type = LQT_CODEC_VIDEO;
       }
 
+    /* Compression ID */
+
+    else if(CHECK_KEYWORD(compression_id_key))
+      {
+      pos = line + strlen(type_key);
+      codec->compression_id =
+        lqt_compression_id_from_string(pos);
+      }
+    
     /* Direction */
    
     else if(CHECK_KEYWORD(direction_key))
@@ -774,7 +784,7 @@ static void write_parameter_info(FILE * output,
     }
 
   fprintf(output, "%s%s\n", type_key, tmp);
-
+  
   /*
    *   Print the value
    */
@@ -859,6 +869,12 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
 
   if(tmp)
     fprintf(output, "%s%s\n", type_key, tmp);
+
+  if(info->compression_id != LQT_COMPRESSION_NONE)
+    {
+    fprintf(output, "%s%s\n", compression_id_key,
+            lqt_compression_id_to_string(info->compression_id));
+    }
   
   switch(info->direction)
     {

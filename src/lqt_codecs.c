@@ -216,8 +216,6 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
 
   if(!codec_info)
     {
-    
-
     if(compressor && (*compressor != '\0'))
       {
       codec_array = lqt_find_audio_codec(compressor, encode);
@@ -228,7 +226,8 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
       }
     if(!codec_array)
       {
-      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Could not find audio %s for fourcc %4s",
+      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Could not find audio %s for fourcc %4s",
               (encode ? "Encoder" : "Decoder"), compressor);
       return -1;
       }

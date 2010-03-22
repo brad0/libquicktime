@@ -32,6 +32,7 @@
 #include <quicktime/lqt.h>
 
 #include <quicktime/qtprivate.h>
+#include <quicktime/compression.h>
 
 #ifdef HAVE_GCC_VISIBILITY
 #define LQT_EXTERN __attribute__ ((visibility("default"))) 
@@ -128,6 +129,8 @@ typedef struct
   int * encoding_colormodels;
   
   lqt_image_size_static_t * image_sizes;
+  
+  lqt_compression_id_t compression_id;
   
   } lqt_codec_info_static_t;
 
