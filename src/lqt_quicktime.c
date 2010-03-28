@@ -244,14 +244,14 @@ int quicktime_make_streamable(char *in_path, char *out_path)
 void lqt_set_audio_parameter(quicktime_t *file,int stream, const char *key,
                              const void *value)
   {
-  quicktime_codec_t *codec = (quicktime_codec_t*)file->atracks[stream].codec;
+  quicktime_codec_t *codec = file->atracks[stream].codec;
   if(codec->set_parameter) codec->set_parameter(file, stream, key, value);
   }
 
 void lqt_set_video_parameter(quicktime_t *file,int stream, const char *key,
                              const void *value)
   {
-  quicktime_codec_t *codec = (quicktime_codec_t*)file->vtracks[stream].codec;
+  quicktime_codec_t *codec = file->vtracks[stream].codec;
   if(codec->set_parameter) codec->set_parameter(file, stream, key, value);
   }
 
@@ -549,7 +549,7 @@ int lqt_add_video_track(quicktime_t *file,
   lqt_set_default_video_parameters(file, file->total_vtracks-1);
         
   /* Get encoding colormodel */
-  ((quicktime_codec_t*)(file->vtracks[file->total_vtracks-1].codec))->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
+  file->vtracks[file->total_vtracks-1].codec->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
   file->vtracks[file->total_vtracks-1].io_cmodel =
     file->vtracks[file->total_vtracks-1].stream_cmodel;
   return 0;
@@ -772,7 +772,7 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
 
   /* Resync codec */
 
-  codec = (quicktime_codec_t*)(file->vtracks[track].codec);
+  codec = file->vtracks[track].codec;
   if(codec && codec->resync)
     codec->resync(file, track);
     
@@ -969,7 +969,7 @@ void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
     /* Maybe switch the encoding colormodel to better match the IO one. */
     if(file->wr && !file->encoding_started)
       {
-      char * name = ((quicktime_codec_t*)(file->vtracks[track].codec))->codec_name;
+      char * name = file->vtracks[track].codec->codec_name;
       lqt_codec_info_t ** info = lqt_find_video_codec_by_name(name);
       int encoding_cmodel = lqt_get_best_target_colormodel(
               colormodel, (*info)->encoding_colormodels);
@@ -1390,7 +1390,7 @@ void quicktime_init_maps(quicktime_t * file)
                                file->wr,
                                (lqt_codec_info_t*)0);
       /* Some codecs set the channel setup */
-      ((quicktime_codec_t*)file->atracks[i].codec)->decode_audio(file, (void*)0, 0, i);
+      file->atracks[i].codec->decode_audio(file, (void*)0, 0, i);
       }
     }
 
@@ -1409,7 +1409,7 @@ void quicktime_init_maps(quicktime_t * file)
                                file->wr,
                                (lqt_codec_info_t*)0);
       /* Get decoder colormodel */
-      ((quicktime_codec_t*)file->vtracks[i].codec)->decode_video(file, (uint8_t**)0, i);
+      file->vtracks[i].codec->decode_video(file, (uint8_t**)0, i);
       file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
       
       lqt_get_default_rowspan(file->vtracks[i].stream_cmodel,
@@ -2012,7 +2012,7 @@ void lqt_set_default_video_parameters(quicktime_t * file, int track)
   lqt_codec_info_t ** codec_info;
   quicktime_codec_t * codec;
     
-  codec = (quicktime_codec_t*)(file->vtracks[track].codec);
+  codec = file->vtracks[track].codec;
   codec_info = lqt_find_video_codec_by_name(codec->codec_name);
   if(codec_info)
     {
@@ -2030,7 +2030,7 @@ void lqt_set_default_audio_parameters(quicktime_t * file, int track)
   quicktime_codec_t * codec;
   for(i = 0; i < file->total_atracks; i++)
     {
-    codec = (quicktime_codec_t*)(file->atracks[i].codec);
+    codec = file->atracks[i].codec;
     codec_info = lqt_find_audio_codec_by_name(codec->codec_name);
     if(codec_info)
       {
@@ -2355,14 +2355,12 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
     {
     if(file->wr)
       {
-      ((quicktime_codec_t*)(atrack->codec))->encode_audio(file, (void*)0, 
-                                                          0, track);
+      atrack->codec->encode_audio(file, (void*)0, 0, track);
       
       }
     else
       {
-      ((quicktime_codec_t*)(atrack->codec))->decode_audio(file, (void*)0, 
-                                                          0, track);
+      atrack->codec->decode_audio(file, (void*)0, 0, track);
 
       }
     }

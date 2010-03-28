@@ -1483,13 +1483,13 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
 
 lqt_codec_info_t ** lqt_audio_codec_from_file(quicktime_t * file, int track)
   {
-  char * name = ((quicktime_codec_t*)(file->atracks[track].codec))->codec_name;
+  char * name = file->atracks[track].codec->codec_name;
   return lqt_find_audio_codec_by_name(name);
   }
 
 lqt_codec_info_t ** lqt_video_codec_from_file(quicktime_t * file, int track)
   {
-  char * name = ((quicktime_codec_t*)(file->vtracks[track].codec))->codec_name;
+  char * name = file->vtracks[track].codec->codec_name;
   return lqt_find_video_codec_by_name(name);
   }
 

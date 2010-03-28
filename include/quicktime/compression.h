@@ -74,9 +74,12 @@ typedef struct
   } lqt_compression_info_t;
 
 
+#define LQT_PACKET_KEYFRAME (1<<0) //!< Keyframes
 
 typedef struct
   {
+  int flags;
+
   int data_len;      //!< Length of data
   int data_alloc;    //!< Allocated size for data
   uint8_t * data;    //!< Data

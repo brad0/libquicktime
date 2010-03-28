@@ -207,7 +207,7 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
 
   char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
   int wav_id       = atrack->track->mdia.minf.stbl.stsd.table[0].compression_id;
-  atrack->codec = calloc(1, sizeof(quicktime_codec_t));
+  atrack->codec = calloc(1, sizeof(*atrack->codec));
   quicktime_codec_defaults(atrack->codec);
 
   atrack->codec->module = (void*)0;
