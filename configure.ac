@@ -931,7 +931,7 @@ plugins/ffmpeg/Makefile \
 plugins/schroedinger/Makefile \
 plugins/x264/Makefile \
 utils/Makefile \
-utils/gtk/Makefile)
+utils/gtk/Makefile])
 
 echo "Configuration: "
 $have_gtk
