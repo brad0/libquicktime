@@ -100,6 +100,8 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
 int lqt_writes_audio_compressed(quicktime_t * file,
                                 const lqt_compression_info_t * info)
   {
+  
+
   return 0;
   }
 
