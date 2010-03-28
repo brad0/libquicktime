@@ -931,8 +931,7 @@ plugins/ffmpeg/Makefile \
 plugins/schroedinger/Makefile \
 plugins/x264/Makefile \
 utils/Makefile \
-utils/gtk/Makefile \
-lqt-config], [chmod a+x lqt-config])
+utils/gtk/Makefile)
 
 echo "Configuration: "
 $have_gtk
