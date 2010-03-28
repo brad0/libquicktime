@@ -84,7 +84,7 @@ typedef struct
 
 static int delete_codec(quicktime_audio_map_t *atrack)
   {
-  quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_faad2_codec_t *codec = atrack->codec->priv;
 
   if(codec->dec)
     faacDecClose(codec->dec);
@@ -141,7 +141,7 @@ static int decode_chunk(quicktime_t *file, int track)
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   
   quicktime_faad2_codec_t *codec =
-    ((quicktime_codec_t*)file->atracks[track].codec)->priv;
+    file->atracks[track].codec->priv;
   
   num_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
 
@@ -227,7 +227,7 @@ static int decode(quicktime_t *file,
   int samples_decoded;
   
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_faad2_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faad2_codec_t *codec = track_map->codec->priv;
 
   /* TODO Check whether seeking happened */
 
@@ -330,7 +330,7 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
 
   faacDecConfigurationPtr cfg;
   
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_faad2_codec_t *codec;
 
   /* Init public items */

@@ -744,7 +744,7 @@ static int read_audio_chunk(quicktime_t * file, int track,
   {
   int bytes, samples = 0, bytes_from_samples;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_pcm_codec_t *codec = track_map->codec->priv;
   
   bytes = lqt_read_audio_chunk(file, track, chunk, buffer, buffer_alloc, &samples);
 
@@ -759,7 +759,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   {
   int64_t chunk, chunk_sample;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_pcm_codec_t *codec = track_map->codec->priv;
   void * output;
   int64_t samples_to_skip = 0;
   int samples_in_chunk;
@@ -874,7 +874,7 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   quicktime_atom_t chunk_atom;
   
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_pcm_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
 
   
@@ -941,7 +941,7 @@ static int set_parameter_pcm(quicktime_t *file,
                              const void *value)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
 
   if(!strcasecmp(key, "pcm_little_endian"))
     {
@@ -967,7 +967,7 @@ static int set_parameter_pcm(quicktime_t *file,
 
 static int delete_pcm(quicktime_audio_map_t *atrack)
   {
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   if(codec->chunk_buffer)
     {
     free(codec->chunk_buffer);
@@ -980,7 +980,7 @@ static int delete_pcm(quicktime_audio_map_t *atrack)
 void quicktime_init_codec_twos(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1023,7 +1023,7 @@ void quicktime_init_codec_twos(quicktime_audio_map_t *atrack)
 void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1066,7 +1066,7 @@ void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack)
 static void init_encode_in24(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
   
   /* Initialize version 1 stsd */
@@ -1089,7 +1089,7 @@ static void init_encode_in24(quicktime_t * file, int track)
 void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1113,7 +1113,7 @@ void quicktime_init_codec_in24(quicktime_audio_map_t *atrack)
 static void init_encode_in32(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
   
   /* Initialize version 1 stsd */
@@ -1146,7 +1146,7 @@ static void init_encode_in32(quicktime_t * file, int track)
 void quicktime_init_codec_in32(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1179,7 +1179,7 @@ void quicktime_init_codec_in32(quicktime_audio_map_t *atrack)
 static void init_encode_fl32(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
   
   /* Initialize version 1 stsd */
@@ -1203,7 +1203,7 @@ static void init_encode_fl32(quicktime_t * file, int track)
 void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1229,7 +1229,7 @@ void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack)
 static void init_encode_fl64(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
   
   /* Initialize version 1 stsd */
@@ -1252,7 +1252,7 @@ static void init_encode_fl64(quicktime_t * file, int track)
 void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
   {
   quicktime_pcm_codec_t *codec;
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   
   /* Init public items */
   codec_base->delete_acodec = delete_pcm;
@@ -1278,7 +1278,7 @@ void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack)
 
 void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_pcm_codec_t *codec;
   
   /* Init public items */
@@ -1320,7 +1320,7 @@ void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack)
 
 void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_pcm_codec_t *codec;
   
   /* Init public items */
@@ -1342,7 +1342,7 @@ void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack)
 
 void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_pcm_codec_t *codec;
   
   /* Init public items */
@@ -1375,7 +1375,7 @@ void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack)
 static void init_decode_lpcm(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
   
   if(table->formatSpecificFlags & kAudioFormatFlagIsFloat)
@@ -1469,7 +1469,7 @@ static void init_decode_lpcm(quicktime_t * file, int track)
 static void init_encode_lpcm(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
-  quicktime_pcm_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
   quicktime_stsd_table_t *table = &(atrack->track->mdia.minf.stbl.stsd.table[0]);
 
   uint32_t formatSpecificFlags = 0;
@@ -1583,7 +1583,7 @@ static void init_encode_lpcm(quicktime_t * file, int track)
 
 void quicktime_init_codec_lpcm(quicktime_audio_map_t *atrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_pcm_codec_t *codec;
   
   /* Init public items */

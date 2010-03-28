@@ -58,7 +58,7 @@ typedef struct
 
 static int delete_codec(quicktime_audio_map_t *track_map)
   {
-  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faac_codec_t *codec = track_map->codec->priv;
   if(codec->sample_buffer)
     free(codec->sample_buffer);
   if(codec->chunk_buffer)
@@ -75,7 +75,7 @@ static int encode_frame(quicktime_t *file,
   int bytes_encoded;
   int result;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
   /* Normalize input to 16 bit int */
 
@@ -150,7 +150,7 @@ static int encode(quicktime_t *file,
   unsigned long decoderConfigLen;
   
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
   uint8_t mp4a_atom[4];
   
@@ -305,7 +305,7 @@ static int set_parameter(quicktime_t *file,
                          const void *value)
   {
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faac_codec_t *codec = track_map->codec->priv;
     
   if(!strcasecmp(key, "faac_bitrate"))
     codec->bitrate = *(int*)value;
@@ -329,7 +329,7 @@ static int flush(quicktime_t *file, int track)
   {
   int i;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_faac_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
 
   if(!codec->initialized)
@@ -366,7 +366,7 @@ static int flush(quicktime_t *file, int track)
 
 void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)track_map->codec;
+  quicktime_codec_t *codec_base = track_map->codec;
   quicktime_faac_codec_t *codec;
   
   /* Init public items */

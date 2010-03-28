@@ -139,7 +139,7 @@ colormodels[] =
 
 static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
   {
-  quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
           
   if(codec->extradata)
     free(codec->extradata);
@@ -405,8 +405,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   quicktime_trak_t *trak = vtrack->track;
   int height;
   int width;
-  quicktime_ffmpeg_video_codec_t *codec =
-    ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   int got_pic;
   //  int do_cmodel_transfer;
   quicktime_ctab_t * ctab;
@@ -664,8 +663,7 @@ static void resync_ffmpeg(quicktime_t *file, int track)
   int64_t keyframe, frame;
   int buffer_size, got_pic;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_ffmpeg_video_codec_t *codec =
-    ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   
   /* Forget about previously decoded frame */
   codec->have_frame = 0;
@@ -718,9 +716,8 @@ static int set_pass_ffmpeg(quicktime_t *file,
                            int track, int pass, int total_passes,
                            const char * stats_file)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_ffmpeg_video_codec_t *codec =
-    ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
 
   codec->total_passes = total_passes;
   codec->pass = pass;
@@ -736,7 +733,7 @@ static int init_imx_encoder(quicktime_t *file, int track)
   quicktime_trak_t *trak = vtrack->track;
   int height = trak->tkhd.track_height;
   char *compressor = trak->mdia.minf.stbl.stsd.table[0].format;
-  quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   
   compressor[0] = 'm';
   compressor[1] = 'x';
@@ -803,7 +800,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   int bytes_encoded;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_trak_t *trak = vtrack->track;
-  quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
   int stats_len;
@@ -1095,7 +1092,7 @@ static int flush(quicktime_t *file, int track)
         int result = 0;
 	int bytes_encoded;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_ffmpeg_video_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
 
         /* Do nothing if we didn't encode anything yet */
         if(!codec->initialized)
@@ -1136,7 +1133,7 @@ static int set_parameter_video(quicktime_t *file,
                                const void *value)
   {
   quicktime_ffmpeg_video_codec_t *codec =
-    ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+    file->vtracks[track].codec->priv;
   if(!strcasecmp(key, "ff_qscale"))
     {
     codec->qscale = *(int*)(value) * FF_QP2LAMBDA;
@@ -1196,18 +1193,18 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
   codec->encoder = encoder;
   codec->decoder = decoder;
   
-  ((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
-  ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = lqt_ffmpeg_delete_video;
-  ((quicktime_codec_t*)vtrack->codec)->flush = flush;
-  ((quicktime_codec_t*)vtrack->codec)->resync = resync_ffmpeg;
+  vtrack->codec->priv = (void *)codec;
+  vtrack->codec->delete_vcodec = lqt_ffmpeg_delete_video;
+  vtrack->codec->flush = flush;
+  vtrack->codec->resync = resync_ffmpeg;
   
   if(encoder)
     {
-    ((quicktime_codec_t*)vtrack->codec)->encode_video = lqt_ffmpeg_encode_video;
-    ((quicktime_codec_t*)vtrack->codec)->set_pass = set_pass_ffmpeg;
+    vtrack->codec->encode_video = lqt_ffmpeg_encode_video;
+    vtrack->codec->set_pass = set_pass_ffmpeg;
     }
   if(decoder)
-    ((quicktime_codec_t*)vtrack->codec)->decode_video = lqt_ffmpeg_decode_video;
+    vtrack->codec->decode_video = lqt_ffmpeg_decode_video;
   
-  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter_video;
+  vtrack->codec->set_parameter = set_parameter_video;
   }

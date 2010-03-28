@@ -46,7 +46,7 @@ typedef struct
 
 static int delete_codec(quicktime_video_map_t *vtrack)
   {
-  quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_png_codec_t *codec = vtrack->codec->priv;
   if(codec->buffer) free(codec->buffer);
   if(codec->temp_frame) free(codec->temp_frame);
   free(codec);
@@ -98,7 +98,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   png_structp png_ptr;
   png_infop info_ptr;
   png_infop end_info = 0;	
-  quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_png_codec_t *codec = vtrack->codec->priv;
 
   if(!row_pointers)
     {
@@ -131,7 +131,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   int result = 0;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
   quicktime_trak_t *trak = vtrack->track;
-  quicktime_png_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_png_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
   png_structp png_ptr;
@@ -200,7 +200,7 @@ static int set_parameter(quicktime_t *file,
                          const char *key, 
                          const void *value)
   {
-  quicktime_png_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  quicktime_png_codec_t *codec = file->vtracks[track].codec->priv;
   
   if(!strcasecmp(key, "png_compression_level"))
     codec->compression_level = *(int*)value;
@@ -212,14 +212,14 @@ void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
   quicktime_png_codec_t *codec;
 
   /* Init public items */
-  ((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_png_codec_t));
-  ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-  ((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
-  ((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
-  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
+  vtrack->codec->priv = calloc(1, sizeof(quicktime_png_codec_t));
+  vtrack->codec->delete_vcodec = delete_codec;
+  vtrack->codec->decode_video = decode;
+  vtrack->codec->encode_video = encode;
+  vtrack->codec->set_parameter = set_parameter;
   
   /* Init private items */
-  codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  codec = vtrack->codec->priv;
   codec->compression_level = 9;
   vtrack->stream_cmodel = BC_RGB888;
   }

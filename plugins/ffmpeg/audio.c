@@ -307,7 +307,7 @@ typedef struct
 
 static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
   {
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = vtrack->codec->priv;
   
   if(codec->avctx)
     {
@@ -327,7 +327,7 @@ static int set_parameter(quicktime_t *file,
                   const char *key, 
                   const void *value)
   {
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = file->atracks[track].codec->priv;
   lqt_ffmpeg_set_parameter(codec->avctx, key, value);
   return 0;
   }
@@ -342,7 +342,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
   int frame_bytes;
   int new_samples;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
 
   chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
 
@@ -421,7 +421,7 @@ static int decode_chunk(quicktime_t * file, int track)
   int bytes_used, bytes_skipped;
   int64_t chunk_size;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
 
   /* Read chunk */
   
@@ -663,7 +663,7 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
   //  int result = 0;
   int64_t chunk_sample; /* For seeking only */
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
   int channels = file->atracks[track].channels;
   //  int64_t total_samples;
 
@@ -849,7 +849,7 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   {
   int result = -1;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ffmpeg_audio_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   int channels = file->atracks[track].channels;
   quicktime_atom_t chunk_atom;
@@ -971,12 +971,12 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *e
 	codec->encoder = encoder;
 	codec->decoder = decoder;
 	codec-> avctx = avcodec_alloc_context();
-	((quicktime_codec_t*)atrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)atrack->codec)->delete_acodec = lqt_ffmpeg_delete_audio;
+	atrack->codec->priv = (void *)codec;
+	atrack->codec->delete_acodec = lqt_ffmpeg_delete_audio;
 	if(encoder)
-          ((quicktime_codec_t*)atrack->codec)->encode_audio = lqt_ffmpeg_encode_audio;
+          atrack->codec->encode_audio = lqt_ffmpeg_encode_audio;
 	if(decoder)
-          ((quicktime_codec_t*)atrack->codec)->decode_audio = lqt_ffmpeg_decode_audio;
-	((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter;
+          atrack->codec->decode_audio = lqt_ffmpeg_decode_audio;
+	atrack->codec->set_parameter = set_parameter;
         atrack->sample_format = LQT_SAMPLE_INT16;
 }

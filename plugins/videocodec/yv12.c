@@ -41,7 +41,7 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 {
 	quicktime_yv12_codec_t *codec;
 
-	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	codec = vtrack->codec->priv;
         if(codec->buffer)
           free(codec->buffer);
 	free(codec);
@@ -50,7 +50,7 @@ static int delete_codec(quicktime_video_map_t *vtrack)
 
 static void initialize(quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+  quicktime_codec_t *codec_base = vtrack->codec;
   quicktime_yv12_codec_t *codec = codec_base->priv;
   if(!codec->initialized)
     {
@@ -68,7 +68,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   int bytes, i;
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_yv12_codec_t *codec = vtrack->codec->priv;
   int y_size, uv_size;
   int result = 0;
 
@@ -125,7 +125,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_yv12_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_yv12_codec_t *codec = vtrack->codec->priv;
 	int result = 0;
 	int y_size, uv_size;
         int i;
@@ -181,7 +181,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack)
 {
-	quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+	quicktime_codec_t *codec_base = vtrack->codec;
 
 /* Init public items */
 	codec_base->priv = calloc(1, sizeof(quicktime_yv12_codec_t));

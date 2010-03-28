@@ -296,7 +296,7 @@ typedef struct
 
 static int delete_codec(quicktime_audio_map_t *atrack)
   {
-  quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  quicktime_mp3_codec_t *codec = atrack->codec->priv;
   //  if(codec->mp3) mpeg3_delete_layer(codec->mp3);
   //  if(codec->mp3_header)  mpeg3_delete_layer(codec->mp3_header);
   //  if(codec->packet_buffer) free(codec->packet_buffer);
@@ -452,7 +452,7 @@ static int encode(quicktime_t *file,
   int encoded_size;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
   quicktime_trak_t *trak = track_map->track;
-  quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_mp3_codec_t *codec = track_map->codec->priv;
   int i;
 
   uint8_t extradata[12];
@@ -615,7 +615,7 @@ static int set_parameter(quicktime_t *file, int track,
   {
   quicktime_audio_map_t *atrack = &(file->atracks[track]);
   quicktime_mp3_codec_t *codec =
-    ((quicktime_codec_t*)atrack->codec)->priv;
+    atrack->codec->priv;
   
   if(!strcasecmp(key, "mp3_bitrate_mode"))
     {
@@ -644,7 +644,7 @@ static int flush(quicktime_t *file, int track)
   {
   int result = 0;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_mp3_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_mp3_codec_t *codec = track_map->codec->priv;
   
   if(codec->encode_initialized)
     {
@@ -670,14 +670,14 @@ void quicktime_init_codec_lame(quicktime_audio_map_t *atrack)
   quicktime_mp3_codec_t *codec;
   
   /* Init public items */
-  ((quicktime_codec_t*)atrack->codec)->priv = calloc(1, sizeof(quicktime_mp3_codec_t));
-  ((quicktime_codec_t*)atrack->codec)->delete_acodec = delete_codec;
-  //  ((quicktime_codec_t*)atrack->codec)->decode_audio = decode;
-  ((quicktime_codec_t*)atrack->codec)->encode_audio = encode;
-  ((quicktime_codec_t*)atrack->codec)->set_parameter = set_parameter;
-  ((quicktime_codec_t*)atrack->codec)->flush = flush;
+  atrack->codec->priv = calloc(1, sizeof(quicktime_mp3_codec_t));
+  atrack->codec->delete_acodec = delete_codec;
+  //  atrack->codec->decode_audio = decode;
+  atrack->codec->encode_audio = encode;
+  atrack->codec->set_parameter = set_parameter;
+  atrack->codec->flush = flush;
   
-  codec = ((quicktime_codec_t*)atrack->codec)->priv;
+  codec = atrack->codec->priv;
   codec->bitrate = 256000;
   codec->quality = 0;
   atrack->sample_format = LQT_SAMPLE_INT16;

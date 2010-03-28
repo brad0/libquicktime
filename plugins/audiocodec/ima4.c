@@ -194,7 +194,7 @@ static void ima4_encode_sample(int *last_sample, int *last_index, int *nibble, i
 
 static void ima4_encode_block(quicktime_audio_map_t *atrack, unsigned char *output, int16_t *input, int step, int channel)
 {
-	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+	quicktime_ima4_codec_t *codec = atrack->codec->priv;
 	int i, nibble_count = 0, nibble, header;
 
 /* Get a fake starting sample */
@@ -251,7 +251,7 @@ static int read_audio_chunk(quicktime_t * file, int track,
 
 static int delete_codec(quicktime_audio_map_t *atrack)
 {
-	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)atrack->codec)->priv;
+	quicktime_ima4_codec_t *codec = atrack->codec->priv;
 
 	if(codec->last_samples) free(codec->last_samples);
 	if(codec->last_indexes) free(codec->last_indexes);
@@ -272,7 +272,7 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
         int64_t chunk;
         int16_t * output = (int16_t*)_output;
         int samples_decoded, samples_copied;
-	quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)file->atracks[track].codec)->priv;
+	quicktime_ima4_codec_t *codec = file->atracks[track].codec->priv;
         int samples_to_skip = 0;
 
         if(!_output) /* Global initialization */
@@ -427,7 +427,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   int64_t j;
   int64_t chunk_bytes;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   int16_t *input_ptr, *input;
   unsigned char *output_ptr;
@@ -532,7 +532,7 @@ static int flush(quicktime_t *file, int track)
   {
   quicktime_atom_t chunk_atom;
   quicktime_audio_map_t *track_map = &(file->atracks[track]);
-  quicktime_ima4_codec_t *codec = ((quicktime_codec_t*)track_map->codec)->priv;
+  quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   
 
@@ -569,7 +569,7 @@ static int flush(quicktime_t *file, int track)
 
 void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack)
 {
-	quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
+	quicktime_codec_t *codec_base = atrack->codec;
 	quicktime_ima4_codec_t *codec;
 /* Set sample format */
         atrack->sample_format = LQT_SAMPLE_INT16;

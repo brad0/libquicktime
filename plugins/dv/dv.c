@@ -56,7 +56,7 @@ static pthread_mutex_t libdv_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
-	quicktime_dv_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_dv_codec_t *codec = vtrack->codec->priv;
 
 	if(codec->dv_decoder)
 	{
@@ -96,7 +96,7 @@ static int check_sequentiality( unsigned char **row_pointers,
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-	quicktime_dv_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_dv_codec_t *codec = vtrack->codec->priv;
 	quicktime_trak_t *trak = vtrack->track;
 	int width = trak->tkhd.track_width;
 	int height = trak->tkhd.track_height;
@@ -204,7 +204,7 @@ static int set_parameter(quicktime_t *file,
 		const char *key, 
 		const void *value)
 {
-	quicktime_dv_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+	quicktime_dv_codec_t *codec = file->vtracks[track].codec->priv;
 	
 	if(!strcasecmp(key, "dv_decode_quality"))
 	{
@@ -248,17 +248,17 @@ void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
 	quicktime_dv_codec_t *codec;
 
 /* Init public items */
-	((quicktime_codec_t*)vtrack->codec)->priv = calloc(1, sizeof(quicktime_dv_codec_t));
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
-	((quicktime_codec_t*)vtrack->codec)->decode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->encode_audio = 0;
-	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
+	vtrack->codec->priv = calloc(1, sizeof(quicktime_dv_codec_t));
+	vtrack->codec->delete_vcodec = delete_codec;
+	vtrack->codec->encode_video = encode;
+	vtrack->codec->decode_audio = 0;
+	vtrack->codec->encode_audio = 0;
+	vtrack->codec->set_parameter = set_parameter;
 
 
 	/* Init private items */
 
-	codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	codec = vtrack->codec->priv;
 	
 	codec->dv_decoder = NULL;
 	codec->dv_encoder = NULL;

@@ -55,7 +55,7 @@ typedef struct
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
-	quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
         if(codec->mjpeg)
           mjpeg_delete(codec->mjpeg);
 	if(codec->buffer)
@@ -71,7 +71,7 @@ static int decode(quicktime_t *file,
                   int track)
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   mjpeg_t *mjpeg;
   long size, field2_offset;
   int result = 0;
@@ -140,14 +140,14 @@ static int decode(quicktime_t *file,
 static void resync(quicktime_t *file, int track)
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   codec->have_frame = 0;
   }
      
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   quicktime_trak_t *trak = vtrack->track;
   int result = 0;
   long field2_offset;
@@ -228,7 +228,7 @@ static int set_parameter(quicktime_t *file,
                          const char *key, 
                          const void *value)
   {
-  quicktime_jpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  quicktime_jpeg_codec_t *codec = file->vtracks[track].codec->priv;
 	
   if(!strcasecmp(key, "jpeg_quality"))
     {
@@ -257,15 +257,15 @@ void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
     jpeg_type = JPEG_MJPA;
     }
   /* Init public items */
-  ((quicktime_codec_t*)vtrack->codec)->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
-  ((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-  ((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
-  ((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
-  ((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
-  ((quicktime_codec_t*)vtrack->codec)->resync = resync;
+  vtrack->codec->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
+  vtrack->codec->delete_vcodec = delete_codec;
+  vtrack->codec->decode_video = decode;
+  vtrack->codec->encode_video = encode;
+  vtrack->codec->set_parameter = set_parameter;
+  vtrack->codec->resync = resync;
 
   /* Init private items */
-  codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+  codec = vtrack->codec->priv;
   codec->jpeg_type = jpeg_type;
   codec->quality = 80;
   codec->usefloat = 0;

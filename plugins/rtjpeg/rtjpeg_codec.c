@@ -32,7 +32,7 @@
 
 static int delete_codec(quicktime_video_map_t *vtrack)
 {
-	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_rtjpeg_codec_t *codec = vtrack->codec->priv;
 	if(codec->compress_struct) RTjpeg_close(codec->compress_struct);
 	if(codec->rows) lqt_rows_free(codec->rows);
         if(codec->write_buffer) free(codec->write_buffer);
@@ -50,7 +50,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int buffer_size;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
         //	quicktime_trak_t *trak = vtrack->track;
-	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_rtjpeg_codec_t *codec = vtrack->codec->priv;
 
         if(!row_pointers)
           {
@@ -99,7 +99,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int i;
 	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
 	quicktime_trak_t *trak = vtrack->track;
-	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_rtjpeg_codec_t *codec = vtrack->codec->priv;
 
         if(!row_pointers)
           {
@@ -158,7 +158,7 @@ static int set_parameter(quicktime_t *file,
                          const char *key, 
                          const void *value)
 {
-	quicktime_rtjpeg_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+	quicktime_rtjpeg_codec_t *codec = file->vtracks[track].codec->priv;
 
 	if(!strcasecmp(key, "rtjpeg_quality"))
 		codec->Q = *(int*)value;
@@ -184,9 +184,9 @@ void quicktime_init_codec_rtjpeg(quicktime_video_map_t *vtrack)
 	codec->LQ = 1;
 	codec->CQ = 1;
 	
-	((quicktime_codec_t*)vtrack->codec)->priv = (void *)codec;
-	((quicktime_codec_t*)vtrack->codec)->delete_vcodec = delete_codec;
-	((quicktime_codec_t*)vtrack->codec)->decode_video = decode;
-	((quicktime_codec_t*)vtrack->codec)->encode_video = encode;
-	((quicktime_codec_t*)vtrack->codec)->set_parameter = set_parameter;
+	vtrack->codec->priv = codec;
+	vtrack->codec->delete_vcodec = delete_codec;
+	vtrack->codec->decode_video = decode;
+	vtrack->codec->encode_video = encode;
+	vtrack->codec->set_parameter = set_parameter;
 }

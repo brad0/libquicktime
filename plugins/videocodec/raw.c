@@ -199,7 +199,7 @@ static void scanline_raw_32(uint8_t * src,
 
 static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
 {
-	quicktime_raw_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+	quicktime_raw_codec_t *codec = vtrack->codec->priv;
 #if 0
 	if(codec->temp_frame)
 	{
@@ -241,7 +241,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
   int i;
   unsigned char *ptr;
   quicktime_ctab_t * ctab;
-  quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  quicktime_raw_codec_t *codec = file->vtracks[track].codec->priv;
         
   if(!row_pointers)
     {
@@ -358,7 +358,7 @@ static int quicktime_encode_raw(quicktime_t *file,
   int result = 0;
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
-  quicktime_raw_codec_t *codec = ((quicktime_codec_t*)file->vtracks[track].codec)->priv;
+  quicktime_raw_codec_t *codec = file->vtracks[track].codec->priv;
         
   if(!row_pointers)
     {
@@ -422,7 +422,7 @@ static int quicktime_encode_raw(quicktime_t *file,
 
 void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+  quicktime_codec_t *codec_base = vtrack->codec;
  
   codec_base->priv = calloc(1, sizeof(quicktime_raw_codec_t));
   codec_base->delete_vcodec = quicktime_delete_codec_raw;

@@ -41,7 +41,7 @@ static int delete_codec(quicktime_video_map_t *vtrack)
     {
     quicktime_v210_codec_t *codec;
 
-    codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+    codec = vtrack->codec->priv;
     if  (codec->buffer)
         free(codec->buffer);
     free(codec);
@@ -78,7 +78,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     int64_t bytes;
     int result = 0;
     quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-    quicktime_v210_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+    quicktime_v210_codec_t *codec = vtrack->codec->priv;
     int width = vtrack->track->tkhd.track_width;
     int height = vtrack->track->tkhd.track_height;
 
@@ -163,7 +163,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     {
     quicktime_video_map_t *vtrack = &(file->vtracks[track]);
-    quicktime_v210_codec_t *codec = ((quicktime_codec_t*)vtrack->codec)->priv;
+    quicktime_v210_codec_t *codec = vtrack->codec->priv;
     int width = vtrack->track->tkhd.track_width;
     int height = vtrack->track->tkhd.track_height;
     int result = 0;
@@ -304,7 +304,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 void quicktime_init_codec_v210(quicktime_video_map_t *vtrack)
     {
-    quicktime_codec_t *codec_base = (quicktime_codec_t*)vtrack->codec;
+    quicktime_codec_t *codec_base = vtrack->codec;
 
 /* Init public items */
     codec_base->priv = calloc(1, sizeof(quicktime_v210_codec_t));
