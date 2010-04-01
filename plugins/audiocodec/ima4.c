@@ -249,21 +249,21 @@ static int read_audio_chunk(quicktime_t * file, int track,
 
 /* =================================== public for ima4 */
 
-static int delete_codec(quicktime_audio_map_t *atrack)
-{
-	quicktime_ima4_codec_t *codec = atrack->codec->priv;
+static int delete_codec(quicktime_codec_t *codec_base)
+  {
+  quicktime_ima4_codec_t *codec = codec_base->priv;
+  
+  if(codec->last_samples) free(codec->last_samples);
+  if(codec->last_indexes) free(codec->last_indexes);
 
-	if(codec->last_samples) free(codec->last_samples);
-	if(codec->last_indexes) free(codec->last_indexes);
-
-        if(codec->chunk_buffer)
-          free(codec->chunk_buffer);
-        if(codec->sample_buffer)
-          free(codec->sample_buffer);
+  if(codec->chunk_buffer)
+    free(codec->chunk_buffer);
+  if(codec->sample_buffer)
+    free(codec->sample_buffer);
         
-        free(codec);
-	return 0;
-}
+  free(codec);
+  return 0;
+  }
 
 static int decode(quicktime_t *file, void * _output, long samples, int track)
 {
@@ -567,26 +567,25 @@ static int flush(quicktime_t *file, int track)
   return 0;
   }
 
-void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack)
-{
-	quicktime_codec_t *codec_base = atrack->codec;
-	quicktime_ima4_codec_t *codec;
-/* Set sample format */
-        atrack->sample_format = LQT_SAMPLE_INT16;
-                
-/* Init public items */
-	codec_base->priv = calloc(1, sizeof(quicktime_ima4_codec_t));
-	codec_base->delete_acodec = delete_codec;
-	codec_base->decode_video = 0;
-	codec_base->encode_video = 0;
-	codec_base->decode_audio = decode;
-	codec_base->encode_audio = encode;
-	codec_base->flush = flush;
-        //	codec_base->fourcc = QUICKTIME_IMA4;
-        //	codec_base->title = "IMA 4";
-        //	codec_base->desc = "IMA 4";
-        //	codec_base->wav_id = 0x11;
+void quicktime_init_codec_ima4(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
+  {
+  quicktime_ima4_codec_t *codec;
+  /* Set sample format */
 
-/* Init private items */
-	codec = codec_base->priv;
-}
+  if(atrack)
+    atrack->sample_format = LQT_SAMPLE_INT16;
+
+  codec = calloc(1, sizeof(*codec));
+  
+  codec_base->priv = codec;
+
+  codec_base->delete_codec = delete_codec;
+  codec_base->decode_video = 0;
+  codec_base->encode_video = 0;
+  codec_base->decode_audio = decode;
+  codec_base->encode_audio = encode;
+  codec_base->flush = flush;
+  
+  }

@@ -179,9 +179,9 @@ typedef struct
   
   } quicktime_x264_codec_t;
 
-static int delete_codec(quicktime_video_map_t *vtrack)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_x264_codec_t *codec = vtrack->codec;
+  quicktime_x264_codec_t *codec = codec_base->priv;
   if(codec->enc)
     x264_encoder_close(codec->enc);
   
@@ -1036,23 +1036,22 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-void quicktime_init_codec_x264(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_x264(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
   quicktime_x264_codec_t *codec;
-  
+
+  codec = calloc(1, sizeof(*codec));
   /* Init public items */
-  vtrack->codec->priv = calloc(1, sizeof(quicktime_x264_codec_t));
-  vtrack->codec->delete_vcodec = delete_codec;
-  vtrack->codec->encode_video = encode;
-  vtrack->codec->set_pass = set_pass_x264;
-  vtrack->codec->flush = flush;
-  vtrack->codec->decode_video = 0;
-  vtrack->codec->set_parameter = set_parameter;
-  vtrack->codec->decode_audio = 0;
-  vtrack->codec->encode_audio = 0;
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
+  codec_base->encode_video = encode;
+  codec_base->set_pass = set_pass_x264;
+  codec_base->flush = flush;
+  codec_base->set_parameter = set_parameter;
   
   /* Init private items */
-  codec = vtrack->codec->priv;
   x264_param_default(&(codec->params));
   }
 

@@ -113,9 +113,9 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
  *   Return the actual codec constructor
  */
 
-LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index)
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
   {
   if(index == 0)
     return quicktime_init_codec_lame;
-  return (lqt_init_audio_codec_func_t)0;
+  return (lqt_init_codec_func_t)0;
   }

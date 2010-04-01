@@ -55,13 +55,15 @@ typedef struct
   uint8_t ** rows;
   } quicktime_yuv2_codec_t;
 
-static int quicktime_delete_codec_yuv2(quicktime_video_map_t *vtrack)
+static int quicktime_delete_codec_yuv2(quicktime_codec_t *codec_base)
   {
   quicktime_yuv2_codec_t *codec;
 
-  codec = vtrack->codec->priv;
-  if(codec->buffer) free(codec->buffer);
-  if(codec->rows) free(codec->rows);
+  codec = codec_base->priv;
+  if(codec->buffer)
+    free(codec->buffer);
+  if(codec->rows)
+    free(codec->rows);
   free(codec);
   return 0;
   }
@@ -260,31 +262,28 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   }
 
 
-void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_yuv2(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = vtrack->codec;
-
   /* Init public items */
   codec_base->priv = calloc(1, sizeof(quicktime_yuv2_codec_t));
-  codec_base->delete_vcodec = quicktime_delete_codec_yuv2;
+  codec_base->delete_codec = quicktime_delete_codec_yuv2;
   codec_base->decode_video = decode;
   codec_base->encode_video = encode;
-  codec_base->decode_audio = 0;
-  codec_base->encode_audio = 0;
   }
 
-void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_2vuy(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = vtrack->codec;
   quicktime_yuv2_codec_t * codec;
+  codec = calloc(1, sizeof(*codec));
   /* Init public items */
-  codec_base->priv = calloc(1, sizeof(quicktime_yuv2_codec_t));
-  codec_base->delete_vcodec = quicktime_delete_codec_yuv2;
+  codec_base->priv = codec;
+  codec_base->delete_codec = quicktime_delete_codec_yuv2;
   codec_base->decode_video = decode;
   codec_base->encode_video = encode;
-  codec_base->decode_audio = 0;
-  codec_base->encode_audio = 0;
-  codec = (quicktime_yuv2_codec_t *)(codec_base->priv);
   codec->is_2vuy = 1;
   }
 

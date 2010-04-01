@@ -1427,8 +1427,7 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
 int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
                           lqt_codec_info_t * info);
 
-int quicktime_delete_vcodec(quicktime_video_map_t *vtrack);
-int quicktime_delete_acodec(quicktime_audio_map_t *vtrack);
+int quicktime_delete_codec(quicktime_codec_t *codec);
 int quicktime_codecs_flush(quicktime_t *file);
 
 LQT_EXTERN void lqt_write_frame_header(quicktime_t * file, int track,
@@ -1441,6 +1440,11 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track);
 
 LQT_EXTERN void lqt_video_append_timestamp(quicktime_t * file, int track,
                                            int64_t time, int duration);
+
+quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
+                                         quicktime_audio_map_t * amap,
+                                         quicktime_video_map_t * vmap);
+
 
 /* workarounds.c */
 

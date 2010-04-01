@@ -444,9 +444,9 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   }
      
 
-LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
   {
   if((index == 0) || (index == 1))
     return quicktime_init_codec_schroedinger;
-  return (lqt_init_video_codec_func_t)0;
+  return (lqt_init_codec_func_t)0;
   }

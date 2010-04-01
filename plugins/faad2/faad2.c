@@ -82,9 +82,9 @@ typedef struct
   
   } quicktime_faad2_codec_t;
 
-static int delete_codec(quicktime_audio_map_t *atrack)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_faad2_codec_t *codec = atrack->codec->priv;
+  quicktime_faad2_codec_t *codec = codec_base->priv;
 
   if(codec->dec)
     faacDecClose(codec->dec);
@@ -320,7 +320,9 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
+void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
+                                quicktime_audio_map_t *atrack,
+                                quicktime_video_map_t *vtrack)
   {
   uint8_t * extradata = (uint8_t *)0;
   int extradata_size = 0;
@@ -330,25 +332,26 @@ void quicktime_init_codec_faad2(quicktime_audio_map_t *atrack)
 
   faacDecConfigurationPtr cfg;
   
-  quicktime_codec_t *codec_base = atrack->codec;
   quicktime_faad2_codec_t *codec;
 
+  codec = calloc(1, sizeof(*codec));
+  
   /* Init public items */
-  codec_base->priv = calloc(1, sizeof(quicktime_faad2_codec_t));
-  codec_base->delete_acodec = delete_codec;
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
   codec_base->decode_audio = decode;
   codec_base->set_parameter = set_parameter;
   
-  codec = codec_base->priv;
-
-  atrack->sample_format = LQT_SAMPLE_FLOAT;
-
   /* Ok, usually, we initialize decoders during the first
      decode() call, but in this case, we might need to
      set the correct samplerate, which should be known before */
 
   codec->dec = faacDecOpen();
 
+  if(!atrack)
+    return;
+  
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
   stsd = &(atrack->track->mdia.minf.stbl.stsd);
   
   if(stsd->table[0].has_esds)

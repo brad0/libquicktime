@@ -969,12 +969,10 @@ void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
     /* Maybe switch the encoding colormodel to better match the IO one. */
     if(file->wr && !file->encoding_started)
       {
-      char * name = file->vtracks[track].codec->codec_name;
-      lqt_codec_info_t ** info = lqt_find_video_codec_by_name(name);
+      lqt_codec_info_t * info = file->vtracks[track].codec->info;
       int encoding_cmodel = lqt_get_best_target_colormodel(
-              colormodel, (*info)->encoding_colormodels);
-      lqt_destroy_codec_info(info);
-
+              colormodel, info->encoding_colormodels);
+      
       if (encoding_cmodel != LQT_COLORMODEL_NONE)
         {
         file->vtracks[track].stream_cmodel = encoding_cmodel;
@@ -1322,7 +1320,7 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
   {
-  quicktime_delete_vcodec(vtrack);
+  quicktime_delete_codec(vtrack->codec);
   if(vtrack->temp_frame)
     lqt_rows_free(vtrack->temp_frame);
   if(vtrack->timecodes)
@@ -1362,7 +1360,7 @@ int quicktime_init_audio_map(quicktime_t * file,
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
   {
-  quicktime_delete_acodec(atrack);
+  quicktime_delete_codec(atrack->codec);
   if(atrack->sample_buffer)
     free(atrack->sample_buffer);
   if(atrack->channel_setup)
@@ -2009,15 +2007,15 @@ static void apply_default_parameters(quicktime_t * file,
 
 void lqt_set_default_video_parameters(quicktime_t * file, int track)
   {
-  lqt_codec_info_t ** codec_info;
-  quicktime_codec_t * codec;
-    
-  codec = file->vtracks[track].codec;
-  codec_info = lqt_find_video_codec_by_name(codec->codec_name);
-  if(codec_info)
+  int i;
+  lqt_codec_info_t * codec_info;
+
+  for(i = 0; i < file->total_vtracks; i++)
     {
-    apply_default_parameters(file, track, codec, *codec_info, file->wr);
-    lqt_destroy_codec_info(codec_info);
+    codec_info = file->vtracks[track].codec->info;
+    if(codec_info)
+      apply_default_parameters(file, track, file->vtracks[track].codec,
+                               codec_info, file->wr);
     }
   }
 
@@ -2026,17 +2024,13 @@ void lqt_set_default_video_parameters(quicktime_t * file, int track)
 void lqt_set_default_audio_parameters(quicktime_t * file, int track)
   {
   int i;
-  lqt_codec_info_t ** codec_info;
-  quicktime_codec_t * codec;
+  lqt_codec_info_t * codec_info;
   for(i = 0; i < file->total_atracks; i++)
     {
-    codec = file->atracks[i].codec;
-    codec_info = lqt_find_audio_codec_by_name(codec->codec_name);
+    codec_info = file->atracks[track].codec->info;
     if(codec_info)
-      {
-      apply_default_parameters(file, i, codec, *codec_info, file->wr);
-      lqt_destroy_codec_info(codec_info);
-      }
+      apply_default_parameters(file, i, file->atracks[track].codec,
+                               codec_info, file->wr);
     }
   }
 

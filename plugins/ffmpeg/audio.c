@@ -305,19 +305,21 @@ typedef struct
 #endif
   } quicktime_ffmpeg_audio_codec_t;
 
-static int lqt_ffmpeg_delete_audio(quicktime_audio_map_t *vtrack)
+static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
   {
-  quicktime_ffmpeg_audio_codec_t *codec = vtrack->codec->priv;
-  
+  quicktime_ffmpeg_audio_codec_t * codec = codec_base->priv;
   if(codec->avctx)
     {
     if(codec->initialized)
       avcodec_close(codec->avctx);
     av_free(codec->avctx);
     }
-  if(codec->sample_buffer) free(codec->sample_buffer);
-  if(codec->chunk_buffer)  free(codec->chunk_buffer);
-  if(codec->extradata) free(codec->extradata); 
+  if(codec->sample_buffer)
+    free(codec->sample_buffer);
+  if(codec->chunk_buffer)
+    free(codec->chunk_buffer);
+  if(codec->extradata)
+    free(codec->extradata); 
   free(codec);
   return 0;
   }
@@ -958,25 +960,31 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   return result;
   }
 
-void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *atrack, AVCodec *encoder,
+void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
+                                       quicktime_audio_map_t *atrack, AVCodec *encoder,
                                        AVCodec *decoder)
-{
-	quicktime_ffmpeg_audio_codec_t *codec;
+  {
+  quicktime_ffmpeg_audio_codec_t *codec;
+  
+  avcodec_init();
+  codec = calloc(1, sizeof(*codec));
+  if(!codec)
+    return;
+  
+  codec->encoder = encoder;
+  codec->decoder = decoder;
+  codec-> avctx = avcodec_alloc_context();
+  codec_base->priv = (void *)codec;
 
-	avcodec_init();
-	codec = calloc(1, sizeof(quicktime_ffmpeg_audio_codec_t));
-	if(!codec)
-          return;
+  codec_base->delete_codec = lqt_ffmpeg_delete_audio;
+  if(encoder)
+    codec_base->encode_audio = lqt_ffmpeg_encode_audio;
+  if(decoder)
+    codec_base->decode_audio = lqt_ffmpeg_decode_audio;
+  codec_base->set_parameter = set_parameter;
 
-	codec->encoder = encoder;
-	codec->decoder = decoder;
-	codec-> avctx = avcodec_alloc_context();
-	atrack->codec->priv = (void *)codec;
-	atrack->codec->delete_acodec = lqt_ffmpeg_delete_audio;
-	if(encoder)
-          atrack->codec->encode_audio = lqt_ffmpeg_encode_audio;
-	if(decoder)
-          atrack->codec->decode_audio = lqt_ffmpeg_decode_audio;
-	atrack->codec->set_parameter = set_parameter;
-        atrack->sample_format = LQT_SAMPLE_INT16;
-}
+  if(!atrack)
+    return;
+  
+  atrack->sample_format = LQT_SAMPLE_INT16;
+  }

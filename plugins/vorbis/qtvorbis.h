@@ -27,6 +27,8 @@
 
 #include <quicktime/qtprivate.h>
 
-void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_vorbis(quicktime_codec_t *codec_base,
+                                 quicktime_audio_map_t *atrack,
+                                 quicktime_video_map_t *vtrack);
 
 #endif

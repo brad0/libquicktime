@@ -21,20 +21,43 @@
  with this library; if not, write to the Free Software Foundation, Inc., 51
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
-void quicktime_init_codec_ima4(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_rawaudio(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_twos(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_ulaw(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_alaw(quicktime_audio_map_t *atrack);
-void quicktime_init_codec_sowt(quicktime_audio_map_t *atrack);
 
-void quicktime_init_codec_in24(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_ima4(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_rawaudio(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_twos(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_ulaw(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_alaw(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_sowt(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 
-void quicktime_init_codec_in32(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_in24(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+
+void quicktime_init_codec_in32(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 
 
-void quicktime_init_codec_fl32(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_fl32(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 
-void quicktime_init_codec_fl64(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_fl64(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 
-void quicktime_init_codec_lpcm(quicktime_audio_map_t *atrack);
+void quicktime_init_codec_lpcm(quicktime_codec_t * codec,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);

@@ -1341,7 +1341,6 @@ typedef struct
   /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
   int wav_id;
 
-  int compatibility_flags; /* Taken from codec info */
 
   lqt_compression_info_t ci;
   
@@ -1372,9 +1371,7 @@ typedef struct
 
   lqt_chroma_placement_t chroma_placement;
   lqt_interlace_mode_t interlace_mode;
-
-  int compatibility_flags; /* Taken from codec info */
-
+  
   // Timecode stuff
   uint32_t encode_timecode;
   int has_encode_timecode;
@@ -1614,8 +1611,7 @@ struct quicktime_s
 
 struct quicktime_codec_s
   {
-  int (*delete_vcodec)(quicktime_video_map_t *vtrack);
-  int (*delete_acodec)(quicktime_audio_map_t *atrack);
+  int (*delete_codec)(quicktime_codec_t *codec);
   int (*decode_video)(quicktime_t *file, 
                       unsigned char **row_pointers, 
                       int track);
@@ -1649,7 +1645,9 @@ struct quicktime_codec_s
 
   /* The followings are for libquicktime only */
   void *module;     /* Needed by libquicktime for dynamic loading */
-  char *codec_name; /* Needed by libquicktime */
+
+  lqt_codec_info_t * info;
+
   };
 
 #endif

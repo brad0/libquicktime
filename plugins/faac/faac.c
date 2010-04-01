@@ -56,9 +56,9 @@ typedef struct
   } quicktime_faac_codec_t;
 
 
-static int delete_codec(quicktime_audio_map_t *track_map)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_faac_codec_t *codec = track_map->codec->priv;
+  quicktime_faac_codec_t *codec = codec_base->priv;
   if(codec->sample_buffer)
     free(codec->sample_buffer);
   if(codec->chunk_buffer)
@@ -364,67 +364,71 @@ static int flush(quicktime_t *file, int track)
   return 0;
   }
 
-void quicktime_init_codec_faac(quicktime_audio_map_t *track_map)
+void quicktime_init_codec_faac(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = track_map->codec;
   quicktime_faac_codec_t *codec;
   
   /* Init public items */
-  codec_base->priv = calloc(1, sizeof(quicktime_faac_codec_t));
-  codec_base->delete_acodec = delete_codec;
+  codec = calloc(1, sizeof(*codec));
+  
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
   codec_base->encode_audio = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->flush = flush;
   
-  codec = codec_base->priv;
-
   codec->bitrate = 0;
   codec->quality = 100;
-  
-  track_map->sample_format = LQT_SAMPLE_FLOAT;
 
-  if(track_map->channels <= 6)
+  if(!atrack)
+    return;
+  
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+
+  if(atrack->channels <= 6)
     {
     /* Set default AAC channel setup */
-    track_map->channel_setup = calloc(track_map->channels,
-                                      sizeof(*track_map->channel_setup));
+    atrack->channel_setup = calloc(atrack->channels,
+                                      sizeof(*atrack->channel_setup));
 
-    switch(track_map->channels)
+    switch(atrack->channels)
       {
       case 1:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
         break;
       case 2:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_LEFT;
-        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_RIGHT;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_LEFT;
+        atrack->channel_setup[1] = LQT_CHANNEL_FRONT_RIGHT;
         break;
       case 3:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
-        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
-        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        atrack->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        atrack->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
         break;
       case 4:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
-        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
-        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
-        track_map->channel_setup[3] = LQT_CHANNEL_BACK_CENTER;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        atrack->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        atrack->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        atrack->channel_setup[3] = LQT_CHANNEL_BACK_CENTER;
         break;
       case 5:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
-        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
-        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
-        track_map->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
-        track_map->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        atrack->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        atrack->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        atrack->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
+        atrack->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
         break;
       case 6:
-        track_map->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
-        track_map->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
-        track_map->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
-        track_map->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
-        track_map->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
-        track_map->channel_setup[5] = LQT_CHANNEL_LFE;
+        atrack->channel_setup[0] = LQT_CHANNEL_FRONT_CENTER;
+        atrack->channel_setup[1] = LQT_CHANNEL_FRONT_LEFT;
+        atrack->channel_setup[2] = LQT_CHANNEL_FRONT_RIGHT;
+        atrack->channel_setup[3] = LQT_CHANNEL_BACK_LEFT;
+        atrack->channel_setup[4] = LQT_CHANNEL_BACK_RIGHT;
+        atrack->channel_setup[5] = LQT_CHANNEL_LFE;
         break;
       }
-    quicktime_set_chan(track_map);
+    quicktime_set_chan(atrack);
     }
   }

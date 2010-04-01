@@ -28,7 +28,6 @@
 
 #include "qtpng.h"
 
-void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
 
 static char * fourccs_png[]  = { QUICKTIME_PNG, (char*)0 };
 
@@ -93,19 +92,12 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   return (lqt_codec_info_static_t*)0;
   }
 
-/*
- * This is missing in qtpng.h, so we add it here to leave the original
- * source untouched
- */
-
-void quicktime_init_codec_png(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_pngalpha(quicktime_video_map_t *vtrack);
 
 /*
  *   Return the actual codec constructor
  */
 
-LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
   {
   switch(index)
     {
@@ -116,5 +108,5 @@ LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
       return quicktime_init_codec_pngalpha;
       break;
     }
-  return (lqt_init_video_codec_func_t)0;
+  return (lqt_init_codec_func_t)0;
   }

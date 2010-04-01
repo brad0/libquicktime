@@ -32,17 +32,10 @@
 
 #define LOG_DOMAIN "codecs"
 
-static int quicktime_delete_vcodec_stub(quicktime_video_map_t *vtrack)
+static int quicktime_delete_codec_stub(quicktime_codec_t *codec)
   {
   lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
-          "quicktime_delete_vcodec_stub called");
-  return 0;
-  }
-
-static int quicktime_delete_acodec_stub(quicktime_audio_map_t *atrack)
-  {
-  lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
-          "quicktime_delete_acodec_stub called");
+          "quicktime_delete_stub called");
   return 0;
   }
 
@@ -89,39 +82,71 @@ static int quicktime_flush_codec_stub(quicktime_t *file, int track)
   return 0;
   }
 
-
-static int quicktime_codec_defaults(quicktime_codec_t *codec)
+/*
+ *  Original quicktime4linux function changed for dynamic loading
+ */
+quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
+                                         quicktime_audio_map_t * amap,
+                                         quicktime_video_map_t * vmap)
   {
-  codec->delete_vcodec = quicktime_delete_vcodec_stub;
-  codec->delete_acodec = quicktime_delete_acodec_stub;
+  quicktime_codec_t * codec;
+  lqt_init_codec_func_t init_codec;
+  lqt_init_codec_func_t (*get_codec)(int);
+
+  codec = calloc(1, sizeof(*codec));
+
+  /* Set stubs */
+  codec->delete_codec = quicktime_delete_codec_stub;
   codec->decode_video = quicktime_decode_video_stub;
   codec->encode_video = quicktime_encode_video_stub;
   codec->decode_audio = quicktime_decode_audio_stub;
   codec->encode_audio = quicktime_encode_audio_stub;
   codec->flush = quicktime_flush_codec_stub;
-  return 0;
-  }
 
-/*
- *  Original quicktime4linux function changed for dynamic loading
- */
+  codec->info = info;
+  
+  lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
+          "Loading module %s", info->module_filename);
+
+  /* dlopen the module */
+  codec->module = dlopen(info->module_filename, RTLD_NOW);
+  
+  if(!codec->module)
+    {
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading module %s failed: %s",
+            info->module_filename, dlerror());
+    goto fail;
+    }
+
+  get_codec =
+    (lqt_init_codec_func_t(*)(int))dlsym(codec->module, "get_codec");
+  
+  if(!get_codec)
+    {
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+            "Module %s contains no function get_codec",
+            info->module_filename);
+    goto fail;
+    }
+
+  init_codec = get_codec(info->module_index);
+  init_codec(codec, amap, vmap);
+  
+  return codec;
+
+  fail:
+  if(codec->module)
+    dlclose(codec->module);
+  free(codec);
+  return NULL;
+  }
 
 int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
                           lqt_codec_info_t * codec_info)
   {
   lqt_codec_info_t ** codec_array = (lqt_codec_info_t**)0;
   
-  lqt_init_video_codec_func_t init_codec;
-  lqt_init_video_codec_func_t (*get_codec)(int);
-    
-  void * module = (void*)0;
-  
   char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
-
-  vtrack->codec = calloc(1, sizeof(*vtrack->codec));
-  quicktime_codec_defaults(vtrack->codec);
-
-  vtrack->codec->module = (void*)0;
   
   /* Try to find the codec */
 
@@ -138,55 +163,20 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
     codec_info = *codec_array;
     }
 
-  vtrack->compatibility_flags = codec_info->compatibility_flags;
-  
-  lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
-          "Loading module %s", codec_info->module_filename);
-  
-  /* dlopen the module */
-  module = dlopen(codec_info->module_filename, RTLD_NOW);
-  
-  if(!module)
+  vtrack->codec = quicktime_load_codec(codec_info, NULL, vtrack);
+
+  if(!vtrack->codec)
     {
-    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading module %s failed: %s",
-            codec_info->module_filename, dlerror());
+    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading codec %s failed",
+            codec_info->name);
     
     if(codec_array)
       lqt_destroy_codec_info(codec_array);
 
     return -1;
+    
     }
-  
-  vtrack->codec->codec_name =
-    malloc(strlen(codec_info->name)+1);
-  strcpy(vtrack->codec->codec_name, codec_info->name);
-  
-  /* Set the module */
-  
-  vtrack->codec->module = module;
-  
-  /* Get the codec finder for the module */
-  
-  get_codec =
-    (lqt_init_video_codec_func_t(*)(int))dlsym(module,
-                                               "get_video_codec");
-  
-  if(!get_codec)
-    {
-    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
-            "Module %s contains no function get_video_codec",
-            codec_info->module_filename);
-    if(codec_array)
-      lqt_destroy_codec_info(codec_array);
 
-    return -1;
-    }
-  
-  /* Obtain the initializer for the actual codec */
-  
-  init_codec = get_codec(codec_info->module_index);
-  
-  init_codec(vtrack);
   if(codec_array)
     lqt_destroy_codec_info(codec_array);
 
@@ -200,17 +190,9 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
                           lqt_codec_info_t * codec_info)
   {
   lqt_codec_info_t ** codec_array = (lqt_codec_info_t**)0;
-  lqt_init_audio_codec_func_t init_codec;
-  lqt_init_audio_codec_func_t (*get_codec)(int);
-    
-  void * module;
-
+  
   char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
   int wav_id       = atrack->track->mdia.minf.stbl.stsd.table[0].compression_id;
-  atrack->codec = calloc(1, sizeof(*atrack->codec));
-  quicktime_codec_defaults(atrack->codec);
-
-  atrack->codec->module = (void*)0;
   
   /* Try to find the codec */
 
@@ -234,52 +216,8 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
     codec_info = *codec_array;
     }
 
-  atrack->compatibility_flags = codec_info->compatibility_flags;
+  atrack->codec = quicktime_load_codec(codec_info, atrack, NULL);
   
-  lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
-          "Loading module %s", codec_info->module_filename);
-  
-  /* dlopen the module */
-  module = dlopen(codec_info->module_filename, RTLD_NOW);
-  
-  if(!module)
-    {
-    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Loading module %s failed: %s",
-            codec_info->module_filename, dlerror());
-    if(codec_array)
-      lqt_destroy_codec_info(codec_array);
-    return -1;
-    }
-
-  atrack->codec->codec_name = malloc(strlen(codec_info->name)+1);
-  strcpy(atrack->codec->codec_name, codec_info->name);
-    
-  /* Set the module */
-  
-  atrack->codec->module = module;
-  
-  /* Get the codec finder for the module */
-  
-  get_codec =
-    (lqt_init_audio_codec_func_t(*)(int))dlsym(module,
-                                               "get_audio_codec");
-  
-  if(!get_codec)
-    {
-    lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
-            "Module %s contains no function get_audio_codec",
-            codec_info->module_filename);
-    if(codec_array)
-      lqt_destroy_codec_info(codec_array);
-    return -1;
-    }
-  
-  /* Obtain the initializer for the actual codec */
-
-  init_codec = get_codec(codec_info->module_index);
-  
-  init_codec(atrack);
-
   /* We set the wav ids from our info structure, so we don't have to do this
      in the plugin sources */
   
@@ -292,30 +230,14 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   }
 
 
-int quicktime_delete_vcodec(quicktime_video_map_t *vtrack)
+int quicktime_delete_codec(quicktime_codec_t *codec)
   {
-  vtrack->codec->delete_vcodec(vtrack);
+  codec->delete_codec(codec);
   /* Close the module */
   
-  if(vtrack->codec->module)
-    dlclose(vtrack->codec->module);
-  if(vtrack->codec->codec_name)
-    free(vtrack->codec->codec_name);
-  free(vtrack->codec);
-  vtrack->codec = 0;
-  return 0;
-  }
-
-int quicktime_delete_acodec(quicktime_audio_map_t *atrack)
-  {
-  atrack->codec->delete_acodec(atrack);
-  /* Close the module */
-  if(atrack->codec->module)
-    dlclose(atrack->codec->module);
-  if(atrack->codec->codec_name)
-    free(atrack->codec->codec_name);
-  free(atrack->codec);
-  atrack->codec = 0;
+  if(codec->module)
+    dlclose(codec->module);
+  free(codec);
   return 0;
   }
 
@@ -531,13 +453,13 @@ static void start_encoding(quicktime_t *file)
   /* Trigger warnings if codecs are in the wrong container */
   for(i = 0; i < file->total_atracks; i++)
     {
-    if(!(file->atracks[i].compatibility_flags & file->file_type))
+    if(!(file->atracks[i].codec->info->compatibility_flags & file->file_type))
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
               "Audio codec and container are not known to be compatible. File might be playable by libquicktime only.");
     }
   for(i = 0; i < file->total_vtracks; i++)
     {
-    if(!(file->vtracks[i].compatibility_flags & file->file_type))
+    if(!(file->vtracks[i].codec->info->compatibility_flags & file->file_type))
       lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
               "Video codec and container are not known to be compatible. File might be playable by libquicktime only.");
     

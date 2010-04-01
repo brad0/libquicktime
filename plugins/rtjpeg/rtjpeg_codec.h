@@ -29,28 +29,30 @@
 #include <quicktime/qtprivate.h>
 
 typedef struct
-{
-        uint8_t ** rows;
-        int rowspan, rowspan_uv;
+  {
+  uint8_t ** rows;
+  int rowspan, rowspan_uv;
 
-	/* Compression stuff */
-	RTjpeg_t * compress_struct;
-	uint8_t * write_buffer;
-	int Q;
-	int K;
-	int LQ;
-	int CQ;
+  /* Compression stuff */
+  RTjpeg_t * compress_struct;
+  uint8_t * write_buffer;
+  int Q;
+  int K;
+  int LQ;
+  int CQ;
 	
-	/* DeCompression stuff */
-	RTjpeg_t * decompress_struct;
-	uint8_t * read_buffer;
-	int read_buffer_alloc;
-        int jpeg_width;
-        int jpeg_height;
-        int qt_width;
-        int qt_height;
-} quicktime_rtjpeg_codec_t;
+  /* DeCompression stuff */
+  RTjpeg_t * decompress_struct;
+  uint8_t * read_buffer;
+  int read_buffer_alloc;
+  int jpeg_width;
+  int jpeg_height;
+  int qt_width;
+  int qt_height;
+  } quicktime_rtjpeg_codec_t;
 
 #endif
 
-void quicktime_init_codec_rtjpeg(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_rtjpeg(quicktime_codec_t * codec_base,
+                                 quicktime_audio_map_t *atrack,
+                                 quicktime_video_map_t *vtrack);

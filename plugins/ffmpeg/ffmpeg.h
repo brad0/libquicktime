@@ -28,9 +28,11 @@
 #include <quicktime/qtprivate.h>
 #include AVCODEC_HEADER
 
-void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack,
+void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec,
+                                       quicktime_video_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
-void quicktime_init_audio_codec_ffmpeg(quicktime_audio_map_t *vtrack,
+void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec,
+                                       quicktime_audio_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
 
 void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,

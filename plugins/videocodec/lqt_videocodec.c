@@ -258,7 +258,7 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   return (lqt_codec_info_static_t*)0;
   }
 
-LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
   {
   switch(index)
     {
@@ -283,6 +283,6 @@ LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
     case 9: /* v210 */
       return quicktime_init_codec_v210;
     }
-  return (lqt_init_video_codec_func_t)0;
+  return (lqt_init_codec_func_t)0;
   }
 

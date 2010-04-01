@@ -294,25 +294,13 @@ typedef struct
   
   } quicktime_mp3_codec_t;
 
-static int delete_codec(quicktime_audio_map_t *atrack)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_mp3_codec_t *codec = atrack->codec->priv;
-  //  if(codec->mp3) mpeg3_delete_layer(codec->mp3);
-  //  if(codec->mp3_header)  mpeg3_delete_layer(codec->mp3_header);
-  //  if(codec->packet_buffer) free(codec->packet_buffer);
-  /*   if(codec->output) */
-  /*     { */
-  /*     int i; */
-  /*     for(i = 0; i < atrack->channels; i++) */
-  /*       free(codec->output[i]); */
-  /*     free(codec->output); */
-  /*     } */
-
+  quicktime_mp3_codec_t *codec = codec_base->priv;
   
   if(codec->lame_global)
-    {
     lame_close(codec->lame_global);
-    }
+  
   if(codec->input_buffer[0])
     free(codec->input_buffer[0]);
   if(codec->input_buffer[1])
@@ -321,7 +309,6 @@ static int delete_codec(quicktime_audio_map_t *atrack)
   
   if(codec->encoder_output)
     free(codec->encoder_output);
-  //  if(codec->encoded_header)  mpeg3_delete_layer(codec->encoded_header);
   free(codec);
   return 0;
   }
@@ -665,20 +652,27 @@ static int flush(quicktime_t *file, int track)
   return 0;
   }
 
-void quicktime_init_codec_lame(quicktime_audio_map_t *atrack)
+void quicktime_init_codec_lame(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
   quicktime_mp3_codec_t *codec;
+
+  codec = calloc(1, sizeof(*codec));
   
   /* Init public items */
-  atrack->codec->priv = calloc(1, sizeof(quicktime_mp3_codec_t));
-  atrack->codec->delete_acodec = delete_codec;
-  //  atrack->codec->decode_audio = decode;
-  atrack->codec->encode_audio = encode;
-  atrack->codec->set_parameter = set_parameter;
-  atrack->codec->flush = flush;
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
+  //  codec_base->decode_audio = decode;
+  codec_base->encode_audio = encode;
+  codec_base->set_parameter = set_parameter;
+  codec_base->flush = flush;
   
-  codec = atrack->codec->priv;
   codec->bitrate = 256000;
   codec->quality = 0;
+
+  if(!atrack)
+    return;
+  
   atrack->sample_format = LQT_SAMPLE_INT16;
   }

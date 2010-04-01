@@ -33,92 +33,93 @@
 #define LOG_DOMAIN "vorbis"
 
 typedef struct
-{
+  {
+  int channels;
+  
+  /* Common stuff */
+  float ** sample_buffer;
+  int sample_buffer_alloc; 
+  /* Encoder stuff */
+  int max_bitrate;
+  int nominal_bitrate;
+  int min_bitrate;
+  int use_vbr;
+  int write_OVHS;
+  int encode_initialized;
+  ogg_stream_state enc_os;
+  ogg_page enc_og;
+  uint8_t * enc_header;
+  int enc_header_len;
+  int header_written;
 
-/* Common stuff */
-        float ** sample_buffer;
-        int sample_buffer_alloc; 
-/* Encoder stuff */
-        int max_bitrate;
-	int nominal_bitrate;
-	int min_bitrate;
-	int use_vbr;
-        int write_OVHS;
-        int encode_initialized;
-	ogg_stream_state enc_os;
-	ogg_page enc_og;
-        uint8_t * enc_header;
-        int enc_header_len;
-        int header_written;
+  ogg_packet enc_op;
+  vorbis_info enc_vi;
+  vorbis_comment enc_vc;
+  vorbis_dsp_state enc_vd;
+  vorbis_block enc_vb;
+  //        int64_t last_granulepos;
 
-ogg_packet enc_op;
-	vorbis_info enc_vi;
-	vorbis_comment enc_vc;
-	vorbis_dsp_state enc_vd;
-	vorbis_block enc_vb;
-//        int64_t last_granulepos;
+  // Number of samples written to disk
+  int encoded_samples;
 
-// Number of samples written to disk
-	int encoded_samples;
+  int enc_samples_in_buffer;
 
-        int enc_samples_in_buffer;
+  int chunk_started;
+  quicktime_atom_t chunk_atom;
 
-        int chunk_started;
-        quicktime_atom_t chunk_atom;
+  /* Decoder stuff */
 
-/* Decoder stuff */
+  ogg_sync_state   dec_oy; /* sync and verify incoming physical bitstream */
+  ogg_stream_state dec_os; /* take physical pages, weld into a logical
+                              stream of packets */
+  ogg_page         dec_og; /* one Ogg bitstream page.  Vorbis packets are inside */
+  ogg_packet       dec_op; /* one raw packet of data for decode */
 
-	ogg_sync_state   dec_oy; /* sync and verify incoming physical bitstream */
-	ogg_stream_state dec_os; /* take physical pages, weld into a logical
-				stream of packets */
-	ogg_page         dec_og; /* one Ogg bitstream page.  Vorbis packets are inside */
-	ogg_packet       dec_op; /* one raw packet of data for decode */
+  vorbis_info      dec_vi; /* struct that stores all the static vorbis bitstream
+                              settings */
+  vorbis_comment   dec_vc; /* struct that stores all the bitstream user comments */
+  vorbis_dsp_state dec_vd; /* central working state for the packet->PCM decoder */
+  vorbis_block     dec_vb; /* local working space for packet->PCM decode */
 
-	vorbis_info      dec_vi; /* struct that stores all the static vorbis bitstream
-				settings */
-	vorbis_comment   dec_vc; /* struct that stores all the bitstream user comments */
-	vorbis_dsp_state dec_vd; /* central working state for the packet->PCM decoder */
-	vorbis_block     dec_vb; /* local working space for packet->PCM decode */
-
-	int decode_initialized;
-        int stream_initialized;
+  int decode_initialized;
+  int stream_initialized;
 
   
   /* Buffer for the entire chunk */
 
-        uint8_t * chunk_buffer;
-        int chunk_buffer_alloc;
-        int bytes_in_chunk_buffer;
+  uint8_t * chunk_buffer;
+  int chunk_buffer_alloc;
+  int bytes_in_chunk_buffer;
 
   /* Start and end positions of the sample buffer */
     
-        int64_t sample_buffer_start;
-        int64_t sample_buffer_end;
+  int64_t sample_buffer_start;
+  int64_t sample_buffer_end;
 
 
-// Number of last sample relative to file
-	int64_t output_position;
-// Number of last sample relative to output buffer
-	long output_end;
-// Number of samples in output buffer
-	long output_size;
-// Number of samples allocated in output buffer
-	long output_allocated;
-// Current reading position in file
-	int64_t chunk;
-// Number of samples decoded in the current chunk
-	int chunk_samples;
+  // Number of last sample relative to file
+  int64_t output_position;
+  // Number of last sample relative to output buffer
+  long output_end;
+  // Number of samples in output buffer
+  long output_size;
+  // Number of samples allocated in output buffer
+  long output_allocated;
+  // Current reading position in file
+  int64_t chunk;
+  // Number of samples decoded in the current chunk
+  int chunk_samples;
 
-        int header_read;
+  int header_read;
 
   } quicktime_vorbis_codec_t;
 
 
 /* =================================== public for vorbis */
 
-static int delete_codec(quicktime_audio_map_t *atrack)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_vorbis_codec_t *codec = atrack->codec->priv;
+  quicktime_vorbis_codec_t *codec = codec_base->priv;
   int i;
 
   if(codec->encode_initialized)
@@ -141,7 +142,7 @@ static int delete_codec(quicktime_audio_map_t *atrack)
 
   if(codec->sample_buffer) 
     {
-    for(i = 0; i < atrack->channels; i++)
+    for(i = 0; i < codec->channels; i++)
       free(codec->sample_buffer[i]);
     free(codec->sample_buffer);
     }
@@ -270,7 +271,7 @@ static int next_packet(quicktime_t * file, int track)
   }
 
 static float ** alloc_sample_buffer(float ** old, int channels, int samples,
-                             int * sample_buffer_alloc)
+                                    int * sample_buffer_alloc)
   {
   int i;
   if(!old)
@@ -280,7 +281,8 @@ static float ** alloc_sample_buffer(float ** old, int channels, int samples,
   if(*sample_buffer_alloc < samples)
     {
     *sample_buffer_alloc = samples + 256;
-
+    
+    
     for(i = 0; i < channels; i++)
       {
       old[i] = realloc(old[i], (*sample_buffer_alloc) * sizeof(float));
@@ -361,7 +363,8 @@ static int decode(quicktime_t *file,
   if(!codec->decode_initialized)
     {
     codec->decode_initialized = 1;
-
+    codec->channels = track_map->channels;
+    
     ogg_sync_init(&codec->dec_oy); /* Now we can read pages */
 
     vorbis_info_init(&codec->dec_vi);
@@ -655,7 +658,7 @@ static int encode(quicktime_t *file,
 
  
     codec->encode_initialized = 1;
-
+    codec->channels = track_map->channels;
     lqt_init_vbr_audio(file, track);
 
 
@@ -801,43 +804,49 @@ static int flush(quicktime_t *file, int track)
         return 0;
 }
 
-void quicktime_init_codec_vorbis(quicktime_audio_map_t *atrack)
-{
-	quicktime_codec_t *codec_base = (quicktime_codec_t*)atrack->codec;
-	quicktime_vorbis_codec_t *codec;
-	char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
+void quicktime_init_codec_vorbis(quicktime_codec_t *codec_base,
+                                 quicktime_audio_map_t *atrack,
+                                 quicktime_video_map_t *vtrack)
+  {
+  quicktime_vorbis_codec_t *codec;
+  char *compressor = atrack->track->mdia.minf.stbl.stsd.table[0].format;
 
-/* Init public items */
-	codec_base->priv = calloc(1, sizeof(quicktime_vorbis_codec_t));
-	codec_base->delete_acodec = delete_codec;
-	codec_base->decode_audio = decode;
-	codec_base->encode_audio = encode;
-	codec_base->set_parameter = set_parameter;
-	codec_base->flush = flush;
+  /* Init public items */
+  codec = calloc(1, sizeof(*codec));
+  
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
+  codec_base->decode_audio = decode;
+  codec_base->encode_audio = encode;
+  codec_base->set_parameter = set_parameter;
+  codec_base->flush = flush;
         
-	codec = codec_base->priv;
-	codec->nominal_bitrate = 128000;
-	codec->max_bitrate = -1;
-	codec->min_bitrate = -1;
-        atrack->sample_format = LQT_SAMPLE_FLOAT;
-        if(quicktime_match_32(compressor, "OggV"))
-          {
-          codec->write_OVHS = 1;
-          }
-        /* Set Vorbis 5.1 channel mapping */
-        if(atrack->channels == 6)
-          {
-          if(!atrack->channel_setup)
-            {
-            atrack->channel_setup = calloc(6, sizeof(*atrack->channel_setup));
-            atrack->channel_setup[0] =  LQT_CHANNEL_FRONT_LEFT;
-            atrack->channel_setup[1] =  LQT_CHANNEL_FRONT_CENTER;
-            atrack->channel_setup[2] =  LQT_CHANNEL_FRONT_RIGHT;
-            atrack->channel_setup[3] =  LQT_CHANNEL_LFE;
-            atrack->channel_setup[4] =  LQT_CHANNEL_BACK_LEFT;
-            atrack->channel_setup[5] =  LQT_CHANNEL_BACK_RIGHT;
+  codec->nominal_bitrate = 128000;
+  codec->max_bitrate = -1;
+  codec->min_bitrate = -1;
+  
+  if(!atrack)
+    return;
+  
+  atrack->sample_format = LQT_SAMPLE_FLOAT;
+  if(quicktime_match_32(compressor, "OggV"))
+    {
+    codec->write_OVHS = 1;
+    }
+  /* Set Vorbis 5.1 channel mapping */
+  if(atrack->channels == 6)
+    {
+    if(!atrack->channel_setup)
+      {
+      atrack->channel_setup = calloc(6, sizeof(*atrack->channel_setup));
+      atrack->channel_setup[0] =  LQT_CHANNEL_FRONT_LEFT;
+      atrack->channel_setup[1] =  LQT_CHANNEL_FRONT_CENTER;
+      atrack->channel_setup[2] =  LQT_CHANNEL_FRONT_RIGHT;
+      atrack->channel_setup[3] =  LQT_CHANNEL_LFE;
+      atrack->channel_setup[4] =  LQT_CHANNEL_BACK_LEFT;
+      atrack->channel_setup[5] =  LQT_CHANNEL_BACK_RIGHT;
 
-            }
-          }
+      }
+    }
 
-}
+  }

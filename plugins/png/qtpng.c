@@ -44,11 +44,13 @@ typedef struct
   } quicktime_png_codec_t;
 
 
-static int delete_codec(quicktime_video_map_t *vtrack)
+static int delete_codec(quicktime_codec_t *codec_base)
   {
-  quicktime_png_codec_t *codec = vtrack->codec->priv;
-  if(codec->buffer) free(codec->buffer);
-  if(codec->temp_frame) free(codec->temp_frame);
+  quicktime_png_codec_t *codec = codec_base->priv;
+  if(codec->buffer)
+    free(codec->buffer);
+  if(codec->temp_frame)
+    free(codec->temp_frame);
   free(codec);
   return 0;
   }
@@ -207,26 +209,37 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-void quicktime_init_codec_png(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_png(quicktime_codec_t * codec_base,
+                              quicktime_audio_map_t *atrack,
+                              quicktime_video_map_t *vtrack)
   {
   quicktime_png_codec_t *codec;
 
+  codec = calloc(1, sizeof(*codec));
+  
   /* Init public items */
-  vtrack->codec->priv = calloc(1, sizeof(quicktime_png_codec_t));
-  vtrack->codec->delete_vcodec = delete_codec;
-  vtrack->codec->decode_video = decode;
-  vtrack->codec->encode_video = encode;
-  vtrack->codec->set_parameter = set_parameter;
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
+  codec_base->decode_video = decode;
+  codec_base->encode_video = encode;
+  codec_base->set_parameter = set_parameter;
   
   /* Init private items */
-  codec = vtrack->codec->priv;
   codec->compression_level = 9;
+
+  if(!vtrack)
+    return;
   vtrack->stream_cmodel = BC_RGB888;
   }
 
-void quicktime_init_codec_pngalpha(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_pngalpha(quicktime_codec_t * codec_base,
+                                   quicktime_audio_map_t *atrack,
+                                   quicktime_video_map_t *vtrack)
   {
   /* Proceed as normal */
-  quicktime_init_codec_png(vtrack);
+  quicktime_init_codec_png(codec_base, atrack, vtrack);
+  
+  if(!vtrack)
+    return;
   vtrack->stream_cmodel = BC_RGBA8888;
   }

@@ -27,6 +27,8 @@
 
 #include <quicktime/qtprivate.h>
 
-extern void quicktime_init_codec_dv(quicktime_video_map_t *);
+extern void quicktime_init_codec_dv(quicktime_codec_t * codec,
+                                    quicktime_audio_map_t *atrack,
+                                    quicktime_video_map_t *vtrack);
 
 #endif

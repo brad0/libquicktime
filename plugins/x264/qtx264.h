@@ -22,4 +22,6 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
-void quicktime_init_codec_x264(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_x264(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);

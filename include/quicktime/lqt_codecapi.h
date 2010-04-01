@@ -54,8 +54,9 @@
  *   which should be returned by get_codec()
  */
 
-typedef void (* lqt_init_video_codec_func_t)(quicktime_video_map_t *);
-typedef void (* lqt_init_audio_codec_func_t)(quicktime_audio_map_t *);
+typedef void (* lqt_init_codec_func_t)(quicktime_codec_t * codec,
+                                       quicktime_audio_map_t *,
+                                       quicktime_video_map_t *);
 
 typedef struct
   {
@@ -148,8 +149,7 @@ int get_codec_api_version(void) { return LQT_CODEC_API_VERSION; }
 /* Declarations for the codec functions */
 LQT_EXTERN int get_num_codecs();
 LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index);
-LQT_EXTERN lqt_init_audio_codec_func_t get_audio_codec(int index);
-LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index);
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index);
 #endif
 
 /*

@@ -28,6 +28,8 @@
 #include <pthread.h>
 #include <string.h>
 
+#include "dv.h"
+
 // Buffer sizes
 #define DV_NTSC_SIZE 120000
 #define DV_PAL_SIZE 144000
@@ -54,9 +56,9 @@ typedef struct
 
 static pthread_mutex_t libdv_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static int delete_codec(quicktime_video_map_t *vtrack)
+static int delete_codec(quicktime_codec_t *codec_base)
 {
-	quicktime_dv_codec_t *codec = vtrack->codec->priv;
+	quicktime_dv_codec_t *codec = codec_base->priv;
 
 	if(codec->dv_decoder)
 	{
@@ -108,8 +110,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 	int data_length = isPAL ? DV_PAL_SIZE : DV_NTSC_SIZE;
 	int result = 0;
 	dv_color_space_t encode_dv_colormodel = 0;
-        quicktime_atom_t chunk_atom;
-
+        
         if(!row_pointers)
           {
           vtrack->stream_cmodel = BC_YUV422;
@@ -243,31 +244,23 @@ static int set_parameter(quicktime_t *file,
 	return 0;
 }
 
-void quicktime_init_codec_dv(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_dv(quicktime_codec_t * codec_base,
+                             quicktime_audio_map_t *atrack,
+                             quicktime_video_map_t *vtrack)
 {
 	quicktime_dv_codec_t *codec;
 
 /* Init public items */
-	vtrack->codec->priv = calloc(1, sizeof(quicktime_dv_codec_t));
-	vtrack->codec->delete_vcodec = delete_codec;
-	vtrack->codec->encode_video = encode;
-	vtrack->codec->decode_audio = 0;
-	vtrack->codec->encode_audio = 0;
-	vtrack->codec->set_parameter = set_parameter;
-
-
-	/* Init private items */
-
-	codec = vtrack->codec->priv;
-	
-	codec->dv_decoder = NULL;
-	codec->dv_encoder = NULL;
+        codec = calloc(1, sizeof(*codec));
+        codec_base->priv = codec;
+        
+        codec_base->delete_codec = delete_codec;
+	codec_base->encode_video = encode;
+	codec_base->set_parameter = set_parameter;
+        /* Init private items */
+        
 	codec->decode_quality = DV_QUALITY_BEST;
-	codec->anamorphic16x9 = 0;
 	codec->vlc_encode_passes = 3;
-	codec->clamp_luma = codec->clamp_chroma = 0;
-	codec->add_ntsc_setup = 0;
-	codec->parameters_changed = 0;
 	
 	codec->data = calloc(1, 144000);
 }

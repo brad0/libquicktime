@@ -63,13 +63,14 @@ typedef struct
   int initialized;
   } quicktime_yuv4_codec_t;
 
-static int quicktime_delete_codec_yuv4(quicktime_video_map_t *vtrack)
-{
-	quicktime_yuv4_codec_t *codec = vtrack->codec->priv;
-	free(codec->buffer);
-	free(codec);
-	return 0;
-}
+static int quicktime_delete_codec_yuv4(quicktime_codec_t *codec_base)
+  {
+  quicktime_yuv4_codec_t *codec = codec_base->priv;
+  if(codec->buffer)
+    free(codec->buffer);
+  free(codec);
+  return 0;
+  }
 
 
 static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv4_codec_t *codec)
@@ -381,17 +382,15 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 }
 
 
-void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack)
-{
-	quicktime_codec_t *codec_base = vtrack->codec;
-
-/* Init public items */
-	codec_base->priv = calloc(1, sizeof(quicktime_yuv4_codec_t));
-	codec_base->delete_vcodec = quicktime_delete_codec_yuv4;
-	codec_base->decode_video = decode;
-	codec_base->encode_video = encode;
-	codec_base->decode_audio = 0;
-	codec_base->encode_audio = 0;
-}
+void quicktime_init_codec_yuv4(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
+  {
+  /* Init public items */
+  codec_base->priv = calloc(1, sizeof(quicktime_yuv4_codec_t));
+  codec_base->delete_codec = quicktime_delete_codec_yuv4;
+  codec_base->decode_video = decode;
+  codec_base->encode_video = encode;
+  }
 
 

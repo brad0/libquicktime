@@ -137,10 +137,10 @@ colormodels[] =
     { PIX_FMT_YUV410P,   BC_YUV420P, 0 },  ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
   };
 
-static int lqt_ffmpeg_delete_video(quicktime_video_map_t *vtrack)
+static int lqt_ffmpeg_delete_video(quicktime_codec_t *codec_base)
   {
-  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
-          
+  quicktime_ffmpeg_video_codec_t *codec = codec_base->priv;
+  
   if(codec->extradata)
     free(codec->extradata);
 
@@ -1151,20 +1151,45 @@ static int set_parameter_video(quicktime_t *file,
   return 0;
   }
 
-void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *encoder,
+void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
+                                       quicktime_video_map_t *vtrack,
+                                       AVCodec *encoder,
                                        AVCodec *decoder)
   {
   quicktime_ffmpeg_video_codec_t *codec;
-
-  char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
-        
+  char *compressor;
+  
   avcodec_init();
 
   codec = calloc(1, sizeof(*codec));
   if(!codec)
     return;
   codec->avctx = avcodec_alloc_context();
-        
+
+  codec->encoder = encoder;
+  codec->decoder = decoder;
+  
+  vtrack->codec->priv = codec;
+  vtrack->codec->delete_codec = lqt_ffmpeg_delete_video;
+  vtrack->codec->flush = flush;
+  vtrack->codec->resync = resync_ffmpeg;
+  
+  if(encoder)
+    {
+    vtrack->codec->encode_video = lqt_ffmpeg_encode_video;
+    vtrack->codec->set_pass = set_pass_ffmpeg;
+    }
+  if(decoder)
+    vtrack->codec->decode_video = lqt_ffmpeg_decode_video;
+  
+  vtrack->codec->set_parameter = set_parameter_video;
+
+  if(!vtrack)
+    return;
+
+  compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+  
+  
   if (quicktime_match_32(compressor, "dvc "))
     vtrack->stream_cmodel = BC_YUV411P;
   else if (quicktime_match_32(compressor, "dv5n") ||
@@ -1190,21 +1215,4 @@ void quicktime_init_video_codec_ffmpeg(quicktime_video_map_t *vtrack, AVCodec *e
   else
     vtrack->stream_cmodel = BC_YUV420P;
   
-  codec->encoder = encoder;
-  codec->decoder = decoder;
-  
-  vtrack->codec->priv = (void *)codec;
-  vtrack->codec->delete_vcodec = lqt_ffmpeg_delete_video;
-  vtrack->codec->flush = flush;
-  vtrack->codec->resync = resync_ffmpeg;
-  
-  if(encoder)
-    {
-    vtrack->codec->encode_video = lqt_ffmpeg_encode_video;
-    vtrack->codec->set_pass = set_pass_ffmpeg;
-    }
-  if(decoder)
-    vtrack->codec->decode_video = lqt_ffmpeg_decode_video;
-  
-  vtrack->codec->set_parameter = set_parameter_video;
   }

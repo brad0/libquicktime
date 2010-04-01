@@ -252,7 +252,7 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info,
                                              1.0e8,
                                              1.0,
                                              1.0,
-                                             1.0);
+                                             0.0);
         ret->widget = gtk_spin_button_new(GTK_ADJUSTMENT(ret->adjustment),
                                           0.0,
                                           0);

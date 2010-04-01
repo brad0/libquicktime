@@ -21,4 +21,7 @@
  with this library; if not, write to the Free Software Foundation, Inc., 51
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
-void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
+
+void quicktime_init_codec_jpeg(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);

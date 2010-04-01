@@ -53,18 +53,18 @@ typedef struct
   int usefloat;
   } quicktime_jpeg_codec_t;
 
-static int delete_codec(quicktime_video_map_t *vtrack)
-{
-	quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
-        if(codec->mjpeg)
-          mjpeg_delete(codec->mjpeg);
-	if(codec->buffer)
-		free(codec->buffer);
-	if(codec->temp_video)
-		free(codec->temp_video);
-	free(codec);
-	return 0;
-}
+static int delete_codec(quicktime_codec_t *codec_base)
+  {
+  quicktime_jpeg_codec_t *codec = codec_base->priv;
+  if(codec->mjpeg)
+    mjpeg_delete(codec->mjpeg);
+  if(codec->buffer)
+    free(codec->buffer);
+  if(codec->temp_video)
+    free(codec->temp_video);
+  free(codec);
+  return 0;
+  }
 
 static int decode(quicktime_t *file, 
                   unsigned char **row_pointers, 
@@ -234,39 +234,41 @@ static int set_parameter(quicktime_t *file,
     {
     codec->quality = *(int*)value;
     }
-  else
-    if(!strcasecmp(key, "jpeg_usefloat"))
-      {
-      codec->usefloat = *(int*)value;
-      }
+  else if(!strcasecmp(key, "jpeg_usefloat"))
+    {
+    codec->usefloat = *(int*)value;
+    }
   return 0;
   }
 
-void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_jpeg(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
   {
-  char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+  char *compressor;
   quicktime_jpeg_codec_t *codec;
-  int jpeg_type=0;
-
-  if(quicktime_match_32(compressor, QUICKTIME_JPEG))
-    {
-    jpeg_type = JPEG_PROGRESSIVE;
-    }
-  if(quicktime_match_32(compressor, QUICKTIME_MJPA))
-    {
-    jpeg_type = JPEG_MJPA;
-    }
+  
   /* Init public items */
-  vtrack->codec->priv = lqt_bufalloc(sizeof(quicktime_jpeg_codec_t));
-  vtrack->codec->delete_vcodec = delete_codec;
-  vtrack->codec->decode_video = decode;
-  vtrack->codec->encode_video = encode;
-  vtrack->codec->set_parameter = set_parameter;
-  vtrack->codec->resync = resync;
+  codec = calloc(1, sizeof(*codec));
+  
+  codec_base->priv = codec;
+  codec_base->delete_codec = delete_codec;
+  codec_base->decode_video = decode;
+  codec_base->encode_video = encode;
+  codec_base->set_parameter = set_parameter;
+  codec_base->resync = resync;
 
   /* Init private items */
-  codec = vtrack->codec->priv;
-  codec->jpeg_type = jpeg_type;
   codec->quality = 80;
   codec->usefloat = 0;
+
+  if(!vtrack)
+    return;
+
+  compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+  
+  if(quicktime_match_32(compressor, QUICKTIME_JPEG))
+    codec->jpeg_type = JPEG_PROGRESSIVE;
+  else if(quicktime_match_32(compressor, QUICKTIME_MJPA))
+    codec->jpeg_type = JPEG_MJPA;
   }

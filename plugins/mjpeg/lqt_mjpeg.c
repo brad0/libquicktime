@@ -27,8 +27,6 @@
 #include "jpeg.h"
 #include <quicktime/colormodels.h>
 
-void quicktime_init_codec_jpeg(quicktime_video_map_t *vtrack);
-
 /*
  *  We cheat here: Actually, this is one codec but we tell the
  *  outer world, that we are 2 codecs because mjpa and jpeg are
@@ -107,9 +105,9 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   }
      
 
-LQT_EXTERN lqt_init_video_codec_func_t get_video_codec(int index)
+LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
   {
   if((index == 0) || (index == 1))
     return quicktime_init_codec_jpeg;
-  return (lqt_init_video_codec_func_t)0;
+  return (lqt_init_codec_func_t)0;
   }

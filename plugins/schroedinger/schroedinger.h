@@ -34,7 +34,9 @@
 #define SCHRO_CHECK_VERSION(a,b,c) 0
 #endif
 
-void quicktime_init_codec_schroedinger(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_schroedinger(quicktime_codec_t * codec_base,
+                                       quicktime_audio_map_t *atrack,
+                                       quicktime_video_map_t *vtrack);
 
 extern lqt_parameter_info_static_t encode_parameters_schroedinger[];
 
@@ -82,7 +84,7 @@ typedef struct
   
   } schroedinger_codec_t;
 
-int lqt_schroedinger_delete(quicktime_video_map_t *vtrack);
+int lqt_schroedinger_delete(quicktime_codec_t *codec_base);
 
 int lqt_schrodinger_get_colormodel(SchroVideoFormat *format);
 SchroFrameFormat lqt_schrodinger_get_frame_format(SchroVideoFormat *format);

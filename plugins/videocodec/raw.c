@@ -22,6 +22,8 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
+#include <stdio.h>
+
 #include "lqt_private.h"
 #include <quicktime/colormodels.h>
 #include <stdlib.h>
@@ -197,29 +199,16 @@ static void scanline_raw_32(uint8_t * src,
 
 /* */
 
-static int quicktime_delete_codec_raw(quicktime_video_map_t *vtrack)
-{
-	quicktime_raw_codec_t *codec = vtrack->codec->priv;
-#if 0
-	if(codec->temp_frame)
-	{
-		free(codec->temp_frame);
-	}
-	if(codec->temp_rows)
-	{
-		free(codec->temp_rows);
-	}
-#endif
-	if(codec->buffer)
-	{
-		free(codec->buffer);
-	}
+static int quicktime_delete_codec_raw(quicktime_codec_t *codec_base)
+  {
+  quicktime_raw_codec_t *codec = codec_base->priv;
+  if(codec->buffer)
+    free(codec->buffer);
+  
+  free(codec);
+  return 0;
+  }
 
-	free(codec);
-	return 0;
-}
-
-#include <stdio.h>
 
 static int source_cmodel(quicktime_t *file, int track)
 {
@@ -420,19 +409,29 @@ static int quicktime_encode_raw(quicktime_t *file,
   return result;
   }
 
-void quicktime_init_codec_raw(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_raw(quicktime_codec_t * codec_base,
+                              quicktime_audio_map_t *atrack,
+                              quicktime_video_map_t *vtrack)
   {
-  quicktime_codec_t *codec_base = vtrack->codec;
- 
+  
   codec_base->priv = calloc(1, sizeof(quicktime_raw_codec_t));
-  codec_base->delete_vcodec = quicktime_delete_codec_raw;
+  codec_base->delete_codec = quicktime_delete_codec_raw;
   codec_base->decode_video = quicktime_decode_raw;
   codec_base->encode_video = quicktime_encode_raw;
+
+  if(!vtrack)
+    return;
+  
   vtrack->stream_cmodel = BC_RGB888;
   }
 
-void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack)
+void quicktime_init_codec_rawalpha(quicktime_codec_t * codec_base,
+                                   quicktime_audio_map_t *atrack,
+                                   quicktime_video_map_t *vtrack)
   {
-  quicktime_init_codec_raw(vtrack);
+  quicktime_init_codec_raw(codec_base, atrack, vtrack);
+
+  if(!vtrack)
+    return;
   vtrack->stream_cmodel = BC_RGBA8888;
   }

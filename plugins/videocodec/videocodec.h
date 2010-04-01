@@ -28,16 +28,37 @@
 #include <quicktime/quicktime.h>
 
 void lqt_set_fiel_uncompressed(quicktime_t * file, int track);
-void quicktime_init_codec_raw(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_rawalpha(quicktime_video_map_t *vtrack);
 
-void quicktime_init_codec_v210(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v308(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v408(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_v410(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yuv2(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_2vuy(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yuv4(quicktime_video_map_t *vtrack);
-void quicktime_init_codec_yv12(quicktime_video_map_t *vtrack);
+void quicktime_init_codec_raw(quicktime_codec_t * codec_base,
+                              quicktime_audio_map_t *atrack,
+                              quicktime_video_map_t *vtrack);
+void quicktime_init_codec_rawalpha(quicktime_codec_t * codec_base,
+                                   quicktime_audio_map_t *atrack,
+                                   quicktime_video_map_t *vtrack);
+
+void quicktime_init_codec_v210(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_v308(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_v408(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_v410(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_yuv2(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_2vuy(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_yuv4(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
+void quicktime_init_codec_yv12(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 
 #endif
