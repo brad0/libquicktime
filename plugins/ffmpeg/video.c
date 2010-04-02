@@ -600,8 +600,10 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     else if(codec->is_imx)
       {
       /* IMX */
-      if((codec->avctx->height == 608) || (codec->avctx->height == 512))
+      if(codec->avctx->height == 608)
         codec->y_offset = 32;
+      else if(codec->avctx->height == 512)
+        codec->y_offset = 26;
       vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
       }
     
