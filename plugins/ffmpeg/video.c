@@ -354,8 +354,8 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
 
 #ifdef HAVE_LIBSWSCALE
   out_planes[0] = out_frame[0];
-  out_planes[1] = out_frame[0];
-  out_planes[2] = out_frame[0];
+  out_planes[1] = out_frame[1];
+  out_planes[2] = out_frame[2];
   out_planes[3] = (uint8_t*)0;
 
   out_strides[0] = row_span;
@@ -579,7 +579,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
                          codec->avctx->pix_fmt,
                          width, height,
                          lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel),
-                         0, (SwsFilter*)0,
+                         SWS_FAST_BILINEAR, (SwsFilter*)0,
                          (SwsFilter*)0,
                          (double*)0);
         }
