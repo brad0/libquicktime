@@ -783,7 +783,7 @@ static int init_imx_encoder(quicktime_t *file, int track)
       break;
     case 486: // NTSC without VBI
       codec->avctx->height = 512;
-      codec->y_offset = 32;
+      codec->y_offset = 26;
       compressor[3] = 'n';
       break;
     case 512: // NTSC with VBI
