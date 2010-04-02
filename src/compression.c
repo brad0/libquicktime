@@ -158,6 +158,7 @@ compression_ids[] =
     { LQT_COMPRESSION_MPEG4_ASP, "mpeg4"   },
     { LQT_COMPRESSION_H264,      "h264"    },
     { LQT_COMPRESSION_DIRAC,     "dirac"   },
+    { LQT_COMPRESSION_D10,       "d10"     },
   };
   
 const char * lqt_compression_id_to_string(lqt_compression_id_t id)
@@ -181,3 +182,12 @@ lqt_compression_id_t lqt_compression_id_from_string(const char * str)
     }
   return LQT_COMPRESSION_NONE;
   }
+#if 0
+void lqt_compression_info_dump(const lqt_compression_info_t * ci)
+  {
+  lqt_dump("Compression info\n");
+  lqt_dump("  Codec: %s\n", lqt_compression_id_to_string(ci->id));
+  lqt_dump("  Bitrate: %d\n", ci->bitrate);
+  
+  }
+#endif

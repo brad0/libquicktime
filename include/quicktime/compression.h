@@ -25,6 +25,8 @@
 #ifndef _LQT_COMPRESSION_H_
 #define _LQT_COMPRESSION_H_
 
+#pragma GCC visibility push(default)
+
 
 typedef enum
   {
@@ -124,5 +126,6 @@ int lqt_add_video_track_compressed(quicktime_t * file, const lqt_compression_inf
 int lqt_write_audio_packet(quicktime_t * file, lqt_packet_t * p, int track);
 int lqt_write_video_packet(quicktime_t * file, lqt_packet_t * p, int track);
 
+#pragma GCC visibility pop
 
 #endif // _LQT_COMPRESSION_H_
