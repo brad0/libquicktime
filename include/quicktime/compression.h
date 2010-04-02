@@ -46,6 +46,7 @@ typedef enum
     LQT_COMPRESSION_MPEG4_ASP,      //!< MPEG-4 ASP (a.k.a. Divx4)
     LQT_COMPRESSION_H264,           //!< H.264 (Annex B)
     LQT_COMPRESSION_DIRAC,          //!< Complete DIRAC frames
+    LQT_COMPRESSION_D10,            //!< D10 according to SMPTE 356M-2001
 
   } lqt_compression_id_t;
 
@@ -70,6 +71,7 @@ typedef struct
   int height;
   int pixel_width;
   int pixel_height;
+  int colormodel;
   
   } lqt_compression_info_t;
 

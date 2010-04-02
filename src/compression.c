@@ -51,7 +51,8 @@ void lqt_packet_free(lqt_packet_t * p)
 
 /* Reading */
 
-const lqt_compression_info_t * lqt_get_audio_compression_info(quicktime_t * file, int track)
+const lqt_compression_info_t *
+lqt_get_audio_compression_info(quicktime_t * file, int track)
   {
   quicktime_audio_map_t * atrack;
 
@@ -68,7 +69,8 @@ const lqt_compression_info_t * lqt_get_audio_compression_info(quicktime_t * file
     return &atrack->ci;
   }
 
-const lqt_compression_info_t * lqt_get_video_compression_info(quicktime_t * file, int track)
+const lqt_compression_info_t *
+lqt_get_video_compression_info(quicktime_t * file, int track)
   {
   quicktime_video_map_t * vtrack;
 
@@ -101,7 +103,6 @@ int lqt_writes_audio_compressed(quicktime_t * file,
                                 const lqt_compression_info_t * info)
   {
   
-
   return 0;
   }
 

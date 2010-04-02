@@ -103,7 +103,7 @@ quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
   codec->encode_audio = quicktime_encode_audio_stub;
   codec->flush = quicktime_flush_codec_stub;
 
-  codec->info = info;
+  codec->info = lqt_codec_info_copy_single(info);
   
   lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
           "Loading module %s", info->module_filename);
@@ -237,6 +237,10 @@ int quicktime_delete_codec(quicktime_codec_t *codec)
   
   if(codec->module)
     dlclose(codec->module);
+
+  if(codec->info)
+    lqt_codec_info_destroy_single(codec->info);
+
   free(codec);
   return 0;
   }

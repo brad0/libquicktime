@@ -134,7 +134,7 @@ static void destroy_parameter_info(lqt_parameter_info_t * p)
 
 /* Free memory of codec info (public) */
 
-static void destroy_codec_info(lqt_codec_info_t * ptr)
+void lqt_codec_info_destroy_single(lqt_codec_info_t * ptr)
   {
   int i;
 
@@ -269,8 +269,7 @@ copy_parameter_info(lqt_parameter_info_t * ret,
  *  Copy codec Info
  */
 
-static lqt_codec_info_t *
-copy_codec_info(const lqt_codec_info_t * info)
+lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info)
   {
   int i, len;
   lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
@@ -393,7 +392,7 @@ static lqt_codec_info_t * find_codec_by_filename(lqt_codec_info_t ** list,
         {
         tmp_ptr = ptr->next;
 
-        destroy_codec_info(ptr);
+        lqt_codec_info_destroy_single(ptr);
         ptr = tmp_ptr;
         }
       else
@@ -702,14 +701,14 @@ void lqt_registry_destroy()
   while(lqt_audio_codecs)
     {
     tmp = lqt_audio_codecs->next;
-    destroy_codec_info(lqt_audio_codecs);
+    lqt_codec_info_destroy_single(lqt_audio_codecs);
     lqt_audio_codecs = tmp;
     }
 
   while(lqt_video_codecs)
     {
     tmp = lqt_video_codecs->next;
-    destroy_codec_info(lqt_video_codecs);
+    lqt_codec_info_destroy_single(lqt_video_codecs);
     lqt_video_codecs = tmp;
     }
 
@@ -765,7 +764,7 @@ void lqt_registry_init()
     {
     tmp_file_codecs = file_codecs;
     file_codecs = file_codecs->next;
-    destroy_codec_info(tmp_file_codecs);
+    lqt_codec_info_destroy_single(tmp_file_codecs);
     do_write = 1;
     }
   
@@ -1244,7 +1243,7 @@ lqt_codec_info_t ** lqt_find_audio_codec(char * fourcc, int encode)
   if(tmp_ptr)
     {
     ret = calloc(2, sizeof(lqt_codec_info_t*));
-    *ret = copy_codec_info(tmp_ptr);
+    *ret = lqt_codec_info_copy_single(tmp_ptr);
     }
   lqt_registry_unlock();
   return ret;
@@ -1286,7 +1285,7 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_wav_id(int wav_id, int encode)
   if(tmp_ptr)
     {
     ret = calloc(2, sizeof(lqt_codec_info_t*));
-    *ret = copy_codec_info(tmp_ptr);
+    *ret = lqt_codec_info_copy_single(tmp_ptr);
     }
   lqt_registry_unlock();
   return ret;
@@ -1329,7 +1328,7 @@ lqt_codec_info_t ** lqt_find_video_codec(char * fourcc, int encode)
   if(tmp_ptr)
     {
     ret = calloc(2, sizeof(lqt_codec_info_t*));
-    *ret = copy_codec_info(tmp_ptr);
+    *ret = lqt_codec_info_copy_single(tmp_ptr);
     }
   lqt_registry_unlock();
 
@@ -1383,7 +1382,7 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
       if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
          (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         {
-        ret[num_added] = copy_codec_info(info);
+        ret[num_added] = lqt_codec_info_copy_single(info);
         num_added++;
         }
       }
@@ -1396,7 +1395,7 @@ lqt_codec_info_t ** lqt_query_registry(int audio, int video,
       if((encode && (info->direction != LQT_DIRECTION_DECODE)) ||
          (decode && (info->direction != LQT_DIRECTION_ENCODE)))
         {
-        ret[num_added] = copy_codec_info(info);
+        ret[num_added] = lqt_codec_info_copy_single(info);
         num_added++;
         }
       }
@@ -1430,7 +1429,7 @@ lqt_codec_info_t ** lqt_find_audio_codec_by_name(const char * name)
     if(!strcmp(info->name, name))
       {
       ret = calloc(2, sizeof(lqt_codec_info_t*));
-      *ret = copy_codec_info(info);
+      *ret = lqt_codec_info_copy_single(info);
       break;
       }
     else
@@ -1463,7 +1462,7 @@ lqt_codec_info_t ** lqt_find_video_codec_by_name(const char * name)
     if(!strcmp(info->name, name))
       {
       ret = calloc(2, sizeof(lqt_codec_info_t*));
-      *ret = copy_codec_info(info);
+      *ret = lqt_codec_info_copy_single(info);
       break;
       }
     else
@@ -1507,7 +1506,7 @@ void lqt_destroy_codec_info(lqt_codec_info_t ** info)
   
   while(*ptr)
     {
-    destroy_codec_info(*ptr);
+    lqt_codec_info_destroy_single(*ptr);
     ptr++;
     }
   free(info);
@@ -1697,7 +1696,7 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
   if(module)
     dlclose(module);
   if(info_from_module)
-    destroy_codec_info(info_from_module);
+    lqt_codec_info_destroy_single(info_from_module);
   
   }
 

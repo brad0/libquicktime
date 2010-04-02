@@ -1953,13 +1953,16 @@ int quicktime_close(quicktime_t *file)
 static void apply_default_parameters(quicktime_t * file,
                                      int track,
                                      quicktime_codec_t * codec,
-                                     lqt_codec_info_t * codec_info,
                                      int encode)
   {
   int num_parameters;
   lqt_parameter_info_t * parameter_info;
   int j;
+  
+  lqt_codec_info_t * codec_info = codec->info;
 
+  if(!codec_info)
+    return;
   
   if(encode)
     {
@@ -2008,14 +2011,11 @@ static void apply_default_parameters(quicktime_t * file,
 void lqt_set_default_video_parameters(quicktime_t * file, int track)
   {
   int i;
-  lqt_codec_info_t * codec_info;
 
   for(i = 0; i < file->total_vtracks; i++)
     {
-    codec_info = file->vtracks[track].codec->info;
-    if(codec_info)
-      apply_default_parameters(file, track, file->vtracks[track].codec,
-                               codec_info, file->wr);
+    apply_default_parameters(file, track, file->vtracks[track].codec,
+                             file->wr);
     }
   }
 
@@ -2024,13 +2024,10 @@ void lqt_set_default_video_parameters(quicktime_t * file, int track)
 void lqt_set_default_audio_parameters(quicktime_t * file, int track)
   {
   int i;
-  lqt_codec_info_t * codec_info;
   for(i = 0; i < file->total_atracks; i++)
     {
-    codec_info = file->atracks[track].codec->info;
-    if(codec_info)
-      apply_default_parameters(file, i, file->atracks[track].codec,
-                               codec_info, file->wr);
+    apply_default_parameters(file, i, file->atracks[track].codec,
+                             file->wr);
     }
   }
 

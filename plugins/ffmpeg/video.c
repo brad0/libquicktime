@@ -1169,20 +1169,20 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec->encoder = encoder;
   codec->decoder = decoder;
   
-  vtrack->codec->priv = codec;
-  vtrack->codec->delete_codec = lqt_ffmpeg_delete_video;
-  vtrack->codec->flush = flush;
-  vtrack->codec->resync = resync_ffmpeg;
+  codec_base->priv = codec;
+  codec_base->delete_codec = lqt_ffmpeg_delete_video;
+  codec_base->flush = flush;
+  codec_base->resync = resync_ffmpeg;
   
   if(encoder)
     {
-    vtrack->codec->encode_video = lqt_ffmpeg_encode_video;
-    vtrack->codec->set_pass = set_pass_ffmpeg;
+    codec_base->encode_video = lqt_ffmpeg_encode_video;
+    codec_base->set_pass = set_pass_ffmpeg;
     }
   if(decoder)
-    vtrack->codec->decode_video = lqt_ffmpeg_decode_video;
+    codec_base->decode_video = lqt_ffmpeg_decode_video;
   
-  vtrack->codec->set_parameter = set_parameter_video;
+  codec_base->set_parameter = set_parameter_video;
 
   if(!vtrack)
     return;

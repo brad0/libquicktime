@@ -566,6 +566,11 @@ LQT_EXTERN void lqt_logs(quicktime_t * file, lqt_log_level_t level,
 /* For dumping strings */
 void lqt_dump(const char * format, ...)  __attribute__ ((format (printf, 1, 2)));
 
+/* lqt_codecinfo.c */
+
+lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info);
+void lqt_codec_info_destroy_single(lqt_codec_info_t * info);
+
 /* matrix.c */
 
 void quicktime_matrix_init(quicktime_matrix_t *matrix);
