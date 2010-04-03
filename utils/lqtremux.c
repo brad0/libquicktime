@@ -38,10 +38,12 @@ typedef struct
   const lqt_compression_info_t * ci;
   quicktime_t * in_file;
   quicktime_t * out_file;
-  int64_t time;
-  lqt_packet_t * p;
+  double time;
+  int timescale;
+  
   int in_index;
   int out_index;
+  int eof;
   } track_t;
 
 typedef struct
@@ -56,20 +58,69 @@ track_t * audio_tracks = NULL;
 track_t * video_tracks = NULL;
 int total_tracks = 0;
 file_t * files;
+int num_files;
+
+int nfiles;
 int num_audio_tracks, num_video_tracks;
 quicktime_t * file;
 
 int prefix_len;
 char * prefix = NULL;
 
-static void audio_iteration(track_t * track)
+static void audio_iteration(track_t * track, lqt_packet_t * p)
   {
+  int samples_read = 0;
+  int samples_to_read = track->ci->samplerate / 2; /* We make half second audio chunks */
+
+  while(samples_read < samples_to_read)
+    {
+    if(!lqt_read_audio_packet(track->in_file, p, track->in_index))
+      {
+      track->eof = 1;
+      return;
+      }
+    
+    lqt_write_audio_packet(track->out_file, p, track->out_index);
+
+    samples_read += p->duration;
+    }
+  
+  track->time = (double)(p->timestamp + p->duration) / (double)(track->ci->samplerate);
   
   }
 
-static void video_iteration(track_t * track)
+static void video_iteration(track_t * track, lqt_packet_t * p)
   {
+  double test_time;
   
+  if(!lqt_read_video_packet(track->in_file, p, track->in_index))
+    {
+    track->eof = 1;
+    return;
+    }
+
+  lqt_write_video_packet(track->out_file, p, track->out_index);
+  
+  test_time = (double)(p->timestamp + p->duration) / (double)(track->ci->video_timescale);
+  if(test_time > track->time)
+    track->time = test_time;
+  
+  }
+
+static track_t * tracks_min_time(track_t * tracks, int num, double * t)
+  {
+  int i;
+  track_t * ret = NULL;
+  
+  for(i = 0; i < num; i++)
+    {
+    if(!tracks[i].eof && (!ret || (tracks[i].time < *t)))
+      {
+      *t = tracks->time;
+      ret = &tracks[i];
+      }
+    }
+  return ret;
   }
 
 static int init_demultiplex(char * filename)
@@ -86,9 +137,7 @@ static int init_demultiplex(char * filename)
     
   num_audio_tracks = quicktime_audio_tracks(file);
   num_video_tracks = quicktime_video_tracks(file);
-
-  files = calloc(num_audio_tracks + num_video_tracks, sizeof(*files));
-
+  
   if(!prefix) /* Create default prefix */
     {
     char * pos;
@@ -107,7 +156,7 @@ static int init_demultiplex(char * filename)
     if(pos)
       *pos = '\0';
     }
-
+  
   prefix_len = strlen(prefix);
 
   tmp_string = malloc(prefix_len + 128);
@@ -134,7 +183,9 @@ static int init_demultiplex(char * filename)
         {
         fprintf(stderr, "Audio track %d cannot be written compressed\n", i+1);
         quicktime_close(audio_tracks[i].out_file);
+        remove(tmp_string);
         audio_tracks[i].out_file = NULL;
+        audio_tracks[i].in_file = NULL;
         continue;
         }
       total_tracks++;
@@ -167,7 +218,9 @@ static int init_demultiplex(char * filename)
         {
         fprintf(stderr, "Video track %d cannot be written compressed\n", i+1);
         quicktime_close(video_tracks[i].out_file);
+        remove(tmp_string);
         video_tracks[i].out_file = NULL;
+        video_tracks[i].in_file = NULL;
         continue;
         }
       total_tracks++;
@@ -184,6 +237,22 @@ static int init_demultiplex(char * filename)
   return 1;
   }
 
+static void cleanup_demultiplex()
+  {
+  int i;
+  for(i = 0; i < num_audio_tracks; i++)
+    {
+    if(audio_tracks[i].out_file)
+      quicktime_close(audio_tracks[i].out_file);
+    }
+  for(i = 0; i < num_video_tracks; i++)
+    {
+    if(video_tracks[i].out_file)
+      quicktime_close(video_tracks[i].out_file);
+    }
+  quicktime_close(file);
+  }
+
 static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
   {
   int i, j;
@@ -193,7 +262,7 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
   lqt_file_type_t type = LQT_FILE_QT;
   
   files = calloc(num_in_files, sizeof(*files));
-
+  num_files = num_in_files;
   /* Open input files */
      
   for(i = 0; i < num_in_files; i++)
@@ -298,11 +367,29 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
   return 1;
   }
 
+static void cleanup_multiplex()
+  {
+  int i;
+  for(i = 0; i < num_files; i++)
+    {
+    if(files[i].file)
+      quicktime_close(files[i].file);
+    }
+  if(file)
+    quicktime_close(file);
+  }
+
 int main(int argc, char ** argv)
   {
   int i;
   int first_file;
-  int num_files;
+  int nfiles;
+
+  double audio_time, video_time;
+  track_t * atrack, *vtrack;
+  lqt_packet_t p;
+
+  memset(&p, 0, sizeof(p));
   
   if(argc < 2)
     {
@@ -312,7 +399,7 @@ int main(int argc, char ** argv)
 
   /* Parse agruments */
 
-  num_files = argc - 1;
+  nfiles = argc - 1;
 
   i = 1;
   while(i < argc)
@@ -332,18 +419,18 @@ int main(int argc, char ** argv)
         }
       prefix = strdup(argv[i+1]);
       i++;
-      num_files -= 2;
+      nfiles -= 2;
       }
     i++;
     }
 
-  if(!num_files)
+  if(!nfiles)
     {
     print_usage();
     return -1;
     }
   
-  if(num_files == 1)
+  if(nfiles == 1)
     {
     /* Demultiplex */
     if(!init_demultiplex(argv[argc-1]))
@@ -353,7 +440,7 @@ int main(int argc, char ** argv)
     {
     /* Multiplex */
     
-    if(!init_multiplex(&argv[first_file], num_files-1, argv[argc-1]))
+    if(!init_multiplex(&argv[first_file], nfiles-1, argv[argc-1]))
       return -1;
     }
 
@@ -364,7 +451,40 @@ int main(int argc, char ** argv)
     }
 
   /* Transmultiplex */
-  
+
+  while(1)
+    {
+    atrack = tracks_min_time(audio_tracks, num_audio_tracks, &audio_time);
+    vtrack = tracks_min_time(video_tracks, num_video_tracks, &video_time);
+
+    if(atrack && vtrack)
+      {
+      if(audio_time < video_time)
+        audio_iteration(atrack, &p);
+      else
+        video_iteration(atrack, &p);
+      }
+    else if(atrack)
+      audio_iteration(atrack, &p);
+    else if(vtrack)
+      video_iteration(vtrack, &p);
+    else
+      break;
+    }
+
+  /* Cleanup */
+
+  if(nfiles == 1)
+    cleanup_demultiplex();
+  else
+    cleanup_multiplex();
+
+  if(files)
+    free(files);
+  if(audio_tracks)
+    free(audio_tracks);
+  if(video_tracks)
+    free(video_tracks);
   
   return 0;
   }

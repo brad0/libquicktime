@@ -74,6 +74,7 @@ typedef struct
   int pixel_width;
   int pixel_height;
   int colormodel;
+  int video_timescale;
   
   } lqt_compression_info_t;
 
