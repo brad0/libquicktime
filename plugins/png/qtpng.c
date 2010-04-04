@@ -105,6 +105,10 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   if(!row_pointers)
     {
     vtrack->stream_cmodel = source_cmodel(file, track);
+
+    /* Set compression info */
+    vtrack->ci.id = LQT_COMPRESSION_PNG;
+    
     return 0;
     }
 
@@ -209,6 +213,16 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
+static int writes_compressed(quicktime_t * file, const lqt_compression_info_t * ci)
+  {
+  if(!(file->file_type & (LQT_FILE_QT | LQT_FILE_QT_OLD)))
+    return 0;
+
+  if((ci->colormodel != BC_RGB888) && (ci->colormodel != BC_RGBA8888))
+    return 0;
+  return 1;
+  }
+
 void quicktime_init_codec_png(quicktime_codec_t * codec_base,
                               quicktime_audio_map_t *atrack,
                               quicktime_video_map_t *vtrack)
@@ -223,6 +237,7 @@ void quicktime_init_codec_png(quicktime_codec_t * codec_base,
   codec_base->decode_video = decode;
   codec_base->encode_video = encode;
   codec_base->set_parameter = set_parameter;
+  codec_base->writes_compressed = writes_compressed;
   
   /* Init private items */
   codec->compression_level = 9;

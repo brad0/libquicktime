@@ -29,8 +29,8 @@
 
 static void print_usage()
   {
-  fprintf(stderr, "Usage: qtremux [-pre <outprefix>] infile\n");
-  fprintf(stderr, "       qtremux infile1 infile2 ... outfile\n");
+  fprintf(stderr, "Usage: lqtremux [-pre <outprefix>] infile\n");
+  fprintf(stderr, "       lqtremux infile1 infile2 ... outfile\n");
   }
 
 typedef struct
@@ -66,6 +66,35 @@ quicktime_t * file;
 
 int prefix_len;
 char * prefix = NULL;
+
+lqt_codec_info_t ** audio_encoders;
+lqt_codec_info_t ** video_encoders;
+
+static lqt_codec_info_t * find_audio_encoder(lqt_compression_id_t id)
+  {
+  int i = 0;
+
+  while(audio_encoders[i])
+    {
+    if(audio_encoders[i]->compression_id == id)
+      return audio_encoders[i];
+    i++;
+    }
+  return NULL;
+  }
+
+static lqt_codec_info_t * find_video_encoder(lqt_compression_id_t id)
+  {
+  int i = 0;
+  
+  while(video_encoders[i])
+    {
+    if(video_encoders[i]->compression_id == id)
+      return video_encoders[i];
+    i++;
+    }
+  return NULL;
+  }
 
 static void audio_iteration(track_t * track, lqt_packet_t * p)
   {
@@ -127,7 +156,9 @@ static int init_demultiplex(char * filename)
   {
   int i;
   char * tmp_string;
-
+  
+  lqt_codec_info_t * codec_info;
+  
   file = lqt_open_read(filename);
   if(!file)
     {
@@ -173,13 +204,21 @@ static int init_demultiplex(char * filename)
         fprintf(stderr, "Audio track %d cannot be read compressed\n", i+1);
         continue;
         }
+      lqt_compression_info_dump(audio_tracks[i].ci);
+      
+      codec_info = find_audio_encoder(audio_tracks[i].ci->id);
+      if(!codec_info)
+        {
+        fprintf(stderr, "No audio encoder found for compressed writing\n");
+        continue;
+        }
       
       sprintf(tmp_string, "%s_audio_%02d.mov", prefix, i+1);
       audio_tracks[i].in_file = file;
       audio_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
-
+      
       if(!lqt_writes_audio_compressed(audio_tracks[i].out_file,
-                                      audio_tracks[i].ci))
+                                      audio_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d cannot be written compressed\n", i+1);
         quicktime_close(audio_tracks[i].out_file);
@@ -208,13 +247,21 @@ static int init_demultiplex(char * filename)
         fprintf(stderr, "Video track %d cannot be read compressed\n", i+1);
         continue;
         }
+      lqt_compression_info_dump(video_tracks[i].ci);
+
+      codec_info = find_video_encoder(video_tracks[i].ci->id);
+      if(!codec_info)
+        {
+        fprintf(stderr, "No video encoder found for compressed writing\n");
+        continue;
+        }
       
       sprintf(tmp_string, "%s_video_%02d.mov", prefix, i+1);
       video_tracks[i].in_file = file;
       video_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
 
       if(!lqt_writes_video_compressed(video_tracks[i].out_file,
-                                      video_tracks[i].ci))
+                                      video_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Video track %d cannot be written compressed\n", i+1);
         quicktime_close(video_tracks[i].out_file);
@@ -260,6 +307,7 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
   int video_index;
   char * pos;
   lqt_file_type_t type = LQT_FILE_QT;
+  lqt_codec_info_t * codec_info;
   
   files = calloc(num_in_files, sizeof(*files));
   num_files = num_in_files;
@@ -323,7 +371,15 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         audio_index++;
         continue;
         }
-      if(!lqt_writes_audio_compressed(file, audio_tracks[audio_index].ci))
+
+      codec_info = find_audio_encoder(audio_tracks[i].ci->id);
+      if(!codec_info)
+        {
+        fprintf(stderr, "No audio encoder found for compressed writing\n");
+        continue;
+        }
+      
+      if(!lqt_writes_audio_compressed(file, audio_tracks[audio_index].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);
@@ -347,7 +403,15 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         video_index++;
         continue;
         }
-      if(!lqt_writes_video_compressed(file, video_tracks[video_index].ci))
+
+      codec_info = find_video_encoder(video_tracks[i].ci->id);
+      if(!codec_info)
+        {
+        fprintf(stderr, "No video encoder found for compressed writing\n");
+        continue;
+        }
+
+      if(!lqt_writes_video_compressed(file, video_tracks[video_index].ci, codec_info))
         {
         fprintf(stderr, "Video track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);
@@ -429,6 +493,11 @@ int main(int argc, char ** argv)
     print_usage();
     return -1;
     }
+
+  /* Query registry */
+  
+  audio_encoders = lqt_query_registry(1, 0, 1, 0);
+  video_encoders = lqt_query_registry(0, 1, 1, 0);
   
   if(nfiles == 1)
     {
@@ -485,6 +554,9 @@ int main(int argc, char ** argv)
     free(audio_tracks);
   if(video_tracks)
     free(video_tracks);
+
+  lqt_destroy_codec_info(audio_encoders);
+  lqt_destroy_codec_info(video_encoders);
   
   return 0;
   }

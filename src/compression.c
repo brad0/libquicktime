@@ -59,11 +59,6 @@ lqt_get_audio_compression_info(quicktime_t * file, int track)
   atrack = &file->atracks[track];
   
   if(atrack->ci.id == LQT_COMPRESSION_NONE)
-    {
-    /* Try to get compression info */
-    }
-  
-  if(atrack->ci.id == LQT_COMPRESSION_NONE)
     return NULL;
   else
     return &atrack->ci;
@@ -77,14 +72,26 @@ lqt_get_video_compression_info(quicktime_t * file, int track)
   vtrack = &file->vtracks[track];
   
   if(vtrack->ci.id == LQT_COMPRESSION_NONE)
-    {
-    /* Try to get compression info */
-    }
-  
-  if(vtrack->ci.id == LQT_COMPRESSION_NONE)
     return NULL;
   else
+    {
+    if(!vtrack->ci.width)
+      {
+      vtrack->ci.width = quicktime_video_width(file, track);
+      vtrack->ci.height = quicktime_video_height(file, track);
+      lqt_get_pixel_aspect(file, track,
+                           &vtrack->ci.pixel_width,
+                           &vtrack->ci.pixel_height);
+      vtrack->ci.colormodel = vtrack->stream_cmodel;
+      vtrack->ci.video_timescale = lqt_video_time_scale(file, track);
+
+      if(vtrack->track->mdia.minf.stbl.stss.total_entries)
+        vtrack->ci.flags |= LQT_COMPRESSION_HAS_P_FRAMES;
+      if(vtrack->track->mdia.minf.stbl.ctts.total_entries)
+        vtrack->ci.flags |= LQT_COMPRESSION_HAS_B_FRAMES;
+      }
     return &vtrack->ci;
+    }
   }
 
 int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
@@ -100,15 +107,27 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
 /* Writing */
 
 int lqt_writes_audio_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * info)
+                                const lqt_compression_info_t * ci,
+                                lqt_codec_info_t * codec_info)
   {
+  int ret;
+  quicktime_codec_t * codec;
+
+  if(codec_info->compression_id != ci->id)
+    return 0;
   
   return 0;
   }
 
 int lqt_writes_video_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * info)
+                                const lqt_compression_info_t * ci,
+                                lqt_codec_info_t * codec_info)
   {
+  int ret;
+  quicktime_codec_t * codec;
+  
+  if(codec_info->compression_id != ci->id)
+    return 0;
   return 0;
   }
 
@@ -182,12 +201,31 @@ lqt_compression_id_t lqt_compression_id_from_string(const char * str)
     }
   return LQT_COMPRESSION_NONE;
   }
-#if 0
+
 void lqt_compression_info_dump(const lqt_compression_info_t * ci)
   {
-  lqt_dump("Compression info\n");
-  lqt_dump("  Codec: %s\n", lqt_compression_id_to_string(ci->id));
-  lqt_dump("  Bitrate: %d\n", ci->bitrate);
-  
+  int is_video = (ci->id >= 0x10000);
+
+  lqt_dump("%s compression info\n", (is_video ? "Video" : "Audio"));
+  lqt_dump("  Codec:       %s\n", lqt_compression_id_to_string(ci->id));
+
+  if(ci->bitrate)
+    {
+    if(ci->bitrate < 0)
+      lqt_dump("  Bitrate:     Variable\n");
+    else
+      lqt_dump("  Bitrate:     %d\n", ci->bitrate);
+    }
+  if(is_video)
+    {
+    lqt_dump("  Image size:  %d x %d\n", ci->width, ci->height);
+    lqt_dump("  Pixel size:  %d x %d\n", ci->pixel_width, ci->pixel_height);
+    lqt_dump("  Colormodel:  %s\n", lqt_colormodel_to_string(ci->colormodel));
+    lqt_dump("  Frame types: I");
+    if(ci->flags & LQT_COMPRESSION_HAS_P_FRAMES)
+      lqt_dump(", P");
+    if(ci->flags & LQT_COMPRESSION_HAS_B_FRAMES)
+      lqt_dump(", B");
+    lqt_dump("\n");
+    }
   }
-#endif

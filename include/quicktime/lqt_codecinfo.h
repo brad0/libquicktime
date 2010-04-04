@@ -184,7 +184,7 @@ typedef struct
     \brief Structure describing a codec
 */
   
-typedef struct lqt_codec_info_s
+struct lqt_codec_info_s
   {
   int compatibility_flags; /*!< Compatibility flags (not used right now) */
 
@@ -230,7 +230,7 @@ typedef struct lqt_codec_info_s
   lqt_compression_id_t compression_id; /*!< Supported compression ID */
   
   struct lqt_codec_info_s * next;   /*!< For chaining (used internally only) */
-  } lqt_codec_info_t;
+  };
 
 
 /* Global Entry points */

@@ -1641,6 +1641,8 @@ struct quicktime_codec_s
   /* Resynchronize the codec after seeking */
   void (*resync)(quicktime_t *file, int track);
 
+  int (*writes_compressed)(quicktime_t * file, const lqt_compression_info_t * ci);
+  
   void *priv;
 
   /* The followings are for libquicktime only */

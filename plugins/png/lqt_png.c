@@ -58,6 +58,7 @@ static lqt_codec_info_static_t codec_info_pngalpha =
   .encoding_parameters = encode_parameters_png,
   .decoding_parameters = (lqt_parameter_info_static_t*)0,
   .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_CODEC_OBSOLETE,
+  .compression_id      = LQT_COMPRESSION_PNG,
   };
 
 static lqt_codec_info_static_t codec_info_png =
@@ -74,6 +75,7 @@ static lqt_codec_info_static_t codec_info_png =
   .encoding_colormodels = (int[]) { BC_RGB888,
                                     BC_RGBA8888,
                                     LQT_COLORMODEL_NONE},
+  .compression_id      = LQT_COMPRESSION_PNG,
   };
 
 /* These are called from the plugin loader */

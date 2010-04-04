@@ -36,6 +36,9 @@ extern "C" {
   
 /* Some public enums needed by most subsequent headers */
 
+typedef struct lqt_codec_info_s lqt_codec_info_t;
+
+  
 /**
  * @file quicktime.h
  * Public api header for the quicktime4linux compatibility layer.
