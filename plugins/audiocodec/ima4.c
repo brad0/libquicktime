@@ -208,8 +208,8 @@ static void ima4_encode_block(quicktime_audio_map_t *atrack, unsigned char *outp
 
 	for(i = 0; i < SAMPLES_PER_BLOCK; i++)
 	{
-		ima4_encode_sample(&(codec->last_samples[channel]), 
-							&(codec->last_indexes[channel]), 
+		ima4_encode_sample(&codec->last_samples[channel], 
+							&codec->last_indexes[channel], 
 							&nibble, 
 							*input);
 
@@ -290,8 +290,8 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
           
           codec->chunk_buffer_size =
             lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                                 &(codec->chunk_buffer),
-                                 &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
+                                 &codec->chunk_buffer,
+                                 &codec->chunk_buffer_alloc, &codec->chunk_samples);
           
           if(codec->chunk_buffer_size <= 0)
             return 0;
@@ -314,8 +314,8 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
             codec->chunk_buffer_size =
               lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                                   &(codec->chunk_buffer),
-                                   &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
+                                   &codec->chunk_buffer,
+                                   &codec->chunk_buffer_alloc, &codec->chunk_samples);
             if(codec->chunk_buffer_size <= 0)
               return 0;
             codec->chunk_buffer_ptr = codec->chunk_buffer;
@@ -347,7 +347,10 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
           for(i = 0; i < file->atracks[track].channels; i++)
             {
-            ima4_decode_block(&(file->atracks[track]), codec->sample_buffer + i, codec->chunk_buffer_ptr, file->atracks[track].channels);
+            ima4_decode_block(&file->atracks[track],
+                              codec->sample_buffer + i,
+                              codec->chunk_buffer_ptr,
+                              file->atracks[track].channels);
             codec->chunk_buffer_ptr += BLOCK_SIZE;
             codec->chunk_buffer_size -= BLOCK_SIZE;
             }
@@ -374,8 +377,8 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
               codec->chunk_buffer_size =
                 lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                                     &(codec->chunk_buffer),
-                                     &(codec->chunk_buffer_alloc), &(codec->chunk_samples));
+                                     &codec->chunk_buffer,
+                                     &codec->chunk_buffer_alloc, &codec->chunk_samples);
               
               if(codec->chunk_buffer_size <= 0)
                 break;
@@ -386,7 +389,7 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
             for(i = 0; i < file->atracks[track].channels; i++)
               {
-              ima4_decode_block(&(file->atracks[track]),
+              ima4_decode_block(&file->atracks[track],
                                 codec->sample_buffer + i,
                                 codec->chunk_buffer_ptr, file->atracks[track].channels);
               codec->chunk_buffer_ptr += BLOCK_SIZE;
@@ -426,7 +429,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   int result = 0;
   int64_t j;
   int64_t chunk_bytes;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   int16_t *input_ptr, *input;
@@ -531,7 +534,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
 static int flush(quicktime_t *file, int track)
   {
   quicktime_atom_t chunk_atom;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   

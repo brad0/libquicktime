@@ -401,7 +401,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   int i, imax;
   int result = 0;
   int buffer_size;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   int height;
   int width;
@@ -478,10 +478,10 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       }
     /* Add palette info */
     
-    ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
+    ctab = &trak->mdia.minf.stbl.stsd.table->ctab;
     if(ctab->size)
       {
-      codec->avctx->palctrl = &(codec->palette);
+      codec->avctx->palctrl = &codec->palette;
       codec->palette.palette_changed = 1;
       imax =
         (ctab->size > AVPALETTE_COUNT)
@@ -664,7 +664,7 @@ static void resync_ffmpeg(quicktime_t *file, int track)
   {
   int64_t keyframe, frame;
   int buffer_size, got_pic;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   
   /* Forget about previously decoded frame */
@@ -731,7 +731,7 @@ static int set_pass_ffmpeg(quicktime_t *file,
 
 static int init_imx_encoder(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   int height = trak->tkhd.track_height;
   char *compressor = trak->mdia.minf.stbl.stsd.table[0].format;
@@ -800,7 +800,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   int result = 0;
   int pixel_width, pixel_height;
   int bytes_encoded;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
@@ -892,7 +892,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
           0, /* Decoder version */
           0xa, /* Level */
           0 /* Profile */ };
-      quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+      quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
                                     "d263", d263_data,
                                     sizeof(d263_data));
       strncpy(trak->mdia.minf.stbl.stsd.table[0].format,
@@ -1053,7 +1053,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     {
     if(codec->encoder->id == CODEC_ID_FFVHUFF)
       {
-      quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+      quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
                                     "glbl",
                                     codec->avctx->extradata, codec->avctx->extradata_size );
       }
@@ -1093,7 +1093,7 @@ static int flush(quicktime_t *file, int track)
   {
         int result = 0;
 	int bytes_encoded;
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+	quicktime_video_map_t *vtrack = &file->vtracks[track];
 	quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
 
         /* Do nothing if we didn't encode anything yet */

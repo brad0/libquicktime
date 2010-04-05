@@ -237,7 +237,7 @@ void quicktime_write_iods(quicktime_t *file, quicktime_moov_t * moov)
   {
   quicktime_atom_t atom;
   int i;
-  quicktime_iods_t * iods = &(moov->iods);
+  quicktime_iods_t * iods = &moov->iods;
   
   quicktime_atom_write_header(file, &atom, "iods");
 

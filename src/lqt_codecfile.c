@@ -317,7 +317,7 @@ static void read_parameter_info(FILE * input,
     else if(CHECK_KEYWORD(value_key))
       {
       pos = line + strlen(value_key);
-      read_parameter_value(pos, &(info->val_default), info->type);
+      read_parameter_value(pos, &info->val_default, info->type);
       }
 
     else if(CHECK_KEYWORD(min_value_key))
@@ -432,7 +432,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
 
     else if(CHECK_KEYWORD(compression_id_key))
       {
-      pos = line + strlen(type_key);
+      pos = line + strlen(compression_id_key);
       codec->compression_id =
         lqt_compression_id_from_string(pos);
       }
@@ -634,7 +634,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
     else if(CHECK_KEYWORD(begin_parameter_e_key))
       {
       read_parameter_info(input,
-                          &(codec->encoding_parameters[encoding_parameters_read]),
+                          &codec->encoding_parameters[encoding_parameters_read],
                           line);
       encoding_parameters_read++;
       }
@@ -642,7 +642,7 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
     else if(CHECK_KEYWORD(begin_parameter_d_key))
       {
       read_parameter_info(input,
-                     &(codec->decoding_parameters[decoding_parameters_read]),
+                     &codec->decoding_parameters[decoding_parameters_read],
                      line);
       decoding_parameters_read++;
       }
@@ -920,7 +920,7 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
 
   for(i = 0; i < info->num_encoding_parameters; i++)
     {
-    write_parameter_info(output, &(info->encoding_parameters[i]), 1);
+    write_parameter_info(output, &info->encoding_parameters[i], 1);
     }
 
   fprintf(output, "%s%d\n", num_decoding_parameters_key,
@@ -928,7 +928,7 @@ static int write_codec_info(const lqt_codec_info_t * info, FILE * output)
     
   for(i = 0; i < info->num_decoding_parameters; i++)
     {
-    write_parameter_info(output, &(info->decoding_parameters[i]), 0);
+    write_parameter_info(output, &info->decoding_parameters[i], 0);
     }
   
   if((info->type == LQT_CODEC_VIDEO) &&

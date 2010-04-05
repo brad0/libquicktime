@@ -79,7 +79,7 @@ int lqt_text_tracks(quicktime_t * file)
   quicktime_minf_t *minf;
   for(i = 0; i < file->moov.total_tracks; i++)
     {
-    minf = &(file->moov.trak[i]->mdia.minf);
+    minf = &file->moov.trak[i]->mdia.minf;
     if(minf->is_text)
       result++;
     }
@@ -219,10 +219,10 @@ void lqt_set_text_time(quicktime_t * file, int track, int64_t time)
   quicktime_trak_t * trak = ttrack->track;
     
   file->ttracks[track].current_position =
-    quicktime_time_to_sample(&(trak->mdia.minf.stbl.stts),
-                             &(time),
-                             &(stts_index),
-                             &(stts_count));
+    quicktime_time_to_sample(&trak->mdia.minf.stbl.stts,
+                             &time,
+                             &stts_index,
+                             &stts_count);
   
   }
 
@@ -233,7 +233,7 @@ int lqt_add_text_track(quicktime_t * file, int timescale)
   quicktime_trak_t * trak;
   file->ttracks =
     realloc(file->ttracks, (file->total_ttracks+1)*sizeof(quicktime_text_map_t));
-  memset(&(file->ttracks[file->total_ttracks]), 0, sizeof(quicktime_text_map_t));
+  memset(&file->ttracks[file->total_ttracks], 0, sizeof(quicktime_text_map_t));
   
   trak = quicktime_add_track(file);
 
@@ -245,7 +245,7 @@ int lqt_add_text_track(quicktime_t * file, int timescale)
     lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
             "Text track not supported for this file");
 
-  lqt_init_text_map(file, &(file->ttracks[file->total_ttracks]),
+  lqt_init_text_map(file, &file->ttracks[file->total_ttracks],
                     trak, 1);
   file->total_ttracks++;
   return 0;

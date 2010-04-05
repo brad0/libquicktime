@@ -165,7 +165,7 @@ static int next_chunk(quicktime_t * file, int track)
   uint8_t * header;
   uint32_t header_len;
 
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
 
   if(!codec->header_read) /* Try OVHS atom */
@@ -192,8 +192,8 @@ static int next_chunk(quicktime_t * file, int track)
     for(i = 0; i < num_packets; i++)
       {
       chunk_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
-                                             &(codec->chunk_buffer),
-                                             &(codec->chunk_buffer_alloc), &samples);
+                                             &codec->chunk_buffer,
+                                             &codec->chunk_buffer_alloc, &samples);
       buffer = ogg_sync_buffer(&codec->dec_oy, chunk_size);
       memcpy(buffer, codec->chunk_buffer, chunk_size);
       ogg_sync_wrote(&codec->dec_oy, chunk_size);
@@ -203,8 +203,8 @@ static int next_chunk(quicktime_t * file, int track)
     {
     chunk_size = lqt_read_audio_chunk(file,
                                       track, track_map->cur_chunk,
-                                      &(codec->chunk_buffer),
-                                      &(codec->chunk_buffer_alloc), (int*)0);
+                                      &codec->chunk_buffer,
+                                      &codec->chunk_buffer_alloc, (int*)0);
     if(chunk_size <= 0)
       {
       return 0;
@@ -222,7 +222,7 @@ static int next_chunk(quicktime_t * file, int track)
 
 static int next_page(quicktime_t * file, int track)
   {
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   int result = 0;
   
@@ -253,7 +253,7 @@ static int next_page(quicktime_t * file, int track)
 
 static int next_packet(quicktime_t * file, int track)
   {
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
 
   int result = 0;
@@ -297,12 +297,12 @@ static int decode_frame(quicktime_t * file, int track)
   int i;
   float ** channels;
   int samples_decoded = 0;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
 
   while(1)
     {
-    samples_decoded = vorbis_synthesis_pcmout(&codec->dec_vd, &(channels));
+    samples_decoded = vorbis_synthesis_pcmout(&codec->dec_vd, &channels);
 
     if(samples_decoded > 0)
       break;
@@ -325,7 +325,7 @@ static int decode_frame(quicktime_t * file, int track)
                                              file->atracks[track].channels,
                                              codec->sample_buffer_end -
                                              codec->sample_buffer_start + samples_decoded,
-                                             &(codec->sample_buffer_alloc));
+                                             &codec->sample_buffer_alloc);
 
   for(i = 0; i < track_map->channels; i++)
     {
@@ -345,7 +345,7 @@ static int decode(quicktime_t *file,
   {
   int i, j;
   int64_t chunk_sample; /* For seeking only */
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   //  int64_t total_samples;
   int samples_decoded;
@@ -422,12 +422,12 @@ static int decode(quicktime_t *file,
 
     if(lqt_audio_is_vbr(file, track))
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->cur_chunk),
+                              &track_map->cur_chunk,
                               track_map->track,
                               track_map->current_position);
     else
       quicktime_chunk_of_sample(&chunk_sample,
-                                &(track_map->cur_chunk),
+                                &track_map->cur_chunk,
                                 track_map->track,
                                 track_map->current_position);
       
@@ -483,7 +483,7 @@ static int decode(quicktime_t *file,
       for(i = 0; i < track_map->channels; i++)
         {
         memmove(codec->sample_buffer[i],
-                &(codec->sample_buffer[i][samples_to_skip]),
+                &codec->sample_buffer[i][samples_to_skip],
                 samples_to_move * sizeof(float));
         }
       }
@@ -529,7 +529,7 @@ static int decode(quicktime_t *file,
 
 static int flush_header(quicktime_t * file, int track)
   {
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   while(ogg_stream_flush(&codec->enc_os, &codec->enc_og))
     {
@@ -561,7 +561,7 @@ static int flush_data(quicktime_t * file, int track)
   {
   int64_t new_encoded_samples;
   int result = 0;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_trak_t *trak = track_map->track;
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   
@@ -620,7 +620,7 @@ static int flush_data(quicktime_t * file, int track)
 
 static void flush_audio(quicktime_t * file, int track)
   {
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   
   float ** output;
@@ -644,7 +644,7 @@ static int encode(quicktime_t *file,
   int i, j;
   int samples_copied, samples_to_copy;
   int result = 0;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_trak_t *trak = track_map->track;
   quicktime_vorbis_codec_t *codec = track_map->codec->priv;
   int samplerate = track_map->samplerate;
@@ -759,7 +759,7 @@ static int set_parameter(quicktime_t *file,
 		const char *key, 
 		const void *value)
 {
-	quicktime_audio_map_t *atrack = &(file->atracks[track]);
+	quicktime_audio_map_t *atrack = &file->atracks[track];
 	quicktime_vorbis_codec_t *codec = atrack->codec->priv;
 
 	if(!strcasecmp(key, "vorbis_vbr"))
@@ -779,7 +779,7 @@ static int set_parameter(quicktime_t *file,
 
 static int flush(quicktime_t *file, int track)
 {
-	quicktime_audio_map_t *track_map = &(file->atracks[track]);
+	quicktime_audio_map_t *track_map = &file->atracks[track];
 	quicktime_vorbis_codec_t *codec = track_map->codec->priv;
 	quicktime_trak_t *trak = track_map->track;
 

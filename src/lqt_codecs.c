@@ -301,8 +301,8 @@ static void set_default_rowspan(quicktime_t *file, int track)
 
   lqt_get_default_rowspan(file->vtracks[track].io_cmodel,
                           quicktime_video_width(file, track),
-                          &(file->vtracks[track].io_row_span),
-                          &(file->vtracks[track].io_row_span_uv));
+                          &file->vtracks[track].io_row_span,
+                          &file->vtracks[track].io_row_span_uv);
   }
 
 /*
@@ -326,8 +326,8 @@ int lqt_decode_video(quicktime_t *file,
       {
       file->vtracks[track].temp_frame =
         lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
-                       &(file->vtracks[track].stream_row_span),
-                       &(file->vtracks[track].stream_row_span_uv));
+                       &file->vtracks[track].stream_row_span,
+                       &file->vtracks[track].stream_row_span_uv);
       }
     result =
       file->vtracks[track].codec->decode_video(file,
@@ -357,8 +357,8 @@ int lqt_decode_video(quicktime_t *file,
     result = file->vtracks[track].codec->decode_video(file, row_pointers, track);
           
     }
-        
-  lqt_update_frame_position(&(file->vtracks[track]));
+  
+  lqt_update_frame_position(&file->vtracks[track]);
   return result;
   }
 
@@ -399,8 +399,8 @@ long quicktime_decode_scaled(quicktime_t *file,
     {
     file->vtracks[track].temp_frame =
       lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
-                     &(file->vtracks[track].stream_row_span),
-                     &(file->vtracks[track].stream_row_span_uv));
+                     &file->vtracks[track].stream_row_span,
+                     &file->vtracks[track].stream_row_span_uv);
     }
   result =
     file->vtracks[track].codec->decode_video(file,
@@ -421,7 +421,7 @@ long quicktime_decode_scaled(quicktime_t *file,
                   file->vtracks[track].stream_row_span_uv, /* Chroma rowspan */
                   file->vtracks[track].io_row_span_uv      /* Chroma rowspan */);
         
-  lqt_update_frame_position(&(file->vtracks[track]));
+  lqt_update_frame_position(&file->vtracks[track]);
   return result;
   }
 
@@ -492,8 +492,8 @@ static int do_encode_video(quicktime_t *file,
       {
       file->vtracks[track].temp_frame =
         lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
-                       &(file->vtracks[track].stream_row_span),
-                       &(file->vtracks[track].stream_row_span_uv));
+                       &file->vtracks[track].stream_row_span,
+                       &file->vtracks[track].stream_row_span_uv);
       }
     cmodel_transfer(file->vtracks[track].temp_frame, //    unsigned char **output_rows, /* Leave NULL if non existent */
                     row_pointers,                    //    unsigned char **input_rows,
@@ -715,7 +715,6 @@ int lqt_encode_video_d(quicktime_t *file,
 
   /* Must set valid timestamp for encoders */
   vtrack->timestamp = time;
-  
   lqt_video_append_timestamp(file, track, time, duration);
   
   result = do_encode_video(file, row_pointers, track);
@@ -779,7 +778,7 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
   {
   int result;
   quicktime_audio_map_t * atrack;
-  atrack = &(file->atracks[track]);
+  atrack = &file->atracks[track];
   result = atrack->codec->decode_audio(file, output, 
                                                                samples,
                                                                track);
@@ -794,7 +793,7 @@ int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int tra
   quicktime_audio_map_t * atrack;
   if(!samples)
     return 0;
-  atrack = &(file->atracks[track]);
+  atrack = &file->atracks[track];
   start_encoding(file);
   file->atracks[track].current_position += samples;
   result = atrack->codec->encode_audio(file, input, 
@@ -816,7 +815,7 @@ static int decode_audio_old(quicktime_t *file,
   {
   int result;
   quicktime_audio_map_t * atrack;
-  atrack = &(file->atracks[track]);
+  atrack = &file->atracks[track];
 
   if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
     atrack->codec->decode_audio(file, (void*)0, 
@@ -978,7 +977,7 @@ static int encode_audio_old(quicktime_t *file,
                             int track)
   {
   quicktime_audio_map_t * atrack;
-  atrack = &(file->atracks[track]);
+  atrack = &file->atracks[track];
   start_encoding(file);
   
   if(!samples)

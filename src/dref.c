@@ -104,7 +104,7 @@ void quicktime_dref_init_all(quicktime_dref_t *dref, lqt_file_type_t type)
 	{
 		dref->total_entries = 1;
 		dref->table = (quicktime_dref_table_t *)malloc(sizeof(quicktime_dref_table_t) * dref->total_entries);
-		quicktime_dref_table_init(&(dref->table[0]), type);
+		quicktime_dref_table_init(&dref->table[0], type);
 	}
 }
 
@@ -114,7 +114,7 @@ void quicktime_dref_delete(quicktime_dref_t *dref)
 	{
 		int i;
 		for(i = 0; i < dref->total_entries; i++)
-			quicktime_dref_table_delete(&(dref->table[i]));
+			quicktime_dref_table_delete(&dref->table[i]);
 		free(dref->table);
 	}
 	dref->total_entries = 0;
@@ -129,7 +129,7 @@ void quicktime_dref_dump(quicktime_dref_t *dref)
 	lqt_dump("      flags %ld\n", dref->flags);
 	for(i = 0; i < dref->total_entries; i++)
 	{
-		quicktime_dref_table_dump(&(dref->table[i]));
+		quicktime_dref_table_dump(&dref->table[i]);
 	}
 }
 
@@ -143,8 +143,8 @@ void quicktime_read_dref(quicktime_t *file, quicktime_dref_t *dref)
 	dref->table = (quicktime_dref_table_t*)malloc(sizeof(quicktime_dref_table_t) * dref->total_entries);
 	for(i = 0; i < dref->total_entries; i++)
 	{
-		quicktime_dref_table_init(&(dref->table[i]), file->file_type);
-		quicktime_read_dref_table(file, &(dref->table[i]));
+		quicktime_dref_table_init(&dref->table[i], file->file_type);
+		quicktime_read_dref_table(file, &dref->table[i]);
 	}
 }
 
@@ -160,7 +160,7 @@ void quicktime_write_dref(quicktime_t *file, quicktime_dref_t *dref)
 
 	for(i = 0; i < dref->total_entries; i++)
 	{
-		quicktime_write_dref_table(file, &(dref->table[i]));
+		quicktime_write_dref_table(file, &dref->table[i]);
 	}
 	quicktime_atom_write_footer(file, &atom);
 }

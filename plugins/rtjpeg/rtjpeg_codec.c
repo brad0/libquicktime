@@ -53,7 +53,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   int result = 0;
   int t;
   int buffer_size;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   //	quicktime_trak_t *trak = vtrack->track;
   quicktime_rtjpeg_codec_t *codec = vtrack->codec->priv;
 
@@ -75,8 +75,8 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   RTjpeg_set_format(codec->decompress_struct, &t);
 
   codec->rows = lqt_rows_alloc(codec->jpeg_width, codec->jpeg_height,
-                               vtrack->stream_cmodel, &(codec->rowspan),
-                               &(codec->rowspan_uv));
+                               vtrack->stream_cmodel, &codec->rowspan,
+                               &codec->rowspan_uv);
                 
   }
 
@@ -103,7 +103,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   int result = 0;
   int i;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   quicktime_rtjpeg_codec_t *codec = vtrack->codec->priv;
 
@@ -122,7 +122,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   codec->jpeg_height = BLOCK_SIZE * ((codec->qt_height + BLOCK_SIZE - 1) / (BLOCK_SIZE));
   codec->jpeg_width  = BLOCK_SIZE * ((codec->qt_width  + BLOCK_SIZE - 1) / (BLOCK_SIZE));
 
-  RTjpeg_set_size(codec->compress_struct, &(codec->jpeg_width), &(codec->jpeg_height));
+  RTjpeg_set_size(codec->compress_struct, &codec->jpeg_width, &codec->jpeg_height);
   i = codec->Q;
   i *= 255;
   i /= 100;
@@ -132,8 +132,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   RTjpeg_set_intra(codec->compress_struct, &codec->K, &codec->LQ, &codec->CQ);
 
   codec->rows = lqt_rows_alloc(codec->jpeg_width, codec->jpeg_height,
-                               vtrack->stream_cmodel, &(codec->rowspan),
-                               &(codec->rowspan_uv));
+                               vtrack->stream_cmodel, &codec->rowspan,
+                               &codec->rowspan_uv);
                 
   codec->write_buffer = malloc(codec->jpeg_width * codec->jpeg_height * 3 / 2 + 100);
   if(!codec->write_buffer)

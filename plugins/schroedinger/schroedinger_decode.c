@@ -54,7 +54,7 @@ static SchroBuffer * get_data(quicktime_t *file, int track)
   uint8_t * data;
   int size;
   SchroBuffer * ret;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
 
   if(codec->dec_eof)
@@ -109,7 +109,7 @@ static void get_format(quicktime_t *file, int track)
   {
   SchroVideoFormat * format;
 
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   quicktime_trak_t *trak = vtrack->track;
   
@@ -150,7 +150,7 @@ static void get_format(quicktime_t *file, int track)
 
 static int decode_picture(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   int state;
   SchroBuffer * buf = NULL;
@@ -237,7 +237,7 @@ static int decode_picture(quicktime_t *file, int track)
 
 static void init_decode(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
 
   /* Create stuff */
@@ -253,7 +253,7 @@ int lqt_schroedinger_decode_video(quicktime_t *file,
                                   unsigned char **row_pointers,
                                   int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
 
   if(!codec->dec)
@@ -285,7 +285,7 @@ int lqt_schroedinger_decode_video(quicktime_t *file,
 
 void lqt_schroedinger_resync(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   
   schro_decoder_reset(codec->dec);
@@ -305,7 +305,7 @@ static void copy_frame_8(quicktime_t * file,
                          int track)
   {
   uint8_t * cpy_rows[3];
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
 
   cpy_rows[0] = codec->dec_frame->components[0].data;

@@ -89,6 +89,7 @@ static lqt_codec_info_t * find_video_encoder(lqt_compression_id_t id)
   
   while(video_encoders[i])
     {
+    // fprintf(stderr, "find_video_encoder %s\n", video_encoders[i]->name);
     if(video_encoders[i]->compression_id == id)
       return video_encoders[i];
     i++;
@@ -217,8 +218,8 @@ static int init_demultiplex(char * filename)
       audio_tracks[i].in_file = file;
       audio_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
       
-      if(!lqt_writes_audio_compressed(audio_tracks[i].out_file,
-                                      audio_tracks[i].ci, codec_info))
+      if(!lqt_writes_compressed(audio_tracks[i].out_file,
+                                audio_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d cannot be written compressed\n", i+1);
         quicktime_close(audio_tracks[i].out_file);
@@ -230,7 +231,7 @@ static int init_demultiplex(char * filename)
       total_tracks++;
       
       lqt_add_audio_track_compressed(audio_tracks[i].out_file,
-                                     audio_tracks[i].ci);
+                                     audio_tracks[i].ci, codec_info);
       audio_tracks[i].in_index = i;
       audio_tracks[i].out_index = 0;
       }
@@ -260,8 +261,8 @@ static int init_demultiplex(char * filename)
       video_tracks[i].in_file = file;
       video_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
 
-      if(!lqt_writes_video_compressed(video_tracks[i].out_file,
-                                      video_tracks[i].ci, codec_info))
+      if(!lqt_writes_compressed(video_tracks[i].out_file,
+                                video_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Video track %d cannot be written compressed\n", i+1);
         quicktime_close(video_tracks[i].out_file);
@@ -273,7 +274,7 @@ static int init_demultiplex(char * filename)
       total_tracks++;
 
       lqt_add_video_track_compressed(video_tracks[i].out_file,
-                                     video_tracks[i].ci);
+                                     video_tracks[i].ci, codec_info);
       video_tracks[i].in_index = i;
       video_tracks[i].out_index = 0;
       }
@@ -379,7 +380,7 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         continue;
         }
       
-      if(!lqt_writes_audio_compressed(file, audio_tracks[audio_index].ci, codec_info))
+      if(!lqt_writes_compressed(file, audio_tracks[audio_index].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);
@@ -390,6 +391,10 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
       audio_tracks[audio_index].out_index = audio_index;
       audio_tracks[audio_index].in_file = files[i].file;
       audio_tracks[audio_index].out_file = file;
+
+      lqt_add_audio_track_compressed(audio_tracks[audio_index].out_file,
+                                     audio_tracks[audio_index].ci, codec_info);
+      
       audio_index++;
       total_tracks++;
       }
@@ -407,11 +412,12 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
       codec_info = find_video_encoder(video_tracks[i].ci->id);
       if(!codec_info)
         {
-        fprintf(stderr, "No video encoder found for compressed writing\n");
+        fprintf(stderr, "No video encoder found for compressed writing of %s\n",
+                lqt_compression_id_to_string(video_tracks[i].ci->id));
         continue;
         }
 
-      if(!lqt_writes_video_compressed(file, video_tracks[video_index].ci, codec_info))
+      if(!lqt_writes_compressed(file, video_tracks[video_index].ci, codec_info))
         {
         fprintf(stderr, "Video track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);
@@ -422,6 +428,10 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
       video_tracks[video_index].out_index = video_index;
       video_tracks[video_index].in_file = files[i].file;
       video_tracks[video_index].out_file = file;
+
+      lqt_add_video_track_compressed(video_tracks[audio_index].out_file,
+                                     video_tracks[audio_index].ci, codec_info);
+      
       video_index++;
       total_tracks++;
       

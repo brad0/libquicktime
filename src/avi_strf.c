@@ -58,7 +58,7 @@ void quicktime_read_strf_audio(quicktime_t *file,
         strf->wf.f.WAVEFORMATEXTENSIBLE.Samples.wValidBitsPerSample = quicktime_read_int16_le(file);;
         strf->wf.f.WAVEFORMATEXTENSIBLE.dwChannelMask = quicktime_read_int32_le(file);;
 
-        quicktime_GUID_read(file, &(strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat));
+        quicktime_GUID_read(file, &strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat);
         
         if((strf->wf.f.WAVEFORMATEX.cbSize > 22) &&
            (parent_atom->size >= 18 + strf->wf.f.WAVEFORMATEX.cbSize - 22))
@@ -111,7 +111,7 @@ void quicktime_write_strf_audio(quicktime_t *file,
 
       quicktime_write_int16_le(file, strf->wf.f.WAVEFORMATEXTENSIBLE.Samples.wValidBitsPerSample);
       quicktime_write_int32_le(file, strf->wf.f.WAVEFORMATEXTENSIBLE.dwChannelMask);;
-      quicktime_GUID_write(file, &(strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat));
+      quicktime_GUID_write(file, &strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat);
       break;
     }
 
@@ -163,7 +163,7 @@ void quicktime_strf_dump_audio(quicktime_strf_t *strf)
       lqt_dump("    wValidBitsPerSample: %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.Samples.wValidBitsPerSample);
       lqt_dump("    dwChannelMask:       %d\n", strf->wf.f.WAVEFORMATEXTENSIBLE.dwChannelMask);
       lqt_dump("    SubFormat:           ");
-      quicktime_GUID_dump(&(strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat));
+      quicktime_GUID_dump(&strf->wf.f.WAVEFORMATEXTENSIBLE.SubFormat);
       lqt_dump("  \n");
       break;
     }

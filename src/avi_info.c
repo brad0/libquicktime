@@ -40,7 +40,7 @@ static char * my_strdup(const char * str)
   if(!strncmp((char*)ptr, #tag, 4))             \
     { \
     info->tag = my_strdup((char*)(ptr + 8));    \
-    lqt_charset_convert(cnv, &(info->tag), -1, (int*)0); \
+    lqt_charset_convert(cnv, &info->tag, -1, (int*)0); \
     ptr += string_len + 8; \
     if(string_len % 2) \
       ptr++; \
@@ -116,7 +116,7 @@ void quicktime_init_riffinfo(quicktime_riffinfo_t *info)
 #define WS(tag) \
   if(info->tag)             \
     { \
-    lqt_charset_convert(cnv, &(info->tag), -1, (int*)0); \
+    lqt_charset_convert(cnv, &info->tag, -1, (int*)0); \
     quicktime_atom_write_header(file, &child_atom, #tag);\
     /* The trailing '\0' must be written to the file! */\
     quicktime_write_data(file, (uint8_t*)info->tag, strlen(info->tag)+1); \

@@ -95,10 +95,10 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv4_codec_t *co
 			codec->btov_tab[i] = (long)(-0.0813 * 65536 * i);
 		}
 
-		codec->vtor = &(codec->vtor_tab[128]);
-		codec->vtog = &(codec->vtog_tab[128]);
-		codec->utog = &(codec->utog_tab[128]);
-		codec->utob = &(codec->utob_tab[128]);
+		codec->vtor = &codec->vtor_tab[128];
+		codec->vtog = &codec->vtog_tab[128];
+		codec->utog = &codec->utog_tab[128];
+		codec->utob = &codec->utob_tab[128];
 		for(i = -128; i < 128; i++)
 		{
 /* decompression */
@@ -126,7 +126,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
 	int64_t bytes, in_y, out_y;
 	register int x1, x2;
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+	quicktime_video_map_t *vtrack = &file->vtracks[track];
 	quicktime_yuv4_codec_t *codec = vtrack->codec->priv;
 	int width = vtrack->track->tkhd.track_width;
 	int height = vtrack->track->tkhd.track_height;
@@ -251,7 +251,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+	quicktime_video_map_t *vtrack = &file->vtracks[track];
 	quicktime_yuv4_codec_t *codec = vtrack->codec->priv;
 	int result = 0;
 	int width = vtrack->track->tkhd.track_width;

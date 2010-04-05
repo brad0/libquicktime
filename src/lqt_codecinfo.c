@@ -167,14 +167,14 @@ void lqt_codec_info_destroy_single(lqt_codec_info_t * ptr)
   if(ptr->encoding_parameters)
     {
     for(i = 0; i < ptr->num_encoding_parameters; i++)
-      destroy_parameter_info(&(ptr->encoding_parameters[i]));
+      destroy_parameter_info(&ptr->encoding_parameters[i]);
     free(ptr->encoding_parameters);
     }
 
   if(ptr->decoding_parameters)
     {
     for(i = 0; i < ptr->num_decoding_parameters; i++)
-      destroy_parameter_info(&(ptr->decoding_parameters[i]));
+      destroy_parameter_info(&ptr->decoding_parameters[i]);
     free(ptr->decoding_parameters);
     }
   if(ptr->image_sizes)
@@ -259,8 +259,8 @@ copy_parameter_info(lqt_parameter_info_t * ret,
       break;
     }
 
-  copy_parameter_value(&(ret->val_default),
-                       &(info->val_default),
+  copy_parameter_value(&ret->val_default,
+                       &info->val_default,
                        info->type);
 
   }
@@ -342,8 +342,8 @@ lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info)
       calloc(ret->num_encoding_parameters+1, sizeof(lqt_parameter_info_t));
 
     for(i = 0; i < ret->num_encoding_parameters; i++)
-      copy_parameter_info(&(ret->encoding_parameters[i]),
-                          &(info->encoding_parameters[i]));
+      copy_parameter_info(&ret->encoding_parameters[i],
+                          &info->encoding_parameters[i]);
     }
 
   ret->num_decoding_parameters = info->num_decoding_parameters;
@@ -353,8 +353,8 @@ lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info)
       calloc(ret->num_decoding_parameters, sizeof(lqt_parameter_info_t));
 
     for(i = 0; i < ret->num_decoding_parameters; i++)
-      copy_parameter_info(&(ret->decoding_parameters[i]),
-                          &(info->decoding_parameters[i]));
+      copy_parameter_info(&ret->decoding_parameters[i],
+                          &info->decoding_parameters[i]);
     }
   ret->compression_id = info->compression_id;
   return ret;
@@ -1050,8 +1050,8 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
     for(i = 0; i < ret->num_encoding_parameters; i++)
       {
       /* Copy parameter info */
-      create_parameter_info(&(ret->encoding_parameters[i]),
-                            &(template->encoding_parameters[i]));
+      create_parameter_info(&ret->encoding_parameters[i],
+                            &template->encoding_parameters[i]);
       }
     }
   else
@@ -1079,8 +1079,8 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
     for(i = 0; i < ret->num_decoding_parameters; i++)
       {
       /* Copy parameter info */
-      create_parameter_info(&(ret->decoding_parameters[i]),
-                            &(template->decoding_parameters[i]));
+      create_parameter_info(&ret->decoding_parameters[i],
+                            &template->decoding_parameters[i]);
       }
     }
   else
@@ -1179,7 +1179,7 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
   else
     {
     for(i = 0; i < info->num_encoding_parameters; i++)
-      dump_codec_parameter(&(info->encoding_parameters[i]));
+      dump_codec_parameter(&info->encoding_parameters[i]);
     }
 
   if(!info->num_encoding_parameters)
@@ -1189,7 +1189,7 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info)
   else
     {
     for(i = 0; i < info->num_decoding_parameters; i++)
-      dump_codec_parameter(&(info->decoding_parameters[i]));
+      dump_codec_parameter(&info->decoding_parameters[i]);
     }
   lqt_dump("Module filename: %s\nIndex inside module: %d\n",
           info->module_filename, info->module_index);
@@ -1667,8 +1667,8 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
       if(!strcmp(codec_info->encoding_parameters[i].name, 
                  info_from_module->encoding_parameters[i].name))
         {
-        copy_parameter_value(&(codec_info->encoding_parameters[i].val_default),
-                             &(info_from_module->encoding_parameters[i].val_default),
+        copy_parameter_value(&codec_info->encoding_parameters[i].val_default,
+                             &info_from_module->encoding_parameters[i].val_default,
                              codec_info->encoding_parameters[i].type);
 
         }
@@ -1685,8 +1685,8 @@ void lqt_restore_default_parameters(lqt_codec_info_t * codec_info,
       if(!strcmp(codec_info->decoding_parameters[i].name, 
                  info_from_module->decoding_parameters[i].name))
         {
-        copy_parameter_value(&(codec_info->decoding_parameters[i].val_default),
-                             &(info_from_module->decoding_parameters[i].val_default),
+        copy_parameter_value(&codec_info->decoding_parameters[i].val_default,
+                             &info_from_module->decoding_parameters[i].val_default,
                              codec_info->decoding_parameters[i].type);
 
         }

@@ -96,7 +96,7 @@ static void flush_function(png_structp png_ptr)
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   int result = 0;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   png_structp png_ptr;
   png_infop info_ptr;
   png_infop end_info = 0;	
@@ -135,7 +135,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   int result = 0;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   quicktime_png_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
@@ -196,6 +196,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   result = !quicktime_write_data(file, 
                                  codec->buffer, 
                                  codec->buffer_size);
+
   lqt_write_frame_footer(file, track);
   return result;
   }

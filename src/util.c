@@ -222,7 +222,7 @@ int quicktime_read_data(quicktime_t *file, uint8_t *data, int64_t size)
         if(fragment_start + fragment_len > file->preload_size)
           fragment_len = file->preload_size - fragment_start;
         quicktime_fseek(file, file->preload_end);
-        result = fread(&(file->preload_buffer[fragment_start]),
+        result = fread(&file->preload_buffer[fragment_start],
                        fragment_len, 1, file->stream);
 
         if(result < fragment_len)

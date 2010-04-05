@@ -77,7 +77,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     int i, j;
     int64_t bytes;
     int result = 0;
-    quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+    quicktime_video_map_t *vtrack = &file->vtracks[track];
     quicktime_v210_codec_t *codec = vtrack->codec->priv;
     int width = vtrack->track->tkhd.track_width;
     int height = vtrack->track->tkhd.track_height;
@@ -162,7 +162,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     {
-    quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+    quicktime_video_map_t *vtrack = &file->vtracks[track];
     quicktime_v210_codec_t *codec = vtrack->codec->priv;
     int width = vtrack->track->tkhd.track_width;
     int height = vtrack->track->tkhd.track_height;

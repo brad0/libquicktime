@@ -42,7 +42,7 @@ int quicktime_tkhd_init(quicktime_tkhd_t *tkhd, lqt_file_type_t type)
 	tkhd->alternate_group = 0;
 	tkhd->volume = 1.0;
 	tkhd->reserved3 = 0;
-	quicktime_matrix_init(&(tkhd->matrix));
+	quicktime_matrix_init(&tkhd->matrix);
 	tkhd->track_width = 0;
 	tkhd->track_height = 0;
 	return 0;
@@ -72,7 +72,7 @@ void quicktime_tkhd_dump(quicktime_tkhd_t *tkhd)
 	lqt_dump("   alternate_group %d\n", tkhd->alternate_group);
 	lqt_dump("   volume %f\n", tkhd->volume);
 	lqt_dump("   reserved3 %ld\n", tkhd->reserved3);
-	quicktime_matrix_dump(&(tkhd->matrix));
+	quicktime_matrix_dump(&tkhd->matrix);
 	lqt_dump("   track_width %f\n", tkhd->track_width);
 	lqt_dump("   track_height %f\n", tkhd->track_height);
 }
@@ -103,7 +103,7 @@ void quicktime_read_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 	tkhd->alternate_group = quicktime_read_int16(file);
 	tkhd->volume = quicktime_read_fixed16(file);
 	tkhd->reserved3 = quicktime_read_int16(file);
-	quicktime_read_matrix(file, &(tkhd->matrix));
+	quicktime_read_matrix(file, &tkhd->matrix);
 	tkhd->track_width = quicktime_read_fixed32(file);
 	tkhd->track_height = quicktime_read_fixed32(file);
 }
@@ -135,7 +135,7 @@ void quicktime_write_tkhd(quicktime_t *file, quicktime_tkhd_t *tkhd)
 	quicktime_write_int16(file, tkhd->alternate_group);
 	quicktime_write_fixed16(file, tkhd->volume);
 	quicktime_write_int16(file, tkhd->reserved3);
-	quicktime_write_matrix(file, &(tkhd->matrix));
+	quicktime_write_matrix(file, &tkhd->matrix);
  	quicktime_write_fixed32(file, tkhd->track_width);
  	quicktime_write_fixed32(file, tkhd->track_height);
 	quicktime_atom_write_footer(file, &atom);

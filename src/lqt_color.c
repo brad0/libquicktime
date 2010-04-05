@@ -482,8 +482,8 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
 
     video_buffer    = malloc(3 * sizeof(unsigned char*));
     video_buffer[0] = malloc(y_size + 2 * uv_size);
-    video_buffer[1] = &(video_buffer[0][y_size]);
-    video_buffer[2] = &(video_buffer[0][y_size+uv_size]);
+    video_buffer[1] = &video_buffer[0][y_size];
+    video_buffer[2] = &video_buffer[0][y_size+uv_size];
     }
   else
     {
@@ -494,7 +494,7 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
         
     video_buffer[0] = malloc(height * bytes_per_line);
     for(i = 1; i < height; i++)
-      video_buffer[i] = &(video_buffer[0][i*bytes_per_line]);
+      video_buffer[i] = &video_buffer[0][i*bytes_per_line];
     
     }
   return video_buffer;

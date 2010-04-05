@@ -886,7 +886,7 @@ void quicktime_get_chan(quicktime_audio_map_t * atrack)
   uint32_t mask;
   quicktime_chan_t * chan;
   const channel_label_t * channel_labels;
-  chan = &(atrack->track->mdia.minf.stbl.stsd.table[0].chan);
+  chan = &atrack->track->mdia.minf.stbl.stsd.table[0].chan;
 
   if(chan->mChannelLayoutTag == CHANNEL_LAYOUT_UseChannelDescriptions)
     {
@@ -986,7 +986,7 @@ void quicktime_set_chan(quicktime_audio_map_t * atrack)
   if(!atrack->channel_setup)
     return;
 
-  chan = &(atrack->track->mdia.minf.stbl.stsd.table[0].chan);
+  chan = &atrack->track->mdia.minf.stbl.stsd.table[0].chan;
 
   /* Search for a equal channel setup */
   for(i = 0; i < sizeof(channel_locations) / sizeof(channel_locations[0]); i++)

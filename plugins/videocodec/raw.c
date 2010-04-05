@@ -238,7 +238,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
     return 0;
     }
         
-  ctab = &(trak->mdia.minf.stbl.stsd.table->ctab);
+  ctab = &trak->mdia.minf.stbl.stsd.table->ctab;
                 
         
   if(!codec->scanline_func)
@@ -342,7 +342,7 @@ static int quicktime_encode_raw(quicktime_t *file,
   int i, j;
   uint8_t * in_ptr, *out_ptr;
   uint8_t padd = 0;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   int result = 0;
   int height = trak->tkhd.track_height;

@@ -60,7 +60,7 @@ void quicktime_update_ixtable(quicktime_t *file,
 	int64_t offset,
 	int size)
 {
-        quicktime_indx_t *indx = &(trak->strl->indx);
+        quicktime_indx_t *indx = &trak->strl->indx;
         
         quicktime_ix_t *ix = indx->table[indx->table_size-1].ix;
         quicktime_ixtable_t *ix_table;
@@ -100,7 +100,7 @@ void quicktime_write_ix(quicktime_t *file,
         quicktime_ix_t   *ix;
 
         strl = trak->strl;
-        indx = &(strl->indx);
+        indx = &strl->indx;
         ix = indx->table[indx->table_size-1].ix;
         
         quicktime_atom_write_header(file, &ix->atom, ix->tag);

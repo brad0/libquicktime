@@ -74,7 +74,7 @@ static int encode_frame(quicktime_t *file,
   int imax, i;
   int bytes_encoded;
   int result;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
   /* Normalize input to 16 bit int */
@@ -149,7 +149,7 @@ static int encode(quicktime_t *file,
   uint8_t * decoderConfig;
   unsigned long decoderConfigLen;
   
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
   uint8_t mp4a_atom[4];
@@ -213,12 +213,12 @@ static int encode(quicktime_t *file,
     
     quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
 #if 0
-    quicktime_set_stsd_audio_v2(&(trak->mdia.minf.stbl.stsd.table[0]),
+    quicktime_set_stsd_audio_v2(&trak->mdia.minf.stbl.stsd.table[0],
                                 0x00000002, /* formatSpecificFlags */
                                 0, /* constBytesPerAudioPacket */
                                 codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
 #else
-    quicktime_set_stsd_audio_v1(&(trak->mdia.minf.stbl.stsd.table[0]),
+    quicktime_set_stsd_audio_v1(&trak->mdia.minf.stbl.stsd.table[0],
                                 1024, // uint32_t samples_per_packet,
                                 768, // uint32_t bytes_per_packet,
                                 1536, // uint32_t bytes_per_frame,
@@ -304,7 +304,7 @@ static int set_parameter(quicktime_t *file,
                          const char *key, 
                          const void *value)
   {
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
     
   if(!strcasecmp(key, "faac_bitrate"))
@@ -328,7 +328,7 @@ static int set_parameter(quicktime_t *file,
 static int flush(quicktime_t *file, int track)
   {
   int i;
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
 

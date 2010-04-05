@@ -44,7 +44,7 @@ void quicktime_stsd_init_table(quicktime_stsd_t *stsd)
     {
     stsd->total_entries = 1;
     stsd->table = (quicktime_stsd_table_t*)calloc(1, sizeof(quicktime_stsd_table_t) * stsd->total_entries);
-    quicktime_stsd_table_init(&(stsd->table[0]));
+    quicktime_stsd_table_init(&stsd->table[0]);
     }
   }
 
@@ -55,7 +55,7 @@ int quicktime_stsd_init_qtvr(quicktime_t *file,
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
 
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
   switch(track_type)
 	{
 	case QTVR_OBJ:
@@ -90,7 +90,7 @@ void quicktime_stsd_init_panorama(quicktime_t *file,
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
 	
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
   table->format[0] = 'p';
   table->format[1] = 'a';
   table->format[2] = 'n';
@@ -108,7 +108,7 @@ void quicktime_stsd_init_video(quicktime_t *file,
   {
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
 
   quicktime_copy_char32(table->format, compression);
   table->width = frame_w;
@@ -127,7 +127,7 @@ void quicktime_stsd_init_audio(quicktime_t *file,
   {
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
         
   quicktime_copy_char32(table->format, compressor);
   quicktime_copy_char32(table->wave.frma.codec, compressor);
@@ -143,7 +143,7 @@ void quicktime_stsd_init_text(quicktime_t *file,
   quicktime_stsd_text_t * text;
   
   quicktime_stsd_init_table(stsd);
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
 
   table->format[0] = 't';
   table->format[1] = 'e';
@@ -184,7 +184,7 @@ void quicktime_stsd_init_tx3g(quicktime_t *file,
   quicktime_stsd_tx3g_t *tx3g;
   
   quicktime_stsd_init_table(stsd);
-  table = &(stsd->table[0]);
+  table = &stsd->table[0];
 
   table->format[0] = 't';
   table->format[1] = 'x';
@@ -246,7 +246,7 @@ void quicktime_stsd_delete(quicktime_stsd_t *stsd)
   if(stsd->total_entries)
     {
     for(i = 0; i < stsd->total_entries; i++)
-      quicktime_stsd_table_delete(&(stsd->table[i]));
+      quicktime_stsd_table_delete(&stsd->table[i]);
     free(stsd->table);
     }
 
@@ -263,7 +263,7 @@ void quicktime_stsd_dump(void *minf_ptr, quicktime_stsd_t *stsd)
 	
   for(i = 0; i < stsd->total_entries; i++)
     {
-    quicktime_stsd_table_dump(minf_ptr, &(stsd->table[i]));
+    quicktime_stsd_table_dump(minf_ptr, &stsd->table[i]);
     }
   }
 
@@ -277,7 +277,7 @@ void quicktime_read_stsd(quicktime_t *file, quicktime_stsd_t *stsd)
   stsd->table = calloc(stsd->total_entries, sizeof(quicktime_stsd_table_t));
   for(i = 0; i < stsd->total_entries; i++)
     {
-    quicktime_read_stsd_table_raw(file, &(stsd->table[i]));
+    quicktime_read_stsd_table_raw(file, &stsd->table[i]);
     }
   }
 
@@ -303,7 +303,7 @@ void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak,
         
   for(i = 0; i < stsd->total_entries; i++)
     {
-    quicktime_stsd_table_init(&(stsd->table[i]));
+    quicktime_stsd_table_init(&stsd->table[i]);
                 
                 
     quicktime_set_position(file, 0);
@@ -314,7 +314,7 @@ void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak,
     file->preload_end = file->preload_start + stsd->table[i].table_raw_size;
     file->preload_ptr = 0;
                 
-    quicktime_read_stsd_table(file, &(trak->mdia.minf), &(stsd->table[i]));
+    quicktime_read_stsd_table(file, &trak->mdia.minf, &stsd->table[i]);
     if(trak->mdia.minf.is_video && !stsd->table[i].width && !stsd->table[i].height)
       {
       stsd->table[i].width =  (int)(trak->tkhd.track_width);

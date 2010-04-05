@@ -97,7 +97,7 @@ static int check_sequentiality( unsigned char **row_pointers,
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+	quicktime_video_map_t *vtrack = &file->vtracks[track];
 	quicktime_dv_codec_t *codec = vtrack->codec->priv;
 	quicktime_trak_t *trak = vtrack->track;
 	int width = trak->tkhd.track_width;

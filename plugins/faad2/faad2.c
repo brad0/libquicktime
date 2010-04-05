@@ -138,7 +138,7 @@ static int decode_chunk(quicktime_t *file, int track)
   float * samples;
   faacDecFrameInfo frame_info;
 
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   
   quicktime_faad2_codec_t *codec =
     file->atracks[track].codec->priv;
@@ -164,8 +164,8 @@ static int decode_chunk(quicktime_t *file, int track)
   for(i = 0; i < num_packets; i++)
     {
     packet_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
-                                            &(codec->data),
-                                            &(codec->data_alloc), &num_samples);
+                                            &codec->data,
+                                            &codec->data_alloc, &num_samples);
 
     // fprintf(stderr, "Packet size %d, %d\n", i, packet_size);
     
@@ -205,8 +205,8 @@ static int decode_chunk(quicktime_t *file, int track)
       frame_info.samples/=2;
       }
     
-    memcpy(&(codec->sample_buffer[(codec->sample_buffer_end -
-                                   codec->sample_buffer_start)*track_map->channels]),
+    memcpy(&codec->sample_buffer[(codec->sample_buffer_end -
+                                   codec->sample_buffer_start)*track_map->channels],
            samples, frame_info.samples * sizeof(float));
     codec->sample_buffer_end += frame_info.samples / track_map->channels;
     }
@@ -226,7 +226,7 @@ static int decode(quicktime_t *file,
   int samples_to_move;
   int samples_decoded;
   
-  quicktime_audio_map_t *track_map = &(file->atracks[track]);
+  quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faad2_codec_t *codec = track_map->codec->priv;
 
   /* TODO Check whether seeking happened */
@@ -245,14 +245,14 @@ static int decode(quicktime_t *file,
     if(codec->upsample)
       {
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->cur_chunk),
+                              &track_map->cur_chunk,
                               track_map->track,
                               track_map->current_position / 2);
       chunk_sample *= 2;
       }
     else
       lqt_chunk_of_sample_vbr(&chunk_sample,
-                              &(track_map->cur_chunk),
+                              &track_map->cur_chunk,
                               track_map->track,
                               track_map->current_position);
     
@@ -352,7 +352,7 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
     return;
   
   atrack->sample_format = LQT_SAMPLE_FLOAT;
-  stsd = &(atrack->track->mdia.minf.stbl.stsd);
+  stsd = &atrack->track->mdia.minf.stbl.stsd;
   
   if(stsd->table[0].has_esds)
     {

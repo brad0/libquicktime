@@ -154,7 +154,7 @@ int quicktime_read_tref(quicktime_t *file, quicktime_tref_t *tref,
     {
     ref = add_reference(tref);
           
-    quicktime_atom_read_header(file, &(atom));
+    quicktime_atom_read_header(file, &atom);
     ref->type[0] = atom.type[0];
     ref->type[1] = atom.type[1];
     ref->type[2] = atom.type[2];

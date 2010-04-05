@@ -48,7 +48,7 @@ void quicktime_stts_init_qtvr(quicktime_t *file,
   {
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
-  table = &(stts->table[0]);
+  table = &stts->table[0];
   table->sample_duration = frame_duration;
   }
 
@@ -57,7 +57,7 @@ void quicktime_stts_init_panorama(quicktime_t *file,
   {
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
-  table = &(stts->table[0]);
+  table = &stts->table[0];
   table->sample_duration = frame_duration;
   }
 
@@ -66,7 +66,7 @@ void quicktime_stts_init_video(quicktime_t *file, quicktime_stts_t *stts,
   {
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
-  table = &(stts->table[0]);
+  table = &stts->table[0];
   table->sample_duration = frame_duration;
   stts->default_duration = frame_duration;
   }
@@ -76,7 +76,7 @@ void quicktime_stts_init_audio(quicktime_t *file, quicktime_stts_t *stts,
   {
   quicktime_stts_table_t *table;
   quicktime_stts_init_table(stts);
-  table = &(stts->table[0]);
+  table = &stts->table[0];
   table->sample_duration = 1;
   }
 

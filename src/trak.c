@@ -27,10 +27,10 @@
 
 int quicktime_trak_init(quicktime_trak_t *trak, lqt_file_type_t type)
   {
-  quicktime_tkhd_init(&(trak->tkhd), type);
-  quicktime_edts_init(&(trak->edts));
-  quicktime_mdia_init(&(trak->mdia));
-  quicktime_tref_init(&(trak->tref));
+  quicktime_tkhd_init(&trak->tkhd, type);
+  quicktime_edts_init(&trak->edts);
+  quicktime_mdia_init(&trak->mdia);
+  quicktime_tref_init(&trak->tref);
   trak->has_tref = 0;
   return 0;
   }
@@ -45,11 +45,11 @@ int quicktime_trak_init_video(quicktime_t *file,
   {
 
   quicktime_tkhd_init_video(file, 
-                            &(trak->tkhd), 
+                            &trak->tkhd, 
                             frame_w, 
                             frame_h);
   quicktime_mdia_init_video(file, 
-                            &(trak->mdia), 
+                            &trak->mdia, 
                             frame_w, 
                             frame_h, 
                             frame_duration,
@@ -57,7 +57,7 @@ int quicktime_trak_init_video(quicktime_t *file,
                             compressor);
   if(!IS_MP4(file->file_type))
     {
-    quicktime_edts_init_table(&(trak->edts));
+    quicktime_edts_init_table(&trak->edts);
     trak->has_edts = 1;
     }
   return 0;
@@ -72,10 +72,10 @@ int quicktime_trak_init_timecode(quicktime_t *file,
                                  int frame_h,
                                  uint32_t flags)
   {
-  quicktime_tkhd_init_timecode(file, &(trak->tkhd), frame_w, frame_h);
-  quicktime_mdia_init_timecode(file, &(trak->mdia), time_scale, frame_duration,
+  quicktime_tkhd_init_timecode(file, &trak->tkhd, frame_w, frame_h);
+  quicktime_mdia_init_timecode(file, &trak->mdia, time_scale, frame_duration,
                                num_frames, flags);
-  quicktime_edts_init_table(&(trak->edts));
+  quicktime_edts_init_table(&trak->edts);
   return 0;
   }
 
@@ -85,14 +85,14 @@ int quicktime_trak_init_qtvr(quicktime_t *file, quicktime_trak_t *trak, int trac
   {
 
   quicktime_tkhd_init_video(file, 
-                            &(trak->tkhd),
+                            &trak->tkhd,
                             height, 
                             width);
   quicktime_mdia_init_qtvr(file, 
-                           &(trak->mdia), track_type, timescale, frame_duration);
-  quicktime_edts_init_table(&(trak->edts));
+                           &trak->mdia, track_type, timescale, frame_duration);
+  quicktime_edts_init_table(&trak->edts);
   trak->has_edts = 1;
-  quicktime_tref_init_qtvr(&(trak->tref), track_type);
+  quicktime_tref_init_qtvr(&trak->tref, track_type);
   trak->has_tref = 1;
   return 0;
   }
@@ -101,12 +101,12 @@ int quicktime_trak_init_panorama(quicktime_t *file, quicktime_trak_t *trak, int 
   {
 
   quicktime_tkhd_init_video(file, 
-                            &(trak->tkhd), 
+                            &trak->tkhd, 
                             height, 
                             height/2);
   quicktime_mdia_init_panorama(file, 
-                               &(trak->mdia), width, height, timescale, frame_duration);
-  quicktime_edts_init_table(&(trak->edts));
+                               &trak->mdia, width, height, timescale, frame_duration);
+  quicktime_edts_init_table(&trak->edts);
   trak->has_edts = 1;
 
   return 0;
@@ -119,14 +119,14 @@ int quicktime_trak_init_audio(quicktime_t *file,
                               int bits, 
                               char *compressor)
   {
-  quicktime_mdia_init_audio(file, &(trak->mdia), 
+  quicktime_mdia_init_audio(file, &trak->mdia, 
                             channels, 
                             sample_rate, 
                             bits, 
                             compressor);
   if(!IS_MP4(file->file_type))
     {
-    quicktime_edts_init_table(&(trak->edts));
+    quicktime_edts_init_table(&trak->edts);
     trak->has_edts = 1;
     }
   return 0;
@@ -137,12 +137,12 @@ int quicktime_trak_init_text(quicktime_t * file, quicktime_trak_t * trak,
   {
   trak->tkhd.volume = 0;
   trak->tkhd.flags = 3;
-  quicktime_mdia_init_text(file, &(trak->mdia), 
+  quicktime_mdia_init_text(file, &trak->mdia, 
                            timescale);
 
   if(!IS_MP4(file->file_type))
     {
-    quicktime_edts_init_table(&(trak->edts));
+    quicktime_edts_init_table(&trak->edts);
     trak->has_edts = 1;
     }
   return 0;
@@ -153,7 +153,7 @@ int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
   {
   trak->tkhd.volume = 0;
   trak->tkhd.flags = 1;
-  quicktime_mdia_init_tx3g(file, &(trak->mdia), 
+  quicktime_mdia_init_tx3g(file, &trak->mdia, 
                            timescale);
  
   return 0;
@@ -163,10 +163,10 @@ int quicktime_trak_init_tx3g(quicktime_t * file, quicktime_trak_t * trak,
 
 int quicktime_trak_delete(quicktime_trak_t *trak)
   {
-  quicktime_mdia_delete(&(trak->mdia));
-  quicktime_edts_delete(&(trak->edts));
-  quicktime_tkhd_delete(&(trak->tkhd));
-  quicktime_tref_delete(&(trak->tref));
+  quicktime_mdia_delete(&trak->mdia);
+  quicktime_edts_delete(&trak->edts);
+  quicktime_tkhd_delete(&trak->tkhd);
+  quicktime_tref_delete(&trak->tref);
 
   if(trak->chunk_sizes)
     free(trak->chunk_sizes);
@@ -177,11 +177,11 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
 int quicktime_trak_dump(quicktime_trak_t *trak)
   {
   lqt_dump(" track (trak)\n");
-  quicktime_tkhd_dump(&(trak->tkhd));
-  if(trak->has_edts) quicktime_edts_dump(&(trak->edts));
+  quicktime_tkhd_dump(&trak->tkhd);
+  if(trak->has_edts) quicktime_edts_dump(&trak->edts);
   if (trak->has_tref)
-    quicktime_tref_dump(&(trak->tref));
-  quicktime_mdia_dump(&(trak->mdia));
+    quicktime_tref_dump(&trak->tref);
+  quicktime_mdia_dump(&trak->mdia);
 
   return 0;
   }
@@ -189,7 +189,7 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
 // Used when reading a file
 quicktime_trak_t* quicktime_add_trak(quicktime_t *file)
   {
-  quicktime_moov_t *moov = &(file->moov);
+  quicktime_moov_t *moov = &file->moov;
   if(moov->total_tracks < MAXTRACKS)
     {
     moov->trak[moov->total_tracks] = calloc(1, sizeof(quicktime_trak_t));
@@ -241,9 +241,9 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
 
     /* mandatory */
     if(quicktime_atom_is(&leaf_atom, "tkhd"))
-      quicktime_read_tkhd(file, &(trak->tkhd));
+      quicktime_read_tkhd(file, &trak->tkhd);
     else if(quicktime_atom_is(&leaf_atom, "mdia"))
-      quicktime_read_mdia(file, trak, &(trak->mdia), &leaf_atom);
+      quicktime_read_mdia(file, trak, &trak->mdia, &leaf_atom);
     /* optional */
     else if(quicktime_atom_is(&leaf_atom, "clip"))
       quicktime_atom_skip(file, &leaf_atom);
@@ -251,7 +251,7 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
       quicktime_atom_skip(file, &leaf_atom);
     else if(quicktime_atom_is(&leaf_atom, "edts"))
       {
-      quicktime_read_edts(file, &(trak->edts), &leaf_atom);
+      quicktime_read_edts(file, &trak->edts, &leaf_atom);
       trak->has_edts = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "load"))
@@ -263,7 +263,7 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
     else if(quicktime_atom_is(&leaf_atom, "tref"))
       {
       trak->has_tref = 1;
-      quicktime_read_tref(file, &(trak->tref), &leaf_atom);
+      quicktime_read_tref(file, &trak->tref, &leaf_atom);
       }
     else quicktime_atom_skip(file, &leaf_atom);
     } while(quicktime_position(file) < trak_atom->end);
@@ -282,14 +282,14 @@ int quicktime_write_trak(quicktime_t *file,
   quicktime_atom_t atom;
   quicktime_atom_write_header(file, &atom, "trak");
 
-  quicktime_write_tkhd(file, &(trak->tkhd));
+  quicktime_write_tkhd(file, &trak->tkhd);
         
   if(trak->has_edts)
-    quicktime_write_edts(file, &(trak->edts));
-  quicktime_write_mdia(file, &(trak->mdia));
+    quicktime_write_edts(file, &trak->edts);
+  quicktime_write_mdia(file, &trak->mdia);
 	
   if (trak->has_tref) 
-    quicktime_write_tref(file, &(trak->tref));
+    quicktime_write_tref(file, &trak->tref);
 	
   quicktime_atom_write_footer(file, &atom);
 
@@ -298,7 +298,7 @@ int quicktime_write_trak(quicktime_t *file,
 
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
   {
-  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
   int i;
   int64_t total = 0;
   
@@ -545,12 +545,12 @@ void quicktime_write_chunk_footer(quicktime_t *file,
   if(offset + sample_size > file->mdat.atom.size)
     file->mdat.atom.size = offset + sample_size;
 
-  quicktime_update_stco(&(trak->mdia.minf.stbl.stco), 
+  quicktime_update_stco(&trak->mdia.minf.stbl.stco, 
                         current_chunk, 
                         offset);
 
   if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
-    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+    quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
                           current_chunk, 
                           sample_size);
   /* Need to increase sample count for CBR (the VBR routines to it
@@ -560,19 +560,19 @@ void quicktime_write_chunk_footer(quicktime_t *file,
         
   if(trak->mdia.minf.is_panorama)
     {
-    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+    quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
                           current_chunk, 
                           sample_size);	
     }
   
   if(trak->mdia.minf.is_qtvr)
     {
-    quicktime_update_stsz(&(trak->mdia.minf.stbl.stsz), 
+    quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
                           current_chunk, 
                           sample_size);
     }
   
-  quicktime_update_stsc(&(trak->mdia.minf.stbl.stsc), 
+  quicktime_update_stsc(&trak->mdia.minf.stbl.stsc, 
                         current_chunk, 
                         samples);
   }
@@ -581,7 +581,7 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
                             int64_t *duration, 
                             int *timescale)
   {
-  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
   int i;
   *duration = 0;
 
@@ -653,9 +653,9 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
   {
   long result, current_chunk;
-  quicktime_stsc_t *stsc = &(trak->mdia.minf.stbl.stsc);
-  quicktime_stts_t *stts = &(trak->mdia.minf.stbl.stts);
-  quicktime_stsd_t *stsd = &(trak->mdia.minf.stbl.stsd);
+  quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  quicktime_stsd_t *stsd = &trak->mdia.minf.stbl.stsd;
   long i = stsc->total_entries - 1;
 
   if(!stsc->total_entries)
@@ -674,7 +674,7 @@ long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
 
 int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset)
   {
-  quicktime_stco_t *stco = &(trak->mdia.minf.stbl.stco);
+  quicktime_stco_t *stco = &trak->mdia.minf.stbl.stco;
   int i;
 
   for(i = 0; i < stco->total_entries; i++)

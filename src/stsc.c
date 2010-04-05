@@ -47,7 +47,7 @@ void quicktime_stsc_init_video(quicktime_t *file, quicktime_stsc_t *stsc)
 {
 	quicktime_stsc_table_t *table;
 	quicktime_stsc_init_table(file, stsc);
-	table = &(stsc->table[0]);
+	table = &stsc->table[0];
 	table->chunk = 1;
 	table->samples = 1;
 	table->id = 1;
@@ -57,7 +57,7 @@ void quicktime_stsc_init_audio(quicktime_t *file, quicktime_stsc_t *stsc, int sa
 {
 	quicktime_stsc_table_t *table;
 	quicktime_stsc_init_table(file, stsc);
-	table = &(stsc->table[0]);
+	table = &stsc->table[0];
 	table->chunk = 1;
 	table->samples = 0;         /* set this after completion or after every audio chunk is written */
 	table->id = 1;

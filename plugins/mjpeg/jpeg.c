@@ -70,7 +70,7 @@ static int decode(quicktime_t *file,
                   unsigned char **row_pointers, 
                   int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   mjpeg_t *mjpeg;
   long size, field2_offset;
@@ -139,14 +139,14 @@ static int decode(quicktime_t *file,
 
 static void resync(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   codec->have_frame = 0;
   }
      
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   quicktime_trak_t *trak = vtrack->track;
   int result = 0;

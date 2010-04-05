@@ -72,7 +72,7 @@ void quicktime_elst_init_all(quicktime_elst_t *elst)
 	{
 		elst->total_entries = 1;
 		elst->table = (quicktime_elst_table_t*)malloc(sizeof(quicktime_elst_table_t) * elst->total_entries);
-		quicktime_elst_table_init(&(elst->table[0]));
+		quicktime_elst_table_init(&elst->table[0]);
 	}
 }
 
@@ -82,7 +82,7 @@ void quicktime_elst_delete(quicktime_elst_t *elst)
 	if(elst->total_entries)
 	{
 		for(i = 0; i < elst->total_entries; i++)
-			quicktime_elst_table_delete(&(elst->table[i]));
+			quicktime_elst_table_delete(&elst->table[i]);
 		free(elst->table);
 	}
 	elst->total_entries = 0;
@@ -98,7 +98,7 @@ void quicktime_elst_dump(quicktime_elst_t *elst)
 
 	for(i = 0; i < elst->total_entries; i++)
 	{
-		quicktime_elst_table_dump(&(elst->table[i]));
+		quicktime_elst_table_dump(&elst->table[i]);
 	}
 }
 
@@ -112,8 +112,8 @@ void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst)
 	elst->table = (quicktime_elst_table_t*)calloc(1, sizeof(quicktime_elst_table_t) * elst->total_entries);
 	for(i = 0; i < elst->total_entries; i++)
 	{
-		quicktime_elst_table_init(&(elst->table[i]));
-		quicktime_read_elst_table(file, &(elst->table[i]));
+		quicktime_elst_table_init(&elst->table[i]);
+		quicktime_read_elst_table(file, &elst->table[i]);
 	}
 }
 

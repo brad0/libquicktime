@@ -1642,6 +1642,9 @@ struct quicktime_codec_s
   void (*resync)(quicktime_t *file, int track);
 
   int (*writes_compressed)(quicktime_t * file, const lqt_compression_info_t * ci);
+
+  int (*write_packet)(quicktime_t * file, lqt_packet_t * p, int track);
+  int (*read_packet)(quicktime_t * file, lqt_packet_t * p, int track);
   
   void *priv;
 

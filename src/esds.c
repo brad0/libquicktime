@@ -273,7 +273,7 @@ quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
   {
   quicktime_esds_t * esds;
   trak->mdia.minf.stbl.stsd.table[0].has_esds = 1;
-  esds = &(trak->mdia.minf.stbl.stsd.table[0].esds);
+  esds = &trak->mdia.minf.stbl.stsd.table[0].esds;
   esds->decoderConfigLen = decoderConfigLen;
   esds->decoderConfig = malloc(esds->decoderConfigLen);
   memcpy(esds->decoderConfig, decoderConfig, esds->decoderConfigLen);

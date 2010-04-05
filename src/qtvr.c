@@ -28,9 +28,9 @@
 int quicktime_qtvr_init(quicktime_qtvr_t *qtvr)
 {
 	memset(qtvr, 0, sizeof(*qtvr));
-	quicktime_imgp_init(&(qtvr->imgp));
-	quicktime_vrsc_init(&(qtvr->vrsc));
-	quicktime_vrnp_init(&(qtvr->vrnp));
+	quicktime_imgp_init(&qtvr->imgp);
+	quicktime_vrsc_init(&qtvr->vrsc);
+	quicktime_vrnp_init(&qtvr->vrnp);
 	return 0;
 }
 
@@ -42,9 +42,9 @@ int quicktime_qtvr_delete(quicktime_qtvr_t *qtvr)
 void quicktime_qtvr_dump(quicktime_qtvr_t *qtvr)
 {
 	lqt_dump("       qtvr world\n");
-	quicktime_vrsc_dump(&(qtvr->vrsc));
-	quicktime_imgp_dump(&(qtvr->imgp));
-	quicktime_vrnp_dump(&(qtvr->vrnp));
+	quicktime_vrsc_dump(&qtvr->vrsc);
+	quicktime_imgp_dump(&qtvr->imgp);
+	quicktime_vrnp_dump(&qtvr->vrnp);
 }
 
 int quicktime_read_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr, quicktime_atom_t *qtvr_atom)
@@ -59,16 +59,16 @@ int quicktime_read_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr, quicktime_ato
 	    	quicktime_qtatom_read_header(file, &leaf_atom);
 		if(quicktime_qtatom_is(&leaf_atom, "vrsc"))
 		{
-		    	result += quicktime_read_vrsc(file, &(qtvr->vrsc), &leaf_atom);
+		    	result += quicktime_read_vrsc(file, &qtvr->vrsc, &leaf_atom);
 		} else
 		if(quicktime_qtatom_is(&leaf_atom, "imgp"))
 		{
-		    	result += quicktime_read_imgp(file, &(qtvr->imgp), &leaf_atom);
+		    	result += quicktime_read_imgp(file, &qtvr->imgp, &leaf_atom);
 		} else
 		if(quicktime_qtatom_is(&leaf_atom, "vrnp"))
 		{
 		    	qtvr->vrnp.children = leaf_atom.child_count;
-		    	result += quicktime_read_vrnp(file, &(qtvr->vrnp), &leaf_atom);
+		    	result += quicktime_read_vrnp(file, &qtvr->vrnp, &leaf_atom);
 		} else
 			quicktime_qtatom_skip(file, &leaf_atom);
 	}while(quicktime_position(file) < root_atom.end);
@@ -84,9 +84,9 @@ void quicktime_write_qtvr(quicktime_t *file, quicktime_qtvr_t *qtvr )
 	quicktime_qtatom_write_header(file, &subatom, "sean", 1);
 
    	subatom.child_count = 3;
-	quicktime_write_vrsc(file, &(qtvr->vrsc));
-	quicktime_write_imgp(file, &(qtvr->imgp));
-	quicktime_write_vrnp(file, &(qtvr->vrnp));
+	quicktime_write_vrsc(file, &qtvr->vrsc);
+	quicktime_write_imgp(file, &qtvr->imgp);
+	quicktime_write_vrnp(file, &qtvr->vrnp);
 
 	quicktime_qtatom_write_footer(file, &subatom);
 

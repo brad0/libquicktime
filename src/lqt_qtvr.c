@@ -43,7 +43,7 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
     quicktime_qtatom_t root_atom, leaf_atom;
     quicktime_trak_t *trak;
     
-    quicktime_ndhd_init(&(file->qtvr_node[0].ndhd));
+    quicktime_ndhd_init(&file->qtvr_node[0].ndhd);
     trak = file->moov.trak[lqt_qtvr_get_qtvr_track(file)];
     
     if (quicktime_track_samples(file, trak) > 0) {
@@ -56,7 +56,7 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
     quicktime_qtatom_write_header(file, &leaf_atom, "ndhd", 1);
-    quicktime_write_ndhd(file, &(file->qtvr_node[0].ndhd));
+    quicktime_write_ndhd(file, &file->qtvr_node[0].ndhd);
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
     quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
@@ -83,7 +83,7 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
     root_atom.child_count = 1;
     quicktime_qtatom_write_header(file, &leaf_atom, "obji", 1);
     leaf_atom.child_count = 0;
-    quicktime_write_obji(file, &(file->qtvr_node[0].obji));
+    quicktime_write_obji(file, &file->qtvr_node[0].obji);
 
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
@@ -100,7 +100,7 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
     quicktime_qtatom_t root_atom, leaf_atom;
     quicktime_trak_t *trak;
     
-    quicktime_ndhd_init(&(file->qtvr_node[0].ndhd));
+    quicktime_ndhd_init(&file->qtvr_node[0].ndhd);
     file->qtvr_node[0].ndhd.nodeType[0] = 'p';
     file->qtvr_node[0].ndhd.nodeType[1] = 'a';
     file->qtvr_node[0].ndhd.nodeType[2] = 'n';
@@ -122,7 +122,7 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
     quicktime_qtatom_write_header(file, &leaf_atom, "ndhd", 1);
-    quicktime_write_ndhd(file, &(file->qtvr_node[0].ndhd));
+    quicktime_write_ndhd(file, &file->qtvr_node[0].ndhd);
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
     quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
@@ -149,7 +149,7 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
     root_atom.child_count = 1;
     quicktime_qtatom_write_header(file, &leaf_atom, "pdat", 1);
     leaf_atom.child_count = 0;
-    quicktime_write_pdat(file, &(file->qtvr_node[0].pdat));
+    quicktime_write_pdat(file, &file->qtvr_node[0].pdat);
 
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
@@ -202,7 +202,7 @@ int lqt_qtvr_set_type(quicktime_t  *file, int type, int width, int height, int d
 
         trak = quicktime_add_track(file);
         quicktime_trak_init_qtvr(file, trak, QTVR_OBJ, width, height, duration, time_scale);
-        quicktime_obji_init(&(file->qtvr_node[0].obji));
+        quicktime_obji_init(&file->qtvr_node[0].obji);
         file->qtvr_node[0].obji.viewDuration = duration;
 
         trak = quicktime_add_track(file);
@@ -225,7 +225,7 @@ int lqt_qtvr_set_type(quicktime_t  *file, int type, int width, int height, int d
 
         trak = quicktime_add_track(file);
         quicktime_trak_init_qtvr(file, trak, QTVR_PAN, width, height, duration, time_scale);
-        quicktime_pdat_init(&(file->qtvr_node[0].pdat));
+        quicktime_pdat_init(&file->qtvr_node[0].pdat);
 
         trak = quicktime_add_track(file);
         quicktime_trak_init_qtvr(file, trak, QTVR_QTVR_PAN, width, height, duration, time_scale);

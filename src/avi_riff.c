@@ -420,7 +420,7 @@ static void indx_build_index(quicktime_t *file)
   for(i = 0; i < file->moov.total_tracks; i++)
     {
     trak = file->moov.trak[i];
-    indx = &(trak->strl->indx);
+    indx = &trak->strl->indx;
     
     for(j = 0; j < indx->table_size; j++)
       {
@@ -471,11 +471,11 @@ int quicktime_import_avi(quicktime_t *file)
   for(i = 0; i < file->moov.total_tracks; i++)
     {
     if(file->moov.trak[i]->mdia.minf.is_video)
-       quicktime_compress_stts(&(file->moov.trak[i]->mdia.minf.stbl.stts));
+       quicktime_compress_stts(&file->moov.trak[i]->mdia.minf.stbl.stts);
     }
   if(first_riff->have_info)
     {
-    quicktime_riffinfo_2_udta(&first_riff->info, &(file->moov.udta));
+    quicktime_riffinfo_2_udta(&first_riff->info, &file->moov.udta);
     }
   //  quicktime_moov_dump(&file->moov);
   

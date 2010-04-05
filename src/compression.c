@@ -101,46 +101,57 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
 
 int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  p->timestamp = vtrack->timestamp;
+  p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
+  p->data_len =
+    lqt_read_video_frame(file, &p->data, &p->data_alloc,
+                         vtrack->current_position, NULL, track);
+  lqt_update_frame_position(vtrack);
+  
   return 0;
   }
 
 /* Writing */
 
-int lqt_writes_audio_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * ci,
-                                lqt_codec_info_t * codec_info)
+int lqt_writes_compressed(quicktime_t * file,
+                          const lqt_compression_info_t * ci,
+                          lqt_codec_info_t * codec_info)
   {
-  int ret;
-  quicktime_codec_t * codec;
-
-  if(codec_info->compression_id != ci->id)
-    return 0;
-  
-  return 0;
-  }
-
-int lqt_writes_video_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * ci,
-                                lqt_codec_info_t * codec_info)
-  {
-  int ret;
+  int ret = 0;
   quicktime_codec_t * codec;
   
   if(codec_info->compression_id != ci->id)
     return 0;
-  return 0;
+
+  codec = quicktime_load_codec(codec_info, NULL, NULL);
+
+  if(!codec->writes_compressed ||
+     codec->writes_compressed(file, ci))
+    ret = 1;
+
+  quicktime_delete_codec(codec);
+  
+  return ret;
   }
 
 int lqt_add_audio_track_compressed(quicktime_t * file,
-                                   const lqt_compression_info_t * info)
+                                   const lqt_compression_info_t * ci,
+                                   lqt_codec_info_t * codec_info)
   {
-  return 0;
+  return lqt_add_audio_track_internal(file,
+                                      ci->num_channels, ci->samplerate, 16,
+                                      codec_info, ci);
   }
 
 int lqt_add_video_track_compressed(quicktime_t * file,
-                                   const lqt_compression_info_t * info)
+                                   const lqt_compression_info_t * ci,
+                                   lqt_codec_info_t * codec_info)
   {
-  return 0;
+  return lqt_add_video_track_internal(file,
+                                      ci->width, ci->height,
+                                      0, ci->video_timescale,
+                                      codec_info, ci);
   }
 
 int lqt_write_audio_packet(quicktime_t * file,
@@ -152,7 +163,27 @@ int lqt_write_audio_packet(quicktime_t * file,
 int lqt_write_video_packet(quicktime_t * file,
                            lqt_packet_t * p, int track)
   {
-  return 0;
+  int result;
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+
+  /* Must set valid timestamp for encoders */
+  vtrack->timestamp = p->timestamp;
+  lqt_video_append_timestamp(file, track, p->timestamp, p->duration);
+    
+  if(vtrack->codec->write_packet)
+    return vtrack->codec->write_packet(file, p, track);
+  else
+    {
+    lqt_write_frame_header(file, track,
+                           -1, p->timestamp, !!(p->flags & LQT_PACKET_KEYFRAME));
+    
+    result = !quicktime_write_data(file, p->data, p->data_len);
+    lqt_write_frame_footer(file, track);
+    }
+
+  file->vtracks[track].current_position++;
+  
+  return result;
   }
 
 static const struct
@@ -228,4 +259,22 @@ void lqt_compression_info_dump(const lqt_compression_info_t * ci)
       lqt_dump(", B");
     lqt_dump("\n");
     }
+  }
+
+void lqt_compression_info_copy(lqt_compression_info_t * dst,
+                               const lqt_compression_info_t * src)
+  {
+  memcpy(dst, src, sizeof(*dst));
+  if(dst->global_header)
+    {
+    dst->global_header = malloc(dst->global_header_len);
+    memcpy(dst->global_header, src->global_header, dst->global_header_len);
+    }
+  }
+
+void lqt_packet_dump(const lqt_packet_t * p)
+  {
+  lqt_dump("Packet: %d bytes\n", p->data_len);
+  lqt_dump("  Time: %"PRId64", Duration: %d\n", p->timestamp, p->duration);
+  lqt_hexdump(p->data, p->data_len > 16 ? 16 : p->data_len, 16);
   }

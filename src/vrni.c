@@ -27,7 +27,7 @@
 int quicktime_vrni_init(quicktime_vrni_t *vrnp)
 {
 	vrnp->ID = 1;
-	quicktime_nloc_init(&(vrnp->nloc));
+	quicktime_nloc_init(&vrnp->nloc);
 	return 0;
 }
 
@@ -40,7 +40,7 @@ void quicktime_vrni_dump(quicktime_vrni_t *vrni)
 {
 	lqt_dump("         node id (vrni)\n");
 	lqt_dump("          id %i\n", vrni->ID);
-	quicktime_nloc_dump(&(vrni->nloc));
+	quicktime_nloc_dump(&vrni->nloc);
 }
 
 int quicktime_read_vrni(quicktime_t *file, quicktime_vrni_t *vrni, quicktime_qtatom_t *vrni_atom)
@@ -50,7 +50,7 @@ int quicktime_read_vrni(quicktime_t *file, quicktime_vrni_t *vrni, quicktime_qta
 	
 	quicktime_qtatom_read_header(file, &leaf_atom);
 	
-	quicktime_read_nloc(file, &(vrni->nloc), &leaf_atom);
+	quicktime_read_nloc(file, &vrni->nloc, &leaf_atom);
 	
 	return result;
 }
@@ -59,7 +59,7 @@ void quicktime_write_vrni(quicktime_t *file, quicktime_vrni_t *vrni )
 {
 	quicktime_qtatom_t atom;
 	quicktime_qtatom_write_header(file, &atom, "vrni", 1);
-	quicktime_write_nloc(file, &(vrni->nloc));
+	quicktime_write_nloc(file, &vrni->nloc);
 	atom.child_count = 1;
 	quicktime_qtatom_write_footer(file, &atom);
 

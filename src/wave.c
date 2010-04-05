@@ -26,7 +26,7 @@
 
 uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len)
   {
-  quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
+  quicktime_wave_t * wave = &trak->mdia.minf.stbl.stsd.table[0].wave;
   return(quicktime_user_atoms_get_atom(&wave->user_atoms, name, len));
   }
 
@@ -34,7 +34,7 @@ uint8_t * quicktime_wave_get_user_atom(quicktime_trak_t * trak, char * name, uin
 void quicktime_wave_set_user_atom(quicktime_trak_t * trak, char * name,
                                   uint8_t * data, uint32_t len)
   {
-  quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
+  quicktime_wave_t * wave = &trak->mdia.minf.stbl.stsd.table[0].wave;
 
   quicktime_user_atoms_add_atom(&wave->user_atoms,
                                 name, data, len);
@@ -56,17 +56,17 @@ void quicktime_read_wave(quicktime_t *file, quicktime_wave_t *wave,
     
     if(quicktime_atom_is(&leaf_atom, "frma"))
       {
-      quicktime_read_frma(file, &(wave->frma), &leaf_atom);
+      quicktime_read_frma(file, &wave->frma, &leaf_atom);
       wave->has_frma = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "enda"))
       {
-      quicktime_read_enda(file, &(wave->enda), &leaf_atom);
+      quicktime_read_enda(file, &wave->enda, &leaf_atom);
       wave->has_enda = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "esds"))
       {
-      quicktime_read_esds(file, &(wave->esds));
+      quicktime_read_esds(file, &wave->esds);
       wave->has_esds = 1;
       quicktime_atom_skip(file, &leaf_atom);
       }

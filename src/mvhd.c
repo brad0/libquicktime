@@ -36,7 +36,7 @@ int quicktime_mvhd_init(quicktime_mvhd_t *mvhd)
 	mvhd->preferred_rate = 1.0;
 	mvhd->preferred_volume = 1.0;
 	for(i = 0; i < 10; i++) mvhd->reserved[i] = 0;
-	quicktime_matrix_init(&(mvhd->matrix));
+	quicktime_matrix_init(&mvhd->matrix);
 	mvhd->preview_time = 0;
 	mvhd->preview_duration = 0;
 	mvhd->poster_time = 0;
@@ -68,7 +68,7 @@ void quicktime_mvhd_dump(quicktime_mvhd_t *mvhd)
 	lqt_dump("  preferred_rate %f\n", mvhd->preferred_rate);
 	lqt_dump("  preferred_volume %f\n", mvhd->preferred_volume);
 	quicktime_print_chars("  reserved ", mvhd->reserved, 10);
-	quicktime_matrix_dump(&(mvhd->matrix));
+	quicktime_matrix_dump(&mvhd->matrix);
 	lqt_dump("  preview_time %ld\n", mvhd->preview_time);
 	lqt_dump("  preview_duration %ld\n", mvhd->preview_duration);
 	lqt_dump("  poster_time %ld\n", mvhd->poster_time);
@@ -101,7 +101,7 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 	mvhd->preferred_rate = quicktime_read_fixed32(file);
 	mvhd->preferred_volume = quicktime_read_fixed16(file);
 	quicktime_read_data(file, mvhd->reserved, 10);
-	quicktime_read_matrix(file, &(mvhd->matrix));
+	quicktime_read_matrix(file, &mvhd->matrix);
 	mvhd->preview_time = quicktime_read_int32(file);
 	mvhd->preview_duration = quicktime_read_int32(file);
 	mvhd->poster_time = quicktime_read_int32(file);
@@ -143,7 +143,7 @@ void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)
 	quicktime_write_fixed32(file, mvhd->preferred_rate);
 	quicktime_write_fixed16(file, mvhd->preferred_volume);
 	quicktime_write_data(file, mvhd->reserved, 10);
-	quicktime_write_matrix(file, &(mvhd->matrix));
+	quicktime_write_matrix(file, &mvhd->matrix);
 	quicktime_write_int32(file, mvhd->preview_time);
 	quicktime_write_int32(file, mvhd->preview_duration);
 	quicktime_write_int32(file, mvhd->poster_time);

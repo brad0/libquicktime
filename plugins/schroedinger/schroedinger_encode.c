@@ -44,7 +44,7 @@ int lqt_schroedinger_set_enc_parameter(quicktime_t *file,
   int i, j;
   double v;
   int found = 0;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   
   /* Find the parameter */
@@ -96,7 +96,7 @@ int lqt_schroedinger_set_enc_parameter(quicktime_t *file,
 static int flush_data(quicktime_t *file, int track)
   {
   SchroStateEnum  state;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   SchroBuffer *enc_buf;
   int presentation_frame;
@@ -204,7 +204,7 @@ static int flush_data(quicktime_t *file, int track)
 
 static void set_interlacing(quicktime_t * file, int track, SchroVideoFormat * format)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_stsd_table_t *stsd;
   
   stsd = vtrack->track->mdia.minf.stbl.stsd.table;
@@ -247,7 +247,7 @@ int lqt_schroedinger_encode_video(quicktime_t *file,
   {
   SchroFrame * frame;
   SchroVideoFormat * format;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   
   if(!row_pointers)
@@ -316,7 +316,7 @@ int lqt_schroedinger_encode_video(quicktime_t *file,
 int lqt_schroedinger_flush(quicktime_t *file,
                            int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   schroedinger_codec_t *codec = vtrack->codec->priv;
   schro_encoder_end_of_stream(codec->enc);
   flush_data(file, track);
@@ -329,7 +329,7 @@ static void copy_frame_8(quicktime_t * file,
                          int track)
   {
   uint8_t * cpy_rows[3];
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   
   cpy_rows[0] = frame->components[0].data;
   cpy_rows[1] = frame->components[1].data;

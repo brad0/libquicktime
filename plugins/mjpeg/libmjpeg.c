@@ -474,17 +474,17 @@ static void delete_rows(mjpeg_compressor *compressor)
 
 static void new_jpeg_objects(mjpeg_compressor *engine)
   {
-  engine->jpeg_decompress.err = jpeg_std_error(&(engine->jpeg_error.pub));
+  engine->jpeg_decompress.err = jpeg_std_error(&engine->jpeg_error.pub);
   engine->jpeg_error.pub.error_exit = mjpeg_error_exit;
   /* Ideally the error handler would be set here but it must be called in a thread */
-  jpeg_create_decompress(&(engine->jpeg_decompress));
+  jpeg_create_decompress(&engine->jpeg_decompress);
   engine->jpeg_decompress.raw_data_out = TRUE;
   engine->jpeg_decompress.dct_method = JDCT_IFAST;
   }
 
 static void delete_jpeg_objects(mjpeg_compressor *engine)
   {
-  jpeg_destroy_decompress(&(engine->jpeg_decompress));
+  jpeg_destroy_decompress(&engine->jpeg_decompress);
   }
 
 
@@ -761,7 +761,7 @@ static void mjpeg_delete_decompressor(mjpeg_compressor *engine)
    * the child going into the cond_wait state for more input
    */
 
-  jpeg_destroy_decompress(&(engine->jpeg_decompress));
+  jpeg_destroy_decompress(&engine->jpeg_decompress);
   delete_rows(engine);
   free(engine->mcu_rows[0]);
   free(engine->mcu_rows[1]);
@@ -775,16 +775,16 @@ static mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
 
   result->field_h = mjpeg->coded_h / mjpeg->fields;
   result->mjpeg = mjpeg;
-  result->jpeg_compress.err = jpeg_std_error(&(result->jpeg_error.pub));
-  jpeg_create_compress(&(result->jpeg_compress));
+  result->jpeg_compress.err = jpeg_std_error(&result->jpeg_error.pub);
+  jpeg_create_compress(&result->jpeg_compress);
   result->jpeg_compress.image_width = mjpeg->coded_w;
   result->jpeg_compress.image_height = result->field_h;
   result->jpeg_compress.input_components = 3;
   result->jpeg_compress.in_color_space = JCS_RGB;
-  jpeg_set_defaults(&(result->jpeg_compress));
+  jpeg_set_defaults(&result->jpeg_compress);
   result->jpeg_compress.input_components = 3;
   result->jpeg_compress.in_color_space = JCS_RGB;
-  jpeg_set_quality(&(result->jpeg_compress), mjpeg->quality, 0);
+  jpeg_set_quality(&result->jpeg_compress, mjpeg->quality, 0);
 
   if(mjpeg->use_float) 
     result->jpeg_compress.dct_method = JDCT_FLOAT;
@@ -849,7 +849,7 @@ static void mjpeg_delete_compressor(mjpeg_compressor *engine)
    * the child going into the cond_wait state for more input 
    */
 
-  jpeg_destroy((j_common_ptr)&(engine->jpeg_compress));
+  jpeg_destroy((j_common_ptr)&engine->jpeg_compress);
   if(engine->output_buffer) free(engine->output_buffer);
   delete_rows(engine);
   free(engine->mcu_rows[0]);

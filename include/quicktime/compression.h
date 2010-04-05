@@ -104,10 +104,16 @@ lqt_compression_id_t lqt_compression_id_from_string(const char * str);
 
 void lqt_compression_info_free(lqt_compression_info_t * info);
 
+void lqt_compression_info_copy(lqt_compression_info_t * dst,
+                               const lqt_compression_info_t * src);
+
+
 void lqt_packet_alloc(lqt_packet_t * packet, int bytes);
 void lqt_packet_free(lqt_packet_t * packet);
 
 void lqt_compression_info_dump(const lqt_compression_info_t * ci);
+void lqt_packet_dump(const lqt_packet_t * p);
+
 
 
 /* Reading */
@@ -120,16 +126,16 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track);
 
 /* Writing */
 
-int lqt_writes_audio_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * ci,
-                                lqt_codec_info_t * codec_info);
+int lqt_writes_compressed(quicktime_t * file,
+                          const lqt_compression_info_t * ci,
+                          lqt_codec_info_t * codec_info);
 
-int lqt_writes_video_compressed(quicktime_t * file,
-                                const lqt_compression_info_t * ci,
-                                lqt_codec_info_t * codec_info);
-
-int lqt_add_audio_track_compressed(quicktime_t * file, const lqt_compression_info_t * info);
-int lqt_add_video_track_compressed(quicktime_t * file, const lqt_compression_info_t * info);
+int lqt_add_audio_track_compressed(quicktime_t * file,
+                                   const lqt_compression_info_t * ci,
+                                   lqt_codec_info_t * codec_info);
+int lqt_add_video_track_compressed(quicktime_t * file,
+                                   const lqt_compression_info_t * ci,
+                                   lqt_codec_info_t * codec_info);
 
 int lqt_write_audio_packet(quicktime_t * file, lqt_packet_t * p, int track);
 int lqt_write_video_packet(quicktime_t * file, lqt_packet_t * p, int track);

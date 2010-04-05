@@ -442,7 +442,7 @@ static int flush_frame(quicktime_t *file, int track,
   int encoded_size;
   uint8_t * ptr;
   
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
 
   pic_out.i_pts = 0;
@@ -492,7 +492,7 @@ static int set_pass_x264(quicktime_t *file,
                            int track, int pass, int total_passes,
                            const char * stats_file)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_x264_codec_t *codec =
     vtrack->codec->priv;
 
@@ -565,7 +565,7 @@ x264_do_log( void * priv, int i_level, const char *psz, va_list argp)
 
 static void set_fiel(quicktime_t * file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_stsd_table_t *stsd;
   
   stsd = vtrack->track->mdia.minf.stbl.stsd.table;
@@ -594,7 +594,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   x264_picture_t pic_in;
 
   int result = 0, pixel_width, pixel_height;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
@@ -710,7 +710,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     /* Encode global header */
     avcc = create_avcc_atom(codec, &avcc_size);
     
-    quicktime_user_atoms_add_atom(&(trak->mdia.minf.stbl.stsd.table[0].user_atoms),
+    quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
                                   "avcC", avcc, avcc_size);
 
     file->moov.iods.videoProfileId = 0x15;
@@ -742,7 +742,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int flush(quicktime_t *file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
   
   /* Do nothing if we didn't encode anything yet */
@@ -1052,6 +1052,6 @@ void quicktime_init_codec_x264(quicktime_codec_t * codec_base,
   codec_base->set_parameter = set_parameter;
   
   /* Init private items */
-  x264_param_default(&(codec->params));
+  x264_param_default(&codec->params);
   }
 

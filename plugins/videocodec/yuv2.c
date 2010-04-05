@@ -189,7 +189,7 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   int64_t bytes;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_yuv2_codec_t *codec = vtrack->codec->priv;
   int width = quicktime_video_width(file, track);
   int height = quicktime_video_height(file, track);
@@ -220,7 +220,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_yuv2_codec_t *codec = vtrack->codec->priv;
   int result = 1;
   int width = vtrack->track->tkhd.track_width;

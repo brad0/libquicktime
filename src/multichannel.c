@@ -80,7 +80,7 @@ void lqt_set_channel_setup(quicktime_t * file, int track, lqt_channel_t * ch)
                                                 sizeof(*file->atracks[track].channel_setup));
   
   memcpy(file->atracks[track].channel_setup, ch, sizeof(*ch)*file->atracks[track].channels);
-  quicktime_set_chan(&(file->atracks[track]));
+  quicktime_set_chan(&file->atracks[track]);
   }
 
 const lqt_channel_t * lqt_get_channel_setup(quicktime_t * file, int track)

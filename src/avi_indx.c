@@ -57,7 +57,7 @@ void quicktime_indx_init_riff(quicktime_t *file, quicktime_trak_t * trak)
   quicktime_indxtable_t *indx_table;
   
   strl = trak->strl;
-  indx = &(strl->indx);
+  indx = &strl->indx;
 
   
   if(indx->table_size >= indx->table_allocation)
@@ -83,7 +83,7 @@ void quicktime_indx_finalize_riff(quicktime_t *file, quicktime_trak_t * trak)
   quicktime_indxtable_t *indx_table;
   
   strl = trak->strl;
-  indx = &(strl->indx);
+  indx = &strl->indx;
 
   indx_table = &indx->table[indx->table_size-1];
 

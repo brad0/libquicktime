@@ -48,7 +48,7 @@ void quicktime_frma_dump(quicktime_frma_t *frma)
 
 void quicktime_set_frma(quicktime_trak_t * trak, char * codec)
   {
-  quicktime_wave_t * wave = &(trak->mdia.minf.stbl.stsd.table[0].wave);
+  quicktime_wave_t * wave = &trak->mdia.minf.stbl.stsd.table[0].wave;
   memcpy(wave->frma.codec, codec, 4);
   wave->has_frma = 1;
   trak->mdia.minf.stbl.stsd.table[0].has_wave = 1;

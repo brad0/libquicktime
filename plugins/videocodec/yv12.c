@@ -67,7 +67,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   uint8_t * dst_ptr;
 
   int bytes, i;
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_yv12_codec_t *codec = vtrack->codec->priv;
   int y_size, uv_size;
   int result = 0;
@@ -124,7 +124,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 {
-	quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+	quicktime_video_map_t *vtrack = &file->vtracks[track];
 	quicktime_yv12_codec_t *codec = vtrack->codec->priv;
 	int result = 0;
 	int y_size, uv_size;

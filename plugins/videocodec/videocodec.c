@@ -29,7 +29,7 @@
 
 void lqt_set_fiel_uncompressed(quicktime_t * file, int track)
   {
-  quicktime_video_map_t *vtrack = &(file->vtracks[track]);
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_stsd_table_t *stsd;
   
   stsd = vtrack->track->mdia.minf.stbl.stsd.table;

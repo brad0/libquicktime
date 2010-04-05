@@ -139,7 +139,7 @@ quicktime_stsdtable_read_tx3g(quicktime_t *file,
     quicktime_atom_read_header(file, &leaf_atom);
     if(quicktime_atom_is(&leaf_atom, "ftab"))
       {
-      quicktime_read_ftab(file, &(table->tx3g.ftab));
+      quicktime_read_ftab(file, &table->tx3g.ftab);
       table->tx3g.has_ftab = 1;
       }
     else
@@ -224,7 +224,7 @@ quicktime_stsdtable_read_timecode(quicktime_t *file,
       {
       int len = 0;
       quicktime_read_udta_string(file,
-                                 &(table->tmcd.name),
+                                 &table->tmcd.name,
                                  &len, 0);
       }
     else
@@ -353,18 +353,18 @@ void quicktime_read_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table,
     quicktime_atom_read_header(file, &leaf_atom);
     if(quicktime_atom_is(&leaf_atom, "wave"))
       {
-      quicktime_read_wave(file, &(table->wave), &leaf_atom);
+      quicktime_read_wave(file, &table->wave, &leaf_atom);
       table->has_wave = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "esds"))
       {
-      quicktime_read_esds(file, &(table->esds));
+      quicktime_read_esds(file, &table->esds);
       table->has_esds = 1;
       quicktime_atom_skip(file, &leaf_atom);
       }
     else if(quicktime_atom_is(&leaf_atom, "chan"))
       {
-      quicktime_read_chan(file, &(table->chan));
+      quicktime_read_chan(file, &table->chan);
       table->has_chan = 1;
       quicktime_atom_skip(file, &leaf_atom);
       }
@@ -506,49 +506,49 @@ void quicktime_read_stsd_video(quicktime_t *file, quicktime_stsd_table_t *table,
       (bits_per_pixel == 4) ||
       (bits_per_pixel == 8)))
     {
-    quicktime_read_ctab(file, &(table->ctab));
+    quicktime_read_ctab(file, &table->ctab);
     table->has_ctab = 1;
     }
   else
-    quicktime_default_ctab(&(table->ctab), table->depth);
+    quicktime_default_ctab(&table->ctab, table->depth);
         
   while(quicktime_position(file) + 8 < parent_atom->end)
     {
     quicktime_atom_read_header(file, &leaf_atom);
     if(quicktime_atom_is(&leaf_atom, "ctab"))
       {
-      quicktime_read_ctab(file, &(table->ctab));
+      quicktime_read_ctab(file, &table->ctab);
       table->has_ctab = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "gama"))
       {
-      quicktime_read_gama(file, &(table->gama));
+      quicktime_read_gama(file, &table->gama);
       table->has_gama = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "fiel"))
       {
-      quicktime_read_fiel(file, &(table->fiel));
+      quicktime_read_fiel(file, &table->fiel);
       table->has_fiel = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "pasp"))
       {
-      quicktime_read_pasp(file, &(table->pasp));
+      quicktime_read_pasp(file, &table->pasp);
       table->has_pasp = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "clap"))
       {
-      quicktime_read_clap(file, &(table->clap));
+      quicktime_read_clap(file, &table->clap);
       table->has_clap = 1;
       }
     else if (quicktime_atom_is(&leaf_atom, "colr"))
       {
-      quicktime_read_colr(file, &(table->colr));
+      quicktime_read_colr(file, &table->colr);
       table->has_colr = 1;
       }
     else if(quicktime_atom_is(&leaf_atom, "esds"))
       {
       // printf("esds: %"PRId64" bytes\n", leaf_atom.size);
-      quicktime_read_esds(file, &(table->esds));
+      quicktime_read_esds(file, &table->esds);
       table->has_esds = 1;
       quicktime_atom_skip(file, &leaf_atom);
       }
@@ -589,27 +589,27 @@ void quicktime_write_stsd_video(quicktime_t *file,
 
     if (table->has_pasp)
       {
-      quicktime_write_pasp(file, &(table->pasp));
+      quicktime_write_pasp(file, &table->pasp);
       terminate = 1;
       }
     if (table->has_clap)
       {
-      quicktime_write_clap(file, &(table->clap));
+      quicktime_write_clap(file, &table->clap);
       terminate = 1;
       }
     if (table->has_colr)
       {
-      quicktime_write_colr(file, &(table->colr));
+      quicktime_write_colr(file, &table->colr);
       terminate = 1;
       }
     if (table->has_fiel)
       {
-      quicktime_write_fiel(file, &(table->fiel));
+      quicktime_write_fiel(file, &table->fiel);
       terminate = 1;
       }
     if (table->has_gama)
       {
-      quicktime_write_gama(file, &(table->gama));
+      quicktime_write_gama(file, &table->gama);
       terminate = 1;
       }
     }
@@ -662,12 +662,12 @@ void quicktime_read_stsd_table(quicktime_t *file, quicktime_minf_t *minf,
   if (quicktime_match_32(leaf_atom.type, "pano"))
     {	    
     minf->is_panorama = 1;
-    quicktime_read_pano(file, &(table->pano), &leaf_atom);
+    quicktime_read_pano(file, &table->pano, &leaf_atom);
     }
   else if (quicktime_match_32(leaf_atom.type, "qtvr"))
     {	    
     minf->is_qtvr = 1;
-    quicktime_read_qtvr(file, &(table->qtvr), &leaf_atom);
+    quicktime_read_qtvr(file, &table->qtvr, &leaf_atom);
     }
   else if (quicktime_match_32(leaf_atom.type, "\0\0\0\0") && file->moov.udta.is_qtvr)
     {	    
@@ -724,15 +724,15 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
   sprintf(table->compressor_name, "%s-%s", PACKAGE, VERSION);
   table->depth = 24;
   table->ctab_id = 65535;
-  quicktime_ctab_init(&(table->ctab));
-  quicktime_pasp_init(&(table->pasp));
-  quicktime_gama_init(&(table->gama));
-  quicktime_fiel_init(&(table->fiel));
-  quicktime_clap_init(&(table->clap));
-  quicktime_colr_init(&(table->colr));
-  quicktime_pano_init(&(table->pano));
-  quicktime_qtvr_init(&(table->qtvr));
-  quicktime_chan_init(&(table->chan));
+  quicktime_ctab_init(&table->ctab);
+  quicktime_pasp_init(&table->pasp);
+  quicktime_gama_init(&table->gama);
+  quicktime_fiel_init(&table->fiel);
+  quicktime_clap_init(&table->clap);
+  quicktime_colr_init(&table->colr);
+  quicktime_pano_init(&table->pano);
+  quicktime_qtvr_init(&table->qtvr);
+  quicktime_chan_init(&table->chan);
 	
   table->channels = 0;
   table->sample_size = 0;
@@ -746,11 +746,11 @@ void quicktime_stsd_table_delete(quicktime_stsd_table_t *table)
   /* LQT: Delete table_raw as well */
   if(table->table_raw)
     free(table->table_raw);
-  quicktime_ctab_delete(&(table->ctab));
-  quicktime_wave_delete(&(table->wave));
-  quicktime_esds_delete(&(table->esds));
-  quicktime_ftab_delete(&(table->tx3g.ftab));
-  quicktime_user_atoms_delete(&(table->user_atoms));
+  quicktime_ctab_delete(&table->ctab);
+  quicktime_wave_delete(&table->wave);
+  quicktime_esds_delete(&table->esds);
+  quicktime_ftab_delete(&table->tx3g.ftab);
+  quicktime_user_atoms_delete(&table->user_atoms);
   
   if(table->tmcd.name)
     free(table->tmcd.name);
@@ -774,19 +774,19 @@ void quicktime_stsd_video_dump(quicktime_stsd_table_t *table)
   lqt_dump("       ctab_id %d\n", table->ctab_id);
 
   if (table->has_pasp)
-    quicktime_pasp_dump(&(table->pasp));
+    quicktime_pasp_dump(&table->pasp);
   if (table->has_clap)
-    quicktime_clap_dump(&(table->clap));
+    quicktime_clap_dump(&table->clap);
   if (table->has_colr)
-    quicktime_colr_dump(&(table->colr));
+    quicktime_colr_dump(&table->colr);
   if (table->has_fiel)
-    quicktime_fiel_dump(&(table->fiel));
+    quicktime_fiel_dump(&table->fiel);
   if (table->has_gama)
-    quicktime_gama_dump(&(table->gama));
+    quicktime_gama_dump(&table->gama);
 
-  if(table->has_ctab) quicktime_ctab_dump(&(table->ctab));
-  if(table->has_esds) quicktime_esds_dump(&(table->esds));
-  quicktime_user_atoms_dump(&(table->user_atoms));
+  if(table->has_ctab) quicktime_ctab_dump(&table->ctab);
+  if(table->has_esds) quicktime_esds_dump(&table->esds);
+  quicktime_user_atoms_dump(&table->user_atoms);
   }
 
 void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
@@ -826,7 +826,7 @@ void quicktime_stsd_audio_dump(quicktime_stsd_table_t *table)
     quicktime_esds_dump(&table->esds);
   if(table->has_chan)
     quicktime_chan_dump(&table->chan);
-  quicktime_user_atoms_dump(&(table->user_atoms));
+  quicktime_user_atoms_dump(&table->user_atoms);
   }
 
 
@@ -844,9 +844,9 @@ void quicktime_stsd_table_dump(void *minf_ptr, quicktime_stsd_table_t *table)
   else if(minf->is_video) quicktime_stsd_video_dump(table);
         
   else if (quicktime_match_32(table->format, "pano"))
-    quicktime_pano_dump(&(table->pano));
+    quicktime_pano_dump(&table->pano);
   else if (quicktime_match_32(table->format, "qtvr"))
-    quicktime_qtvr_dump(&(table->qtvr));
+    quicktime_qtvr_dump(&table->qtvr);
   else if(quicktime_match_32(table->format, "text"))
     quicktime_stsdtable_dump_text(table);
   else if(quicktime_match_32(table->format, "tx3g"))
@@ -866,8 +866,8 @@ void quicktime_write_stsd_table(quicktime_t *file, quicktime_minf_t *minf, quick
 
   if(minf->is_audio) quicktime_write_stsd_audio(file, table);
   if(minf->is_video) quicktime_write_stsd_video(file, table);
-  if(minf->is_qtvr == QTVR_QTVR_PAN) quicktime_write_qtvr(file, &(table->qtvr));
-  if(minf->is_qtvr == QTVR_QTVR_OBJ) quicktime_write_qtvr(file, &(table->qtvr));
+  if(minf->is_qtvr == QTVR_QTVR_PAN) quicktime_write_qtvr(file, &table->qtvr);
+  if(minf->is_qtvr == QTVR_QTVR_OBJ) quicktime_write_qtvr(file, &table->qtvr);
   if(minf->is_timecode) quicktime_write_stsd_timecode(file, table);
   
   if(minf->is_text)
@@ -909,14 +909,14 @@ void quicktime_set_stsd_audio_v2(quicktime_stsd_table_t *table,
 
 uint8_t * quicktime_stsd_get_user_atom(quicktime_trak_t * trak, char * name, uint32_t * len)
   {
-  quicktime_stsd_table_t *table = &(trak->mdia.minf.stbl.stsd.table[0]);
+  quicktime_stsd_table_t *table = &trak->mdia.minf.stbl.stsd.table[0];
   return(quicktime_user_atoms_get_atom(&table->user_atoms, name, len));
   }
 
 void quicktime_stsd_set_user_atom(quicktime_trak_t * trak, char * name,
                                   uint8_t * data, uint32_t len)
   {
-  quicktime_stsd_table_t *table = &(trak->mdia.minf.stbl.stsd.table[0]);
+  quicktime_stsd_table_t *table = &trak->mdia.minf.stbl.stsd.table[0];
   quicktime_user_atoms_add_atom(&table->user_atoms,
                                 name, data, len);
   
