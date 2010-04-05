@@ -107,9 +107,13 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   p->data_len =
     lqt_read_video_frame(file, &p->data, &p->data_alloc,
                          vtrack->current_position, NULL, track);
+
+  if(!p->data_len)
+    return 0;
+  
   lqt_update_frame_position(vtrack);
   
-  return 0;
+  return 1;
   }
 
 /* Writing */
@@ -274,7 +278,7 @@ void lqt_compression_info_copy(lqt_compression_info_t * dst,
 
 void lqt_packet_dump(const lqt_packet_t * p)
   {
-  lqt_dump("Packet: %d bytes\n", p->data_len);
-  lqt_dump("  Time: %"PRId64", Duration: %d\n", p->timestamp, p->duration);
+  lqt_dump("Packet: %d bytes, Time: %"PRId64", Duration: %d, Keyframe: %d\n",
+           p->data_len, p->timestamp, p->duration, !!(p->flags & LQT_PACKET_KEYFRAME));
   lqt_hexdump(p->data, p->data_len > 16 ? 16 : p->data_len, 16);
   }

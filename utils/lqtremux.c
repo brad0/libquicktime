@@ -109,6 +109,9 @@ static void audio_iteration(track_t * track, lqt_packet_t * p)
       track->eof = 1;
       return;
       }
+
+    fprintf(stderr, "Got audio packet\n");
+    lqt_packet_dump(p);
     
     lqt_write_audio_packet(track->out_file, p, track->out_index);
 
@@ -129,6 +132,10 @@ static void video_iteration(track_t * track, lqt_packet_t * p)
     return;
     }
 
+  fprintf(stderr, "Got video packet\n");
+  lqt_packet_dump(p);
+
+  
   lqt_write_video_packet(track->out_file, p, track->out_index);
   
   test_time = (double)(p->timestamp + p->duration) / (double)(track->ci->video_timescale);
