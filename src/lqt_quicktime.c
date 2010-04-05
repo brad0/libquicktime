@@ -421,10 +421,10 @@ int lqt_add_audio_track_internal(quicktime_t *file,
   char * compressor = codec_info->fourccs[0];
   
   file->atracks = realloc(file->atracks,
-                          (file->total_atracks+1)*sizeof(quicktime_audio_map_t));
+                          (file->total_atracks+1)*sizeof(*file->atracks));
 
-  memset(&file->atracks[file->total_atracks], 0, sizeof(quicktime_audio_map_t));
-
+  memset(&file->atracks[file->total_atracks], 0, sizeof(*file->atracks));
+  
   if(ci)
     lqt_compression_info_copy(&file->vtracks[file->total_vtracks].ci, ci);
   
