@@ -1406,6 +1406,8 @@ int lqt_add_video_track_internal(quicktime_t *file,
                                  const lqt_compression_info_t * ci);
 
 
+int lqt_is_keyframe(quicktime_t *file, int track, int frame);
+
 
 /* Read all the information about the file. */
 /* Requires a MOOV atom be present in the file. */

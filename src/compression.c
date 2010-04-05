@@ -102,14 +102,19 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
 int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
-  p->timestamp = vtrack->timestamp;
-  p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
+
   p->data_len =
     lqt_read_video_frame(file, &p->data, &p->data_alloc,
                          vtrack->current_position, NULL, track);
-
   if(!p->data_len)
     return 0;
+
+  p->flags = 0;
+  if(lqt_is_keyframe(file, track, vtrack->current_position))
+    p->flags |= LQT_PACKET_KEYFRAME;
+  
+  p->timestamp = vtrack->timestamp;
+  p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
   
   lqt_update_frame_position(vtrack);
   

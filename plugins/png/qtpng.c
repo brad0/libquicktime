@@ -145,7 +145,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   if(!row_pointers)
     {
-    // vtrack->stream_cmodel = source_cmodel(file, track);
+    if(vtrack->ci.id)
+      vtrack->stream_cmodel = vtrack->ci.colormodel;
     return 0;
     }
 

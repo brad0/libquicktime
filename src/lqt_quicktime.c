@@ -419,14 +419,7 @@ int lqt_add_audio_track_internal(quicktime_t *file,
   {
   quicktime_trak_t *trak;
   char * compressor = codec_info->fourccs[0];
-
-  /* Fake the bits parameter for some formats. */
-  if(quicktime_match_32(compressor, QUICKTIME_ULAW) ||
-     quicktime_match_32(compressor, QUICKTIME_IMA4))
-    bits = 16;
-  else if(quicktime_match_32(compressor, QUICKTIME_RAW))
-    bits = 8;
-
+  
   file->atracks = realloc(file->atracks,
                           (file->total_atracks+1)*sizeof(quicktime_audio_map_t));
 
@@ -1334,6 +1327,25 @@ int quicktime_has_keyframes(quicktime_t *file, int track)
 	
   return stss->total_entries > 0;
   }
+
+int lqt_is_keyframe(quicktime_t *file, int track, int frame)
+  {
+  int i;
+  quicktime_stss_t *stss = &file->vtracks[track].track->mdia.minf.stbl.stss;
+
+  if(!stss->total_entries)
+    return 1;
+
+  frame++;
+  
+  for(i = 0; i < stss->total_entries; i++)
+    {
+    if(stss->table[i].sample == frame)
+      return 1;
+    }
+  return 0;
+  }
+
 
 int quicktime_init_video_map(quicktime_video_map_t *vtrack,
                              quicktime_trak_t *trak,

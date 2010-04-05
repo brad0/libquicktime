@@ -35,19 +35,6 @@ typedef struct
 } avi_tag_t;
 
 
-#if 0
-static int is_keyframe(quicktime_trak_t *trak, int frame)
-{
-	int i;
-	quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
-	frame++;
-	for(i = 0; i < stss->total_entries; i++)
-	{
-		if(stss->table[i].sample == frame) return 1;
-	}
-	return 0;
-}
-#endif
 
 void quicktime_delete_idx1(quicktime_idx1_t *idx1)
 {
