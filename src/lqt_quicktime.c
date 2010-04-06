@@ -415,10 +415,10 @@ int quicktime_audio_tracks(quicktime_t *file)
 int lqt_set_audio_codec(quicktime_t *file, int track,
                         lqt_codec_info_t * info)
   {
-  quicktime_init_audio_map(file, &file->atracks[file->total_atracks],
+  quicktime_init_audio_map(file, &file->atracks[track],
                            file->wr,
                            info);
-  lqt_set_default_audio_parameters(file, file->total_atracks);
+  lqt_set_default_audio_parameters(file, track);
   return 0;
   }
 
@@ -441,8 +441,7 @@ int lqt_add_audio_track_internal(quicktime_t *file,
   trak = quicktime_add_track(file);
   quicktime_trak_init_audio(file, trak, channels,
                             sample_rate, bits, compressor);
-
-  file->vtracks[file->total_vtracks].track = trak;
+  file->atracks[file->total_atracks].track = trak;
   
   file->total_atracks++;
   
@@ -547,17 +546,17 @@ int lqt_set_video_codec(quicktime_t *file, int track,
                        quicktime_video_height(file, track)))
     return 1;
   
-  quicktime_init_video_map(&file->vtracks[file->total_vtracks-1],
+  quicktime_init_video_map(&file->vtracks[track],
                            file->wr, info);
   
-  lqt_set_default_video_parameters(file, file->total_vtracks-1);
+  lqt_set_default_video_parameters(file, track);
   
   /* Get encoding colormodel */
   file->vtracks[file->total_vtracks-1].codec->encode_video(file,
                                                            (uint8_t**)0,
-                                                           file->total_vtracks-1);
-  file->vtracks[file->total_vtracks-1].io_cmodel =
-    file->vtracks[file->total_vtracks-1].stream_cmodel;
+                                                           track);
+  file->vtracks[track].io_cmodel =
+    file->vtracks[track].stream_cmodel;
   
   
   return 0;
