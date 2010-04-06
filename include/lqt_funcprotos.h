@@ -922,6 +922,11 @@ void quicktime_write_stsd(quicktime_t *file, quicktime_minf_t *minf, quicktime_s
 void quicktime_finalize_stsd(quicktime_t * file, quicktime_trak_t * trak, quicktime_stsd_t * stsd);
 
 
+void quicktime_stsd_set_video_codec(quicktime_stsd_t *stsd, 
+                                    char * compression);
+
+void quicktime_stsd_set_audio_codec(quicktime_stsd_t *stsd, 
+                                    char * compression);
 
 void quicktime_stsd_init_video(quicktime_t *file, 
                                quicktime_stsd_t *stsd, 
@@ -1371,13 +1376,13 @@ quicktime_trak_t* quicktime_add_track(quicktime_t *);
 int quicktime_get_timescale(double frame_rate);
 
 int quicktime_init_audio_map(quicktime_t * file,
-                             quicktime_audio_map_t *atrack, quicktime_trak_t *trak,
+                             quicktime_audio_map_t *atrack,
                              int encode, lqt_codec_info_t * info);
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack);
 
 
-int quicktime_init_video_map(quicktime_video_map_t *vtrack, quicktime_trak_t *trak,
+int quicktime_init_video_map(quicktime_video_map_t *vtrack,
                              int encode, lqt_codec_info_t * info);
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack);

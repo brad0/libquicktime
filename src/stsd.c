@@ -99,6 +99,13 @@ void quicktime_stsd_init_panorama(quicktime_t *file,
   table->pano.SHeight = height;
   }
 
+void quicktime_stsd_set_video_codec(quicktime_stsd_t *stsd, 
+                                    char * compression)
+  {
+  quicktime_stsd_table_t *table;
+  table = &stsd->table[0];
+  quicktime_copy_char32(table->format, compression);
+  }
 
 void quicktime_stsd_init_video(quicktime_t *file, 
                                quicktime_stsd_t *stsd, 
@@ -109,13 +116,24 @@ void quicktime_stsd_init_video(quicktime_t *file,
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
   table = &stsd->table[0];
-
-  quicktime_copy_char32(table->format, compression);
+  
+  if(compression)
+    quicktime_stsd_set_video_codec(stsd, compression);
+  
   table->width = frame_w;
   table->height = frame_h;
   table->frames_per_sample = 1;
   table->depth = 24;
   table->ctab_id = 65535;
+  }
+
+void quicktime_stsd_set_audio_codec(quicktime_stsd_t *stsd, 
+                                    char * compressor)
+  {
+  quicktime_stsd_table_t *table;
+  table = &stsd->table[0];
+  quicktime_copy_char32(table->format, compressor);
+  quicktime_copy_char32(table->wave.frma.codec, compressor);
   }
 
 void quicktime_stsd_init_audio(quicktime_t *file, 
@@ -128,9 +146,10 @@ void quicktime_stsd_init_audio(quicktime_t *file,
   quicktime_stsd_table_t *table;
   quicktime_stsd_init_table(stsd);
   table = &stsd->table[0];
-        
-  quicktime_copy_char32(table->format, compressor);
-  quicktime_copy_char32(table->wave.frma.codec, compressor);
+  
+  if(compressor)
+    quicktime_stsd_set_audio_codec(stsd, compressor);
+  
   table->channels = channels;
   table->sample_size = bits;
   table->samplerate = sample_rate;

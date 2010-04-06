@@ -156,7 +156,8 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
   
     if(!codec_array)
       {
-      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN, "Could not find video %s for fourcc %4s",
+      lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
+              "Could not find video %s for fourcc %4s",
               (encode ? "Encoder" : "Decoder"), compressor);
       return -1;
       }

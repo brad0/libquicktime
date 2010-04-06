@@ -933,22 +933,36 @@ int lqt_set_video(quicktime_t *file, int tracks,
 
  
 /** \ingroup audio_encode
- *  \brief Add an audio tracks for encoding
+ *  \brief Add an audio track for encoding
  *  \param file A quicktime handle
  *  \param channels Number of channels
  *  \param sample_rate Samplerate
  *  \param bits Bits per sample (always 16)
- *  \param codec_info Codec to use (see \ref codec_registry )
+ *  \param codec_info Codec to use (see \ref codec_registry) or NULL
  *
  *  This sets adds a new audio track for encoding. Note that the bits argument
  *  should always be 16 since it's implicit to the codec in all cases.
  *  Call this function to subsequently to add as many tracks as you like.
+ *
+ *  If you passed NULL for the codec_info, you should call \ref lqt_set_audio_codec
+ *  once you know which codec to use.
  */
 
 int lqt_add_audio_track(quicktime_t *file,
                         int channels, long sample_rate, int bits,
                         lqt_codec_info_t * codec_info);
 
+/** \ingroup audio_encode
+ *  \brief Set a codec for an audio track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param info The codec to be used for encoding
+ */
+  
+int lqt_set_audio_codec(quicktime_t *file, int track,
+                        lqt_codec_info_t * info);
+
+  
 /** \ingroup audio_encode
  *  \brief Set the audio language
  *  \param file A quicktime handle
@@ -968,12 +982,15 @@ void lqt_set_audio_language(quicktime_t * file, int track, const char * language
  *  \param frame_h Image height
  *  \param frame_duration Duration of one frame. This can later be overridden
  *  \param timescale Timescale of the track
- *  \param codec_info Codec to use (see \ref codec_registry )
+ *  \param codec_info Codec to use (see \ref codec_registry ) or NULL
  *
  *  This sets one or more video tracks for encoding. The framerate is
  *  passed as a rational number (timescale/frame_duration). E.g. for an NTSC
  *  stream, you'll choose timescale = 30000 and frame_duration = 1001.
  *  Call this function to subsequently to add as many tracks as you like.
+ *  
+ *  If you passed NULL for the codec_info, you should call \ref lqt_set_video_codec
+ *  once you know which codec to use.
  */
   
 int lqt_add_video_track(quicktime_t *file,
@@ -981,6 +998,17 @@ int lqt_add_video_track(quicktime_t *file,
                         int frame_duration, int timescale,
                         lqt_codec_info_t * codec_info);
 
+/** \ingroup video_encode
+ *  \brief Set a codec for an audio track
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param info The codec to be used for encoding
+ */
+  
+int lqt_set_video_codec(quicktime_t *file, int track,
+                        lqt_codec_info_t * info);
+
+  
 /** \ingroup video_encode
  *  \brief Enable multipass encoding
  *  \param file A quicktime handle

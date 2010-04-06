@@ -412,13 +412,23 @@ int quicktime_audio_tracks(quicktime_t *file)
   return result;
   }
 
+int lqt_set_audio_codec(quicktime_t *file, int track,
+                        lqt_codec_info_t * info)
+  {
+  quicktime_init_audio_map(file, &file->atracks[file->total_atracks],
+                           file->wr,
+                           info);
+  lqt_set_default_audio_parameters(file, file->total_atracks);
+  return 0;
+  }
+
 int lqt_add_audio_track_internal(quicktime_t *file,
                                  int channels, long sample_rate, int bits,
                                  lqt_codec_info_t * codec_info,
                                  const lqt_compression_info_t * ci)
   {
   quicktime_trak_t *trak;
-  char * compressor = codec_info->fourccs[0];
+  char * compressor = codec_info ? codec_info->fourccs[0] : NULL;
   
   file->atracks = realloc(file->atracks,
                           (file->total_atracks+1)*sizeof(*file->atracks));
@@ -431,16 +441,14 @@ int lqt_add_audio_track_internal(quicktime_t *file,
   trak = quicktime_add_track(file);
   quicktime_trak_init_audio(file, trak, channels,
                             sample_rate, bits, compressor);
+
+  file->vtracks[file->total_vtracks].track = trak;
   
-  quicktime_init_audio_map(file, &file->atracks[file->total_atracks],
-                           trak, file->wr,
-                           codec_info);
-  file->atracks[file->total_atracks].track = trak;
-  file->atracks[file->total_atracks].channels = channels;
-  file->atracks[file->total_atracks].current_position = 0;
-  file->atracks[file->total_atracks].cur_chunk = 0;
-  lqt_set_default_audio_parameters(file, file->total_atracks);
   file->total_atracks++;
+  
+  if(codec_info)
+    return lqt_set_audio_codec(file, file->total_atracks-1,
+                               codec_info);
   return 0;
   }
 
@@ -512,6 +520,48 @@ int quicktime_set_video(quicktime_t *file,
   return 0;
   }
 
+static int check_image_size(lqt_codec_info_t * info,
+                            int frame_w, int frame_h)
+  {
+  int i;
+  if(info->num_image_sizes)
+    {
+    for(i = 0; i < info->num_image_sizes; i++)
+      {
+      if((frame_w == info->image_sizes[i].width) &&
+         (frame_h == info->image_sizes[i].height))
+        return 1;
+      }
+    
+    return 0;
+    }
+  else
+    return 1;
+  }
+
+int lqt_set_video_codec(quicktime_t *file, int track,
+                        lqt_codec_info_t * info)
+  {
+  if(!check_image_size(info,
+                       quicktime_video_width(file, track),
+                       quicktime_video_height(file, track)))
+    return 1;
+  
+  quicktime_init_video_map(&file->vtracks[file->total_vtracks-1],
+                           file->wr, info);
+  
+  lqt_set_default_video_parameters(file, file->total_vtracks-1);
+  
+  /* Get encoding colormodel */
+  file->vtracks[file->total_vtracks-1].codec->encode_video(file,
+                                                           (uint8_t**)0,
+                                                           file->total_vtracks-1);
+  file->vtracks[file->total_vtracks-1].io_cmodel =
+    file->vtracks[file->total_vtracks-1].stream_cmodel;
+  
+  
+  return 0;
+  }
 
 int lqt_add_video_track_internal(quicktime_t *file,
                                  int frame_w, int frame_h,
@@ -519,52 +569,38 @@ int lqt_add_video_track_internal(quicktime_t *file,
                                  lqt_codec_info_t * info,
                                  const lqt_compression_info_t * ci)
   {
-  char * compressor = info->fourccs[0];
+  char * compressor = info ? info->fourccs[0] : NULL;
   quicktime_trak_t *trak;
 
   /* Check if the image size is supported */
-
-  if(info->num_image_sizes)
+  if(info && !check_image_size(info, frame_w, frame_h))
     {
-    int i;
-    for(i = 0; i < info->num_image_sizes; i++)
-      {
-      if((frame_w == info->image_sizes[i].width) &&
-         (frame_h == info->image_sizes[i].height))
-        break;
-      }
-    if(i >= info->num_image_sizes)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-              "Adding video track failed, unsupported image size");
-      return 1;
-      }
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+            "Adding video track failed, unsupported image size");
+    return 1;
     }
   
   if(!file->total_vtracks)
     quicktime_mhvd_init_video(file, &file->moov.mvhd, timescale);
   file->vtracks = realloc(file->vtracks, (file->total_vtracks+1) *
-                          sizeof(quicktime_video_map_t));
-  memset(&file->vtracks[file->total_vtracks], 0, sizeof(quicktime_video_map_t));
-
+                          sizeof(*file->vtracks));
+  memset(&file->vtracks[file->total_vtracks], 0, sizeof(*file->vtracks));
+  
   if(ci)
     lqt_compression_info_copy(&file->vtracks[file->total_vtracks].ci, ci);
-
+  
   trak = quicktime_add_track(file);
-
+  file->vtracks[file->total_vtracks].track = trak;
+  
   file->total_vtracks++;
         
   quicktime_trak_init_video(file, trak, frame_w, frame_h,
                             frame_duration, timescale, compressor);
 
-  quicktime_init_video_map(&file->vtracks[file->total_vtracks-1],
-                           trak, file->wr, info);
-  lqt_set_default_video_parameters(file, file->total_vtracks-1);
-        
-  /* Get encoding colormodel */
-  file->vtracks[file->total_vtracks-1].codec->encode_video(file, (uint8_t**)0, file->total_vtracks-1);
-  file->vtracks[file->total_vtracks-1].io_cmodel =
-    file->vtracks[file->total_vtracks-1].stream_cmodel;
+
+  if(info)
+    return lqt_set_video_codec(file, file->total_vtracks-1, info);
+  
   return 0;
   }
 
@@ -1348,11 +1384,9 @@ int lqt_is_keyframe(quicktime_t *file, int track, int frame)
 
 
 int quicktime_init_video_map(quicktime_video_map_t *vtrack,
-                             quicktime_trak_t *trak,
                              int encode,
                              lqt_codec_info_t * info)
   {
-  vtrack->track = trak;
   vtrack->current_position = 0;
   vtrack->cur_chunk = 0;
   vtrack->io_cmodel = BC_RGB888;
@@ -1379,21 +1413,20 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
 
 int quicktime_init_audio_map(quicktime_t * file,
                              quicktime_audio_map_t *atrack,
-                             quicktime_trak_t *trak, int encode,
+                             int encode,
                              lqt_codec_info_t * info)
   {
   if(!encode)
-    atrack->total_samples = quicktime_track_samples(file, trak);
-  atrack->track = trak;
-  atrack->channels = trak->mdia.minf.stbl.stsd.table[0].channels;
-  atrack->samplerate = (int)(trak->mdia.minf.stbl.stsd.table[0].samplerate + 0.5);
+    atrack->total_samples = quicktime_track_samples(file, atrack->track);
+  atrack->channels = atrack->track->mdia.minf.stbl.stsd.table[0].channels;
+  atrack->samplerate = (int)(atrack->track->mdia.minf.stbl.stsd.table[0].samplerate + 0.5);
   atrack->current_position = 0;
   atrack->cur_chunk = 0;
 
   if(!encode) 
     {
     /* Set channel setup */
-    if(trak->mdia.minf.stbl.stsd.table[0].has_chan)
+    if(atrack->track->mdia.minf.stbl.stsd.table[0].has_chan)
       quicktime_get_chan(atrack);
     }
   quicktime_init_acodec(atrack, encode, info);
@@ -1426,7 +1459,8 @@ void quicktime_init_maps(quicktime_t * file)
       {
       while(!file->moov.trak[track]->mdia.minf.is_audio)
         track++;
-      quicktime_init_audio_map(file, &file->atracks[i], file->moov.trak[track],
+      file->atracks[i].track = file->moov.trak[track];
+      quicktime_init_audio_map(file, &file->atracks[i],
                                file->wr,
                                (lqt_codec_info_t*)0);
       /* Some codecs set the channel setup */
@@ -1444,8 +1478,9 @@ void quicktime_init_maps(quicktime_t * file)
       {
       while(!file->moov.trak[track]->mdia.minf.is_video)
         track++;
-      
-      quicktime_init_video_map(&file->vtracks[i], file->moov.trak[track],
+
+      file->vtracks[i].track = file->moov.trak[track];
+      quicktime_init_video_map(&file->vtracks[i],
                                file->wr,
                                (lqt_codec_info_t*)0);
       /* Get decoder colormodel */
