@@ -415,6 +415,12 @@ int quicktime_audio_tracks(quicktime_t *file)
 int lqt_set_audio_codec(quicktime_t *file, int track,
                         lqt_codec_info_t * info)
   {
+  quicktime_stsd_t * stsd;
+  
+  stsd = &file->atracks[track].track->mdia.minf.stbl.stsd;
+  
+  quicktime_stsd_set_audio_codec(stsd, info->fourccs[0]);
+  
   quicktime_init_audio_map(file, &file->atracks[track],
                            file->wr,
                            info);
@@ -541,10 +547,16 @@ static int check_image_size(lqt_codec_info_t * info,
 int lqt_set_video_codec(quicktime_t *file, int track,
                         lqt_codec_info_t * info)
   {
+  quicktime_stsd_t *stsd;
+  
   if(!check_image_size(info,
                        quicktime_video_width(file, track),
                        quicktime_video_height(file, track)))
     return 1;
+
+  stsd = &file->vtracks[track].track->mdia.minf.stbl.stsd;
+  
+  quicktime_stsd_set_video_codec(stsd, info->fourccs[0]);
   
   quicktime_init_video_map(&file->vtracks[track],
                            file->wr, info);
