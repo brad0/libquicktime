@@ -215,9 +215,9 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-static int writes_compressed(quicktime_t * file, const lqt_compression_info_t * ci)
+static int writes_compressed(lqt_file_type_t type, const lqt_compression_info_t * ci)
   {
-  if(!(file->file_type & (LQT_FILE_QT | LQT_FILE_QT_OLD)))
+  if(!(type & (LQT_FILE_QT | LQT_FILE_QT_OLD)))
     return 0;
 
   if((ci->colormodel != BC_RGB888) && (ci->colormodel != BC_RGBA8888))

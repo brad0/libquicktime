@@ -123,7 +123,7 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
 
 /* Writing */
 
-int lqt_writes_compressed(quicktime_t * file,
+int lqt_writes_compressed(lqt_file_type_t type,
                           const lqt_compression_info_t * ci,
                           lqt_codec_info_t * codec_info)
   {
@@ -136,7 +136,7 @@ int lqt_writes_compressed(quicktime_t * file,
   codec = quicktime_load_codec(codec_info, NULL, NULL);
 
   if(!codec->writes_compressed ||
-     codec->writes_compressed(file, ci))
+     codec->writes_compressed(type, ci))
     ret = 1;
 
   quicktime_delete_codec(codec);

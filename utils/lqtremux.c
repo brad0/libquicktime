@@ -225,7 +225,7 @@ static int init_demultiplex(char * filename)
       audio_tracks[i].in_file = file;
       audio_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
       
-      if(!lqt_writes_compressed(audio_tracks[i].out_file,
+      if(!lqt_writes_compressed(lqt_get_file_type(audio_tracks[i].out_file),
                                 audio_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d cannot be written compressed\n", i+1);
@@ -268,7 +268,7 @@ static int init_demultiplex(char * filename)
       video_tracks[i].in_file = file;
       video_tracks[i].out_file = lqt_open_write(tmp_string, LQT_FILE_QT);
 
-      if(!lqt_writes_compressed(video_tracks[i].out_file,
+      if(!lqt_writes_compressed(lqt_get_file_type(video_tracks[i].out_file),
                                 video_tracks[i].ci, codec_info))
         {
         fprintf(stderr, "Video track %d cannot be written compressed\n", i+1);
@@ -387,7 +387,8 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         continue;
         }
       
-      if(!lqt_writes_compressed(file, audio_tracks[audio_index].ci, codec_info))
+      if(!lqt_writes_compressed(lqt_get_file_type(file),
+                                audio_tracks[audio_index].ci, codec_info))
         {
         fprintf(stderr, "Audio track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);
@@ -424,7 +425,8 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         continue;
         }
 
-      if(!lqt_writes_compressed(file, video_tracks[video_index].ci, codec_info))
+      if(!lqt_writes_compressed(lqt_get_file_type(file),
+                                video_tracks[video_index].ci, codec_info))
         {
         fprintf(stderr, "Video track %d of file %s cannot be written compressed\n",
                 j+1, in_files[i]);

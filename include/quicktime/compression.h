@@ -126,7 +126,7 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track);
 
 /* Writing */
 
-int lqt_writes_compressed(quicktime_t * file,
+int lqt_writes_compressed(lqt_file_type_t type,
                           const lqt_compression_info_t * ci,
                           lqt_codec_info_t * codec_info);
 
