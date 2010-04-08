@@ -781,8 +781,8 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
   quicktime_audio_map_t * atrack;
   atrack = &file->atracks[track];
   result = atrack->codec->decode_audio(file, output, 
-                                                               samples,
-                                                               track);
+                                       samples,
+                                       track);
 
   file->atracks[track].current_position += samples;
   return result;

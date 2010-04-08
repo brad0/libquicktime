@@ -442,7 +442,7 @@ int lqt_add_audio_track_internal(quicktime_t *file,
   memset(&file->atracks[file->total_atracks], 0, sizeof(*file->atracks));
   
   if(ci)
-    lqt_compression_info_copy(&file->vtracks[file->total_vtracks].ci, ci);
+    lqt_compression_info_copy(&file->atracks[file->total_atracks].ci, ci);
   
   trak = quicktime_add_track(file);
   quicktime_trak_init_audio(file, trak, channels,
@@ -598,8 +598,10 @@ int lqt_add_video_track_internal(quicktime_t *file,
   memset(&file->vtracks[file->total_vtracks], 0, sizeof(*file->vtracks));
   
   if(ci)
+    {
     lqt_compression_info_copy(&file->vtracks[file->total_vtracks].ci, ci);
-  
+    file->vtracks[file->total_vtracks].stream_cmodel = ci->colormodel;
+    }
   trak = quicktime_add_track(file);
   file->vtracks[file->total_vtracks].track = trak;
   
@@ -1748,16 +1750,18 @@ int quicktime_read_info(quicktime_t *file)
       /* go back to the original position */
       quicktime_set_position(file, start_position);
       }
-        
+
+  /* Set file type if no ftyp is there (must be done before initializing the codecs) */
+  if(file->file_type == LQT_FILE_NONE)
+    file->file_type = LQT_FILE_QT_OLD;
+
+  
   /* Initialize track map objects */
   if(got_header)
     {
     quicktime_init_maps(file);
     }
 
-  /* Set file type if no ftyp is there */
-  if(file->file_type == LQT_FILE_NONE)
-    file->file_type = LQT_FILE_QT_OLD;
         
   /* Shut down preload in case of an obsurdly high temp_size */
   quicktime_set_preload(file, 0);

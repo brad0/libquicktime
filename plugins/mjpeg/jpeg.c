@@ -121,6 +121,10 @@ static int decode(quicktime_t *file,
       /* Detect colormodel and return */
       vtrack->stream_cmodel = mjpeg->jpeg_color_model;
       codec->have_frame = 1;
+
+      /* Set compression info */
+      if(file->file_type & (LQT_FILE_QT | LQT_FILE_QT_OLD))
+        vtrack->ci.id = LQT_COMPRESSION_JPEG;
       return 0;
       }
     }
@@ -137,6 +141,17 @@ static int decode(quicktime_t *file,
   return result;
   }
 
+static int writes_compressed(lqt_file_type_t type, const lqt_compression_info_t * ci)
+  {
+  if((ci->colormodel == BC_YUVJ444P) ||
+     (ci->colormodel == BC_YUVJ422P) ||
+     (ci->colormodel == BC_YUVJ420P))
+    return 1;
+  else
+    return 0;
+  }
+
+  
 static void resync(quicktime_t *file, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
@@ -257,7 +272,8 @@ void quicktime_init_codec_jpeg(quicktime_codec_t * codec_base,
   codec_base->encode_video = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->resync = resync;
-
+  codec_base->writes_compressed = writes_compressed;
+  
   /* Init private items */
   codec->quality = 80;
   codec->usefloat = 0;

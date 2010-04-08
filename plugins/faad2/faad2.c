@@ -343,7 +343,7 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   codec_base->set_parameter = set_parameter;
   
   /* Ok, usually, we initialize decoders during the first
-     decode() call, but in this case, we might need to
+     decode() call. But in this case, we might need to
      set the correct samplerate, which should be known before */
 
   codec->dec = faacDecOpen();

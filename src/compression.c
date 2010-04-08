@@ -25,7 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lqt_private.h"
+#include <lqt_private.h>
+#include <quicktime/lqt_codecapi.h>
 
 void lqt_compression_info_free(lqt_compression_info_t * info)
   {
@@ -60,8 +61,13 @@ lqt_get_audio_compression_info(quicktime_t * file, int track)
   
   if(atrack->ci.id == LQT_COMPRESSION_NONE)
     return NULL;
-  else
-    return &atrack->ci;
+
+  if(!atrack->ci.samplerate)
+    {
+    atrack->ci.samplerate = quicktime_sample_rate(file, track);
+    atrack->ci.num_channels = quicktime_track_channels(file, track);
+    }
+  return &atrack->ci;
   }
 
 const lqt_compression_info_t *
@@ -73,29 +79,48 @@ lqt_get_video_compression_info(quicktime_t * file, int track)
   
   if(vtrack->ci.id == LQT_COMPRESSION_NONE)
     return NULL;
-  else
-    {
-    if(!vtrack->ci.width)
-      {
-      vtrack->ci.width = quicktime_video_width(file, track);
-      vtrack->ci.height = quicktime_video_height(file, track);
-      lqt_get_pixel_aspect(file, track,
-                           &vtrack->ci.pixel_width,
-                           &vtrack->ci.pixel_height);
-      vtrack->ci.colormodel = vtrack->stream_cmodel;
-      vtrack->ci.video_timescale = lqt_video_time_scale(file, track);
 
-      if(vtrack->track->mdia.minf.stbl.stss.total_entries)
-        vtrack->ci.flags |= LQT_COMPRESSION_HAS_P_FRAMES;
-      if(vtrack->track->mdia.minf.stbl.ctts.total_entries)
-        vtrack->ci.flags |= LQT_COMPRESSION_HAS_B_FRAMES;
-      }
-    return &vtrack->ci;
+  if(!vtrack->ci.width)
+    {
+    vtrack->ci.width = quicktime_video_width(file, track);
+    vtrack->ci.height = quicktime_video_height(file, track);
+    lqt_get_pixel_aspect(file, track,
+                         &vtrack->ci.pixel_width,
+                         &vtrack->ci.pixel_height);
+    vtrack->ci.colormodel = vtrack->stream_cmodel;
+    vtrack->ci.video_timescale = lqt_video_time_scale(file, track);
+    
+    if(vtrack->track->mdia.minf.stbl.stss.total_entries)
+      vtrack->ci.flags |= LQT_COMPRESSION_HAS_P_FRAMES;
+    if(vtrack->track->mdia.minf.stbl.ctts.total_entries)
+      vtrack->ci.flags |= LQT_COMPRESSION_HAS_B_FRAMES;
     }
+  return &vtrack->ci;
   }
 
 int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+
+  if(atrack->block_align)
+    {
+    int bytes_from_samples;
+    p->data_len =
+      lqt_read_audio_chunk(file, track, atrack->cur_chunk,
+                           &p->data, &p->data_alloc, &p->duration);
+
+    if(!p->data_len)
+      return 0;
+    
+    bytes_from_samples = p->duration * atrack->block_align;
+    if(p->data_len > bytes_from_samples)
+      p->data_len = bytes_from_samples;
+
+    p->timestamp = atrack->current_position;
+    atrack->current_position += p->duration;
+    atrack->cur_chunk++;
+    return 1;
+    }
   return 0;
   }
 
@@ -166,6 +191,25 @@ int lqt_add_video_track_compressed(quicktime_t * file,
 int lqt_write_audio_packet(quicktime_t * file,
                            lqt_packet_t * p, int track)
   {
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+
+  if(atrack->codec->write_packet)
+    return atrack->codec->write_packet(file, p, track);
+  else
+    {
+    quicktime_atom_t chunk_atom;
+    int result;
+    quicktime_write_chunk_header(file, atrack->track, &chunk_atom);
+    result = quicktime_write_data(file, p->data, p->data_len);
+    quicktime_write_chunk_footer(file, atrack->track,
+                                 atrack->cur_chunk, &chunk_atom, p->duration);
+    atrack->cur_chunk++;
+    if(result)
+      return 0;
+    else
+      return 1;
+    }
+  
   return 0;
   }
 
@@ -174,7 +218,7 @@ int lqt_write_video_packet(quicktime_t * file,
   {
   int result;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
-
+  
   /* Must set valid timestamp for encoders */
   vtrack->timestamp = p->timestamp;
   lqt_video_append_timestamp(file, track, p->timestamp, p->duration);
@@ -190,7 +234,7 @@ int lqt_write_video_packet(quicktime_t * file,
     lqt_write_frame_footer(file, track);
     }
 
-  file->vtracks[track].current_position++;
+  vtrack->current_position++;
   
   return result;
   }

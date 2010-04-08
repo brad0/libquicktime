@@ -1341,6 +1341,8 @@ typedef struct
   /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
   int wav_id;
 
+  /* PCM codecs need this */
+  int block_align;
 
   lqt_compression_info_t ci;
   

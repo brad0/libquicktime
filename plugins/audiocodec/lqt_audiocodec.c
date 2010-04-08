@@ -197,6 +197,7 @@ static lqt_codec_info_static_t codec_info_ulaw =
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+    .compression_id = LQT_COMPRESSION_ULAW,
   };
 
 static lqt_codec_info_static_t codec_info_alaw =
@@ -211,6 +212,7 @@ static lqt_codec_info_static_t codec_info_alaw =
     .encoding_parameters = (lqt_parameter_info_static_t*)0,
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+    .compression_id = LQT_COMPRESSION_ALAW,
   };
 
 

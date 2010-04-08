@@ -71,6 +71,7 @@ every frame in YUV 4:2:0"),
     .decoding_parameters = (lqt_parameter_info_static_t*)0,
     .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
     .encoding_colormodels = (int[]){ BC_YUVJ420P, BC_YUVJ422P, BC_YUVJ444P, LQT_COLORMODEL_NONE },
+    .compression_id      = LQT_COMPRESSION_JPEG,
   };
 
 static lqt_codec_info_static_t codec_info_mjpa =
