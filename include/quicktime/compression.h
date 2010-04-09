@@ -54,6 +54,7 @@ typedef enum
 
 #define LQT_COMPRESSION_HAS_P_FRAMES (1<<0) //!< Not all frames are keyframes
 #define LQT_COMPRESSION_HAS_B_FRAMES (1<<1) //!< Frames don't appear in presentation order 
+#define LQT_COMPRESSION_SBR          (1<<2) //!< Samplerate got doubled by decoder, format and sample counts are for the upsampled rate
 
 typedef struct
   {
@@ -103,6 +104,11 @@ lqt_compression_id_t lqt_compression_id_from_string(const char * str);
 
 
 void lqt_compression_info_free(lqt_compression_info_t * info);
+
+void lqt_compression_info_set_header(lqt_compression_info_t * info,
+                                     uint8_t * header,
+                                     int header_len);
+
 
 void lqt_compression_info_copy(lqt_compression_info_t * dst,
                                const lqt_compression_info_t * src);

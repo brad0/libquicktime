@@ -268,7 +268,7 @@ void quicktime_esds_delete(quicktime_esds_t * esds)
   }
 
 quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
-                                      uint8_t * decoderConfig,
+                                      const uint8_t * decoderConfig,
                                       int decoderConfigLen)
   {
   quicktime_esds_t * esds;

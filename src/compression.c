@@ -312,6 +312,13 @@ void lqt_compression_info_dump(const lqt_compression_info_t * ci)
       lqt_dump(", B");
     lqt_dump("\n");
     }
+  else
+    {
+    lqt_dump("  Samplerate:  %d\n", ci->samplerate);
+    lqt_dump("  Channels:    %d\n", ci->num_channels);
+    lqt_dump("  SBR:         %s\n",
+            (ci->flags & LQT_COMPRESSION_SBR ? "Yes" : "No"));
+    }
   }
 
 void lqt_compression_info_copy(lqt_compression_info_t * dst,
@@ -324,6 +331,16 @@ void lqt_compression_info_copy(lqt_compression_info_t * dst,
     memcpy(dst->global_header, src->global_header, dst->global_header_len);
     }
   }
+
+void lqt_compression_info_set_header(lqt_compression_info_t * info,
+                                     uint8_t * header,
+                                     int header_len)
+  {
+  info->global_header = malloc(header_len);
+  memcpy(info->global_header, header, header_len);
+  info->global_header_len = header_len;
+  }
+
 
 void lqt_packet_dump(const lqt_packet_t * p)
   {

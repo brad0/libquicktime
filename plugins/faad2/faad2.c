@@ -381,11 +381,18 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);
 
+  atrack->ci.id = LQT_COMPRESSION_AAC;
+
+  lqt_compression_info_set_header(&atrack->ci,
+                                  extradata,
+                                  extradata_size);
+  
   if(atrack->samplerate != samplerate)
     {
     atrack->samplerate = samplerate;
     codec->upsample = 1;
     atrack->total_samples *= 2;
+    atrack->ci.flags |= LQT_COMPRESSION_SBR;
     }
   stsd->table[0].channels = channels;
   atrack->channels = channels;

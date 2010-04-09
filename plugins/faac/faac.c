@@ -132,12 +132,80 @@ static int encode_frame(quicktime_t *file,
   return 1;
   }
 
+static void setup_header(quicktime_t *file, int track,
+                         const uint8_t * header, int header_len)
+  {
+  quicktime_esds_t * esds;
+  uint8_t mp4a_atom[4];
+  quicktime_audio_map_t *track_map = &file->atracks[track];
+  quicktime_trak_t * trak = track_map->track;
+  
+  esds = quicktime_set_esds(trak, header, header_len);
+
+  quicktime_set_frma(trak, "mp4a");
+
+  mp4a_atom[0] = 0x00;
+  mp4a_atom[1] = 0x00;
+  mp4a_atom[2] = 0x00;
+  mp4a_atom[3] = 0x00;
+    
+  quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
+#if 0
+  quicktime_set_stsd_audio_v2(&trak->mdia.minf.stbl.stsd.table[0],
+                              0x00000002, /* formatSpecificFlags */
+                              0, /* constBytesPerAudioPacket */
+                              codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
+#else
+  quicktime_set_stsd_audio_v1(&trak->mdia.minf.stbl.stsd.table[0],
+                              1024, // uint32_t samples_per_packet,
+                              768, // uint32_t bytes_per_packet,
+                              1536, // uint32_t bytes_per_frame,
+                              0 // uint32_t bytes_per_sample
+                              );
+#endif
+  trak->mdia.minf.stbl.stsd.table[0].sample_size = 16;
+    
+  esds->version         = 0;
+  esds->flags           = 0;
+    
+  esds->esid            = 0;
+  esds->stream_priority = 0;
+    
+  esds->objectTypeId    = 64; /* MPEG-4 audio */
+  esds->streamType      = 0x15; /* from qt4l and Autumns Child.m4a */
+  //    esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
+  esds->bufferSizeDB    = 6144;
+  /* Maybe correct these later? */
+  esds->maxBitrate      = 128000;
+  esds->avgBitrate      = 128000;
+
+  /* No idea if the following is right but other AAC LC files have the same */
+
+#if 0
+  switch(enc_config->aacObjectType)
+    {
+    case LOW:
+      // "High Quality Audio Profile @ Level 2"
+      file->moov.iods.audioProfileId  = 0x0f;
+      break;
+    case SSR:
+      file->moov.iods.audioProfileId  = 0x0f;
+      break;
+    default:
+      file->moov.iods.audioProfileId  = 0x0f;
+      break;
+    }
+#else
+  file->moov.iods.audioProfileId  = 0x0f;
+#endif
+  
+  }
+
 static int encode(quicktime_t *file, 
                   void *_input,
                   long samples,
                   int track)
   {
-  quicktime_esds_t * esds;
   int samples_read;
   int samples_to_copy;
   
@@ -152,7 +220,6 @@ static int encode(quicktime_t *file,
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t * trak = track_map->track;
-  uint8_t mp4a_atom[4];
   
   if(!codec->initialized)
     {
@@ -198,63 +265,11 @@ static int encode(quicktime_t *file,
     
     faacEncGetDecoderSpecificInfo(codec->enc, &decoderConfig,
                                   &decoderConfigLen);
+
+    setup_header(file, track,  decoderConfig, decoderConfigLen);
     
-    esds = quicktime_set_esds(trak,
-                              decoderConfig,
-                              decoderConfigLen);
     free(decoderConfig);
-
-    quicktime_set_frma(trak, "mp4a");
-
-    mp4a_atom[0] = 0x00;
-    mp4a_atom[1] = 0x00;
-    mp4a_atom[2] = 0x00;
-    mp4a_atom[3] = 0x00;
     
-    quicktime_wave_set_user_atom(trak, "mp4a", mp4a_atom, 4);
-#if 0
-    quicktime_set_stsd_audio_v2(&trak->mdia.minf.stbl.stsd.table[0],
-                                0x00000002, /* formatSpecificFlags */
-                                0, /* constBytesPerAudioPacket */
-                                codec->samples_per_frame /* constLPCMFramesPerAudioPacket */);
-#else
-    quicktime_set_stsd_audio_v1(&trak->mdia.minf.stbl.stsd.table[0],
-                                1024, // uint32_t samples_per_packet,
-                                768, // uint32_t bytes_per_packet,
-                                1536, // uint32_t bytes_per_frame,
-                                0 // uint32_t bytes_per_sample
-                                );
-#endif
-    trak->mdia.minf.stbl.stsd.table[0].sample_size = 16;
-    
-    esds->version         = 0;
-    esds->flags           = 0;
-    
-    esds->esid            = 0;
-    esds->stream_priority = 0;
-    
-    esds->objectTypeId    = 64; /* MPEG-4 audio */
-    esds->streamType      = 0x15; /* from qt4l and Autumns Child.m4a */
-    //    esds->bufferSizeDB    = 64000; /* Hopefully not important :) */
-    esds->bufferSizeDB    = 6144;
-    /* Maybe correct these later? */
-    esds->maxBitrate      = 128000;
-    esds->avgBitrate      = 128000;
-
-    /* No idea if the following is right but other AAC LC files have the same */
-    switch(enc_config->aacObjectType)
-      {
-      case LOW:
-        // "High Quality Audio Profile @ Level 2"
-        file->moov.iods.audioProfileId  = 0x0f;
-        break;
-      case SSR:
-        file->moov.iods.audioProfileId  = 0x0f;
-        break;
-      default:
-        file->moov.iods.audioProfileId  = 0x0f;
-        break;
-      }
     }
   
   /* Encode samples */

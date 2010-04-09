@@ -420,8 +420,8 @@ int quicktime_read_mp4_descr_length(quicktime_t * file);
    other parameters can be set by the encoder */
 
 LQT_EXTERN quicktime_esds_t * quicktime_set_esds(quicktime_trak_t * trak,
-                                      uint8_t * decoderConfig,
-                                      int decoderConfigLen);
+                                                 const uint8_t * decoderConfig,
+                                                 int decoderConfigLen);
 
 /* fiel.c */
 
