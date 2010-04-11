@@ -2601,7 +2601,8 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
 
 /* Determine the number of VBR packets (=samples) in one chunk */
 
-int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * samples)
+int lqt_audio_num_vbr_packets(quicktime_t * file,
+                              int track, long chunk, int * samples)
   {
   int64_t start_sample;
   

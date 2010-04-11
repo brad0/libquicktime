@@ -121,6 +121,44 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
     atrack->cur_chunk++;
     return 1;
     }
+  else if(lqt_audio_is_vbr(file, track))
+    {
+    /* First chunk */
+    if(!atrack->total_vbr_packets)
+      {
+      atrack->cur_chunk = 0;
+      atrack->total_vbr_packets =
+        lqt_audio_num_vbr_packets(file, track,
+                                  atrack->cur_chunk,
+                                  NULL);
+      atrack->cur_vbr_packet = 0;
+      }
+    /* Next chunk */
+    else if(atrack->cur_vbr_packet == atrack->total_vbr_packets)
+      {
+      atrack->cur_chunk++;
+      atrack->total_vbr_packets =
+        lqt_audio_num_vbr_packets(file, track,
+                                  atrack->cur_chunk,
+                                  NULL);
+      atrack->cur_vbr_packet = 0;
+      }
+    if(!atrack->total_vbr_packets)
+      return 0;
+    
+    p->data_len = lqt_audio_read_vbr_packet(file, track, atrack->cur_chunk,
+                                            atrack->cur_vbr_packet,
+                                            &p->data, &p->data_alloc, &p->duration);
+    
+    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+      p->duration *= 2;
+    
+    p->timestamp = atrack->current_position;
+    atrack->current_position += p->duration;
+    atrack->cur_vbr_packet++;
+    return 1;
+    }
+  
   return 0;
   }
 
@@ -173,9 +211,18 @@ int lqt_add_audio_track_compressed(quicktime_t * file,
                                    const lqt_compression_info_t * ci,
                                    lqt_codec_info_t * codec_info)
   {
-  return lqt_add_audio_track_internal(file,
-                                      ci->num_channels, ci->samplerate, 16,
-                                      codec_info, ci);
+  quicktime_audio_map_t *atrack;
+  
+  if(lqt_add_audio_track_internal(file,
+                                  ci->num_channels, ci->samplerate, 16,
+                                  codec_info, ci))
+    return 1;
+
+  atrack = &file->atracks[file->total_atracks-1];
+
+  if(atrack->codec->init_compressed)
+    atrack->codec->init_compressed(file, file->total_atracks-1);
+  return 0;
   }
 
 int lqt_add_video_track_compressed(quicktime_t * file,
@@ -191,13 +238,35 @@ int lqt_add_video_track_compressed(quicktime_t * file,
 int lqt_write_audio_packet(quicktime_t * file,
                            lqt_packet_t * p, int track)
   {
+  int result;
   quicktime_audio_map_t *atrack = &file->atracks[track];
 
-  if(atrack->codec->write_packet)
-    return atrack->codec->write_packet(file, p, track);
+  //  if(atrack->codec->write_packet)
+  //    return atrack->codec->write_packet(file, p, track);
+  if(lqt_audio_is_vbr(file, track))
+    {
+    int samples;
+    if(file->write_trak != atrack->track)
+      quicktime_write_chunk_header(file, atrack->track);
+
+    lqt_start_audio_vbr_frame(file, track);
+    
+    result = !quicktime_write_data(file, p->data, p->data_len);
+    
+    samples = p->duration;
+    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+      samples /= 2;
+    
+    lqt_finish_audio_vbr_frame(file, track, samples);
+    
+    if(result)
+      return 0;
+    else
+      return 1;
+
+    }
   else
     {
-    int result;
     quicktime_write_chunk_header(file, atrack->track);
     result = quicktime_write_data(file, p->data, p->data_len);
 

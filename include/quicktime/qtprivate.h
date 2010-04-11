@@ -1318,7 +1318,10 @@ typedef struct
   lqt_channel_t * channel_setup;
   int64_t current_position;   /* current sample in output file */
   int64_t cur_chunk;      /* current chunk in output file */
-
+  
+  int cur_vbr_packet;     // Current packet within this chunk
+  int total_vbr_packets;  // Total number of VBR packets in this chunk
+  
   /* Last position if set by the codec. If last position and current position
      differ, the codec knows, that a seek happened since the last decode call */
   int64_t last_position;
@@ -1366,13 +1369,14 @@ typedef struct
   
   int64_t stts_index;
   int64_t stts_count;
-  int stream_cmodel;  /* Colormodel, which is read/written natively by the codec  */
+  int stream_cmodel; // Colormodel, which is read/written natively by the codec
+  int io_cmodel;  // Colormodel, which is used by the encode/decode functions
   int stream_row_span, stream_row_span_uv;
 
-  int io_cmodel;      /* Colormodel, which is used by the encode/decode functions */
   int io_row_span, io_row_span_uv;
 
-  /* This is used by the core to do implicit colorspace conversion and scaling (NOT recommended!!) */
+  /* This is used by the core to do implicit colorspace conversion and scaling
+     (NOT recommended!!) */
   uint8_t ** temp_frame;
 
   lqt_chroma_placement_t chroma_placement;
@@ -1650,9 +1654,11 @@ struct quicktime_codec_s
   void (*resync)(quicktime_t *file, int track);
 
   int (*writes_compressed)(lqt_file_type_t type, const lqt_compression_info_t * ci);
+  int (*init_compressed)(quicktime_t * file, int track);
 
   int (*write_packet)(quicktime_t * file, lqt_packet_t * p, int track);
   int (*read_packet)(quicktime_t * file, lqt_packet_t * p, int track);
+
   
   void *priv;
 

@@ -143,7 +143,9 @@ static int decode_chunk(quicktime_t *file, int track)
   quicktime_faad2_codec_t *codec =
     file->atracks[track].codec->priv;
   
-  num_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
+  num_packets = lqt_audio_num_vbr_packets(file, track,
+                                          track_map->cur_chunk,
+                                          &num_samples);
 
   // fprintf(stderr, "Num packets %ld, %d\n", track_map->cur_chunk, num_packets);
 
@@ -154,16 +156,22 @@ static int decode_chunk(quicktime_t *file, int track)
     num_samples *= 2;
   
   
-  if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
+  if(codec->sample_buffer_alloc <
+     codec->sample_buffer_end - codec->sample_buffer_start + num_samples)
     {
-    codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + num_samples + 1024;
+    codec->sample_buffer_alloc =
+      codec->sample_buffer_end - codec->sample_buffer_start +
+      num_samples + 1024;
+
     codec->sample_buffer = realloc(codec->sample_buffer,
-                                   codec->sample_buffer_alloc * track_map->channels * sizeof(float));
+                                   codec->sample_buffer_alloc *
+                                   track_map->channels * sizeof(float));
     }
   
   for(i = 0; i < num_packets; i++)
     {
-    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
+    packet_size = lqt_audio_read_vbr_packet(file, track,
+                                            track_map->cur_chunk, i,
                                             &codec->data,
                                             &codec->data_alloc, &num_samples);
 
@@ -189,7 +197,8 @@ static int decode_chunk(quicktime_t *file, int track)
                                         sizeof(*(track_map->channel_setup)));
       for(i = 0; i < track_map->channels; i++)
         {
-        track_map->channel_setup[i] = get_channel(frame_info.channel_position[i]);
+        track_map->channel_setup[i] =
+          get_channel(frame_info.channel_position[i]);
         }
 
       }
@@ -283,7 +292,8 @@ static int decode(quicktime_t *file,
 
     if(samples_to_move > 0)
       {
-      memmove(codec->sample_buffer, codec->sample_buffer + samples_to_skip * track_map->channels,
+      memmove(codec->sample_buffer,
+              codec->sample_buffer + samples_to_skip * track_map->channels,
               samples_to_move * track_map->channels * sizeof(float));
       }
     codec->sample_buffer_start = track_map->current_position;
@@ -376,7 +386,6 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   cfg->outputFormat = FAAD_FMT_FLOAT;
   
   faacDecSetConfiguration(codec->dec, cfg);
-
   
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);

@@ -134,6 +134,8 @@ static void setup_header(quicktime_t *file, int track,
   uint8_t mp4a_atom[4];
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_trak_t * trak = track_map->track;
+
+  lqt_init_vbr_audio(file, track);
   
   esds = quicktime_set_esds(trak, header, header_len);
 
@@ -218,7 +220,6 @@ static int encode(quicktime_t *file,
   
   if(!codec->initialized)
     {
-    lqt_init_vbr_audio(file, track);
     /* Create encoder */
     
     codec->enc = faacEncOpen(track_map->samplerate,
@@ -364,6 +365,26 @@ static int flush(quicktime_t *file, int track)
   return 0;
   }
 
+static int writes_compressed(lqt_file_type_t type, const lqt_compression_info_t * ci)
+  {
+  if(!(type & (LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
+               LQT_FILE_M4A | LQT_FILE_3GP)))
+    return 0;
+
+  if(!ci->global_header_len)
+    return 0;
+  
+  return 1;
+  }
+
+static int init_compressed(quicktime_t * file, int track)
+  {
+  setup_header(file, track,
+               file->atracks[track].ci.global_header,
+               file->atracks[track].ci.global_header_len);
+  return 0;
+  }
+
 void quicktime_init_codec_faac(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack)
@@ -378,6 +399,8 @@ void quicktime_init_codec_faac(quicktime_codec_t * codec_base,
   codec_base->encode_audio = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->flush = flush;
+  codec_base->writes_compressed = writes_compressed;
+  codec_base->init_compressed   = init_compressed;
   
   codec->bitrate = 0;
   codec->quality = 100;
