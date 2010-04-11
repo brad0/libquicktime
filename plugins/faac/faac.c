@@ -44,7 +44,6 @@ typedef struct
   int initialized;
   faacEncHandle enc;
 
-  int chunk_started;
   quicktime_atom_t chunk_atom;
 
   int encoder_delay;
@@ -111,12 +110,8 @@ static int encode_frame(quicktime_t *file,
   
   /* Write these data */
 
-  if(!codec->chunk_started)
-    {
-    codec->chunk_started = 1;
-    lqt_start_audio_vbr_chunk(file, track);
-    quicktime_write_chunk_header(file, trak, &codec->chunk_atom);
-    }
+  if(file->write_trak != trak)
+    quicktime_write_chunk_header(file, trak);
   
   lqt_start_audio_vbr_frame(file, track);
   result = !quicktime_write_data(file, codec->chunk_buffer,
@@ -242,7 +237,8 @@ static int encode(quicktime_t *file,
     
     if(!faacEncSetConfiguration(codec->enc, enc_config))
       {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Setting encode parameters failed, check settings");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "Setting encode parameters failed, check settings");
       }
     /* Allocate buffers */
 
@@ -277,8 +273,6 @@ static int encode(quicktime_t *file,
 
   input = (float*)_input;
   
-  
-  
   while(samples_read < samples)
     {
     /* Put samples into sample buffer */
@@ -287,7 +281,8 @@ static int encode(quicktime_t *file,
     if(samples_read + samples_to_copy > samples)
       samples_to_copy = samples - samples_read;
 
-    memcpy(codec->sample_buffer + track_map->channels * codec->sample_buffer_size,
+    memcpy(codec->sample_buffer +
+           track_map->channels * codec->sample_buffer_size,
            input + samples_read * track_map->channels,
            samples_to_copy * track_map->channels * sizeof(float));
     
@@ -301,15 +296,10 @@ static int encode(quicktime_t *file,
     }
 
   /* Finalize audio chunk */
-  if(codec->chunk_started)
+  if(file->write_trak == trak)
     {
-    quicktime_write_chunk_footer(file,
-                                 trak,
-                                 track_map->cur_chunk,
-                                 &codec->chunk_atom,
-                                 track_map->vbr_num_frames);
+    quicktime_write_chunk_footer(file, trak);
     track_map->cur_chunk++;
-    codec->chunk_started = 0;
     }
   return 0;
   }
@@ -365,15 +355,10 @@ static int flush(quicktime_t *file, int track)
     ;
   
   /* Finalize audio chunk */
-  if(codec->chunk_started)
+  if(file->write_trak == trak)
     {
-    quicktime_write_chunk_footer(file,
-                                 trak,
-                                 track_map->cur_chunk,
-                                 &codec->chunk_atom,
-                                 track_map->vbr_num_frames);
+    quicktime_write_chunk_footer(file, trak);
     track_map->cur_chunk++;
-    codec->chunk_started = 0;
     return 1;
     }
   return 0;

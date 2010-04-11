@@ -39,7 +39,6 @@ static int deg2frame(quicktime_t *file, float hdeg, float vdeg)
 
 int lqt_qtvr_add_object_node(quicktime_t *file)
 {
-    quicktime_atom_t chunk_atom;
     quicktime_qtatom_t root_atom, leaf_atom;
     quicktime_trak_t *trak;
     
@@ -51,7 +50,7 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
                 "lqt_qtvr_add_node only single node movies supported.");
       return -1;
     }
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
+    quicktime_write_chunk_header(file, trak);
     quicktime_qtatom_write_container_header(file);
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
@@ -59,7 +58,8 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
     quicktime_write_ndhd(file, &file->qtvr_node[0].ndhd);
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
-    quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
+    trak->chunk_samples = 1;
+    quicktime_write_chunk_footer(file, trak);
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.children++;
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.vrni->nloc.nodeType[0] = 'o';
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.vrni->nloc.nodeType[1] = 'b';
@@ -77,7 +77,7 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
     
     trak = file->moov.trak[lqt_qtvr_get_object_track(file)];
 
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
+    quicktime_write_chunk_header(file, trak);
     quicktime_qtatom_write_container_header(file);
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
@@ -87,7 +87,8 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
 
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
-    quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
+    trak->chunk_samples = 1;
+    quicktime_write_chunk_footer(file, trak);
     trak->mdia.minf.stbl.stts.table[0].sample_count = 1;
     /* set duration to duration of image track */
     trak->mdia.minf.stbl.stts.table[0].sample_duration = file->qtvr_node[0].obji.rows * file->qtvr_node[0].obji.columns;
@@ -96,7 +97,6 @@ int lqt_qtvr_add_object_node(quicktime_t *file)
 
 int lqt_qtvr_add_panorama_node(quicktime_t *file)
 {
-    quicktime_atom_t chunk_atom;
     quicktime_qtatom_t root_atom, leaf_atom;
     quicktime_trak_t *trak;
     
@@ -117,7 +117,7 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
                 "lqt_qtvr_add_node only single node movies supported.");
       return -1;
     }
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
+    quicktime_write_chunk_header(file, trak);
     quicktime_qtatom_write_container_header(file);
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
@@ -125,7 +125,8 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
     quicktime_write_ndhd(file, &file->qtvr_node[0].ndhd);
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
-    quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
+    trak->chunk_samples = 1;
+    quicktime_write_chunk_footer(file, trak);
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.children++;
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.vrni->nloc.nodeType[0] = 'p';
     trak->mdia.minf.stbl.stsd.table->qtvr.vrnp.vrni->nloc.nodeType[1] = 'a';
@@ -143,7 +144,7 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
 
     trak = file->moov.trak[lqt_qtvr_get_panorama_track(file)];
 
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
+    quicktime_write_chunk_header(file, trak);
     quicktime_qtatom_write_container_header(file);
     quicktime_qtatom_write_header(file, &root_atom, "sean", 1);
     root_atom.child_count = 1;
@@ -153,7 +154,8 @@ int lqt_qtvr_add_panorama_node(quicktime_t *file)
 
     quicktime_qtatom_write_footer(file, &leaf_atom);
     quicktime_qtatom_write_footer(file, &root_atom);
-    quicktime_write_chunk_footer(file, trak, 1, &chunk_atom, 1);
+    trak->chunk_samples = 1;
+    quicktime_write_chunk_footer(file, trak);
 
 
     trak->mdia.minf.stbl.stts.table[0].sample_count = 1;

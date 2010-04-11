@@ -64,7 +64,6 @@ typedef struct
 
   int enc_samples_in_buffer;
 
-  int chunk_started;
   quicktime_atom_t chunk_atom;
 
   /* Decoder stuff */
@@ -589,12 +588,9 @@ static int flush_data(quicktime_t * file, int track)
     if(!ogg_stream_flush(&codec->enc_os, &codec->enc_og))
       break;
 
-    if(!codec->chunk_started)
-      {
-      codec->chunk_started = 1;
-      lqt_start_audio_vbr_chunk(file, track);
-      quicktime_write_chunk_header(file, trak, &codec->chunk_atom);
-      }
+    if(file->write_trak != trak)
+      quicktime_write_chunk_header(file, trak);
+    
     lqt_start_audio_vbr_frame(file, track);
     if(!codec->header_written)
       {
@@ -609,7 +605,8 @@ static int flush_data(quicktime_t * file, int track)
       }
     new_encoded_samples = codec->enc_os.granulepos;
 
-    lqt_finish_audio_vbr_frame(file, track, new_encoded_samples - codec->encoded_samples);
+    lqt_finish_audio_vbr_frame(file, track,
+                               new_encoded_samples - codec->encoded_samples);
     codec->encoded_samples = new_encoded_samples;
     
     
@@ -737,15 +734,10 @@ static int encode(quicktime_t *file,
   result = 0;
 
   // Wrote a chunk.
-  if(codec->chunk_started)
+  if(file->write_trak == trak)
     {
-    quicktime_write_chunk_footer(file, 
-                                 trak,
-                                 track_map->cur_chunk,
-                                 &codec->chunk_atom, 
-                                 track_map->vbr_num_frames);
+    quicktime_write_chunk_footer(file, trak);
     track_map->cur_chunk++;
-    codec->chunk_started = 0;
     }
 
   return result;
@@ -778,31 +770,26 @@ static int set_parameter(quicktime_t *file,
 
 
 static int flush(quicktime_t *file, int track)
-{
-	quicktime_audio_map_t *track_map = &file->atracks[track];
-	quicktime_vorbis_codec_t *codec = track_map->codec->priv;
-	quicktime_trak_t *trak = track_map->track;
+  {
+  quicktime_audio_map_t *track_map = &file->atracks[track];
+  quicktime_vorbis_codec_t *codec = track_map->codec->priv;
+  quicktime_trak_t *trak = track_map->track;
 
-        flush_audio(file, track);
-	vorbis_analysis_wrote(&codec->enc_vd,0);
+  flush_audio(file, track);
+  vorbis_analysis_wrote(&codec->enc_vd,0);
 
-        flush_data(file, track);
+  flush_data(file, track);
         
-        //	FLUSH_OGG2
+  //	FLUSH_OGG2
 	
-	if(codec->chunk_started)
-	{
-        quicktime_write_chunk_footer(file, 
-                                     trak,
-                                     track_map->cur_chunk,
-                                     &codec->chunk_atom, 
-                                     track_map->vbr_num_frames);
-        track_map->cur_chunk++;
-        codec->chunk_started = 0;
-        return 1;
-	}
-        return 0;
-}
+  if(file->write_trak == trak)
+    {
+    quicktime_write_chunk_footer(file, trak);
+    track_map->cur_chunk++;
+    return 1;
+    }
+  return 0;
+  }
 
 void quicktime_init_codec_vorbis(quicktime_codec_t *codec_base,
                                  quicktime_audio_map_t *atrack,

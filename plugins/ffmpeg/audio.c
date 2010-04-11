@@ -855,7 +855,6 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
   int channels = file->atracks[track].channels;
-  quicktime_atom_t chunk_atom;
   int frame_bytes;
   int samples_done = 0;
   int samples_encoded;
@@ -934,7 +933,7 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
                                        &codec->sample_buffer[samples_done*channels]);
     if(frame_bytes > 0)
       {
-      quicktime_write_chunk_header(file, trak, &chunk_atom);
+      quicktime_write_chunk_header(file, trak);
 #if 0    // PATCH 3  
       if(codec->avctx->frame_size == 1)
         samples_encoded = codec->samples_in_buffer;
@@ -947,11 +946,8 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
       codec->samples_in_buffer  -= samples_encoded;
       
       result = !quicktime_write_data(file, codec->chunk_buffer, frame_bytes);
-      quicktime_write_chunk_footer(file,
-                                   trak, 
-                                   file->atracks[track].cur_chunk,
-                                   &chunk_atom, 
-                                   samples_encoded);
+      trak->chunk_samples = samples_encoded;
+      quicktime_write_chunk_footer(file, trak);
       file->atracks[track].cur_chunk++;
       }
     }

@@ -1193,20 +1193,17 @@ int quicktime_write_audio(quicktime_t *file,
   {
   int result;
   int64_t bytes;
-  quicktime_atom_t chunk_atom;
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_trak_t *trak = track_map->track;
                                                                                                                   
   /* write chunk for 1 track */
   bytes = samples * quicktime_audio_bits(file, track) / 8 * file->atracks[track].channels;
-  quicktime_write_chunk_header(file, trak, &chunk_atom);
+  quicktime_write_chunk_header(file, trak);
   result = !quicktime_write_data(file, audio_buffer, bytes);
-  quicktime_write_chunk_footer(file,
-                               trak,
-                               track_map->cur_chunk,
-                               &chunk_atom,
-                               samples);
-                                                                                                                  
+
+  trak->chunk_samples = samples;
+  quicktime_write_chunk_footer(file, trak);
+  
   /*      file->atracks[track].current_position += samples; */
   file->atracks[track].cur_chunk++;
   return result;
@@ -1975,6 +1972,10 @@ int quicktime_close(quicktime_t *file)
   int result = 0;
   if(file->wr)
     {
+    /* Finish final chunk if necessary */
+    if(file->write_trak)
+      quicktime_write_chunk_footer(file, file->write_trak);
+    
     quicktime_codecs_flush(file);
 
     for(i = 0; i < file->total_vtracks; i++)
@@ -2459,14 +2460,18 @@ void lqt_init_vbr_audio(quicktime_t * file, int track)
   trak->mdia.minf.is_audio_vbr = 1;
   }
 
-void lqt_start_audio_vbr_chunk(quicktime_t * file, int track)
-  {
-  file->atracks[track].vbr_num_frames = 0;
-  }
 
 void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
   {
   quicktime_audio_map_t * atrack = &file->atracks[track];
+  
+  /* Make chunk at maximum 10 VBR packets large */
+  if((file->write_trak == atrack->track) &&
+     (atrack->track->chunk_samples >= 10))
+    {
+    quicktime_write_chunk_footer(file, file->write_trak);
+    quicktime_write_chunk_header(file, atrack->track);
+    }
   atrack->vbr_frame_start = quicktime_position(file);
   }
 
@@ -2474,23 +2479,24 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   {
   quicktime_stsz_t * stsz;
   quicktime_stts_t * stts;
+  long vbr_frames_written;
   quicktime_audio_map_t * atrack = &file->atracks[track];
   
-  stsz = &file->atracks[track].track->mdia.minf.stbl.stsz;
-  stts = &file->atracks[track].track->mdia.minf.stbl.stts;
+  stsz = &atrack->track->mdia.minf.stbl.stsz;
+  stts = &atrack->track->mdia.minf.stbl.stts;
+
+  vbr_frames_written = stsz->total_entries;
   
   /* Update stsz */
 
-  quicktime_update_stsz(stsz, file->atracks[track].vbr_frames_written, 
-                        quicktime_position(file) - file->atracks[track].vbr_frame_start);
+  quicktime_update_stsz(stsz, vbr_frames_written, 
+                        quicktime_position(file) -
+                        atrack->vbr_frame_start);
   /* Update stts */
   
-  quicktime_update_stts(stts, file->atracks[track].vbr_frames_written, num_samples);
-
-  atrack->vbr_num_frames++;
-  atrack->vbr_frames_written++;
-
+  quicktime_update_stts(stts, vbr_frames_written, num_samples);
   
+  atrack->track->chunk_samples++;
   }
 
 /* VBR Reading support */

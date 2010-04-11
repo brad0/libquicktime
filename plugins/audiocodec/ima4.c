@@ -438,9 +438,9 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   quicktime_trak_t *trak = track_map->track;
   int16_t *input_ptr, *input;
   unsigned char *output_ptr;
-  quicktime_atom_t chunk_atom;
-  int samples_encoded, total_samples_copied, samples_copied, frames_encoded, old_buffer_size;
-
+  int samples_encoded, total_samples_copied,
+    samples_copied, frames_encoded, old_buffer_size;
+  
   if(codec->encode_initialized)
     {
     codec->encode_initialized = 1;
@@ -523,14 +523,12 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   /* Don't write 0 samples. */
   if(samples_encoded)
     {
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
+    quicktime_write_chunk_header(file, trak);
     result = quicktime_write_data(file, codec->chunk_buffer, chunk_bytes);
+    trak->chunk_samples = samples_encoded;
     quicktime_write_chunk_footer(file, 
-                                 trak,
-                                 track_map->cur_chunk,
-                                 &chunk_atom, 
-                                 samples_encoded);
-
+                                 trak);
+    
     if(result) 
       result = 0; 
     else 
@@ -543,7 +541,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
 
 static int flush(quicktime_t *file, int track)
   {
-  quicktime_atom_t chunk_atom;
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
@@ -567,13 +564,12 @@ static int flush(quicktime_t *file, int track)
       output_ptr += BLOCK_SIZE;
       }
 
-    quicktime_write_chunk_header(file, trak, &chunk_atom);
-    result = quicktime_write_data(file, codec->chunk_buffer, (int)(output_ptr - codec->chunk_buffer));
-    quicktime_write_chunk_footer(file,
-                                 trak,
-                                 track_map->cur_chunk,
-                                 &chunk_atom, 
-                                 codec->sample_buffer_size);
+    quicktime_write_chunk_header(file, trak);
+    result = quicktime_write_data(file, codec->chunk_buffer,
+                                  (int)(output_ptr - codec->chunk_buffer));
+
+    trak->chunk_samples = codec->sample_buffer_size;
+    quicktime_write_chunk_footer(file, trak);
     track_map->cur_chunk++;
     return 1;
     }

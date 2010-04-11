@@ -913,6 +913,12 @@ typedef struct
                             tracks. They can not so easily be obtained
                             during decoding */
   int has_tref;
+
+  /* Stuff for writing chunks is stored here */
+  quicktime_atom_t chunk_atom;
+  int chunk_num;
+  int chunk_samples;
+  
   } quicktime_trak_t;
 
 
@@ -1330,10 +1336,8 @@ typedef struct
   int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
 
   /* VBR stuff */
-  int vbr_num_frames; /* Frames written since start of chunk */
   int64_t vbr_frame_start;
-  int64_t vbr_frames_written;
-
+  
   /* The total samples are calculated while initializing, but they MIGHT
      be changed by the faad decoder, in the case resampling happens. */
   int64_t total_samples;
@@ -1609,6 +1613,8 @@ struct quicktime_s
      all the time. */
   int io_error;
   int io_eof;
+  
+  quicktime_trak_t * write_trak;
   };
 
 struct quicktime_codec_s

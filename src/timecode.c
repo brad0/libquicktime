@@ -211,14 +211,14 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
   if(vm->num_timecodes &&
      ((vm->num_timecodes >= TIMECODES_PER_CHUNK) || force))
     {
-    quicktime_atom_t chunk_atom;
-    quicktime_write_chunk_header(file, vm->timecode_track, &chunk_atom);
+    quicktime_write_chunk_header(file, vm->timecode_track);
 
     for(i = 0; i < vm->num_timecodes; i++)
       quicktime_write_int32(file, vm->timecodes[i]);
+
     
-    quicktime_write_chunk_footer(file, vm->timecode_track, vm->cur_timecode_chunk,
-                                 &chunk_atom, vm->num_timecodes);
+    vm->timecode_track->chunk_samples = vm->num_timecodes;
+    quicktime_write_chunk_footer(file, vm->timecode_track);
     vm->cur_timecode_chunk++;
     vm->num_timecodes = 0;
     }

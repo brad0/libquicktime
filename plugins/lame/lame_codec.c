@@ -318,7 +318,6 @@ static int write_data(quicktime_t *file, int track,
                       quicktime_mp3_codec_t *codec, int samples)
   {
   mpeg_header h;
-  quicktime_atom_t chunk_atom;
   int result = 0;
   int chunk_bytes = 0, chunk_samples = 0;
   quicktime_audio_map_t *track_map;
@@ -351,13 +350,10 @@ static int write_data(quicktime_t *file, int track,
     {
     if(track_map->track->strl)
       {
-      quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
+      quicktime_write_chunk_header(file, track_map->track);
       result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-      quicktime_write_chunk_footer(file, 
-                                   track_map->track, 
-                                   track_map->cur_chunk,
-                                   &chunk_atom,
-                                   chunk_samples);
+      track_map->track->chunk_samples = chunk_samples;
+      quicktime_write_chunk_footer(file, track_map->track);
       if(file->total_riffs == 1)
         {
         track_map->track->strl->strh.dwLength += chunk_bytes;
@@ -365,31 +361,22 @@ static int write_data(quicktime_t *file, int track,
       }
     else
       {
-      lqt_start_audio_vbr_chunk(file, track);
-      quicktime_write_chunk_header(file, track_map->track, &chunk_atom);
-
+      quicktime_write_chunk_header(file, track_map->track);
       lqt_start_audio_vbr_frame(file, track);
       result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-
-    
+      
       if(samples < 0)
         {
         lqt_finish_audio_vbr_frame(file, track, chunk_samples);
         quicktime_write_chunk_footer(file, 
-                                     track_map->track, 
-                                     track_map->cur_chunk,
-                                     &chunk_atom,
-                                     track_map->vbr_num_frames);
+                                     track_map->track);
         codec->samples_written += chunk_samples;
         }
       else
         {
         lqt_finish_audio_vbr_frame(file, track, samples);
         quicktime_write_chunk_footer(file, 
-                                     track_map->track, 
-                                     track_map->cur_chunk,
-                                     &chunk_atom,
-                                     track_map->vbr_num_frames);
+                                     track_map->track);
         codec->samples_written += samples;
         }
       }

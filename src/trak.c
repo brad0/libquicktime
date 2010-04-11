@@ -481,9 +481,11 @@ int64_t quicktime_sample_to_offset(quicktime_t *file,
   }
 
 void quicktime_write_chunk_header(quicktime_t *file, 
-                                  quicktime_trak_t *trak, 
-                                  quicktime_atom_t *chunk)
+                                  quicktime_trak_t *trak)
   {
+  if(file->write_trak)
+    quicktime_write_chunk_footer(file, file->write_trak);
+  
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
     /* Get tag from first riff strl */
@@ -503,27 +505,24 @@ void quicktime_write_chunk_header(quicktime_t *file,
       }
     
     /* Write AVI header */
-    quicktime_atom_write_header(file, chunk, tag);
+    quicktime_atom_write_header(file, &trak->chunk_atom, tag);
     }
   else
-    {
-    chunk->start = quicktime_position(file);
-    }
+    trak->chunk_atom.start = quicktime_position(file);
+
+  file->write_trak = trak;
   }
 
 void quicktime_write_chunk_footer(quicktime_t *file, 
-                                  quicktime_trak_t *trak,
-                                  int current_chunk,
-                                  quicktime_atom_t *chunk, 
-                                  int samples)
+                                  quicktime_trak_t *trak)
   {
-  int64_t offset = chunk->start;
+  int64_t offset = trak->chunk_atom.start;
   int sample_size = quicktime_position(file) - offset;
-
+  
   // Write AVI footer
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
-    quicktime_atom_write_footer(file, chunk);
+    quicktime_atom_write_footer(file, &trak->chunk_atom);
           
     // Save original index entry for first RIFF only
     if(file->total_riffs < 2)
@@ -546,35 +545,41 @@ void quicktime_write_chunk_footer(quicktime_t *file,
     file->mdat.atom.size = offset + sample_size;
 
   quicktime_update_stco(&trak->mdia.minf.stbl.stco, 
-                        current_chunk, 
+                        trak->chunk_num, 
                         offset);
 
   if(trak->mdia.minf.is_video || trak->mdia.minf.is_text)
     quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
-                          current_chunk, 
+                          trak->chunk_num, 
                           sample_size);
   /* Need to increase sample count for CBR (the VBR routines to it
      themselves) */
   if(trak->mdia.minf.is_audio && !trak->mdia.minf.is_audio_vbr)
-    trak->mdia.minf.stbl.stts.table->sample_count += samples;
-        
+    trak->mdia.minf.stbl.stts.table->sample_count +=
+      trak->chunk_samples;
+  
   if(trak->mdia.minf.is_panorama)
     {
     quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
-                          current_chunk, 
+                          trak->chunk_num, 
                           sample_size);	
     }
   
   if(trak->mdia.minf.is_qtvr)
     {
     quicktime_update_stsz(&trak->mdia.minf.stbl.stsz, 
-                          current_chunk, 
+                          trak->chunk_num,
                           sample_size);
     }
   
   quicktime_update_stsc(&trak->mdia.minf.stbl.stsc, 
-                        current_chunk, 
-                        samples);
+                        trak->chunk_num, 
+                        trak->chunk_samples);
+
+  trak->chunk_num++;
+  trak->chunk_samples = 0;
+  
+  file->write_trak = NULL;
   }
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 

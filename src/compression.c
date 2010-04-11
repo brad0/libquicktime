@@ -197,12 +197,12 @@ int lqt_write_audio_packet(quicktime_t * file,
     return atrack->codec->write_packet(file, p, track);
   else
     {
-    quicktime_atom_t chunk_atom;
     int result;
-    quicktime_write_chunk_header(file, atrack->track, &chunk_atom);
+    quicktime_write_chunk_header(file, atrack->track);
     result = quicktime_write_data(file, p->data, p->data_len);
-    quicktime_write_chunk_footer(file, atrack->track,
-                                 atrack->cur_chunk, &chunk_atom, p->duration);
+
+    atrack->track->chunk_samples = p->duration;
+    quicktime_write_chunk_footer(file, atrack->track);
     atrack->cur_chunk++;
     if(result)
       return 0;

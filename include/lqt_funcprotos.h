@@ -1190,13 +1190,10 @@ int64_t quicktime_sample_range_size(quicktime_trak_t *trak,
 int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
 
 LQT_EXTERN void quicktime_write_chunk_header(quicktime_t *file, 
-                                             quicktime_trak_t *trak, 
-                                             quicktime_atom_t *chunk);
+                                             quicktime_trak_t *trak);
+
 LQT_EXTERN void quicktime_write_chunk_footer(quicktime_t *file, 
-                                             quicktime_trak_t *trak,
-                                             int current_chunk,
-                                             quicktime_atom_t *chunk, 
-                                             int samples);
+                                             quicktime_trak_t *trak);
 
 int quicktime_trak_duration(quicktime_trak_t *trak, 
                             int64_t *duration, 
@@ -1227,7 +1224,8 @@ void lqt_flush_timecode(quicktime_t * file, int track, int64_t time,
 void quicktime_tmcd_dump(quicktime_tmcd_t *tmcd);
 void quicktime_tmcd_init(quicktime_tmcd_t *tmcd);
 void quicktime_tmcd_delete(quicktime_tmcd_t *tmcd);
-void quicktime_read_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd, quicktime_atom_t *parent_atom);
+void quicktime_read_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd,
+                         quicktime_atom_t *parent_atom);
 void quicktime_write_tmcd(quicktime_t *file, quicktime_tmcd_t *tmcd);
 
 
@@ -1391,7 +1389,6 @@ int quicktime_delete_video_map(quicktime_video_map_t *vtrack);
 void quicktime_init_maps(quicktime_t * file);
 void lqt_update_frame_position(quicktime_video_map_t * track);
 
-LQT_EXTERN void lqt_start_audio_vbr_chunk(quicktime_t * file, int track);
 LQT_EXTERN void lqt_init_vbr_audio(quicktime_t * file, int track);
 
 LQT_EXTERN int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 

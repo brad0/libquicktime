@@ -560,7 +560,7 @@ void lqt_write_frame_header(quicktime_t * file, int track,
   vtrack->picture_numbers[vtrack->cur_chunk] = pic_num;
   vtrack->keyframe = keyframe;
   
-  quicktime_write_chunk_header(file, trak, &vtrack->chunk_atom);
+  quicktime_write_chunk_header(file, trak);
   }
 
 
@@ -568,13 +568,10 @@ void lqt_write_frame_footer(quicktime_t * file, int track)
   {
   quicktime_video_map_t * vtrack = &file->vtracks[track];
   quicktime_trak_t * trak = vtrack->track;
-  
-  quicktime_write_chunk_footer(file, 
-                               trak, 
-                               vtrack->cur_chunk,
-                               &vtrack->chunk_atom, 
-                               1);
 
+  trak->chunk_samples = 1;
+  quicktime_write_chunk_footer(file, trak);
+  
   if(vtrack->keyframe)
     quicktime_insert_keyframe(file, vtrack->cur_chunk, track);
   vtrack->cur_chunk++;

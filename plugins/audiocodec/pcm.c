@@ -873,7 +873,6 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
 static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   {
   int result;
-  quicktime_atom_t chunk_atom;
   
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_pcm_codec_t *codec = atrack->codec->priv;
@@ -920,9 +919,12 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   codec->chunk_buffer_ptr = codec->chunk_buffer;
   codec->encode(codec, samples * atrack->channels, input);
 
-  quicktime_write_chunk_header(file, trak, &chunk_atom);
-  result = quicktime_write_data(file, codec->chunk_buffer, samples * atrack->block_align);
-  quicktime_write_chunk_footer(file, trak, atrack->cur_chunk, &chunk_atom, samples);
+  quicktime_write_chunk_header(file, trak);
+  result = quicktime_write_data(file, codec->chunk_buffer,
+                                samples * atrack->block_align);
+  trak->chunk_samples = samples;
+  
+  quicktime_write_chunk_footer(file, trak);
   atrack->cur_chunk++;		
   
   /* defeat fwrite's return */

@@ -285,7 +285,6 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
   const char * charset_fallback;
   quicktime_text_map_t * ttrack;
   quicktime_trak_t     * trak;
-  quicktime_atom_t       chunk_atom;
   int out_len;
   
   ttrack = &file->ttracks[track];
@@ -334,7 +333,7 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     ttrack->initialized = 1;
     }
 
-  quicktime_write_chunk_header(file, trak, &chunk_atom);
+  quicktime_write_chunk_header(file, trak);
 
   if(text)
     {
@@ -359,9 +358,9 @@ int lqt_write_text(quicktime_t * file, int track, const char * text,
     {
     quicktime_write_int16(file, 0);
     }
-  
-  quicktime_write_chunk_footer(file, trak, ttrack->cur_chunk,
-                               &chunk_atom, 1);
+
+  trak->chunk_samples = 1;
+  quicktime_write_chunk_footer(file, trak);
 
   quicktime_update_stts(&trak->mdia.minf.stbl.stts, ttrack->current_position, duration);
   
