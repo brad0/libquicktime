@@ -785,8 +785,9 @@ static mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   result->jpeg_compress.input_components = 3;
   result->jpeg_compress.in_color_space = JCS_RGB;
   jpeg_set_quality(&result->jpeg_compress, mjpeg->quality, 0);
-//  result->jpeg_compress.do_fancy_downsampling = FALSE;
-
+#if JPEG_LIB_VERSION >= 70
+  result->jpeg_compress.do_fancy_downsampling = FALSE;
+#endif
   if(mjpeg->use_float) 
     result->jpeg_compress.dct_method = JDCT_FLOAT;
   else
