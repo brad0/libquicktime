@@ -1227,6 +1227,7 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
       {
       strncpy(vtrack->track->strl->strh.fccHandler, "divx", 4);
       strncpy(vtrack->track->strl->strf.bh.biCompression, "DX50", 4);
+      codec->initialized = 1;
       }
     }
   
