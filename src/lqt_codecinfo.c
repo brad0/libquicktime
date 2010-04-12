@@ -272,8 +272,8 @@ copy_parameter_info(lqt_parameter_info_t * ret,
 lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info)
   {
   int i, len;
-  lqt_codec_info_t * ret = calloc(1, sizeof(lqt_codec_info_t));
-  
+  lqt_codec_info_t * ret = calloc(1, sizeof(*ret));
+
   ret->compatibility_flags = info->compatibility_flags;
     
   if(info->name)
@@ -984,9 +984,11 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template)
       }
 
     ret->encoding_colormodels =
-      malloc(ret->num_encoding_colormodels * sizeof(*ret->encoding_colormodels));
+      malloc((ret->num_encoding_colormodels+1) * sizeof(*ret->encoding_colormodels));
     for(i = 0; i < ret->num_encoding_colormodels; i++)
       ret->encoding_colormodels[i] = template->encoding_colormodels[i];
+    ret->encoding_colormodels[ret->num_encoding_colormodels] =
+      LQT_COLORMODEL_NONE;
     }
   
   /* Copy wav_ids */

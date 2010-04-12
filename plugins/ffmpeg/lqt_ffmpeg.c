@@ -314,6 +314,8 @@ struct CODECIDMAP
    */
   int   do_encode;
   int   * encoding_colormodels;
+  
+  lqt_compression_id_t compression_id;
   };
 
 /* Image sizes */
@@ -384,7 +386,8 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
                              LQT_FILE_3GP  | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
-      .do_encode = 1
+      .do_encode = 1,
+      .compression_id = LQT_COMPRESSION_MPEG4_ASP,
     },
     {
       .id = CODEC_ID_MSMPEG4V1,
@@ -1008,6 +1011,7 @@ static void set_codec_info(struct CODECIDMAP * map)
     //    capabilities = "Codec";
     codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
     codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
+    codec_info_ffmpeg.compression_id = map->compression_id;
     }
   else if(map->encoder)
     {
@@ -1016,6 +1020,7 @@ static void set_codec_info(struct CODECIDMAP * map)
     codec_info_ffmpeg.decoding_parameters = NULL;
     codec_info_ffmpeg.compatibility_flags = map->compatibility_flags;
     codec_info_ffmpeg.encoding_colormodels = map->encoding_colormodels;
+    codec_info_ffmpeg.compression_id = map->compression_id;
 
     //    capabilities = "Encoder";
     }

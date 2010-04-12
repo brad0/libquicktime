@@ -110,8 +110,8 @@ static void audio_iteration(track_t * track, lqt_packet_t * p)
       return;
       }
 
-    fprintf(stderr, "Got audio packet\n");
-    lqt_packet_dump(p);
+    //    fprintf(stderr, "Got audio packet\n");
+    //    lqt_packet_dump(p);
     
     lqt_write_audio_packet(track->out_file, p, track->out_index);
 
@@ -132,8 +132,8 @@ static void video_iteration(track_t * track, lqt_packet_t * p)
     return;
     }
 
-  fprintf(stderr, "Got video packet\n");
-  lqt_packet_dump(p);
+  // fprintf(stderr, "Got video packet\n");
+  // lqt_packet_dump(p);
 
   
   lqt_write_video_packet(track->out_file, p, track->out_index);
@@ -144,16 +144,18 @@ static void video_iteration(track_t * track, lqt_packet_t * p)
   
   }
 
-static track_t * tracks_min_time(track_t * tracks, int num, double * t)
+static track_t * tracks_min_time(track_t * tracks, int num)
   {
   int i;
   track_t * ret = NULL;
+  double min_time = 0.0;
   
   for(i = 0; i < num; i++)
     {
-    if(!tracks[i].eof && (!ret || (tracks[i].time < *t)))
+    if(tracks[i].in_file && !tracks[i].eof &&
+       (!ret || (tracks[i].time < min_time)))
       {
-      *t = tracks->time;
+      min_time = tracks->time;
       ret = &tracks[i];
       }
     }
@@ -260,7 +262,8 @@ static int init_demultiplex(char * filename)
       codec_info = find_video_encoder(video_tracks[i].ci->id);
       if(!codec_info)
         {
-        fprintf(stderr, "No video encoder found for compressed writing\n");
+        fprintf(stderr, "No video encoder found for compressed writing of %s\n",
+                lqt_compression_id_to_string(video_tracks[i].ci->id));
         continue;
         }
       
@@ -395,6 +398,9 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         audio_index++;
         continue;
         }
+
+      lqt_compression_info_dump(audio_tracks[i].ci);
+      
       audio_tracks[audio_index].in_index = j;
       audio_tracks[audio_index].out_index = audio_index;
       audio_tracks[audio_index].in_file = files[i].file;
@@ -433,13 +439,14 @@ static int init_multiplex(char ** in_files, int num_in_files, char * out_file)
         video_index++;
         continue;
         }
+      lqt_compression_info_dump(video_tracks[i].ci);
       video_tracks[video_index].in_index = j;
       video_tracks[video_index].out_index = video_index;
       video_tracks[video_index].in_file = files[i].file;
       video_tracks[video_index].out_file = file;
 
-      lqt_add_video_track_compressed(video_tracks[audio_index].out_file,
-                                     video_tracks[audio_index].ci, codec_info);
+      lqt_add_video_track_compressed(video_tracks[video_index].out_file,
+                                     video_tracks[video_index].ci, codec_info);
       
       video_index++;
       total_tracks++;
@@ -467,8 +474,7 @@ int main(int argc, char ** argv)
   int i;
   int first_file;
   int nfiles;
-
-  double audio_time, video_time;
+  
   track_t * atrack, *vtrack;
   lqt_packet_t p;
 
@@ -542,15 +548,17 @@ int main(int argc, char ** argv)
 
   while(1)
     {
-    atrack = tracks_min_time(audio_tracks, num_audio_tracks, &audio_time);
-    vtrack = tracks_min_time(video_tracks, num_video_tracks, &video_time);
+    atrack = tracks_min_time(audio_tracks, num_audio_tracks);
+    vtrack = tracks_min_time(video_tracks, num_video_tracks);
 
     if(atrack && vtrack)
       {
-      if(audio_time < video_time)
+      fprintf(stderr, "A: %f, V: %f\n", atrack->time, vtrack->time);
+      
+      if(atrack->time < vtrack->time)
         audio_iteration(atrack, &p);
       else
-        video_iteration(atrack, &p);
+        video_iteration(vtrack, &p);
       }
     else if(atrack)
       audio_iteration(atrack, &p);

@@ -242,6 +242,9 @@ static int decode(quicktime_t *file,
 
   if(!output)
     {
+    /* HACK: Sometimes mp4 files don't set this correctly */
+    lqt_init_vbr_audio(file, track); 
+
     /* Set channel setup */
     decode_chunk(file, track);
     return 0;

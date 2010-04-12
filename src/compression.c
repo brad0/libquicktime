@@ -212,9 +212,13 @@ int lqt_add_audio_track_compressed(quicktime_t * file,
                                    lqt_codec_info_t * codec_info)
   {
   quicktime_audio_map_t *atrack;
+
+  int samplerate = ci->samplerate;
+  if(ci->flags & LQT_COMPRESSION_SBR)
+    samplerate /= 2;
   
   if(lqt_add_audio_track_internal(file,
-                                  ci->num_channels, ci->samplerate, 16,
+                                  ci->num_channels, samplerate, 16,
                                   codec_info, ci))
     return 1;
 
@@ -229,10 +233,19 @@ int lqt_add_video_track_compressed(quicktime_t * file,
                                    const lqt_compression_info_t * ci,
                                    lqt_codec_info_t * codec_info)
   {
-  return lqt_add_video_track_internal(file,
-                                      ci->width, ci->height,
-                                      0, ci->video_timescale,
-                                      codec_info, ci);
+  quicktime_video_map_t *vtrack;
+  if(lqt_add_video_track_internal(file,
+                                  ci->width, ci->height,
+                                  0, ci->video_timescale,
+                                  codec_info, ci))
+    return 1;
+
+  vtrack = &file->vtracks[file->total_vtracks-1];
+  
+  if(vtrack->codec->init_compressed)
+    vtrack->codec->init_compressed(file, file->total_vtracks-1);
+  return 0;
+  
   }
 
 int lqt_write_audio_packet(quicktime_t * file,
