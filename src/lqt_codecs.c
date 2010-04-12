@@ -440,7 +440,7 @@ int lqt_set_video_pass(quicktime_t *file,
     return 0;
   }
 
-static void start_encoding(quicktime_t *file)
+void lqt_start_encoding(quicktime_t *file)
   {
   int i;
   if(file->encoding_started)
@@ -481,7 +481,7 @@ static int do_encode_video(quicktime_t *file,
   int height;
   int width;
 
-  start_encoding(file);
+  lqt_start_encoding(file);
   
   set_default_rowspan(file, track);
   height = quicktime_video_height(file, track);
@@ -792,7 +792,7 @@ int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int tra
   if(!samples)
     return 0;
   atrack = &file->atracks[track];
-  start_encoding(file);
+  lqt_start_encoding(file);
   file->atracks[track].current_position += samples;
   result = atrack->codec->encode_audio(file, input, 
                                                                samples,
@@ -976,7 +976,7 @@ static int encode_audio_old(quicktime_t *file,
   {
   quicktime_audio_map_t * atrack;
   atrack = &file->atracks[track];
-  start_encoding(file);
+  lqt_start_encoding(file);
   
   if(!samples)
     return 0;

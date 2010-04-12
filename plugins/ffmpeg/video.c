@@ -1207,6 +1207,34 @@ static int init_compressed_mpeg4(quicktime_t * file, int track)
   return 0;
   }
 
+static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int result;
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  
+  lqt_write_frame_header(file, track,
+                         -1, p->timestamp, !!(p->flags & LQT_PACKET_KEYFRAME));
+
+  /* Prepend header to keyframe */
+  if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML)) 
+    {
+    if(p->flags & LQT_PACKET_KEYFRAME)
+      result = !quicktime_write_data(file, vtrack->ci.global_header,
+                                     vtrack->ci.global_header_len);
+
+    if(!codec->initialized)
+      {
+      strncpy(vtrack->track->strl->strh.fccHandler, "divx", 4);
+      strncpy(vtrack->track->strl->strf.bh.biCompression, "DX50", 4);
+      }
+    }
+  
+  result = !quicktime_write_data(file, p->data, p->data_len);
+  lqt_write_frame_footer(file, track);
+  return result;
+  }
+
 void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
                                        quicktime_video_map_t *vtrack,
                                        AVCodec *encoder,
@@ -1239,6 +1267,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
       {
       codec_base->writes_compressed = writes_compressed_mpeg4;
       codec_base->init_compressed   = init_compressed_mpeg4;
+      codec_base->write_packet = write_packet_mpeg4;
       }
     }
   if(decoder)

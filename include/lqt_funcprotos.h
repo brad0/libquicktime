@@ -1416,6 +1416,7 @@ int lqt_is_keyframe(quicktime_t *file, int track, int frame);
 /* If no MOOV atom exists return 1 else return 0. */
 int quicktime_read_info(quicktime_t *file);
 
+void lqt_start_encoding(quicktime_t *file);
 
 /*
  *  Set the default codec parameters from the registry

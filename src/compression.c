@@ -254,6 +254,8 @@ int lqt_write_audio_packet(quicktime_t * file,
   int result;
   quicktime_audio_map_t *atrack = &file->atracks[track];
 
+  lqt_start_encoding(file);
+  
   //  if(atrack->codec->write_packet)
   //    return atrack->codec->write_packet(file, p, track);
   if(lqt_audio_is_vbr(file, track))
@@ -300,13 +302,17 @@ int lqt_write_video_packet(quicktime_t * file,
   {
   int result;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
+
+  lqt_start_encoding(file);
   
   /* Must set valid timestamp for encoders */
   vtrack->timestamp = p->timestamp;
   lqt_video_append_timestamp(file, track, p->timestamp, p->duration);
     
   if(vtrack->codec->write_packet)
-    return vtrack->codec->write_packet(file, p, track);
+    {
+    result = vtrack->codec->write_packet(file, p, track);
+    }
   else
     {
     lqt_write_frame_header(file, track,
