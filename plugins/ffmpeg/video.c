@@ -1213,9 +1213,6 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
   quicktime_video_map_t * vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   
-  lqt_write_frame_header(file, track,
-                         -1, p->timestamp, !!(p->flags & LQT_PACKET_KEYFRAME));
-
   /* Prepend header to keyframe */
   if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML)) 
     {
@@ -1232,7 +1229,6 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
     }
   
   result = !quicktime_write_data(file, p->data, p->data_len);
-  lqt_write_frame_footer(file, track);
   return result;
   }
 

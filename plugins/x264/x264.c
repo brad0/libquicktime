@@ -324,16 +324,12 @@ static int avc_parse_nal_units(uint8_t *src, int src_size,
   return ret_size;
   }
 
-static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
-                                  int * ret_size)
+static void create_avcc_atom(quicktime_t * file, int track, uint8_t *header,
+                             int header_len)
   {
-  int i;
-  x264_nal_t *nal;
-  int nnal;
   uint8_t * ret, *ret_ptr;
-  uint8_t * tmp_buf, *tmp_buf_1 = (uint8_t*)0;
+  uint8_t *tmp_buf_1 = (uint8_t*)0;
   int tmp_buf_alloc_1 = 0;
-  int tmp_size;
   int tmp_size_1;
   
   uint8_t * ptr, *ptr_end;
@@ -341,19 +337,12 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
   uint32_t sps_size=0, pps_size=0;
   uint8_t *sps=0, *pps=0;
   uint8_t nal_type;
+  int ret_size;
+
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_trak_t *trak = vtrack->track;
   
-  x264_encoder_headers(codec->enc, &nal, &nnal);
-
-  tmp_size = 0;
-
-  /* 5 bytes NAL header + worst case escaping */
-  for(i = 0; i < nnal; i++)
-    tmp_size += 5 + nal[i].i_payload * 4 / 3;
-
-  tmp_buf = malloc(tmp_size);
-  tmp_size = encode_nals(tmp_buf, tmp_size, nal, nnal);
-  
-  tmp_size_1 = avc_parse_nal_units(tmp_buf, tmp_size,
+  tmp_size_1 = avc_parse_nal_units(header, header_len,
                                    &tmp_buf_1, &tmp_buf_alloc_1);
 
   /* Look for sps and pps */
@@ -384,7 +373,7 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
     ptr += nal_size + 4;
     }
 
-  *ret_size =
+  ret_size =
     6 +        // Initial bytes
     2 +        // sps_size
     sps_size + // sps
@@ -393,7 +382,7 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
     pps_size;  // pps
 
   
-  ret = malloc(*ret_size);
+  ret = malloc(ret_size);
   ret_ptr = ret;
   
   /* Start encoding */
@@ -426,10 +415,11 @@ static uint8_t * create_avcc_atom(quicktime_x264_codec_t * codec,
   memcpy(ret_ptr, pps, pps_size);
   ret_ptr += pps_size;
 
-  free(tmp_buf);
   free(tmp_buf_1);
-  
-  return ret;
+
+  quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
+                                "avcC", ret, ret_size);
+  file->moov.iods.videoProfileId = 0x15;
   }
 
 static int flush_frame(quicktime_t *file, int track,
@@ -599,9 +589,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
-  uint8_t * avcc;
-  int avcc_size;
-  
   
   if(!row_pointers)
     {
@@ -699,21 +686,35 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     
     /* Open encoder */
 
-
     codec->enc = x264_encoder_open(&codec->params);
     if(!codec->enc)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "x264_encoder_open failed");
       return 1;
       }
-    
-    /* Encode global header */
-    avcc = create_avcc_atom(codec, &avcc_size);
-    
-    quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
-                                  "avcC", avcc, avcc_size);
 
-    file->moov.iods.videoProfileId = 0x15;
+    if(!trak->strl) /* Global header for MOV */
+      {
+      int i;
+      
+      int header_len;
+      uint8_t * header;
+      x264_nal_t *nal;
+      int nnal;
+      
+      x264_encoder_headers(codec->enc, &nal, &nnal);
+      
+      header_len = 0;
+
+      /* 5 bytes NAL header + worst case escaping */
+      for(i = 0; i < nnal; i++)
+        header_len += 5 + nal[i].i_payload * 4 / 3;
+
+      header = malloc(header_len);
+      header_len = encode_nals(header, header_len, nal, nnal);
+      create_avcc_atom(file, track, header, header_len);
+      free(header);
+      }
     
     codec->initialized = 1;
     }
@@ -1036,6 +1037,51 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
+static int init_compressed(quicktime_t * file, int track)
+  {
+  create_avcc_atom(file, track,
+                   file->vtracks[track].ci.global_header,
+                   file->vtracks[track].ci.global_header_len);
+  return 0;
+  }
+
+static int write_packet(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int result;
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_x264_codec_t *codec = vtrack->codec->priv;
+  
+  /* AVI case: Prepend header to keyframe */
+  if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML)) 
+    {
+    if(p->flags & LQT_PACKET_KEYFRAME)
+      result = !quicktime_write_data(file, vtrack->ci.global_header,
+                                     vtrack->ci.global_header_len);
+
+    if(!codec->initialized)
+      {
+      strncpy(vtrack->track->strl->strh.fccHandler, "H264", 4);
+      strncpy(vtrack->track->strl->strf.bh.biCompression, "H264", 4);
+      codec->initialized = 1;
+      }
+    result = !quicktime_write_data(file, p->data, p->data_len);
+    }
+  /* MOV case: Reformat stream */
+  else
+    {
+    int encoded_size;
+    encoded_size = avc_parse_nal_units(p->data,
+                                       p->data_len,
+                                       &codec->work_buffer_1,
+                                       &codec->work_buffer_alloc_1);
+    result = !quicktime_write_data(file, codec->work_buffer_1, encoded_size);
+    }
+  
+  return result;
+  }
+
+
+
 void quicktime_init_codec_x264(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack)
@@ -1050,6 +1096,9 @@ void quicktime_init_codec_x264(quicktime_codec_t * codec_base,
   codec_base->set_pass = set_pass_x264;
   codec_base->flush = flush;
   codec_base->set_parameter = set_parameter;
+  codec_base->init_compressed = init_compressed;
+  codec_base->write_packet = write_packet;
+  
   
   /* Init private items */
   x264_param_default(&codec->params);

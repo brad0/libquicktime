@@ -705,6 +705,7 @@ static lqt_codec_info_static_t codec_info_x264 =
                            LQT_FILE_MP4 |
                            LQT_FILE_AVI |
                            LQT_FILE_AVI_ODML,
+    .compression_id      = LQT_COMPRESSION_H264,
   };
 
 /* These are called from the plugin loader */

@@ -241,6 +241,9 @@ int lqt_add_video_track_compressed(quicktime_t * file,
     return 1;
 
   vtrack = &file->vtracks[file->total_vtracks-1];
+
+  if(vtrack->ci.flags & LQT_COMPRESSION_HAS_B_FRAMES)
+    vtrack->track->mdia.minf.stbl.has_ctts = 1;
   
   if(vtrack->codec->init_compressed)
     vtrack->codec->init_compressed(file, file->total_vtracks-1);
@@ -302,26 +305,41 @@ int lqt_write_video_packet(quicktime_t * file,
   {
   int result;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
-
+  quicktime_trak_t * trak = vtrack->track;
+  
   lqt_start_encoding(file);
+
+  fprintf(stderr, "lqt_write_video_packet\n");
+  lqt_packet_dump(p);
   
   /* Must set valid timestamp for encoders */
-  vtrack->timestamp = p->timestamp;
-  lqt_video_append_timestamp(file, track, p->timestamp, p->duration);
-    
+  
+  quicktime_write_chunk_header(file, vtrack->track);
+  
   if(vtrack->codec->write_packet)
-    {
     result = vtrack->codec->write_packet(file, p, track);
-    }
   else
-    {
-    lqt_write_frame_header(file, track,
-                           -1, p->timestamp, !!(p->flags & LQT_PACKET_KEYFRAME));
-    
     result = !quicktime_write_data(file, p->data, p->data_len);
-    lqt_write_frame_footer(file, track);
-    }
+  
+  trak->chunk_samples = 1;
+  quicktime_write_chunk_footer(file, trak);
+  
+  if(p->flags && LQT_PACKET_KEYFRAME)
+    quicktime_insert_keyframe(file, vtrack->current_position, track);
 
+  /* Update stts */
+  quicktime_update_stts(&trak->mdia.minf.stbl.stts, vtrack->current_position,
+                        p->duration);
+
+  if(vtrack->ci.flags & LQT_COMPRESSION_HAS_B_FRAMES)
+    {
+    /* CTS = PTS - DTS */
+    quicktime_update_ctts(&trak->mdia.minf.stbl.ctts, vtrack->current_position,
+                          p->timestamp - vtrack->timestamp);
+    }
+  vtrack->timestamp += p->duration;
+  
+  vtrack->cur_chunk++;
   vtrack->current_position++;
   
   return result;

@@ -587,9 +587,20 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
   quicktime_stts_table_t * stts_tab;
   int64_t dts;
   int has_b_frames = 0;
+  
+  /* If all frames are keyframes, disable stss */
+  if(trak->mdia.minf.stbl.stss.total_entries == vtrack->cur_chunk)
+    trak->mdia.minf.stbl.stss.total_entries = 0;
+  
+  /* If we have no timestamp arrays (e.g. if stream was written compressed)
+     return here */
 
+  if(!vtrack->picture_numbers)
+    return;
+  
   stts = &trak->mdia.minf.stbl.stts;
   ctts = &trak->mdia.minf.stbl.ctts;
+  
 #if 0
   fprintf (stderr, "Build timestamp tables %ld frames %d\n",
            vtrack->cur_chunk, stts->default_duration);
@@ -641,11 +652,6 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
 
   if(stts->table[vtrack->cur_chunk-1].sample_duration <= 0)
     stts->table[vtrack->cur_chunk-1].sample_duration = stts->default_duration;
-
-  /* If all frames are keyframes, disable stss */
-
-  if(trak->mdia.minf.stbl.stss.total_entries == vtrack->cur_chunk)
-    trak->mdia.minf.stbl.stss.total_entries = 0;
   
   /* If we have no B-frames, exit here */
   if(!has_b_frames)
