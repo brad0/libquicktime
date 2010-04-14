@@ -1369,6 +1369,10 @@ typedef struct
   
   int64_t stts_index;
   int64_t stts_count;
+
+  int64_t ctts_index;
+  int64_t ctts_count;
+
   int stream_cmodel; // Colormodel, which is read/written natively by the codec
   int io_cmodel;  // Colormodel, which is used by the encode/decode functions
   int stream_row_span, stream_row_span_uv;

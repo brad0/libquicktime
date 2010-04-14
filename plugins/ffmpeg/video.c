@@ -94,7 +94,9 @@ typedef struct
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
   AVPacket pkt;
 #endif
-  
+
+  /* Stuff for compressed H.264 reading */
+  int nal_size_length;
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -387,7 +389,65 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
   
   }
 
+/* Stuff for reading compressed H.264 */
 
+#define PTR_2_16BE(p) \
+((*(p) << 8) | \
+*(p+1))
+
+#define PTR_2_32BE(p) \
+((*(p) << 24) | \
+(*(p+1) << 16) | \
+(*(p+2) << 8) | \
+*(p+3))
+
+
+static const uint8_t nal_header[4] = { 0x00, 0x00, 0x00, 0x01 };
+
+static void append_h264_header(lqt_compression_info_t * ci,
+                               uint8_t * data, int len)
+  {
+  ci->global_header = realloc(ci->global_header, ci->global_header_len + len + 4);
+  memcpy(ci->global_header + ci->global_header_len, nal_header, 4);
+  ci->global_header_len += 4;
+  memcpy(ci->global_header + ci->global_header_len, data, len);
+  ci->global_header_len += len;
+  }
+                               
+
+static void set_h264_header(quicktime_video_map_t * vtrack,
+                            uint8_t * extradata, int extradata_size)
+  {
+  int i, len;
+  int num_units;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  
+  uint8_t * ptr;
+  ptr = extradata;
+
+  ptr += 4; // Version, profile, profile compat, level
+  codec->nal_size_length = (*ptr & 0x3) + 1;
+  ptr++;
+
+  /* SPS */
+  num_units = *ptr & 0x1f; ptr++;
+  for(i = 0; i < num_units; i++)
+    {
+    len = PTR_2_16BE(ptr); ptr += 2;
+    append_h264_header(&vtrack->ci, ptr, len);
+    ptr += len;
+    }
+
+  /* PPS */
+  num_units = *ptr; ptr++;
+  for(i = 0; i < num_units; i++)
+    {
+    len = PTR_2_16BE(ptr); ptr += 2;
+    append_h264_header(&vtrack->ci, ptr, len);
+    ptr += len;
+    }
+
+  }
 
 /* Just for the curious: This function can be called with NULL as row_pointers.
    In this case, have_frame is set to 1 and a subsequent call will take the
@@ -446,12 +506,17 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       user_atom = quicktime_stsd_get_user_atom(trak, "avcC", &user_atom_len);
 
       if(!user_atom)
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-                "No avcC atom present, decoding is likely to fail");
+        {
+        if(!IS_AVI(file->file_type))
+          lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+                  "No avcC atom present, decoding is likely to fail");
+        }
       else
         {
         extradata = user_atom + 8;
         extradata_size = user_atom_len - 8;
+        vtrack->ci.id = LQT_COMPRESSION_H264;
+        set_h264_header(vtrack, extradata, extradata_size);
         }
       
       }
@@ -1232,6 +1297,72 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
   return result;
   }
 
+static void append_data_h264(lqt_packet_t * p, uint8_t * data, int len,
+                             int header_len)
+  {
+  switch(header_len)
+    {
+    case 3:
+      lqt_packet_alloc(p, p->data_len + 3 + len);
+      memcpy(p->data + p->data_len, &nal_header[1], 3);
+      p->data_len += 3;
+      break;
+    case 4:
+      lqt_packet_alloc(p, p->data_len + 4 + len);
+      memcpy(p->data + p->data_len, nal_header, 4);
+      p->data_len += 4;
+      break;
+    }
+  memcpy(p->data + p->data_len, data, len);
+  p->data_len += len;
+  }
+
+static int read_packet_h264(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int nals_sent = 0;
+  uint8_t * ptr, *end;
+  int len;
+  int buffer_size;
+  
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  
+  if(!(buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                          &codec->buffer_alloc,
+                                          vtrack->current_position, NULL, track)))
+    return 0;
+  
+  ptr = codec->buffer;
+  end = codec->buffer + buffer_size;
+  
+  p->data_len = 0;
+  
+  while(ptr < end - codec->nal_size_length)
+    {
+    switch(codec->nal_size_length)
+      {
+      case 1:
+        len = *ptr;
+        ptr++;
+        break;
+      case 2:
+        len = PTR_2_16BE(ptr);
+        ptr += 2;
+        break;
+      case 4:
+        len = PTR_2_32BE(ptr);
+        ptr += 4;
+        break;
+      default:
+        break;
+      }
+    append_data_h264(p, ptr, len, nals_sent ? 3 : 4);
+    nals_sent++;
+    ptr += len;
+    }
+  return 1;
+  }
+
 void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
                                        quicktime_video_map_t *vtrack,
                                        AVCodec *encoder,
@@ -1268,8 +1399,11 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
       }
     }
   if(decoder)
+    {
+    if(decoder->id == CODEC_ID_H264)
+      codec_base->read_packet = read_packet_h264;
     codec_base->decode_video = lqt_ffmpeg_decode_video;
-  
+    }
   codec_base->set_parameter = set_parameter_video;
 
   if(!vtrack)
@@ -1304,3 +1438,4 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     vtrack->stream_cmodel = BC_YUV420P;
   
   }
+

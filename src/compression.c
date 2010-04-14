@@ -166,17 +166,37 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
 
-  p->data_len =
-    lqt_read_video_frame(file, &p->data, &p->data_alloc,
-                         vtrack->current_position, NULL, track);
-  if(!p->data_len)
+  if(vtrack->current_position >= quicktime_track_samples(file, vtrack->track))
     return 0;
-
+  
   p->flags = 0;
   if(lqt_is_keyframe(file, track, vtrack->current_position))
     p->flags |= LQT_PACKET_KEYFRAME;
+
+  p->data_len = 0;
+
+  if(vtrack->codec->read_packet)
+    {
+    if(!vtrack->codec->read_packet(file, p, track))
+      return 0;
+    }
+  else
+    {
+    p->data_len =
+      lqt_read_video_frame(file, &p->data, &p->data_alloc,
+                           vtrack->current_position, NULL, track);
+    }
   
+  /* PTS = DTS if there are no B-frames */
   p->timestamp = vtrack->timestamp;
+
+  /* PTS = DTS + CTS if there are B-frames */
+  if(vtrack->track->mdia.minf.stbl.has_ctts)
+    {
+    quicktime_ctts_t * ctts = &vtrack->track->mdia.minf.stbl.ctts;
+    p->timestamp += ctts->table[vtrack->ctts_index].sample_duration -
+      ctts->table[0].sample_duration;
+    }
   p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
   
   lqt_update_frame_position(vtrack);

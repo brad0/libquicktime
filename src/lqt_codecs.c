@@ -290,6 +290,20 @@ void lqt_update_frame_position(quicktime_video_map_t * track)
     track->stts_index++;
     track->stts_count = 0;
     }
+
+  if(track->track->mdia.minf.stbl.has_ctts)
+    {
+    track->ctts_count++;
+
+    if(track->ctts_count >=
+       track->track->mdia.minf.stbl.ctts.table[track->ctts_index].sample_count)
+      {
+      track->ctts_index++;
+      track->ctts_count = 0;
+      }
+    
+    }
+  
   track->current_position++;
   }
 
