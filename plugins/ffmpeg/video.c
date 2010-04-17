@@ -682,6 +682,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       else if(codec->avctx->height == 512)
         codec->y_offset = 26;
       vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
+      vtrack->ci.id = LQT_COMPRESSION_D10;
       }
     
     if(codec->avctx->sample_aspect_ratio.num)
@@ -1297,6 +1298,52 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
   return result;
   }
 
+static int init_compressed_imx(quicktime_t * file, int track)
+  {
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  char *compressor = vtrack->track->mdia.minf.stbl.stsd.table[0].format;
+  
+  compressor[0] = 'm';
+  compressor[1] = 'x';
+
+  switch(vtrack->ci.bitrate)
+    {
+    case 30000000:
+      compressor[2] = '3';
+      break;
+    case 40000000:
+      compressor[2] = '4';
+      break;
+    case 50000000:
+      compressor[2] = '5';
+      break;
+    }
+  if((vtrack->ci.height == 512) || (vtrack->ci.height == 486))
+    compressor[3] = 'n';
+  else
+    compressor[3] = 'p';
+  return 0;
+  }
+
+static int writes_compressed_imx(lqt_file_type_t type,
+                                 const lqt_compression_info_t * ci)
+  {
+  /* AVI doesn't support IMX */
+  if(type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+    return 0;
+
+  switch(ci->bitrate)
+    {
+    case 30000000:
+    case 40000000:
+    case 50000000:
+      return 1;
+      break;
+    }
+  return 0;
+  }
+
+
 static void append_data_h264(lqt_packet_t * p, uint8_t * data, int len,
                              int header_len)
   {
@@ -1433,6 +1480,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     {
     vtrack->stream_cmodel = BC_YUV422P;
     codec->is_imx = 1;
+    codec_base->writes_compressed = writes_compressed_imx;
+    codec_base->init_compressed   = init_compressed_imx;
     }
   else
     vtrack->stream_cmodel = BC_YUV420P;

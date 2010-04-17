@@ -134,7 +134,6 @@ static void video_iteration(track_t * track, lqt_packet_t * p)
 
   // fprintf(stderr, "Got video packet\n");
   // lqt_packet_dump(p);
-
   
   lqt_write_video_packet(track->out_file, p, track->out_index);
   
