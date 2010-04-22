@@ -49,6 +49,7 @@ typedef enum
     LQT_COMPRESSION_H264,           //!< H.264 (Annex B)
     LQT_COMPRESSION_DIRAC,          //!< Complete DIRAC frames
     LQT_COMPRESSION_D10,            //!< D10 according to SMPTE 356M-2001
+    LQT_COMPRESSION_DV,             //!< DV Variants
 
   } lqt_compression_id_t;
 

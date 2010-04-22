@@ -877,15 +877,9 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
     codec->initialized = 1;
 
     /* One frame is: bitrate * frame_samples / (samplerate * 8) + 1024 */
-#if 0		// PATCH 1
-    codec->chunk_buffer_alloc = (codec->avctx->bit_rate * codec->avctx->frame_size /
-                                (codec->avctx->sample_rate * 8)) + 1024;
-#else
     codec->chunk_buffer_alloc = ( codec->avctx->frame_size
-									* sizeof( int16_t )
-									* codec->avctx->channels
-								);
-#endif
+                                  * sizeof( int16_t )
+                                  * codec->avctx->channels);
     codec->chunk_buffer = malloc(codec->chunk_buffer_alloc);
 
     if(trak->strl)
@@ -905,7 +899,6 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
 
   /* Allocate sample buffer if necessary */
 
-//         PATCH 2 
   if(codec->sample_buffer_alloc < (codec->samples_in_buffer + samples))
     {
     codec->sample_buffer_alloc = codec->samples_in_buffer + samples + 16;

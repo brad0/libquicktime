@@ -328,9 +328,6 @@ int lqt_write_video_packet(quicktime_t * file,
   quicktime_trak_t * trak = vtrack->track;
   
   lqt_start_encoding(file);
-
-  fprintf(stderr, "lqt_write_video_packet\n");
-  lqt_packet_dump(p);
   
   /* Must set valid timestamp for encoders */
   
@@ -388,6 +385,7 @@ compression_ids[] =
     { LQT_COMPRESSION_H264,      "h264"    },
     { LQT_COMPRESSION_DIRAC,     "dirac"   },
     { LQT_COMPRESSION_D10,       "d10"     },
+    { LQT_COMPRESSION_DV,        "dv"      },
   };
   
 const char * lqt_compression_id_to_string(lqt_compression_id_t id)

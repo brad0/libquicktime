@@ -355,6 +355,13 @@ static lqt_image_size_static_t image_sizes_dnxhd[] =
     { /* End */ },
   };
 
+static lqt_image_size_static_t image_sizes_dv[] =
+  {
+    {  720, 576 },
+    {  720, 480 },
+    { /* End */ },
+  };
+
 
 /* Video; tables from mplayers config... */
 
@@ -684,12 +691,14 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
-      .short_name = "dv_ntsc",
-      .name = TRS("FFMPEG DV (NTSC)"),
-      .fourccs = { "dvc ", (char *)0 },
+      .short_name = "dv",
+      .name = TRS("FFMPEG DV"),
+      .fourccs = { "dvc ", "dvcp", "dvpp", "dvsd", "dv25", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
+      .compression_id = LQT_COMPRESSION_DV, // Also writes all other DV flavours
+      .image_sizes = image_sizes_dv,
     },
     {
       .id = CODEC_ID_DVVIDEO,
@@ -698,12 +707,14 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
-      .short_name = "dv_pal",
-      .name = TRS("FFMPEG DV (PAL)"),
-      .fourccs = { "dvcp", "dvpp", (char *)0 },
+      .short_name = "dvcpro",
+      .name = TRS("FFMPEG DVCPRO"),
+      .fourccs = { "dvpp", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-      .do_encode = 1
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+      .do_encode = 1,
+      .compression_id = LQT_COMPRESSION_DV, // Also writes all other DV flavours
+      .image_sizes = image_sizes_dv,
     },
     {
       .id = CODEC_ID_DVVIDEO,
@@ -712,40 +723,13 @@ struct CODECIDMAP codecidmap_v[] =
       .decoder = NULL,
       .encode_parameters = encode_parameters_dvvideo,
       .decode_parameters = decode_parameters_video,
-      .short_name = "dv_avi",
-      .name = TRS("FFMPEG DV (AVI version)"),
-      .fourccs = { "dvsd", (char *)0 },
+      .short_name = "dv50",
+      .name = TRS("FFMPEG DVCPRO50"),
+      .fourccs = { "dv5p", "dv5n", "dv50", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
-      .do_encode = 1
-    },
-    {
-      .id = CODEC_ID_DVVIDEO,
-      .index = -1,
-      .encoder = NULL,
-      .decoder = NULL,
-      .encode_parameters = encode_parameters_dvvideo,
-      .decode_parameters = decode_parameters_video,
-      .short_name = "dv50_pal",
-      .name = TRS("FFMPEG DVCPRO50 (PAL)"),
-      .fourccs = { "dv5p", (char *)0 },
-      .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-      .do_encode = 1
-    },
-    {
-      .id = CODEC_ID_DVVIDEO,
-      .index = -1,
-      .encoder = NULL,
-      .decoder = NULL,
-      .encode_parameters = encode_parameters_dvvideo,
-      .decode_parameters = decode_parameters_video,
-      .short_name = "dv50_ntsc",
-      .name = TRS("FFMPEG DVCPRO50 (NTSC)"),
-	    .fourccs = { "dv5n", (char *)0 },
-      .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-      .do_encode = 1
+      .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+      .do_encode = 1,
+      .image_sizes = image_sizes_dv,
     },
     /* DVCPRO HD (decoding only for now) */
     {
@@ -762,11 +746,12 @@ struct CODECIDMAP codecidmap_v[] =
                    "dvh5", // DVCPRO HD 50i produced by FCP
                    "dvh6", // DVCPRO HD 60i produced by FCP
                    "dvh3", // DVCPRO HD 30p produced by FCP
+                   "dvh1", // 
                    "AVd1", // AVID DV100
                    (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
-      .do_encode = 1
+      // .do_encode = 1
     },
     {
       .id = CODEC_ID_FFVHUFF,
