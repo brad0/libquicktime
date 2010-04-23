@@ -179,8 +179,10 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         }
 
     if(!codec->initialized)
+      {
       lqt_set_fiel_uncompressed(file, track);
-    
+      lqt_set_colr_yuv_uncompressed(file, track);
+      }
     initialize(vtrack, codec, width, height);
 
     out_ptr = codec->buffer;

@@ -121,6 +121,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
         if(!codec->buffer)
           {
           lqt_set_fiel_uncompressed(file, track);
+          lqt_set_colr_yuv_uncompressed(file, track);
           codec->buffer = malloc(width * height * 4);
           }
         out_ptr = codec->buffer;

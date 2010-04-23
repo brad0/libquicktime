@@ -29,6 +29,19 @@
 
 void lqt_set_fiel_uncompressed(quicktime_t * file, int track);
 
+/*
+ * Sets the colr atom of a track to defaults:
+ * Color Parameter type: 'nclc'
+ * Primaries index : 1
+ * Transfer Function index : 1
+ * Matrix index: 1
+ * According to http://developer.apple.com/mac/library/documentation/QuickTime/QTFF/QTFFChap3/qtff3.html
+ * the colr atom is always required when using uncompressed YUV formats.
+ *
+ * Return type is the same as lqt_set_colr (1 if the call was successful, 0 if there is no such track)
+ */
+int lqt_set_colr_yuv_uncompressed(quicktime_t *file, int track);
+
 void quicktime_init_codec_raw(quicktime_codec_t * codec_base,
                               quicktime_audio_map_t *atrack,
                               quicktime_video_map_t *vtrack);

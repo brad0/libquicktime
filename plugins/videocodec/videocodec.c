@@ -50,3 +50,12 @@ void lqt_set_fiel_uncompressed(quicktime_t * file, int track)
       break;
     }
   }
+
+int lqt_set_colr_yuv_uncompressed(quicktime_t *file,int track) {
+    quicktime_colr_t colr;
+    colr.colorParamType=1852009571;
+    colr.primaries=1;
+    colr.transferFunction=1;
+    colr.matrix=1;
+    return lqt_set_colr(file,track,&colr);
+}
