@@ -273,7 +273,7 @@ lqt_codec_info_t * lqt_codec_info_copy_single(const lqt_codec_info_t * info)
   {
   int i, len;
   lqt_codec_info_t * ret = calloc(1, sizeof(*ret));
-
+//   fprintf(stderr, "lqt_codec_info_copy_single %s\n", info->name);
   ret->compatibility_flags = info->compatibility_flags;
     
   if(info->name)
