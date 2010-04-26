@@ -33,6 +33,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define LQT_COLR_NCLC 0x6E636C63
+#define LQT_COLR_PROF 0x70726F66
+
 /* Fine tuning of quicktime atoms. Use with caution */
 
 /** \defgroup atoms Fine tuning of quicktime atoms

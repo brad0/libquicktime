@@ -53,7 +53,7 @@ void lqt_set_fiel_uncompressed(quicktime_t * file, int track)
 
 int lqt_set_colr_yuv_uncompressed(quicktime_t *file,int track) {
     quicktime_colr_t colr;
-    colr.colorParamType=1852009571;
+    colr.colorParamType=LQT_COLR_NCLC;
     colr.primaries=1;
     colr.transferFunction=1;
     colr.matrix=1;
