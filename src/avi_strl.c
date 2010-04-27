@@ -288,7 +288,7 @@ void quicktime_strl_2_qt(quicktime_t *file,
 
     samples = strl->strh.dwLength;           // dwLength
     bytes_per_sample = strl->strh.dwSampleSize; // dwSampleSize
-
+    
     if(strl->strf.wf.type != LQT_WAVEFORMAT_WAVEFORMAT)
       {
       bits_per_sample = strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample;
@@ -299,7 +299,6 @@ void quicktime_strl_2_qt(quicktime_t *file,
     
     channels       = strl->strf.wf.f.WAVEFORMAT.nChannels;
     sample_rate    = strl->strf.wf.f.WAVEFORMAT.nSamplesPerSec;
-
     
     quicktime_trak_init_audio(file, 
                               trak, 
@@ -307,6 +306,9 @@ void quicktime_strl_2_qt(quicktime_t *file,
                               sample_rate, 
                               bits_per_sample, 
                               (char*)codec);
+
+    if((strl->strh.dwSampleSize == 0) && (strl->strh.dwScale > 1))
+      trak->mdia.minf.is_audio_vbr = 1;
     
     // We store a constant samples per chunk based on the 
     // packet size if sample_size zero

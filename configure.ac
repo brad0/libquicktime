@@ -33,7 +33,7 @@ dnl
 
 have_gpl="false"
 AC_ARG_ENABLE(gpl, [  --enable-gpl            Change license to GPL. This enables some extra plugins],
-              have_gpl="true")
+    have_gpl="true")
 
 dnl
 dnl Libquicktime codec API version
@@ -41,8 +41,13 @@ dnl
 
 LQT_CODEC_API_VERSION="11"
 
+AH_TEMPLATE([HAVE_GPL], [Enable GPL code])
+
+AC_DEFINE_UNQUOTED(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
+
 if test "x$have_gpl" = "xtrue"; then
   LQT_CODEC_API_VERSION="($LQT_CODEC_API_VERSION|0x10000)"
+  AC_DEFINE(HAVE_GPL)
 fi
 
 AH_TEMPLATE([LQT_CODEC_API_VERSION],

@@ -102,7 +102,11 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
   quicktime_audio_map_t *atrack = &file->atracks[track];
 
-  if(atrack->block_align)
+  if(atrack->codec->read_packet)
+    {
+    return atrack->codec->read_packet(file, p, track);
+    }
+  else if(atrack->block_align)
     {
     int bytes_from_samples;
     p->data_len =
@@ -275,15 +279,20 @@ int lqt_write_audio_packet(quicktime_t * file,
                            lqt_packet_t * p, int track)
   {
   int result;
-  quicktime_audio_map_t *atrack = &file->atracks[track];
-
-  lqt_start_encoding(file);
+  int samples;
   
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  
+  lqt_start_encoding(file);
+
+  samples = p->duration;
+  if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+    samples /= 2;
+    
   //  if(atrack->codec->write_packet)
   //    return atrack->codec->write_packet(file, p, track);
   if(lqt_audio_is_vbr(file, track))
     {
-    int samples;
     if(file->write_trak != atrack->track)
       quicktime_write_chunk_header(file, atrack->track);
 
@@ -291,9 +300,6 @@ int lqt_write_audio_packet(quicktime_t * file,
     
     result = !quicktime_write_data(file, p->data, p->data_len);
     
-    samples = p->duration;
-    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
-      samples /= 2;
     
     lqt_finish_audio_vbr_frame(file, track, samples);
     
@@ -308,7 +314,7 @@ int lqt_write_audio_packet(quicktime_t * file,
     quicktime_write_chunk_header(file, atrack->track);
     result = quicktime_write_data(file, p->data, p->data_len);
 
-    atrack->track->chunk_samples = p->duration;
+    atrack->track->chunk_samples = samples;
     quicktime_write_chunk_footer(file, atrack->track);
     atrack->cur_chunk++;
     if(result)
