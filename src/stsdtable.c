@@ -450,7 +450,7 @@ void quicktime_write_stsd_audio(quicktime_t *file, quicktime_stsd_table_t *table
     if(table->has_esds)
       quicktime_write_esds(file, &table->esds);
     }
-        
+  quicktime_write_user_atoms(file, &table->user_atoms);
   }
 
 

@@ -1308,6 +1308,7 @@ static int write_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
       atrack->track->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  atrack->ci.bitrate / 8;
       atrack->track->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
       }
+    codec->header_written = 1;
     }
   
   quicktime_write_chunk_header(file, atrack->track);
