@@ -36,43 +36,43 @@ void quicktime_delete_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
 
 
 void quicktime_read_hdrl(quicktime_t *file, 
-	quicktime_hdrl_t *hdrl,
-	quicktime_atom_t *parent_atom)
-{
-	quicktime_atom_t leaf_atom;
-	uint8_t data[4];
-	int current_track = 0;
+                         quicktime_hdrl_t *hdrl,
+                         quicktime_atom_t *parent_atom)
+  {
+  quicktime_atom_t leaf_atom;
+  uint8_t data[4];
+  int current_track = 0;
 
-	do
-	{
-		quicktime_atom_read_header(file, &leaf_atom);
-		if(quicktime_atom_is(&leaf_atom, "avih"))
-		{
-                quicktime_read_avih(file, &hdrl->avih, &leaf_atom);
-                }
+  do
+    {
+    quicktime_atom_read_header(file, &leaf_atom);
+    if(quicktime_atom_is(&leaf_atom, "avih"))
+      {
+      quicktime_read_avih(file, &hdrl->avih, &leaf_atom);
+      }
 
-/* Got LIST */
-		else if(quicktime_atom_is(&leaf_atom, "LIST"))
-		{
-			data[0] = data[1] = data[2] = data[3] = 0;
-			quicktime_read_data(file, data, 4);
+    /* Got LIST */
+    else if(quicktime_atom_is(&leaf_atom, "LIST"))
+      {
+      data[0] = data[1] = data[2] = data[3] = 0;
+      quicktime_read_data(file, data, 4);
 
-/* Got strl */
-			if(quicktime_match_32(data, "strl"))
-			{
-				quicktime_strl_t *strl = 
-					hdrl->strl[current_track++] = 
-					quicktime_new_strl();
-				quicktime_read_strl(file, strl, &leaf_atom);
-				quicktime_strl_2_qt(file, strl);
-			}
-		}
+      /* Got strl */
+      if(quicktime_match_32(data, "strl"))
+        {
+        quicktime_strl_t *strl = 
+          hdrl->strl[current_track++] = 
+          quicktime_new_strl();
+        quicktime_read_strl(file, strl, &leaf_atom);
+        quicktime_strl_2_qt(file, strl);
+        }
+      }
 
-		quicktime_atom_skip(file, &leaf_atom);
-	}while(quicktime_position(file) < parent_atom->end);
+    quicktime_atom_skip(file, &leaf_atom);
+    }while(quicktime_position(file) < parent_atom->end);
 
-	quicktime_atom_skip(file, &leaf_atom);
-}
+  quicktime_atom_skip(file, &leaf_atom);
+  }
 
 void quicktime_init_hdrl(quicktime_t *file, quicktime_hdrl_t *hdrl)
   {

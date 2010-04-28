@@ -1343,7 +1343,6 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
   {
   int result;
   quicktime_video_map_t * vtrack = &file->vtracks[track];
-  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   
   /* Prepend header to keyframe */
   if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML)) 
@@ -1352,11 +1351,10 @@ static int write_packet_mpeg4(quicktime_t * file, lqt_packet_t * p, int track)
       result = !quicktime_write_data(file, vtrack->ci.global_header,
                                      vtrack->ci.global_header_len);
 
-    if(!codec->initialized)
+    if(!vtrack->current_position)
       {
       strncpy(vtrack->track->strl->strh.fccHandler, "divx", 4);
       strncpy(vtrack->track->strl->strf.bh.biCompression, "DX50", 4);
-      codec->initialized = 1;
       }
     }
   

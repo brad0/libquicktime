@@ -844,6 +844,7 @@ struct CODECIDMAP codecidmap_a[] =
       .wav_ids = { 0x55, LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_AVI | LQT_FILE_AVI_ODML,
       .do_encode = 1,
+      .compression_id = LQT_COMPRESSION_MP2,
     },
     {
       .id = CODEC_ID_AC3,
@@ -856,8 +857,9 @@ struct CODECIDMAP codecidmap_a[] =
       .name = TRS("FFMPEG AC3 Audio"),
       .fourccs = { "ac-3", ".ac3", ".AC3", (char *)0 },
       .wav_ids = { 0x2000, LQT_WAV_ID_NONE },
-      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML,
+      .compatibility_flags = LQT_FILE_AVI | LQT_FILE_AVI_ODML | LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4,
       .do_encode = 1,
+      .compression_id = LQT_COMPRESSION_AC3,
     },
     {
       .id = CODEC_ID_QDM2,

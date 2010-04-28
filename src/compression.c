@@ -291,7 +291,12 @@ int lqt_write_audio_packet(quicktime_t * file,
     
   //  if(atrack->codec->write_packet)
   //    return atrack->codec->write_packet(file, p, track);
-  if(lqt_audio_is_vbr(file, track))
+
+  if(atrack->codec->write_packet)
+    {
+    return atrack->codec->write_packet(file, p, track);
+    }
+  else if(lqt_audio_is_vbr(file, track))
     {
     if(file->write_trak != atrack->track)
       quicktime_write_chunk_header(file, atrack->track);

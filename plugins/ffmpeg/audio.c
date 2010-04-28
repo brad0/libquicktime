@@ -274,121 +274,138 @@ static int mpa_decode_header(mpa_header * h, uint8_t * ptr,
 
 /* AC3 header */
 
-#ifdef HAVE_GPL // Taken from a52dec
 typedef struct
   {
-  int total_bytes;
-  int samplerate;
-  int bitrate;
-
+  /* Primary */
+  int fscod;
+  int frmsizecod;
+  int bsid;
+  int bsmod;
   int acmod;
-  int lfe;
-  int dolby;
-
-  float cmixlev;
-  float smixlev;
+  int cmixlev;
+  int surmixlev;
+  int dsurmod;
+  int lfeon;
   
+  /* Secondary */
+  int frame_bytes;
+  int bitrate;
   } a52_header;
 
-#define LEVEL_3DB 0.7071067811865476
-#define LEVEL_45DB 0.5946035575013605
-#define LEVEL_6DB 0.5
+#define PTR_2_32BE(p) \
+((*(p) << 24) | \
+(*(p+1) << 16) | \
+(*(p+2) << 8) | \
+*(p+3))
+
+static inline int get_bits(uint32_t * bits, int num)
+  {
+  int ret;
+  
+  ret = (*bits) >> (32 - num);
+  (*bits) <<= num;
+  
+  return ret;
+  }
 
 #define A52_FRAME_SAMPLES 1536
 
-static const uint8_t halfrate[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3};
-static const int rate[] = { 32,  40,  48,  56,  64,  80,  96, 112,
-                      128, 160, 192, 224, 256, 320, 384, 448,
-                      512, 576, 640};
-static const uint8_t lfeon[8] = {0x10, 0x10, 0x04, 0x04, 0x04, 0x01, 0x04, 0x01};
+/* Tables from ffmpeg (ac3tab.c) */
+static const uint16_t ac3_frame_size_tab[38][3] =
+  {
+    { 64,   69,   96   },
+    { 64,   70,   96   },
+    { 80,   87,   120  },
+    { 80,   88,   120  },
+    { 96,   104,  144  },
+    { 96,   105,  144  },
+    { 112,  121,  168  },
+    { 112,  122,  168  },
+    { 128,  139,  192  },
+    { 128,  140,  192  },
+    { 160,  174,  240  },
+    { 160,  175,  240  },
+    { 192,  208,  288  },
+    { 192,  209,  288  },
+    { 224,  243,  336  },
+    { 224,  244,  336  },
+    { 256,  278,  384  },
+    { 256,  279,  384  },
+    { 320,  348,  480  },
+    { 320,  349,  480  },
+    { 384,  417,  576  },
+    { 384,  418,  576  },
+    { 448,  487,  672  },
+    { 448,  488,  672  },
+    { 512,  557,  768  },
+    { 512,  558,  768  },
+    { 640,  696,  960  },
+    { 640,  697,  960  },
+    { 768,  835,  1152 },
+    { 768,  836,  1152 },
+    { 896,  975,  1344 },
+    { 896,  976,  1344 },
+    { 1024, 1114, 1536 },
+    { 1024, 1115, 1536 },
+    { 1152, 1253, 1728 },
+    { 1152, 1254, 1728 },
+    { 1280, 1393, 1920 },
+    { 1280, 1394, 1920 },
+  };
 
-static const float clev[4] = {LEVEL_3DB, LEVEL_45DB, LEVEL_6DB, LEVEL_45DB};
-static const float slev[4] = {LEVEL_3DB, LEVEL_6DB,          0, LEVEL_6DB};
-
-
-/* Needs 7 bytes */
+const uint16_t ac3_bitrate_tab[19] =
+  {
+    32, 40, 48, 56, 64, 80, 96, 112, 128,
+    160, 192, 224, 256, 320, 384, 448, 512, 576, 640
+  };
 
 static int a52_header_read(a52_header * ret, uint8_t * buf)
   {
-  int half;
-  int frmsizecod;
-  int bitrate;
-
-  int cmixlev;
-  int smixlev;
-
+  int shift;
+  uint32_t bits;
   memset(ret, 0, sizeof(*ret));
+
+  /* Check syncword */
+  if((buf[0] != 0x0b) || (buf[1] != 0x77))
+    return 0;
+
+  /* Skip syncword & crc */
+  buf += 4;
+
+  bits = PTR_2_32BE(buf);
   
-  if ((buf[0] != 0x0b) || (buf[1] != 0x77))   /* syncword */
-    {
-    return 0;
-    }
-  if (buf[5] >= 0x60)         /* bsid >= 12 */
-    {
-    return 0;
-    }
-  half = halfrate[buf[5] >> 3];
+  ret->fscod      = get_bits(&bits, 2);
+  ret->frmsizecod = get_bits(&bits, 6);
 
-  /* acmod, dsurmod and lfeon */
-  ret->acmod = buf[6] >> 5;
+  if(ret->frmsizecod > 37)
+    return 0;
+  
+  ret->bsid       = get_bits(&bits, 5);
 
-  /* cmixlev and surmixlev */
+  if(ret->bsid >= 12)
+    return 0;
+  
+  ret->bsmod      = get_bits(&bits, 3);
+  ret->acmod      = get_bits(&bits, 3);
 
   if((ret->acmod & 0x01) && (ret->acmod != 0x01))
-    {
-    cmixlev = (buf[6] & 0x18) >> 3;
-    }
-  else
-    cmixlev = -1;
-  
+    ret->cmixlev = get_bits(&bits, 2);
   if(ret->acmod & 0x04)
-    {
-    if((cmixlev) == -1)
-      smixlev = (buf[6] & 0x18) >> 3;
-    else
-      smixlev = (buf[6] & 0x06) >> 1;
-    }
-  else
-    smixlev = -1;
+    ret->surmixlev = get_bits(&bits, 2);
+  if(ret->acmod == 0x02)
+    ret->dsurmod = get_bits(&bits, 2);
+  ret->lfeon = get_bits(&bits, 1);
 
-  if(smixlev >= 0)
-    ret->smixlev = slev[smixlev];
-  if(cmixlev >= 0)
-    ret->cmixlev = clev[cmixlev];
-  
-  if((buf[6] & 0xf8) == 0x50)
-    ret->dolby = 1;
+  /* Secondary variables */
 
-  if(buf[6] & lfeon[ret->acmod])
-    ret->lfe = 1;
+  shift = ret->bsid - 8;
+  if(shift < 0)
+    shift = 0;
 
-  frmsizecod = buf[4] & 63;
-  if (frmsizecod >= 38)
-    return 0;
-  bitrate = rate[frmsizecod >> 1];
-  ret->bitrate = (bitrate * 1000) >> half;
-
-  switch (buf[4] & 0xc0)
-    {
-    case 0:
-      ret->samplerate = 48000 >> half;
-      ret->total_bytes = 4 * bitrate;
-      break;
-    case 0x40:
-      ret->samplerate = 44100 >> half;
-      ret->total_bytes =  2 * (320 * bitrate / 147 + (frmsizecod & 1));
-      break;
-    case 0x80:
-      ret->samplerate = 32000 >> half;
-      ret->total_bytes =  6 * bitrate;
-      break;
-    default:
-      return 0;
-    }
-  
+  ret->bitrate = (ac3_bitrate_tab[ret->frmsizecod>>1] * 1000) >> shift;
+  ret->frame_bytes = ac3_frame_size_tab[ret->frmsizecod][ret->fscod] * 2;
   return 1;
   }
-#endif // HAVE_GPL
 
 /* Codec */
 
@@ -425,7 +442,10 @@ typedef struct
   AVPacket pkt;
 #endif
 
-  int64_t pts;
+  int64_t pts; /* For reading compressed packets */
+
+  int header_written;
+  
   } quicktime_ffmpeg_audio_codec_t;
 
 static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
@@ -826,7 +846,6 @@ static void init_compression_info(quicktime_t *file, int track)
     else
       track_map->ci.bitrate = h.bitrate;
     }
-#ifdef HAVE_GPL
   else if(codec->decoder->id == CODEC_ID_AC3)
     {
     a52_header h;
@@ -839,7 +858,7 @@ static void init_compression_info(quicktime_t *file, int track)
                                         &codec->chunk_buffer_alloc,
                                         codec->bytes_in_chunk_buffer);
 
-    if(chunk_size + codec->bytes_in_chunk_buffer < 7)
+    if(chunk_size + codec->bytes_in_chunk_buffer < 8)
       return;
     
     ptr = codec->chunk_buffer;
@@ -849,14 +868,13 @@ static void init_compression_info(quicktime_t *file, int track)
         break;
       
       ptr++;
-      if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 7)
+      if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 8)
         return;
       }
     
     track_map->ci.bitrate = h.bitrate;
     track_map->ci.id = LQT_COMPRESSION_AC3;
     }
-#endif  
   }
 
 static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
@@ -878,13 +896,13 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
 
   if(!output) /* Global initialization */
     {
+    init_compression_info(file, track);
     return 0;
     }
   
   /* Initialize codec */
   if(!codec->initialized)
     {
-    init_compression_info(file, track);
     /* Set some mandatory variables */
     codec->avctx->channels        = quicktime_track_channels(file, track);
     codec->avctx->sample_rate     = quicktime_sample_rate(file, track);
@@ -1049,6 +1067,46 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
  *   Encoding part
  */
 
+static void create_dac3_atom(quicktime_t * file, int track, uint8_t * buf)
+  {
+  uint32_t tmp;
+  uint8_t dac3_data[3];
+  a52_header header;
+  quicktime_trak_t *trak = file->atracks[track].track;
+  
+  if(a52_header_read(&header, buf))
+    {
+    tmp = header.fscod;
+
+    tmp <<= 5;
+    tmp |= header.bsid;
+    
+    tmp <<= 3;
+    tmp |= header.bsmod;
+
+    tmp <<= 3;
+    tmp |= header.acmod;
+
+    tmp <<= 1;
+    tmp |= header.lfeon;
+
+    tmp <<= 5;
+    tmp |= header.frmsizecod >> 1;
+
+    tmp <<= 5;
+
+    dac3_data[0] = tmp >> 16;
+    dac3_data[1] = (tmp >>  8) & 0xff;
+    dac3_data[2] = tmp & 0xff;
+    
+    quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
+                                  "dac3", dac3_data,
+                                  sizeof(dac3_data));
+    }
+  
+  }
+
+
 static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
                             long samples, int track)
   {
@@ -1096,7 +1154,6 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
       trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->avctx->bit_rate / 8;
       trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
       }
-
     }
 
   /* Allocate sample buffer if necessary */
@@ -1222,20 +1279,50 @@ static int init_compressed_mp2(quicktime_t * file, int track)
   return 0;
   }
 
-static int writes_compressed_ac3(lqt_file_type_t type, const lqt_compression_info_t * ci)
-  {
-  return 1;
-  }
-
+#if 0
 static int init_compressed_ac3(quicktime_t * file, int track)
   {
   
   return 0;
   }
+#endif
 
+static int write_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int result;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_ffmpeg_audio_codec_t *codec = atrack->codec->priv;
+  
+  if(!codec->header_written && (p->data_len >= 8))
+    {
+    if(file->file_type & (LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4))
+      create_dac3_atom(file, track, p->data);
+    else if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+      {
+      /* strh stuff */
+      atrack->track->strl->strh.dwRate = atrack->ci.bitrate / 8;
+      atrack->track->strl->strh.dwScale = 1;
+      atrack->track->strl->strh.dwSampleSize = 1;
+      /* WAVEFORMATEX stuff */
+      atrack->track->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
+      atrack->track->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  atrack->ci.bitrate / 8;
+      atrack->track->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+      }
+    }
+  
+  quicktime_write_chunk_header(file, atrack->track);
+  result = quicktime_write_data(file, p->data, p->data_len);
+  
+  atrack->track->chunk_samples = p->duration;
+  quicktime_write_chunk_footer(file, atrack->track);
+  atrack->cur_chunk++;
+  if(result)
+    return 0;
+  else
+    return 1;
+  
+  }
 
-
-#ifdef HAVE_GPL
 static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
   {
   a52_header h;
@@ -1244,7 +1331,7 @@ static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
   
-  if(codec->bytes_in_chunk_buffer < 7)
+  if(codec->bytes_in_chunk_buffer < 8)
     {
     chunk_size = lqt_append_audio_chunk(file,
                                         track, track_map->cur_chunk,
@@ -1252,7 +1339,7 @@ static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
                                         &codec->chunk_buffer_alloc,
                                         codec->bytes_in_chunk_buffer);
 
-    if(chunk_size + codec->bytes_in_chunk_buffer < 7)
+    if(chunk_size + codec->bytes_in_chunk_buffer < 8)
       return 0;
 
     codec->bytes_in_chunk_buffer += chunk_size;
@@ -1264,31 +1351,31 @@ static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
   ptr = codec->chunk_buffer;
   while(1)
     {
-    if(!a52_header_read(&h, ptr))
-      return 0;
-    
+    if(a52_header_read(&h, ptr))
+      break;
+      
     ptr++;
 
-    if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 7)
+    if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 8)
       return 0;
     }
   
-  lqt_packet_alloc(p, h.total_bytes);
-  memcpy(p->data, ptr, h.total_bytes);
-  ptr += h.total_bytes;
+  lqt_packet_alloc(p, h.frame_bytes);
+  memcpy(p->data, ptr, h.frame_bytes);
+  ptr += h.frame_bytes;
 
   codec->bytes_in_chunk_buffer -= (ptr - codec->chunk_buffer);
 
   if(codec->bytes_in_chunk_buffer)
     memmove(codec->chunk_buffer, ptr, codec->bytes_in_chunk_buffer);
-  
+
+  p->data_len = h.frame_bytes;
   p->duration = A52_FRAME_SAMPLES;
   p->timestamp = codec->pts;
   codec->pts += p->duration;
   p->flags = LQT_PACKET_KEYFRAME;
   return 1;
   }
-#endif
 
 void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
                                        quicktime_audio_map_t *atrack, AVCodec *encoder,
@@ -1315,11 +1402,11 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
 
   if((decoder->id == CODEC_ID_MP3) || (decoder->id == CODEC_ID_MP2))
     codec_base->read_packet = read_packet_mpa;
-#ifdef HAVE_GPL
   else if(decoder->id == CODEC_ID_AC3)
+    {
+    codec_base->write_packet = write_packet_ac3;
     codec_base->read_packet = read_packet_ac3;
-#endif
-  
+    }
   if(!atrack)
     return;
   

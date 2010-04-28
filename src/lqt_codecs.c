@@ -102,7 +102,10 @@ quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
   codec->decode_audio = quicktime_decode_audio_stub;
   codec->encode_audio = quicktime_encode_audio_stub;
   codec->flush = quicktime_flush_codec_stub;
-
+  
+  if(!info)
+    return codec;
+  
   codec->info = lqt_codec_info_copy_single(info);
   
   lqt_log(NULL, LQT_LOG_DEBUG, LOG_DOMAIN,
@@ -159,11 +162,11 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
       lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
               "Could not find video %s for fourcc %4s",
               (encode ? "Encoder" : "Decoder"), compressor);
-      return -1;
       }
-    codec_info = *codec_array;
+    else
+      codec_info = *codec_array;
     }
-
+  
   vtrack->codec = quicktime_load_codec(codec_info, NULL, vtrack);
 
   if(!vtrack->codec)
@@ -212,9 +215,9 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
       lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
               "Could not find audio %s for fourcc %4s",
               (encode ? "Encoder" : "Decoder"), compressor);
-      return -1;
       }
-    codec_info = *codec_array;
+    else
+      codec_info = *codec_array;
     }
 
   atrack->codec = quicktime_load_codec(codec_info, atrack, NULL);
@@ -222,7 +225,7 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
   /* We set the wav ids from our info structure, so we don't have to do this
      in the plugin sources */
   
-  if(codec_info->num_wav_ids)
+  if(codec_info && codec_info->num_wav_ids)
     atrack->wav_id = codec_info->wav_ids[0];
   
   if(codec_array)
