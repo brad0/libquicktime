@@ -389,7 +389,7 @@ struct CODECIDMAP codecidmap_v[] =
       .name = TRS("FFMPEG MPEG-4"),
       .fourccs = { "mp4v", "divx", "DIV1", "div1", "MP4S", "mp4s",
                    "M4S2", "m4s2", "xvid", "XVID", "XviD", "DX50",
-                   "dx50", "DIVX", "MP4V", "3IV2", (char *)0 },
+                   "dx50", "DIVX", "MP4V", "3IV2", "FMP4", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 |
                              LQT_FILE_3GP  | LQT_FILE_AVI | LQT_FILE_AVI_ODML,

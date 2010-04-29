@@ -1141,19 +1141,9 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
                                   * sizeof( int16_t )
                                   * codec->avctx->channels);
     codec->chunk_buffer = malloc(codec->chunk_buffer_alloc);
-
+    
     if(trak->strl)
-      {
-      /* strh stuff */
-      trak->strl->strh.dwRate = codec->avctx->bit_rate / 8;
-      trak->strl->strh.dwScale = 1;
-      trak->strl->strh.dwSampleSize = 1;
-      /* WAVEFORMATEX stuff */
-      
-      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
-      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->avctx->bit_rate / 8;
-      trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
-      }
+      lqt_set_audio_bitrate(file, track, codec->avctx->bit_rate);
     }
 
   /* Allocate sample buffer if necessary */
@@ -1298,16 +1288,7 @@ static int write_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
     if(file->file_type & (LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4))
       create_dac3_atom(file, track, p->data);
     else if(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
-      {
-      /* strh stuff */
-      atrack->track->strl->strh.dwRate = atrack->ci.bitrate / 8;
-      atrack->track->strl->strh.dwScale = 1;
-      atrack->track->strl->strh.dwSampleSize = 1;
-      /* WAVEFORMATEX stuff */
-      atrack->track->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
-      atrack->track->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  atrack->ci.bitrate / 8;
-      atrack->track->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
-      }
+      lqt_set_audio_bitrate(file, track, atrack->ci.bitrate);
     codec->header_written = 1;
     }
   

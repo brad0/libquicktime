@@ -2458,6 +2458,35 @@ void lqt_init_vbr_audio(quicktime_t * file, int track)
   trak->mdia.minf.stbl.stsd.table[0].compression_id = -2;
   trak->mdia.minf.stbl.stsz.sample_size = 0;
   trak->mdia.minf.is_audio_vbr = 1;
+
+  if(trak->strl)
+    {
+    trak->strl->strh.dwRate = quicktime_sample_rate(file, track);
+    trak->strl->strh.dwScale = 0;
+    trak->strl->strh.dwSampleSize = 0;
+    
+    trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 0;
+    trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  18120; // Probably doesn't matter
+    trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+    }
+  }
+
+LQT_EXTERN void lqt_set_audio_bitrate(quicktime_t * file, int track, int bitrate)
+  {
+  quicktime_trak_t * trak = file->atracks[track].track;
+
+  if(!trak->strl)
+    return;
+  
+  /* strh stuff */
+  trak->strl->strh.dwRate = bitrate / 8;
+  trak->strl->strh.dwScale = 1;
+  trak->strl->strh.dwSampleSize = 1;
+  /* WAVEFORMATEX stuff */
+  
+  trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
+  trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  bitrate / 8;
+  trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
   }
 
 
@@ -2477,6 +2506,7 @@ void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
 
 void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   {
+  int size;
   quicktime_stsz_t * stsz;
   quicktime_stts_t * stts;
   long vbr_frames_written;
@@ -2489,9 +2519,25 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   
   /* Update stsz */
 
+  size = quicktime_position(file) - atrack->vbr_frame_start;
+  
   quicktime_update_stsz(stsz, vbr_frames_written, 
                         quicktime_position(file) -
                         atrack->vbr_frame_start);
+
+  if(atrack->track->strl)
+    {
+    quicktime_strl_t * strl = atrack->track->strl;
+    
+    if(size > strl->strf.wf.f.WAVEFORMAT.nBlockAlign)
+      strl->strf.wf.f.WAVEFORMAT.nBlockAlign = size;
+
+    if(!strl->strh.dwScale)
+      strl->strh.dwScale = num_samples;
+
+    strl->strh.dwLength++;
+    }
+  
   /* Update stts */
   
   quicktime_update_stts(stts, vbr_frames_written, num_samples);
@@ -2507,6 +2553,8 @@ int lqt_audio_is_vbr(quicktime_t * file, int track)
   {
   return file->atracks[track].track->mdia.minf.is_audio_vbr;
   }
+
+
 
 /* Get the index of the VBR packet (== sample) containing a specified
    uncompressed sample */

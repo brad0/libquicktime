@@ -28,6 +28,10 @@
 #include <string.h>
 #include <lame_codec.h>
 
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+
+
 #define LOG_DOMAIN "lame"
 
 /*
@@ -85,25 +89,25 @@ static int mpeg_samplerates[3][3] = {
 /* Header detection stolen from the mpg123 plugin of xmms */
 
 static int header_check(uint32_t head)
-{
-        if ((head & 0xffe00000) != 0xffe00000)
-                return 0;
-        if (!((head >> 17) & 3))
-                return 0;
-        if (((head >> 12) & 0xf) == 0xf)
-                return 0;
-        if (!((head >> 12) & 0xf))
-                return 0;
-        if (((head >> 10) & 0x3) == 0x3)
-                return 0;
-        if (((head >> 19) & 1) == 1 &&
-            ((head >> 17) & 3) == 3 &&
-            ((head >> 16) & 1) == 1)
-                return 0;
-        if ((head & 0xffff0000) == 0xfffe0000)
-                return 0;
-        return 1;
-}
+  {
+  if ((head & 0xffe00000) != 0xffe00000)
+    return 0;
+  if (!((head >> 17) & 3))
+    return 0;
+  if (((head >> 12) & 0xf) == 0xf)
+    return 0;
+  if (!((head >> 12) & 0xf))
+    return 0;
+  if (((head >> 10) & 0x3) == 0x3)
+    return 0;
+  if (((head >> 19) & 1) == 1 &&
+      ((head >> 17) & 3) == 3 &&
+      ((head >> 16) & 1) == 1)
+    return 0;
+  if ((head & 0xffff0000) == 0xfffe0000)
+    return 0;
+  return 1;
+  }
 
 typedef enum
   {
@@ -260,8 +264,6 @@ static int decode_header(mpeg_header * h, uint8_t * ptr)
   return 1;
   }
 
-
-
 typedef struct
   {
   // mp3 encoder
@@ -291,6 +293,8 @@ typedef struct
   int bitrate_max;
   int quality;
   int quality_vbr;
+
+  int header_set;
   
   } quicktime_mp3_codec_t;
 
@@ -311,87 +315,6 @@ static int delete_codec(quicktime_codec_t *codec_base)
     free(codec->encoder_output);
   free(codec);
   return 0;
-  }
-
-
-static int write_data(quicktime_t *file, int track,
-                      quicktime_mp3_codec_t *codec, int samples)
-  {
-  mpeg_header h;
-  int result = 0;
-  int chunk_bytes = 0, chunk_samples = 0;
-  quicktime_audio_map_t *track_map;
-  uint8_t * chunk_ptr;
-
-  track_map = &file->atracks[track];
-  
-  memset(&h, 0, sizeof(h));
-  
-  chunk_ptr = codec->encoder_output;
-  while(codec->encoder_output_size > 4)
-    {
-    if(!decode_header(&h, chunk_ptr))
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Ouch: lame created non mp3 data\n");
-      break;
-      }
-    if(codec->encoder_output_size >= h.frame_bytes)
-      {
-      codec->encoder_output_size -= h.frame_bytes;
-      chunk_ptr += h.frame_bytes;
-      chunk_bytes += h.frame_bytes;
-      chunk_samples += h.samples_per_frame;
-      }
-    else
-      break;
-    }
-
-  if(chunk_ptr > codec->encoder_output)
-    {
-    if(track_map->track->strl)
-      {
-      quicktime_write_chunk_header(file, track_map->track);
-      result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-      track_map->track->chunk_samples = chunk_samples;
-      quicktime_write_chunk_footer(file, track_map->track);
-      if(file->total_riffs == 1)
-        {
-        track_map->track->strl->strh.dwLength += chunk_bytes;
-        }
-      }
-    else
-      {
-      quicktime_write_chunk_header(file, track_map->track);
-      lqt_start_audio_vbr_frame(file, track);
-      result = !quicktime_write_data(file, codec->encoder_output, chunk_bytes);
-      
-      if(samples < 0)
-        {
-        lqt_finish_audio_vbr_frame(file, track, chunk_samples);
-        quicktime_write_chunk_footer(file, 
-                                     track_map->track);
-        codec->samples_written += chunk_samples;
-        }
-      else
-        {
-        lqt_finish_audio_vbr_frame(file, track, samples);
-        quicktime_write_chunk_footer(file, 
-                                     track_map->track);
-        codec->samples_written += samples;
-        }
-      }
-    
-    track_map->cur_chunk++;
-
-    /* Adjust mp3 buffer */
-
-    if(codec->encoder_output_size)
-      memmove(codec->encoder_output, chunk_ptr, codec->encoder_output_size);
-    
-    }
-  
-  
-  return result;
   }
 
 #define PUT_16_LE(num, ptr) \
@@ -416,6 +339,139 @@ ptr+=4;
 #define MPEGLAYER3_FLAG_PADDING_ON       0x00000001
 #define MPEGLAYER3_FLAG_PADDING_OFF      0x00000002
 
+static void set_avi_mp3_header(quicktime_t * file, int track, mpeg_header * h, int vbr)
+  {
+  uint8_t extradata[12];
+  uint8_t * extradata_ptr;
+  uint32_t tmp;
+  
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_trak_t *trak = atrack->track;
+  
+  //  quicktime_mp3_codec_t *codec = atrack->codec->priv;
+  
+  /* Initialize AVI header */
+  
+  if(!vbr)
+    lqt_set_audio_bitrate(file, track, h->bitrate);
+  
+  /* Extradata (completely unneccesary for decoding) */
+  
+  extradata_ptr = extradata;
+
+  tmp = MPEGLAYER3_ID_MPEG; // WORD          wID
+  PUT_16_LE(tmp, extradata_ptr);
+
+  tmp = MPEGLAYER3_FLAG_PADDING_ISO; // DWORD         fdwFlags;
+  PUT_32_LE(tmp, extradata_ptr);
+      
+  switch(h->version)
+    {
+    case MPEG_VERSION_1:
+      tmp = ((144000 / 1) * (h->bitrate/1000)) / atrack->samplerate; // WORD nBlockSize;
+      break;
+    case MPEG_VERSION_2:
+      tmp = ((144000 / 2) * (h->bitrate/1000)) / atrack->samplerate; // WORD nBlockSize;
+      break;
+    case MPEG_VERSION_2_5:
+      tmp = ((144000 / 4) * (h->bitrate/1000)) / atrack->samplerate; // WORD nBlockSize;
+      break;
+    default: // This won't happen, but keeps gcc quiet
+      return;
+    }
+  
+  PUT_16_LE(tmp, extradata_ptr);
+
+  tmp = 1; // WORD nFramesPerBlock;
+  PUT_16_LE(tmp, extradata_ptr);
+
+  tmp = 1393; //  WORD nCodecDelay; WTF???
+  PUT_16_LE(tmp, extradata_ptr);
+      
+  quicktime_strf_set_audio_extradata(&trak->strl->strf, extradata, 12);
+  }
+
+static int write_data(quicktime_t *file, int track,
+                      quicktime_mp3_codec_t *codec, int samples)
+  {
+  int frame_samples;
+  mpeg_header h;
+  int result = 0;
+  quicktime_audio_map_t *atrack;
+
+  int one_packet_per_chunk;
+
+  int vbr = lqt_audio_is_vbr(file, track);
+  
+  atrack = &file->atracks[track];
+
+  if(vbr && atrack->track->strl)
+    one_packet_per_chunk = 1;
+  else
+    one_packet_per_chunk = 0;
+  
+  memset(&h, 0, sizeof(h));
+
+  if(!one_packet_per_chunk)
+    quicktime_write_chunk_header(file, atrack->track);
+  
+  while(codec->encoder_output_size > 4)
+    {
+    if(!decode_header(&h, codec->encoder_output))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Ouch: lame created non mp3 data\n");
+      break;
+      }
+
+    if(!codec->header_set && atrack->track->strl)
+      {
+      set_avi_mp3_header(file, track, &h, vbr);
+      codec->header_set = 1;
+      }
+      
+    if((codec->encoder_output_size >= h.frame_bytes) || (samples > 0))
+      {
+      frame_samples = samples > 0 ? samples : h.samples_per_frame;
+
+      if(one_packet_per_chunk)
+        quicktime_write_chunk_header(file, atrack->track);
+      
+      if(vbr)
+        lqt_start_audio_vbr_frame(file, track);
+
+      result = !quicktime_write_data(file, codec->encoder_output, h.frame_bytes);
+
+      if(vbr)
+        lqt_finish_audio_vbr_frame(file, track, frame_samples);
+
+      if(one_packet_per_chunk)
+        {
+        quicktime_write_chunk_footer(file, atrack->track);
+        atrack->cur_chunk++;
+        }
+      else
+        atrack->track->chunk_samples += frame_samples;
+      
+      codec->samples_written += frame_samples;
+      codec->encoder_output_size -= h.frame_bytes;
+      
+      if(codec->encoder_output_size)
+        memmove(codec->encoder_output,
+                codec->encoder_output + h.frame_bytes, codec->encoder_output_size);
+      }
+    else
+      break;
+    }
+
+  if(!one_packet_per_chunk)
+    {
+    quicktime_write_chunk_footer(file, atrack->track);
+    atrack->cur_chunk++;
+    }
+  return result;
+  }
+
+
 static int encode(quicktime_t *file, 
                   void * _input, 
                   long samples,
@@ -424,25 +480,21 @@ static int encode(quicktime_t *file,
   int16_t * input;
   int result = 0;
   int encoded_size;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_trak_t *trak = track_map->track;
-  quicktime_mp3_codec_t *codec = track_map->codec->priv;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_trak_t *trak = atrack->track;
+  quicktime_mp3_codec_t *codec = atrack->codec->priv;
   int i;
-
-  uint8_t extradata[12];
-  uint8_t * extradata_ptr;
-  uint32_t tmp;
-  int mpeg_version;
   
   if(!codec->encode_initialized)
     {
-    if(!trak->strl)
+    /* CBR audio is written only for AVIs and when VBR is off */
+    if(!(trak->strl && (codec->bitrate_mode == vbr_off)))
       lqt_init_vbr_audio(file, track);
-
+    
     codec->encode_initialized = 1;
     codec->lame_global = lame_init();
 
-    if(trak->strl || (codec->bitrate_mode == vbr_off))
+    if(codec->bitrate_mode == vbr_off)
       {
       lame_set_VBR(codec->lame_global, vbr_off);
       lame_set_brate(codec->lame_global, codec->bitrate / 1000);
@@ -460,8 +512,8 @@ static int encode(quicktime_t *file,
       }
     
     lame_set_quality(codec->lame_global, codec->quality);
-    lame_set_in_samplerate(codec->lame_global, track_map->samplerate);
-    lame_set_out_samplerate(codec->lame_global, track_map->samplerate);
+    lame_set_in_samplerate(codec->lame_global, atrack->samplerate);
+    lame_set_out_samplerate(codec->lame_global, atrack->samplerate);
     
     lame_set_bWriteVbrTag(codec->lame_global, 0);
     
@@ -477,55 +529,6 @@ static int encode(quicktime_t *file,
     //    codec->encoded_header = mpeg3_new_layer();
     codec->samples_per_frame = lame_get_framesize(codec->lame_global);
 
-    /* Initialize AVI header */
-
-    if(trak->strl)
-      {
-      /* strh stuff */
-      trak->strl->strh.dwRate = codec->bitrate / 8;
-      trak->strl->strh.dwScale = 1;
-      trak->strl->strh.dwSampleSize = 1;
-      /* WAVEFORMATEX stuff */
-      
-      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
-      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  codec->bitrate / 8;
-      trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
-
-      /* Extradata (completely unneccesary for decoding) */
-
-      mpeg_version = lame_get_version(codec->lame_global);
-      
-      extradata_ptr = extradata;
-
-      tmp = MPEGLAYER3_ID_MPEG; // WORD          wID
-      PUT_16_LE(tmp, extradata_ptr);
-
-      tmp = MPEGLAYER3_FLAG_PADDING_ISO; // DWORD         fdwFlags;
-      PUT_32_LE(tmp, extradata_ptr);
-      
-      switch(mpeg_version)
-        {
-        case 0: // MPEG-2
-          tmp = ((144000 / 2) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
-          break;
-        case 1: // MPEG-1
-          tmp = ((144000 / 1) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
-          break;
-        case 2: // MPEG-2.5
-          tmp = ((144000 / 4) * (codec->bitrate/1000)) / track_map->samplerate; // WORD nBlockSize;
-          break;
-        }
-      
-      PUT_16_LE(tmp, extradata_ptr);
-
-      tmp = 1; // WORD nFramesPerBlock;
-      PUT_16_LE(tmp, extradata_ptr);
-
-      tmp = 1393; //  WORD nCodecDelay;
-      PUT_16_LE(tmp, extradata_ptr);
-      
-      quicktime_strf_set_audio_extradata(&trak->strl->strf, extradata, 12);
-      }
     }
 
   /* Reallocate output if necessary */
@@ -617,8 +620,8 @@ static int set_parameter(quicktime_t *file, int track,
 static int flush(quicktime_t *file, int track)
   {
   int result = 0;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_mp3_codec_t *codec = track_map->codec->priv;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_mp3_codec_t *codec = atrack->codec->priv;
   
   if(codec->encode_initialized)
     {
@@ -639,6 +642,71 @@ static int flush(quicktime_t *file, int track)
   return 0;
   }
 
+static int writes_compressed_lame(lqt_file_type_t type, const lqt_compression_info_t * ci)
+  {
+  if(type & (LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4))
+    return 1;
+  else if(type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+    {
+    if(ci->bitrate < 0) // VBR not supported yet
+      return 0;
+    else
+      return 1;
+    }
+  return 0;
+  }
+
+static int write_packet_lame(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int result;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_mp3_codec_t *codec = atrack->codec->priv;
+  
+  if(p->data_len >= 4)
+    {
+    if(atrack->track->strl)
+      {
+      if(!codec->header_set)
+        {
+        mpeg_header h;
+        if(!decode_header(&h, p->data))
+          return 0;
+        set_avi_mp3_header(file, track, &h, (atrack->ci.bitrate < 0));
+        codec->header_set = 1;
+        }
+      }
+    }
+
+  if(lqt_audio_is_vbr(file, track))
+    {
+    quicktime_write_chunk_header(file, atrack->track);
+    lqt_start_audio_vbr_frame(file, track);
+    result = !quicktime_write_data(file, p->data, p->data_len);
+
+    lqt_finish_audio_vbr_frame(file, track, p->duration);
+    
+    /* Close this audio chunk. For non-AVIs, lqt will do that for us */
+    if(atrack->track->strl) 
+      quicktime_write_chunk_footer(file, atrack->track);
+    }
+  else
+    {
+    quicktime_write_chunk_header(file, atrack->track);
+    result = !quicktime_write_data(file, p->data, p->data_len);
+    atrack->track->chunk_samples = p->duration;
+    quicktime_write_chunk_footer(file, atrack->track);
+    }
+  
+  atrack->cur_chunk++;
+  if(result)
+    return 0;
+  else
+    return 1;
+  
+  }
+
+
+
 void quicktime_init_codec_lame(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack)
@@ -654,6 +722,9 @@ void quicktime_init_codec_lame(quicktime_codec_t * codec_base,
   codec_base->encode_audio = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->flush = flush;
+  
+  codec_base->writes_compressed = writes_compressed_lame;
+  codec_base->write_packet = write_packet_lame;
   
   codec->bitrate = 256000;
   codec->quality = 0;

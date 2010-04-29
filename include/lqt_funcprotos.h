@@ -1396,6 +1396,9 @@ LQT_EXTERN int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
                                        quicktime_trak_t *trak, 
                                        int64_t sample);
 
+LQT_EXTERN void lqt_set_audio_bitrate(quicktime_t * file, int track, int bitrate);
+
+
 int lqt_add_audio_track_internal(quicktime_t *file,
                                  int channels, long sample_rate, int bits,
                                  lqt_codec_info_t * codec_info,
