@@ -647,65 +647,73 @@ static int writes_compressed_lame(lqt_file_type_t type, const lqt_compression_in
   if(type & (LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4))
     return 1;
   else if(type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
-    {
-    if(ci->bitrate < 0) // VBR not supported yet
-      return 0;
-    else
-      return 1;
-    }
+    return 1;
   return 0;
   }
 
 static int write_packet_lame(quicktime_t * file, lqt_packet_t * p, int track)
   {
   int result;
+  int one_packet_per_chunk;
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_mp3_codec_t *codec = atrack->codec->priv;
   
-  if(p->data_len >= 4)
+  if(p->data_len < 4)
+    return 0;
+  
+  if((atrack->ci.bitrate < 0) && atrack->track->strl)
+    one_packet_per_chunk = 1;
+  else
+    one_packet_per_chunk = 0;
+  
+  if(!codec->header_set)
     {
+    if(!(file->file_type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML)) ||
+       (file->atracks[track].ci.bitrate < 0))
+      lqt_init_vbr_audio(file, track);
+      
     if(atrack->track->strl)
       {
-      if(!codec->header_set)
-        {
-        mpeg_header h;
-        if(!decode_header(&h, p->data))
-          return 0;
-        set_avi_mp3_header(file, track, &h, (atrack->ci.bitrate < 0));
-        codec->header_set = 1;
-        }
+      mpeg_header h;
+      if(!decode_header(&h, p->data))
+        return 0;
+      set_avi_mp3_header(file, track, &h, (atrack->ci.bitrate < 0));
       }
+    codec->header_set = 1;
     }
 
+  if((file->write_trak != atrack->track) && !one_packet_per_chunk)
+    quicktime_write_chunk_header(file, atrack->track);
+  
   if(lqt_audio_is_vbr(file, track))
     {
-    quicktime_write_chunk_header(file, atrack->track);
+    if(one_packet_per_chunk)
+      quicktime_write_chunk_header(file, atrack->track);
     lqt_start_audio_vbr_frame(file, track);
     result = !quicktime_write_data(file, p->data, p->data_len);
 
     lqt_finish_audio_vbr_frame(file, track, p->duration);
     
     /* Close this audio chunk. For non-AVIs, lqt will do that for us */
-    if(atrack->track->strl) 
+    
+    if(one_packet_per_chunk)
+      {
       quicktime_write_chunk_footer(file, atrack->track);
+      atrack->cur_chunk++;
+      }
     }
   else
     {
-    quicktime_write_chunk_header(file, atrack->track);
     result = !quicktime_write_data(file, p->data, p->data_len);
-    atrack->track->chunk_samples = p->duration;
-    quicktime_write_chunk_footer(file, atrack->track);
+    atrack->track->chunk_samples += p->duration;
     }
   
-  atrack->cur_chunk++;
   if(result)
     return 0;
   else
     return 1;
   
   }
-
-
 
 void quicktime_init_codec_lame(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,

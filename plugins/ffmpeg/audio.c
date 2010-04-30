@@ -1216,13 +1216,15 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
                                         &codec->chunk_buffer_alloc,
                                         codec->bytes_in_chunk_buffer);
 
+    //fprintf(stderr, "Got chunk %ld: %d bytes\n", track_map->cur_chunk, chunk_size);
+    
     if(chunk_size + codec->bytes_in_chunk_buffer < 4)
       return 0;
 
     codec->bytes_in_chunk_buffer += chunk_size;
     track_map->cur_chunk++;
     }
-
+  
   /* Check for mpa header */
 
   ptr = codec->chunk_buffer;
@@ -1245,7 +1247,7 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
   lqt_packet_alloc(p, h.frame_bytes);
   memcpy(p->data, ptr, h.frame_bytes);
   ptr += h.frame_bytes;
-
+  
   codec->bytes_in_chunk_buffer -= (ptr - codec->chunk_buffer);
 
   if(codec->bytes_in_chunk_buffer)
@@ -1255,6 +1257,8 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
   p->timestamp = codec->pts;
   codec->pts += p->duration;
   p->flags = LQT_PACKET_KEYFRAME;
+  p->data_len = h.frame_bytes;
+  
   return 1;
   }
 

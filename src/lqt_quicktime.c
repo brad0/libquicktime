@@ -2502,6 +2502,7 @@ void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
     quicktime_write_chunk_header(file, atrack->track);
     }
   atrack->vbr_frame_start = quicktime_position(file);
+  
   }
 
 void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
@@ -2521,10 +2522,8 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
 
   size = quicktime_position(file) - atrack->vbr_frame_start;
   
-  quicktime_update_stsz(stsz, vbr_frames_written, 
-                        quicktime_position(file) -
-                        atrack->vbr_frame_start);
-
+  quicktime_update_stsz(stsz, vbr_frames_written, size);
+  
   if(atrack->track->strl)
     {
     quicktime_strl_t * strl = atrack->track->strl;
