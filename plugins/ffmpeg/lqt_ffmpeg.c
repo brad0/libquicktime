@@ -178,6 +178,12 @@ int ffmpeg_num_video_codecs = -1;
     .val_default = { .val_string =  "50" },             \
     .stringlist_options = (char *[]){ "30", "40", "50", \
                                       (char *)0 }       \
+  }, \
+  {  \
+    .name = "imx_strip_vbi",         \
+    .real_name = TRS("Strip VBI"),   \
+    .type = LQT_PARAMETER_INT,       \
+    .val_default = { .val_int = 1 }  \
   }
 
 #define DECODE_PARAM_AUDIO

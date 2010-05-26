@@ -69,6 +69,7 @@ typedef struct
 
   int qscale;
   int imx_bitrate;
+  int imx_strip_vbi;
   
   int is_imx;
   int y_offset;
@@ -727,10 +728,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     else if(codec->is_imx)
       {
       /* IMX */
-      if(codec->avctx->height == 608)
-        codec->y_offset = 32;
-      else if(codec->avctx->height == 512)
-        codec->y_offset = 26;
+      if (codec->imx_strip_vbi) {
+        codec->y_offset = codec->avctx->height - trak->tkhd.track_height;
+      }
       vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
       vtrack->ci.id = LQT_COMPRESSION_D10;
       vtrack->ci.bitrate = 
@@ -751,6 +751,11 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     return 1;
     }
   
+  if (codec->is_imx && !codec->imx_strip_vbi)
+    {
+    height = codec->avctx->height;
+    }
+
   /*
    * Check for the colormodel
    * There are 2 possible cases:
