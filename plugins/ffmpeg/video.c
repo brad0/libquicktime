@@ -319,7 +319,7 @@ static void convert_image_decode_rgba(AVFrame * in_frame,
                                       unsigned char ** out_frame,
                                       int width, int height, int y_shift)
   {
-  uint32_t r, g, b; // , a;
+  uint32_t r, g, b, a;
   uint32_t * src_ptr;
   uint8_t * dst_ptr;
   int i, j;
@@ -329,15 +329,14 @@ static void convert_image_decode_rgba(AVFrame * in_frame,
     dst_ptr = out_frame[i];
     for(j = 0; j < width; j++)
       {
-      //      a = ((*src_ptr) & 0xff000000) >> 24;
+      a = ((*src_ptr) & 0xff000000) >> 24;
       r = ((*src_ptr) & 0x00ff0000) >> 16;
       g = ((*src_ptr) & 0x0000ff00) >> 8;
       b = ((*src_ptr) & 0x000000ff);
       dst_ptr[0] = r;
       dst_ptr[1] = g;
       dst_ptr[2] = b;
-      //      dst_ptr[3] = a;
-      dst_ptr[3] = 0xff;
+      dst_ptr[3] = a;
       dst_ptr += 4;
       src_ptr++;
       }
