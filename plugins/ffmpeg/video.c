@@ -498,6 +498,38 @@ static void set_h264_header(quicktime_video_map_t * vtrack,
 
   }
 
+static void lqt_ffmpeg_imx_setup_decoding_frame(quicktime_t *file, int track)
+{
+    /* Note that this function may be called more than once. */
+
+    quicktime_video_map_t *vtrack = &file->vtracks[track];
+    quicktime_trak_t *trak = vtrack->track;
+    quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+
+    if (codec->imx_strip_vbi) {
+        codec->y_offset = codec->avctx->height - trak->tkhd.track_height;
+        vtrack->height_extension = 0;
+    } else {
+        codec->y_offset = 0;
+        if (vtrack->height_extension == codec->avctx->height - trak->tkhd.track_height) {
+            return;
+        }
+
+        vtrack->height_extension = codec->avctx->height - trak->tkhd.track_height;
+
+        /* Now we need a larger temp_frame */
+        if (vtrack->temp_frame) {
+            lqt_rows_free(vtrack->temp_frame);
+        }
+
+        vtrack->temp_frame = lqt_rows_alloc(
+                codec->avctx->width, codec->avctx->height,
+                vtrack->stream_cmodel,
+                &vtrack->stream_row_span,
+                &vtrack->stream_row_span_uv);
+    }
+}
+
 /* Just for the curious: This function can be called with NULL as row_pointers.
    In this case, have_frame is set to 1 and a subsequent call will take the
    already decoded frame. This madness is necessary because sometimes ffmpeg
@@ -701,9 +733,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
 #endif
           {
           codec->swsContext =
-            sws_getContext(width, height,
+            sws_getContext(width, height + vtrack->height_extension,
                            codec->avctx->pix_fmt,
-                           width, height,
+                           width, height + vtrack->height_extension,
                            lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel),
                            SWS_FAST_BILINEAR, (SwsFilter*)0,
                            (SwsFilter*)0,
@@ -726,10 +758,14 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
       }
     else if(codec->is_imx)
       {
-      /* IMX */
-      if (codec->imx_strip_vbi) {
-        codec->y_offset = codec->avctx->height - trak->tkhd.track_height;
-      }
+      /* Note that at this point in time, set_parameter_video() is yet to be called,
+         and therefore we don't yet know the "imx_strip_vbi" value.  It's better to
+         initially assume it's on and let lqt_ffmpeg_imx_setup_decoding_frame() act
+         accordingly.  Later, set_parameter_video() will call
+         lqt_ffmpeg_imx_setup_decoding_frame() again. */
+      codec->imx_strip_vbi = 1;
+      lqt_ffmpeg_imx_setup_decoding_frame(file, track);
+
       vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
       vtrack->ci.id = LQT_COMPRESSION_D10;
       vtrack->ci.bitrate = 
@@ -749,11 +785,6 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     codec->have_frame = 1;
     return 1;
     }
-  
-  if (codec->is_imx && !codec->imx_strip_vbi)
-    {
-    height = codec->avctx->height;
-    }
 
   /*
    * Check for the colormodel
@@ -770,11 +801,11 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   
   if(!codec->do_imgconvert)
     {
-    cpy_rows[0] = codec->frame->data[0] + codec->frame->linesize[0];
-    cpy_rows[1] = codec->frame->data[1] + codec->frame->linesize[1];
-    cpy_rows[2] = codec->frame->data[2] + codec->frame->linesize[2];
+    cpy_rows[0] = codec->frame->data[0];
+    cpy_rows[1] = codec->frame->data[1];
+    cpy_rows[2] = codec->frame->data[2];
     
-    lqt_rows_copy_sub(row_pointers, cpy_rows, width, height,
+    lqt_rows_copy_sub(row_pointers, cpy_rows, width, height + vtrack->height_extension,
                       codec->frame->linesize[0], codec->frame->linesize[1],
                       vtrack->stream_row_span, vtrack->stream_row_span_uv,
                       vtrack->stream_cmodel,
@@ -788,8 +819,8 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     {
     convert_image_decode(codec, codec->frame, codec->avctx->pix_fmt,
                          row_pointers, vtrack->stream_cmodel,
-                         width, height, vtrack->stream_row_span,
-                         vtrack->stream_row_span_uv);
+                         width, height + vtrack->height_extension,
+                         vtrack->stream_row_span, vtrack->stream_row_span_uv);
     }
   codec->have_frame = 0;
   return result;
@@ -926,14 +957,21 @@ static int init_imx_encoder(quicktime_t *file, int track)
       codec->y_offset = 32;
       break;
     case 608: // PAL with VBI
+      trak->tkhd.track_height = 576;
+      trak->mdia.minf.stbl.stsd.table[0].height = 576;
+      vtrack->height_extension = 32;
       break;
     case 486: // NTSC without VBI
       codec->avctx->height = 512;
       codec->y_offset = 26;
       break;
     case 512: // NTSC with VBI
+      trak->tkhd.track_height = 486;
+      trak->mdia.minf.stbl.stsd.table[0].height = 486;
+      vtrack->height_extension = 26;
       break;
     }
+
   return 0;
   }
 
@@ -1131,7 +1169,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       return -1;
-    codec->buffer_alloc = width * height * 4 + 1024*256;
+    codec->buffer_alloc = codec->avctx->width * codec->avctx->height * 4 + 1024*256;
     codec->buffer = malloc(codec->buffer_alloc);
     if(!codec->buffer)
       return -1;
@@ -1158,7 +1196,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     if(codec->y_offset)
       {
       lqt_rows_copy_sub(codec->tmp_rows, row_pointers,
-                        width, height,
+                        width, height + vtrack->height_extension,
                         vtrack->stream_row_span,
                         vtrack->stream_row_span_uv,
                         codec->tmp_row_span,
@@ -1306,6 +1344,14 @@ static int set_parameter_video(quicktime_t *file,
   else if(!strcasecmp(key, "imx_bitrate"))
     {
     codec->imx_bitrate = atoi(value);
+    }
+  else if(!strcasecmp(key, "imx_strip_vbi"))
+    {
+    codec->imx_strip_vbi = *(int*)value;
+    if (codec->is_imx && file->rd)
+      {
+      lqt_ffmpeg_imx_setup_decoding_frame(file, track);
+      }
     }
   
   lqt_ffmpeg_set_parameter(codec->avctx, key, value);

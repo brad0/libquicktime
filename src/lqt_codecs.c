@@ -356,10 +356,10 @@ int lqt_decode_video(quicktime_t *file,
                     0, //                                  int in_x,        /* Dimensions to capture from input frame */
                     0, //                                  int in_y, 
                     width, //                              int in_w, 
-                    height, //                             int in_h,
-                    width, //                              int out_w, 
-                    height, //                             int out_h,
-                    file->vtracks[track].stream_cmodel, // int in_colormodel, 
+                    height + file->vtracks[track].height_extension, // int in_h,
+                    width, //                              int out_w,
+                    height + file->vtracks[track].height_extension, // int out_h,
+                    file->vtracks[track].stream_cmodel, // int in_colormodel,
                     file->vtracks[track].io_cmodel,     // int out_colormodel,
                     file->vtracks[track].stream_row_span,   /* For planar use the luma rowspan */
                     file->vtracks[track].io_row_span,       /* For planar use the luma rowspan */
@@ -509,7 +509,8 @@ static int do_encode_video(quicktime_t *file,
     if(!file->vtracks[track].temp_frame)
       {
       file->vtracks[track].temp_frame =
-        lqt_rows_alloc(width, height, file->vtracks[track].stream_cmodel,
+        lqt_rows_alloc(width, height + file->vtracks[track].height_extension,
+                       file->vtracks[track].stream_cmodel,
                        &file->vtracks[track].stream_row_span,
                        &file->vtracks[track].stream_row_span_uv);
       }
@@ -518,9 +519,9 @@ static int do_encode_video(quicktime_t *file,
                     0, //                                  int in_x,        /* Dimensions to capture from input frame */
                     0, //                                  int in_y, 
                     width, //                              int in_w, 
-                    height, //                             int in_h,
+                    height + file->vtracks[track].height_extension, // int in_h,
                     width, //                              int out_w, 
-                    height, //                             int out_h,
+                    height + file->vtracks[track].height_extension, // int out_h,
                     file->vtracks[track].io_cmodel, // int in_colormodel, 
                     file->vtracks[track].stream_cmodel,     // int out_colormodel,
                     file->vtracks[track].io_row_span,   /* For planar use the luma rowspan */

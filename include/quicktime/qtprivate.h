@@ -1383,6 +1383,11 @@ typedef struct
      (NOT recommended!!) */
   uint8_t ** temp_frame;
 
+  /* In some cases (IMX + VBI) the frame we are working with has greater
+   * height than the track height from the tkhd atom.
+   * This variable holds their difference. */
+  int height_extension;
+
   lqt_chroma_placement_t chroma_placement;
   lqt_interlace_mode_t interlace_mode;
   
