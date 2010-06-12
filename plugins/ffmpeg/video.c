@@ -661,6 +661,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
  
+    avcodec_thread_init(codec->avctx, codec->avctx->thread_count);
     if(avcodec_open(codec->avctx, codec->decoder) != 0)
       return -1;
     codec->frame = avcodec_alloc_frame();
@@ -1167,6 +1168,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
 
+    avcodec_thread_init(codec->avctx, codec->avctx->thread_count);
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       return -1;
     codec->buffer_alloc = codec->avctx->width * codec->avctx->height * 4 + 1024*256;
