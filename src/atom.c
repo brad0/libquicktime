@@ -122,23 +122,6 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 		result = read_type(header, atom->type);
 		atom->size = read_size(header);
 		atom->end = atom->start + atom->size;
-
-/* Skip placeholder atom */
-		if(quicktime_match_32(atom->type, "wide"))
-		{
-			atom->start = quicktime_position(file);
-			reset(atom);
-			if(!quicktime_read_data(file, header, HEADER_LENGTH)) return 1;
-			result = read_type(header, atom->type);
-			atom->size -= 8;
-			if(atom->size <= 0)
-			{
-/* Wrapper ended.  Get new atom size */
-				atom->size = read_size(header);
-			}
-			atom->end = atom->start + atom->size;
-		}
-		else
 /* Get extended size */
 		if(atom->size == 1)
 		{
