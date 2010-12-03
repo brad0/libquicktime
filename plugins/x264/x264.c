@@ -853,8 +853,13 @@ enum_t b_pyramid_modes[] =
 enum_t weighted_pred_modes[] =
   {
     { "Disabled",       X264_WEIGHTP_NONE },
+#if X264_BUILD <= 109
     { "Blind offset",   X264_WEIGHTP_BLIND },
     { "Smart analysis", X264_WEIGHTP_SMART },
+#else
+    { "Weighted refs",              X264_WEIGHTP_SIMPLE },
+    { "Weighted refs + Duplicates", X264_WEIGHTP_SMART  },
+#endif
   };
 #endif
 
