@@ -16,6 +16,18 @@ LQGTK_LIST_CODEC_INDEX_COLUMN_ID,
 LQGTK_LIST_CODEC_NUM_COLS
 };
 
+static void set_can_default(GtkWidget * w, gboolean can_default)
+  {
+#if GTK_CHECK_VERSION(2,18,0)
+  gtk_widget_set_can_default(w, can_default);
+#else
+  if(can_default)
+    GTK_WIDGET_SET_FLAGS(w, GTK_CAN_DEFAULT);
+  else
+    GTK_WIDGET_UNSET_FLAGS(w, GTK_CAN_DEFAULT);
+#endif
+  }
+
 static void parameter_combobox_callback(GtkWidget * w, gpointer data)
   {
   LqtGtkParameterWidget * p = (LqtGtkParameterWidget*)data;
@@ -941,10 +953,10 @@ lqtgtk_create_codec_config_window(lqt_codec_info_t * codec_info,
 		   G_CALLBACK(codec_config_window_button_callback),
 		   (gpointer)ret);
 
-  GTK_WIDGET_SET_FLAGS (ret->apply_button, GTK_CAN_DEFAULT);
-  GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
-  GTK_WIDGET_SET_FLAGS (ret->restore_button, GTK_CAN_DEFAULT);
-
+  set_can_default(ret->apply_button, TRUE);
+  set_can_default(ret->close_button, TRUE);
+  set_can_default(ret->restore_button, TRUE);
+  
   gtk_widget_show(ret->apply_button);
   gtk_widget_show(ret->close_button);
   gtk_widget_show(ret->restore_button);
@@ -1240,8 +1252,8 @@ lqtgtk_create_codec_info_window(const lqt_codec_info_t *info)
   ret->mainbox = gtk_vbox_new(0, 10);
 
   ret->close_button = gtk_button_new_from_stock(GTK_STOCK_CLOSE);
-  GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
-
+  set_can_default(ret->close_button, TRUE);
+  
   g_signal_connect(G_OBJECT(ret->close_button), "clicked",
                      G_CALLBACK(codec_info_window_button_callback),
                      (gpointer)ret);
