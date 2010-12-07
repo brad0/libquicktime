@@ -195,6 +195,9 @@ void lqtgtk_destroy_codec_browser(LqtGtkCodecBrowser * );
 
 void lqtgtk_codec_browser_update(LqtGtkCodecBrowser * b);
 
+/* Compatibility wrapper */
+void lqtgtk_widget_set_can_default(GtkWidget * w, gboolean can_default);
+
 #if 0 /* Not used */
   
 /*

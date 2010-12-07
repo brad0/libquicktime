@@ -112,8 +112,8 @@ static MainWindow * create_main_window()
                    G_CALLBACK(main_window_button_callback),
                    (gpointer)ret);
 
-  GTK_WIDGET_SET_FLAGS (ret->close_button, GTK_CAN_DEFAULT);
-  GTK_WIDGET_SET_FLAGS (ret->save_button, GTK_CAN_DEFAULT);
+  lqtgtk_widget_set_can_default(ret->close_button, TRUE);
+  lqtgtk_widget_set_can_default(ret->save_button, TRUE);
   
   gtk_widget_show(ret->close_button);
   gtk_widget_show(ret->save_button);
