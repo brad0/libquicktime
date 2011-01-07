@@ -559,9 +559,14 @@ static void read_codec_info(FILE * input, lqt_codec_info_t * codec,
       pos = line + strlen(num_encoding_colormodels_key);
       codec->num_encoding_colormodels = atoi(pos);
       if(codec->num_encoding_colormodels)
+        {
         codec->encoding_colormodels =
           malloc((codec->num_encoding_colormodels+1) *
                  sizeof(*codec->encoding_colormodels));
+        /* terminate */
+        codec->encoding_colormodels[codec->num_encoding_colormodels] = 
+          LQT_COLORMODEL_NONE;
+        }
       else 	 
         codec->encoding_colormodels = (int*)0; 	 
       } 	 
