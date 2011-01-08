@@ -1,5 +1,5 @@
 AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 1.2.2pre1)
+AM_INIT_AUTOMAKE(libquicktime, 1.2.2)
 
 LQT_VERSION=$VERSION
 
