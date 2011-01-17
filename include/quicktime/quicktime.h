@@ -436,6 +436,15 @@ typedef struct quicktime_s quicktime_t;
 #define QUICKTIME_2VUY "2vuy"
 
 /** \ingroup video_codecs
+ * \brief 8 bit Packed YUV (video range) 4:2:2
+ *
+ * Should always be there, can safely be hardcoded.
+ */
+
+#define QUICKTIME_YUVS "yuvs"
+
+
+/** \ingroup video_codecs
  * \brief 8 bit Packed YUV 4:4:4
  *
  * Should always be there, can safely be hardcoded.

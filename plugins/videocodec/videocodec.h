@@ -67,6 +67,9 @@ void quicktime_init_codec_yuv2(quicktime_codec_t * codec_base,
 void quicktime_init_codec_2vuy(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack);
+void quicktime_init_codec_yuvs(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack);
 void quicktime_init_codec_yuv4(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack);

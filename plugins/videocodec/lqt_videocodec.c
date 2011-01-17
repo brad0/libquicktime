@@ -42,6 +42,8 @@ static char * fourccs_yuv2[] = { QUICKTIME_YUV2, (char*)0 };
 
 static char * fourccs_2vuy[] = { QUICKTIME_2VUY, (char*)0 };
 
+static char * fourccs_yuvs[] = { QUICKTIME_YUVS, (char*)0 };
+
 static char * fourccs_yuv4[] = { QUICKTIME_YUV4, (char*)0 };
 
 static char * fourccs_yv12[] = { QUICKTIME_YUV420, "I420", (char*)0 };
@@ -199,6 +201,19 @@ static lqt_codec_info_static_t codec_info_2vuy =
   .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
   };
 
+static lqt_codec_info_static_t codec_info_yuvs =
+  {
+  .name =                "yuvs",
+  .long_name =           TRS("8 bit Packed YUV 4:2:2 (yuvs)"),
+  .description =         TRS("8 bit Packed YUV 4:2:2 (yuvs)"),
+  .fourccs =             fourccs_yuvs,
+  .type =                LQT_CODEC_VIDEO,
+  .direction =           LQT_DIRECTION_BOTH,
+  .encoding_parameters = (lqt_parameter_info_static_t*)0,
+  .decoding_parameters = (lqt_parameter_info_static_t*)0,
+  .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
+  };
+
 static lqt_codec_info_static_t codec_info_yuv4 =
   {
   .name =                "yuv4",
@@ -228,7 +243,7 @@ static lqt_codec_info_static_t codec_info_yv12 =
 
 /* These are called from the plugin loader */
 
-LQT_EXTERN int get_num_codecs() { return 10; }
+LQT_EXTERN int get_num_codecs() { return 11; }
 
 LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
   {
@@ -254,6 +269,8 @@ LQT_EXTERN lqt_codec_info_static_t * get_codec_info(int index)
       return &codec_info_2vuy;
     case 9: /* v210 */
       return &codec_info_v210;
+    case 10: /* yuvs */
+      return &codec_info_yuvs;
     }
   return (lqt_codec_info_static_t*)0;
   }
@@ -282,6 +299,8 @@ LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
       return quicktime_init_codec_2vuy;
     case 9: /* v210 */
       return quicktime_init_codec_v210;
+    case 10: /* yuvs */
+      return quicktime_init_codec_yuvs;
     }
   return (lqt_init_codec_func_t)0;
   }

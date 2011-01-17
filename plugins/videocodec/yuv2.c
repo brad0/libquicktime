@@ -52,6 +52,7 @@ typedef struct
   int initialized;
 
   int is_2vuy;
+  int is_yuvs;
   uint8_t ** rows;
   } quicktime_yuv2_codec_t;
 
@@ -170,6 +171,54 @@ static void convert_decode_2vuy(quicktime_t * file, int track,
     }
   }
 
+static void convert_encode_yuvs(quicktime_t * file, int track,
+                                quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+  {
+  uint8_t *in_row, *out_row;
+  int y, x;
+  int height = quicktime_video_height(file, track);
+  int width  = quicktime_video_width(file, track);
+  for(y = 0; y < height; y++)
+    {
+    out_row = codec->buffer + y * codec->bytes_per_line;
+    in_row = row_pointers[y];
+    for(x = 0; x < width; )
+      {
+      out_row[0] = in_row[0]; /* U */
+      out_row[1] = in_row[1]; /* Y */
+      out_row[2] = in_row[2]; /* V */
+      out_row[3] = in_row[3]; /* Y */
+      x += 2;
+      out_row += 4;
+      in_row += 4;
+      }
+    }
+  }
+
+static void convert_decode_yuvs(quicktime_t * file, int track,
+                                quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+  {
+  uint8_t *in_row, *out_row;
+  int y, x;
+  int height = quicktime_video_height(file, track);
+  int width  = quicktime_video_width(file, track);
+  for(y = 0; y < height; y++)
+    {
+    in_row = codec->buffer + y * codec->bytes_per_line;
+    out_row = row_pointers[y];
+    for(x = 0; x < width; )
+      {
+      out_row[0] = in_row[0]; /* U */
+      out_row[1] = in_row[1]; /* Y */
+      out_row[2] = in_row[2]; /* V */
+      out_row[3] = in_row[3]; /* Y */
+      x += 2;
+      out_row += 4;
+      in_row += 4;
+      }
+    }
+  }
+
 
 static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *codec,
                        int width, int height)
@@ -197,7 +246,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   if(!row_pointers)
     {
-    if(codec->is_2vuy)
+    if(codec->is_2vuy || codec->is_yuvs)
       vtrack->stream_cmodel = BC_YUV422;
     else
       vtrack->stream_cmodel = BC_YUVJ422P;
@@ -212,6 +261,8 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         
   if(codec->is_2vuy)
     convert_decode_2vuy(file, track, codec, row_pointers);
+  else if(codec->is_yuvs)
+    convert_decode_yuvs(file, track, codec, row_pointers);
   else
     convert_decode_yuv2(file, track, codec, row_pointers);
         
@@ -230,7 +281,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   if(!row_pointers)
     {
-    if(codec->is_2vuy)
+    if(codec->is_2vuy || codec->is_yuvs)
       vtrack->stream_cmodel = BC_YUV422;
     else
       vtrack->stream_cmodel = BC_YUVJ422P;
@@ -250,6 +301,8 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   if(codec->is_2vuy)
     convert_encode_2vuy(file, track, codec, row_pointers);
+  else if(codec->is_yuvs)
+    convert_encode_yuvs(file, track, codec, row_pointers);
   else
     convert_encode_yuv2(file, track, codec, row_pointers);
 
@@ -288,5 +341,19 @@ void quicktime_init_codec_2vuy(quicktime_codec_t * codec_base,
   codec_base->decode_video = decode;
   codec_base->encode_video = encode;
   codec->is_2vuy = 1;
+  }
+
+void quicktime_init_codec_yuvs(quicktime_codec_t * codec_base,
+                               quicktime_audio_map_t *atrack,
+                               quicktime_video_map_t *vtrack)
+  {
+  quicktime_yuv2_codec_t * codec;
+  codec = calloc(1, sizeof(*codec));
+  /* Init public items */
+  codec_base->priv = codec;
+  codec_base->delete_codec = quicktime_delete_codec_yuv2;
+  codec_base->decode_video = decode;
+  codec_base->encode_video = encode;
+  codec->is_yuvs = 1;
   }
 
