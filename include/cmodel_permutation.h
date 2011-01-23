@@ -574,6 +574,33 @@ static inline void transfer_RGB161616_to_YUV420P_YUV422P(unsigned char *output_y
 	output_v[output_column / 2] = v;
 }
 
+static inline void transfer_RGB161616_to_YUV422(unsigned char *(*output),
+  uint16_t *input,
+  int j)
+{
+  int y, u, v, r, g, b;
+  r = input[0];
+  g = input[1];
+  b = input[2];
+
+  RGB_48_TO_YUV_8(r,g,b,y,u,v);
+
+  if(!(j & 1))
+  {
+// Store U and V for even pixels only
+     (*output)[1] = u;
+     (*output)[3] = v;
+     (*output)[0] = y;
+  }
+  else
+  {
+// Store Y and advance output for odd pixels only
+     (*output)[2] = y;
+     (*output) += 4;
+  }
+
+}
+
 static inline void transfer_RGB161616_to_YUV422P16(uint16_t *output_y, 
 	uint16_t *output_u, 
 	uint16_t *output_v, 

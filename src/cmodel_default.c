@@ -416,6 +416,11 @@
 						j); \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_YUV422: \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGB161616_to_YUV422((output), (uint16_t*)(input), j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 				case BC_YUV422P: \
 					TRANSFER_YUV422P_OUT_HEAD \
 					transfer_RGB161616_to_YUV420P_YUV422P(output_y, \
