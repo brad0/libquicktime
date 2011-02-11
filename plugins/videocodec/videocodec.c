@@ -53,6 +53,12 @@ void lqt_set_fiel_uncompressed(quicktime_t * file, int track)
 
 int lqt_set_colr_yuv_uncompressed(quicktime_t *file,int track) {
     quicktime_colr_t colr;
+    
+    if (file->vtracks[track].track->mdia.minf.stbl.stsd.table->has_colr) {
+	/* The user has already provided a colr atom. */
+	return 0;
+    }
+    
     colr.colorParamType=LQT_COLR_NCLC;
     colr.primaries=1;
     colr.transferFunction=1;
