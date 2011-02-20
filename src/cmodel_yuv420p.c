@@ -203,6 +203,14 @@
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV411P_IN_HEAD \
+					transfer_YUV411P_to_RGBA8888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 			} \
 			break; \
  \
@@ -212,6 +220,14 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV444P_IN_HEAD \
 					transfer_YUVJ444P_to_RGB888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV444P_IN_HEAD \
+					transfer_YUVJ444P_to_RGBA8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -247,6 +263,14 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV422P_IN_HEAD \
 					transfer_YUVJ422P_to_RGB888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV422P_IN_HEAD \
+					transfer_YUVJ422P_to_RGBA8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -333,6 +357,14 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV420P_IN_HEAD \
 					transfer_YUVJ420P_to_RGB888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV420P_IN_HEAD \
+					transfer_YUVJ420P_to_RGBA8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \
@@ -544,6 +576,14 @@
 						input_v + (v_in_offset)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV422P16_IN_HEAD \
+					transfer_YUV422P16_to_RGBA8888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
 				case BC_RGB161616:      \
 					TRANSFER_YUV422P16_IN_HEAD_16 \
 					transfer_YUV422P16_to_RGB161616((output), \
@@ -602,6 +642,14 @@
 				case BC_RGB888:      \
 					TRANSFER_YUV444P16_IN_HEAD \
 					transfer_YUV444P16_to_RGB888((output), \
+						input_y + (y_in_offset), \
+						input_u + (u_in_offset), \
+						input_v + (v_in_offset)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888:      \
+					TRANSFER_YUV444P16_IN_HEAD \
+					transfer_YUV444P16_to_RGBA8888((output), \
 						input_y + (y_in_offset), \
 						input_u + (u_in_offset), \
 						input_v + (v_in_offset)); \

@@ -57,6 +57,11 @@
                                           transfer_RGB565_to_RGB888((output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_RGBA8888: \
+					TRANSFER_FRAME_HEAD \
+                                          transfer_RGB565_to_RGBA8888((output), (uint16_t*)(input)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
                         } \
                         break; \
 		case BC_BGR565: \
@@ -70,6 +75,11 @@
 				case BC_RGB888: \
 					TRANSFER_FRAME_HEAD \
                                           transfer_BGR565_to_RGB888((output), (uint16_t*)(input)); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888: \
+					TRANSFER_FRAME_HEAD \
+                                          transfer_BGR565_to_RGBA8888((output), (uint16_t*)(input)); \
 					TRANSFER_FRAME_TAIL \
 					break; \
                         } \
@@ -290,53 +300,62 @@
 			switch(out_colormodel) \
 			{ \
 				case BC_BGR565: \
-						TRANSFER_FRAME_HEAD_16 \
-                                                  transfer_RGBA8888_to_BGR565((output), (input)); \
-						TRANSFER_FRAME_TAIL \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGBA8888_to_BGR565((output), (input));    \
+					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB565: \
-						TRANSFER_FRAME_HEAD_16 \
-						transfer_RGBA8888_to_RGB565((output), (input)); \
-						TRANSFER_FRAME_TAIL \
+					TRANSFER_FRAME_HEAD_16 \
+					transfer_RGBA8888_to_RGB565((output), (input));    \
+					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR888: \
-						TRANSFER_FRAME_HEAD \
-						transfer_RGBA8888_to_BGR888((output), (input)); \
-						TRANSFER_FRAME_TAIL \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_BGR888((output), (input));    \
+					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB888: \
-						TRANSFER_FRAME_HEAD \
-						transfer_RGBA8888_to_RGB888((output), (input)); \
-						TRANSFER_FRAME_TAIL \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_RGB888((output), (input));    \
+					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA8888: \
-						TRANSFER_FRAME_HEAD \
-						transfer_RGBA8888_to_RGBA8888((output), (input)); \
-						TRANSFER_FRAME_TAIL \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_RGBA8888((output), (input));    \
+					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGB161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGBA8888_to_RGB161616((output), (input)); \
+					transfer_RGBA8888_to_RGB161616((output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_RGBA16161616: \
 					TRANSFER_FRAME_HEAD_16 \
-					transfer_RGBA8888_to_RGBA16161616((output), (input)); \
- 					TRANSFER_FRAME_TAIL \
-					break; \
-				case BC_BGR8888: \
-                                        TRANSFER_FRAME_HEAD                   \
-                                        transfer_RGBA8888_to_BGR8888((output), (input)); \
-                                        TRANSFER_FRAME_TAIL                   \
-                                        break;                              \
-				case BC_YUVA8888: \
-					TRANSFER_FRAME_HEAD \
-					transfer_RGBA8888_to_YUVA8888((output), (input)); \
+					transfer_RGBA8888_to_RGBA16161616((output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
+				case BC_BGR8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_BGR8888((output), (input));   \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUVA8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_RGBA8888_to_YUVA8888((output), (input));   \
+                                        TRANSFER_FRAME_TAIL \
+                                        break; \
 				case BC_YUV420P: \
 					TRANSFER_YUV420P_OUT_HEAD \
-					transfer_RGBA888_to_YUV420P_YUV422P(output_y, \
+					transfer_RGBA8888_to_YUV420P_YUV422P(output_y, \
+						output_u, \
+						output_v, \
+						(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUVJ420P: \
+					TRANSFER_YUV420P_OUT_HEAD \
+					transfer_RGBA8888_to_YUVJ420P_YUVJ422P(output_y, \
 						output_u, \
 						output_v, \
 						(input), \
@@ -345,12 +364,39 @@
 					break; \
 				case BC_YUV422: \
 					TRANSFER_FRAME_HEAD \
-					transfer_RGBA888_to_YUV422((output), (input), j); \
+					transfer_RGBA8888_to_YUV422((output), (input), j); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_YUV422P: \
 					TRANSFER_YUV422P_OUT_HEAD \
-					transfer_RGBA888_to_YUV420P_YUV422P(output_y, \
+					transfer_RGBA8888_to_YUV420P_YUV422P(output_y, \
+						output_u, \
+						output_v, \
+						(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUVJ422P: \
+					TRANSFER_YUV422P_OUT_HEAD \
+					transfer_RGBA8888_to_YUVJ420P_YUVJ422P(output_y, \
+						output_u, \
+						output_v, \
+						(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUV422P16: \
+					TRANSFER_YUV422P16_OUT_HEAD \
+                                          transfer_RGBA8888_to_YUV422P16((uint16_t *)output_y, \
+						(uint16_t *)output_u, \
+						(uint16_t *)output_v, \
+						(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUV411P: \
+					TRANSFER_YUV411P_OUT_HEAD \
+					transfer_RGBA8888_to_YUV411P(output_y, \
 						output_u, \
 						output_v, \
 						(input), \
@@ -359,11 +405,29 @@
 					break; \
 				case BC_YUV444P: \
 					TRANSFER_YUV444P_OUT_HEAD \
-					transfer_RGBA888_to_YUV444P(output_y, \
+					transfer_RGBA8888_to_YUV444P(output_y, \
 						output_u, \
 						output_v, \
 						(input), \
 						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_YUVJ444P: \
+					TRANSFER_YUV444P_OUT_HEAD \
+					transfer_RGBA8888_to_YUVJ444P(output_y, \
+						output_u, \
+						output_v, \
+						(input), \
+						j); \
+					TRANSFER_FRAME_TAIL \
+					break; \
+                                case BC_YUV444P16:                        \
+					TRANSFER_YUV444P_OUT_HEAD \
+                                          transfer_RGBA8888_to_YUV444P16((uint16_t*)output_y, \
+                                                                       (uint16_t*)output_u, \
+                                                                       (uint16_t*)output_v, \
+                                                                       (input), \
+                                                                       j); \
 					TRANSFER_FRAME_TAIL \
 					break; \
 			} \
@@ -529,6 +593,11 @@
 				case BC_RGB888: \
 					TRANSFER_FRAME_HEAD \
 					transfer_BGR8888_to_RGB888((output), (input));    \
+					TRANSFER_FRAME_TAIL \
+					break; \
+				case BC_RGBA8888: \
+					TRANSFER_FRAME_HEAD \
+					transfer_BGR8888_to_RGBA8888((output), (input));    \
 					TRANSFER_FRAME_TAIL \
 					break; \
 				case BC_BGR8888: \
