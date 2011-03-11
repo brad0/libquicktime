@@ -799,8 +799,9 @@ struct CODECIDMAP codecidmap_v[] =
       .name = TRS("FFMPEG dnxhd"),
             .fourccs = { "AVdn", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
-      .compatibility_flags = 0,
-      .do_encode = 1
+      .compatibility_flags = LQT_FILE_QT,
+      .do_encode = 1,
+      .encoding_colormodels = (int[]){ BC_YUV422P, BC_YUVJ422P, LQT_COLORMODEL_NONE }
     },
 #endif
     {

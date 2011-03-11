@@ -39,6 +39,15 @@
 // Enable interlaced encoding (experimental)
 // #define DO_INTERLACE
 
+/* We keep the numeric values the same as in the ACLR atom.
+   The interpretation of values is based on trial and error. */
+enum AvidYuvRange
+  {
+  AVID_UNKNOWN_YUV_RANGE = 0, /* This one is not valid in the ACLR atom. */
+  AVID_FULL_YUV_RANGE    = 1, /* [0, 255] for Y, U and V. */
+  AVID_NORMAL_YUV_RANGE  = 2  /* [16, 235] for Y, [16, 240] for U and V. */
+  };
+
 typedef struct
   {
   AVCodecContext * avctx;
@@ -70,6 +79,10 @@ typedef struct
   int qscale;
   int imx_bitrate;
   int imx_strip_vbi;
+
+  /* In some cases FFMpeg would report something like PIX_FMT_YUV422P, while
+     we would like to treat it as PIX_FMT_YUVJ422P. It's only used for decoding */
+  enum PixelFormat reinterpret_pix_fmt;
   
   int is_imx;
   int y_offset;
@@ -228,6 +241,29 @@ static int lqt_ffmpeg_delete_video(quicktime_codec_t *codec_base)
   return 0;
   }
 
+static uint32_t lqt_ffmpeg_read_be32(uint8_t const* p)
+  {
+  return ((uint32_t)p[0] << 24) + ((uint32_t)p[1] << 16) + ((uint32_t)p[2] << 8) + (uint32_t)p[3];
+  }
+
+static void lqt_ffmpeg_write_be32(uint8_t** p, uint32_t val)
+  {
+  *(*p + 0) = (uint8_t)(val >> 24);
+  *(*p + 1) = (uint8_t)(val >> 16);
+  *(*p + 2) = (uint8_t)(val >> 8);
+  *(*p + 3) = (uint8_t)val;
+  *p += 4;
+  }
+
+static void lqt_ffmpeg_write_tag(uint8_t** p, char const* tag)
+  {
+  *(*p + 0) = tag[0];
+  *(*p + 1) = tag[1];
+  *(*p + 2) = tag[2];
+  *(*p + 3) = tag[3];
+  *p += 4;
+  }
+
 #ifndef HAVE_LIBSWSCALE
 static void fill_avpicture(AVPicture * ret, unsigned char ** rows,
                            int lqt_colormodel,
@@ -300,6 +336,69 @@ static int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
     }
   return LQT_COLORMODEL_NONE;
   }
+
+static enum AvidYuvRange lqt_ffmpeg_get_avid_yuv_range(quicktime_trak_t *trak)
+  {
+  uint32_t len = 0;
+  uint8_t const* ACLR = quicktime_stsd_get_user_atom(trak, "ACLR", &len);
+  if (len >= 24)
+    {
+    switch (lqt_ffmpeg_read_be32(ACLR + 16))
+      {
+      case AVID_NORMAL_YUV_RANGE: return AVID_NORMAL_YUV_RANGE;
+      case AVID_FULL_YUV_RANGE:   return AVID_FULL_YUV_RANGE;
+      }
+    }
+  return AVID_UNKNOWN_YUV_RANGE;
+  }
+
+static void lqt_ffmpeg_setup_decoding_colormodel(quicktime_t *file, quicktime_video_map_t *vtrack, int* exact)
+  {
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  codec->reinterpret_pix_fmt = codec->avctx->pix_fmt;
+
+  /* First we try codec-specific colormodel matching. */
+  if(codec->decoder->id == CODEC_ID_DNXHD)
+    {
+    /* PIX_FMT_YUV422P is the only pixel format supported by FFMpeg's DNxHD codec,
+       at least until they implement 10 bit DNxHD. */
+    if (codec->avctx->pix_fmt == PIX_FMT_YUV422P)
+      {
+      *exact = 1;
+      if (lqt_ffmpeg_get_avid_yuv_range(vtrack->track) == AVID_FULL_YUV_RANGE)
+        {
+          vtrack->stream_cmodel = BC_YUVJ422P;
+          codec->reinterpret_pix_fmt = PIX_FMT_YUVJ422P;
+        }
+      else
+        {
+        vtrack->stream_cmodel = BC_YUV422P;
+        codec->reinterpret_pix_fmt = PIX_FMT_YUV422P;
+        }
+      return;
+      }
+    else
+      {
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Unexpected pixel format for DNxHD.");
+      }
+    }
+
+    /* Fall back to generic colormodel matching. */
+    vtrack->stream_cmodel = lqt_ffmpeg_get_lqt_colormodel(codec->avctx->pix_fmt, exact);
+  }
+
+static void lqt_ffmpeg_setup_encoding_colormodel(quicktime_video_map_t *vtrack)
+  {
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  codec->avctx->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
+
+  if (codec->encoder->id == CODEC_ID_DNXHD)
+    {
+    /* FFMpeg's DNxHD encoder doesn't know anything about YUVJ422P. */
+    codec->avctx->pix_fmt = PIX_FMT_YUV422P;
+    }
+  }
+
 
 /* Convert ffmpeg RGBA32 to BC_RGBA888 */
 
@@ -717,8 +816,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   
   if(vtrack->stream_cmodel == LQT_COLORMODEL_NONE)
     {
-    vtrack->stream_cmodel =
-      lqt_ffmpeg_get_lqt_colormodel(codec->avctx->pix_fmt, &exact);
+    lqt_ffmpeg_setup_decoding_colormodel(file, vtrack, &exact);
     if(!exact)
       {
       codec->do_imgconvert = 1;
@@ -818,7 +916,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     }
   else
     {
-    convert_image_decode(codec, codec->frame, codec->avctx->pix_fmt,
+    convert_image_decode(codec, codec->frame, codec->reinterpret_pix_fmt,
                          row_pointers, vtrack->stream_cmodel,
                          width, height + vtrack->height_extension,
                          vtrack->stream_row_span, vtrack->stream_row_span_uv);
@@ -1008,6 +1106,60 @@ static void setup_header_mpeg4(quicktime_t *file, int track,
   
   }
 
+static void setup_avid_atoms(quicktime_t* file, quicktime_video_map_t *vtrack, uint8_t const* enc_data, int enc_data_size)
+  {
+  uint8_t* p;
+  uint8_t ACLR_atom[16];
+  uint8_t APRG_atom[16];
+  uint8_t ARES_atom[112];
+
+  if (enc_data_size < 0x2c)
+    {
+    lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Unexpected stream data from DNxHD!");
+    return;
+    }
+
+  p = ACLR_atom;
+  lqt_ffmpeg_write_tag(&p, "ACLR");
+  lqt_ffmpeg_write_tag(&p, "0001");
+  lqt_ffmpeg_write_be32(&p, vtrack->stream_cmodel == BC_YUVJ422P ? AVID_FULL_YUV_RANGE : AVID_NORMAL_YUV_RANGE);
+  lqt_ffmpeg_write_be32(&p, 0); /* unknown */
+  quicktime_stsd_set_user_atom(vtrack->track, "ACLR", ACLR_atom, sizeof(ACLR_atom));
+
+  p = APRG_atom;
+  lqt_ffmpeg_write_tag(&p, "APRG");
+  lqt_ffmpeg_write_tag(&p, "0001");
+  lqt_ffmpeg_write_be32(&p, 2); /* FFMpeg puts 1 here, but on all files I've seen it's 2. */
+  lqt_ffmpeg_write_be32(&p, 0); /* unknown */
+  quicktime_stsd_set_user_atom(vtrack->track, "APRG", APRG_atom, sizeof(APRG_atom));
+
+  p = ARES_atom;
+  lqt_ffmpeg_write_tag(&p, "ARES");
+  lqt_ffmpeg_write_tag(&p, "0001");
+  lqt_ffmpeg_write_be32(&p, lqt_ffmpeg_read_be32(enc_data + 0x28)); /* cid */
+  lqt_ffmpeg_write_be32(&p, vtrack->track->tkhd.track_width);
+  /* values below are based on samples created with quicktime and avid codecs */
+  if (enc_data[5] & 2)
+    { /* interlaced */
+    lqt_ffmpeg_write_be32(&p, vtrack->track->tkhd.track_height/2);
+    lqt_ffmpeg_write_be32(&p, 2); /* unknown */
+    lqt_ffmpeg_write_be32(&p, 0); /* unknown */
+    lqt_ffmpeg_write_be32(&p, 4); /* unknown */
+    }
+  else
+    { /* progressive */
+    lqt_ffmpeg_write_be32(&p, vtrack->track->tkhd.track_height);
+    lqt_ffmpeg_write_be32(&p, 1); /* unknown */
+    lqt_ffmpeg_write_be32(&p, 0); /* unknown */
+    if (vtrack->track->tkhd.track_height == 1080)
+      lqt_ffmpeg_write_be32(&p, 5); /* unknown */
+    else
+      lqt_ffmpeg_write_be32(&p, 6); /* unknown */
+    }
+  memset(p, 0, 80); /* Fill the rest with zeros. */
+  quicktime_stsd_set_user_atom(vtrack->track, "ARES", ARES_atom, sizeof(ARES_atom));
+  }
+
 static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointers,
                                    int track)
   {
@@ -1017,6 +1169,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t *trak = vtrack->track;
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  int was_initialized = codec->initialized;
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
   int stats_len;
@@ -1062,8 +1215,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
                               
     codec->avctx->width = width;
     codec->avctx->height = height;
-                
-    codec->avctx->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
+
+    lqt_ffmpeg_setup_encoding_colormodel(vtrack);
 
     lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
     codec->avctx->sample_aspect_ratio.num = pixel_width;
@@ -1134,6 +1287,13 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     else if(codec->encoder->id == CODEC_ID_DVVIDEO)
       {
       set_dv_fourcc(width, height, vtrack->stream_cmodel, trak);
+      }
+    else if(codec->encoder->id == CODEC_ID_DNXHD)
+      {
+      if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
+        {
+        codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT;
+        }
       }
     else if(codec->is_imx)
       init_imx_encoder(file, track);
@@ -1247,11 +1407,24 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 
   if(bytes_encoded < 0)
     return -1;
-        
+
+  if(!was_initialized && codec->encoder->id == CODEC_ID_DNXHD)
+    {
+    setup_avid_atoms(file, vtrack, codec->buffer, bytes_encoded);
+    }
+
   if(bytes_encoded)
     {
+    int64_t pts = codec->avctx->coded_frame->pts;
+    if (pts == AV_NOPTS_VALUE || (codec->encoder->id == CODEC_ID_DNXHD && pts == 0))
+      {
+      /* Some codecs don't bother generating presentation timestamps.
+         FFMpeg's DNxHD encoder doesn't even bother to set it to AV_NOPTS_VALUE. */
+      pts = vtrack->timestamp;
+      }
+
     lqt_write_frame_header(file, track,
-                           -1, codec->avctx->coded_frame->pts,
+                           -1, (int)pts,
                            codec->avctx->coded_frame->key_frame);
           
     result = !quicktime_write_data(file, 
@@ -1336,8 +1509,8 @@ static int set_parameter_video(quicktime_t *file,
                                const char *key, 
                                const void *value)
   {
-  quicktime_ffmpeg_video_codec_t *codec =
-    file->vtracks[track].codec->priv;
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   if(!strcasecmp(key, "ff_qscale"))
     {
     codec->qscale = *(int*)(value) * FF_QP2LAMBDA;
@@ -1346,6 +1519,7 @@ static int set_parameter_video(quicktime_t *file,
   else if(!strcasecmp(key, "imx_bitrate"))
     {
     codec->imx_bitrate = atoi(value);
+    return 0;
     }
   else if(!strcasecmp(key, "imx_strip_vbi"))
     {
@@ -1354,6 +1528,7 @@ static int set_parameter_video(quicktime_t *file,
       {
       lqt_ffmpeg_imx_setup_decoding_frame(file, track);
       }
+    return 0;
     }
   
   lqt_ffmpeg_set_parameter(codec->avctx, key, value);
