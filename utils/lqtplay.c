@@ -1040,7 +1040,7 @@ static int qt_init_video(void)
 		qt_rows[i] = qt_frame + qt_width * 3 * i;
 	    break;
 	case BC_YUV422:
-	    fprintf(stderr,_("INFO: using BC_YUV422 + Xvideo extention\n"));
+	    fprintf(stderr,_("INFO: using BC_YUV422 + Xvideo extension\n"));
 	    qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 					  xv_port,FOURCC_YUV2);
 	    for (i = 0; i < qt_height; i++)
@@ -1053,7 +1053,7 @@ static int qt_init_video(void)
             if(xv_have_YV12)
               {
               fprintf(stderr,
-                      _("INFO: using BC_YUV420P + Xvideo extention (YV12)\n"));
+                      _("INFO: using BC_YUV420P + Xvideo extension (YV12)\n"));
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
               xv_port,FOURCC_YV12);
               qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
@@ -1063,7 +1063,7 @@ static int qt_init_video(void)
 	    else if(xv_have_I420)
               {
               fprintf(stderr,
-                      _("INFO: using BC_YUV420P + Xvideo extention (I420)\n"));
+                      _("INFO: using BC_YUV420P + Xvideo extension (I420)\n"));
               qt_xvimage = xv_create_ximage(dpy,qt_width,qt_height,
 	                                    xv_port,FOURCC_I420);
 	      qt_rows[0] = (uint8_t*)(qt_xvimage->data + qt_xvimage->offsets[0]);
@@ -1508,7 +1508,7 @@ static void usage(FILE *fp, char *prog)
               "\n"
               "usage: %s [ options ] <file>\n"
               "options:\n"
-              "  -noxv   don't use the Xvideo extention\n"
+              "  -noxv   don't use the Xvideo extension\n"
               "  -nogl   don't use OpenGL\n"
               "  -noalsa don't use Alsa\n"
               "\n"),

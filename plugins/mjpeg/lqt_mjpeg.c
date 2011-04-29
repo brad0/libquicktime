@@ -62,7 +62,7 @@ static lqt_codec_info_static_t codec_info_jpeg =
   {
     .name =                "jpeg",
     .long_name =           TRS("JPEG photo"),
-    .description =         TRS("This format writes a seperate JPEG photo for \
+    .description =         TRS("This format writes a separate JPEG photo for \
 every frame in YUV 4:2:0"),
     .fourccs =             fourccs_jpeg,
     .type =                LQT_CODEC_VIDEO,

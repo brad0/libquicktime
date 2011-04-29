@@ -216,7 +216,7 @@ the spec or reference software\n \
 1: Strictly conform to all the things in the spec no  \
 matter what consequences\n \
 0: Default\n \
--1: Allow inofficial extensions\n \
+-1: Allow unofficial extensions\n \
 -2: Allow non standarized experimental things") \
   }
 
