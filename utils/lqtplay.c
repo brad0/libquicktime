@@ -70,6 +70,10 @@
 #ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 #endif
+#ifdef HAVE_SNDIO
+#include <poll.h>
+#include <sndio.h>
+#endif
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -789,6 +793,84 @@ return 0;
 
 
 /* ------------------------------------------------------------------------ */
+/* sndio code                                                                 */
+
+#ifdef HAVE_SNDIO
+
+static struct sio_hdl *hdl;
+static struct sio_par par;
+
+static int use_sndio = 1;
+
+static int oss_sr,oss_hr;
+
+#else
+
+/* Disable sndio */
+static int use_sndio = 0;
+
+#endif /* HAVE_SNDIO */
+
+static int
+sndio_setformat(int chan, int rate)
+{
+#ifdef HAVE_SNDIO
+    sio_initpar(&par);
+    par.bits = 16;
+    par.sig = 1;
+    par.rate = rate;
+    par.pchan = chan;
+    /* yes, lqtplay wants really small blocks */
+    par.round = rate / 100;
+    par.appbufsz = par.round * 25;
+
+    if (!sio_setpar(hdl, &par) || !sio_getpar(hdl, &par)) {
+	fprintf(stderr,_("ERROR: can't set sound format\n"));
+	exit(1);
+    }
+
+    if (par.pchan != chan || par.bits != 16 || par.sig != 1 ||
+      par.le != SIO_LE_NATIVE) {
+	fprintf(stderr,_("ERROR: can't set requested sound format\n"));
+	exit(1);
+    }
+
+    if (par.rate != rate) {
+        oss_sr = rate;
+	oss_hr = par.rate;
+	fprintf(stderr,_("WARNING: sample rate mismatch (need %d, got %d)\n"),
+		rate, par.rate);
+    }
+
+    return 0;
+#else
+    return 1;
+#endif
+}
+
+static int sndio_init(char *dev, int channels, int rate)
+{
+#ifdef HAVE_SNDIO
+    hdl = sio_open(NULL, SIO_PLAY, 1);
+    if (NULL == hdl) {
+	fprintf(stderr,_("ERROR: can't open sndio\n"));
+	return -1;
+    }
+    sndio_setformat(channels,rate);
+
+    if (!sio_start(hdl)) {
+        fprintf(stderr,_("ERROR: can't start sndio\n"));
+        return -1;
+    }
+    return 0;
+#else
+    return 1;
+#endif
+}
+
+
+
+/* ------------------------------------------------------------------------ */
 /* oss code                                                                 */
 
 #ifndef AFMT_S16_NE
@@ -974,6 +1056,10 @@ static void qt_init(FILE *fp, char *filename)
         qt_sample_rate = quicktime_sample_rate(qt,0);
   if (use_alsa == 1) {
     if (-1 == alsa_init(adev_name, qt_channels, 
+         qt_sample_rate)) {
+           qt_hasaudio = 0;}
+  } else if (use_sndio == 1) {
+    if (-1 == sndio_init(adev_name, qt_channels,
          qt_sample_rate)) {
            qt_hasaudio = 0;}
   }
@@ -1422,6 +1508,50 @@ static int qt_alsa_audio_write()
   return 0;
 }
 
+static int qt_sndio_audio_write(void)
+{
+#ifdef HAVE_SNDIO
+    struct pollfd pfd;
+    int rc, n, revents;
+
+    if(!qt_audio_samples_in_buffer)
+      decode_audio(AUDIO_BLOCK_SIZE);
+
+    /* this code is absolutely horrible.  do not follow this example. */
+
+    n = sio_pollfd(hdl, &pfd, POLLOUT);
+    rc = poll(&pfd, n, 10000);
+    if (rc <= 0)
+        goto fail;
+    revents = sio_revents(hdl, &pfd);
+    if (!(revents & POLLOUT))
+        goto fail;
+    rc = sio_write(hdl,qt_audio_ptr,qt_audio_samples_in_buffer * qt_channels * sizeof(*qt_audio));
+    switch (rc) {
+    case 0:
+        goto fail;
+	break;
+    default:
+        qt_audio_samples_in_buffer -= rc / (qt_channels * sizeof(*qt_audio));
+        qt_audio_ptr += rc / sizeof(*qt_audio);
+        break;
+    }
+
+    if (qt_audio_eof && 0 == qt_audio_samples_in_buffer) {
+       return -1;
+    }
+
+    return 0;
+
+fail:
+    fprintf(stderr,_("write sndio: Huh? no data to write/no data written?\n"));
+    sio_close(hdl);
+    hdl = NULL;
+    qt_hasaudio = 0;
+#endif
+    return 0;
+}
+
 static int qt_oss_audio_write(void)
 {
     int rc;
@@ -1803,7 +1933,7 @@ int main(int argc, char *argv[])
 		FD_SET(ConnectionNumber(dpy),&rd);
 		max = ConnectionNumber(dpy);
 		if (qt_hasaudio) {
-		    if (use_alsa == 0) {
+		    if (use_alsa == 0 && use_sndio == 0) {
 			FD_SET(oss_fd,&wr);
 			if (oss_fd > max)
 			    max = oss_fd;
@@ -1843,6 +1973,9 @@ int main(int argc, char *argv[])
 		if (qt_hasaudio) {
 		    if (use_alsa == 1) {
 			if (0 != qt_alsa_audio_write()) qt_hasaudio = 0;
+		    }
+		    else if (use_sndio == 1) {
+			if (0 != qt_sndio_audio_write()) qt_hasaudio = 0;
 		    }
 		    else if (FD_ISSET(oss_fd,&wr)) { 
 			if (0 != qt_oss_audio_write()) qt_hasaudio = 0;

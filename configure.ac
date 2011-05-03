@@ -374,6 +374,37 @@ fi
 ALSA_CFLAGS="$ALSA_CFLAGS"
 AC_SUBST(ALSA_CFLAGS)
 
+dnl
+dnl Check for sndio
+dnl
+
+AH_TEMPLATE([HAVE_SNDIO], [Do we have sndio?])
+
+AC_ARG_WITH([sndio], AS_HELP_STRING([--without-sndio], [Build without sndio (default: test)]))
+
+if test "x$with_sndio" != "xno"; then
+SNDIO_CFLAGS=""
+
+AC_CHECK_HEADER(sndio.h,have_sndio="true",have_sndio="false")
+
+if test x$have_sndio = xtrue; then
+AC_CHECK_LIB(sndio,sio_open,have_sndio="true",have_sndio="false")
+fi
+
+if test x$have_sndio = xtrue; then
+SNDIO_LIBS="-lsndio"
+fi
+fi
+
+AM_CONDITIONAL(HAVE_SNDIO, test x$have_sndio = xtrue)
+
+if test x$have_sndio = xtrue; then
+AC_DEFINE(HAVE_SNDIO,1)
+fi
+
+AC_SUBST(SNDIO_CFLAGS)
+AC_SUBST(SNDIO_LIBS)
+
 # NetBSD and OpenBSD have an OSS audio compatability library 
 AH_TEMPLATE([HAVE_LIBOSSAUDIO], [Have libossaudio, for NetBSD and OpenBSD])
 AC_CHECK_LIB(ossaudio, _oss_ioctl, have_libossaudio=true)
@@ -1012,6 +1043,13 @@ echo "Yes"
 else
 echo "Missing (Go to http://www.alsa-project.org/)"
 fi  
+
+echo -n "sndio         "
+if test x$have_sndio = "xtrue"; then
+echo "Yes"
+else
+echo "Missing"
+fi
 
 echo -n "GPL plugins   "
 if test x$have_gpl = "xtrue"; then
