@@ -332,11 +332,20 @@ lqtgtk_create_parameter_widget(lqt_parameter_info_t * info,
       ret->label = gtk_label_new(TR_DOM(info->real_name));
       gtk_misc_set_alignment(GTK_MISC(ret->label), 0.0, 0.5);
 
+#if ((GTK_MAJOR_VERSION == 2) && (GTK_MINOR_VERSION >= 24))
+      ret->widget = gtk_combo_box_text_new();
+#else
       ret->widget = gtk_combo_box_new_text();
+#endif
       for(i = 0; i < info->num_stringlist_options; i++)
         {
+#if ((GTK_MAJOR_VERSION == 2) && (GTK_MINOR_VERSION >= 24))
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (ret->widget),
+				   info->stringlist_options[i]);
+#else
 	gtk_combo_box_append_text (GTK_COMBO_BOX (ret->widget), 
 				   info->stringlist_options[i]);
+#endif
         }
       g_signal_connect(GTK_COMBO_BOX (ret->widget),
 		       "changed",
