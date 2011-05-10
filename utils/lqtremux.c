@@ -154,7 +154,7 @@ static track_t * tracks_min_time(track_t * tracks, int num)
     if(tracks[i].in_file && !tracks[i].eof &&
        (!ret || (tracks[i].time < min_time)))
       {
-      min_time = tracks->time;
+      min_time = tracks[i].time;
       ret = &tracks[i];
       }
     }
