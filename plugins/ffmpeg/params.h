@@ -402,28 +402,6 @@ with max and/or min bitrate, this must be specified.") \
     .stringlist_options = (char*[]){ TRS("Left"), TRS("Plane"), TRS("Median"), (char*)0 }, \
   }
 
-/** Quantizer */
-#define PARAM_MB_QMIN \
-  { \
-    .name =        "ff_mb_qmin", \
-    .real_name =   TRS("Minimum MB quantizer"), \
-    .type =        LQT_PARAMETER_INT, \
-    .val_default = { .val_int = 2 },\
-    .val_min =     { .val_int = 0 },\
-    .val_max =     { .val_int = 31 },\
-  }
-
-/** Quantizer */
-#define PARAM_MB_QMAX \
-  { \
-    .name =        "ff_mb_qmax", \
-    .real_name =   TRS("Maximum MB quantizer"), \
-    .type =        LQT_PARAMETER_INT, \
-    .val_default = { .val_int = 31 }, \
-    .val_min =     { .val_int = 0 }, \
-    .val_max =     { .val_int = 31 }, \
-  }
-
 #define COMPARE_FUNCS (char*[]){ TRS("SAD"), TRS("SSE"), TRS("SATD"), TRS("DCT"), TRS("PSNR"), \
                                  TRS("BIT"), TRS("RD"), TRS("ZERO"), TRS("VSAD"), TRS("VSSE"), \
                                  TRS("NSSE"), \
