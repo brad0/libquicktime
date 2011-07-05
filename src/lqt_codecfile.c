@@ -143,10 +143,9 @@ static const char * video_order_key = "VideoOrder: ";
 
 #define CHECK_KEYWORD(key) (!strncmp(line, key, strlen(key)))
 
-static char filename_buffer[PATH_MAX];
-
-static void create_filename()
+static char * create_filename()
   {
+  char * filename_buffer;
   /* Obtain the home directory */
 
   char * fdir;
@@ -162,14 +161,17 @@ static void create_filename()
  
     fdir = getenv("HOME");
     if(!fdir)
-      return;
-
+      return NULL;
+    filename_buffer = malloc(strlen(fdir) + 22);
     strcpy(filename_buffer, fdir);       
     strcat(filename_buffer, "/.libquicktime_codecs"); 
   
   } else 
+     {
+     filename_buffer = malloc(strlen(fdir) + 1);
      strcpy(filename_buffer, fdir);
-  
+     }
+  return filename_buffer;
   
 }
 
@@ -663,20 +665,18 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
   FILE * input;
   char * line;
   char * pos = (char*)0;
+  char * filename_buffer = create_filename();
   lqt_codec_info_t * ret =     (lqt_codec_info_t *)0;
   lqt_codec_info_t * ret_end = (lqt_codec_info_t *)0;
-  
-  if(*filename_buffer == '\0')
-    create_filename();
 
-  if(*filename_buffer == '\0')
+  if(!filename_buffer || (*filename_buffer == '\0'))
     return NULL;
 
   input = fopen(filename_buffer, "r");
  
   if(!input)
     {
-
+    free(filename_buffer);
     return (lqt_codec_info_t*)0;
     }
   
@@ -737,7 +737,7 @@ lqt_codec_info_t * lqt_registry_read(char ** audio_order, char ** video_order)
 
 
   fclose(input);
-  
+  free(filename_buffer);
   free(line);
   return ret;
   }
@@ -980,20 +980,23 @@ void lqt_registry_write()
   {
   int i;
   FILE * output;
-  
+  char * filename_buffer = create_filename(); 
   lqt_codec_info_t * codec_info;
 
   lqt_registry_lock();
   
-  if(*filename_buffer == '\0')
-    create_filename();
-
+  if(!filename_buffer || (*filename_buffer == '\0'))
+    {
+    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "Codec registry filename could not be generated");
+    return;
+    }
   
   output = fopen(filename_buffer, "w");
   
   if(!output)
     {
     lqt_registry_unlock();
+    free(filename_buffer);
     return;
     }
 
@@ -1057,12 +1060,12 @@ void lqt_registry_write()
     }
   fclose(output);
   lqt_registry_unlock();
-
+  free(filename_buffer);
   return;
 fail:
   fclose(output);
   lqt_registry_unlock();
-  
+  free(filename_buffer);
   lqt_log(NULL, LQT_LOG_INFO, LOG_DOMAIN,
           "%s could not be written, deleting imcomplete file", filename_buffer);
   remove(filename_buffer);
