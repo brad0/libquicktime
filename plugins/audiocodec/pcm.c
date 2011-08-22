@@ -991,6 +991,7 @@ void quicktime_init_codec_twos(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
   
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1038,6 +1039,7 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
   //  codec_base->wav_id = 0x01;
 
   /* Init private items */
@@ -1171,6 +1173,7 @@ void quicktime_init_codec_in32(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1234,6 +1237,7 @@ void quicktime_init_codec_fl32(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1288,6 +1292,7 @@ void quicktime_init_codec_fl64(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
 
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
@@ -1320,7 +1325,8 @@ void quicktime_init_codec_rawaudio(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
-  
+  codec_base->set_parameter = set_parameter_pcm; 
+
   /* Init private items */
   codec = calloc(1, sizeof(*codec));
   codec_base->priv = codec;
@@ -1377,6 +1383,7 @@ void quicktime_init_codec_ulaw(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
   codec_base->writes_compressed = writes_compressed_aulaw;
   
   /* Init private items */
@@ -1405,6 +1412,7 @@ void quicktime_init_codec_alaw(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->set_parameter = set_parameter_pcm;
   codec_base->writes_compressed = writes_compressed_aulaw;
   
   /* Init private items */
