@@ -996,7 +996,7 @@ typedef struct
 typedef struct
   {
   /* Offset of end of 8 byte chunk header relative to ix->base_offset */
-  int relative_offset;
+  uint32_t relative_offset;
   /* size of data without 8 byte header */
   uint32_t size;
   } quicktime_ixtable_t;
