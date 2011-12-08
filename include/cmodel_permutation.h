@@ -208,6 +208,28 @@ static inline void transfer_RGB888_to_YUV422P16(uint16_t *output_y,
 
 }
 
+static inline void transfer_RGB888_to_YUV422P10(uint16_t *output_y,
+    uint16_t *output_u,
+    uint16_t *output_v,
+    unsigned char *input,
+    int output_column)
+{
+    RGB_24_TO_YUV_10(input[0], input[1], input[2],
+                         output_y[output_column], output_u[output_column/2], output_v[output_column/2]);
+
+}
+
+static inline void transfer_RGB888_to_YUVJ422P10(uint16_t *output_y,
+    uint16_t *output_u,
+    uint16_t *output_v,
+    unsigned char *input,
+    int output_column)
+{
+    RGB_24_TO_YUVJ_10(input[0], input[1], input[2],
+                         output_y[output_column], output_u[output_column/2], output_v[output_column/2]);
+
+}
+
 static inline void transfer_RGB888_to_YUV411P(unsigned char *output_y, 
 	unsigned char *output_u, 
 	unsigned char *output_v, 
@@ -761,6 +783,36 @@ static inline void transfer_RGB161616_to_YUV444P16(uint16_t *output_y,
 	output_y[output_column] = y;
 	output_u[output_column] = u;
 	output_v[output_column] = v;
+}
+
+static inline void transfer_RGB161616_to_YUV422P10(uint16_t *output_y,
+    uint16_t *output_u,
+    uint16_t *output_v,
+    uint16_t *input,
+    int output_column)
+{
+    int y, u, v;
+
+    RGB_48_TO_YUV_10(input[0], input[1], input[2], y, u, v);
+
+    output_y[output_column] = y;
+    output_u[output_column / 2] = u;
+    output_v[output_column / 2] = v;
+}
+
+static inline void transfer_RGB161616_to_YUVJ422P10(uint16_t *output_y,
+    uint16_t *output_u,
+    uint16_t *output_v,
+    uint16_t *input,
+    int output_column)
+{
+    int y, u, v;
+
+    RGB_48_TO_YUVJ_10(input[0], input[1], input[2], y, u, v);
+
+    output_y[output_column] = y;
+    output_u[output_column / 2] = u;
+    output_v[output_column / 2] = v;
 }
 
 
@@ -1456,6 +1508,50 @@ static inline void transfer_YUV422P16_to_YUV420P(uint16_t *input_y,
 	output_y[j] = Y_16_TO_Y_8(*input_y);
 	output_u[j / 2] = UV_16_TO_UV_8(*input_u);
 	output_v[j / 2] = UV_16_TO_UV_8(*input_v);
+}
+
+// ******************************** YUV422P10 -> ********************************
+
+static inline void transfer_YUV422P10_to_RGB888(unsigned char *(*output),
+    uint16_t *input_y,
+    uint16_t *input_u,
+    uint16_t *input_v)
+{
+    int i_tmp;
+    YUV_10_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+    (*output) += 3;
+}
+
+static inline void transfer_YUV422P10_to_RGB161616(uint16_t *(*output),
+    uint16_t *input_y,
+    uint16_t *input_u,
+    uint16_t *input_v)
+{
+        int i_tmp;
+    YUV_10_TO_RGB_48(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+    (*output) += 3;
+}
+
+// ******************************** YUVJ422P10 -> ********************************
+
+static inline void transfer_YUVJ422P10_to_RGB888(unsigned char *(*output),
+    uint16_t *input_y,
+    uint16_t *input_u,
+    uint16_t *input_v)
+{
+    int i_tmp;
+    YUVJ_10_TO_RGB_24(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+    (*output) += 3;
+}
+
+static inline void transfer_YUVJ422P10_to_RGB161616(uint16_t *(*output),
+	uint16_t *input_y,
+	uint16_t *input_u,
+	uint16_t *input_v)
+{
+    int i_tmp;
+    YUVJ_10_TO_RGB_48(*input_y, *input_u, *input_v, (*output)[0], (*output)[1], (*output)[2])
+	(*output) += 3;
 }
 
 // ******************************** YUV444P16 -> ********************************

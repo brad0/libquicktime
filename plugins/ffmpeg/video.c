@@ -39,6 +39,12 @@
 // Enable interlaced encoding (experimental)
 // #define DO_INTERLACE
 
+#ifdef  PIX_FMT_YUV422P10
+#define PIX_FMT_YUV422P10_OR_DUMMY PIX_FMT_YUV422P10
+#else
+#define PIX_FMT_YUV422P10_OR_DUMMY -1234
+#endif
+
 /* We keep the numeric values the same as in the ACLR atom.
    The interpretation of values is based on trial and error. */
 enum AvidYuvRange
@@ -125,32 +131,36 @@ static const struct
   }
 colormodels[] =
   {
-    { PIX_FMT_YUV420P,  BC_YUV420P,  1 },  ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
+    { PIX_FMT_YUV420P,   BC_YUV420P,   1 }, ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-    { PIX_FMT_YUV422,   BC_YUV422,   1 },
+    { PIX_FMT_YUV422,    BC_YUV422,    1 },
 #else
-    { PIX_FMT_YUYV422,   BC_YUV422,  1 },
+    { PIX_FMT_YUYV422,   BC_YUV422,    1 },
 #endif
-    { PIX_FMT_RGB24,    BC_RGB888,   1 },  ///< Packed pixel, 3 bytes per pixel, RGBRGB...
-    { PIX_FMT_BGR24,    BC_BGR888,   1 },  ///< Packed pixel, 3 bytes per pixel, BGRBGR...
-    { PIX_FMT_YUV422P,  BC_YUV422P,  1 },  ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
-    { PIX_FMT_YUV444P,  BC_YUV444P,  1 },  ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
-    { PIX_FMT_YUV411P,  BC_YUV411P,  1 },  ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
-    { PIX_FMT_RGB565,   BC_RGB565,   1 },  ///< always stored in cpu endianness
-    { PIX_FMT_YUVJ420P, BC_YUVJ420P, 1 }, ///< Planar YUV 4:2:0 full scale (jpeg)
-    { PIX_FMT_YUVJ422P, BC_YUVJ422P, 1 }, ///< Planar YUV 4:2:2 full scale (jpeg)
-    { PIX_FMT_YUVJ444P, BC_YUVJ444P, 1 }, ///< Planar YUV 4:4:4 full scale (jpeg)
+    { PIX_FMT_RGB24,     BC_RGB888,    1 }, ///< Packed pixel, 3 bytes per pixel, RGBRGB...
+    { PIX_FMT_BGR24,     BC_BGR888,    1 }, ///< Packed pixel, 3 bytes per pixel, BGRBGR...
+    { PIX_FMT_YUV422P,   BC_YUV422P,   1 }, ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+    { PIX_FMT_YUV444P,   BC_YUV444P,   1 }, ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
+    { PIX_FMT_YUV411P,   BC_YUV411P,   1 }, ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
+    { PIX_FMT_YUV422P16, BC_YUV422P16, 1 }, ///< Planar 16 bit YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+#ifdef PIX_FMT_YUV422P10
+    { PIX_FMT_YUV422P10, BC_YUV422P10, 1 }, ///< 10 bit samples in uint16_t containers, planar 4:2:2
+#endif
+    { PIX_FMT_RGB565,    BC_RGB565,    1 }, ///< always stored in cpu endianness
+    { PIX_FMT_YUVJ420P,  BC_YUVJ420P,  1 }, ///< Planar YUV 4:2:0 full scale (jpeg)
+    { PIX_FMT_YUVJ422P,  BC_YUVJ422P,  1 }, ///< Planar YUV 4:2:2 full scale (jpeg)
+    { PIX_FMT_YUVJ444P,  BC_YUVJ444P,  1 }, ///< Planar YUV 4:4:4 full scale (jpeg)
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-    { PIX_FMT_RGBA32,   BC_RGBA8888, 0 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    { PIX_FMT_RGBA32,    BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
 #else
-    { PIX_FMT_RGB32,   BC_RGBA8888, 0 },  ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    { PIX_FMT_RGB32,     BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
 #endif
-    { PIX_FMT_RGB555,   BC_RGB888,   0 },  ///< always stored in cpu endianness, most significant bit to 1
-    { PIX_FMT_GRAY8,    BC_RGB888,   0 },
-    { PIX_FMT_MONOWHITE, BC_RGB888,  0 },///< 0 is white
-    { PIX_FMT_MONOBLACK, BC_RGB888,  0 },///< 0 is black
-    { PIX_FMT_PAL8,      BC_RGB888,  0 },    ///< 8 bit with RGBA palette
-    { PIX_FMT_YUV410P,   BC_YUV420P, 0 },  ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
+    { PIX_FMT_RGB555,    BC_RGB888,    0 }, ///< always stored in cpu endianness, most significant bit to 1
+    { PIX_FMT_GRAY8,     BC_RGB888,    0 },
+    { PIX_FMT_MONOWHITE, BC_RGB888,    0 }, ///< 0 is white
+    { PIX_FMT_MONOBLACK, BC_RGB888,    0 }, ///< 0 is black
+    { PIX_FMT_PAL8,      BC_RGB888,    0 }, ///< 8 bit with RGBA palette
+    { PIX_FMT_YUV410P,   BC_YUV420P,   0 }, ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
   };
 
 static const struct
@@ -310,6 +320,21 @@ static void fill_avpicture(AVPicture * ret, unsigned char ** rows,
   }
 #endif
 
+static int lqt_tenbit_dnxhd_supported(AVCodec const* codec)
+  {
+  int i;
+  if (!codec->pix_fmts)
+    return 0;
+
+  for (i = 0; codec->pix_fmts[i] != PIX_FMT_NONE; ++i)
+    {
+    if (codec->pix_fmts[i] == PIX_FMT_YUV422P10_OR_DUMMY)
+      return 1;
+    }
+
+  return 0;
+  }
+
 static enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   {
   int i;
@@ -360,20 +385,24 @@ static void lqt_ffmpeg_setup_decoding_colormodel(quicktime_t *file, quicktime_vi
   /* First we try codec-specific colormodel matching. */
   if(codec->decoder->id == CODEC_ID_DNXHD)
     {
-    /* PIX_FMT_YUV422P is the only pixel format supported by FFMpeg's DNxHD codec,
-       at least until they implement 10 bit DNxHD. */
-    if (codec->avctx->pix_fmt == PIX_FMT_YUV422P)
+    /* FFMpeg supports PIX_FMT_YUV422P and PIX_FMT_YUV422P10 for DNxHD, which
+       we sometimes interpret as PIX_FMT_YUVJ422P and PIX_FMT_YUVJ422P10. */
+    if (codec->avctx->pix_fmt == PIX_FMT_YUV422P || codec->avctx->pix_fmt == PIX_FMT_YUV422P10_OR_DUMMY)
       {
+      int p10 = (codec->avctx->pix_fmt == PIX_FMT_YUV422P10_OR_DUMMY);
       *exact = 1;
       if (lqt_ffmpeg_get_avid_yuv_range(vtrack->track) == AVID_FULL_YUV_RANGE)
         {
-          vtrack->stream_cmodel = BC_YUVJ422P;
-          codec->reinterpret_pix_fmt = PIX_FMT_YUVJ422P;
+        vtrack->stream_cmodel = p10 ? BC_YUVJ422P10 : BC_YUVJ422P;
+        codec->reinterpret_pix_fmt = p10 ? PIX_FMT_YUV422P10_OR_DUMMY : PIX_FMT_YUVJ422P;
+        // Note: reinterpret_pix_fmt should really be PIX_FMT_YUVJ422P10, except
+        // there is no such colormodel in FFMpeg. Fortunately, it's not a problem
+        // in this case, as reinterpret_pix_fmt is only used when *exact == 0.
         }
       else
         {
-        vtrack->stream_cmodel = BC_YUV422P;
-        codec->reinterpret_pix_fmt = PIX_FMT_YUV422P;
+        vtrack->stream_cmodel = p10 ? BC_YUV422P10 : BC_YUV422P;
+        codec->reinterpret_pix_fmt = p10 ? PIX_FMT_YUV422P10_OR_DUMMY : PIX_FMT_YUV422P;
         }
       return;
       }
@@ -394,8 +423,15 @@ static void lqt_ffmpeg_setup_encoding_colormodel(quicktime_video_map_t *vtrack)
 
   if (codec->encoder->id == CODEC_ID_DNXHD)
     {
-    /* FFMpeg's DNxHD encoder doesn't know anything about YUVJ422P. */
+    /* FFMpeg's DNxHD encoder only supports PIX_FMT_YUV422P and PIX_FMT_YUV422P10
+       and doesn't know anything about PIX_FMT_YUVJ422P and PIX_FMT_YUVJ422P10
+       (in fact, the latter doesn't even exist) */
     codec->avctx->pix_fmt = PIX_FMT_YUV422P;
+    if (vtrack->stream_cmodel == BC_YUV422P10 || vtrack->stream_cmodel == BC_YUVJ422P10)
+      {
+      if (lqt_tenbit_dnxhd_supported(codec->encoder))
+        codec->avctx->pix_fmt = PIX_FMT_YUV422P10_OR_DUMMY;
+      }
     }
   }
 
@@ -1112,6 +1148,7 @@ static void setup_avid_atoms(quicktime_t* file, quicktime_video_map_t *vtrack, u
   uint8_t ACLR_atom[16];
   uint8_t APRG_atom[16];
   uint8_t ARES_atom[112];
+  int full_range_yuv = (vtrack->stream_cmodel == BC_YUVJ422P || vtrack->stream_cmodel == BC_YUVJ422P10);
 
   if (enc_data_size < 0x2c)
     {
@@ -1122,7 +1159,7 @@ static void setup_avid_atoms(quicktime_t* file, quicktime_video_map_t *vtrack, u
   p = ACLR_atom;
   lqt_ffmpeg_write_tag(&p, "ACLR");
   lqt_ffmpeg_write_tag(&p, "0001");
-  lqt_ffmpeg_write_be32(&p, vtrack->stream_cmodel == BC_YUVJ422P ? AVID_FULL_YUV_RANGE : AVID_NORMAL_YUV_RANGE);
+  lqt_ffmpeg_write_be32(&p, full_range_yuv ? AVID_FULL_YUV_RANGE : AVID_NORMAL_YUV_RANGE);
   lqt_ffmpeg_write_be32(&p, 0); /* unknown */
   quicktime_stsd_set_user_atom(vtrack->track, "ACLR", ACLR_atom, sizeof(ACLR_atom));
 

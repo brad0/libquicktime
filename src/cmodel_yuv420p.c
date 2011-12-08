@@ -636,6 +636,90 @@
 					break; \
                         }                              \
 			break; \
+        case BC_YUV422P10: \
+            switch(out_colormodel) \
+            { \
+                case BC_RGB888:      \
+                    TRANSFER_YUV422P16_IN_HEAD \
+                    transfer_YUV422P10_to_RGB888((output), \
+                        input_y + (y_in_offset), \
+                        input_u + (u_in_offset), \
+                        input_v + (v_in_offset)); \
+                    TRANSFER_FRAME_TAIL \
+                    break; \
+                case BC_RGB161616:      \
+                    TRANSFER_YUV422P16_IN_HEAD_16 \
+                    transfer_YUV422P10_to_RGB161616((output), \
+                        input_y + (y_in_offset), \
+                        input_u + (u_in_offset), \
+                        input_v + (v_in_offset)); \
+                    TRANSFER_FRAME_TAIL \
+                    break; \
+                case BC_YUV422P10: \
+                    for(i = 0; i < out_h; i++) \
+                    { \
+                        uint16_t *output_y = (uint16_t *)(output_rows[0] + i * out_rowspan); \
+                        uint16_t *output_u = (uint16_t *)(output_rows[1] + i * out_rowspan_uv); \
+                        uint16_t *output_v = (uint16_t *)(output_rows[2] + i * out_rowspan_uv); \
+                        uint16_t *input_y = (uint16_t *)(input_rows[0] + row_table[i] * in_rowspan); \
+                        uint16_t *input_u = (uint16_t *)(input_rows[1] + row_table[i] * in_rowspan_uv); \
+                        uint16_t *input_v = (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
+                        for(j = 0; j < out_w; j++) \
+                        { \
+                            transfer_YUV422P16_to_YUV420P16(input_y + (y_in_offset), \
+                                input_u + (u_in_offset), \
+                                input_v + (v_in_offset), \
+                                output_y, \
+                                output_u, \
+                                output_v, \
+                                j); \
+                        } \
+                    } \
+                    break; \
+            }                              \
+            break; \
+        case BC_YUVJ422P10: \
+            switch(out_colormodel) \
+            { \
+                case BC_RGB888:      \
+                    TRANSFER_YUV422P16_IN_HEAD \
+                    transfer_YUVJ422P10_to_RGB888((output), \
+                        input_y + (y_in_offset), \
+                        input_u + (u_in_offset), \
+                        input_v + (v_in_offset)); \
+                    TRANSFER_FRAME_TAIL \
+                    break; \
+                case BC_RGB161616:      \
+                    TRANSFER_YUV422P16_IN_HEAD_16 \
+                    transfer_YUVJ422P10_to_RGB161616((output), \
+                        input_y + (y_in_offset), \
+                        input_u + (u_in_offset), \
+                        input_v + (v_in_offset)); \
+                    TRANSFER_FRAME_TAIL \
+                    break; \
+                case BC_YUVJ422P10: \
+                    for(i = 0; i < out_h; i++) \
+                    { \
+                        uint16_t *output_y = (uint16_t *)(output_rows[0] + i * out_rowspan); \
+                        uint16_t *output_u = (uint16_t *)(output_rows[1] + i * out_rowspan_uv); \
+                        uint16_t *output_v = (uint16_t *)(output_rows[2] + i * out_rowspan_uv); \
+                        uint16_t *input_y = (uint16_t *)(input_rows[0] + row_table[i] * in_rowspan); \
+                        uint16_t *input_u = (uint16_t *)(input_rows[1] + row_table[i] * in_rowspan_uv); \
+                        uint16_t *input_v = (uint16_t *)(input_rows[2] + row_table[i] * in_rowspan_uv); \
+                        for(j = 0; j < out_w; j++) \
+                        { \
+                            transfer_YUV422P16_to_YUV420P16(input_y + (y_in_offset), \
+                                input_u + (u_in_offset), \
+                                input_v + (v_in_offset), \
+                                output_y, \
+                                output_u, \
+                                output_v, \
+                                j); \
+                        } \
+                    } \
+                    break; \
+            }                              \
+            break; \
 		case BC_YUV444P16: \
 			switch(out_colormodel) \
 			{ \

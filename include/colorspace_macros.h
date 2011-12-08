@@ -23,6 +23,7 @@
 *******************************************************************************/
 
 #define RECLIP_8(color) (uint8_t)((color>0xFF)?0xff:((color<0)?0:color))
+#define RECLIP_10(color) (uint16_t)((color>0x03FF)?0x03FF:((color<0)?0:color))
 #define RECLIP_16(color) (uint16_t)((color>0xFFFF)?0xFFFF:((color<0)?0:color))
 #define RECLIP_FLOAT(color) ((color>1.0)?1.0:((color<0.0)?0.0:color))
 
@@ -172,6 +173,18 @@
   u=(r_to_u[r]+g_to_u[g]+b_to_u[b])>>8;                                \
   v=(r_to_v[r]+g_to_v[g]+b_to_v[b])>>8;
 
+/* 24 -> 10 */
+
+#define RGB_24_TO_YUV_10(r,g,b,y,u,v)                                  \
+  y=RECLIP_10((r_to_y[r]+g_to_y[g]+b_to_y[b])>>14);                     \
+  u=RECLIP_10((r_to_u[r]+g_to_u[g]+b_to_u[b])>>14);                     \
+  v=RECLIP_10((r_to_v[r]+g_to_v[g]+b_to_v[b])>>14);
+
+#define RGB_24_TO_YUVJ_10(r,g,b,y,u,v)                                 \
+  y=RECLIP_10((r_to_yj[r]+g_to_yj[g]+b_to_yj[b])>>14);                  \
+  u=RECLIP_10((r_to_uj[r]+g_to_uj[g]+b_to_uj[b])>>14);                  \
+  v=RECLIP_10((r_to_vj[r]+g_to_vj[g]+b_to_vj[b])>>14);
+
 /* 48 -> 8 */
 
 #define r_16_to_y (int64_t)((0.29900*219.0/255.0)*0x10000)
@@ -223,6 +236,16 @@
   RGB_48_TO_Y_16(r,g,b,y);                                               \
   u=(r_16_to_u * r + g_16_to_u * g + b_16_to_u * b + 0x80000000LL)>>16;  \
   v=(r_16_to_v * r + g_16_to_v * g + b_16_to_v * b + 0x80000000LL)>>16;
+
+#define RGB_48_TO_YUV_10(r,g,b,y,u,v)                                           \
+  y=RECLIP_10(((r_16_to_y * r + g_16_to_y * g + b_16_to_y * b)>>22) + 0x040LL); \
+  u=RECLIP_10(((r_16_to_u * r + g_16_to_u * g + b_16_to_u * b)>>22) + 0x200LL); \
+  v=RECLIP_10(((r_16_to_v * r + g_16_to_v * g + b_16_to_v * b)>>22) + 0x200LL);
+
+#define RGB_48_TO_YUVJ_10(r,g,b,y,u,v)                                             \
+  y=RECLIP_10((r_16_to_yj * r + g_16_to_yj * g + b_16_to_yj * b)>>22);             \
+  u=RECLIP_10(((r_16_to_uj * r + g_16_to_uj * g + b_16_to_uj * b)>>22) + 0x200LL); \
+  v=RECLIP_10(((r_16_to_vj * r + g_16_to_vj * g + b_16_to_vj * b)>>22) + 0x200LL);
 
 /* RGB Float -> YUV */
 
@@ -328,10 +351,15 @@
 /* YUV (16 bit) -> 8 */
 
 #define y_16_to_rgb  (int64_t)(255.0/219.0 * 0x10000)
-#define v_16_to_r (int64_t)( 1.40200*255.0/224.0 * 0x10000)
-#define u_16_to_g (int64_t)(-0.34414*255.0/224.0 * 0x10000)
-#define v_16_to_g (int64_t)(-0.71414*255.0/224.0 * 0x10000)
-#define u_16_to_b (int64_t)( 1.77200*255.0/224.0 * 0x10000)
+#define yj_16_to_rgb (int64_t)0x10000
+#define v_16_to_r  (int64_t)( 1.40200*255.0/224.0 * 0x10000)
+#define vj_16_to_r (int64_t)( 1.40200 * 0x10000)
+#define u_16_to_g  (int64_t)(-0.34414*255.0/224.0 * 0x10000)
+#define uj_16_to_g (int64_t)(-0.34414 * 0x10000)
+#define v_16_to_g  (int64_t)(-0.71414*255.0/224.0 * 0x10000)
+#define vj_16_to_g (int64_t)(-0.71414 * 0x10000)
+#define u_16_to_b  (int64_t)( 1.77200*255.0/224.0 * 0x10000)
+#define uj_16_to_b (int64_t)( 1.77200 * 0x10000)
 
 #define YUV_16_TO_RGB_24(y,u,v,r,g,b) \
   i_tmp=(y_16_to_rgb * (y-0x1000) + v_16_to_r * (v-0x8000))>>24;        \
@@ -339,6 +367,24 @@
   i_tmp=(y_16_to_rgb * (y-0x1000) + u_16_to_g * (u-0x8000)+ v_16_to_g * (v-0x8000))>>24; \
   g = RECLIP_8(i_tmp);\
   i_tmp=(y_16_to_rgb * (y-0x1000) + u_16_to_b * (u-0x8000))>>24; \
+  b = RECLIP_8(i_tmp);
+
+/* YUV (10 bit) -> 8 */
+
+#define YUV_10_TO_RGB_24(y,u,v,r,g,b) \
+  i_tmp=(yj_16_to_rgb * (y-0x40) + vj_16_to_r * (v-0x200))>>18;        \
+  r = RECLIP_8(i_tmp);\
+  i_tmp=(yj_16_to_rgb * (y-0x40) + uj_16_to_g * (u-0x200)+ vj_16_to_g * (v-0x200))>>18; \
+  g = RECLIP_8(i_tmp);\
+  i_tmp=(yj_16_to_rgb * (y-0x40) + uj_16_to_b * (u-0x200))>>18; \
+  b = RECLIP_8(i_tmp);
+
+#define YUVJ_10_TO_RGB_24(y,u,v,r,g,b) \
+  i_tmp=(yj_16_to_rgb * y + vj_16_to_r * (v-0x200))>>18;        \
+  r = RECLIP_8(i_tmp);\
+  i_tmp=(yj_16_to_rgb * y + uj_16_to_g * (u-0x200)+ vj_16_to_g * (v-0x200))>>18; \
+  g = RECLIP_8(i_tmp);\
+  i_tmp=(yj_16_to_rgb * y + uj_16_to_b * (u-0x200))>>18; \
   b = RECLIP_8(i_tmp);
 
 
@@ -350,6 +396,24 @@
   i_tmp=(y_16_to_rgb * (y-0x1000) + u_16_to_g * (u-0x8000)+ v_16_to_g * (v-0x8000))>>16; \
   g = RECLIP_16(i_tmp);\
   i_tmp=(y_16_to_rgb * (y-0x1000) + u_16_to_b * (u-0x8000))>>16; \
+  b = RECLIP_16(i_tmp);
+
+/* YUV (10 bit) -> 16 */
+
+#define YUV_10_TO_RGB_48(y,u,v,r,g,b) \
+  i_tmp=(y_16_to_rgb * (y-0x40) + v_16_to_r * (v-0x200))>>10;        \
+  r = RECLIP_16(i_tmp);\
+  i_tmp=(y_16_to_rgb * (y-0x40) + u_16_to_g * (u-0x200)+ v_16_to_g * (v-0x200))>>10; \
+  g = RECLIP_16(i_tmp);\
+  i_tmp=(y_16_to_rgb * (y-0x40) + u_16_to_b * (u-0x200))>>10; \
+  b = RECLIP_16(i_tmp);
+
+#define YUVJ_10_TO_RGB_48(y,u,v,r,g,b) \
+  i_tmp=(yj_16_to_rgb * y + vj_16_to_r * (v-0x200))>>10;        \
+  r = RECLIP_16(i_tmp);\
+  i_tmp=(yj_16_to_rgb * y + uj_16_to_g * (u-0x200)+ vj_16_to_g * (v-0x200))>>10; \
+  g = RECLIP_16(i_tmp);\
+  i_tmp=(yj_16_to_rgb * y + uj_16_to_b * (u-0x200))>>10; \
   b = RECLIP_16(i_tmp);
 
 /* YUV (16 bit) -> float */

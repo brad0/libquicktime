@@ -53,6 +53,8 @@ static lqt_colormodel_tab colormodel_table[] =
     { "YUV 4:4:4 planar",          BC_YUV444P },
     { "YUV 4:2:2 planar (16 bit)", BC_YUV422P16 },
     { "YUV 4:4:4 planar (16 bit)", BC_YUV444P16 },
+    { "YUV 4:2:2 planar (10 bit)", BC_YUV422P10 },
+    { "YUV 4:2:2 planar (10 bit, jpeg)", BC_YUVJ422P10 },
     { "YUV 4:2:0 planar (jpeg)",   BC_YUVJ420P },
     { "YUV 4:2:2 planar (jpeg)",   BC_YUVJ422P },
     { "YUV 4:4:4 planar (jpeg)",   BC_YUVJ444P },
@@ -77,6 +79,8 @@ int lqt_colormodel_is_yuv(int colormodel)
     case BC_YUVJ422P:
     case BC_YUVJ444P:
     case BC_YUV411P:
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
       return 1;
     default:
       return 0;
@@ -127,6 +131,8 @@ int lqt_colormodel_is_planar(int colormodel)
     case BC_YUVJ444P:
     case BC_YUVJ420P:
     case BC_YUV411P:
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
       return 1;
     default:
       return 0;
@@ -149,6 +155,8 @@ void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v)
     case BC_YUV422P:
     case BC_YUVJ422P:
     case BC_YUV422P16:
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
       *sub_h = 2;
       *sub_v = 1;
       break;
@@ -198,6 +206,9 @@ static int colormodel_get_bits(int colormodel)
     case BC_YUV422P16:
     case BC_YUV444P16:
       return 48;
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
+      return 30;
     case BC_RGBA16161616:
       return 64;
     default:
@@ -426,6 +437,8 @@ static int get_bytes_per_element(int colormodel)
     case BC_YUV422:
     case BC_YUV422P16:
     case BC_YUV444P16:
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
       return 2;
       break;
     case BC_BGR888:
@@ -533,14 +546,19 @@ void lqt_rows_copy(uint8_t **out_rows, uint8_t **in_rows, int width, int height,
 void lqt_rows_clear(uint8_t **rows,
                     int width, int height, int rowspan, int rowspan_uv, int colormodel)
   {
-  int i, j, bytes_per_element, bytes_per_line;
+  int i, j, bits_per_sample, bytes_per_element, bytes_per_line;
   uint8_t * ptr;
   uint16_t * ptr_16;
   uint8_t * ptr_start;
   int sub_h, sub_v;
+  uint16_t y_val, uv_val;
 
+  bits_per_sample = colormodel_get_bits(colormodel) / (lqt_colormodel_has_alpha(colormodel) ? 4 : 3);
   bytes_per_element = get_bytes_per_element(colormodel);
   bytes_per_line = bytes_per_element * width;
+  y_val = 1 << (bits_per_sample - 4);  // This one is good for non-jpeg colormodels.
+  uv_val = 1 << (bits_per_sample - 1); // This one is good for both jpeg and non-jpeg colormodels.
+
   switch(colormodel)
     {
     case BC_RGB565:
@@ -696,9 +714,11 @@ void lqt_rows_clear(uint8_t **rows,
         ptr += rowspan_uv;
         }
       break;
+    case BC_YUVJ422P10:
+      y_val = 0; // For jpeg colormodels.
     case BC_YUV422P16:
     case BC_YUV444P16:
-
+    case BC_YUV422P10:
       lqt_colormodel_get_chroma_sub(colormodel, &sub_h, &sub_v);
 
       /* Y */
@@ -708,7 +728,7 @@ void lqt_rows_clear(uint8_t **rows,
         ptr_16 = (uint16_t*)ptr_start;
         for(j = 0; j < width; j++)
           {
-          *ptr_16 = 0x1000;
+          *ptr_16 = y_val;
           ptr_16++;
           }
         ptr_start += rowspan;
@@ -724,7 +744,7 @@ void lqt_rows_clear(uint8_t **rows,
         ptr_16 = (uint16_t*)ptr_start;
         for(j = 0; j < width; j++)
           {
-          *ptr_16 = 0x1000;
+          *ptr_16 = uv_val;
           ptr_16++;
           }
         ptr_start += rowspan;
@@ -737,13 +757,13 @@ void lqt_rows_clear(uint8_t **rows,
         ptr_16 = (uint16_t*)ptr_start;
         for(j = 0; j < width; j++)
           {
-          *ptr_16 = 0x1000;
+          *ptr_16 = uv_val;
           ptr_16++;
           }
         ptr_start += rowspan;
         }
       
-      
+
       break;
     }
   }
@@ -974,6 +994,8 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_YUVJ444P:     return 1; break;
         case BC_YUV422P16:    return 1; break;
         case BC_YUV444P16:    return 1; break;
+        case BC_YUV422P10:    return 1; break;
+        case BC_YUVJ422P10:   return 1; break;
         }
       break;
     case BC_RGBA8888:
@@ -1020,6 +1042,8 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_YUVJ444P:     return 0; break;
         case BC_YUV422P16:    return 1; break;
         case BC_YUV444P16:    return 1; break;
+        case BC_YUV422P10:    return 1; break;
+        case BC_YUVJ422P10:   return 1; break;
         }
       break;
     case BC_RGBA16161616:
@@ -1296,6 +1320,14 @@ int lqt_colormodel_has_conversion(int in_cmodel, int out_cmodel)
         case BC_YUVJ422P:     return 0; break;
         case BC_YUVJ444P:     return 0; break;
         case BC_YUV422P16:    return 0; break;
+        }
+      break;
+    case BC_YUV422P10:
+    case BC_YUVJ422P10:
+      switch(out_cmodel)
+        {
+        case BC_RGB888:       return 1; break;
+        case BC_RGB161616:    return 1; break;
         }
       break;
     }

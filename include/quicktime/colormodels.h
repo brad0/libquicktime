@@ -178,6 +178,19 @@
 
 #define BC_YUV444P16    22
 
+/** \ingroup color
+
+    10 bit values in uint16_t native byte order containers, planar YCbCr 4:2:2.
+*/
+#define BC_YUV422P10    23
+
+/** \ingroup color
+
+    10 bit values in uint16_t native byte order containers, planar YCbCr 4:2:2.
+    Luma and chroma values are full range (0 .. 1023)
+*/
+#define BC_YUVJ422P10   24
+
 // Colormodels purely used by Quicktime are done in Quicktime.
 
 // For communication with the X Server

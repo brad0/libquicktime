@@ -32,13 +32,15 @@ int cmodel_is_planar(int colormodel)
 	{
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
-                case BC_YUV444P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
 		case BC_YUV422P16:    return 1; break;
-                case BC_YUV444P16:    return 1; break;
+        case BC_YUV444P16:    return 1; break;
 		case BC_YUVJ420P:     return 1; break;
 		case BC_YUVJ422P:     return 1; break;
-                case BC_YUVJ444P:     return 1; break;
+        case BC_YUVJ444P:     return 1; break;
 		case BC_YUV411P:      return 1; break;
+        case BC_YUV422P10:    return 1; break;
+        case BC_YUVJ422P10:   return 1; break;
 	}
 	return 0;
 }
@@ -61,14 +63,16 @@ int cmodel_calculate_pixelsize(int colormodel)
 // Planar
 		case BC_YUV420P:      return 1; break;
 		case BC_YUV422P:      return 1; break;
-                case BC_YUV444P:      return 1; break;
+        case BC_YUV444P:      return 1; break;
 		case BC_YUVJ420P:     return 1; break;
 		case BC_YUVJ422P:     return 1; break;
-                case BC_YUVJ444P:     return 1; break;
+        case BC_YUVJ444P:     return 1; break;
 		case BC_YUV422P16:    return 2; break;
-                case BC_YUV444P16:    return 2; break;
-                case BC_YUV422:       return 2; break;
+        case BC_YUV444P16:    return 2; break;
+        case BC_YUV422:       return 2; break;
 		case BC_YUV411P:      return 1; break;
+        case BC_YUV422P10:    return 2; break;
+        case BC_YUVJ422P10:   return 2; break;
 	}
 	return 0;
 }
@@ -142,6 +146,8 @@ void cmodel_transfer(unsigned char **output_rows,
 		case BC_YUV422P16:
 		case BC_YUVJ420P:
 		case BC_YUVJ422P:
+        case BC_YUV422P10:
+        case BC_YUVJ422P10:
  			cmodel_yuv420p(output_rows,  \
 				input_rows, \
 				in_x,  \
@@ -280,11 +286,14 @@ int cmodel_is_yuv(int colormodel)
 		case BC_YUVJ422P:
 		case BC_YUV420P:
 		case BC_YUV422P:
-                case BC_YUV444P:
-                case BC_YUV411P:
+        case BC_YUV444P:
+        case BC_YUV411P:
+        case BC_YUV422P16:
+        case BC_YUV444P16:
+        case BC_YUV422P10:
+        case BC_YUVJ422P10:
 			return 1;
 			break;
-		
 		default:
 			return 0;
 			break;
