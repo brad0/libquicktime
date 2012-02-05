@@ -1031,6 +1031,15 @@ int lqt_set_video_pass(quicktime_t *file,
                        const char * stats_file, int track);
 
 /** \ingroup video_decode
+ *  \brief Get the timestamp of a given frame
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param frame The frame
+ *  \returns The timestamp of the frame
+ */
+int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame);
+
+/** \ingroup video_decode
  *  \brief Get the timestamp of the next frame to be decoded
  *  \param file A quicktime handle
  *  \param track Track index (starting with 0)
@@ -1160,9 +1169,44 @@ int64_t lqt_video_duration(quicktime_t * file, int track);
  *  you should verify, that this colormodel can be used with
  *  \ref quicktime_reads_cmodel (for reading), \ref quicktime_writes_cmodel
  *  (for writing) or \ref lqt_get_best_colormodel (for reading and writing).
-  */
+ */
 
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel);
+
+/** \ingroup video_decode
+ * \brief Get the number of video track edit segments
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ */
+
+long lqt_video_edit_list_total_entries(quicktime_t * file, int track);
+
+/** \ingroup video_decode
+ * \brief Get the duration of a video track edit segment
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+long lqt_video_edit_duration(quicktime_t * file, int track, int entry_index);
+
+/** \ingroup video_decode
+ * \brief Get the time offset of a video track edit segment
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+long lqt_video_edit_time(quicktime_t * file, int track, int entry_index);
+
+/** \ingroup video_decode
+ * \brief Get the rate of a video track edit segment
+ *  \param file A quicktime handle
+ *  \param track Video track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+float lqt_video_edit_rate(quicktime_t * file, int track, int entry_index);
 
 /** \ingroup video
  * \brief Set the row span for the luma plane
@@ -1378,6 +1422,41 @@ int lqt_encode_audio_raw(quicktime_t *file,
 void lqt_seek_video(quicktime_t * file, int track,
                     int64_t time);
   
+/** \ingroup audio_decode
+ * \brief Get the number of audio track edit segments
+ *  \param file A quicktime handle
+ *  \param track Audio track index (starting with 0)
+ */
+
+long lqt_audio_edit_list_total_entries(quicktime_t * file, int track);
+
+/** \ingroup audio_decode
+ * \brief Get the duration of a audio track edit segment
+ *  \param file A quicktime handle
+ *  \param track Audio track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+long lqt_audio_edit_duration(quicktime_t * file, int track, int entry_index);
+
+/** \ingroup audio_decode
+ * \brief Get the time offset of a audio track edit segment
+ *  \param file A quicktime handle
+ *  \param track Audio track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+long lqt_audio_edit_time(quicktime_t * file, int track, int entry_index);
+
+/** \ingroup audio_decode
+ * \brief Get the rate of a audio track edit segment
+ *  \param file A quicktime handle
+ *  \param track Audio track index (starting with 0)
+ *  \param entry_index Index into the edit segments
+ */
+
+float lqt_audio_edit_rate(quicktime_t * file, int track, int entry_index);
+
 /*
  *  AVI Specific stuff
  */

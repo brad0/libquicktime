@@ -1016,6 +1016,62 @@ int quicktime_video_depth(quicktime_t *file, int track)
   return 0;
   }
 
+long lqt_video_edit_list_total_entries(quicktime_t * file, int track)
+{
+   if(track < 0 || track >= quicktime_video_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+      
+   return file->vtracks[track].track->edts.elst.total_entries;
+}
+
+long lqt_video_edit_duration(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_video_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+
+   if(entry_index < 0 || entry_index >= file->vtracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0;
+   }
+
+   // convert to media timescale
+   return (long)((double)file->vtracks[track].track->edts.elst.table[entry_index].duration / file->moov.mvhd.time_scale * file->vtracks[track].track->mdia.mdhd.time_scale + 0.5);
+}
+
+long lqt_video_edit_time(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_video_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+
+   if(entry_index < 0 || entry_index >= file->vtracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0;
+   }
+
+   return file->vtracks[track].track->edts.elst.table[entry_index].time;
+}
+
+float lqt_video_edit_rate(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_video_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0.0f;
+   }
+
+   if(entry_index < 0 || entry_index >= file->vtracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0.0f;
+   }
+
+   return file->vtracks[track].track->edts.elst.table[entry_index].rate;
+}
+
 void quicktime_set_cmodel(quicktime_t *file, int colormodel)
   {
   int i;
@@ -1116,6 +1172,15 @@ double quicktime_frame_rate(quicktime_t *file, int track)
   return 0;
   }
 
+int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame)
+  {
+  int64_t dummy1;
+  int64_t dummy2;
+  return
+    quicktime_sample_to_time(&file->vtracks[track].track->mdia.minf.stbl.stts, frame,
+                             &dummy1, &dummy2);
+  }
+
 /*
  *  Return the timestamp of the NEXT frame to be decoded.
  *  Call this BEFORE one of the decoding functions.
@@ -1208,6 +1273,62 @@ int quicktime_write_audio(quicktime_t *file,
   file->atracks[track].cur_chunk++;
   return result;
   }
+
+long lqt_audio_edit_list_total_entries(quicktime_t * file, int track)
+{
+   if(track < 0 || track >= quicktime_audio_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+      
+   return file->atracks[track].track->edts.elst.total_entries;
+}
+
+long lqt_audio_edit_duration(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_audio_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+
+   if(entry_index < 0 || entry_index >= file->atracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0;
+   }
+
+   // convert to media timescale
+   return (long)((double)file->atracks[track].track->edts.elst.table[entry_index].duration / file->moov.mvhd.time_scale * file->atracks[track].track->mdia.mdhd.time_scale + 0.5);
+}
+
+long lqt_audio_edit_time(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_audio_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0;
+   }
+
+   if(entry_index < 0 || entry_index >= file->atracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0;
+   }
+
+   return file->atracks[track].track->edts.elst.table[entry_index].time;
+}
+
+float lqt_audio_edit_rate(quicktime_t * file, int track, int entry_index)
+{
+   if(track < 0 || track >= quicktime_audio_tracks(file)) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal track index");
+      return 0.0f;
+   }
+
+   if(entry_index < 0 || entry_index >= file->atracks[track].track->edts.elst.total_entries) {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "illegal edit list entry");
+      return 0.0f;
+   }
+
+   return file->atracks[track].track->edts.elst.table[entry_index].rate;
+}
 
 int quicktime_write_frame(quicktime_t *file,
                           unsigned char *video_buffer,
