@@ -16,20 +16,15 @@ AVCODEC_HEADER=""
 dnl Look for header
 found_header="false"
 
-AC_TRY_COMPILE([
-#include <libavcodec/avcodec.h>],[], [found_header="true";AVCODEC_HEADER="<libavcodec/avcodec.h>";VDPAU_HEADER="<libavcodec/vdpau.h>" ],)
+AC_TRY_COMPILE([#include <libavcodec/avcodec.h>],[],[found_header="true";AVCODEC_HEADER="<libavcodec/avcodec.h>";VDPAU_HEADER="<libavcodec/vdpau.h>" ],)
 
 if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <avcodec.h>],[],[found_header="true";AVCODEC_HEADER="<avcodec.h>";VDPAU_HEADER="<vdpau.h>"])
+AC_TRY_COMPILE([#include <avcodec.h>],[],[found_header="true";AVCODEC_HEADER="<avcodec.h>";VDPAU_HEADER="<vdpau.h>"])
 fi
 
 if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <ffmpeg/avcodec.h>],[], [found_header="true";AVCODEC_HEADER="<ffmpeg/avcodec.h>";VDPAU_HEADER="<vdpau.h>" ],)
+AC_TRY_COMPILE([#include <ffmpeg/avcodec.h>],[], [found_header="true";AVCODEC_HEADER="<ffmpeg/avcodec.h>";VDPAU_HEADER="<vdpau.h>" ],)
 fi
-
-AC_CHECK_HEADERS([libavcore/avcore.h])
 
 avcodec_ok="false"
 AC_TRY_RUN([
@@ -66,6 +61,8 @@ if test "x$avcodec_ok" = "xtrue"; then
 
 avcodec_swscale_missing="false"
 
+dnl AC_CHECK_HEADERS([libavcore/avcore.h])
+
 AC_MSG_CHECKING(for img_convert)
 AC_TRY_LINK([#include <avcodec.h>],
             [img_convert(NULL, 0, NULL, 0, 0, 0);
@@ -74,7 +71,7 @@ AC_TRY_LINK([#include <avcodec.h>],
             AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
 
 if test "x$have_avcodec_img_convert" != "xtrue"; then
-  if test "x$have_libswscale" != xtrue; then
+  if test "x$have_libswscale" != "xtrue"; then
     avcodec_swscale_missing="true"
     avcodec_ok="false"
   fi

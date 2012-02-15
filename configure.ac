@@ -42,16 +42,13 @@ dnl
 LQT_CODEC_API_VERSION="12"
 
 AH_TEMPLATE([HAVE_GPL], [Enable GPL code])
-
-AC_DEFINE_UNQUOTED(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
+AH_TEMPLATE([LQT_CODEC_API_VERSION],
+            [Libquicktime codec API version])
 
 if test "x$have_gpl" = "xtrue"; then
   LQT_CODEC_API_VERSION="($LQT_CODEC_API_VERSION|0x10000)"
   AC_DEFINE(HAVE_GPL)
 fi
-
-AH_TEMPLATE([LQT_CODEC_API_VERSION],
-            [Libquicktime codec API version])
 
 AC_DEFINE_UNQUOTED(LQT_CODEC_API_VERSION, $LQT_CODEC_API_VERSION)
 AC_SUBST(LQT_CODEC_API_VERSION)
@@ -500,37 +497,6 @@ AC_SUBST(JPEG_CFLAGS)
 AC_SUBST(JPEG_REQUIRED)
 AM_CONDITIONAL(HAVE_LIBJPEG, test x$have_libjpeg = xtrue)
 
-
-
-dnl
-dnl Check for libavcodec (ffmpeg)
-dnl
-
-AH_TEMPLATE([HAVE_LIBAVCODEC],
-            [Do we have libavcodec installed?])
-
-have_libavcodec=false
-
-AVCODEC_BUILD="3277056"
-
-AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
-
-if test "x$with_ffmpeg" != "xno"; then
-
-dnl PKG_CHECK_MODULES(AVCODEC, avcodec_acl = $AVCODEC_REQUIRED, have_libavcodec="true", have_libavcodec="false")
-ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
-
-
-fi
-
-AVCODEC_REQUIRED=$AVCODEC_VERSION
-
-AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
-
-AC_SUBST(AVCODEC_REQUIRED)
-AC_SUBST(AVCODEC_LIBS)
-AC_SUBST(AVCODEC_CFLAGS)
-
 dnl
 dnl libswscale
 dnl
@@ -588,6 +554,33 @@ fi
 
 
 
+
+dnl
+dnl Check for libavcodec (ffmpeg)
+dnl
+
+AH_TEMPLATE([HAVE_LIBAVCODEC],
+            [Do we have libavcodec installed?])
+
+have_libavcodec=false
+
+AVCODEC_BUILD="3412992"
+
+AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
+
+if test "x$with_ffmpeg" != "xno"; then
+
+ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
+
+fi
+
+AVCODEC_REQUIRED=$AVCODEC_VERSION
+
+AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
+
+AC_SUBST(AVCODEC_REQUIRED)
+AC_SUBST(AVCODEC_LIBS)
+AC_SUBST(AVCODEC_CFLAGS)
 
 dnl
 dnl Check for libpng
