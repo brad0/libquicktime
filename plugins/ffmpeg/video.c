@@ -1819,8 +1819,11 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec = calloc(1, sizeof(*codec));
   if(!codec)
     return;
+#if LIBAVCODEC_VERSION_INT < ((53<<16)|(8<<8)|0)
   codec->avctx = avcodec_alloc_context();
-
+#else
+  codec->avctx = avcodec_alloc_context3(NULL);
+#endif
   codec->encoder = encoder;
   codec->decoder = decoder;
   
