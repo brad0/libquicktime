@@ -948,7 +948,7 @@ static void ffmpeg_map_init(void)
     }
     
   avcodec_register_all();
-  avcodec_init();
+  //  avcodec_init();
   ffmpeg_num_video_codecs = 0;
   ffmpeg_num_audio_codecs = 0;
   

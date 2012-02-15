@@ -31,14 +31,6 @@
 
 #define LOG_DOMAIN "ffmpeg_audio"
 
-/* Different decoding functions */
-
-#if LIBAVCODEC_BUILD >= ((51<<16)+(29<<8)+0)
-#define DECODE_FUNC avcodec_decode_audio2
-#else
-#define DECODE_FUNC avcodec_decode_audio
-#endif
-
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
 /* MPEG Audio header parsing code */
@@ -445,7 +437,9 @@ typedef struct
   int64_t pts; /* For reading compressed packets */
 
   int header_written;
-  
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+  AVDictionary * options;
+#endif
   } quicktime_ffmpeg_audio_codec_t;
 
 static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
@@ -462,7 +456,11 @@ static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
   if(codec->chunk_buffer)
     free(codec->chunk_buffer);
   if(codec->extradata)
-    free(codec->extradata); 
+    free(codec->extradata);
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+  if(codec->options)
+    av_dict_free(&codec->options);
+#endif
   free(codec);
   return 0;
   }
@@ -473,7 +471,11 @@ static int set_parameter(quicktime_t *file,
                   const void *value)
   {
   quicktime_ffmpeg_audio_codec_t *codec = file->atracks[track].codec->priv;
-  lqt_ffmpeg_set_parameter(codec->avctx, key, value);
+  lqt_ffmpeg_set_parameter(codec->avctx,
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+                           &codec->options,
+#endif
+                           key, value);
   return 0;
   }
 
@@ -513,13 +515,9 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
     if(!packet_size)
       return 0;
 
-#if LIBAVCODEC_BUILD >= 3349760
     bytes_decoded = codec->sample_buffer_alloc -
       (codec->sample_buffer_end - codec->sample_buffer_start);
     bytes_decoded *= 2 * track_map->channels;
-#else
-    bytes_decoded = 0;
-#endif
 
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
     codec->pkt.data = codec->chunk_buffer;
@@ -533,7 +531,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
                                         &codec->pkt);
 #else
     frame_bytes =
-      DECODE_FUNC(codec->avctx,
+      avcodec_decode_audio2(codec->avctx,
                   &codec->sample_buffer[track_map->channels *
                                          (codec->sample_buffer_end - codec->sample_buffer_start)],
                   &bytes_decoded,
@@ -725,12 +723,12 @@ static int decode_chunk(quicktime_t * file, int track)
                             &codec->pkt);
 #else
     frame_bytes =
-      DECODE_FUNC(codec->avctx,
-                  &codec->sample_buffer[track_map->channels *
-                                        (codec->sample_buffer_end - codec->sample_buffer_start)],
-                  &bytes_decoded,
-                  &codec->chunk_buffer[bytes_used],
-                  codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
+      avcodec_decode_audio2(codec->avctx,
+                            &codec->sample_buffer[track_map->channels *
+                                                  (codec->sample_buffer_end - codec->sample_buffer_start)],
+                            &bytes_decoded,
+                            &codec->chunk_buffer[bytes_used],
+                            codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
 #endif
     if(frame_bytes < 0)
       {
@@ -957,12 +955,20 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
    
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
- 
+
+#if LIBAVCODEC_VERSION_MAJOR < 54
     if(avcodec_open(codec->avctx, codec->decoder) != 0)
       {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Avcodec open failed");
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open failed");
       return 0;
       }
+#else
+    if(avcodec_open2(codec->avctx, codec->decoder, NULL) != 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open2 failed");
+      return 0;
+      }
+#endif
     
     //    codec->sample_buffer_offset = 0;
     codec->initialized = 1;
@@ -1128,11 +1134,19 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
     codec->avctx->codec_id = codec->encoder->id;
     codec->avctx->codec_type = codec->encoder->type;
 
+#if LIBAVCODEC_VERSION_MAJOR < 54
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Avcodec open failed");
-      return -1;
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open failed");
+      return 0;
       }
+#else
+    if(avcodec_open2(codec->avctx, codec->encoder, NULL) != 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open2 failed");
+      return 0;
+      }
+#endif
     
     codec->initialized = 1;
 

@@ -36,8 +36,6 @@
 #include SWSCALE_HEADER
 #endif
 
-// Enable interlaced encoding (experimental)
-// #define DO_INTERLACE
 
 #ifdef  PIX_FMT_YUV422P10
 #define PIX_FMT_YUV422P10_OR_DUMMY PIX_FMT_YUV422P10
@@ -1288,20 +1286,16 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
       if(codec->encoder->id == CODEC_ID_MPEG4)
         {
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
-#ifndef DO_INTERLACE // Seems not to work yet
         /* enable interlaced encoding */
         vtrack->interlace_mode = LQT_INTERLACE_NONE;
-#endif
         }
       else if(codec->encoder->id == CODEC_ID_DVVIDEO)
         {
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
         }
-#ifndef DO_INTERLACE // Seems not to work yet
       else
         /* enable interlaced encoding */
         vtrack->interlace_mode = LQT_INTERLACE_NONE;
-#endif
       }
     return 0;
     }
@@ -1647,7 +1641,11 @@ static int set_parameter_video(quicktime_t *file,
     return 0;
     }
   
-  lqt_ffmpeg_set_parameter(codec->avctx, key, value);
+  lqt_ffmpeg_set_parameter(codec->avctx,
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+                           &codec->options,
+#endif
+                           key, value);
 
 
 

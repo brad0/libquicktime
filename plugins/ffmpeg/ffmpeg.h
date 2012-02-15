@@ -35,7 +35,11 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec,
                                        quicktime_audio_map_t *vtrack,
                                        AVCodec *encoder, AVCodec *decoder);
 
-void lqt_ffmpeg_set_parameter(AVCodecContext * ctx, const char * key,
+void lqt_ffmpeg_set_parameter(AVCodecContext * ctx,
+#if LIBAVCODEC_VERSION_MAJOR >= 54
+                              AVDictionary ** options,
+#endif
+                              const char * key,
                               const void * value);
 
 
