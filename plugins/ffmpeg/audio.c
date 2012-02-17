@@ -1193,6 +1193,9 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
     codec->avctx->codec_id = codec->encoder->id;
     codec->avctx->codec_type = codec->encoder->type;
 
+    codec->avctx->sample_fmt = codec->encoder->sample_fmts[0];
+
+    
 #if LIBAVCODEC_VERSION_MAJOR < 54
     if(avcodec_open(codec->avctx, codec->encoder) != 0)
       {

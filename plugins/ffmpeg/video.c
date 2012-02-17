@@ -43,6 +43,12 @@
 #define PIX_FMT_YUV422P10_OR_DUMMY -1234
 #endif
 
+#if LIBAVCODEC_VERSION_INT >= ((54<<16)|(01<<8)|0)
+#define ENCODE_VIDEO2 1
+#else
+#define ENCODE_VIDEO 1
+#endif
+
 /* We keep the numeric values the same as in the ACLR atom.
    The interpretation of values is based on trial and error. */
 enum AvidYuvRange
@@ -1211,13 +1217,16 @@ static void setup_header_mpeg4(quicktime_t *file, int track,
   
   }
 
-static void setup_avid_atoms(quicktime_t* file, quicktime_video_map_t *vtrack, uint8_t const* enc_data, int enc_data_size)
+static void setup_avid_atoms(quicktime_t* file,
+                             quicktime_video_map_t *vtrack,
+                             uint8_t const* enc_data, int enc_data_size)
   {
   uint8_t* p;
   uint8_t ACLR_atom[16];
   uint8_t APRG_atom[16];
   uint8_t ARES_atom[112];
-  int full_range_yuv = (vtrack->stream_cmodel == BC_YUVJ422P || vtrack->stream_cmodel == BC_YUVJ422P10);
+  int full_range_yuv = (vtrack->stream_cmodel == BC_YUVJ422P ||
+                        vtrack->stream_cmodel == BC_YUVJ422P10);
 
   if (enc_data_size < 0x2c)
     {
@@ -1279,6 +1288,13 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
   int stats_len;
+#if ENCODE_VIDEO2
+  AVPacket pkt;
+  int got_packet;
+#endif
+  int64_t pts;
+  int kf;
+  
   if(!row_pointers)
     {
     if(vtrack->stream_cmodel == BC_YUV420P)
@@ -1509,23 +1525,44 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     if(vtrack->interlace_mode == LQT_INTERLACE_TOP_FIRST)
       codec->frame->top_field_first = 1;
     }
-#endif   
+#endif
+
+#if ENCODE_VIDEO2 // New
+  av_init_packet(&pkt);
+  pkt.data = codec->buffer;
+  pkt.size = codec->buffer_alloc;
+
+  if(avcodec_encode_video2(codec->avctx, &pkt, codec->frame, &got_packet) < 0)
+    return -1;
+
+  if(got_packet)
+    bytes_encoded = pkt.size;
+  else
+    bytes_encoded = 0;
+  
+  pts = pkt.pts;
+  kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
+    
+#else // Old
+  
   bytes_encoded = avcodec_encode_video(codec->avctx,
                                        codec->buffer,
                                        codec->buffer_alloc,
                                        codec->frame);
-
+  
   if(bytes_encoded < 0)
     return -1;
-
+  
+  pts = codec->avctx->coded_frame->pts;
+  kf = codec->avctx->coded_frame->key_frame;
+  
+#endif
+  
   if(!was_initialized && codec->encoder->id == CODEC_ID_DNXHD)
-    {
     setup_avid_atoms(file, vtrack, codec->buffer, bytes_encoded);
-    }
-
+  
   if(bytes_encoded)
     {
-    int64_t pts = codec->avctx->coded_frame->pts;
     if (pts == AV_NOPTS_VALUE || (codec->encoder->id == CODEC_ID_DNXHD && pts == 0))
       {
       /* Some codecs don't bother generating presentation timestamps.
@@ -1535,7 +1572,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 
     lqt_write_frame_header(file, track,
                            -1, (int)pts,
-                           codec->avctx->coded_frame->key_frame);
+                           kf);
           
     result = !quicktime_write_data(file, 
                                    codec->buffer, 
@@ -1580,25 +1617,54 @@ static int flush(quicktime_t *file, int track)
   int bytes_encoded;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
-
+  int64_t pts;
+  int kf;
+  
+#if ENCODE_VIDEO2
+  AVPacket pkt;
+  int got_packet;
+#endif
+  
   /* Do nothing if we didn't encode anything yet */
   if(!codec->initialized)
     return 0;
-        
+
+#if ENCODE_VIDEO2
+  av_init_packet(&pkt);
+  pkt.data = codec->buffer;
+  pkt.size = codec->buffer_alloc;
+  
+  if(avcodec_encode_video2(codec->avctx, &pkt, (AVFrame*)0, &got_packet) < 0)
+    return -1;
+
+  if(got_packet)
+    bytes_encoded = pkt.size;
+  else
+    return 0;
+  
+  pts = pkt.pts;
+
+  kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
+  
+#else
+  
   bytes_encoded = avcodec_encode_video(codec->avctx,
                                        codec->buffer,
                                        codec->buffer_alloc,
                                        (AVFrame*)0);
-
-  if(bytes_encoded < 0)
+  if(bytes_encoded <= 0)
     return 0;
-        
+
+  pts = codec->avctx->coded_frame->pts;
+  kf = codec->avctx->coded_frame->key_frame;
+  
+#endif
+  
   if(bytes_encoded)
     {
     lqt_write_frame_header(file, track,
-                           -1, codec->avctx->coded_frame->pts,
-                           codec->avctx->coded_frame->key_frame);
-          
+                           -1, pts, kf);
+    
     result = !quicktime_write_data(file, 
                                    codec->buffer, 
                                    bytes_encoded);

@@ -470,6 +470,19 @@ static void transcode_cleanup(transcode_handle * h)
   {
   quicktime_close(h->in_file);
   quicktime_close(h->out_file);
+  if(h->video_buffer)
+    lqt_rows_free(h->video_buffer);
+
+  if(h->audio_buffer_i)
+    {
+    free(h->audio_buffer_i[0]);
+    free(h->audio_buffer_i);
+    }
+  if(h->audio_buffer_f)
+    {
+    free(h->audio_buffer_f[0]);
+    free(h->audio_buffer_f);
+    }
   }
 
 
