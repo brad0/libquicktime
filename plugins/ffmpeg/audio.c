@@ -39,6 +39,12 @@
 #define DECODE_AUDIO2 1
 #endif
 
+#if LIBAVCODEC_BUILD >= ((53<<16)+(34<<8)+0)
+#define ENCODE_AUDIO2 1
+#else
+#define ENCODE_AUDIO 1
+#endif
+
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
 /* MPEG Audio header parsing code */
@@ -1173,7 +1179,7 @@ static void create_dac3_atom(quicktime_t * file, int track, uint8_t * buf)
 
 
 static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
-                            long samples, int track)
+                                   long samples, int track)
   {
   int result = -1;
   quicktime_audio_map_t *track_map = &file->atracks[track];
@@ -1184,7 +1190,12 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   int samples_done = 0;
   int samples_encoded;
   /* Initialize encoder */
-    
+#if ENCODE_AUDIO2
+  AVFrame f;
+  AVPacket pkt;
+  int got_packet;
+#endif
+  
   if(!codec->initialized)
     {
     codec->avctx->sample_rate = track_map->samplerate;
@@ -1245,10 +1256,34 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   
   while(codec->samples_in_buffer >= codec->avctx->frame_size)
     {
+#if ENCODE_AUDIO2
+    av_init_packet(&pkt);
+    pkt.data = codec->chunk_buffer;
+    pkt.size = codec->chunk_buffer_alloc;
+
+    avcodec_get_frame_defaults(&f);
+    f.nb_samples = codec->avctx->frame_size;
     
+    avcodec_fill_audio_frame(&f, channels, codec->avctx->sample_fmt,
+                             (uint8_t*)&codec->sample_buffer[samples_done*channels],
+                             codec->avctx->frame_size * channels * 2, 
+                             1);
+
+    if(avcodec_encode_audio2(codec->avctx, &pkt,
+                             &f, &got_packet) < 0)
+      return 0;
+
+    if(got_packet && pkt.size)
+      frame_bytes = pkt.size;
+    else
+      frame_bytes = 0;
+
+#else
     frame_bytes = avcodec_encode_audio(codec->avctx, codec->chunk_buffer,
                                        codec->chunk_buffer_alloc,
                                        &codec->sample_buffer[samples_done*channels]);
+#endif
+    
     if(frame_bytes > 0)
       {
       quicktime_write_chunk_header(file, trak);
