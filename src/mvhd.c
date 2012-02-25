@@ -112,9 +112,10 @@ void quicktime_read_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd, quicktime_at
 }
 
 void quicktime_mhvd_init_video(quicktime_t *file, quicktime_mvhd_t *mvhd, int timescale)
-{
-	mvhd->time_scale = timescale;
-}
+  {
+  if((mvhd->time_scale % timescale) || (mvhd->time_scale < timescale))
+    mvhd->time_scale = timescale;
+  }
 
 void quicktime_write_mvhd(quicktime_t *file, quicktime_mvhd_t *mvhd)
 {
