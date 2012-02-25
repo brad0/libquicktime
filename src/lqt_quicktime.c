@@ -1577,9 +1577,20 @@ int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
 
 // Initialize maps, for reading only
 
+
+
 void quicktime_init_maps(quicktime_t * file)
   {
   int i, j, k, dom, track;
+
+  /* Initialize trak for reading */
+
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    quicktime_trak_fix_counts(file, file->moov.trak[i],
+                              file->moov.mvhd.time_scale);
+    }
+  
   /* get tables for all the different tracks */
   file->total_atracks = quicktime_audio_tracks(file);
 
@@ -2912,3 +2923,112 @@ void lqt_set_max_riff_size(quicktime_t * file, int size)
   {
   file->max_riff_size = size * 1024 * 1024;
   }
+
+/* PTS offsets */
+
+/** \ingroup audio_encode
+ *  \brief Set an audio pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS of the first audio sample (in samples)
+ */
+
+void lqt_set_audio_pts_offset(quicktime_t * file, int track, int64_t offset)
+  {
+  quicktime_trak_t * trak;
+
+  if((track < 0) && (track >= file->total_atracks))
+    return;
+
+  trak = file->atracks[track].track;
+  trak->pts_offset = offset;
+  }
+  
+/** \ingroup audio_decode
+ *  \brief Get an audio pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS of the first audio sample (in samples)
+ */
+
+int64_t lqt_get_audio_pts_offset(quicktime_t * file, int track)
+  {
+  quicktime_trak_t * trak;
+  if((track < 0) && (track >= file->total_atracks))
+    return 0;
+
+  trak = file->atracks[track].track;
+  return trak->pts_offset;
+  }
+
+
+/** \ingroup video_encode
+ *  \brief Set an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS of the first video frame (in timescale units)
+ */
+
+void lqt_set_video_pts_offset(quicktime_t * file, int track, int64_t offset)
+  {
+  quicktime_trak_t * trak;
+  if((track < 0) && (track >= file->total_vtracks))
+    return;
+  trak = file->vtracks[track].track;
+  trak->pts_offset = offset;
+  }
+
+  
+/** \ingroup video_decode
+ *  \brief Get an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS of the first video frame (in timescale units)
+ */
+
+int64_t lqt_get_video_pts_offset(quicktime_t * file, int track)
+  {
+  quicktime_trak_t * trak;
+  if((track < 0) && (track >= file->total_vtracks))
+    return 0;
+  trak = file->vtracks[track].track;
+  return trak->pts_offset;
+
+  }
+
+
+/** \ingroup text_encode
+ *  \brief Set an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS offset of the subtitles (in timescale units)
+ */
+
+void lqt_set_text_pts_offset(quicktime_t * file, int track, int64_t offset)
+  {
+  quicktime_trak_t * trak;
+  if((track < 0) && (track >= file->total_ttracks))
+    return;
+  trak = file->ttracks[track].track;
+  trak->pts_offset = offset;
+  
+  }
+
+  
+/** \ingroup text_decode
+ *  \brief Get an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS offset of the subtitles (in timescale units)
+ */
+
+int64_t lqt_get_text_pts_offset(quicktime_t * file, int track)
+  {
+  quicktime_trak_t * trak;
+  if((track < 0) && (track >= file->total_ttracks))
+    return 0;
+  trak = file->ttracks[track].track;
+  return trak->pts_offset;
+  
+  }
+

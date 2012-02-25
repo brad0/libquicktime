@@ -1681,8 +1681,60 @@ quicktime_t * lqt_open_write_with_log(const char * filename, lqt_file_type_t typ
 
 void lqt_set_max_riff_size(quicktime_t * file, int size);
 
+
+/** \ingroup audio_encode
+ *  \brief Set an audio pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS of the first audio sample (in samples)
+ */
+
+void lqt_set_audio_pts_offset(quicktime_t * file, int track, int64_t offset);
   
+/** \ingroup audio_decode
+ *  \brief Get an audio pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS of the first audio sample (in samples)
+ */
+
+int64_t lqt_get_audio_pts_offset(quicktime_t * file, int track);
+
+/** \ingroup video_encode
+ *  \brief Set an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS of the first video frame (in timescale units)
+ */
+
+void lqt_set_video_pts_offset(quicktime_t * file, int track, int64_t offset);
   
+/** \ingroup video_decode
+ *  \brief Get an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS of the first video frame (in timescale units)
+ */
+
+int64_t lqt_get_video_pts_offset(quicktime_t * file, int track);
+
+/** \ingroup text_encode
+ *  \brief Set an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \param offset PTS offset of the subtitles (in timescale units)
+ */
+
+void lqt_set_text_pts_offset(quicktime_t * file, int track, int64_t offset);
+  
+/** \ingroup text_decode
+ *  \brief Get an video pts offset
+ *  \param file A quicktime handle
+ *  \param track Track index (starting with 0)
+ *  \returns PTS offset of the subtitles (in timescale units)
+ */
+
+int64_t lqt_get_text_pts_offset(quicktime_t * file, int track);
   
 #ifdef __cplusplus
 }

@@ -852,8 +852,8 @@ typedef struct
 /* edit list */
 typedef struct
   {
-  long duration;
-  long time;
+  uint32_t duration;
+  int32_t time;
   float rate;
   } quicktime_elst_table_t;
 
@@ -918,6 +918,8 @@ typedef struct
   quicktime_atom_t chunk_atom;
   int chunk_num;
   int chunk_samples;
+  
+  int64_t pts_offset;
   
   } quicktime_trak_t;
 

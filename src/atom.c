@@ -26,20 +26,20 @@
 #include <ctype.h>
 
 static int read_type(uint8_t *data, uint8_t *type)
-{
-	type[0] = data[4];
-	type[1] = data[5];
-	type[2] = data[6];
-	type[3] = data[7];
+  {
+  type[0] = data[4];
+  type[1] = data[5];
+  type[2] = data[6];
+  type[3] = data[7];
 
-/* need this for quicktime_check_sig */
-	if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
-	return 0;
-	else if(type[0] | type[1] | type[2] | type[3] == 0)
-	return 0; /* These kind of atoms do happen. */
-	else
-	return 1;
-}
+  /* need this for quicktime_check_sig */
+  if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
+    return 0;
+  else if(type[0] | type[1] | type[2] | type[3] == 0)
+    return 0; /* These kind of atoms do happen. */
+  else
+    return 1;
+  }
 
 
 static unsigned long read_size(uint8_t *data)

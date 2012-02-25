@@ -178,8 +178,9 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
   {
   lqt_dump(" track (trak)\n");
   quicktime_tkhd_dump(&trak->tkhd);
-  if(trak->has_edts) quicktime_edts_dump(&trak->edts);
-  if (trak->has_tref)
+  if(trak->has_edts)
+    quicktime_edts_dump(&trak->edts);
+  if(trak->has_tref)
     quicktime_tref_dump(&trak->tref);
   quicktime_mdia_dump(&trak->mdia);
 
@@ -281,18 +282,18 @@ int quicktime_write_trak(quicktime_t *file,
   {
   quicktime_atom_t atom;
   quicktime_atom_write_header(file, &atom, "trak");
-
+  
   quicktime_write_tkhd(file, &trak->tkhd);
-        
+  
   if(trak->has_edts)
     quicktime_write_edts(file, &trak->edts);
   quicktime_write_mdia(file, &trak->mdia);
-	
+  
   if (trak->has_tref) 
     quicktime_write_tref(file, &trak->tref);
-	
+  
   quicktime_atom_write_footer(file, &atom);
-
+  
   return 0;
   }
 
@@ -600,15 +601,31 @@ int quicktime_trak_duration(quicktime_trak_t *trak,
   return 0;
   }
 
+static int fix_counts_read(quicktime_trak_t *trak,
+                           int timescale, int moov_time_scale)
+  {
+  if(trak->has_edts)
+    {
+    trak->pts_offset = quicktime_elst_get_pts_offset(&trak->edts.elst,
+                                                     moov_time_scale, timescale);
+    }
+  return 0;
+  }
+  
 int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
                               int moov_time_scale)
   {
   int64_t duration;
   int timescale;
   quicktime_stts_t * stts;
-  long samples = quicktime_track_samples(file, trak);
-  
+  long samples;
+      
   quicktime_trak_duration(trak, &duration, &timescale);
+
+  if(file->rd)
+    return fix_counts_read(trak, timescale, moov_time_scale);
+  
+  samples = quicktime_track_samples(file, trak);
   
   /* get duration in movie's units */
   trak->tkhd.duration = (long)((double)duration / timescale * moov_time_scale + 0.5);
@@ -616,8 +633,11 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
   trak->mdia.mdhd.time_scale = timescale;
   
   if(trak->has_edts)
-    trak->edts.elst.table[0].duration = trak->tkhd.duration;
-
+    {
+    quicktime_elst_fix_counts(&trak->edts.elst,
+                              moov_time_scale, trak, timescale);
+    }
+  
   if(trak->mdia.minf.is_panorama)
     trak->edts.elst.total_entries = 1;
   
@@ -654,6 +674,9 @@ int quicktime_trak_fix_counts(quicktime_t *file, quicktime_trak_t *trak,
   
   return 0;
   }
+
+int64_t quicktime_elst_get_pts_offset(quicktime_elst_t *elst,
+                                      int moov_scale, int timescale);
 
 long quicktime_chunk_samples(quicktime_trak_t *trak, long chunk)
   {

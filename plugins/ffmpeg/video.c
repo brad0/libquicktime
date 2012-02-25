@@ -43,7 +43,7 @@
 #define PIX_FMT_YUV422P10_OR_DUMMY -1234
 #endif
 
-#if LIBAVCODEC_VERSION_INT >= ((54<<16)|(01<<8)|0)
+#if LIBAVCODEC_VERSION_INT >= ((54<<16)|(1<<8)|0)
 #define ENCODE_VIDEO2 1
 #else
 #define ENCODE_VIDEO 1

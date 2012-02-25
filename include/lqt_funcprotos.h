@@ -403,6 +403,11 @@ void quicktime_elst_delete(quicktime_elst_t *elst);
 void quicktime_elst_dump(quicktime_elst_t *elst);
 void quicktime_read_elst(quicktime_t *file, quicktime_elst_t *elst);
 void quicktime_write_elst(quicktime_t *file, quicktime_elst_t *elst);
+void quicktime_elst_fix_counts(quicktime_elst_t *elst,
+                               int moov_scale, quicktime_trak_t * trak, int timescale);
+int64_t quicktime_elst_get_pts_offset(quicktime_elst_t *elst,
+                                      int moov_scale, int timescale);
+
 
 /* esds.c */
 
