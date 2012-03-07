@@ -275,7 +275,7 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx,
   PARAM_FLAG("ff_flag_cbp_rd",CODEC_FLAG_CBP_RD);
   PARAM_FLAG("ff_flag_qp_rd",CODEC_FLAG_QP_RD);
 
-#if LIBAVCODEC_VERSION_INT >= 54
+#if LIBAVCODEC_VERSION_MAJOR >= 54
   PARAM_DICT_FLAG("ff_flag_h263p_aiv", "aiv");
   PARAM_DICT_FLAG("ff_flag_obmc","obmc");
   PARAM_DICT_FLAG("ff_flag_h263p_slice_struct","structured_slices");
