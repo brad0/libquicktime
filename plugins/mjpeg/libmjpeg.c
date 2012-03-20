@@ -662,6 +662,12 @@ static void decompress_field(mjpeg_compressor *engine, int field)
                   buffer, 
                   buffer_size);
   jpeg_read_header(&engine->jpeg_decompress, TRUE);
+#if 0
+  fprintf(stderr, "decompress_field %d: %d x %d\n",
+          field,
+          engine->jpeg_decompress.image_width,
+          engine->jpeg_decompress.image_height);
+#endif
   guarantee_huff_tables(&engine->jpeg_decompress);
 
 
@@ -717,7 +723,15 @@ static void compress_field(mjpeg_compressor *engine, int field)
   reset_buffer(&engine->output_buffer, &engine->output_size, &engine->output_allocated);
   jpeg_buffer_dest(&engine->jpeg_compress, engine);
 
-
+  /* Fields can have different heights when the total height is odd */
+  engine->jpeg_compress.image_height = engine->field_heights[field];
+#if 0
+  fprintf(stderr, "compress_field %d: %d x %d\n",
+          field,
+          engine->jpeg_compress.image_width,
+          engine->jpeg_compress.image_height);
+#endif
+  
   engine->jpeg_compress.raw_data_in = TRUE;
   jpeg_start_compress(&engine->jpeg_compress, TRUE);
 
@@ -779,12 +793,32 @@ static mjpeg_compressor* mjpeg_new_compressor(mjpeg_t *mjpeg)
   {
   mjpeg_compressor *result = lqt_bufalloc(sizeof(mjpeg_compressor));
 
+  /* Padded height */
   result->field_h = mjpeg->coded_h / mjpeg->fields;
+
+  if(mjpeg->fields == 2)
+    {
+    /* Unpadded heights for the internal JPEG header */
+    result->field_heights[0] = mjpeg->output_h / 2;
+    result->field_heights[1] = mjpeg->output_h / 2;
+
+    /* Top field gets an extra scanline */
+    if(mjpeg->output_h % 2)
+      {
+      /* Top field comes as second field */
+      if(mjpeg->bottom_first)
+        result->field_heights[1]++;
+      else
+        result->field_heights[0]++;
+      }
+    }
+  else
+    result->field_heights[0] = mjpeg->output_h;
+  
   result->mjpeg = mjpeg;
   result->jpeg_compress.err = jpeg_std_error(&result->jpeg_error.pub);
   jpeg_create_compress(&result->jpeg_compress);
-  result->jpeg_compress.image_width = mjpeg->coded_w;
-  result->jpeg_compress.image_height = result->field_h;
+  result->jpeg_compress.image_width = mjpeg->output_w;
   result->jpeg_compress.input_components = 3;
   result->jpeg_compress.in_color_space = JCS_RGB;
   jpeg_set_defaults(&result->jpeg_compress);
@@ -1173,33 +1207,6 @@ typedef struct
   int scan_offset;
   int data_offset;
   } mjpeg_qt_hdr;
-
-#if 0
-
-#define LML_MARKER_SIZE 0x2c
-#define LML_MARKER_TAG 0xffe3
-static void insert_lml33_markers(unsigned char **buffer, 
-                          long *field2_offset, 
-                          long *buffer_size, 
-                          long *buffer_allocated)
-  {
-  long marker_offset = -1;
-
-  /* Search for existing marker to replace */
-  //	marker_offset = find_marker(*buffer, *buffer_size, LML_MARKER_TAG);
-
-  /* Insert new marker */
-  if(marker_offset < 0)
-    {
-    marker_offset = 2;
-    insert_space(buffer, 
-                 buffer_size, 
-                 buffer_allocated,
-                 2,
-                 LML_MARKER_SIZE);
-    }
-  }
-#endif
 
 static void table_offsets(unsigned char *buffer, 
                           long buffer_size, 

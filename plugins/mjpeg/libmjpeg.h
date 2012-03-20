@@ -66,9 +66,12 @@ extern "C" {
     unsigned char **rows[3];
     /* Temp rows for each MCU */
     unsigned char **mcu_rows[3];
-    /* Height of the field */
+    /* Height of the field (padded value) */
     int field_h; 
 
+    /* Output heights of the fields (can be different for both fields) */
+    int field_heights[MAXFIELDS];
+    
     } mjpeg_compressor;
 
   typedef struct
