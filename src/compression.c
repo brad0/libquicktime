@@ -337,6 +337,9 @@ int lqt_write_video_packet(quicktime_t * file,
   int result;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_trak_t * trak = vtrack->track;
+
+  //  fprintf(stderr, "lqt_write_video_packet %ld %d\n",
+  //          p->timestamp, p->duration);
   
   lqt_start_encoding(file);
   

@@ -1402,7 +1402,7 @@ static int write_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
     }
   
   quicktime_write_chunk_header(file, atrack->track);
-  result = quicktime_write_data(file, p->data, p->data_len);
+  result = !quicktime_write_data(file, p->data, p->data_len);
   
   atrack->track->chunk_samples = p->duration;
   quicktime_write_chunk_footer(file, atrack->track);
