@@ -601,7 +601,8 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
   {
   char * pos;
   int ret;
-  char * filename;
+  char * filename = NULL;
+  size_t filename_len = 0, new_size = 0;
   DIR * directory;
   struct dirent * directory_entry;
   struct stat status;
@@ -611,8 +612,6 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
   lqt_codec_info_t * video_codecs_end;
   lqt_codec_info_t * audio_codecs_end;
 
-  filename = malloc(PATH_MAX * sizeof(char));
-  
   /* Set the end pointers so we can quickly add codecs after */
 
   
@@ -662,6 +661,14 @@ static int scan_for_plugins(const char * plugin_dir, lqt_codec_info_t ** databas
     
     /* Now, the file should be a valid plugin, construct the filename */
     
+    new_size = strlen(plugin_dir) + strlen(directory_entry->d_name) + 2;
+    if (new_size > filename_len)
+      {
+      filename_len = new_size;
+      filename = realloc(filename, filename_len);
+      if (!filename)
+        exit(EXIT_FAILURE);
+      }
     strcpy(filename, plugin_dir);
     strcat(filename, "/");
     strcat(filename, directory_entry->d_name);
