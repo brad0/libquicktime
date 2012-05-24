@@ -1059,6 +1059,10 @@ static void resync_ffmpeg(quicktime_t *file, int track)
                                          NULL, track);
       if(buffer_size > 0)
         {
+        // Skip IDCT for frames that other frames won't depend on.
+        // This speeds up seeking.
+        codec->avctx->skip_idct = AVDISCARD_NONREF;
+
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
         codec->pkt.data = codec->buffer;
         codec->pkt.size = buffer_size;
@@ -1073,6 +1077,9 @@ static void resync_ffmpeg(quicktime_t *file, int track)
                              codec->buffer,
                              buffer_size);
 #endif
+        // Don't skip IDCT when we do real decoding.
+        codec->avctx->skip_idct = AVDISCARD_DEFAULT;
+
         if(!got_pic)
           {
           codec->decoding_delay++;
