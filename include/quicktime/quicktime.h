@@ -1098,7 +1098,9 @@ int quicktime_read_frame_end(quicktime_t *file, int track);
 
 /* One keyframe table for each track */
 long quicktime_get_keyframe_before(quicktime_t *file, long frame, int track);
+long quicktime_get_partial_keyframe_before(quicktime_t *file, long frame, int track);
 void quicktime_insert_keyframe(quicktime_t *file, long frame, int track);
+void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track);
 /* Track has keyframes */
 int quicktime_has_keyframes(quicktime_t *file, int track);
 

@@ -99,6 +99,7 @@ stsc.c \
 stsd.c \
 stsdtable.c \
 stss.c \
+stps.c \
 stsz.c \
 stts.c \
 texttrack.c \

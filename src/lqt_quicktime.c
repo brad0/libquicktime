@@ -1440,6 +1440,23 @@ long quicktime_get_keyframe_before(quicktime_t *file, long frame, int track)
   return 0;
   }
 
+long quicktime_get_partial_keyframe_before(quicktime_t *file, long frame, int track)
+  {
+  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_stps_t *stps = &trak->mdia.minf.stbl.stps;
+  int i;
+
+  // Offset 1
+  frame++;
+
+  for(i = stps->total_entries - 1; i >= 0; i--)
+    {
+    if(stps->table[i].sample <= frame) return stps->table[i].sample - 1;
+    }
+
+  return 0;
+  }
+
 #if 0
 static long quicktime_get_keyframe_after(quicktime_t *file, long frame, int track)
   {
@@ -1484,6 +1501,30 @@ void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
   
   stss->table[stss->total_entries].sample = frame+1;
   stss->total_entries++;
+  }
+
+void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track)
+  {
+  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_stps_t *stps = &trak->mdia.minf.stbl.stps;
+
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    // AVI doesn't support partial keyframes.
+    return;
+    }
+
+  // Expand table
+  if(stps->entries_allocated <= stps->total_entries)
+    {
+    stps->entries_allocated += 1024;
+    stps->table = realloc(stps->table,
+                          sizeof(*stps->table) *
+                          stps->entries_allocated);
+    }
+
+  stps->table[stps->total_entries].sample = frame+1;
+  stps->total_entries++;
   }
 
 

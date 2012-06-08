@@ -39,7 +39,7 @@ dnl
 dnl Libquicktime codec API version
 dnl 
 
-LQT_CODEC_API_VERSION="12"
+LQT_CODEC_API_VERSION="13"
 
 AH_TEMPLATE([HAVE_GPL], [Enable GPL code])
 AH_TEMPLATE([LQT_CODEC_API_VERSION],

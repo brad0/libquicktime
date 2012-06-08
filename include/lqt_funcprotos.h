@@ -1015,6 +1015,14 @@ void quicktime_stss_dump(quicktime_stss_t *stss);
 void quicktime_read_stss(quicktime_t *file, quicktime_stss_t *stss);
 void quicktime_write_stss(quicktime_t *file, quicktime_stss_t *stss);
 
+/* stps.c */
+
+void quicktime_stps_init(quicktime_stps_t *stps);
+void quicktime_stps_delete(quicktime_stps_t *stps);
+void quicktime_stps_dump(quicktime_stps_t *stps);
+void quicktime_read_stps(quicktime_t *file, quicktime_stps_t *stps);
+void quicktime_write_stps(quicktime_t *file, quicktime_stps_t *stps);
+
 /* stsz.c */
 
 void quicktime_stsz_init(quicktime_stsz_t *stsz);
@@ -1462,7 +1470,8 @@ int quicktime_delete_codec(quicktime_codec_t *codec);
 int quicktime_codecs_flush(quicktime_t *file);
 
 LQT_EXTERN void lqt_write_frame_header(quicktime_t * file, int track,
-                                       int pic_num1, int64_t pic_pts, int keyframe);
+                                       int pic_num1, int64_t pic_pts,
+                                       enum LqtKeyFrame keyframe);
 
 LQT_EXTERN void lqt_write_frame_footer(quicktime_t * file, int track);
 

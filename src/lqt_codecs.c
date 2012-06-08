@@ -540,8 +540,8 @@ static int do_encode_video(quicktime_t *file,
   }
 
 void lqt_write_frame_header(quicktime_t * file, int track,
-                            int pic_num1,
-                            int64_t pic_pts, int keyframe)
+                            int pic_num1, int64_t pic_pts,
+                            enum LqtKeyFrame keyframe)
   {
   quicktime_video_map_t * vtrack = &file->vtracks[track];
   quicktime_trak_t * trak = vtrack->track;
@@ -590,8 +590,11 @@ void lqt_write_frame_footer(quicktime_t * file, int track)
   trak->chunk_samples = 1;
   quicktime_write_chunk_footer(file, trak);
   
-  if(vtrack->keyframe)
+  if(vtrack->keyframe == LQT_FULL_KEY_FRAME)
     quicktime_insert_keyframe(file, vtrack->cur_chunk, track);
+  else if(vtrack->keyframe == LQT_PARTIAL_KEY_FRAME)
+    quicktime_insert_partial_keyframe(file, vtrack->cur_chunk, track);
+
   vtrack->cur_chunk++;
   }
 

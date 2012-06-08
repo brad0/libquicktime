@@ -95,6 +95,8 @@ typedef struct
   enum PixelFormat reinterpret_pix_fmt;
   
   int is_imx;
+  int is_xdcam_hd422;
+  int consecutive_open_gops; // Only used for for xdcam.
   int y_offset;
 
 #if LIBAVCODEC_VERSION_MAJOR < 54
@@ -1091,6 +1093,165 @@ static void resync_ffmpeg(quicktime_t *file, int track)
     }
   }
 
+static const uint8_t* mpeg2_find_start_code(const uint8_t* buf_ptr, const uint8_t* buf_end, int* chunk_type)
+  {
+  uint32_t code = ~0U;
+
+  while(buf_ptr < buf_end)
+    {
+    if ((code & 0x00FFFFFF) == 0x01)
+      {
+      *chunk_type = *buf_ptr;
+      buf_ptr++;
+      break;
+      }
+    code <<= 8;
+    code |= *buf_ptr;
+    ++buf_ptr;
+    }
+  return buf_ptr;
+  }
+
+static enum AVPictureType mpeg2_parse_frame_type(const uint8_t* buf_ptr, int64_t buf_size)
+  {
+  const uint8_t* buf_end = buf_ptr + buf_size;
+
+  while(buf_ptr < buf_end)
+    {
+    int chunk_type = -1;
+    buf_ptr = mpeg2_find_start_code(buf_ptr, buf_end, &chunk_type);
+
+    if(chunk_type == 0x00) // Picture header
+      {
+      if (buf_ptr + 1 < buf_end)
+        {
+        switch ((buf_ptr[1] & 070) >> 3)
+          {
+          case 1: return AV_PICTURE_TYPE_I;
+          case 2: return AV_PICTURE_TYPE_P;
+          case 3: return AV_PICTURE_TYPE_B;
+          default: return AV_PICTURE_TYPE_NONE;
+          }
+        } // range check
+      } // chunk type
+    else if(chunk_type >= 0x01 && chunk_type <= 0xaf)
+      {
+      // Slice data - no more headers will follow.
+      break;
+      }
+    } // while
+
+  return AV_PICTURE_TYPE_NONE;
+  }
+
+/* Unlike the generic resync_ffmpeg(), this version supports seeking into open GOPs.
+ * Some formats (XDCAM family) use open GOPs almost exclusively. */
+static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  const int64_t target_frame = vtrack->current_position; // Frame we are told to seek to.
+  int64_t frame = target_frame; // Current working frame in bitstream order.
+  int64_t keyframe, partial_keyframe;
+  int64_t buffer_size;
+
+
+  /* Forget about previously decoded frame */
+  codec->have_frame = 0;
+  codec->decoding_delay = 0;
+
+  /* Reset lavc */
+  avcodec_flush_buffers(codec->avctx);
+
+  if(target_frame <= 0)
+    return;
+
+  if(!quicktime_has_keyframes(file, track))
+    return; // Assuming I-frame only stream.
+
+  keyframe = quicktime_get_keyframe_before(file, vtrack->current_position, track);
+  partial_keyframe = quicktime_get_partial_keyframe_before(file, vtrack->current_position, track);
+
+  if(keyframe >= partial_keyframe)
+    frame = keyframe;
+  else
+    {
+    // partial_keyframe points to the beginning of an open GOP.
+    // Open GOPs (logically) start with some B-frames that depend
+    // on the previous GOP. In bitstream order however, both closed
+    // and open GOPs start with an I-frame. In case of open GOPs,
+    // that I-frame serves as a "next reference" to B-frames that
+    // immediately follow in bitstream order.
+    // If our target_frame is not of those leading B-frames, we may
+    // start decoding from partial_keyframe. Otherwise, we will have
+    // to go to the beginning of the previous GOP and start from there.
+    int need_prev_gop = 1;
+
+    // If partial_keyframe == target_frame, that is our targe_frame
+    // is at the start of an open GOP, we will definitely need to
+    // go to the previous GOP, so we can skip frame parsing below.
+    if(partial_keyframe < target_frame)
+      {
+      for(frame = partial_keyframe; frame <= target_frame; ++frame)
+        {
+        buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                           &codec->buffer_alloc,
+                                           frame + 1, NULL, track);
+        // "frame + 1" because of an out-of-order leading I-frame.
+
+        switch(mpeg2_parse_frame_type(codec->buffer, buffer_size))
+          {
+          case AV_PICTURE_TYPE_I:
+          case AV_PICTURE_TYPE_P:
+            need_prev_gop = 0;
+            frame = target_frame; // Breaks the outer loop.
+            break;
+          default:
+            break;
+          }
+        }
+      } // if(partial_keyframe < target_frame)
+
+    frame = partial_keyframe;
+
+    if(need_prev_gop)
+      {
+      // Figure out where the previous GOP starts, open or closed doesn't matter.
+      keyframe = quicktime_get_keyframe_before(file, frame - 1, track);
+      partial_keyframe = quicktime_get_partial_keyframe_before(file, frame - 1, track);
+      frame = keyframe > partial_keyframe ? keyframe : partial_keyframe;
+      }
+    } // if(keyframe >= partial_keyframe) ... else
+
+  while (frame < target_frame)
+    {
+    int got_pic = 0;
+    buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                       &codec->buffer_alloc,
+                                       frame + codec->decoding_delay,
+                                       NULL, track);
+
+    // No need to decode those when seeking.
+    codec->avctx->skip_frame = AVDISCARD_NONREF;
+
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+    codec->pkt.data = codec->buffer;
+    codec->pkt.size = buffer_size;
+    avcodec_decode_video2(codec->avctx, codec->frame, &got_pic, &codec->pkt);
+#else
+    avcodec_decode_video(codec->avctx, codec->frame, &got_pic, codec->buffer, buffer_size);
+#endif
+
+    // For normal decoding we don't skip any frames.
+    codec->avctx->skip_frame = AVDISCARD_DEFAULT;
+
+    if(got_pic || mpeg2_parse_frame_type(codec->buffer, buffer_size) == AV_PICTURE_TYPE_B)
+      frame++;
+    else
+      codec->decoding_delay++;
+    } // while (frame < target_frame)
+  }
+
 static int set_pass_ffmpeg(quicktime_t *file, 
                            int track, int pass, int total_passes,
                            const char * stats_file)
@@ -1133,6 +1294,82 @@ static void set_imx_fourcc(quicktime_t *file, int track, int bitrate,
   else
     compressor[3] = 'p';
   
+  }
+
+static const char* get_xdcam_hd422_fourcc(quicktime_t *file, int track, int height)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  int time_scale = lqt_video_time_scale(file, track);
+  int frame_duration = lqt_frame_duration(file, track, NULL);
+  int interlaced = vtrack->interlace_mode != LQT_INTERLACE_NONE;
+  int frame_rate_100; // Frame rate with 2 decimal places preserved, multiplied by 100.
+
+  if(frame_duration <= 0 || time_scale <= 0)
+    return NULL; // Sanity check.
+
+  frame_rate_100 = time_scale * 100 / frame_duration;
+
+  if(height == 720 && !interlaced) // Only progressive modes are supported for 720 lines.
+    {
+    if(interlaced)
+      {
+      lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "XDCAM HD422 supports 720p but not 720i");
+      return NULL;
+      }
+    else
+      {
+      switch(frame_rate_100)
+        {
+        case 2397:
+          return "xd54";
+        case 2500:
+          return "xd55";
+        case 6000:
+          return "xd59";
+        case 5000:
+          return "xd5a";
+        }
+      }
+    }
+  else if(height == 1080)
+    {
+    if(interlaced)
+      {
+      switch(frame_rate_100)
+        {
+        case 2500:
+          return "xd5c";
+        case 2997:
+          return "xd5b";
+        }
+      }
+    else // if(interlaced)
+      {
+      switch(frame_rate_100)
+        {
+        case 2397:
+          return "xd5d";
+        case 2500:
+          return "xd5e";
+        case 2997:
+          return "xd5f";
+        }
+      }
+    }
+  else if(height == 540)
+    {
+    lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "XDCAM HD422 540p is not supported");
+    return NULL;
+    }
+  else
+    {
+    lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Frame height of %d is not supported by XDCAM HD422", height);
+    return NULL;
+    }
+
+  lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Frame rate %d.%02d is not supported by XDCAM HD422, at least not for %d%c",
+          frame_rate_100 / 100, frame_rate_100 % 100, height, interlaced ? 'i' : 'p');
+  return NULL;
   }
 
 static int init_imx_encoder(quicktime_t *file, int track)
@@ -1190,6 +1427,55 @@ static int init_imx_encoder(quicktime_t *file, int track)
     }
 
   return 0;
+  }
+
+static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  quicktime_trak_t *trak = vtrack->track;
+  int height = trak->tkhd.track_height;
+  int time_scale = lqt_video_time_scale(file, track);
+  int frame_duration = lqt_frame_duration(file, track, NULL);
+  const char* fourcc;
+
+  codec->avctx->pix_fmt = PIX_FMT_YUV422P;
+  codec->avctx->gop_size = frame_duration > 25 * time_scale ? 15 : 12;
+  codec->avctx->max_b_frames = 2;
+  codec->avctx->intra_dc_precision = 2;
+  codec->avctx->qmin = 1;
+  codec->avctx->qmax = 12; // The maximum value compatible with non_linear_quant option.
+  codec->avctx->lmin = FF_QP2LAMBDA;
+
+  // We start with a closed GOP, then switch to open, then periodically switch back to closed.
+  // This flag is not just for libavcodec. We will be checking it ourselves as well.
+  codec->avctx->flags |= CODEC_FLAG_CLOSED_GOP;
+
+  if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
+    codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME;
+
+#if (LIBAVCODEC_VERSION_MAJOR < 54)
+  codec->avctx->flags2 |= CODEC_FLAG2_INTRA_VLC|CODEC_FLAG2_NON_LINEAR_QUANT;
+#else
+  av_dict_set(&codec->options, "non_linear_quant", "1", 0);
+  av_dict_set(&codec->options, "intra_vlc", "1", 0);
+#endif
+
+  codec->avctx->bit_rate = 50*1000*1000;
+  codec->avctx->rc_max_rate = codec->avctx->bit_rate;
+  codec->avctx->rc_min_rate = codec->avctx->bit_rate;
+  codec->avctx->rc_buffer_size = 17825792;
+  codec->avctx->rc_initial_buffer_occupancy = codec->avctx->rc_buffer_size;
+  codec->avctx->scenechange_threshold = 1000*1000*1000;
+
+  fourcc = get_xdcam_hd422_fourcc(file, track, height);
+  if (fourcc)
+    {
+    memcpy(trak->mdia.minf.stbl.stsd.table[0].format, fourcc, 4);
+    return 0;
+    }
+
+  return -1;
   }
 
 static void setup_header_mpeg4(quicktime_t *file, int track,
@@ -1422,6 +1708,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
       }
     else if(codec->is_imx)
       init_imx_encoder(file, track);
+    else if(codec->is_xdcam_hd422)
+      init_xdcam_hd422_encoder(file, track);
     
     /* Initialize 2-pass */
     if(codec->total_passes)
@@ -1565,6 +1853,22 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   
 #endif
   
+  if(kf && codec->is_xdcam_hd422)
+   {
+   if(codec->avctx->flags & CODEC_FLAG_CLOSED_GOP)
+     {
+     codec->consecutive_open_gops = 0;
+     codec->avctx->flags &= ~CODEC_FLAG_CLOSED_GOP; // Switch back to open GOP.
+     }
+   else
+     {
+     kf = LQT_PARTIAL_KEY_FRAME;
+     codec->consecutive_open_gops++;
+     if(codec->consecutive_open_gops >= 400) // Other encoders use similar values.
+       codec->avctx->flags |= CODEC_FLAG_CLOSED_GOP;
+     }
+   }
+
   if(!was_initialized && codec->encoder->id == CODEC_ID_DNXHD)
     setup_avid_atoms(file, vtrack, codec->buffer, bytes_encoded);
   
@@ -1803,6 +2107,30 @@ static int writes_compressed_imx(lqt_file_type_t type,
   return 0;
   }
 
+static int init_compressed_xdcam_hd422(quicktime_t * file, int track)
+  {
+  quicktime_video_map_t * vtrack = &file->vtracks[track];
+
+  const char* fourcc = get_xdcam_hd422_fourcc(file, track, vtrack->ci.height);
+  if (fourcc)
+    {
+    memcpy(vtrack->track->mdia.minf.stbl.stsd.table[0].format, fourcc, 4);
+    return 0;
+    }
+  else
+    return -1;
+  }
+
+static int writes_compressed_xdcam_hd422(lqt_file_type_t type,
+                                         const lqt_compression_info_t * ci)
+  {
+    /* AVI doesn't support XDCAM family of formats */
+    if(type & (LQT_FILE_AVI | LQT_FILE_AVI_ODML))
+      return 0;
+
+    return ci->bitrate == 50000000;
+  }
+
 
 static void append_data_h264(lqt_packet_t * p, uint8_t * data, int len,
                              int header_len)
@@ -1904,6 +2232,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec_base->delete_codec = lqt_ffmpeg_delete_video;
   codec_base->flush = flush;
   codec_base->resync = resync_ffmpeg;
+  if (decoder && decoder->id == CODEC_ID_MPEG2VIDEO)
+    codec_base->resync = resync_ffmpeg_mpeg2;
   
   if(encoder)
     {
@@ -1915,11 +2245,6 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
       codec_base->writes_compressed = writes_compressed_mpeg4;
       codec_base->init_compressed   = init_compressed_mpeg4;
       codec_base->write_packet = write_packet_mpeg4;
-      }
-    else if(encoder->id == CODEC_ID_MPEG2VIDEO)
-      {
-      codec_base->writes_compressed = writes_compressed_imx;
-      codec_base->init_compressed   = init_compressed_imx;
       }
     else if(encoder->id == CODEC_ID_DVVIDEO)
       {
@@ -1970,6 +2295,22 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     {
     vtrack->stream_cmodel = BC_YUV422P;
     codec->is_imx = 1;
+    codec_base->writes_compressed = writes_compressed_imx;
+    codec_base->init_compressed   = init_compressed_imx;
+    }
+  else if(quicktime_match_32(compressor, "xd54") ||
+          quicktime_match_32(compressor, "xd55") ||
+          quicktime_match_32(compressor, "xd5a") ||
+          quicktime_match_32(compressor, "xd5b") ||
+          quicktime_match_32(compressor, "xd5c") ||
+          quicktime_match_32(compressor, "xd5d") ||
+          quicktime_match_32(compressor, "xd5e") ||
+          quicktime_match_32(compressor, "xd5f"))
+    {
+    vtrack->stream_cmodel = BC_YUV422P;
+    codec->is_xdcam_hd422 = 1;
+    codec_base->writes_compressed = writes_compressed_xdcam_hd422;
+    codec_base->init_compressed   = init_compressed_xdcam_hd422;
     }
   else
     vtrack->stream_cmodel = BC_YUV420P;

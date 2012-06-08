@@ -832,6 +832,48 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .compression_id = LQT_COMPRESSION_D10
     },
+    {
+      .id = CODEC_ID_MPEG2VIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "xdcam_hd",
+      .name = TRS("FFMPEG XDCAM HD"),
+      .fourccs = {
+        "xdv1", "xdv2", "xdv3", "xdv4", "xdv5", "xdv6", "xdv7", "xdv8",
+        "xdv9", "xdva", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT
+    },
+    {
+      .id = CODEC_ID_MPEG2VIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "xdcam_ex",
+      .name = TRS("FFMPEG XDCAM EX"),
+      .fourccs = { "xdvb", "xdvc", "xdvd", "xdve", "xdvf", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT
+    },
+    {
+      .id = CODEC_ID_MPEG2VIDEO,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .short_name = "xdcam_hd422",
+      .name = TRS("FFMPEG XDCAM HD422"),
+      .fourccs = {
+        "xd54", "xd55", "xd59", "xd5a", "xd5b", "xd5c", "xd5d", "xd5e", "xd5f",
+        (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT,
+      .do_encode = 1,
+      .encoding_colormodels = (int[]){ BC_YUVJ422P, LQT_COLORMODEL_NONE }
+    },
 };
 
 /* Audio */
