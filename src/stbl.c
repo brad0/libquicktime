@@ -147,6 +147,8 @@ void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
   quicktime_stts_dump(&stbl->stts);
   if(stbl->stss.total_entries)
     quicktime_stss_dump(&stbl->stss);
+  if(stbl->stps.total_entries)
+    quicktime_stps_dump(&stbl->stps);
   quicktime_stsc_dump(&stbl->stsc);
   quicktime_stsz_dump(&stbl->stsz);
   quicktime_stco_dump(&stbl->stco);
@@ -187,6 +189,11 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
       quicktime_read_stss(file, &stbl->stss);
       quicktime_atom_skip(file, &leaf_atom);
       }
+    else if(quicktime_atom_is(&leaf_atom, "stps"))
+      {
+      quicktime_read_stps(file, &stbl->stps);
+      quicktime_atom_skip(file, &leaf_atom);
+      }
     else if(quicktime_atom_is(&leaf_atom, "stsc"))
       {
       quicktime_read_stsc(file, &stbl->stsc);
@@ -222,6 +229,8 @@ void quicktime_write_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_s
   quicktime_write_stsd(file, minf, &stbl->stsd);
   quicktime_write_stts(file, &stbl->stts);
   quicktime_write_stss(file, &stbl->stss);
+  if(stbl->stps.total_entries)
+    quicktime_write_stps(file, &stbl->stps);
   quicktime_write_stsc(file, &stbl->stsc);
   quicktime_write_stsz(file, &stbl->stsz);
   quicktime_write_stco(file, &stbl->stco);

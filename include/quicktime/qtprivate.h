@@ -592,6 +592,20 @@ typedef struct
   quicktime_stss_table_t *table;
   } quicktime_stss_t;
 
+/* partial sync sample */
+typedef struct
+  {
+  long sample;
+  } quicktime_stps_table_t;
+
+typedef struct
+  {
+  int version;
+  long flags;
+  long total_entries;
+  long entries_allocated;
+  quicktime_stps_table_t *table;
+  } quicktime_stps_t;
 
 /* sample to chunk */
 typedef struct
@@ -656,6 +670,7 @@ typedef struct
   quicktime_stsd_t stsd;
   quicktime_stts_t stts;
   quicktime_stss_t stss;
+  quicktime_stps_t stps;
   quicktime_stsc_t stsc;
   quicktime_stsz_t stsz;
   quicktime_stco_t stco;
