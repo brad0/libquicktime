@@ -68,5 +68,6 @@ int quicktime_is_bframe(quicktime_bframe_detector* ctx, int64_t frame)
     ctx->frame = frame;
     }
 
-    return ctx->ctts->table[ctx->ctts_entry_idx].sample_duration < 0;
+    return ctx->ctts->table[ctx->ctts_entry_idx].sample_duration < 
+       ctx->ctts->table[0].sample_duration;;
   }
