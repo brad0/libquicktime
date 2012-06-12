@@ -1703,4 +1703,13 @@ struct quicktime_codec_s
 
   };
 
+
+typedef struct
+  {
+  int64_t frame;
+  long ctts_entry_idx;
+  long sample_within_entry;
+  quicktime_ctts_t *ctts;
+  } quicktime_bframe_detector;
+
 #endif

@@ -131,6 +131,9 @@ typedef struct
 
   /* Stuff for compressed H.264 reading */
   int nal_size_length;
+
+  quicktime_bframe_detector bframe_detector;
+
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -1034,127 +1037,13 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
 
 static void resync_ffmpeg(quicktime_t *file, int track)
   {
-  int64_t keyframe, frame;
-  int buffer_size, got_pic;
-  quicktime_video_map_t *vtrack = &file->vtracks[track];
-  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
-  
-  /* Forget about previously decoded frame */
-  codec->have_frame = 0;
-  codec->decoding_delay = 0;
-  
-  /* Reset lavc */
-  avcodec_flush_buffers(codec->avctx);
-
-  
-  if(quicktime_has_keyframes(file, track))
-    {
-    keyframe = quicktime_get_keyframe_before(file, vtrack->current_position, track);
-
-    frame = keyframe;
-    
-    while(frame < vtrack->current_position)
-      {
-      buffer_size = lqt_read_video_frame(file, &codec->buffer,
-                                         &codec->buffer_alloc,
-                                         frame + codec->decoding_delay,
-                                         NULL, track);
-      if(buffer_size > 0)
-        {
-        // Skip IDCT for frames that other frames won't depend on.
-        // This speeds up seeking.
-        codec->avctx->skip_idct = AVDISCARD_NONREF;
-
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
-        codec->pkt.data = codec->buffer;
-        codec->pkt.size = buffer_size;
-        avcodec_decode_video2(codec->avctx,
-                              codec->frame,
-                              &got_pic,
-                              &codec->pkt);
-#else
-        avcodec_decode_video(codec->avctx,
-                             codec->frame,
-                             &got_pic,
-                             codec->buffer,
-                             buffer_size);
-#endif
-        // Don't skip IDCT when we do real decoding.
-        codec->avctx->skip_idct = AVDISCARD_DEFAULT;
-
-        if(!got_pic)
-          {
-          codec->decoding_delay++;
-          frame--;
-          }
-        }
-      frame++;
-      }
-    }
-  }
-
-static const uint8_t* mpeg2_find_start_code(const uint8_t* buf_ptr, const uint8_t* buf_end, int* chunk_type)
-  {
-  uint32_t code = ~0U;
-
-  while(buf_ptr < buf_end)
-    {
-    if ((code & 0x00FFFFFF) == 0x01)
-      {
-      *chunk_type = *buf_ptr;
-      buf_ptr++;
-      break;
-      }
-    code <<= 8;
-    code |= *buf_ptr;
-    ++buf_ptr;
-    }
-  return buf_ptr;
-  }
-
-static enum AVPictureType mpeg2_parse_frame_type(const uint8_t* buf_ptr, int64_t buf_size)
-  {
-  const uint8_t* buf_end = buf_ptr + buf_size;
-
-  while(buf_ptr < buf_end)
-    {
-    int chunk_type = -1;
-    buf_ptr = mpeg2_find_start_code(buf_ptr, buf_end, &chunk_type);
-
-    if(chunk_type == 0x00) // Picture header
-      {
-      if (buf_ptr + 1 < buf_end)
-        {
-        switch ((buf_ptr[1] & 070) >> 3)
-          {
-          case 1: return AV_PICTURE_TYPE_I;
-          case 2: return AV_PICTURE_TYPE_P;
-          case 3: return AV_PICTURE_TYPE_B;
-          default: return AV_PICTURE_TYPE_NONE;
-          }
-        } // range check
-      } // chunk type
-    else if(chunk_type >= 0x01 && chunk_type <= 0xaf)
-      {
-      // Slice data - no more headers will follow.
-      break;
-      }
-    } // while
-
-  return AV_PICTURE_TYPE_NONE;
-  }
-
-/* Unlike the generic resync_ffmpeg(), this version supports seeking into open GOPs.
- * Some formats (XDCAM family) use open GOPs almost exclusively. */
-static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
-  {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   const int64_t target_frame = vtrack->current_position; // Frame we are told to seek to.
   int64_t frame = target_frame; // Current working frame in bitstream order.
   int64_t keyframe, partial_keyframe;
   int64_t buffer_size;
-
+  const int detect_bframes = vtrack->track->mdia.minf.stbl.has_ctts;
 
   /* Forget about previously decoded frame */
   codec->have_frame = 0;
@@ -1169,8 +1058,12 @@ static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
   if(!quicktime_has_keyframes(file, track))
     return; // Assuming I-frame only stream.
 
-  keyframe = quicktime_get_keyframe_before(file, vtrack->current_position, track);
-  partial_keyframe = quicktime_get_partial_keyframe_before(file, vtrack->current_position, track);
+  keyframe = quicktime_get_keyframe_before(file, target_frame, track);
+
+  if(detect_bframes)
+    partial_keyframe = quicktime_get_partial_keyframe_before(file, target_frame, track);
+  else
+    partial_keyframe = keyframe; // This will force it to go into the branch below.
 
   if(keyframe >= partial_keyframe)
     frame = keyframe;
@@ -1199,15 +1092,10 @@ static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
                                            frame + 1, NULL, track);
         // "frame + 1" because of an out-of-order leading I-frame.
 
-        switch(mpeg2_parse_frame_type(codec->buffer, buffer_size))
+        if(quicktime_is_bframe(&codec->bframe_detector, frame + 1) == 0)
           {
-          case AV_PICTURE_TYPE_I:
-          case AV_PICTURE_TYPE_P:
-            need_prev_gop = 0;
-            frame = target_frame; // Breaks the outer loop.
-            break;
-          default:
-            break;
+          need_prev_gop = 0;
+          break;
           }
         }
       } // if(partial_keyframe < target_frame)
@@ -1223,16 +1111,27 @@ static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
       }
     } // if(keyframe >= partial_keyframe) ... else
 
+
+  // From now on, "frame" means the next frame we expect the decoder to produce.
+  // The next frame to feed into the decoder would be "frame + codec->decoding_delay".
+
   while (frame < target_frame)
     {
     int got_pic = 0;
+
+    if(detect_bframes && quicktime_is_bframe(&codec->bframe_detector, frame + codec->decoding_delay))
+      {
+      frame++;
+      continue;
+      }
+
     buffer_size = lqt_read_video_frame(file, &codec->buffer,
                                        &codec->buffer_alloc,
                                        frame + codec->decoding_delay,
                                        NULL, track);
 
-    // No need to decode those when seeking.
-    codec->avctx->skip_frame = AVDISCARD_NONREF;
+    // This optimization is only for cases where we can't detect B-frames.
+    codec->avctx->skip_idct = AVDISCARD_NONREF;
 
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
     codec->pkt.data = codec->buffer;
@@ -1242,10 +1141,10 @@ static void resync_ffmpeg_mpeg2(quicktime_t *file, int track)
     avcodec_decode_video(codec->avctx, codec->frame, &got_pic, codec->buffer, buffer_size);
 #endif
 
-    // For normal decoding we don't skip any frames.
-    codec->avctx->skip_frame = AVDISCARD_DEFAULT;
+    // Default value is necessary for normal decoding.
+    codec->avctx->skip_idct = AVDISCARD_DEFAULT;
 
-    if(got_pic || mpeg2_parse_frame_type(codec->buffer, buffer_size) == AV_PICTURE_TYPE_B)
+    if(got_pic)
       frame++;
     else
       codec->decoding_delay++;
@@ -2228,12 +2127,12 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec->encoder = encoder;
   codec->decoder = decoder;
   
+  quicktime_init_bframe_detector(&codec->bframe_detector, vtrack);
+
   codec_base->priv = codec;
   codec_base->delete_codec = lqt_ffmpeg_delete_video;
   codec_base->flush = flush;
   codec_base->resync = resync_ffmpeg;
-  if (decoder && decoder->id == CODEC_ID_MPEG2VIDEO)
-    codec_base->resync = resync_ffmpeg_mpeg2;
   
   if(encoder)
     {

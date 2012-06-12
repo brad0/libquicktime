@@ -1489,3 +1489,9 @@ quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
 /* workarounds.c */
 
 int64_t quicktime_add3(int64_t a, int64_t b, int64_t c);
+
+
+/* bframe_detector.c */
+
+LQT_EXTERN void quicktime_init_bframe_detector(quicktime_bframe_detector* ctx, quicktime_video_map_t* vtrack);
+LQT_EXTERN int quicktime_is_bframe(quicktime_bframe_detector* ctx, int64_t frame);
