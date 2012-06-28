@@ -201,7 +201,9 @@ int ffmpeg_num_video_codecs = -1;
 #define DECODE_PARAM_AUDIO
 
 #define DECODE_PARAM_VIDEO \
-  PARAM_FLAG_GRAY
+  PARAM_FLAG_GRAY,         \
+  PARAM_THREAD_COUNT
+
 
 static lqt_parameter_info_static_t encode_parameters_mpeg4[] = {
   ENCODE_PARAM_VIDEO_FRAMETYPES_IPB,
@@ -292,7 +294,18 @@ static lqt_parameter_info_static_t encode_parameters_ffv1[] = {
 };
 
 static lqt_parameter_info_static_t encode_parameters_imx[] = {
+  PARAM_THREAD_COUNT,
   ENCODE_PARAM_IMX,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_dnxhd[] = {
+  PARAM_THREAD_COUNT,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_xdcam_hd422[] = {
+  PARAM_THREAD_COUNT,
   { /* End of parameters */ }
 };
 
@@ -684,6 +697,7 @@ struct CODECIDMAP codecidmap_v[] =
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
       .short_name = "rle",
       .name = TRS("FFMPEG RLE"),
       .fourccs = { "rle ", (char *)0 },
@@ -697,6 +711,7 @@ struct CODECIDMAP codecidmap_v[] =
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
       .short_name = "wrle",
       .name = TRS("FFMPEG Microsoft RLE"),
       .fourccs = { "WRLE", (char *)0 },
@@ -806,6 +821,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
+      .encode_parameters = encode_parameters_dnxhd,
       .image_sizes = image_sizes_dnxhd,
       .short_name = "dnxhd",
       .name = TRS("FFMPEG dnxhd"),
@@ -864,6 +880,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoder = NULL,
       .decoder = NULL,
       .decode_parameters = decode_parameters_video,
+      .encode_parameters = encode_parameters_xdcam_hd422,
       .short_name = "xdcam_hd422",
       .name = TRS("FFMPEG XDCAM HD422"),
       .fourccs = {
