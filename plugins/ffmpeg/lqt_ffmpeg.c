@@ -53,6 +53,10 @@ int ffmpeg_num_video_codecs = -1;
 #define CODEC_TYPE_NB         AVMEDIA_TYPE_NB
 #endif
 
+#if LIBAVCODEC_VERSION_INT > ((53<<16)|(17<<8)|0)
+#define HAVE_PRORES_SUPPORT
+#endif
+
   
 #define ENCODE_PARAM_AUDIO \
   { \
@@ -198,6 +202,16 @@ int ffmpeg_num_video_codecs = -1;
     .val_default = { .val_int = 1 }  \
   }
 
+#define ENCODE_PARAM_PRORES                                             \
+  {                                                                     \
+    .name = "prores_profile",                                           \
+    .real_name = TRS("ProRes profile"),                                 \
+    .type = LQT_PARAMETER_STRINGLIST,                                   \
+    .val_default = { .val_string =  "Standard" },                       \
+    .stringlist_options = (char *[]){ "HQ", "Standard",  "LT", "Proxy", \
+                                      (char *)0 }                       \
+  }
+
 #define DECODE_PARAM_AUDIO
 
 #define DECODE_PARAM_VIDEO \
@@ -306,6 +320,12 @@ static lqt_parameter_info_static_t encode_parameters_dnxhd[] = {
 
 static lqt_parameter_info_static_t encode_parameters_xdcam_hd422[] = {
   PARAM_THREAD_COUNT,
+  { /* End of parameters */ }
+};
+
+static lqt_parameter_info_static_t encode_parameters_prores[] = {
+  PARAM_THREAD_COUNT,
+  ENCODE_PARAM_PRORES,
   { /* End of parameters */ }
 };
 
@@ -891,6 +911,23 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .encoding_colormodels = (int[]){ BC_YUV422P, LQT_COLORMODEL_NONE }
     },
+#ifdef HAVE_PRORES_SUPPORT
+    {
+      .id = CODEC_ID_PRORES,
+      .index = -1,
+      .encoder = NULL,
+      .decoder = NULL,
+      .decode_parameters = decode_parameters_video,
+      .encode_parameters = encode_parameters_prores,
+      .short_name = "prores",
+      .name = TRS("FFMPEG ProRes"),
+      .fourccs = { "apch", "apcn", "apcs", "apco", (char *)0 },
+      .wav_ids = { LQT_WAV_ID_NONE },
+      .compatibility_flags = LQT_FILE_QT,
+      .do_encode = 1,
+      .encoding_colormodels = (int[]){ BC_YUV422P10, LQT_COLORMODEL_NONE }
+    },
+#endif
 };
 
 /* Audio */
@@ -1014,7 +1051,16 @@ static void ffmpeg_map_init(void)
   for(i = 0; i < NUMMAPS_V; i++)
     {
     if(codecidmap_v[i].do_encode)
-      codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
+      {
+#ifdef HAVE_PRORES_SUPPORT
+      // FFMpeg has 2 different ProRes encoders, so try the better one first.
+      if(codecidmap_v[i].id == CODEC_ID_PRORES)
+        codecidmap_v[i].encoder = avcodec_find_encoder_by_name("prores_kostya");
+
+      if(!codecidmap_v[i].encoder)
+#endif
+        codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
+      }
     codecidmap_v[i].decoder = avcodec_find_decoder(codecidmap_v[i].id);
 
     if(codecidmap_v[i].encoder || codecidmap_v[i].decoder)

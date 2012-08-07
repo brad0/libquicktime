@@ -43,11 +43,32 @@
 #define PIX_FMT_YUV422P10_OR_DUMMY -1234
 #endif
 
+#if LIBAVCODEC_VERSION_INT > ((53<<16)|(17<<8)|0)
+#define HAVE_PRORES_SUPPORT
+#endif
+
 #if LIBAVCODEC_VERSION_INT >= ((54<<16)|(1<<8)|0)
 #define ENCODE_VIDEO2 1
 #else
 #define ENCODE_VIDEO 1
 #endif
+
+static const struct
+{
+    const char* fourcc;
+
+    /* There are two different ProRes encoders in FFMpeg. One of them
+       only accepts numeric profile values, while the other one also
+       accepts profile names. Fortunately, they do agree on numeric values. */
+    const char* ffmpeg_profile;
+
+    const char* lqt_name;
+} lqt_prores_profiles[] = {
+    { "apco", "0", "Proxy" },
+    { "apcs", "1", "LT" },
+    { "apcn", "2", "Standard" },
+    { "apch", "3", "HQ" }
+};
 
 /* We keep the numeric values the same as in the ACLR atom.
    The interpretation of values is based on trial and error. */
@@ -98,6 +119,7 @@ typedef struct
   int is_xdcam_hd422;
   int consecutive_open_gops; // Only used for for xdcam.
   int y_offset;
+  int prores_profile; // Index into lqt_prores_profiles, for encoding only.
 
 #if LIBAVCODEC_VERSION_MAJOR < 54
   AVPaletteControl palette;
@@ -1377,6 +1399,56 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   return -1;
   }
 
+#ifdef HAVE_PRORES_SUPPORT
+static int init_prores_encoder(quicktime_t *file, int track)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_trak_t *trak = vtrack->track;
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  int height = trak->tkhd.track_height;
+
+  if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
+    codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT;
+
+  // Color parameters go into ProRes bitstream.
+  if (trak->mdia.minf.stbl.stsd.table->has_colr)
+    {
+    // If COLR atom was provided by the client, use that.
+    const quicktime_colr_t* colr = &trak->mdia.minf.stbl.stsd.table->colr;
+    codec->avctx->color_primaries = colr->primaries;
+    codec->avctx->color_trc = colr->transferFunction;
+    codec->avctx->colorspace = colr->matrix;
+    }
+  else
+    {
+    // Try to guess the correct parameters.
+    if (height >= 720)
+      {
+      codec->avctx->color_primaries = AVCOL_PRI_BT709;
+      codec->avctx->color_trc = AVCOL_TRC_BT709;
+      codec->avctx->colorspace = AVCOL_SPC_BT709;
+      }
+    else if (height >= 576)
+      {
+      codec->avctx->color_primaries = AVCOL_PRI_BT470BG;
+      codec->avctx->color_trc = AVCOL_TRC_BT709;
+      codec->avctx->colorspace = AVCOL_SPC_SMPTE170M;
+      }
+    else
+      {
+      codec->avctx->color_primaries = AVCOL_PRI_SMPTE170M;
+      codec->avctx->color_trc = AVCOL_TRC_BT709;
+      codec->avctx->colorspace = AVCOL_SPC_SMPTE170M;
+      }
+    }
+
+  av_dict_set(&codec->options, "profile", lqt_prores_profiles[codec->prores_profile].ffmpeg_profile, 0);
+  memcpy(trak->mdia.minf.stbl.stsd.table[0].format, lqt_prores_profiles[codec->prores_profile].fourcc, 4);
+
+  return 0;
+  }
+#endif
+
 static void setup_header_mpeg4(quicktime_t *file, int track,
                                const uint8_t * header, int header_len,
                                int advanced)
@@ -1609,6 +1681,10 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
       init_imx_encoder(file, track);
     else if(codec->is_xdcam_hd422)
       init_xdcam_hd422_encoder(file, track);
+#ifdef HAVE_PRORES_SUPPORT
+    else if(codec->encoder->id == CODEC_ID_PRORES)
+      init_prores_encoder(file, track);
+#endif
     
     /* Initialize 2-pass */
     if(codec->total_passes)
@@ -1895,6 +1971,7 @@ static int set_parameter_video(quicktime_t *file,
                                const char *key, 
                                const void *value)
   {
+  int i;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   if(!strcasecmp(key, "ff_qscale"))
@@ -1915,6 +1992,17 @@ static int set_parameter_video(quicktime_t *file,
       lqt_ffmpeg_imx_setup_decoding_frame(file, track);
       }
     return 0;
+    }
+  else if(!strcasecmp(key, "prores_profile"))
+    {
+    for(i = 0; i < sizeof(lqt_prores_profiles)/sizeof(lqt_prores_profiles[0]); i++)
+      {
+      if(!strcasecmp((const char*)value, lqt_prores_profiles[i].lqt_name))
+        {
+        codec->prores_profile = i;
+        break;
+        }
+      }
     }
   
   lqt_ffmpeg_set_parameter(codec->avctx,
@@ -2210,6 +2298,13 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     codec->is_xdcam_hd422 = 1;
     codec_base->writes_compressed = writes_compressed_xdcam_hd422;
     codec_base->init_compressed   = init_compressed_xdcam_hd422;
+    }
+  else if(quicktime_match_32(compressor, "apch") ||
+          quicktime_match_32(compressor, "apcn") ||
+          quicktime_match_32(compressor, "apcs") ||
+          quicktime_match_32(compressor, "apco"))
+    {
+    vtrack->stream_cmodel = BC_YUV422P10;
     }
   else
     vtrack->stream_cmodel = BC_YUV420P;
