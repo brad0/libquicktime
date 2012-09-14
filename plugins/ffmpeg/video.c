@@ -1057,15 +1057,55 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   return result;
   }
 
+static int64_t bitstream_i_frame_to_display_frame(int64_t bitstream_i_frame, quicktime_bframe_detector* bframe_detector)
+  {
+  if (!bframe_detector)
+    return bitstream_i_frame; // Assuming closed GOP.
+  else
+    { // This branch can also handle P-frames, though we aren't relying on that.
+    int num_following_b_frames = 0;
+    while (quicktime_is_bframe(bframe_detector, bitstream_i_frame + num_following_b_frames + 1) == 1)
+      {
+      num_following_b_frames++;
+      }
+    return bitstream_i_frame + num_following_b_frames;
+    }
+  }
+
+static int64_t bitstream_b_frame_to_display_frame(int64_t bitstream_b_frame)
+  {
+  return bitstream_b_frame - 1;
+  }
+
+static int64_t get_bitstream_sync_frame(quicktime_t* file, int64_t display_frame, int track, quicktime_bframe_detector* bframe_detector)
+  {
+  int64_t full_sync_kf = quicktime_get_keyframe_before(file, display_frame, track);
+  int64_t partial_sync_kf = quicktime_get_partial_keyframe_before(file, display_frame, track);
+
+  while (partial_sync_kf > full_sync_kf && partial_sync_kf > 0)
+    {
+    if (bitstream_i_frame_to_display_frame(partial_sync_kf, bframe_detector) <= display_frame)
+      return partial_sync_kf;
+
+    partial_sync_kf = quicktime_get_partial_keyframe_before(file, partial_sync_kf - 1, track);
+    }
+
+  return full_sync_kf;
+  }
+
 static void resync_ffmpeg(quicktime_t *file, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
-  const int64_t target_frame = vtrack->current_position; // Frame we are told to seek to.
-  int64_t frame = target_frame; // Current working frame in bitstream order.
-  int64_t keyframe, partial_keyframe;
+
+  const int64_t target_display_frame = vtrack->current_position; // Frame we are told to seek to.
+  int64_t bitstream_frame; // Current working frame in bitstream order.
   int64_t buffer_size;
+  const int64_t total_frames = quicktime_video_length(file, track);
+  int decoded_frames_to_discard = 0;
+  int seen_non_b_frames = 0;
   const int detect_bframes = vtrack->track->mdia.minf.stbl.has_ctts;
+  quicktime_bframe_detector* bframe_detector = detect_bframes ? &codec->bframe_detector : NULL;
 
   /* Forget about previously decoded frame */
   codec->have_frame = 0;
@@ -1074,86 +1114,54 @@ static void resync_ffmpeg(quicktime_t *file, int track)
   /* Reset lavc */
   avcodec_flush_buffers(codec->avctx);
 
-  if(target_frame <= 0)
+  if(target_display_frame <= 0)
     return;
 
   if(!quicktime_has_keyframes(file, track))
     return; // Assuming I-frame only stream.
 
-  keyframe = quicktime_get_keyframe_before(file, target_frame, track);
+  bitstream_frame = get_bitstream_sync_frame(file, target_display_frame, track, bframe_detector);
+  decoded_frames_to_discard = target_display_frame - bitstream_i_frame_to_display_frame(bitstream_frame, bframe_detector);
 
-  if(detect_bframes)
-    partial_keyframe = quicktime_get_partial_keyframe_before(file, target_frame, track);
-  else
-    partial_keyframe = keyframe; // This will force it to go into the branch below.
-
-  if(keyframe >= partial_keyframe)
-    frame = keyframe;
-  else
-    {
-    // partial_keyframe points to the beginning of an open GOP.
-    // Open GOPs (logically) start with some B-frames that depend
-    // on the previous GOP. In bitstream order however, both closed
-    // and open GOPs start with an I-frame. In case of open GOPs,
-    // that I-frame serves as a "next reference" to B-frames that
-    // immediately follow in bitstream order.
-    // If our target_frame is not of those leading B-frames, we may
-    // start decoding from partial_keyframe. Otherwise, we will have
-    // to go to the beginning of the previous GOP and start from there.
-    int need_prev_gop = 1;
-
-    // If partial_keyframe == target_frame, that is our targe_frame
-    // is at the start of an open GOP, we will definitely need to
-    // go to the previous GOP, so we can skip frame parsing below.
-    if(partial_keyframe < target_frame)
-      {
-      for(frame = partial_keyframe; frame <= target_frame; ++frame)
-        {
-        buffer_size = lqt_read_video_frame(file, &codec->buffer,
-                                           &codec->buffer_alloc,
-                                           frame + 1, NULL, track);
-        // "frame + 1" because of an out-of-order leading I-frame.
-
-        if(quicktime_is_bframe(&codec->bframe_detector, frame + 1) == 0)
-          {
-          need_prev_gop = 0;
-          break;
-          }
-        }
-      } // if(partial_keyframe < target_frame)
-
-    frame = partial_keyframe;
-
-    if(need_prev_gop)
-      {
-      // Figure out where the previous GOP starts, open or closed doesn't matter.
-      keyframe = quicktime_get_keyframe_before(file, frame - 1, track);
-      partial_keyframe = quicktime_get_partial_keyframe_before(file, frame - 1, track);
-      frame = keyframe > partial_keyframe ? keyframe : partial_keyframe;
-      }
-    } // if(keyframe >= partial_keyframe) ... else
-
-
-  // From now on, "frame" means the next frame we expect the decoder to produce.
-  // The next frame to feed into the decoder would be "frame + codec->decoding_delay".
-
-  while (frame < target_frame)
+  for (;; bitstream_frame++)
     {
     int got_pic = 0;
 
-    if(detect_bframes && quicktime_is_bframe(&codec->bframe_detector, frame + codec->decoding_delay))
+    if (decoded_frames_to_discard <= 0) // Should not be < 0 unless the stream is broken.
       {
-      frame++;
-      continue;
+      // We want vtrack->current_position + codec->decoding_delay == bitstream_frame
+      // when the next encoded frame is read.
+      codec->decoding_delay = bitstream_frame - vtrack->current_position;
+      break;
       }
 
-    buffer_size = lqt_read_video_frame(file, &codec->buffer,
-                                       &codec->buffer_alloc,
-                                       frame + codec->decoding_delay,
-                                       NULL, track);
+    if (bitstream_frame < total_frames)
+      {
+      if (detect_bframes)
+        {
+        int is_bframe = quicktime_is_bframe(bframe_detector, bitstream_frame);
+        if (!is_bframe)
+          seen_non_b_frames++;
 
-    // This optimization is only for cases where we can't detect B-frames.
-    codec->avctx->skip_idct = AVDISCARD_NONREF;
+        // Skip initial B-frames.
+        if (is_bframe && seen_non_b_frames < 2)
+          continue;
+
+        // Don't do IDCT where we don't have to.
+        if (is_bframe && bitstream_b_frame_to_display_frame(bitstream_frame) < target_display_frame)
+          codec->avctx->skip_idct = AVDISCARD_NONREF;
+        }
+
+      buffer_size = lqt_read_video_frame(file, &codec->buffer,
+                                         &codec->buffer_alloc,
+                                         bitstream_frame, NULL, track);
+      }
+    else // if (bitstream_frame < total_frames)
+      {
+      // Feed an empty packet to the decoder to indicate end of stream,
+      // which will make it return the final decoded frames it still owes us.
+      buffer_size = 0;
+      }
 
 #if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
     codec->pkt.data = codec->buffer;
@@ -1167,10 +1175,15 @@ static void resync_ffmpeg(quicktime_t *file, int track)
     codec->avctx->skip_idct = AVDISCARD_DEFAULT;
 
     if(got_pic)
-      frame++;
-    else
-      codec->decoding_delay++;
-    } // while (frame < target_frame)
+      decoded_frames_to_discard--;
+    else if (bitstream_frame >= total_frames)
+      {
+      // We've already fed an empty packet to the decoder, indicating
+      // no more data will follow, yet it didn't return any additional
+      // frames. At this point we give up and declare decoding failure.
+      break;
+      }
+    } // for (;; bitstream_frame++)
   }
 
 static int set_pass_ffmpeg(quicktime_t *file, 
