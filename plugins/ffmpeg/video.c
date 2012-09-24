@@ -1374,7 +1374,7 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   const char* fourcc;
 
   codec->avctx->pix_fmt = PIX_FMT_YUV422P;
-  codec->avctx->gop_size = frame_duration > 25 * time_scale ? 15 : 12;
+  codec->avctx->gop_size = time_scale > 25 * frame_duration ? 15 : 12;
   codec->avctx->max_b_frames = 2;
   codec->avctx->intra_dc_precision = 2;
   codec->avctx->qmin = 1;
