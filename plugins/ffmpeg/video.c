@@ -2227,8 +2227,10 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
 #endif
   codec->encoder = encoder;
   codec->decoder = decoder;
-  
-  quicktime_init_bframe_detector(&codec->bframe_detector, vtrack);
+
+  // vtrack can be NULL if called from lqt_writes_compressed
+  if(vtrack)
+    quicktime_init_bframe_detector(&codec->bframe_detector, vtrack);
 
   codec_base->priv = codec;
   codec_base->delete_codec = lqt_ffmpeg_delete_video;
