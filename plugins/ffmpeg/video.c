@@ -2223,7 +2223,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
 #if LIBAVCODEC_VERSION_INT < ((53<<16)|(8<<8)|0)
   codec->avctx = avcodec_alloc_context();
 #else
-  codec->avctx = avcodec_alloc_context3(NULL);
+  codec->avctx = avcodec_alloc_context3(encoder ? encoder : decoder);
 #endif
   codec->encoder = encoder;
   codec->decoder = decoder;
