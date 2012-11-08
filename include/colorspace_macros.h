@@ -372,12 +372,12 @@
 /* YUV (10 bit) -> 8 */
 
 #define YUV_10_TO_RGB_24(y,u,v,r,g,b) \
-  i_tmp=(yj_16_to_rgb * (y-0x40) + vj_16_to_r * (v-0x200))>>18;        \
-  r = RECLIP_8(i_tmp);\
-  i_tmp=(yj_16_to_rgb * (y-0x40) + uj_16_to_g * (u-0x200)+ vj_16_to_g * (v-0x200))>>18; \
-  g = RECLIP_8(i_tmp);\
-  i_tmp=(yj_16_to_rgb * (y-0x40) + uj_16_to_b * (u-0x200))>>18; \
-  b = RECLIP_8(i_tmp);
+   i_tmp=(y_16_to_rgb * (y-0x40) + v_16_to_r * (v-0x200))>>18;        \
+   r = RECLIP_8(i_tmp);\
+   i_tmp=(y_16_to_rgb * (y-0x40) + u_16_to_g * (u-0x200)+ v_16_to_g * (v-0x200))>>18; \
+   g = RECLIP_8(i_tmp);\
+   i_tmp=(y_16_to_rgb * (y-0x40) + u_16_to_b * (u-0x200))>>18; \
+   b = RECLIP_8(i_tmp);
 
 #define YUVJ_10_TO_RGB_24(y,u,v,r,g,b) \
   i_tmp=(yj_16_to_rgb * y + vj_16_to_r * (v-0x200))>>18;        \
