@@ -1447,6 +1447,9 @@ typedef struct
   enum LqtKeyFrame keyframe;
 
   lqt_compression_info_t ci;
+
+  /* 1 if encoding, 0 if decoding. */
+  int do_encode;
   
   } quicktime_video_map_t;
 

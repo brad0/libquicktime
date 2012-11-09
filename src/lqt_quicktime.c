@@ -1562,6 +1562,7 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
   vtrack->current_position = 0;
   vtrack->cur_chunk = 0;
   vtrack->io_cmodel = BC_RGB888;
+  vtrack->do_encode = encode;
   quicktime_init_vcodec(vtrack, encode, info);
   return 0;
   }
