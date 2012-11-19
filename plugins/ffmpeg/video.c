@@ -117,7 +117,6 @@ typedef struct
   
   int is_imx;
   int is_xdcam_hd422;
-  int consecutive_open_gops; // Only used for for xdcam.
   int y_offset;
   int prores_profile; // Index into lqt_prores_profiles, for encoding only.
 
@@ -317,6 +316,46 @@ static void lqt_ffmpeg_write_tag(uint8_t** p, char const* tag)
   *(*p + 3) = tag[3];
   *p += 4;
   }
+
+static uint8_t generate_sdtp_flags_mpeg2(long frame, const AVCodecContext* avctx)
+  {
+  unsigned flags = 0;
+
+  switch(avctx->coded_frame->pict_type)
+    {
+    case AV_PICTURE_TYPE_I:
+      flags |= 0x20; // doesnt_depend_on_other_samples
+      if(avctx->gop_size > 1)
+        flags |= 0x04; // other_samples_depend_on_this_one
+      if(avctx->max_b_frames > 0)
+        flags |= 0x40; // earlier_dps_allowed
+      break;
+    case AV_PICTURE_TYPE_P:
+      flags |= 0x10; // sample_depends_on_others
+      if(avctx->max_b_frames > 0)
+        flags |= 0x40|0x04; // earlier_dps_allowed|other_samples_depend_on_this_one
+      break;
+    case AV_PICTURE_TYPE_B:
+      flags |= 0x10|0x08; // sample_depends_on_others|no_other_samples_depend_on_this_one
+      break;
+    default:;
+    }
+
+  return (uint8_t)flags;
+  }
+
+static void maybe_add_sdtp_entry(quicktime_t* file, long sample, int track)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+
+  if (codec->encoder->id == CODEC_ID_MPEG2VIDEO && codec->avctx->gop_size > 1)
+    {
+    uint8_t flags = generate_sdtp_flags_mpeg2(sample, codec->avctx);
+    quicktime_insert_sdtp_entry(file, sample, track, flags);
+    }
+  }
+
 
 #ifndef HAVE_LIBSWSCALE
 static void fill_avpicture(AVPicture * ret, unsigned char ** rows,
@@ -1381,9 +1420,9 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   codec->avctx->qmax = 12; // The maximum value compatible with non_linear_quant option.
   codec->avctx->lmin = FF_QP2LAMBDA;
 
-  // We start with a closed GOP, then switch to open, then periodically switch back to closed.
-  // This flag is not just for libavcodec. We will be checking it ourselves as well.
-  codec->avctx->flags |= CODEC_FLAG_CLOSED_GOP;
+  // XDCAM is meant to use open GOPs. From time to time we might want to insert closed GOPs
+  // like some other encoders do, but libavcodec only checks this flag once.
+  codec->avctx->flags &= ~CODEC_FLAG_CLOSED_GOP;
 
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
     codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME;
@@ -1801,7 +1840,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   codec->frame->pts = vtrack->timestamp;
   if(codec->avctx->flags & CODEC_FLAG_QSCALE)
     codec->frame->quality = codec->qscale;
-#ifdef DO_INTERLACE
+#if 1
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
     {
     codec->frame->interlaced_frame = 1;
@@ -1841,21 +1880,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   
 #endif
   
-  if(kf && codec->is_xdcam_hd422)
-   {
-   if(codec->avctx->flags & CODEC_FLAG_CLOSED_GOP)
-     {
-     codec->consecutive_open_gops = 0;
-     codec->avctx->flags &= ~CODEC_FLAG_CLOSED_GOP; // Switch back to open GOP.
-     }
-   else
-     {
-     kf = LQT_PARTIAL_KEY_FRAME;
-     codec->consecutive_open_gops++;
-     if(codec->consecutive_open_gops >= 400) // Other encoders use similar values.
-       codec->avctx->flags |= CODEC_FLAG_CLOSED_GOP;
-     }
-   }
+  if(kf && codec->is_xdcam_hd422 && vtrack->cur_chunk)
+    kf = LQT_PARTIAL_KEY_FRAME; // For XDCAM, only the first key frame is full key frame.
 
   if(!was_initialized && codec->encoder->id == CODEC_ID_DNXHD)
     setup_avid_atoms(file, vtrack, codec->buffer, bytes_encoded);
@@ -1876,6 +1902,10 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     result = !quicktime_write_data(file, 
                                    codec->buffer, 
                                    bytes_encoded);
+
+    // Must go before lqt_write_frame_header() which increments vtrack->cur_chunk.
+    // cur_chunk is a frame number in storage order.
+    maybe_add_sdtp_entry(file, vtrack->cur_chunk, track);
 
     lqt_write_frame_footer(file, track);
           
@@ -1958,6 +1988,9 @@ static int flush(quicktime_t *file, int track)
   kf = codec->avctx->coded_frame->key_frame;
   
 #endif
+
+  if(kf && codec->is_xdcam_hd422 && vtrack->cur_chunk)
+    kf = LQT_PARTIAL_KEY_FRAME; // For XDCAM, only the first key frame is full key frame.
   
   if(bytes_encoded)
     {
@@ -1967,6 +2000,10 @@ static int flush(quicktime_t *file, int track)
     result = !quicktime_write_data(file, 
                                    codec->buffer, 
                                    bytes_encoded);
+
+    // Must go before lqt_write_frame_header() which increments vtrack->cur_chunk.
+    // cur_chunk is a frame number in storage order.
+    maybe_add_sdtp_entry(file, vtrack->cur_chunk, track);
 
     lqt_write_frame_footer(file, track);
           

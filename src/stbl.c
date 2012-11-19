@@ -34,6 +34,7 @@ void quicktime_stbl_init(quicktime_stbl_t *stbl)
   quicktime_stps_init(&stbl->stps);
   quicktime_stsc_init(&stbl->stsc);
   quicktime_stsz_init(&stbl->stsz);
+  quicktime_sdtp_init(&stbl->sdtp);
   quicktime_stco_init(&stbl->stco);
   }
 
@@ -139,6 +140,7 @@ void quicktime_stbl_delete(quicktime_stbl_t *stbl)
   quicktime_stps_delete(&stbl->stps);
   quicktime_stsc_delete(&stbl->stsc);
   quicktime_stsz_delete(&stbl->stsz);
+  quicktime_sdtp_delete(&stbl->sdtp);
   quicktime_stco_delete(&stbl->stco);
   }
 
@@ -153,6 +155,8 @@ void quicktime_stbl_dump(void *minf_ptr, quicktime_stbl_t *stbl)
     quicktime_stps_dump(&stbl->stps);
   quicktime_stsc_dump(&stbl->stsc);
   quicktime_stsz_dump(&stbl->stsz);
+  if(stbl->sdtp.total_entries)
+    quicktime_sdtp_dump(&stbl->sdtp);
   quicktime_stco_dump(&stbl->stco);
   if(stbl->has_ctts)
     quicktime_ctts_dump(&stbl->ctts);
@@ -206,6 +210,15 @@ int quicktime_read_stbl(quicktime_t *file, quicktime_minf_t *minf,
       quicktime_read_stsz(file, &stbl->stsz);
       quicktime_atom_skip(file, &leaf_atom);
       }
+    else if(quicktime_atom_is(&leaf_atom, "sdtp"))
+      {
+      // This atom doesn't have its own number_of_entries field.
+      long num_entries = stbl->stsz.total_entries; // That's what Apple docs tell us to use.
+      if(num_entries <= 0)
+        num_entries = leaf_atom.size - 12; // Fallback, in case stsz wasn't loaded yet.
+      quicktime_read_sdtp(file, &stbl->sdtp, num_entries);
+      quicktime_atom_skip(file, &leaf_atom);
+      }
     else if(quicktime_atom_is(&leaf_atom, "co64"))
       {
       quicktime_read_stco64(file, &stbl->stco);
@@ -235,6 +248,12 @@ void quicktime_write_stbl(quicktime_t *file, quicktime_minf_t *minf, quicktime_s
     quicktime_write_stps(file, &stbl->stps);
   quicktime_write_stsc(file, &stbl->stsc);
   quicktime_write_stsz(file, &stbl->stsz);
+
+  // Must go after stsz, as it doesn't have its own number_of_entries field
+  // and Apple docs say to use stsz.number_of_entries.
+  if(stbl->sdtp.total_entries)
+    quicktime_write_sdtp(file, &stbl->sdtp);
+
   quicktime_write_stco(file, &stbl->stco);
   if(stbl->has_ctts)
     quicktime_write_ctts(file, &stbl->ctts);

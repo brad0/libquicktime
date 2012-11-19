@@ -1104,6 +1104,9 @@ void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track)
 /* Track has keyframes */
 int quicktime_has_keyframes(quicktime_t *file, int track);
 
+/* Sample dependencies for long-GOP formats. */
+void quicktime_insert_sdtp_entry(quicktime_t *file, long frame, int track, uint8_t flags);
+
 /* ===================== Access to built in codecs follows. */
 
 /* If the codec for this track is supported in the library return 1. */

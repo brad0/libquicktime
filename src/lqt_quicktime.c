@@ -1527,6 +1527,29 @@ void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track)
   stps->total_entries++;
   }
 
+void quicktime_insert_sdtp_entry(quicktime_t *file, long sample, int track, uint8_t flags)
+  {
+  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_sdtp_t *sdtp = &trak->mdia.minf.stbl.sdtp;
+
+  if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
+    {
+    // AVI doesn't support sdtp atom
+    return;
+    }
+
+  // Expand table
+  if(sdtp->entries_allocated <= sample)
+    {
+    sdtp->entries_allocated = sdtp->entries_allocated * 2 + 512;
+    sdtp->table = realloc(sdtp->table, sdtp->entries_allocated);
+    memset(sdtp->table + sdtp->total_entries, 0, sdtp->entries_allocated - sdtp->total_entries);
+    }
+
+  sdtp->table[sample] = flags;
+  if(sdtp->total_entries <= sample)
+    sdtp->total_entries = sample + 1;
+  }
 
 int quicktime_has_keyframes(quicktime_t *file, int track)
   {

@@ -1041,6 +1041,14 @@ void quicktime_update_stsz(quicktime_stsz_t *stsz,
                            long sample_size);
 void quicktime_stsz_init_timecode(quicktime_stsz_t *stsz);
 
+/* sdtp.c */
+
+void quicktime_sdtp_init(quicktime_sdtp_t *sdtp);
+void quicktime_sdtp_delete(quicktime_sdtp_t *sdtp);
+void quicktime_sdtp_dump(quicktime_sdtp_t *sdtp);
+void quicktime_read_sdtp(quicktime_t *file, quicktime_sdtp_t *sdtp, long num_entries);
+void quicktime_write_sdtp(quicktime_t *file, quicktime_sdtp_t *sdtp);
+
 /* stts.c */
 
 void quicktime_stts_init(quicktime_stts_t *stts);

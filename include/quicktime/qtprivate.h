@@ -643,6 +643,15 @@ typedef struct
   quicktime_stsz_table_t *table;
   } quicktime_stsz_t;
 
+/* sample dependency table */
+typedef struct
+  {
+  int version;
+  long flags;
+  long total_entries;
+  long entries_allocated;
+  uint8_t *table;
+  } quicktime_sdtp_t;
 
 /* chunk offset */
 typedef struct
@@ -673,6 +682,7 @@ typedef struct
   quicktime_stps_t stps;
   quicktime_stsc_t stsc;
   quicktime_stsz_t stsz;
+  quicktime_sdtp_t sdtp;
   quicktime_stco_t stco;
   quicktime_ctts_t ctts;
   int has_ctts;
