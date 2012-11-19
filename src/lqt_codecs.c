@@ -752,7 +752,22 @@ int lqt_encode_video_d(quicktime_t *file,
   if(file->vtracks[track].timecode_track)
     lqt_flush_timecode(file, track, time, 0);
   
-  file->vtracks[track].current_position++;
+  vtrack->current_position++;
+
+  /* vtrack->current_position now points past the last frame
+     we were asked to encode. If that frame was the last one
+     but flushing the codec produces more output, there will be
+     read access to vtrack->timestamps[vtrack->current_position]
+     from lqt_write_frame_header(), therefore we need to make sure
+     it's a valid address pointing to initialized memory. */
+  if(vtrack->current_position >= vtrack->timestamps_alloc)
+    {
+    vtrack->timestamps_alloc += 1024;
+    vtrack->timestamps = realloc(vtrack->timestamps,
+                                 vtrack->timestamps_alloc *
+                                 sizeof(*vtrack->timestamps));
+    }
+  vtrack->timestamps[vtrack->current_position] = -1;
   return 0;
   }
 

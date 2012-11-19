@@ -39,6 +39,7 @@ int main(int argc, char ** argv)
           fprintf(stderr, "    %s\n", s->enum_list[j]);
           j++;
           }
+        fprintf(stderr, "Default: %s\n", s->enum_list[(int)(s->default_value)]);
         break;
       case SCHRO_ENCODER_SETTING_TYPE_DOUBLE:
         fprintf(stderr, "Double\n");
