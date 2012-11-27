@@ -155,6 +155,9 @@ typedef struct
 
   quicktime_bframe_detector bframe_detector;
 
+  /* lqt_pts = ffmpeg_pts * pts_factor */
+  int encoding_pts_factor;
+
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -1639,10 +1642,23 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     /* time_base is 1/framerate for constant framerate */
           
     codec->avctx->time_base.den = lqt_video_time_scale(file, track);
-    codec->avctx->time_base.num = lqt_frame_duration(file, track, NULL);
+    codec->avctx->time_base.num = 1; // If we want variable frame durations, we need 1 here.
+    codec->encoding_pts_factor = 1;
 
-    //          codec->avctx->time_base.den = 1;
-    //          codec->avctx->time_base.num = lqt_video_time_scale(file, track);
+    // Codecs for which time_base.num == 1 causes problems.
+    switch(codec->encoder->id)
+      {
+      // Variable duration frames won't work for these.
+      case CODEC_ID_MPEG2VIDEO:
+      case CODEC_ID_DVVIDEO:
+      case CODEC_ID_DNXHD:
+          codec->encoding_pts_factor = lqt_frame_duration(file, track, NULL);
+          codec->avctx->time_base.num = codec->encoding_pts_factor;
+          // time_base may be reduced by a common factor by libavcodec,
+          // so we can't just use that.
+          break;
+      default:;
+      }
 
     if(codec->avctx->flags & CODEC_FLAG_QSCALE)
       codec->avctx->global_quality = codec->qscale;
@@ -1837,7 +1853,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     codec->frame->linesize[2] = vtrack->stream_row_span_uv;
     }
   
-  codec->frame->pts = vtrack->timestamp;
+  codec->frame->pts = vtrack->timestamp / codec->encoding_pts_factor;
   if(codec->avctx->flags & CODEC_FLAG_QSCALE)
     codec->frame->quality = codec->qscale;
 #if 1
@@ -1862,7 +1878,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   else
     bytes_encoded = 0;
   
-  pts = pkt.pts;
+  pts = pkt.pts * codec->encoding_pts_factor;
   kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
     
 #else // Old
@@ -1875,7 +1891,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   if(bytes_encoded < 0)
     return -1;
   
-  pts = codec->avctx->coded_frame->pts;
+  pts = codec->avctx->coded_frame->pts * encoding_pts_factor;
   kf = codec->avctx->coded_frame->key_frame;
   
 #endif
@@ -1971,7 +1987,7 @@ static int flush(quicktime_t *file, int track)
   else
     return 0;
   
-  pts = pkt.pts;
+  pts = pkt.pts * codec->encoding_pts_factor;
 
   kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
   
@@ -1984,7 +2000,7 @@ static int flush(quicktime_t *file, int track)
   if(bytes_encoded <= 0)
     return 0;
 
-  pts = codec->avctx->coded_frame->pts;
+  pts = codec->avctx->coded_frame->pts * codec->encoding_pts_factor;
   kf = codec->avctx->coded_frame->key_frame;
   
 #endif
