@@ -707,10 +707,13 @@ void quicktime_stsd_table_init(quicktime_stsd_table_t *table)
 
   table->version = 0;
   table->revision = 0;
-  table->vendor[0] = 'l';
-  table->vendor[1] = 'q';
-  table->vendor[2] = 't';
-  table->vendor[3] = ' ';
+  
+  /* We used to write "lqt " here, but some broken
+     software expects "appl" */
+  table->vendor[0] = 'a';
+  table->vendor[1] = 'p';
+  table->vendor[2] = 'p';
+  table->vendor[3] = 'l';
 
   table->temporal_quality = 100;
   table->spatial_quality = 258;
