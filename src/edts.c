@@ -43,14 +43,16 @@ void quicktime_read_edts(quicktime_t *file, quicktime_edts_t *edts, quicktime_at
 {
 	quicktime_atom_t leaf_atom;
 
-	do
+	while (quicktime_position(file) + 8 < edts_atom->end)
 	{
 		quicktime_atom_read_header(file, &leaf_atom);
 		if(quicktime_atom_is(&leaf_atom, "elst"))
-		{ quicktime_read_elst(file, &edts->elst); }
+			quicktime_read_elst(file, &edts->elst);
 		else
 			quicktime_atom_skip(file, &leaf_atom);
-	}while(quicktime_position(file) < edts_atom->end);
+	}
+
+	quicktime_set_position(file, edts_atom->end);
 }
 
 void quicktime_edts_dump(quicktime_edts_t *edts)
