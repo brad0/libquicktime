@@ -202,6 +202,8 @@ int lqt_qtvr_set_type(quicktime_t  *file, int type, int width, int height, int d
         file->moov.udta.ctyp[3] = 'r';
         file->moov.udta.is_qtvr = 1;
 
+        file->moov.mvhd.time_scale = time_scale;
+
         trak = quicktime_add_track(file);
         quicktime_trak_init_qtvr(file, trak, QTVR_OBJ, width, height, duration, time_scale);
         quicktime_obji_init(&file->qtvr_node[0].obji);
@@ -224,6 +226,8 @@ int lqt_qtvr_set_type(quicktime_t  *file, int type, int width, int height, int d
         file->moov.udta.ctyp[2] = 'v';
         file->moov.udta.ctyp[3] = 'r';
         file->moov.udta.is_qtvr = 1;
+
+        file->moov.mvhd.time_scale = time_scale;
 
         trak = quicktime_add_track(file);
         quicktime_trak_init_qtvr(file, trak, QTVR_PAN, width, height, duration, time_scale);
