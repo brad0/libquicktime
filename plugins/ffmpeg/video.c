@@ -1360,7 +1360,7 @@ static int init_imx_encoder(quicktime_t *file, int track)
   codec->avctx->gop_size = 0;
   codec->avctx->intra_dc_precision = 2;
   codec->avctx->qmin = 1;
-  codec->avctx->qmax = 3;
+  codec->avctx->qmax = codec->imx_bitrate == 30 ? 8 : 3;
   codec->avctx->rtp_payload_size = 1; // ??
   codec->avctx->rc_buffer_aggressivity = 0.25;
   codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_LOW_DELAY;
