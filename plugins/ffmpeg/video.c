@@ -952,8 +952,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
                                &got_pic,
                                &codec->pkt) < 0)
         {
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Skipping corrupted frame");
-        continue;
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Broken frame encountered");
+        codec->decoding_delay--;
+        return 1;
         }
 
 #if LIBAVCODEC_VERSION_MAJOR >= 54
@@ -976,15 +977,16 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
                               codec->buffer,
                               buffer_size) < 0)
         {
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Skipping corrupted frame");
-        continue;
+        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Broken frame encountered");
+        codec->decoding_delay--;
+        return 1;
         }
 #endif      
       if(got_pic)
         codec->decoding_delay--;
       
       if((buffer_size <= 0) && !got_pic)
-        return 0;
+        return 1;
       }
     }
   

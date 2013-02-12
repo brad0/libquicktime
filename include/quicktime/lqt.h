@@ -1056,6 +1056,7 @@ int64_t lqt_frame_time(quicktime_t * file, int track);
  *  \param file A quicktime handle
  *  \param row_pointers Frame (see \ref lqt_rows_alloc)
  *  \param track Track index (starting with 0)
+ *  \returns 0 on success and a non-zero value on failure.
  *
  * Decode one video frame and increment the interal frame pointer.
  * To get the presentation timestamp for this frame, call
