@@ -25,6 +25,7 @@
 #include "lqt_private.h"
 #include <quicktime/colormodels.h>
 #include <png.h>
+#include <string.h>
 #include <stdlib.h>
 #include "qtpng.h"
 
