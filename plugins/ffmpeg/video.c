@@ -2348,7 +2348,8 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
           quicktime_match_32(compressor, "mx5p") ||
           quicktime_match_32(compressor, "mx3n") ||
           quicktime_match_32(compressor, "mx4n") ||
-          quicktime_match_32(compressor, "mx5n"))
+          quicktime_match_32(compressor, "mx5n") ||
+          quicktime_match_32(compressor, "AVmp"))
     {
     vtrack->stream_cmodel = BC_YUV422P;
     codec->is_imx = 1;
