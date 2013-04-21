@@ -45,6 +45,11 @@
 #define ENCODE_AUDIO 1
 #endif
 
+#ifndef AVCODEC_MAX_AUDIO_FRAME_SIZE
+/* from libavcodec/avcodec.h dated Dec 23 2012 */
+#define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
+#endif
+
 /* The following code was ported from gmerlin_avdecoder (http://gmerlin.sourceforge.net) */
 
 /* MPEG Audio header parsing code */
