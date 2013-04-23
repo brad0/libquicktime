@@ -469,7 +469,17 @@ static void lqt_ffmpeg_setup_decoding_colormodel(quicktime_t *file, quicktime_vi
   codec->reinterpret_pix_fmt = codec->avctx->pix_fmt;
 
   /* First we try codec-specific colormodel matching. */
-  if(codec->decoder->id == CODEC_ID_DNXHD)
+  if(codec->is_imx && quicktime_match_32(vtrack->track->mdia.minf.stbl.stsd.table[0].format, "AVmp"))
+    {
+     if (lqt_ffmpeg_get_avid_yuv_range(vtrack->track) == AVID_FULL_YUV_RANGE)
+       {
+       vtrack->stream_cmodel = BC_YUVJ422P;
+       codec->reinterpret_pix_fmt = PIX_FMT_YUVJ422P;
+       *exact = 1;
+       return;
+       }
+    }
+  else if(codec->decoder->id == CODEC_ID_DNXHD)
     {
     /* FFMpeg supports PIX_FMT_YUV422P and PIX_FMT_YUV422P10 for DNxHD, which
        we sometimes interpret as PIX_FMT_YUVJ422P and PIX_FMT_YUVJ422P10. */
@@ -731,12 +741,13 @@ static void lqt_ffmpeg_imx_setup_decoding_frame(quicktime_t *file, int track)
         codec->y_offset = codec->avctx->height - trak->tkhd.track_height;
         vtrack->height_extension = 0;
     } else {
+        int stsd_height = trak->mdia.minf.stbl.stsd.table[0].height;
         codec->y_offset = 0;
-        if (vtrack->height_extension == codec->avctx->height - trak->tkhd.track_height) {
+        if (vtrack->height_extension == codec->avctx->height - stsd_height) {
             return;
         }
 
-        vtrack->height_extension = codec->avctx->height - trak->tkhd.track_height;
+        vtrack->height_extension = codec->avctx->height - stsd_height;
 
         /* Now we need a larger temp_frame */
         if (vtrack->temp_frame) {
@@ -1043,9 +1054,11 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
 
       vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
       vtrack->ci.id = LQT_COMPRESSION_D10;
-      vtrack->ci.bitrate = 
-        (trak->mdia.minf.stbl.stsd.table[0].format[2] - '0') *
-        10000000;
+      if (quicktime_match_32(trak->mdia.minf.stbl.stsd.table[0].format, "AVmp"))
+        vtrack->ci.bitrate = 50000000;
+      else
+        vtrack->ci.bitrate =
+          (trak->mdia.minf.stbl.stsd.table[0].format[2] - '0') * 10000000;
       }
     
     if(codec->avctx->sample_aspect_ratio.num)
