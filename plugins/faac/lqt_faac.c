@@ -39,7 +39,7 @@ static lqt_parameter_info_static_t encode_parameters_faac[] =
       .val_default = { .val_int = 0 }
     },
     {
-      .name =        "quality",
+      .name =        "faac_quality",
       .real_name =   TRS("VBR Quality"),
       .type =        LQT_PARAMETER_INT,
       .val_min =     { .val_int = 10 },
@@ -47,7 +47,7 @@ static lqt_parameter_info_static_t encode_parameters_faac[] =
       .val_default = { .val_int = 100 },
     },
     {
-      .name        = "object_type",
+      .name        = "faac_object_type",
       .real_name   = TRS("Object type"),
       .type        = LQT_PARAMETER_STRINGLIST,
       .val_default = { .val_string = "Low" },
@@ -56,6 +56,13 @@ static lqt_parameter_info_static_t encode_parameters_faac[] =
                                        TRS("SSR"),
                                        TRS("LTP"),
                                        (char*)0 },
+    },
+    {
+      .name =        "faac_priming_delay",
+      .real_name =   TRS("Priming delay (samples)"),
+      .type =        LQT_PARAMETER_INT,
+      .val_min =     { .val_int = FAAC_PRIMING_DELAY },
+      .val_default = { .val_int = 2112 },
     },
     { /* End of parameters */ }
   };

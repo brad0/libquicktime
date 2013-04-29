@@ -22,6 +22,8 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
+#define FAAC_PRIMING_DELAY 1024
+
 void quicktime_init_codec_faac(quicktime_codec_t * codec,
                                quicktime_audio_map_t *atrack,
                                quicktime_video_map_t *vtrack);

@@ -52,6 +52,7 @@ typedef struct
   int bitrate;
   int quality;
   int object_type;
+  int priming_delay;  
   } quicktime_faac_codec_t;
 
 
@@ -80,7 +81,7 @@ static int encode_frame(quicktime_t *file,
 
   imax = codec->sample_buffer_size * track_map->channels;
   
-  if(!num_samples && (codec->encoder_delay < 0))
+  if(!num_samples && (codec->encoder_delay < -FAAC_PRIMING_DELAY))
     return 0;
   
   for(i = 0; i < imax; i++)
@@ -116,10 +117,10 @@ static int encode_frame(quicktime_t *file,
   lqt_start_audio_vbr_frame(file, track);
   result = !quicktime_write_data(file, codec->chunk_buffer,
                                  bytes_encoded);
-  if(codec->encoder_delay < 0)
+  if(codec->encoder_delay < -FAAC_PRIMING_DELAY)
     {
     lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame +
-                               codec->encoder_delay);
+                               codec->encoder_delay + FAAC_PRIMING_DELAY);
     }
   else
     lqt_finish_audio_vbr_frame(file, track, codec->samples_per_frame);
@@ -205,6 +206,7 @@ static int encode(quicktime_t *file,
   {
   int samples_read;
   int samples_to_copy;
+  int priming_delay = 0;
   
   faacEncConfigurationPtr enc_config;
   unsigned long input_samples;
@@ -255,6 +257,9 @@ static int encode(quicktime_t *file,
 #endif
     codec->chunk_buffer_size = output_bytes;
     codec->chunk_buffer = malloc(codec->chunk_buffer_size);
+
+    if(codec->priming_delay > FAAC_PRIMING_DELAY)
+      priming_delay = codec->priming_delay - FAAC_PRIMING_DELAY;
     
     codec->initialized = 1;
 
@@ -276,19 +281,37 @@ static int encode(quicktime_t *file,
   
   while(samples_read < samples)
     {
+    /* Add priming delay */
+    if(priming_delay >= codec->samples_per_frame)
+      {
+	memset(codec->sample_buffer, 0,
+	       codec->samples_per_frame * track_map->channels * sizeof(float));
+	codec->sample_buffer_size = codec->samples_per_frame;
+	priming_delay -= codec->samples_per_frame;
+      }
+    else if(priming_delay > 0)
+      {
+	memset(codec->sample_buffer, 0,
+	       priming_delay * track_map->channels * sizeof(float));
+	codec->sample_buffer_size = priming_delay;
+	priming_delay = 0;
+      }
     /* Put samples into sample buffer */
     
     samples_to_copy = codec->samples_per_frame - codec->sample_buffer_size;
     if(samples_read + samples_to_copy > samples)
       samples_to_copy = samples - samples_read;
 
-    memcpy(codec->sample_buffer +
-           track_map->channels * codec->sample_buffer_size,
-           input + samples_read * track_map->channels,
-           samples_to_copy * track_map->channels * sizeof(float));
-    
-    codec->sample_buffer_size += samples_to_copy;
-    samples_read += samples_to_copy;
+    if(samples_to_copy > 0)
+      {
+	memcpy(codec->sample_buffer +
+	       track_map->channels * codec->sample_buffer_size,
+	       input + samples_read * track_map->channels,
+	       samples_to_copy * track_map->channels * sizeof(float));
+	
+	codec->sample_buffer_size += samples_to_copy;
+	samples_read += samples_to_copy;
+      }
     
     /* Encode one frame, possibly starting a new audio chunk */
     if(codec->sample_buffer_size == codec->samples_per_frame)
@@ -312,7 +335,7 @@ static int set_parameter(quicktime_t *file,
   {
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_faac_codec_t *codec = track_map->codec->priv;
-    
+
   if(!strcasecmp(key, "faac_bitrate"))
     codec->bitrate = *(int*)value;
   else if(!strcasecmp(key, "faac_quality"))
@@ -328,6 +351,8 @@ static int set_parameter(quicktime_t *file,
     else if(!strcmp((char*)value, "LTP"))
       codec->object_type = LTP;
     }
+  else if(!strcasecmp(key, "faac_priming_delay"))
+    codec->priming_delay = *(int*)value;
   return 0;
   }
 
@@ -404,6 +429,7 @@ void quicktime_init_codec_faac(quicktime_codec_t * codec_base,
   
   codec->bitrate = 0;
   codec->quality = 100;
+  codec->priming_delay = 2112;
 
   if(!atrack)
     return;
