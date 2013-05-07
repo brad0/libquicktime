@@ -427,7 +427,7 @@ int64_t quicktime_chunk_to_offset(quicktime_t *file,
   int64_t result = 0;
 
   if(trak->mdia.minf.stbl.stco.total_entries && 
-     chunk > trak->mdia.minf.stbl.stco.total_entries)
+     chunk >= trak->mdia.minf.stbl.stco.total_entries)
     result = table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
   else
     if(trak->mdia.minf.stbl.stco.total_entries)
