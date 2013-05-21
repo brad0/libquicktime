@@ -1628,6 +1628,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
 #endif
   int64_t pts;
   int kf;
+  uint8_t* encoded_data;
   
   if(!row_pointers)
     {
@@ -1893,6 +1894,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   else
     bytes_encoded = 0;
   
+  encoded_data = pkt.data; // May be different from codec->buffer!
   pts = pkt.pts * codec->encoding_pts_factor;
   kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
     
@@ -1906,6 +1908,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
   if(bytes_encoded < 0)
     return -1;
   
+  encoded_data = codec->buffer;
   pts = codec->avctx->coded_frame->pts * encoding_pts_factor;
   kf = codec->avctx->coded_frame->key_frame;
   
@@ -1931,8 +1934,12 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
                            kf);
           
     result = !quicktime_write_data(file, 
-                                   codec->buffer, 
+                                   encoded_data,
                                    bytes_encoded);
+
+#if ENCODE_VIDEO2
+    av_free_packet(&pkt);
+#endif
 
     // Must go before lqt_write_frame_header() which increments vtrack->cur_chunk.
     // cur_chunk is a frame number in storage order.
