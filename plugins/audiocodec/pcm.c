@@ -1053,7 +1053,7 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
     {
     case 8:
       atrack->block_align = atrack->channels;
-      atrack->sample_format = LQT_SAMPLE_UINT8;
+      atrack->sample_format = LQT_SAMPLE_INT8;
       codec->encode = encode_8;
       codec->decode = decode_8;
       break;
