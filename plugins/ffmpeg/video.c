@@ -1683,7 +1683,12 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
     codec->avctx->height = height;
 
     lqt_ffmpeg_setup_encoding_colormodel(vtrack);
-
+#if ENCODE_VIDEO2
+    codec->frame->width = width;
+    codec->frame->height = height;
+    codec->frame->format = codec->avctx->pix_fmt;
+#endif
+    
     lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
     codec->avctx->sample_aspect_ratio.num = pixel_width;
     codec->avctx->sample_aspect_ratio.den = pixel_height;
