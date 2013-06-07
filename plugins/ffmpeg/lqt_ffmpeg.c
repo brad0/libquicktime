@@ -1055,7 +1055,12 @@ static void ffmpeg_map_init(void)
 #ifdef HAVE_PRORES_SUPPORT
       // FFMpeg has 2 different ProRes encoders, so try the better one first.
       if(codecidmap_v[i].id == CODEC_ID_PRORES)
-        codecidmap_v[i].encoder = avcodec_find_encoder_by_name("prores_kostya");
+        {
+        // In newer versions it's called prores_ks. It used to be called prores_kostya
+        codecidmap_v[i].encoder = avcodec_find_encoder_by_name("prores_ks");
+        if(!codecidmap_v[i].encoder)
+          codecidmap_v[i].encoder = avcodec_find_encoder_by_name("prores_kostya");
+        }
 
       if(!codecidmap_v[i].encoder)
 #endif
