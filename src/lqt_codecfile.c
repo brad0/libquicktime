@@ -160,6 +160,10 @@ static char * create_filename()
                     "no system-wide codec file. Looking in user's home.");
  
     fdir = getenv("HOME");
+#ifdef _WIN32
+    if(!fdir)
+      fdir = getenv("USERPROFILE");
+#endif
     if(!fdir)
       return NULL;
     filename_buffer = malloc(strlen(fdir) + 22);

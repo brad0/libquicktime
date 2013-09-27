@@ -31,7 +31,9 @@
 #include "lqt_codecinfo.h"
 #include "lqt_qtvr.h"
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
 
 
 #ifdef __cplusplus
@@ -1741,6 +1743,8 @@ int64_t lqt_get_text_pts_offset(quicktime_t * file, int track);
 }
 #endif /* __cplusplus */
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
   
 #endif

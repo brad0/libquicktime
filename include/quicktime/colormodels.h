@@ -25,7 +25,9 @@
 #ifndef COLORMODELS_H
 #define COLORMODELS_H
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
 
 /** \defgroup color Color handling
 
@@ -238,6 +240,8 @@ int cmodel_is_planar(int color_model);
 }
 #endif
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 #endif

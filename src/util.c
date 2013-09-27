@@ -931,7 +931,18 @@ void lqt_dump_time(uint64_t t)
   struct tm tm;
   /*  2082844800 = seconds between 1/1/04 and 1/1/70 */
   ti = t - 2082844800;
+#ifdef HAVE_LOCALTIME_R
   localtime_r(&ti, &tm);
+#elif defined(_WIN64) && defined(HAVE__LOCALTIME64_S)
+  if(_localtime64_s(&tm, &ti))
+    perror("_localtime64_s:");
+#elif defined(_WIN32) && defined(HAVE__LOCALTIME32_S)
+  if(_localtime32_s(&tm, &ti))
+    perror("_localtime32_s:");
+#else
+  // fallback to non-reentrant localtime
+  memcpy(&tm, localtime(&ti), sizeof(tm));
+#endif
   tm.tm_mon++;
   printf("%04d-%02d-%02d %02d:%02d:%02d (%"PRId64")",
          tm.tm_year+1900, tm.tm_mon, tm.tm_mday,

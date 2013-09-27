@@ -198,6 +198,10 @@ AC_HEADER_TIME
 dnl Checks for library functions.
 
 AC_FUNC_MMAP
+# In case we are building for Windows via MinGW, we may need to use msvcrt's
+# localtime_s - however for most MinGW builds, localtime_s isn't exported so
+# check for _localtime32_s/_localtime64_s instead.
+AC_CHECK_FUNCS(localtime_r, ,AC_CHECK_FUNCS([_localtime32_s _localtime64_s]))
 AC_CHECK_FUNCS([gettimeofday memalign posix_memalign lrint vasprintf])
 AC_CHECK_FUNCS(fseeko, [have_fseeko="true"])
 AM_CONDITIONAL(HAVE_FSEEKO, test x"$have_fseeko" = "xtrue")

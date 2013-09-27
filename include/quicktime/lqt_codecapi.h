@@ -25,7 +25,9 @@
 #ifndef _LQT_CODECAPI_H_
 #define _LQT_CODECAPI_H_
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
 
 #include <config.h>
 #include <quicktime/lqt_version.h>
@@ -219,6 +221,8 @@ int lqt_audio_read_vbr_packet(quicktime_t * file,
                               uint8_t ** buffer, int * buffer_alloc,
                               int * samples);
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 #endif // _LQT_CODECAPI_H_

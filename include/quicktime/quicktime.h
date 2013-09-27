@@ -32,7 +32,9 @@ extern "C" {
 #include <inttypes.h>
 #include <stddef.h>
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
   
 /* Some public enums needed by most subsequent headers */
 
@@ -1308,7 +1310,9 @@ int64_t quicktime_byte_position(quicktime_t *file);
   
 void quicktime_set_avi(quicktime_t *file, int value);
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 
 #ifdef __cplusplus

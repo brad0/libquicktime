@@ -27,7 +27,9 @@
 
 
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -218,6 +220,8 @@ int  lqt_get_colr(quicktime_t *file, int track, quicktime_colr_t *colr);
 }
 #endif /* __cplusplus */
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 #endif /* _LQT_ATOMS_H_ */

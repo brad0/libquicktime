@@ -32,7 +32,9 @@
 #ifndef _LQT_CODEC_INFO_H_
 #define _LQT_CODEC_INFO_H_
 
+#ifdef __GNUC__
 #pragma GCC visibility push(default)
+#endif
 
 #include <inttypes.h>
 
@@ -498,6 +500,8 @@ void lqt_dump_codec_info(const lqt_codec_info_t * info);
 }
 #endif /* __cplusplus */
 
+#ifdef __GNUC__
 #pragma GCC visibility pop
+#endif
 
 #endif /* _LQT_CODEC_INFO_H_ */
