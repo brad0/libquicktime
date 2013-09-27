@@ -677,7 +677,7 @@ quicktime_trak_t* quicktime_add_track(quicktime_t *file)
 
 int quicktime_init(quicktime_t *file)
   {
-  bzero(file, sizeof(quicktime_t));
+  memset(file, 0, sizeof(quicktime_t));
   //	quicktime_atom_write_header64(new_file, &file->mdat.atom, "mdat");
   quicktime_moov_init(&file->moov);
   file->max_riff_size = 0x40000000;

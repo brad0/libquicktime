@@ -2391,7 +2391,7 @@ int RTjpeg_set_quality(RTjpeg_t *rtj, int *quality)
  RTjpeg_dct_init(rtj);
  RTjpeg_idct_init(rtj);
  RTjpeg_quant_init(rtj);
-// bzero(rtj->old, ((4*rtj->width*rtj->height)));
+// memset(rtj->old, 0, ((4*rtj->width*rtj->height)));
  return 0;
 }
 
@@ -2425,7 +2425,7 @@ int RTjpeg_set_size(RTjpeg_t *rtj, int *w, int *h)
    lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "RTjpeg: Could not allocate memory");
    return -1;
   }
-  bzero(rtj->old, ((4*rtj->width*rtj->height)));
+  memset(rtj->old, 0, ((4*rtj->width*rtj->height)));
  }
  return 0;
 }
@@ -2461,7 +2461,7 @@ int RTjpeg_set_intra(RTjpeg_t *rtj, int *key, int *lm, int *cm)
   lqt_log(NULL, LQT_LOG_ERROR, LOG_DOMAIN, "RTjpeg: Could not allocate memory");
   return -1;
  }
- bzero(rtj->old, ((4*rtj->width*rtj->height)));
+ memset(rtj->old, 0, ((4*rtj->width*rtj->height)));
 
  return 0;
 }
@@ -2476,7 +2476,7 @@ RTjpeg_t * RTjpeg_init()
  RTjpeg_t * rtj;
 
  rtj = (RTjpeg_t *)malloc(sizeof(RTjpeg_t));
- bzero(rtj, sizeof(RTjpeg_t));
+ memset(rtj, 0, sizeof(RTjpeg_t));
  return rtj;
 }
 
@@ -3458,7 +3458,7 @@ void RTjpeg_yuv420rgb8(RTjpeg_t *rtj, uint8_t **planes, uint8_t **rows)
  uint8_t *b = planes[0];
  for(i=0; i<rtj->height; i++)
  {
-  bcopy(b, rows[i], rtj->width);
+  memcpy(rows[i], b, rtj->width);
   b+=rtj->width;
  }
 }
@@ -3480,7 +3480,7 @@ int RTjpeg_compress(RTjpeg_t *rtj, uint8_t *sp, uint8_t **planes)
  } else
  {
   if(rtj->key_count == 0)
-   bzero(rtj->old, ((4*rtj->width*rtj->height)));
+   memset(rtj->old, 0, ((4*rtj->width*rtj->height)));
   switch(rtj->f)
   {
    case RTJ_YUV420: ds = RTjpeg_mcompressYUV420(rtj, &(fh->data), planes); break;
@@ -3518,7 +3518,7 @@ static int RTjpeg_nullcompress(RTjpeg_t *rtj, int8_t *sp)
  } else
  {
   if(rtj->key_count == 0)
-   bzero(rtj->old, ((4*rtj->width*rtj->height)));
+   memset(rtj->old, 0, ((4*rtj->width*rtj->height)));
   switch(rtj->f)
   {
    case RTJ_YUV420: ds = RTjpeg_nullcompressYUV420(rtj, &(fh->data)); break;

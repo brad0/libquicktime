@@ -1218,7 +1218,7 @@ static void table_offsets(unsigned char *buffer,
   int field = 0;
   int len;
 
-  bzero(header, sizeof(mjpeg_qt_hdr) * 2);
+  memset(header, 0, sizeof(mjpeg_qt_hdr) * 2);
 
   // Read every marker to get the offsets for the headers
   for(field = 0; field < 2; field++)
@@ -1437,7 +1437,7 @@ static void read_quicktime_markers(unsigned char *buffer,
 long mjpeg_get_quicktime_field2(unsigned char *buffer, long buffer_size)
   {
   mjpeg_qt_hdr header[2];
-  bzero(&header, sizeof(mjpeg_qt_hdr) * 2);
+  memset(&header, 0, sizeof(mjpeg_qt_hdr) * 2);
 
   read_quicktime_markers(buffer, buffer_size, header);
   return header[0].next_offset;
