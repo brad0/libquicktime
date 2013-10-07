@@ -933,10 +933,10 @@ void lqt_dump_time(uint64_t t)
   ti = t - 2082844800;
 #ifdef HAVE_LOCALTIME_R
   localtime_r(&ti, &tm);
-#elif defined(_WIN64) && defined(HAVE__LOCALTIME64_S)
+#elif defined(HAVE__LOCALTIME64_S)
   if(_localtime64_s(&tm, &ti))
     perror("_localtime64_s:");
-#elif defined(_WIN32) && defined(HAVE__LOCALTIME32_S)
+#elif defined(HAVE__LOCALTIME32_S)
   if(_localtime32_s(&tm, &ti))
     perror("_localtime32_s:");
 #else

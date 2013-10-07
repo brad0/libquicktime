@@ -14,7 +14,7 @@ AM_CFLAGS = @AVCODEC_CFLAGS@ $(libswscale_cflags) -DLOCALE_DIR=\"$(localedir)\"
 pkglib_LTLIBRARIES = lqt_ffmpeg.la
 
 lqt_ffmpeg_la_SOURCES = lqt_ffmpeg.c audio.c video.c params.c
-lqt_ffmpeg_la_LDFLAGS = -avoid-version -module
+lqt_ffmpeg_la_LDFLAGS = -no-undefined -avoid-version -module
 lqt_ffmpeg_la_LIBADD = @MODULE_LIBADD@ @AVCODEC_LIBS@ $(libswscale_libs)
 
 noinst_HEADERS = ffmpeg.h params.h

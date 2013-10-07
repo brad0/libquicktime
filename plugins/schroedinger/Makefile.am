@@ -11,7 +11,7 @@ schroedinger_decode.c \
 schroedinger_encode.c \
 lqt_schroedinger.c
 
-lqt_schroedinger_la_LDFLAGS = -avoid-version -module
+lqt_schroedinger_la_LDFLAGS = -no-undefined -avoid-version -module
 lqt_schroedinger_la_LIBADD = @MODULE_LIBADD@ @SCHROEDINGER_LIBS@
 
 noinst_HEADERS = schroedinger.h

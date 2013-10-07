@@ -9,7 +9,7 @@ AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 #
 libquicktime_la_LIBADD = @ICONV_LIBS@ @LTLIBINTL@
 
-libquicktime_la_LDFLAGS = -export-dynamic
+libquicktime_la_LDFLAGS = -no-undefined -export-dynamic
 
 # build only the files, which can be compiled
 
