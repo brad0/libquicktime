@@ -369,8 +369,8 @@ int lqt_decode_video(quicktime_t *file,
     }
   else
     {
-    file->vtracks[track].stream_row_span    = file->vtracks[track].io_row_span;
-    file->vtracks[track].stream_row_span_uv = file->vtracks[track].io_row_span_uv;
+    file->vtracks[track].io_row_span    = file->vtracks[track].stream_row_span;
+    file->vtracks[track].io_row_span_uv = file->vtracks[track].stream_row_span_uv;
           
     result = file->vtracks[track].codec->decode_video(file, row_pointers, track);
           

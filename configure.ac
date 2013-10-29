@@ -107,6 +107,8 @@ dnl This is necessary for libtool assembler support
 AS=gcc
 ASFLAGS=
 
+MODULE_LDFLAGS=""
+
 AC_SUBST(AS)
 AC_SUBST(ASFLAGS)
 
@@ -127,11 +129,14 @@ AH_TEMPLATE([LINUX],
 case "$host_os" in
 	linux*)
 		AC_DEFINE(LINUX)
+                MODULE_LDFLAGS="$MODULE_LDFLAGS -no-undefined"
 		;;
 	*)
 		echo $host_os
 		;;
 esac
+
+AC_SUBST(MODULE_LDFLAGS)
 
 AC_DEFINE(_GNU_SOURCE)
 

@@ -7,7 +7,7 @@ lqt_lame.c
 
 AM_CFLAGS = @LAME_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
-lqt_lame_la_LDFLAGS = -no-undefined -avoid-version -module
+lqt_lame_la_LDFLAGS = @MODULE_LDFLAGS@ -avoid-version -module
 lqt_lame_la_LIBADD = @MODULE_LIBADD@ @LAME_LIBS@
 
 noinst_HEADERS = lame_codec.h

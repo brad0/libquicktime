@@ -9,7 +9,7 @@ ima4.c \
 pcm.c \
 lqt_audiocodec.c
 
-lqt_audiocodec_la_LDFLAGS = -no-undefined -avoid-version -module
+lqt_audiocodec_la_LDFLAGS = @MODULE_LDFLAGS@ -avoid-version -module
 lqt_audiocodec_la_LIBADD = @MODULE_LIBADD@
 
 noinst_HEADERS = \

@@ -16,7 +16,7 @@ yv12.c \
 videocodec.c \
 lqt_videocodec.c
 
-lqt_videocodec_la_LDFLAGS = -no-undefined -avoid-version -module
+lqt_videocodec_la_LDFLAGS = @MODULE_LDFLAGS@ -avoid-version -module
 lqt_videocodec_la_LIBADD = @MODULE_LIBADD@
 
 

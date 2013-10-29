@@ -491,7 +491,7 @@ uint8_t ** lqt_rows_alloc(int width, int height, int colormodel, int * rowspan, 
       *rowspan_uv = (*rowspan + sub_h - 1) / sub_h;
 
     y_size = *rowspan * height;
-    uv_size = (*rowspan_uv * (height + sub_v - 1))/sub_v;
+    uv_size = *rowspan_uv * ((height + sub_v - 1)/sub_v);
 
     video_buffer    = malloc(3 * sizeof(unsigned char*));
     video_buffer[0] = malloc(y_size + 2 * uv_size);
