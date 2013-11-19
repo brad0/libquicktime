@@ -131,6 +131,9 @@ case "$host_os" in
 		AC_DEFINE(LINUX)
                 MODULE_LDFLAGS="$MODULE_LDFLAGS -no-undefined"
 		;;
+	mingw*)
+		MODULE_LDFLAGS="$MODULE_LDFLAGS -no-undefined"
+		;;
 	*)
 		echo $host_os
 		;;
