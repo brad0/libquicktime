@@ -927,7 +927,11 @@ void lqt_hexdump_stdout(uint8_t * data, int len, int linebreak)
 
 void lqt_dump_time(uint64_t t)
   {
+#if !defined(HAVE_LOCALTIME_R) && defined(HAVE__LOCALTIME64_S)
+  __time64_t ti;
+#else
   time_t ti;
+#endif
   struct tm tm;
   /*  2082844800 = seconds between 1/1/04 and 1/1/70 */
   ti = t - 2082844800;

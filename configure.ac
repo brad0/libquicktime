@@ -194,7 +194,7 @@ AC_SEARCH_LIBS(pthread_create, [pthread c_r])
 
 AC_SUBST(LIBS)
 
-AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h soundcard.h stddef.h)
+AC_CHECK_HEADERS(fcntl.h sys/param.h sys/time.h unistd.h linux/videodev.h sys/soundcard.h soundcard.h stddef.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -210,7 +210,7 @@ AC_FUNC_MMAP
 # localtime_s - however for most MinGW builds, localtime_s isn't exported so
 # check for _localtime32_s/_localtime64_s instead.
 AC_CHECK_FUNCS(localtime_r, , [AC_CHECK_FUNCS([_localtime32_s _localtime64_s])])
-AC_CHECK_FUNCS([gettimeofday memalign posix_memalign lrint vasprintf])
+AC_CHECK_FUNCS([getpagesize gettimeofday memalign posix_memalign lrint vasprintf])
 AC_CHECK_FUNCS(fseeko, [have_fseeko="true"])
 AM_CONDITIONAL(HAVE_FSEEKO, test x"$have_fseeko" = "xtrue")
 
