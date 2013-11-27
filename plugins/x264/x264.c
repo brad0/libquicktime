@@ -431,6 +431,7 @@ static int flush_frame(quicktime_t *file, int track,
   x264_picture_t pic_out;
   int encoded_size;
   uint8_t * ptr;
+  int ret;
   
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
@@ -438,11 +439,13 @@ static int flush_frame(quicktime_t *file, int track,
   pic_out.i_pts = 0;
   /* Encode frames, get nals */
 #if X264_BUILD >= 76
-  if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out)<0)
+  ret = x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out);
+  if(ret <= 0)
+    return ret;
 #else
   if(x264_encoder_encode(codec->enc, &nal, &nnal, pic_in, &pic_out))
-#endif
     return 0;
+#endif
   
   /* Encode nals -> get h264 stream */
   encoded_size = encode_nals(codec->work_buffer,
@@ -745,12 +748,23 @@ static int flush(quicktime_t *file, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_x264_codec_t *codec = vtrack->codec->priv;
+  int flushed = 0;
   
   /* Do nothing if we didn't encode anything yet */
   if(!codec->initialized)
     return 0;
-  
-  return flush_frame(file, track, (x264_picture_t*)0);
+
+#if X264_BUILD >= 76
+  while(x264_encoder_delayed_frames(codec->enc) > 0)
+  {
+      if(flush_frame(file, track, (x264_picture_t*)0) < 0)
+          return 0;
+      flushed = 1;
+  }
+#else
+  flushed = flush_frame(file, track, (x264_picture_t*)0);
+#endif
+  return flushed;
   }
   
 
