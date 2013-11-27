@@ -37,12 +37,48 @@
 #define lrint(x) ((long int)(x))
 #endif
 
+static FILE * file_open(const char *path, const char *mode)
+{
+#ifdef __MINGW32__
+        // Work around for unicode characters
+        FILE *file = 0;
+        wchar_t* wcharPath = 0;
+        wchar_t* wcharMode = 0;
+        if( __mingw_str_utf8_wide(path, &wcharPath, 0) &&
+                __mingw_str_utf8_wide(mode, &wcharMode, 0) )
+        {
+                file = _wfopen(wcharPath, wcharMode);
+        }
+        __mingw_str_free(wcharPath);
+        __mingw_str_free(wcharMode);
+        return file;
+#else
+        return fopen(path, mode);
+#endif
+}
+
 /* Disk I/O */
 
 int64_t quicktime_get_file_length(const char *path)
 {
+#ifdef __MINGW32__
+      // // Work around for unicode characters
+      int wstat_res = 0;
+      wchar_t* wcharPath = 0;
+      struct _stat64 status;
+      status.st_size = 0;
+
+      // Using _wstat64 explicitly in case mingw fails to typedef _wstat for large files
+      if( __mingw_str_utf8_wide(path, &wcharPath, 0) )
+            wstat_res = _wstat64(wcharPath, &status);
+
+      __mingw_str_free(wcharPath);
+
+      if(wstat_res)
+#else
       struct stat status;
       if(stat(path, &status))
+#endif
               perror("quicktime_get_file_length stat:");
       return status.st_size;
 }
@@ -50,8 +86,8 @@ int64_t quicktime_get_file_length(const char *path)
 int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr)
 {
 	int exists = 0;
-	char flags[10];
-	if(rd && (file->stream = fopen(path, "rb")))
+        char flags[10];
+        if(rd && (file->stream = file_open(path, "rb")))
 	{
 		exists = 1; 
 		fclose(file->stream); 
@@ -69,7 +105,7 @@ int quicktime_file_open(quicktime_t *file, const char *path, int rd, int wr)
 			sprintf(flags, "wb+");
 	}
 
-	if(!(file->stream = fopen(path, flags)))
+        if(!(file->stream = file_open(path, flags)))
 	{
 		return 1;
 	}
