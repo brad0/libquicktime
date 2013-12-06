@@ -391,6 +391,27 @@
 						} \
 					} \
 					break; \
+				case BC_YUVJ422P: \
+					for(i = 0; i < out_h; i++) \
+					{ \
+						unsigned char *output_y = output_rows[0] + i * out_rowspan; \
+						unsigned char *output_u = output_rows[1] + i * out_rowspan_uv; \
+						unsigned char *output_v = output_rows[2] + i * out_rowspan_uv; \
+						unsigned char *input_y = input_rows[0] + row_table[i] * in_rowspan; \
+						unsigned char *input_u = input_rows[1] + row_table[i] / 2 * in_rowspan_uv; \
+						unsigned char *input_v = input_rows[2] + row_table[i] / 2 * in_rowspan_uv; \
+						for(j = 0; j < out_w; j++) \
+						{ \
+							transfer_YUV422P_to_YUV420P(input_y + (y_in_offset), \
+								input_u + (u_in_offset), \
+								input_v + (v_in_offset), \
+								output_y, \
+								output_u, \
+								output_v, \
+								j); \
+						} \
+					} \
+					break; \
 			} \
 			break; \
  \
