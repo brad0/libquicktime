@@ -684,6 +684,14 @@ int lqt_colormodel_is_yuv(int colormodel);
 void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v);
 
 /** \ingroup color
+   \brief Check, if a colormodel is video range or full range
+   \param colormodel A colormodel
+   \returns 1 if the colormodel is video range, 0 else
+*/
+
+int lqt_colormodel_is_video_range(int colormodel);
+
+/** \ingroup color
    \brief Get the default row span for a colormodel and an image width
    \param colormodel A colormodel
    \param width Image width

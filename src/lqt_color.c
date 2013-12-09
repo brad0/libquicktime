@@ -172,6 +172,25 @@ void lqt_colormodel_get_chroma_sub(int colormodel, int * sub_h, int * sub_v)
 
   }
 
+int lqt_colormodel_is_video_range(int colormodel)
+  {
+  switch(colormodel)
+    {
+    case BC_YUV422:
+    case BC_YUV420P:
+    case BC_YUV422P:
+    case BC_YUV444P:
+    case BC_YUV411P:
+    case BC_YUVA8888:   
+    case BC_YUV422P16:
+    case BC_YUV444P16:
+    case BC_YUV422P10:
+      return 1;
+    default:
+      return 0;
+    }
+  }
+
 
 /*
  *   Return the bits of a colormodel. This is used only internally
@@ -233,12 +252,28 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
   int input_has_alpha  = lqt_colormodel_has_alpha(in_colormodel);
   int output_has_alpha = lqt_colormodel_has_alpha(out_colormodel);
 
- 
+  int input_relative_bits = colormodel_get_bits(in_colormodel) *
+      (input_has_alpha ? 3 : 4);
+  int output_relative_bits = colormodel_get_bits(out_colormodel) *
+      (output_has_alpha ? 3 : 4);
+  
+  int input_sub_h = 1;
+  int input_sub_v = 1;
+  int output_sub_h = 1;
+  int output_sub_v = 1;
+
+  int price = 0;
+  
+  if(input_is_yuv)
+      lqt_colormodel_get_chroma_sub(in_colormodel, &input_sub_h, &input_sub_v);
+  if(output_is_yuv)
+      lqt_colormodel_get_chroma_sub(out_colormodel, &output_sub_h, &output_sub_v);
+  
   /* Zero conversions are for free :-) */
   
   if(in_colormodel == out_colormodel)
     return 0;
-
+  
   /*
    *  Don't know what to do here. It can happen for very few
    *  colormodels which aren't supported by any codecs.
@@ -248,59 +283,67 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
     {
     lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
             "Input colorspace is neither RGB nor YUV, can't predict conversion price");
-    return 7;
+    return 99;
     }
   
   if(!output_is_rgb && !output_is_yuv)
     {
     lqt_log(NULL, LQT_LOG_WARNING, LOG_DOMAIN,
             "Output colorspace is neither RGB nor YUV, can't predict conversion price");
-    return 7;
+    return 99;
     }
 
   /*
-   *  Adding or removing the alpha channel means losing information or
-   *  adding unneccesary information -> too bad
+   *  Losing information?
    */
 
-  if(input_has_alpha != output_has_alpha)
-    return 6;
+  if(input_has_alpha && !output_has_alpha)
+    price += 4;
+
+  if(input_relative_bits > output_relative_bits)
+    price += 4;
+  
+  if(input_sub_h < output_sub_h)
+      price += (output_sub_h - input_sub_h) * 4;
+  if(input_sub_v < output_sub_v)
+      price += (output_sub_v - input_sub_v) * 4;
+
+  if(!lqt_colormodel_is_video_range(in_colormodel) &&
+     lqt_colormodel_is_video_range(out_colormodel))
+    price += 4;
   
   /*
-   *  YUV <-> RGB conversion costs 4-5
+   *  YUV <-> RGB conversion costs 3
    */
   
   if((input_is_yuv && output_is_rgb) ||
      (input_is_rgb && output_is_yuv))
-    {
-    /* Added check to make sure that staying on the same bit depth
-       is considered as "better" when doing a colorspace conversion. */
-    if(colormodel_get_bits(in_colormodel) !=
-      colormodel_get_bits(out_colormodel))
-      /* With bit conversion: 5   */
-      return 5;
-    else 
-      /* No bit conversion is better: 4   */
-      return 4;
-    }
-  
+    price += 3;
+
   /*
-   *  Alpha blending is a bit more simple
+   * Adding unnecessary information?
    */
 
-  if((input_is_yuv && output_is_rgb) ||
-     (input_is_rgb && output_is_yuv))
-    return 3;
-  
-  /* Bit with conversion costs 2   */
-  
-  if(colormodel_get_bits(in_colormodel) !=
-     colormodel_get_bits(out_colormodel))
-    return 2;
+  if(output_has_alpha && !input_has_alpha)
+    price += 1;
 
-  /* Reordering of components is cheapest */
+  if(output_relative_bits > input_relative_bits)
+    price += 1;
   
-  return 1;
+  if(input_sub_h > output_sub_h)
+      price += (input_sub_h - output_sub_h);
+  if(input_sub_v > output_sub_v)
+      price += (input_sub_v - output_sub_v);
+  
+  if(lqt_colormodel_is_video_range(in_colormodel) &&
+     !lqt_colormodel_is_video_range(out_colormodel))
+    price += 1;
+
+  /* Reordering of components */
+
+  price += 1;
+
+  return price;
   }
 
 int lqt_get_decoder_colormodel(quicktime_t * file, int track)
@@ -311,7 +354,7 @@ int lqt_get_decoder_colormodel(quicktime_t * file, int track)
 int
 lqt_get_best_target_colormodel(int source, int const* target_options)
   {
-  int conversion_price = 0, best_conversion_price = 10;
+  int conversion_price = 0, best_conversion_price = 100;
   int ret = LQT_COLORMODEL_NONE;
   int i;
 
@@ -343,7 +386,7 @@ lqt_get_best_target_colormodel(int source, int const* target_options)
 int
 lqt_get_best_source_colormodel(int const* source_options, int target)
   {
-  int conversion_price = 0, best_conversion_price = 10;
+  int conversion_price = 0, best_conversion_price = 100;
   int ret = LQT_COLORMODEL_NONE;
   int i;
 
