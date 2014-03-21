@@ -45,6 +45,46 @@ static int64_t get_file_length(quicktime_t *file)
   return total_bytes;
   }
 
+static void skip_null_block(quicktime_t *file)
+  {
+  int len, i, offset;
+  uint64_t *ptrs[4];
+  unsigned char *buf = malloc(0x100000);
+  if(!buf)
+    return;
+
+  do
+    {
+    len = quicktime_read_data(file, buf, 0x100000);
+    i = len / 32;
+    ptrs[0] = (uint64_t*)buf;
+    ptrs[1] = ptrs[0]+1;
+    ptrs[2] = ptrs[0]+2;
+    ptrs[3] = ptrs[0]+3;
+    while(i--)
+      {
+          if(*ptrs[0] | *ptrs[1] | *ptrs[2] | *ptrs[3])
+              break;
+          ptrs[0] += 4;
+          ptrs[1] += 4;
+          ptrs[2] += 4;
+          ptrs[3] += 4;
+      }
+    }
+  while(i < 0 && quicktime_position(file) < file->total_length);
+    
+  if(i >= 0)
+    {
+    /* Find offset to first non-NULL byte */
+    offset = ((len/32)-(i+1))*32;
+    while(!(buf[offset]))
+        offset++;
+    quicktime_set_position(file, quicktime_position(file) - 0x100000 + offset);
+    }
+
+  free(buf);
+}
+
 int lqt_fileno(quicktime_t *file)
   {
   FILE *fp;
@@ -1858,6 +1898,15 @@ int quicktime_read_info(quicktime_t *file)
                 got_header = 1;
                 }
               else
+                if(((leaf_atom.type[0] | leaf_atom.type[1] | leaf_atom.type[2] | leaf_atom.type[3]) == 0) &&
+                   (leaf_atom.size == 0))
+                  {
+                  /* Some quicktime movies created by Arri Alexa
+                     have been found to contain large blocks of
+                     NULL bytes not contained in atoms */
+                  skip_null_block(file);
+                  }
+                  else
                 quicktime_atom_skip(file, &leaf_atom);
           }
         }while(!result && quicktime_position(file) < file->total_length);
