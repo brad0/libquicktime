@@ -27,7 +27,8 @@
 void quicktime_tcmi_init(quicktime_tcmi_t *tcmi)
   {
   tcmi->version = 0;
-  tcmi->flags = 1;
+//  tcmi->flags = 1; /* This causes the timecodes to be displayed in Quicktime-7 */
+  tcmi->flags = 0;
   tcmi->font = 0;
   tcmi->face = 0;
   tcmi->size = 12;
