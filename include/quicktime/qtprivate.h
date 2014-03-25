@@ -933,10 +933,6 @@ typedef struct
   
   quicktime_tref_t tref;
   quicktime_strl_t * strl; // != NULL for AVI files during reading and writing
-  int chunk_sizes_alloc;
-  int64_t * chunk_sizes; /* This contains the chunk sizes for audio
-                            tracks. They can not so easily be obtained
-                            during decoding */
   int has_tref;
 
   /* Stuff for writing chunks is stored here */
@@ -945,7 +941,14 @@ typedef struct
   int chunk_samples;
   
   int64_t pts_offset;
-  
+
+  /* Chunk sizes for audio */ 
+  int chunk_sizes_alloc;
+  int64_t * chunk_sizes; /* This contains the chunk sizes for audio
+                            tracks. They can not so easily be obtained
+                            during decoding */
+
+ 
   } quicktime_trak_t;
 
 
@@ -1379,7 +1382,6 @@ typedef struct
   int block_align;
 
   lqt_compression_info_t ci;
-  
   } quicktime_audio_map_t;
 
 

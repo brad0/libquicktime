@@ -96,7 +96,7 @@ int lqt_fileno(quicktime_t *file)
 int quicktime_make_streamable(char *in_path, char *out_path)
   {
   quicktime_t file, *old_file, new_file;
-  int moov_exists = 0, mdat_exists = 0, ftyp_exists = 0, result, atoms = 1;
+  int moov_exists = 0, mdat_exists = 0, result, atoms = 1;
   int64_t mdat_start = 0, mdat_size = 0;
   quicktime_atom_t leaf_atom;
   int64_t moov_length = 0, moov_start;
@@ -127,18 +127,12 @@ int quicktime_make_streamable(char *in_path, char *out_path)
         moov_exists = atoms;
         moov_length = leaf_atom.size;
         }
-      else
-        if(quicktime_atom_is(&leaf_atom, "ftyp"))
-          {
-          ftyp_exists = atoms;
-          }
-        else
-          if(quicktime_atom_is(&leaf_atom, "mdat"))
-            {
-            mdat_start = quicktime_position(&file) - HEADER_LENGTH;
-            mdat_size = leaf_atom.size;
-            mdat_exists = atoms;
-            }
+      else if(quicktime_atom_is(&leaf_atom, "mdat"))
+        {
+        mdat_start = quicktime_position(&file) - HEADER_LENGTH;
+        mdat_size = leaf_atom.size;
+        mdat_exists = atoms;
+        }
 
       quicktime_atom_skip(&file, &leaf_atom);
 
@@ -2552,9 +2546,7 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
     }
 
   if(!trak->chunk_sizes)
-    {
     trak->chunk_sizes = lqt_get_chunk_sizes(file, trak);
-    }
 
   /* Reallocate buffer */
 
