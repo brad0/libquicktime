@@ -86,6 +86,7 @@ ndhd.c \
 nloc.c \
 nmhd.c \
 obji.c \
+packetindex.c \
 pano.c \
 pasp.c \
 pdat.c \

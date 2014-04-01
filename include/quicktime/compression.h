@@ -83,7 +83,14 @@ typedef struct
   } lqt_compression_info_t;
 
 
-#define LQT_PACKET_KEYFRAME (1<<0) //!< Keyframes
+#define LQT_PACKET_KEYFRAME  (1<<0) //!< Keyframes
+#define LQT_PACKET_REF_FRAME (1<<1) //!< Reference frame
+
+#define LQT_PACKET_TYPE_MASK (0xf00) //!< Mask for frame types
+#define LQT_PACKET_TYPE_I    (1<<8) //!< I-frame
+#define LQT_PACKET_TYPE_P    (2<<8) //!< P-frame
+#define LQT_PACKET_TYPE_B    (3<<8) //!< B-frame
+
 
 typedef struct
   {

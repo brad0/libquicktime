@@ -24,7 +24,8 @@
 
 #include "lqt_private.h"
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
+
 #define __RTJPEG_INTERNAL__
 #include "RTjpeg.h"
 #ifdef MMX

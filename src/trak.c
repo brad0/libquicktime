@@ -168,6 +168,8 @@ int quicktime_trak_delete(quicktime_trak_t *trak)
   quicktime_tkhd_delete(&trak->tkhd);
   quicktime_tref_delete(&trak->tref);
 
+  lqt_packet_index_delete(&trak->idx);
+
   if(trak->chunk_sizes)
     free(trak->chunk_sizes);
   return 0;
@@ -183,6 +185,7 @@ int quicktime_trak_dump(quicktime_trak_t *trak)
   if(trak->has_tref)
     quicktime_tref_dump(&trak->tref);
   quicktime_mdia_dump(&trak->mdia);
+  lqt_packet_index_dump(&trak->idx);
 
   return 0;
   }

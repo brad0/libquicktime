@@ -35,7 +35,7 @@ static int read_type(uint8_t *data, uint8_t *type)
   /* need this for quicktime_check_sig */
   if(isalpha(type[0]) && isalpha(type[1]) && isalpha(type[2]) && isalpha(type[3]))
     return 0;
-  else if(type[0] | type[1] | type[2] | type[3] == 0)
+  else if((type[0] | type[1] | type[2] | type[3]) == 0)
     return 0; /* These kind of atoms do happen. */
   else
     return 1;

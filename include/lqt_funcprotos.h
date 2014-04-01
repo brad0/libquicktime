@@ -774,6 +774,16 @@ void quicktime_obji_dump(quicktime_obji_t *obji);
 int quicktime_read_obji(quicktime_t *file, quicktime_obji_t *obji);
 void quicktime_write_obji(quicktime_t *file, quicktime_obji_t *obji);
 
+/* packetindex.c */
+
+void lqt_packet_index_delete(lqt_packet_index_t*);
+void lqt_packet_index_dump(const lqt_packet_index_t*);
+void lqt_packet_index_append(lqt_packet_index_t*,
+                             const lqt_packet_index_entry_t*);
+
+void lqt_packet_index_alloc(lqt_packet_index_t*, int num);
+ 
+
 /* pano.c */
 
 int quicktime_pano_init(quicktime_pano_t *pano);  
