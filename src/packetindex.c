@@ -35,16 +35,41 @@ void lqt_packet_index_delete(lqt_packet_index_t * pi)
 void lqt_packet_index_dump(const lqt_packet_index_t* pi)
   {
   int i;
+  char c;
   lqt_dump("     Packet index (generated)\n");
   lqt_dump("      num_entries %d\n", pi->num_entries);
   for(i = 0; i < pi->num_entries; i++)
     {
-    lqt_dump("       pos %"PRId64" pts %"PRId64" dts %"PRId64" dur %"PRId64" sz %"PRId64" fl %08x\n",
+    lqt_dump("       pos %"PRId64" pts %"PRId64" dts %"PRId64" dur %"PRId64" sz %"PRId64" ",
              pi->entries[i].position,
              pi->entries[i].pts, pi->entries[i].dts,
              pi->entries[i].duration,
-             pi->entries[i].size,
-             pi->entries[i].flags);
+             pi->entries[i].size);
+
+    switch(pi->entries[i].flags & LQT_PACKET_TYPE_MASK)
+      {
+      case LQT_PACKET_TYPE_I:
+        c = 'I';
+        break;
+      case LQT_PACKET_TYPE_P:
+        c = 'P';
+        break;
+      case LQT_PACKET_TYPE_B:
+        c = 'B';
+        break;
+      default:
+        c = '?';
+        break;
+      }
+    lqt_dump("FT %c ", c);
+    
+    if(pi->entries[i].flags & LQT_PACKET_KEYFRAME)
+      lqt_dump("key ");
+    if(pi->entries[i].flags & LQT_PACKET_REF_FRAME)
+      lqt_dump("ref ");
+
+    lqt_dump("\n");
+    
     }
   }
 
@@ -59,7 +84,7 @@ void lqt_packet_index_alloc(lqt_packet_index_t * pi, int num)
   }
 
 void lqt_packet_index_append(lqt_packet_index_t * pi,
-                                   const lqt_packet_index_entry_t * e)
+                             const lqt_packet_index_entry_t * e)
   {
   if(pi->num_entries >= pi->entries_alloc)
     lqt_packet_index_alloc(pi, pi->num_entries + 1024);
@@ -69,3 +94,210 @@ void lqt_packet_index_append(lqt_packet_index_t * pi,
   pi->num_entries++;
   }
 
+static void
+packet_index_create_video(quicktime_t *file,
+                          quicktime_trak_t * trak,
+                          lqt_packet_index_t * idx)
+  {
+  int i;
+
+  int stts_index = 0;
+  int stts_count = 0;
+
+  int ctts_index = 0;
+  int ctts_count = 0;
+  
+  lqt_packet_index_entry_t e;
+  int stsc_index = 0;
+  int stsc_count = 0;
+  int stsc_chunk = 1;
+
+  int stss_index = 0;
+  int stps_index = 0;
+  
+  int64_t max_pts = 0;
+
+  quicktime_stss_t *stss;
+  quicktime_stps_t *stps;
+  
+  quicktime_ctts_t *ctts;
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  int num = quicktime_track_samples(file, trak);
+
+  if(trak->mdia.minf.stbl.has_ctts)
+    ctts = &trak->mdia.minf.stbl.ctts;
+  else
+    ctts = NULL;
+  
+  memset(&e, 0, sizeof(e));
+  
+  lqt_packet_index_alloc(idx, num);
+
+  e.position = quicktime_chunk_to_offset(file, trak, 0);
+
+  if(trak->mdia.minf.stbl.stsz.sample_size)
+    e.size = trak->mdia.minf.stbl.stsz.sample_size;
+
+  if(trak->mdia.minf.stbl.stss.total_entries > 0)
+    stss = &trak->mdia.minf.stbl.stss;
+  else
+    stss = NULL;
+  
+  if(trak->mdia.minf.stbl.stps.total_entries > 0)
+    stps = &trak->mdia.minf.stbl.stps;
+  else
+    stps = NULL;
+  
+  for(i = 0; i < num; i++)
+    {
+    e.flags = 0;
+    
+    /* Duration */
+    e.duration = stts->table[stts_index].sample_duration;;
+
+    /* PTS */
+    e.pts = e.dts;
+    
+    /* PTS = DTS + CTS if there are B-frames */
+    if(ctts)
+      {
+      e.pts += ctts->table[ctts_index].sample_duration -
+        ctts->table[0].sample_duration;
+      }
+
+    /* Determine size */
+    if(!trak->mdia.minf.stbl.stsz.sample_size)
+      e.size = trak->mdia.minf.stbl.stsz.table[i].size;
+    
+    /* Determine if we have a keyframe */
+    if(stss &&
+       (stss_index < stss->total_entries) &&
+       (stss->table[stss_index].sample == i+1))
+      {
+      e.flags |= LQT_PACKET_KEYFRAME | LQT_PACKET_REF_FRAME;
+      stss_index++;
+      }
+    else if(stps && 
+            (stps_index < stps->total_entries) &&
+            (stps->table[stps_index].sample == i+1))
+      {
+      e.flags |= LQT_PACKET_KEYFRAME | LQT_PACKET_REF_FRAME;
+      stps_index++;
+      }
+    else if(!stss)
+      e.flags |= LQT_PACKET_KEYFRAME;
+
+    if(e.flags & LQT_PACKET_KEYFRAME)
+      e.flags |= LQT_PACKET_TYPE_I;
+    else if(e.pts < max_pts)
+      e.flags |= LQT_PACKET_TYPE_B;
+    else
+      e.flags |= LQT_PACKET_TYPE_P | LQT_PACKET_REF_FRAME;
+    
+    if(e.pts > max_pts)
+      max_pts = e.pts;
+    
+    /* Append entry */
+    lqt_packet_index_append(idx, &e);
+
+    /* Advance packet */
+    e.dts += e.duration;
+    e.position += e.size;
+    
+    /* Advance indices */
+
+    /* stts */
+    stts_count++;
+    if(stts_count >= stts->table[stts_index].sample_count)
+      {
+      stts_index++;
+      stts_count = 0;
+      }
+
+    /* ctts */
+    if(ctts)
+      {
+      ctts_count++;
+      if(ctts_count >= ctts->table[ctts_index].sample_count)
+        {
+        ctts_index++;
+        ctts_count = 0;
+        }
+      }
+
+    /* stsc */
+    stsc_count++;
+    if(stsc_count >= trak->mdia.minf.stbl.stsc.table[stsc_index].samples)
+      {
+      /* Increment chunk */
+      stsc_chunk++;
+      stsc_count = 0;
+
+      /* stsc position */
+      if((stsc_index < trak->mdia.minf.stbl.stsc.total_entries - 1) &&
+         (stsc_chunk == trak->mdia.minf.stbl.stsc.table[stsc_index+1].chunk))
+        stsc_index++;
+      e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
+      }
+    }
+
+  /* Find Reference B-Frames */
+
+  if(ctts)
+    {
+    int64_t min_b_pts = -1;
+    i = num;
+
+    while(--i >= 0)
+      {
+      if((idx->entries[i].flags & LQT_PACKET_TYPE_MASK) == LQT_PACKET_TYPE_B)
+        {
+        if(min_b_pts == -1)
+          min_b_pts = idx->entries[i].pts;
+        else if(idx->entries[i].pts > min_b_pts)
+          idx->entries[i].flags |= LQT_PACKET_REF_FRAME;
+        else
+          min_b_pts = idx->entries[i].pts;
+        }
+      }
+    }
+  
+  }
+
+static void
+packet_index_create_audio(quicktime_t *file,
+                          quicktime_trak_t * trak,
+                          lqt_packet_index_t * idx)
+  {
+  // Each chunk is a packet
+  
+  }
+
+static void
+packet_index_create_audio_vbr(quicktime_t *file,
+                              quicktime_trak_t * trak,
+                              lqt_packet_index_t * idx)
+  {
+  // Each sample is a packet
+  
+  }
+
+void
+lqt_packet_index_create_from_trak(quicktime_t *file,
+                                  quicktime_trak_t * trak,
+                                  lqt_packet_index_t * idx)
+  {
+  if(trak->idx.num_entries)
+    return;
+
+  if(trak->mdia.minf.is_audio)
+    {
+    if(trak->mdia.minf.is_audio_vbr)
+      packet_index_create_audio_vbr(file, trak, idx);
+    
+    else // Each packet is a "chunk"
+      return packet_index_create_audio(file, trak, idx);
+    }
+  else if(trak->mdia.minf.is_video)
+    packet_index_create_video(file, trak, idx);
+  }

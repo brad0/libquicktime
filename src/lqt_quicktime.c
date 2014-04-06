@@ -1688,6 +1688,10 @@ void quicktime_init_maps(quicktime_t * file)
     {
     quicktime_trak_fix_counts(file, file->moov.trak[i],
                               file->moov.mvhd.time_scale);
+
+    lqt_packet_index_create_from_trak(file,
+                                      file->moov.trak[i],
+                                      &file->moov.trak[i]->idx);
     }
   
   /* get tables for all the different tracks */

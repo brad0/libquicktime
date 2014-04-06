@@ -783,6 +783,11 @@ void lqt_packet_index_append(lqt_packet_index_t*,
 
 void lqt_packet_index_alloc(lqt_packet_index_t*, int num);
  
+void
+lqt_packet_index_create_from_trak(quicktime_t *file,
+                                  quicktime_trak_t * trak,
+                                  lqt_packet_index_t * idx);
+
 
 /* pano.c */
 

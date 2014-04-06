@@ -332,11 +332,18 @@ static void insert_video_packet(quicktime_trak_t * trak,
   quicktime_stsz_t *stsz = &trak->mdia.minf.stbl.stsz;
   quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
 
+  lqt_packet_index_entry_t e;
+  memset(&e, 0, sizeof(e));
+    
   /* If size is zero, the last frame will be repeated */
 
   if(!size)
     {
     stts->table[stts->total_entries-1].sample_duration += stts->default_duration;
+
+    if(trak->idx.num_entries)
+      trak->idx.entries[trak->idx.num_entries-1].duration += stts->default_duration;
+    
     return;
     }
   
@@ -365,6 +372,31 @@ static void insert_video_packet(quicktime_trak_t * trak,
   /* Update sample size */
 
   quicktime_update_stsz(stsz, stsz->total_entries, size);
+
+  /* Update packet index */
+  
+  e.position = offset;
+  e.size = size;
+
+  if(keyframe)
+    e.flags = LQT_PACKET_TYPE_I | LQT_PACKET_KEYFRAME;
+  else
+    e.flags = LQT_PACKET_TYPE_P;
+
+  e.duration = stts->default_duration;
+
+  if(trak->idx.num_entries)
+    {
+    e.pts = trak->idx.entries[trak->idx.num_entries-1].pts +
+      trak->idx.entries[trak->idx.num_entries-1].duration;
+    }
+  else
+    e.pts = 0;
+
+  e.dts = e.pts;
+  
+  lqt_packet_index_append(&trak->idx, &e);
+  
   }
 
 /* Build index tables from an idx1 index */
