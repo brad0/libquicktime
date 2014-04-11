@@ -285,6 +285,9 @@ static void insert_audio_packet(quicktime_trak_t * trak,
   quicktime_stco_t *stco;
   quicktime_stsc_t *stsc;
   quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  lqt_packet_index_entry_t e;
+  memset(&e, 0, sizeof(e));
+  
   /* Update stco */
 
   stco = &trak->mdia.minf.stbl.stco;
@@ -305,6 +308,14 @@ static void insert_audio_packet(quicktime_trak_t * trak,
 
   /* Update total samples */
 
+  e.pts = stts->table[0].sample_count;
+  e.dts = e.pts;
+  e.flags |= LQT_PACKET_KEYFRAME;
+  e.size = size;
+  e.position = offset;
+  e.duration = num_samples;
+  lqt_packet_index_append(&trak->idx, &e);
+  
   stts->table[0].sample_count += num_samples;
 
   if(trak->chunk_sizes_alloc < stco->total_entries)

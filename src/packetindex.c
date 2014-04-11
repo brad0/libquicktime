@@ -122,8 +122,13 @@ packet_index_create_video(quicktime_t *file,
   
   quicktime_ctts_t *ctts;
   quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
-  int num = quicktime_track_samples(file, trak);
+  quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
+  int num = 0;
 
+  /* Count frames */
+  for(i = 0; i < stts->total_entries; i++)
+    num += stts->table[i].sample_count;
+  
   if(trak->mdia.minf.stbl.has_ctts)
     ctts = &trak->mdia.minf.stbl.ctts;
   else
@@ -227,15 +232,15 @@ packet_index_create_video(quicktime_t *file,
 
     /* stsc */
     stsc_count++;
-    if(stsc_count >= trak->mdia.minf.stbl.stsc.table[stsc_index].samples)
+    if(stsc_count >= stsc->table[stsc_index].samples)
       {
       /* Increment chunk */
       stsc_chunk++;
       stsc_count = 0;
 
       /* stsc position */
-      if((stsc_index < trak->mdia.minf.stbl.stsc.total_entries - 1) &&
-         (stsc_chunk == trak->mdia.minf.stbl.stsc.table[stsc_index+1].chunk))
+      if((stsc_index < stsc->total_entries - 1) &&
+         (stsc_chunk == stsc->table[stsc_index+1].chunk))
         stsc_index++;
       e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
       }
@@ -270,7 +275,40 @@ packet_index_create_audio(quicktime_t *file,
                           lqt_packet_index_t * idx)
   {
   // Each chunk is a packet
+  lqt_packet_index_entry_t e;
+  int64_t * chunk_sizes;
+  int i;
+  int stsc_index = 0;
+  int num = trak->mdia.minf.stbl.stco.total_entries;
+  quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
+
+  lqt_packet_index_alloc(idx, num);
+    
+  memset(&e, 0, sizeof(e));
+  chunk_sizes = lqt_get_chunk_sizes(file, trak);
+
+  e.flags |= LQT_PACKET_KEYFRAME;
+  e.position = quicktime_chunk_to_offset(file, trak, 0);
   
+  for(i = 0; i < num; i++)
+    {
+    if((stsc_index < stsc->total_entries - 1) &&
+       (i+1 == stsc->table[stsc_index+1].chunk))
+      stsc_index++;
+    
+    e.position = trak->mdia.minf.stbl.stco.table[i].offset;
+    e.size     = chunk_sizes[i];
+    e.duration = stsc->table[stsc_index].samples;
+
+    /* Append entry */
+    lqt_packet_index_append(idx, &e);
+
+    /* Advance */
+    e.pts += e.duration;
+    e.dts = e.pts;
+    }
+  
+  free(chunk_sizes);
   }
 
 static void
@@ -279,6 +317,71 @@ packet_index_create_audio_vbr(quicktime_t *file,
                               lqt_packet_index_t * idx)
   {
   // Each sample is a packet
+  int stts_index = 0;
+  int stts_count = 0;
+  int i;
+  lqt_packet_index_entry_t e;
+  int stsc_index = 0;
+  int stsc_count = 0;
+  int stsc_chunk = 1;
+
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
+
+  int num = 0;
+
+  for(i = 0; i < stts->total_entries; i++)
+    num += stts->table[i].sample_count;
+
+  lqt_packet_index_alloc(idx, num);
+  
+  memset(&e, 0, sizeof(e));
+
+  e.flags |= LQT_PACKET_KEYFRAME;
+
+  if(trak->mdia.minf.stbl.stsz.sample_size)
+    e.size = trak->mdia.minf.stbl.stsz.sample_size;
+
+  e.position = quicktime_chunk_to_offset(file, trak, 0);
+  
+  for(i = 0; i < num; i++)
+    {
+    e.duration = stts->table[stts_index].sample_duration;
+    
+    if(!trak->mdia.minf.stbl.stsz.sample_size)
+      e.size = trak->mdia.minf.stbl.stsz.table[i].size;
+    
+    /* Append entry */
+    lqt_packet_index_append(idx, &e);
+    
+    /* Advance */
+    e.pts += e.duration;
+    e.dts = e.pts;
+    e.position += e.size;
+    
+    /* stts */
+    stts_count++;
+    if(stts_count >= stts->table[stts_index].sample_count)
+      {
+      stts_index++;
+      stts_count = 0;
+      }
+    
+    /* stsc */
+    stsc_count++;
+    if(stsc_count >= stsc->table[stsc_index].samples)
+      {
+      /* Increment chunk */
+      stsc_chunk++;
+      stsc_count = 0;
+
+      /* stsc position */
+      if((stsc_index < stsc->total_entries - 1) &&
+         (stsc_chunk == stsc->table[stsc_index+1].chunk))
+        stsc_index++;
+      e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
+      }
+    }
   
   }
 
