@@ -62,6 +62,8 @@ void lqt_packet_index_dump(const lqt_packet_index_t* pi)
         break;
       }
     lqt_dump("FT %c ", c);
+
+    lqt_dump("stsd_id %d ", pi->entries[i].stsd_index);
     
     if(pi->entries[i].flags & LQT_PACKET_KEYFRAME)
       lqt_dump("key ");
@@ -241,7 +243,10 @@ packet_index_create_video(quicktime_t *file,
       /* stsc position */
       if((stsc_index < stsc->total_entries - 1) &&
          (stsc_chunk == stsc->table[stsc_index+1].chunk))
+        {
         stsc_index++;
+        e.stsd_index = stsc->table[stsc_index].id - 1;
+        }
       e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
       }
     }
@@ -294,8 +299,10 @@ packet_index_create_audio(quicktime_t *file,
     {
     if((stsc_index < stsc->total_entries - 1) &&
        (i+1 == stsc->table[stsc_index+1].chunk))
+      {
       stsc_index++;
-    
+      e.stsd_index = stsc->table[stsc_index].id - 1;
+      }
     e.position = trak->mdia.minf.stbl.stco.table[i].offset;
     e.size     = chunk_sizes[i];
     e.duration = stsc->table[stsc_index].samples;
@@ -378,7 +385,10 @@ packet_index_create_audio_vbr(quicktime_t *file,
       /* stsc position */
       if((stsc_index < stsc->total_entries - 1) &&
          (stsc_chunk == stsc->table[stsc_index+1].chunk))
+        {
         stsc_index++;
+        e.stsd_index = stsc->table[stsc_index].id - 1;
+        }
       e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
       }
     }

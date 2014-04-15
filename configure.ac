@@ -9,6 +9,8 @@ LQT_VERSION_MICRO=`echo $VERSION | cut -d . -f 3 | cut -d p -f 1`
 
 USER_CFLAGS=$CFLAGS
 
+AC_LANG_SOURCE(C)
+
 dnl AM_CONFIG_HEADER(config.h)
 AC_CONFIG_HEADERS(config.h)
 

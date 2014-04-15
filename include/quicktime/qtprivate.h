@@ -934,6 +934,7 @@ typedef struct
   int64_t dts;      // Decoding time stamp
   int64_t duration; // Duration of this packet
   int flags;        // Flags (like in lqt_packet_t)
+  int stsd_index;   // For streams with muiltiple stsd (index starts with 0)
   } lqt_packet_index_entry_t;
 
 typedef struct
