@@ -170,6 +170,7 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
 
+#if 0  
   if(vtrack->current_position >= quicktime_track_samples(file, vtrack->track))
     return 0;
   
@@ -204,6 +205,24 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
   
   lqt_update_frame_position(vtrack);
+
+#else
+
+  if(vtrack->codec->read_packet)
+    {
+    if(!vtrack->codec->read_packet(file, p, track))
+      return 0;
+    }
+  else
+    {
+    if(!lqt_packet_index_read_packet(file,
+                                     &vtrack->track->idx,
+                                     p, vtrack->track->idx_pos))
+      return 0;
+    }
+  vtrack->track->idx_pos++;
+  
+#endif
   
   return 1;
   }
@@ -485,4 +504,13 @@ void lqt_packet_dump(const lqt_packet_t * p)
   lqt_dump("Packet: %d bytes, Time: %"PRId64", Duration: %d, Keyframe: %d\n",
            p->data_len, p->timestamp, p->duration, !!(p->flags & LQT_PACKET_KEYFRAME));
   lqt_hexdump(p->data, p->data_len > 16 ? 16 : p->data_len, 16);
+  }
+
+void lqt_packet_copy_metadata(lqt_packet_t * dst, const lqt_packet_t * src)
+  {
+  dst->flags = src->flags;
+  dst->timestamp = src->timestamp;
+  dst->duration = src->duration;
+  dst->header_size = src->header_size;
+  
   }

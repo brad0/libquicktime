@@ -1491,22 +1491,6 @@ long quicktime_get_partial_keyframe_before(quicktime_t *file, long frame, int tr
   return 0;
   }
 
-#if 0
-static long quicktime_get_keyframe_after(quicktime_t *file, long frame, int track)
-  {
-  quicktime_trak_t *trak = file->vtracks[track].track;
-  quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
-  int i;
-  // Offset 1
-  frame++;
-  for(i = 0; i < stss->total_entries; i++)
-    {
-    if(stss->table[i].sample >= frame) return stss->table[i].sample - 1;
-    }
-  return 0;
-  }
-#endif
-
 void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
   {
   quicktime_trak_t *trak = file->vtracks[track].track;

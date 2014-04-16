@@ -86,7 +86,7 @@ typedef struct
 #define LQT_PACKET_KEYFRAME  (1<<0) //!< Keyframes
 #define LQT_PACKET_REF_FRAME (1<<1) //!< Reference frame
 
-#define LQT_PACKET_TYPE_MASK (0xf00) //!< Mask for frame types
+#define LQT_PACKET_TYPE_MASK (0xf << 8) //!< Mask for frame types
 #define LQT_PACKET_TYPE_I    (1<<8) //!< I-frame
 #define LQT_PACKET_TYPE_P    (2<<8) //!< P-frame
 #define LQT_PACKET_TYPE_B    (3<<8) //!< B-frame
@@ -130,6 +130,8 @@ void lqt_packet_free(lqt_packet_t * packet);
 void lqt_compression_info_dump(const lqt_compression_info_t * ci);
 void lqt_packet_dump(const lqt_packet_t * p);
 
+/* Copy everything except the payload */
+void lqt_packet_copy_metadata(lqt_packet_t * dst, const lqt_packet_t * src);
 
 
 /* Reading */

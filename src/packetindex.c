@@ -207,6 +207,9 @@ packet_index_create_video(quicktime_t *file,
     /* Append entry */
     lqt_packet_index_append(idx, &e);
 
+    if(i == num - 1)
+      break;
+    
     /* Advance packet */
     e.dts += e.duration;
     e.position += e.size;
@@ -360,6 +363,9 @@ packet_index_create_audio_vbr(quicktime_t *file,
     
     /* Append entry */
     lqt_packet_index_append(idx, &e);
+
+    if(i == num - 1)
+      break;
     
     /* Advance */
     e.pts += e.duration;
@@ -414,3 +420,45 @@ lqt_packet_index_create_from_trak(quicktime_t *file,
   else if(trak->mdia.minf.is_video)
     packet_index_create_video(file, trak, idx);
   }
+
+#define FRAME_PADDING 128
+
+int lqt_packet_index_peek_packet(quicktime_t *file,
+                                 const lqt_packet_index_t * idx,
+                                 lqt_packet_t * p, int packetnum)
+  {
+  const lqt_packet_index_entry_t * e;
+  if((packetnum < 0) || (packetnum >= idx->num_entries))
+    return 0;
+  e = idx->entries + packetnum;
+
+  /* Set fields */
+  p->flags = e->flags;
+  p->timestamp = e->pts;
+  p->duration = e->duration;
+  return 1;
+  }
+
+int lqt_packet_index_read_packet(quicktime_t *file,
+                                 const lqt_packet_index_t * idx,
+                                 lqt_packet_t * p, int packetnum)
+  {
+  const lqt_packet_index_entry_t * e;
+  if(!lqt_packet_index_peek_packet(file, idx, p, packetnum))
+    return 0;
+
+  e = idx->entries + packetnum;
+  
+  /* Read data */
+  quicktime_set_position(file, e->position);
+  lqt_packet_alloc(p, e->size);
+  if(quicktime_read_data(file, p->data, e->size) < e->size)
+    return 0;
+  memset(p->data + e->size, 0, FRAME_PADDING);
+  p->data_len = e->size;
+  return 1;
+  }
+
+
+
+#undef FRAME_PADDING

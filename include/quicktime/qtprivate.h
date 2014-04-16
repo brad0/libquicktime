@@ -964,7 +964,8 @@ typedef struct
 
   /* Runtime generated */
   lqt_packet_index_t idx;
-
+  int idx_pos; // Index position
+  
   /* Chunk sizes for audio */ 
   int chunk_sizes_alloc;
   int64_t * chunk_sizes; /* This contains the chunk sizes for audio

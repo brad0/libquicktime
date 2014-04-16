@@ -158,6 +158,7 @@ typedef struct
   /* lqt_pts = ffmpeg_pts * pts_factor */
   int encoding_pts_factor;
 
+  lqt_packet_t lqt_pkt;
   } quicktime_ffmpeg_video_codec_t;
 
 /* ffmpeg <-> libquicktime colormodels */
@@ -291,6 +292,8 @@ static int lqt_ffmpeg_delete_video(quicktime_codec_t *codec_base)
   
   if(codec->tmp_rows)
     lqt_rows_free(codec->tmp_rows);
+
+  lqt_packet_free(&codec->lqt_pkt);
   
   free(codec);
 	
@@ -909,7 +912,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     if(avcodec_open2(codec->avctx, codec->decoder, NULL) != 0)
       return -1;
 #endif
-    codec->frame = avcodec_alloc_frame();
+    codec->frame = av_frame_alloc();
     vtrack->stream_cmodel = LQT_COLORMODEL_NONE;
     codec->initialized = 1;
     }
@@ -1653,8 +1656,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file, unsigned char **row_pointe
         
   if(!codec->initialized)
     {
-    codec->frame = avcodec_alloc_frame();
-
+    codec->frame = av_frame_alloc();
+    
     /* time_base is 1/framerate for constant framerate */
           
     codec->avctx->time_base.den = lqt_video_time_scale(file, track);
@@ -2237,18 +2240,16 @@ static int read_packet_h264(quicktime_t * file, lqt_packet_t * p, int track)
   int nals_sent = 0;
   uint8_t * ptr, *end;
   int len;
-  int buffer_size;
   
   quicktime_video_map_t * vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
-  
-  if(!(buffer_size = lqt_read_video_frame(file, &codec->buffer,
-                                          &codec->buffer_alloc,
-                                          vtrack->current_position, NULL, track)))
+
+  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                   &codec->lqt_pkt, vtrack->track->idx_pos))
     return 0;
   
-  ptr = codec->buffer;
-  end = codec->buffer + buffer_size;
+  ptr = codec->lqt_pkt.data;
+  end = codec->lqt_pkt.data + codec->lqt_pkt.data_len;
   
   p->data_len = 0;
   
@@ -2275,6 +2276,9 @@ static int read_packet_h264(quicktime_t * file, lqt_packet_t * p, int track)
     nals_sent++;
     ptr += len;
     }
+
+  lqt_packet_copy_metadata(p, &codec->lqt_pkt);
+
   return 1;
   }
 

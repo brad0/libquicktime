@@ -788,6 +788,15 @@ lqt_packet_index_create_from_trak(quicktime_t *file,
                                   quicktime_trak_t * trak,
                                   lqt_packet_index_t * idx);
 
+LQT_EXTERN int lqt_packet_index_read_packet(quicktime_t *file,
+                                            const lqt_packet_index_t * idx,
+                                            lqt_packet_t * p, int packetnum);
+
+/* Get packet fields without reading anything */
+int lqt_packet_index_peek_packet(quicktime_t *file,
+                                 const lqt_packet_index_t * idx,
+                                 lqt_packet_t * p, int packetnum);
+
 
 /* pano.c */
 
