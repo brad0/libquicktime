@@ -47,15 +47,17 @@ typedef struct
   int16_t * sample_buffer; /* SAMPLES_PER_BLOCK * channels (interleaved) */
   int sample_buffer_size;  /* samples from last en/decode call */
  
-  /* Buffer for chunks */
-  int chunk_buffer_size;
-  int chunk_buffer_alloc;
-  int chunk_samples;
-  uint8_t * chunk_buffer;
-  uint8_t * chunk_buffer_ptr;
+  int packet_samples;
+  
+  //  int chunk_buffer_size;
+  //  int chunk_buffer_alloc;
+  //  uint8_t * chunk_buffer;
+  uint8_t * pkt_ptr;
 
   int decode_initialized;
   int encode_initialized;
+
+  lqt_packet_t pkt;
   
   } quicktime_ima4_codec_t;
 
@@ -259,24 +261,24 @@ static int delete_codec(quicktime_codec_t *codec_base)
   
   if(codec->last_samples) free(codec->last_samples);
   if(codec->last_indexes) free(codec->last_indexes);
-
-  if(codec->chunk_buffer)
-    free(codec->chunk_buffer);
+  
   if(codec->sample_buffer)
     free(codec->sample_buffer);
-        
+
+  lqt_packet_free(&codec->pkt);
+  
   free(codec);
   return 0;
   }
 
 static int decode(quicktime_t *file, void * _output, long samples, int track)
   {
-  int64_t chunk_sample;
   int64_t i;
-  int64_t chunk;
   int16_t * output = (int16_t*)_output;
   int samples_decoded, samples_copied;
-  quicktime_ima4_codec_t *codec = file->atracks[track].codec->priv;
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  
+  quicktime_ima4_codec_t *codec = atrack->codec->priv;
   int samples_to_skip = 0;
 
   if(!_output) /* Global initialization */
@@ -288,49 +290,43 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
     {
     codec->decode_initialized = 1;
 
-    codec->sample_buffer = malloc(sizeof(*(codec->sample_buffer)) * file->atracks[track].channels * SAMPLES_PER_BLOCK);
+    codec->sample_buffer = malloc(sizeof(*(codec->sample_buffer)) * atrack->channels * SAMPLES_PER_BLOCK);
           
     /* Read first chunk */
-          
-    codec->chunk_buffer_size =
-      lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                           &codec->chunk_buffer,
-                           &codec->chunk_buffer_alloc, &codec->chunk_samples);
-          
-    if(codec->chunk_buffer_size <= 0)
+
+    if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
+                                     &codec->pkt, atrack->track->idx_pos))
       return 0;
-    codec->chunk_buffer_ptr = codec->chunk_buffer;
+
+    atrack->track->idx_pos++;
+    codec->pkt_ptr = codec->pkt.data;
+    codec->packet_samples = codec->pkt.duration;
     }
         
-  if(file->atracks[track].current_position != file->atracks[track].last_position)
+  if(atrack->current_position != atrack->last_position)
     {
     /* Seeking happened */
-    quicktime_chunk_of_sample(&chunk_sample, &chunk,
-                              file->atracks[track].track,
-                              file->atracks[track].current_position);
-
+    int new_index_pos;
+    new_index_pos = lqt_packet_index_seek(&atrack->track->idx,
+                                          atrack->current_position);
+    
     /* Read the chunk */
 
-    if(file->atracks[track].cur_chunk != chunk)
+    if(atrack->track->idx_pos != new_index_pos)
       //          if(1)
       {
-      file->atracks[track].cur_chunk = chunk;
-
-      codec->chunk_buffer_size =
-        lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                             &codec->chunk_buffer,
-                             &codec->chunk_buffer_alloc, &codec->chunk_samples);
-      if(codec->chunk_buffer_size <= 0)
+      atrack->track->idx_pos = new_index_pos;
+      if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
+                                       &codec->pkt, atrack->track->idx_pos))
         return 0;
-      codec->chunk_buffer_ptr = codec->chunk_buffer;
+
+      atrack->track->idx_pos++;
       }
-    else
-      {
-      codec->chunk_buffer_size += (int)(codec->chunk_buffer_ptr - codec->chunk_buffer);
-      codec->chunk_buffer_ptr = codec->chunk_buffer;
-      }
-          
-    samples_to_skip = file->atracks[track].current_position - chunk_sample;
+
+    codec->pkt_ptr = codec->pkt.data;
+    codec->packet_samples = codec->pkt.duration;
+    
+    samples_to_skip = atrack->current_position - codec->pkt.timestamp;
     if(samples_to_skip < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
@@ -341,24 +337,21 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
     while(samples_to_skip > SAMPLES_PER_BLOCK)
       {
-      codec->chunk_buffer_ptr += file->atracks[track].channels * BLOCK_SIZE;
-      codec->chunk_buffer_size -= file->atracks[track].channels * BLOCK_SIZE;
+      codec->pkt_ptr += atrack->channels * BLOCK_SIZE;
       samples_to_skip -= SAMPLES_PER_BLOCK;
-      codec->chunk_samples -= SAMPLES_PER_BLOCK;
       }
 
     /* Decode frame */
 
-    for(i = 0; i < file->atracks[track].channels; i++)
+    for(i = 0; i < atrack->channels; i++)
       {
       ima4_decode_block(&file->atracks[track],
                         codec->sample_buffer + i,
-                        codec->chunk_buffer_ptr,
-                        file->atracks[track].channels);
-      codec->chunk_buffer_ptr += BLOCK_SIZE;
-      codec->chunk_buffer_size -= BLOCK_SIZE;
+                        codec->pkt_ptr,
+                        atrack->channels);
+      codec->pkt_ptr += BLOCK_SIZE;
       }
-    codec->chunk_samples -= SAMPLES_PER_BLOCK;
+    codec->packet_samples -= SAMPLES_PER_BLOCK;
     /* Skip samples */
           
     codec->sample_buffer_size = SAMPLES_PER_BLOCK - samples_to_skip;
@@ -374,38 +367,34 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
     if(!codec->sample_buffer_size)
       {
       /* Get new chunk if necessary */
-            
-      if(!codec->chunk_buffer_size)
-        {
-        file->atracks[track].cur_chunk++;
 
-        codec->chunk_buffer_size =
-          lqt_read_audio_chunk(file, track, file->atracks[track].cur_chunk,
-                               &codec->chunk_buffer,
-                               &codec->chunk_buffer_alloc, &codec->chunk_samples);
-              
-        if(codec->chunk_buffer_size <= 0)
-          break;
-        codec->chunk_buffer_ptr = codec->chunk_buffer;
+      if(codec->pkt_ptr - codec->pkt.data >= codec->pkt.data_len)
+        {
+        if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
+                                         &codec->pkt, atrack->track->idx_pos))
+          return 0;
+
+        atrack->track->idx_pos++;
+        codec->pkt_ptr = codec->pkt.data;
+        codec->packet_samples = codec->pkt.duration;
         }
-            
+      
       /* Decode one frame */
 
-      for(i = 0; i < file->atracks[track].channels; i++)
+      for(i = 0; i < atrack->channels; i++)
         {
-        ima4_decode_block(&file->atracks[track],
+        ima4_decode_block(atrack,
                           codec->sample_buffer + i,
-                          codec->chunk_buffer_ptr, file->atracks[track].channels);
-        codec->chunk_buffer_ptr += BLOCK_SIZE;
-        codec->chunk_buffer_size -= BLOCK_SIZE;
+                          codec->pkt_ptr, atrack->channels);
+        codec->pkt_ptr += BLOCK_SIZE;
         }
-            
-      if(codec->chunk_samples < SAMPLES_PER_BLOCK)
-        codec->sample_buffer_size = codec->chunk_samples;
+      
+      if(codec->packet_samples < SAMPLES_PER_BLOCK)
+        codec->sample_buffer_size = codec->packet_samples;
       else
         codec->sample_buffer_size = SAMPLES_PER_BLOCK;
-            
-      codec->chunk_samples -= SAMPLES_PER_BLOCK;
+      
+      codec->packet_samples -= SAMPLES_PER_BLOCK;
       //            codec->sample_buffer_size = SAMPLES_PER_BLOCK;
       }
           
@@ -415,15 +404,15 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
     if(samples_copied > codec->sample_buffer_size)
       samples_copied = codec->sample_buffer_size;
 
-    memcpy(output + file->atracks[track].channels * samples_decoded,
-           codec->sample_buffer + file->atracks[track].channels * (SAMPLES_PER_BLOCK - codec->sample_buffer_size),
-           samples_copied * 2 * file->atracks[track].channels);
+    memcpy(output + atrack->channels * samples_decoded,
+           codec->sample_buffer + atrack->channels * (SAMPLES_PER_BLOCK - codec->sample_buffer_size),
+           samples_copied * 2 * atrack->channels);
 
     samples_decoded += samples_copied;
     codec->sample_buffer_size -= samples_copied;
     }
         
-  file->atracks[track].last_position = file->atracks[track].current_position + samples_decoded;
+  atrack->last_position = atrack->current_position + samples_decoded;
   return samples_decoded;
   }
 
@@ -432,7 +421,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   {
   int result = 0;
   int64_t j;
-  int64_t chunk_bytes;
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ima4_codec_t *codec = track_map->codec->priv;
   quicktime_trak_t *trak = track_map->track;
@@ -449,14 +437,11 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   
   
   /* Get output size */
-  chunk_bytes = ima4_samples_to_bytes(samples + codec->sample_buffer_size, track_map->channels);
-  if(codec->chunk_buffer_alloc < chunk_bytes)
-    {
-    /* Allocate space for one extra block */
-    codec->chunk_buffer_alloc = chunk_bytes + track_map->channels * BLOCK_SIZE;
-    codec->chunk_buffer = realloc(codec->chunk_buffer, codec->chunk_buffer_alloc);
-    }
-        
+  codec->pkt.data_len = ima4_samples_to_bytes(samples + codec->sample_buffer_size,
+                                       track_map->channels);
+
+  lqt_packet_alloc(&codec->pkt, codec->pkt.data_len + track_map->channels * BLOCK_SIZE);
+  
   if(!codec->last_samples)
     codec->last_samples = calloc(track_map->channels, sizeof(*(codec->last_samples)));
         
@@ -470,8 +455,8 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
         
   /* Encode from the input buffer to the read_buffer up to a multiple of  */
   /* blocks. */
-  output_ptr = codec->chunk_buffer;
-
+  output_ptr = codec->pkt.data;
+  
   input = (int16_t*)_input;
   input_ptr = input;
   samples_encoded = 0;
@@ -516,7 +501,6 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
       }
     }
   
-  
   /* Write to disk */
         
   /* The block division may result in 0 samples getting encoded. */
@@ -524,7 +508,7 @@ static int encode(quicktime_t *file, void *_input, long samples, int track)
   if(samples_encoded)
     {
     quicktime_write_chunk_header(file, trak);
-    result = quicktime_write_data(file, codec->chunk_buffer, chunk_bytes);
+    result = quicktime_write_data(file, codec->pkt.data, codec->pkt.data_len);
     trak->chunk_samples = samples_encoded;
     quicktime_write_chunk_footer(file, 
                                  trak);
@@ -557,17 +541,17 @@ static int flush(quicktime_t *file, int track)
     while(i < SAMPLES_PER_BLOCK * track_map->channels)
       codec->sample_buffer[i++] = 0;
 
-    output_ptr = codec->chunk_buffer;
+    output_ptr = codec->pkt.data;
     for(i = 0; i < track_map->channels; i++)
       {
       ima4_encode_block(track_map, output_ptr, codec->sample_buffer + i, track_map->channels, i);
       output_ptr += BLOCK_SIZE;
       }
-
+    codec->pkt.data_len = (int)(output_ptr - codec->pkt.data);
+    
     quicktime_write_chunk_header(file, trak);
-    result = quicktime_write_data(file, codec->chunk_buffer,
-                                  (int)(output_ptr - codec->chunk_buffer));
-
+    result = quicktime_write_data(file, codec->pkt.data, codec->pkt.data_len);
+    
     trak->chunk_samples = codec->sample_buffer_size;
     quicktime_write_chunk_footer(file, trak);
     track_map->cur_chunk++;

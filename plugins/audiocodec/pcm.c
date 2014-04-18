@@ -50,7 +50,7 @@ typedef enum
 
 typedef struct quicktime_pcm_codec_s
   {
-  uint8_t * chunk_buffer_ptr;
+  uint8_t * pkt_ptr;
 
   lqt_packet_t pkt;
   
@@ -78,15 +78,15 @@ typedef struct quicktime_pcm_codec_s
 
 static void encode_8(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
-  memcpy(codec->chunk_buffer_ptr, _input, num_samples);
+  memcpy(codec->pkt_ptr, _input, num_samples);
   }
 
 static void decode_8(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
   {
   uint8_t * output = (uint8_t *)(*_output);
 
-  memcpy(output, codec->chunk_buffer_ptr, num_samples);
-  codec->chunk_buffer_ptr += num_samples;
+  memcpy(output, codec->pkt_ptr, num_samples);
+  codec->pkt_ptr += num_samples;
 
   output += num_samples;
   *_output = output;
@@ -96,15 +96,15 @@ static void decode_8(quicktime_pcm_codec_t*codec, int num_samples, void ** _outp
 
 static void encode_s16(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
-  memcpy(codec->chunk_buffer_ptr, _input, 2 * num_samples);
+  memcpy(codec->pkt_ptr, _input, 2 * num_samples);
   }
 
 static void decode_s16(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
   {
   uint8_t * output = (uint8_t *)(*_output);
 
-  memcpy(output, codec->chunk_buffer_ptr, 2 * num_samples);
-  codec->chunk_buffer_ptr += 2 * num_samples;
+  memcpy(output, codec->pkt_ptr, 2 * num_samples);
+  codec->pkt_ptr += 2 * num_samples;
   
   output += 2 * num_samples;
   *_output = output;
@@ -119,9 +119,9 @@ static void encode_s16_swap(quicktime_pcm_codec_t*codec, int num_samples, void *
 
   for(i = 0; i < num_samples; i++)
     {
-    codec->chunk_buffer_ptr[0] = input[1];
-    codec->chunk_buffer_ptr[1] = input[0];
-    codec->chunk_buffer_ptr+=2;
+    codec->pkt_ptr[0] = input[1];
+    codec->pkt_ptr[1] = input[0];
+    codec->pkt_ptr+=2;
     input+=2;
     }
   }
@@ -133,9 +133,9 @@ static void decode_s16_swap(quicktime_pcm_codec_t*codec, int num_samples, void *
   
   for(i = 0; i < num_samples; i++)
     {
-    output[0] = codec->chunk_buffer_ptr[1];
-    output[1] = codec->chunk_buffer_ptr[0];
-    codec->chunk_buffer_ptr+=2;
+    output[0] = codec->pkt_ptr[1];
+    output[1] = codec->pkt_ptr[0];
+    codec->pkt_ptr+=2;
     output+=2;
     }
   *_output = output;
@@ -151,10 +151,10 @@ static void encode_s24_be(quicktime_pcm_codec_t*codec, int num_samples, void * _
 
   for(i = 0; i < num_samples; i++)
     {
-    codec->chunk_buffer_ptr[0] = (*input & 0xff000000) >> 24;
-    codec->chunk_buffer_ptr[1] = (*input & 0xff0000) >> 16;
-    codec->chunk_buffer_ptr[2] = (*input & 0xff00) >> 8;
-    codec->chunk_buffer_ptr+=3;
+    codec->pkt_ptr[0] = (*input & 0xff000000) >> 24;
+    codec->pkt_ptr[1] = (*input & 0xff0000) >> 16;
+    codec->pkt_ptr[2] = (*input & 0xff00) >> 8;
+    codec->pkt_ptr+=3;
     input++;
     }
   
@@ -168,10 +168,10 @@ static void decode_s24_be(quicktime_pcm_codec_t*codec, int num_samples, void ** 
   
   for(i = 0; i < num_samples; i++)
     {
-    *output  = (uint32_t)(codec->chunk_buffer_ptr[0]) << 24;
-    *output |= (uint32_t)(codec->chunk_buffer_ptr[1]) << 16;
-    *output |= (uint32_t)(codec->chunk_buffer_ptr[2]) <<  8;
-    codec->chunk_buffer_ptr+=3;
+    *output  = (uint32_t)(codec->pkt_ptr[0]) << 24;
+    *output |= (uint32_t)(codec->pkt_ptr[1]) << 16;
+    *output |= (uint32_t)(codec->pkt_ptr[2]) <<  8;
+    codec->pkt_ptr+=3;
     output++;
     }
   *_output = output;
@@ -187,10 +187,10 @@ static void encode_s24_le(quicktime_pcm_codec_t*codec, int num_samples, void * _
 
   for(i = 0; i < num_samples; i++)
     {
-    codec->chunk_buffer_ptr[2] = (*input & 0xff000000) >> 24;
-    codec->chunk_buffer_ptr[1] = (*input & 0xff0000) >> 16;
-    codec->chunk_buffer_ptr[0] = (*input & 0xff00) >> 8;
-    codec->chunk_buffer_ptr+=3;
+    codec->pkt_ptr[2] = (*input & 0xff000000) >> 24;
+    codec->pkt_ptr[1] = (*input & 0xff0000) >> 16;
+    codec->pkt_ptr[0] = (*input & 0xff00) >> 8;
+    codec->pkt_ptr+=3;
     input++;
     }
 
@@ -204,10 +204,10 @@ static void decode_s24_le(quicktime_pcm_codec_t*codec, int num_samples, void ** 
   
   for(i = 0; i < num_samples; i++)
     {
-    *output  = (uint32_t)(codec->chunk_buffer_ptr[2]) << 24;
-    *output |= (uint32_t)(codec->chunk_buffer_ptr[1]) << 16;
-    *output |= (uint32_t)(codec->chunk_buffer_ptr[0]) <<  8;
-    codec->chunk_buffer_ptr+=3;
+    *output  = (uint32_t)(codec->pkt_ptr[2]) << 24;
+    *output |= (uint32_t)(codec->pkt_ptr[1]) << 16;
+    *output |= (uint32_t)(codec->pkt_ptr[0]) <<  8;
+    codec->pkt_ptr+=3;
     output++;
     }
   *_output = output;
@@ -218,15 +218,15 @@ static void decode_s24_le(quicktime_pcm_codec_t*codec, int num_samples, void ** 
 
 static void encode_s32(quicktime_pcm_codec_t*codec, int num_samples, void * _input)
   {
-  memcpy(codec->chunk_buffer_ptr, _input, 4 * num_samples);
+  memcpy(codec->pkt_ptr, _input, 4 * num_samples);
   }
 
 static void decode_s32(quicktime_pcm_codec_t*codec, int num_samples, void ** _output)
   {
   uint8_t * output = (uint8_t *)(*_output);
 
-  memcpy(output, codec->chunk_buffer_ptr, 4 * num_samples);
-  codec->chunk_buffer_ptr += 4 * num_samples;
+  memcpy(output, codec->pkt_ptr, 4 * num_samples);
+  codec->pkt_ptr += 4 * num_samples;
   
   output += 4 * num_samples;
   *_output = output;
@@ -241,11 +241,11 @@ static void encode_s32_swap(quicktime_pcm_codec_t*codec, int num_samples, void *
 
   for(i = 0; i < num_samples; i++)
     {
-    codec->chunk_buffer_ptr[0] = input[3];
-    codec->chunk_buffer_ptr[1] = input[2];
-    codec->chunk_buffer_ptr[2] = input[1];
-    codec->chunk_buffer_ptr[3] = input[0];
-    codec->chunk_buffer_ptr+=4;
+    codec->pkt_ptr[0] = input[3];
+    codec->pkt_ptr[1] = input[2];
+    codec->pkt_ptr[2] = input[1];
+    codec->pkt_ptr[3] = input[0];
+    codec->pkt_ptr+=4;
     input+=4;
     }
   }
@@ -257,11 +257,11 @@ static void decode_s32_swap(quicktime_pcm_codec_t*codec, int num_samples, void *
   
   for(i = 0; i < num_samples; i++)
     {
-    output[0] = codec->chunk_buffer_ptr[3];
-    output[1] = codec->chunk_buffer_ptr[2];
-    output[2] = codec->chunk_buffer_ptr[1];
-    output[3] = codec->chunk_buffer_ptr[0];
-    codec->chunk_buffer_ptr+=4;
+    output[0] = codec->pkt_ptr[3];
+    output[1] = codec->pkt_ptr[2];
+    output[2] = codec->pkt_ptr[1];
+    output[3] = codec->pkt_ptr[0];
+    codec->pkt_ptr+=4;
     output+=4;
     }
   *_output = output;
@@ -551,8 +551,8 @@ static void encode_fl32_be(quicktime_pcm_codec_t*codec, int num_samples, void * 
 
   for(i = 0; i < num_samples; i++)
     {
-    float32_be_write(*input, codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=4;
+    float32_be_write(*input, codec->pkt_ptr);
+    codec->pkt_ptr+=4;
     input++;
     }
   
@@ -565,8 +565,8 @@ static void decode_fl32_be(quicktime_pcm_codec_t*codec, int num_samples, void **
   
   for(i = 0; i < num_samples; i++)
     {
-    *output = float32_be_read(codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=4;
+    *output = float32_be_read(codec->pkt_ptr);
+    codec->pkt_ptr+=4;
     output++;
     }
   *_output = output;
@@ -581,8 +581,8 @@ static void encode_fl32_le(quicktime_pcm_codec_t*codec, int num_samples, void * 
 
   for(i = 0; i < num_samples; i++)
     {
-    float32_le_write(*input, codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=4;
+    float32_le_write(*input, codec->pkt_ptr);
+    codec->pkt_ptr+=4;
     input++;
     }
 
@@ -595,8 +595,8 @@ static void decode_fl32_le(quicktime_pcm_codec_t*codec, int num_samples, void **
   
   for(i = 0; i < num_samples; i++)
     {
-    *output = float32_le_read(codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=4;
+    *output = float32_le_read(codec->pkt_ptr);
+    codec->pkt_ptr+=4;
     output++;
     }
   *_output = output;
@@ -611,8 +611,8 @@ static void encode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void * 
 
   for(i = 0; i < num_samples; i++)
     {
-    double64_be_write(*input, codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=8;
+    double64_be_write(*input, codec->pkt_ptr);
+    codec->pkt_ptr+=8;
     input++;
     }
   
@@ -625,8 +625,8 @@ static void decode_fl64_be(quicktime_pcm_codec_t*codec, int num_samples, void **
   
   for(i = 0; i < num_samples; i++)
     {
-    *output = double64_be_read(codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=8;
+    *output = double64_be_read(codec->pkt_ptr);
+    codec->pkt_ptr+=8;
     output++;
     }
   *_output = output;
@@ -641,8 +641,8 @@ static void encode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void * 
 
   for(i = 0; i < num_samples; i++)
     {
-    double64_le_write(*input, codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=8;
+    double64_le_write(*input, codec->pkt_ptr);
+    codec->pkt_ptr+=8;
     input++;
     }
 
@@ -655,8 +655,8 @@ static void decode_fl64_le(quicktime_pcm_codec_t*codec, int num_samples, void **
   
   for(i = 0; i < num_samples; i++)
     {
-    *output = double64_le_read(codec->chunk_buffer_ptr);
-    codec->chunk_buffer_ptr+=8;
+    *output = double64_le_read(codec->pkt_ptr);
+    codec->pkt_ptr+=8;
     output++;
     }
   *_output = output;
@@ -678,8 +678,8 @@ static void encode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void * _in
   
   for(i = 0; i < num_samples; i++)
     {
-    ENCODE_ULAW(input[0], codec->chunk_buffer_ptr[0]);
-    codec->chunk_buffer_ptr++;
+    ENCODE_ULAW(input[0], codec->pkt_ptr[0]);
+    codec->pkt_ptr++;
     input++;
     }
   }
@@ -692,8 +692,8 @@ static void decode_ulaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
   
   for(i = 0; i < num_samples; i++)
     {
-    DECODE_ULAW(codec->chunk_buffer_ptr[0], output[0]);
-    codec->chunk_buffer_ptr++;
+    DECODE_ULAW(codec->pkt_ptr[0], output[0]);
+    codec->pkt_ptr++;
     output++;
     }
   *_output = output;
@@ -714,8 +714,8 @@ static void encode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void * _in
   
   for(i = 0; i < num_samples; i++)
     {
-    ENCODE_ALAW(input[0], codec->chunk_buffer_ptr[0]);
-    codec->chunk_buffer_ptr++;
+    ENCODE_ALAW(input[0], codec->pkt_ptr[0]);
+    codec->pkt_ptr++;
     input++;
     }
   }
@@ -728,8 +728,8 @@ static void decode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
   
   for(i = 0; i < num_samples; i++)
     {
-    DECODE_ALAW(codec->chunk_buffer_ptr[0], output[0]);
-    codec->chunk_buffer_ptr++;
+    DECODE_ALAW(codec->pkt_ptr[0], output[0]);
+    codec->pkt_ptr++;
     output++;
     }
   *_output = output;
@@ -799,7 +799,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
       return 0;
       }
-    codec->chunk_buffer_ptr = codec->pkt.data;
+    codec->pkt_ptr = codec->pkt.data;
     codec->initialized = 1;
     
     atrack->ci.id = codec->cid;
@@ -814,14 +814,12 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   if(atrack->current_position != atrack->last_position)
     {
     int new_index_pos;
-
     new_index_pos = lqt_packet_index_seek(&atrack->track->idx,
                                           atrack->current_position);
 
     if(new_index_pos != atrack->track->idx_pos)
       {
       atrack->track->idx_pos = new_index_pos;
-
       if(!read_packet_pcm(file, &codec->pkt, track))
         return 0;
       }
@@ -833,46 +831,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
       samples_to_skip = 0;
       }
     
-    codec->chunk_buffer_ptr = codec->pkt.data + samples_to_skip * codec->block_align;
-
-    
-#if 0
-    /* Seeking happened */
-    
-    quicktime_chunk_of_sample(&chunk_sample, &chunk,
-                              atrack->track,
-                              atrack->current_position);
-
-    /* Read the chunk */
-    
-    if(atrack->cur_chunk != chunk)
-      {
-      atrack->cur_chunk = chunk;
-
-      codec->chunk_buffer_size = read_audio_chunk(file,
-                                                  track, atrack->cur_chunk,
-                                                  &codec->chunk_buffer,
-                                                  &codec->chunk_buffer_alloc);
-      if(codec->chunk_buffer_size <= 0)
-        return 0;
-      
-      codec->chunk_buffer_ptr = codec->chunk_buffer;
-      }
-    else
-      {
-      codec->chunk_buffer_ptr = codec->chunk_buffer;
-      }
-    
-    /* Skip samples */
-    
-    samples_to_skip = atrack->current_position - chunk_sample;
-    if(samples_to_skip < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
-      samples_to_skip = 0;
-      }
-    codec->chunk_buffer_ptr = codec->chunk_buffer + samples_to_skip * codec->block_align;
-#endif
+    codec->pkt_ptr = codec->pkt.data + samples_to_skip * codec->block_align;
     }
 
   samples_decoded = 0;
@@ -882,23 +841,12 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   while(samples_decoded < samples)
     {
     /* Get new chunk if necessary */
-    if(codec->chunk_buffer_ptr - codec->pkt.data >= codec->pkt.data_len)
+    if(codec->pkt_ptr - codec->pkt.data >= codec->pkt.data_len)
       {
       if(!read_packet_pcm(file, &codec->pkt, track))
         return 0;
         
-      codec->chunk_buffer_ptr = codec->pkt.data;
-
-#if 0      
-      atrack->cur_chunk++;
-      codec->chunk_buffer_size = read_audio_chunk(file,
-                                                  track, atrack->cur_chunk,
-                                                  &codec->chunk_buffer,
-                                                  &codec->chunk_buffer_alloc);
-      if(codec->chunk_buffer_size <= 0)
-        break;
-      codec->chunk_buffer_ptr = codec->chunk_buffer;
-#endif
+      codec->pkt_ptr = codec->pkt.data;
       }
 
     /* Decode */
@@ -907,7 +855,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
 
     samples_in_chunk =
       ((codec->pkt.data_len-
-        (int)(codec->chunk_buffer_ptr - codec->pkt.data)))/codec->block_align;
+        (int)(codec->pkt_ptr - codec->pkt.data)))/codec->block_align;
     
     if(samples_to_decode > samples_in_chunk)
       samples_to_decode = samples_in_chunk;
@@ -967,7 +915,7 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
 
   lqt_packet_alloc(&codec->pkt, samples * codec->block_align);
   
-  codec->chunk_buffer_ptr = codec->pkt.data;
+  codec->pkt_ptr = codec->pkt.data;
   
   codec->encode(codec, samples * atrack->channels, input);
 
