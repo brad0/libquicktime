@@ -320,7 +320,8 @@ void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in
 
 /* Decoding */
 
-static void decode_int8_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_int8_to_int16(void * _in, int16_t ** out,
+                                 int num_channels, int num_samples)
   {
   int i, j;
   int8_t * in;
@@ -338,7 +339,8 @@ static void decode_int8_to_int16(void * _in, int16_t ** out, int num_channels, i
     }
   }
 
-static void decode_uint8_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_uint8_to_int16(void * _in, int16_t ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   uint8_t * in;
@@ -356,7 +358,8 @@ static void decode_uint8_to_int16(void * _in, int16_t ** out, int num_channels, 
     }
   }
 
-static void decode_int16_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_int16_to_int16(void * _in, int16_t ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   int16_t * in;
@@ -374,7 +377,8 @@ static void decode_int16_to_int16(void * _in, int16_t ** out, int num_channels, 
     }
   }
 
-static void decode_int32_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_int32_to_int16(void * _in, int16_t ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   int32_t * in;
@@ -392,7 +396,8 @@ static void decode_int32_to_int16(void * _in, int16_t ** out, int num_channels, 
     }
   }
 
-static void decode_float_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_float_to_int16(void * _in, int16_t ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j, tmp;
   float * in;
@@ -410,7 +415,8 @@ static void decode_float_to_int16(void * _in, int16_t ** out, int num_channels, 
     }
   }
 
-static void decode_double_to_int16(void * _in, int16_t ** out, int num_channels, int num_samples)
+static void decode_double_to_int16(void * _in, int16_t ** out,
+                                   int num_channels, int num_samples)
   {
   int i, j, tmp;
   double * in;
@@ -428,7 +434,8 @@ static void decode_double_to_int16(void * _in, int16_t ** out, int num_channels,
     }
   }
 
-static void decode_int8_to_float(void * _in, float ** out, int num_channels, int num_samples)
+static void decode_int8_to_float(void * _in, float ** out,
+                                 int num_channels, int num_samples)
   {
   int i, j;
   int8_t * in;
@@ -446,7 +453,8 @@ static void decode_int8_to_float(void * _in, float ** out, int num_channels, int
     }
   }
 
-static void decode_uint8_to_float(void * _in, float ** out, int num_channels, int num_samples)
+static void decode_uint8_to_float(void * _in, float ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   uint8_t * in;
@@ -464,7 +472,8 @@ static void decode_uint8_to_float(void * _in, float ** out, int num_channels, in
     }
   }
 
-static void decode_int16_to_float(void * _in, float ** out, int num_channels, int num_samples)
+static void decode_int16_to_float(void * _in, float ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   int16_t * in;
@@ -500,7 +509,8 @@ static void decode_int32_to_float(void * _in, float ** out, int num_channels, in
     }
   }
 
-static void decode_float_to_float(void * _in, float ** out, int num_channels, int num_samples)
+static void decode_float_to_float(void * _in, float ** out,
+                                  int num_channels, int num_samples)
   {
   int i, j;
   float * in;
@@ -518,7 +528,8 @@ static void decode_float_to_float(void * _in, float ** out, int num_channels, in
     }
   }
 
-static void decode_double_to_float(void * _in, float ** out, int num_channels, int num_samples)
+static void decode_double_to_float(void * _in, float ** out,
+                                   int num_channels, int num_samples)
   {
   int i, j;
   double * in;

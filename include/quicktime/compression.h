@@ -29,6 +29,7 @@
 #pragma GCC visibility push(default)
 #endif
 
+#define LQT_PACKET_PADDING 128 // This many zeros will be appended to each packet
 
 typedef enum
   {
@@ -133,6 +134,7 @@ void lqt_packet_dump(const lqt_packet_t * p);
 /* Copy everything except the payload */
 void lqt_packet_copy_metadata(lqt_packet_t * dst, const lqt_packet_t * src);
 
+void lqt_packet_flush(lqt_packet_t * pkt, int bytes);
 
 /* Reading */
 

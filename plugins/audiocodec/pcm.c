@@ -50,10 +50,9 @@ typedef enum
 
 typedef struct quicktime_pcm_codec_s
   {
-  uint8_t * chunk_buffer;
   uint8_t * chunk_buffer_ptr;
-  int chunk_buffer_size;
-  int chunk_buffer_alloc;
+
+  lqt_packet_t pkt;
   
   int sample_buffer_size;
   int last_chunk_samples;
@@ -72,6 +71,7 @@ typedef struct quicktime_pcm_codec_s
 
   lqt_compression_id_t cid;
   
+  int block_align;
   } quicktime_pcm_codec_t;
 
 /* 8 bit per sample, signedness and endian neutral */
@@ -738,6 +738,7 @@ static void decode_alaw(quicktime_pcm_codec_t*codec, int num_samples, void ** _o
 
 /* Generic decode function */
 
+#if 0
 static int read_audio_chunk(quicktime_t * file, int track,
                             long chunk,
                             uint8_t ** buffer, int * buffer_alloc)
@@ -753,10 +754,32 @@ static int read_audio_chunk(quicktime_t * file, int track,
   else
     return bytes;
   }
+#endif
+
+static int read_packet_pcm(quicktime_t * file, lqt_packet_t * p, int track)
+  {
+  int bytes_from_samples;
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
+
+  if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
+                                   p, atrack->track->idx_pos))
+    return 0;
+
+  bytes_from_samples = p->duration * codec->block_align;
+  if(p->data_len > bytes_from_samples)
+    p->data_len = bytes_from_samples;
+
+  //  fprintf(stderr, "Got packet\n");
+  //  lqt_packet_dump(p);
+
+  atrack->track->idx_pos++;
+  return 1;
+  }
+
 
 static int decode_pcm(quicktime_t *file, void * _output, long samples, int track)
   {
-  int64_t chunk, chunk_sample;
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_pcm_codec_t *codec = atrack->codec->priv;
   void * output;
@@ -771,18 +794,14 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     
     /* Read the first audio chunk */
 
-    codec->chunk_buffer_size = read_audio_chunk(file,
-                                                track, atrack->cur_chunk,
-                                                &codec->chunk_buffer,
-                                                &codec->chunk_buffer_alloc);
-    if(codec->chunk_buffer_size <= 0)
+    if(!read_packet_pcm(file, &codec->pkt, track))
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
       return 0;
       }
-    codec->chunk_buffer_ptr = codec->chunk_buffer;
+    codec->chunk_buffer_ptr = codec->pkt.data;
     codec->initialized = 1;
-
+    
     atrack->ci.id = codec->cid;
     
     }
@@ -794,7 +813,32 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   
   if(atrack->current_position != atrack->last_position)
     {
+    int new_index_pos;
+
+    new_index_pos = lqt_packet_index_seek(&atrack->track->idx,
+                                          atrack->current_position);
+
+    if(new_index_pos != atrack->track->idx_pos)
+      {
+      atrack->track->idx_pos = new_index_pos;
+
+      if(!read_packet_pcm(file, &codec->pkt, track))
+        return 0;
+      }
+    
+    samples_to_skip = atrack->current_position - codec->pkt.timestamp;
+    if(samples_to_skip < 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
+      samples_to_skip = 0;
+      }
+    
+    codec->chunk_buffer_ptr = codec->pkt.data + samples_to_skip * codec->block_align;
+
+    
+#if 0
     /* Seeking happened */
+    
     quicktime_chunk_of_sample(&chunk_sample, &chunk,
                               atrack->track,
                               atrack->current_position);
@@ -804,6 +848,7 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     if(atrack->cur_chunk != chunk)
       {
       atrack->cur_chunk = chunk;
+
       codec->chunk_buffer_size = read_audio_chunk(file,
                                                   track, atrack->cur_chunk,
                                                   &codec->chunk_buffer,
@@ -826,7 +871,8 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
       samples_to_skip = 0;
       }
-    codec->chunk_buffer_ptr = codec->chunk_buffer + samples_to_skip * atrack->block_align;
+    codec->chunk_buffer_ptr = codec->chunk_buffer + samples_to_skip * codec->block_align;
+#endif
     }
 
   samples_decoded = 0;
@@ -836,8 +882,14 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
   while(samples_decoded < samples)
     {
     /* Get new chunk if necessary */
-    if(codec->chunk_buffer_ptr - codec->chunk_buffer >= codec->chunk_buffer_size)
+    if(codec->chunk_buffer_ptr - codec->pkt.data >= codec->pkt.data_len)
       {
+      if(!read_packet_pcm(file, &codec->pkt, track))
+        return 0;
+        
+      codec->chunk_buffer_ptr = codec->pkt.data;
+
+#if 0      
       atrack->cur_chunk++;
       codec->chunk_buffer_size = read_audio_chunk(file,
                                                   track, atrack->cur_chunk,
@@ -846,23 +898,26 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
       if(codec->chunk_buffer_size <= 0)
         break;
       codec->chunk_buffer_ptr = codec->chunk_buffer;
+#endif
       }
 
     /* Decode */
 
-    samples_in_chunk = ((codec->chunk_buffer_size-(int)(codec->chunk_buffer_ptr - codec->chunk_buffer)))
-      /atrack->block_align;
-    
     samples_to_decode = samples - samples_decoded;
+
+    samples_in_chunk =
+      ((codec->pkt.data_len-
+        (int)(codec->chunk_buffer_ptr - codec->pkt.data)))/codec->block_align;
     
     if(samples_to_decode > samples_in_chunk)
       samples_to_decode = samples_in_chunk;
-
+    
     if(!samples_to_decode) // EOF
       break;
 
     codec->decode(codec, samples_to_decode * atrack->channels, &output);
     samples_decoded += samples_to_decode;
+
     }
   atrack->last_position = atrack->current_position + samples_decoded;
   return samples_decoded;
@@ -890,12 +945,12 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
       /* strh stuff */
       trak->strl->strh.dwRate = atrack->samplerate;
       trak->strl->strh.dwScale = 1;
-      trak->strl->strh.dwSampleSize = atrack->block_align / atrack->channels;
+      trak->strl->strh.dwSampleSize = codec->block_align / atrack->channels;
       
       /* WAVEFORMATEX stuff */
       
-      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = atrack->block_align;
-      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec = atrack->block_align * atrack->samplerate;
+      trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = codec->block_align;
+      trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec = codec->block_align * atrack->samplerate;
       trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = trak->strl->strh.dwSampleSize * 8;
       }
 
@@ -910,18 +965,15 @@ static int encode_pcm(quicktime_t *file, void * input, long samples, int track)
   
   /* Allocate chunk buffer */
 
-  if(codec->chunk_buffer_alloc < samples * atrack->block_align)
-    {
-    codec->chunk_buffer_alloc = samples * atrack->block_align + 1024;
-    codec->chunk_buffer = realloc(codec->chunk_buffer, codec->chunk_buffer_alloc);
-    }
-
-  codec->chunk_buffer_ptr = codec->chunk_buffer;
+  lqt_packet_alloc(&codec->pkt, samples * codec->block_align);
+  
+  codec->chunk_buffer_ptr = codec->pkt.data;
+  
   codec->encode(codec, samples * atrack->channels, input);
 
   quicktime_write_chunk_header(file, trak);
-  result = quicktime_write_data(file, codec->chunk_buffer,
-                                samples * atrack->block_align);
+  result = quicktime_write_data(file, codec->pkt.data,
+                                samples * codec->block_align);
   trak->chunk_samples = samples;
   
   quicktime_write_chunk_footer(file, trak);
@@ -972,10 +1024,7 @@ static int set_parameter_pcm(quicktime_t *file,
 static int delete_pcm(quicktime_codec_t *codec_base)
   {
   quicktime_pcm_codec_t *codec = codec_base->priv;
-  if(codec->chunk_buffer)
-    {
-    free(codec->chunk_buffer);
-    }
+  lqt_packet_free(&codec->pkt);
   free(codec);
   return 0;
   }
@@ -1003,13 +1052,13 @@ void quicktime_init_codec_twos(quicktime_codec_t *codec_base,
   switch(atrack->track->mdia.minf.stbl.stsd.table[0].sample_size)
     {
     case 8:
-      atrack->block_align = atrack->channels;
+      codec->block_align = atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT8;
       codec->encode = encode_8;
       codec->decode = decode_8;
       break;
     case 16:
-      atrack->block_align = 2 * atrack->channels;
+      codec->block_align = 2 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT16;
 #ifdef WORDS_BIGENDIAN
       codec->encode = encode_s16;
@@ -1020,7 +1069,7 @@ void quicktime_init_codec_twos(quicktime_codec_t *codec_base,
 #endif
       break;
     case 24:
-      atrack->block_align = 3 * atrack->channels;
+      codec->block_align = 3 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT32;
       codec->encode = encode_s24_be;
       codec->decode = decode_s24_be;
@@ -1052,13 +1101,13 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
   switch(atrack->track->mdia.minf.stbl.stsd.table[0].sample_size)
     {
     case 8:
-      atrack->block_align = atrack->channels;
+      codec->block_align = atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT8;
       codec->encode = encode_8;
       codec->decode = decode_8;
       break;
     case 16:
-      atrack->block_align = 2 * atrack->channels;
+      codec->block_align = 2 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT16;
 #ifdef WORDS_BIGENDIAN
       codec->encode = encode_s16_swap;
@@ -1069,7 +1118,7 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
 #endif
       break;
     case 24:
-      atrack->block_align = 3 * atrack->channels;
+      codec->block_align = 3 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT32;
       codec->encode = encode_s24_le;
       codec->decode = decode_s24_le;
@@ -1125,7 +1174,7 @@ void quicktime_init_codec_in24(quicktime_codec_t *codec_base,
   if(!atrack)
     return;
 
-  atrack->block_align = 3 * atrack->channels;
+  codec->block_align = 3 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT32;
 
   }
@@ -1185,7 +1234,7 @@ void quicktime_init_codec_in32(quicktime_codec_t *codec_base,
   if(!atrack)
     return;
   
-  atrack->block_align = 4 * atrack->channels;
+  codec->block_align = 4 * atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT32;
 
 #ifdef WORDS_BIGENDIAN
@@ -1249,7 +1298,7 @@ void quicktime_init_codec_fl32(quicktime_codec_t *codec_base,
     return;
   
   atrack->sample_format = LQT_SAMPLE_FLOAT;
-  atrack->block_align = 4 * atrack->channels;
+  codec->block_align = 4 * atrack->channels;
 
   if(quicktime_get_enda(&atrack->track->mdia.minf.stbl.stsd.table[0]))
     codec->decode = decode_fl32_le;
@@ -1304,7 +1353,7 @@ void quicktime_init_codec_fl64(quicktime_codec_t *codec_base,
     return;
 
   atrack->sample_format = LQT_SAMPLE_DOUBLE;
-  atrack->block_align = 8 * atrack->channels;
+  codec->block_align = 8 * atrack->channels;
 
   if(quicktime_get_enda(&atrack->track->mdia.minf.stbl.stsd.table[0]))
     codec->decode = decode_fl64_le;
@@ -1337,13 +1386,13 @@ void quicktime_init_codec_rawaudio(quicktime_codec_t *codec_base,
   switch(atrack->track->mdia.minf.stbl.stsd.table[0].sample_size)
     {
     case 8:
-      atrack->block_align = atrack->channels;
+      codec->block_align = atrack->channels;
       atrack->sample_format = LQT_SAMPLE_UINT8;
       codec->encode = encode_8;
       codec->decode = decode_8;
       break;
     case 16:
-      atrack->block_align = 2 * atrack->channels;
+      codec->block_align = 2 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT16;
 #ifdef WORDS_BIGENDIAN
       codec->encode = encode_s16;
@@ -1354,7 +1403,7 @@ void quicktime_init_codec_rawaudio(quicktime_codec_t *codec_base,
 #endif
       break;
     case 24:
-      atrack->block_align = 3 * atrack->channels;
+      codec->block_align = 3 * atrack->channels;
       atrack->sample_format = LQT_SAMPLE_INT32;
       codec->encode = encode_s24_le;
       codec->decode = decode_s24_le;
@@ -1398,7 +1447,7 @@ void quicktime_init_codec_ulaw(quicktime_codec_t *codec_base,
   if(!atrack)
     return;
 
-  atrack->block_align = atrack->channels;
+  codec->block_align = atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT16;
   }
 
@@ -1427,7 +1476,7 @@ void quicktime_init_codec_alaw(quicktime_codec_t *codec_base,
   if(!atrack)
     return;
 
-  atrack->block_align = atrack->channels;
+  codec->block_align = atrack->channels;
   atrack->sample_format = LQT_SAMPLE_INT16;
   }
 
@@ -1531,7 +1580,7 @@ static void init_decode_lpcm(quicktime_t * file, int track)
       }
     }
 
-  atrack->block_align = (table->sample_size/8) * atrack->channels;
+  codec->block_align = (table->sample_size/8) * atrack->channels;
 
   }
 
@@ -1636,11 +1685,11 @@ static void init_encode_lpcm(quicktime_t * file, int track)
   
   /* Initialize version 2 stsd */
 
-  atrack->block_align = atrack->channels * (table->sample_size/8);
+  codec->block_align = atrack->channels * (table->sample_size/8);
 
   quicktime_set_stsd_audio_v2(table,
                               formatSpecificFlags,
-                              atrack->block_align /* constBytesPerAudioPacket */,
+                              codec->block_align /* constBytesPerAudioPacket */,
                               1 /* constLPCMFramesPerAudioPacket */);
 
   /* Set correct stsz */
@@ -1660,7 +1709,10 @@ void quicktime_init_codec_lpcm(quicktime_codec_t *codec_base,
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
   codec_base->encode_audio = encode_pcm;
+  codec_base->read_packet = read_packet_pcm;
+  
   codec_base->set_parameter = set_parameter_pcm;
+  
   
   /* Init private items */
   codec = calloc(1, sizeof(*codec));

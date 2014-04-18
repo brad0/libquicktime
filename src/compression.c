@@ -36,9 +36,9 @@ void lqt_compression_info_free(lqt_compression_info_t * info)
 
 void lqt_packet_alloc(lqt_packet_t * p, int bytes)
   {
-  if(p->data_alloc < bytes)
+  if(p->data_alloc < bytes + LQT_PACKET_PADDING)
     {
-    p->data_alloc = bytes + 1024;
+    p->data_alloc = bytes  + LQT_PACKET_PADDING + 1024;
     p->data = realloc(p->data, p->data_alloc);
     }
   }
@@ -106,6 +106,7 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
     {
     return atrack->codec->read_packet(file, p, track);
     }
+#if 0
   else if(atrack->block_align)
     {
     int bytes_from_samples;
@@ -162,6 +163,18 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
     atrack->cur_vbr_packet++;
     return 1;
     }
+#else
+  else
+    {
+    if(!lqt_packet_index_read_packet(file,
+                                     &atrack->track->idx,
+                                     p, atrack->track->idx_pos))
+      return 0;
+    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+      p->duration *= 2;
+    atrack->track->idx_pos++;
+    }
+#endif
   
   return 0;
   }
@@ -210,6 +223,7 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
 
   if(vtrack->codec->read_packet)
     {
+    /* Codec will increment the index position */
     if(!vtrack->codec->read_packet(file, p, track))
       return 0;
     }
@@ -219,8 +233,8 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
                                      &vtrack->track->idx,
                                      p, vtrack->track->idx_pos))
       return 0;
+    vtrack->track->idx_pos++;
     }
-  vtrack->track->idx_pos++;
   
 #endif
   
@@ -502,7 +516,8 @@ void lqt_compression_info_set_header(lqt_compression_info_t * info,
 void lqt_packet_dump(const lqt_packet_t * p)
   {
   lqt_dump("Packet: %d bytes, Time: %"PRId64", Duration: %d, Keyframe: %d\n",
-           p->data_len, p->timestamp, p->duration, !!(p->flags & LQT_PACKET_KEYFRAME));
+           p->data_len, p->timestamp, p->duration,
+           !!(p->flags & LQT_PACKET_KEYFRAME));
   lqt_hexdump(p->data, p->data_len > 16 ? 16 : p->data_len, 16);
   }
 
@@ -512,5 +527,11 @@ void lqt_packet_copy_metadata(lqt_packet_t * dst, const lqt_packet_t * src)
   dst->timestamp = src->timestamp;
   dst->duration = src->duration;
   dst->header_size = src->header_size;
-  
+  }
+
+void lqt_packet_flush(lqt_packet_t * pkt, int bytes)
+  {
+  if(bytes < pkt->data_len)
+    memmove(pkt->data, pkt->data + bytes, pkt->data_len - bytes);
+  pkt->data_len -= bytes;
   }

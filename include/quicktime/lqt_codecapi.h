@@ -205,6 +205,11 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
                            uint8_t ** buffer, int * buffer_alloc,
                            int initial_bytes);
 
+int lqt_packet_index_append_packet(quicktime_t *file,
+                                   const lqt_packet_index_t * idx,
+                                   lqt_packet_t * p, int packetnum);
+
+
 /*
  *  Read VBR audio packets
  */

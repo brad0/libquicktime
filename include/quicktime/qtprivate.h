@@ -1403,7 +1403,7 @@ typedef struct
   int wav_id;
 
   /* PCM codecs need this */
-  int block_align;
+  //  int block_align;
 
   lqt_compression_info_t ci;
   } quicktime_audio_map_t;

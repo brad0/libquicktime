@@ -421,8 +421,6 @@ lqt_packet_index_create_from_trak(quicktime_t *file,
     packet_index_create_video(file, trak, idx);
   }
 
-#define FRAME_PADDING 128
-
 int lqt_packet_index_peek_packet(quicktime_t *file,
                                  const lqt_packet_index_t * idx,
                                  lqt_packet_t * p, int packetnum)
@@ -454,11 +452,53 @@ int lqt_packet_index_read_packet(quicktime_t *file,
   lqt_packet_alloc(p, e->size);
   if(quicktime_read_data(file, p->data, e->size) < e->size)
     return 0;
-  memset(p->data + e->size, 0, FRAME_PADDING);
+  memset(p->data + e->size, 0, LQT_PACKET_PADDING);
   p->data_len = e->size;
   return 1;
   }
 
+int lqt_packet_index_append_packet(quicktime_t *file,
+                                   const lqt_packet_index_t * idx,
+                                   lqt_packet_t * p, int packetnum)
+  {
+  const lqt_packet_index_entry_t * e;
+  if(!lqt_packet_index_peek_packet(file, idx, p, packetnum))
+    return 0;
 
+  e = idx->entries + packetnum;
+  
+  /* Read data */
+  quicktime_set_position(file, e->position);
+  lqt_packet_alloc(p, p->data_len + e->size);
+  if(quicktime_read_data(file, p->data + p->data_len, e->size) < e->size)
+    return 0;
+  p->data_len += e->size;
+  memset(p->data + p->data_len, 0, LQT_PACKET_PADDING);
+  return 1;
+  }
 
-#undef FRAME_PADDING
+int lqt_packet_index_seek(const lqt_packet_index_t * idx,
+                          int64_t pts)
+  {
+  int i;
+  int ret = -1;
+  for(i = 0; i < idx->num_entries; i++)
+    {
+    if((idx->entries[i].pts <= pts) &&
+       (idx->entries[i].pts + idx->entries[i].duration) > pts)
+      {
+      ret = i;
+      break;
+      }
+    }
+  if(ret < 0)
+    return ret;
+
+  while(ret >= 0)
+    {
+    if(idx->entries[ret].flags & LQT_PACKET_KEYFRAME)
+      break;
+    ret--;
+    }
+  return ret;
+  }
