@@ -942,6 +942,15 @@ typedef struct
   int num_entries;
   int entries_alloc;
   lqt_packet_index_entry_t * entries;
+  
+  /* Statistics data */
+  int num_key_frames;
+  int num_b_frames;
+  int max_packet_size;
+  int64_t min_packet_duration; // Minimum packet duration
+  int64_t max_packet_duration; // Maximum packet duration
+  int64_t max_pts;
+  
   } lqt_packet_index_t;
 
 typedef struct
@@ -1364,12 +1373,14 @@ typedef struct
 typedef struct
   {
   quicktime_trak_t *track; /* real quicktime track corresponding to this table */
-  int channels;
-
+  
+  /* Format */
+  int channels;  /* number of audio channels in the track */
   int samplerate;
-
-  /* number of audio channels in the track */
   lqt_channel_t * channel_setup;
+  lqt_sample_format_t sample_format; /* Set by the codec */
+
+  /* Position information */
   int64_t current_position;   /* current sample in output file */
   int64_t cur_chunk;      /* current chunk in output file */
   
@@ -1387,7 +1398,6 @@ typedef struct
   /* Another API enhancement: Codecs only deliver samples in the format specified by
      sample_format. The usual decode() functions will convert them to int16_t or float */
    
-  lqt_sample_format_t sample_format; /* Set by the codec */
 
   uint8_t * sample_buffer;
   int sample_buffer_alloc;  /* Allocated size in SAMPLES of the sample buffer */
@@ -1423,6 +1433,8 @@ typedef struct
   long current_position;   /* current frame in output file */
   long cur_chunk;      /* current chunk in output file */
 
+  int64_t next_display_frame; // Index position of the next displayed frame
+  
   quicktime_codec_t * codec;
   /* Timestamp of the NEXT frame decoded. Unit is the timescale of the track */
   /* For Encoding: Timestamp of the LAST encoded frame */

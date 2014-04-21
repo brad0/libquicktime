@@ -795,6 +795,13 @@ LQT_EXTERN int lqt_packet_index_read_packet(quicktime_t *file,
 LQT_EXTERN int lqt_packet_index_seek(const lqt_packet_index_t * idx,
                                      int64_t pts);
 
+int lqt_packet_index_get_keyframe_before(const lqt_packet_index_t * idx,
+                                         int ret);
+
+void lqt_packet_index_finish(lqt_packet_index_t * idx);
+
+int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
+                                            int pos);
 
 /* Get packet fields without reading anything */
 int lqt_packet_index_peek_packet(quicktime_t *file,

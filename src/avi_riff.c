@@ -392,8 +392,9 @@ static void insert_video_packet(quicktime_trak_t * trak,
   if(keyframe)
     e.flags = LQT_PACKET_TYPE_I | LQT_PACKET_KEYFRAME;
   else
+    // B-frames in AVIs aren't really supported
     e.flags = LQT_PACKET_TYPE_P;
-
+  
   e.duration = stts->default_duration;
 
   if(trak->idx.num_entries)

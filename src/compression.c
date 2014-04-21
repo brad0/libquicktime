@@ -26,6 +26,8 @@
 #include <string.h>
 
 #include <lqt_private.h>
+
+#define LQT_LIBQUICKTIME
 #include <quicktime/lqt_codecapi.h>
 
 void lqt_compression_info_free(lqt_compression_info_t * info)

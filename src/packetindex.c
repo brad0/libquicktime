@@ -26,6 +26,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
+
+
 void lqt_packet_index_delete(lqt_packet_index_t * pi)
   {
   if(pi->entries)
@@ -477,6 +481,31 @@ int lqt_packet_index_append_packet(quicktime_t *file,
   return 1;
   }
 
+void lqt_packet_index_finish(lqt_packet_index_t * idx)
+  {
+  int i;
+  
+  for(i = 0; i < idx->num_entries; i++)
+    {
+    if(idx->entries[i].flags & LQT_PACKET_KEYFRAME)
+      idx->num_key_frames++;
+    if((idx->entries[i].flags & LQT_PACKET_TYPE_MASK) == LQT_PACKET_TYPE_B)
+      idx->num_b_frames++;
+
+    if(idx->max_packet_size < idx->entries[i].size)
+      idx->max_packet_size = idx->entries[i].size;
+
+    if(!i || (idx->entries[i].duration < idx->min_packet_duration))
+      idx->min_packet_duration = idx->entries[i].duration;
+    
+    if(!i || (idx->entries[i].duration > idx->max_packet_duration))
+      idx->max_packet_duration = idx->entries[i].duration;
+    
+    if(idx->max_pts < idx->entries[i].pts + idx->entries[i].duration)
+      idx->max_pts = idx->entries[i].pts + idx->entries[i].duration;
+    }
+  }
+
 int lqt_packet_index_seek(const lqt_packet_index_t * idx,
                           int64_t pts)
   {
@@ -491,12 +520,57 @@ int lqt_packet_index_seek(const lqt_packet_index_t * idx,
       break;
       }
     }
-  if(ret < 0)
-    return ret;
+  return ret;
+  }
 
+/* get the next frame in display order. This routine is intentionally
+   quite stupid, but it should be bullet-proof for all kinds of weird
+   reordering schemes */
+
+int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
+                                            int pos)
+  {
+  int i, start, end;
+  int ret = -1;
+  int64_t ret_pts = -1;
+  
+  if(idx->num_b_frames)
+    return ret + 1;
+
+  start = ret - 32;
+  if(start > 0)
+    start = 0;
+
+  end = ret + 32;
+
+  if(end > idx->num_entries)
+    end = idx->num_entries;
+
+  for(i = start; i < end; i++)
+    {
+    /* Frame comes before in display order */
+    if(idx->entries[i].pts <= idx->entries[pos].pts)
+      continue;
+    
+    if((ret_pts < 0) || (idx->entries[i].pts < ret_pts))
+      {
+      ret = i;
+      ret_pts = idx->entries[i].pts;
+      }
+    }
+  return ret;
+  }
+  
+int lqt_packet_index_get_keyframe_before(const lqt_packet_index_t * idx,
+                                         int ret)
+  {
+  int64_t pts = idx->entries[ret].pts;
+  
+  /* Go to the keyframe before */
   while(ret >= 0)
     {
-    if(idx->entries[ret].flags & LQT_PACKET_KEYFRAME)
+    if((idx->entries[ret].pts <= pts) &&
+       (idx->entries[ret].flags & LQT_PACKET_KEYFRAME))
       break;
     ret--;
     }

@@ -854,6 +854,7 @@ int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
 
 int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
   {
+#if 0
   int64_t chunk_sample, chunk;
   quicktime_trak_t *trak;
   quicktime_codec_t * codec;
@@ -875,18 +876,35 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
                              frame,
                              &file->vtracks[track].stts_index,
                              &file->vtracks[track].stts_count);
+#else
+  quicktime_video_map_t *vtrack;
+  quicktime_trak_t *trak;
+  quicktime_codec_t * codec;
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+
+  vtrack = file->vtracks + track;
+  trak = vtrack->track;
+  
+  if((frame < 0) || (frame >= trak->idx.num_entries))
+    return 0;
+  
+  vtrack->timestamp = trak->idx.entries[frame].pts;
+  trak->idx_pos = lqt_packet_index_get_keyframe_before(&trak->idx, frame);
+  vtrack->next_display_frame = trak->idx_pos;
+
+#endif
 
   /* Resync codec */
-
-  codec = file->vtracks[track].codec;
-  if(codec && codec->resync)
+  if((codec = file->vtracks[track].codec) && codec->resync)
     codec->resync(file, track);
-    
   return 0;
   }
 
 void lqt_seek_video(quicktime_t * file, int track, int64_t time)
   {
+#if 0
   int64_t frame;
   quicktime_trak_t *trak;
 
@@ -902,9 +920,18 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
                              &file->vtracks[track].timestamp,
                              &file->vtracks[track].stts_index,
                              &file->vtracks[track].stts_count);
-
-
+  
   quicktime_set_video_position(file, frame, track);
+#else
+  quicktime_trak_t *trak;
+  int64_t pos;
+  if((track < 0) || (track >= file->total_vtracks))
+    return;
+  trak = file->vtracks[track].track;
+  pos = lqt_packet_index_seek(&trak->idx, time);
+  if(pos >= 0)
+    quicktime_set_video_position(file, pos, track);
+#endif
   }
 
 
@@ -1208,11 +1235,11 @@ double quicktime_frame_rate(quicktime_t *file, int track)
 
 int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame)
   {
-  int64_t dummy1;
-  int64_t dummy2;
+  if(file->total_vtracks > track)
+    return -1;
+
   return
-    quicktime_sample_to_time(&file->vtracks[track].track->mdia.minf.stbl.stts, frame,
-                             &dummy1, &dummy2);
+    file->vtracks[track].track->idx.entries[frame].pts;
   }
 
 /*
@@ -1222,7 +1249,10 @@ int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame)
   
 int64_t lqt_frame_time(quicktime_t * file, int track)
   {
-  return file->vtracks[track].timestamp;
+  if(file->total_vtracks > track)
+    return -1;
+  return
+    file->vtracks[track].track->idx.entries[file->vtracks[track].next_display_frame].pts;
   }
 
 /*
@@ -1231,11 +1261,7 @@ int64_t lqt_frame_time(quicktime_t * file, int track)
 
 int64_t lqt_video_duration(quicktime_t * file, int track)
   {
-  int64_t dummy1;
-  int64_t dummy2;
-  return
-    quicktime_sample_to_time(&file->vtracks[track].track->mdia.minf.stbl.stts, -1,
-                             &dummy1, &dummy2);
+  return file->vtracks[track].track->idx.max_pts;
   }
 
 
@@ -1260,21 +1286,19 @@ int lqt_video_time_scale(quicktime_t * file, int track)
 
 int lqt_frame_duration(quicktime_t * file, int track, int *constant)
   {
+  quicktime_video_map_t * vtrack;
   if(file->total_vtracks <= track)
     return 0;
 
+  vtrack = file->vtracks + track;
+  
   if(constant)
     {
-    if(file->vtracks[track].track->mdia.minf.stbl.stts.total_entries == 1)
+    if(vtrack->track->idx.max_packet_duration ==
+       vtrack->track->idx.min_packet_duration)
       *constant = 1;
-    else if((file->vtracks[track].track->mdia.minf.stbl.stts.total_entries == 2) && 
-            (file->vtracks[track].track->mdia.minf.stbl.stts.table[1].sample_count == 1))
-      *constant = 1;
-    else
-      *constant = 0;
     }
-  return
-    file->vtracks[track].track->mdia.minf.stbl.stts.table[file->vtracks[track].stts_index].sample_duration;
+  return vtrack->track->idx.entries[vtrack->next_display_frame].duration;
   }
 
 
@@ -1572,9 +1596,11 @@ void quicktime_insert_sdtp_entry(quicktime_t *file, long sample, int track, uint
 int quicktime_has_keyframes(quicktime_t *file, int track)
   {
   quicktime_trak_t *trak = file->vtracks[track].track;
-  quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
-	
-  return stss->total_entries > 0;
+
+  if(trak->idx.num_entries == trak->idx.num_key_frames)
+    return 0;
+  else
+    return 1;
   }
 
 int lqt_is_keyframe(quicktime_t *file, int track, int frame)
@@ -1676,6 +1702,8 @@ void quicktime_init_maps(quicktime_t * file)
     lqt_packet_index_create_from_trak(file,
                                       file->moov.trak[i],
                                       &file->moov.trak[i]->idx);
+
+    lqt_packet_index_finish(&file->moov.trak[i]->idx);
     }
   
   /* get tables for all the different tracks */

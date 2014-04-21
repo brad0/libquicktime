@@ -1117,7 +1117,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
   return result;
   }
 
-static int64_t bitstream_i_frame_to_display_frame(int64_t bitstream_i_frame, quicktime_bframe_detector* bframe_detector)
+#if 0
+static int64_t bitstream_i_frame_to_display_frame(int64_t bitstream_i_frame,
+                                                  quicktime_bframe_detector* bframe_detector)
   {
   if (!bframe_detector)
     return bitstream_i_frame; // Assuming closed GOP.
@@ -1137,7 +1139,8 @@ static int64_t bitstream_b_frame_to_display_frame(int64_t bitstream_b_frame)
   return bitstream_b_frame - 1;
   }
 
-static int64_t get_bitstream_sync_frame(quicktime_t* file, int64_t display_frame, int track, quicktime_bframe_detector* bframe_detector)
+static int64_t get_bitstream_sync_frame(quicktime_t* file, int64_t display_frame,
+                                        int track, quicktime_bframe_detector* bframe_detector)
   {
   int64_t full_sync_kf = quicktime_get_keyframe_before(file, display_frame, track);
   int64_t partial_sync_kf = quicktime_get_partial_keyframe_before(file, display_frame, track);
@@ -1152,6 +1155,7 @@ static int64_t get_bitstream_sync_frame(quicktime_t* file, int64_t display_frame
 
   return full_sync_kf;
   }
+
 
 static void resync_ffmpeg(quicktime_t *file, int track)
   {
@@ -1245,6 +1249,68 @@ static void resync_ffmpeg(quicktime_t *file, int track)
       }
     } // for (;; bitstream_frame++)
   }
+#else
+
+static void resync_ffmpeg(quicktime_t *file, int track)
+  {
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
+  quicktime_trak_t *trak = vtrack->track;
+  
+  int non_b_frames_seen = 0;
+  int got_pic;
+  /* Reset lavc */
+  avcodec_flush_buffers(codec->avctx);
+    
+  if(!quicktime_has_keyframes(file, track))
+    return; // Assuming I-frame only stream.
+  
+  while(vtrack->track->idx.entries[vtrack->next_display_frame].pts < vtrack->timestamp)
+    {
+    /* Decide whether to skip the next packet */
+    if((trak->idx.entries[trak->idx_pos].flags & LQT_PACKET_TYPE_MASK) == LQT_PACKET_TYPE_B)
+      {
+      /* Skip obsolete B-frames or non-ref B-frames */
+      if((non_b_frames_seen < 2) ||
+         !(trak->idx.entries[trak->idx_pos].flags & LQT_PACKET_REF_FRAME))
+        {
+        vtrack->track->idx_pos++;
+        continue;
+        }
+      }
+    else
+      non_b_frames_seen++;
+    
+    /* Feed into ffmpeg */
+
+    if(!lqt_packet_index_read_packet(file, &trak->idx, &codec->lqt_pkt, trak->idx_pos))
+      codec->lqt_pkt.data_len = 0;
+    
+    trak->idx_pos++;
+    
+#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
+    codec->pkt.data = codec->lqt_pkt.data;
+    codec->pkt.size = codec->lqt_pkt.data_len;
+    avcodec_decode_video2(codec->avctx, codec->frame, &got_pic, &codec->pkt);
+#else
+    avcodec_decode_video(codec->avctx, codec->frame, &got_pic,
+                         codec->lqt_pkt.data,
+                         codec->lqt_pkt.data_len);
+#endif
+
+    if(got_pic)
+      {
+      vtrack->next_display_frame =
+        lqt_packet_index_get_next_display_frame(&trak->idx,
+                                                vtrack->next_display_frame);
+      }
+    else if(!codec->lqt_pkt.data_len) // EOF
+      return;
+    }
+  
+  }
+
+#endif
 
 static int set_pass_ffmpeg(quicktime_t *file, 
                            int track, int pass, int total_passes,

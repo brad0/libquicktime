@@ -1073,9 +1073,10 @@ int quicktime_write_audio(quicktime_t *file, uint8_t *audio_buffer, long samples
  *  If you get compressed video frames (e.g. from a firewire port),
  *  use this function to write them into a quicktime container. Before,
  *  you must set up the track with \ref lqt_add_video_track or, if no
- *  software codec is present, with \ref quicktime_set_video .
+ *  software codec is present, with \ref quicktime_set_video.
+ *
+ *  Note: Use \ref lqt_write_video_packet instead.
  */
-     
 
 int quicktime_write_frame(quicktime_t *file, uint8_t *video_buffer, int64_t bytes, int track);
 
@@ -1089,6 +1090,9 @@ int quicktime_write_frame(quicktime_t *file, uint8_t *video_buffer, int64_t byte
  *  \ref quicktime_frame_size . This function increments all pointers in the
  *  track, so you can sequentially read all frames without setting the position
  *  in between.
+ *
+ *  Note: Use \ref lqt_write_video_packet instead.
+ *
  */
   
 long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track);

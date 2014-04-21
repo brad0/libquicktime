@@ -308,6 +308,12 @@ void lqt_update_frame_position(quicktime_video_map_t * track)
     }
   
   track->current_position++;
+
+  /* Maybe that's the only thing we need */
+
+  track->next_display_frame =
+    lqt_packet_index_get_next_display_frame(&track->track->idx,
+                                            track->next_display_frame);
   }
 
 /* Set the io_rowspan for the case the user didn't. */

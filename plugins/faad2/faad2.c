@@ -200,11 +200,7 @@ static int decode_chunk(quicktime_t *file, int track)
         track_map->channel_setup[i] =
           get_channel(frame_info.channel_position[i]);
         }
-
       }
-    
-      
-    
     
     if((track_map->channels == 1) && (frame_info.channels == 2))
       {
