@@ -43,8 +43,7 @@
 
 typedef struct
   {
-  unsigned char *buffer;
-  int buffer_alloc;
+  lqt_packet_t pkt;
   int coded_w;
   
   /* The YUV2 codec requires a bytes per line that is a multiple of 4 */
@@ -61,8 +60,7 @@ static int quicktime_delete_codec_yuv2(quicktime_codec_t *codec_base)
   quicktime_yuv2_codec_t *codec;
 
   codec = codec_base->priv;
-  if(codec->buffer)
-    free(codec->buffer);
+  lqt_packet_free(&codec->pkt);
   if(codec->rows)
     free(codec->rows);
   free(codec);
@@ -79,7 +77,7 @@ static void convert_encode_yuv2(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    out_row = codec->buffer + y * codec->bytes_per_line;
+    out_row = codec->pkt.data + y * codec->bytes_per_line;
 
     in_y = row_pointers[0] + y * file->vtracks[track].stream_row_span;
     in_u = row_pointers[1] + y * file->vtracks[track].stream_row_span_uv;
@@ -106,7 +104,7 @@ static void convert_decode_yuv2(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    in_row = codec->buffer + y * codec->bytes_per_line;
+    in_row = codec->pkt.data + y * codec->bytes_per_line;
           
     out_y = row_pointers[0] + y * file->vtracks[track].stream_row_span;
     out_u = row_pointers[1] + y * file->vtracks[track].stream_row_span_uv;
@@ -132,7 +130,7 @@ static void convert_encode_2vuy(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    out_row = codec->buffer + y * codec->bytes_per_line;
+    out_row = codec->pkt.data + y * codec->bytes_per_line;
     in_row = row_pointers[y];
     for(x = 0; x < width; )
       {
@@ -156,7 +154,7 @@ static void convert_decode_2vuy(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    in_row = codec->buffer + y * codec->bytes_per_line;
+    in_row = codec->pkt.data + y * codec->bytes_per_line;
     out_row = row_pointers[y];
     for(x = 0; x < width; )
       {
@@ -172,7 +170,8 @@ static void convert_decode_2vuy(quicktime_t * file, int track,
   }
 
 static void convert_encode_yuvs(quicktime_t * file, int track,
-                                quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+                                quicktime_yuv2_codec_t *codec,
+                                unsigned char **row_pointers)
   {
   uint8_t *in_row, *out_row;
   int y, x;
@@ -180,7 +179,7 @@ static void convert_encode_yuvs(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    out_row = codec->buffer + y * codec->bytes_per_line;
+    out_row = codec->pkt.data + y * codec->bytes_per_line;
     in_row = row_pointers[y];
     for(x = 0; x < width; )
       {
@@ -195,8 +194,10 @@ static void convert_encode_yuvs(quicktime_t * file, int track,
     }
   }
 
-static void convert_decode_yuvs(quicktime_t * file, int track,
-                                quicktime_yuv2_codec_t *codec, unsigned char **row_pointers)
+static void
+convert_decode_yuvs(quicktime_t * file, int track,
+                    quicktime_yuv2_codec_t *codec,
+                    unsigned char **row_pointers)
   {
   uint8_t *in_row, *out_row;
   int y, x;
@@ -204,7 +205,7 @@ static void convert_decode_yuvs(quicktime_t * file, int track,
   int width  = quicktime_video_width(file, track);
   for(y = 0; y < height; y++)
     {
-    in_row = codec->buffer + y * codec->bytes_per_line;
+    in_row = codec->pkt.data + y * codec->bytes_per_line;
     out_row = row_pointers[y];
     for(x = 0; x < width; )
       {
@@ -220,7 +221,8 @@ static void convert_decode_yuvs(quicktime_t * file, int track,
   }
 
 
-static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *codec,
+static void initialize(quicktime_video_map_t *vtrack,
+                       quicktime_yuv2_codec_t *codec,
                        int width, int height)
   {
   int coded_w;
@@ -229,15 +231,13 @@ static void initialize(quicktime_video_map_t *vtrack, quicktime_yuv2_codec_t *co
     /* Init private items */
     coded_w = ((width+3)/4)*4;
     codec->bytes_per_line = coded_w * 2;
-    codec->buffer_alloc = codec->bytes_per_line * height;
-    codec->buffer = calloc(1, codec->buffer_alloc);
+    lqt_packet_alloc(&codec->pkt, codec->bytes_per_line * height);
     codec->initialized = 1;
     }
   }
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   {
-  int64_t bytes;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_yuv2_codec_t *codec = vtrack->codec->priv;
   int width = quicktime_video_width(file, track);
@@ -255,10 +255,12 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
   initialize(vtrack, codec, width, height);
 
-  bytes = lqt_read_video_frame(file, &codec->buffer,
-                               &codec->buffer_alloc,
-                               vtrack->current_position, NULL, track);
-        
+  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                   &codec->pkt,
+                                   vtrack->track->idx_pos))
+    return -1;
+  vtrack->track->idx_pos++;
+  
   if(codec->is_2vuy)
     convert_decode_2vuy(file, track, codec, row_pointers);
   else if(codec->is_yuvs)
@@ -277,8 +279,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   int width = vtrack->track->tkhd.track_width;
   int height = vtrack->track->tkhd.track_height;
   int64_t bytes;
-  unsigned char *buffer;
-
+  
   if(!row_pointers)
     {
     if(codec->is_2vuy || codec->is_yuvs)
@@ -297,7 +298,6 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   initialize(vtrack, codec, width, height);
 
   bytes = height * codec->bytes_per_line;
-  buffer = codec->buffer;
 
   if(codec->is_2vuy)
     convert_encode_2vuy(file, track, codec, row_pointers);
@@ -310,7 +310,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                          vtrack->current_position,
                          -1, 0);
   
-  result = !quicktime_write_data(file, buffer, bytes);
+  result = !quicktime_write_data(file, codec->pkt.data, bytes);
 
   lqt_write_frame_footer(file, track);
   

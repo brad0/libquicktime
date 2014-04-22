@@ -30,130 +30,118 @@
 
 typedef struct
   {
-  uint8_t *buffer;
-  int buffer_alloc;
+  lqt_packet_t pkt;
   } quicktime_v308_codec_t;
 
 static int delete_codec(quicktime_codec_t *codec_base)
-{
-	quicktime_v308_codec_t *codec;
+  {
+  quicktime_v308_codec_t *codec;
 
-	codec = codec_base->priv;
-	if(codec->buffer) free(codec->buffer);
-	free(codec);
-	return 0;
-}
-
-
-
-
+  codec = codec_base->priv;
+  lqt_packet_free(&codec->pkt);
+  free(codec);
+  return 0;
+  }
 
 static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
-{
-        uint8_t *in_ptr, *out_y, *out_u, *out_v;
-        int i, j;
-	int64_t bytes;
-	int result = 0;
-	quicktime_video_map_t *vtrack = &file->vtracks[track];
-	quicktime_v308_codec_t *codec = vtrack->codec->priv;
-	int width = vtrack->track->tkhd.track_width;
-	int height = vtrack->track->tkhd.track_height;
+  {
+  uint8_t *in_ptr, *out_y, *out_u, *out_v;
+  int i, j;
+  int result = 0;
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_v308_codec_t *codec = vtrack->codec->priv;
+  int width = vtrack->track->tkhd.track_width;
+  int height = vtrack->track->tkhd.track_height;
 
-        if(!row_pointers)
-          {
-          //          vtrack->stream_cmodel = BC_VYU888;
-          vtrack->stream_cmodel = BC_YUV444P;
-          return 0;
-          }
+  if(!row_pointers)
+    {
+    //          vtrack->stream_cmodel = BC_VYU888;
+    vtrack->stream_cmodel = BC_YUV444P;
+    return 0;
+    }
 
-        bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                     vtrack->current_position, NULL, track);
-
-        if(bytes <= 0)
-          return -1;
+  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                   &codec->pkt,
+                                   vtrack->track->idx_pos))
+    return -1;
+  vtrack->track->idx_pos++;
         
-        in_ptr = codec->buffer;
-	for(i = 0; i < height; i++)
-          {
-          out_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
-          out_u = row_pointers[1] + i * file->vtracks[track].stream_row_span_uv;
-          out_v = row_pointers[2] + i * file->vtracks[track].stream_row_span_uv;
-          for(j = 0; j < width; j++)
-            {
-            *out_y = in_ptr[1]; /* Y */
-            *out_u = in_ptr[2]; /* U */
-            *out_v = in_ptr[0]; /* V */
+  in_ptr = codec->pkt.data;
+  for(i = 0; i < height; i++)
+    {
+    out_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
+    out_u = row_pointers[1] + i * file->vtracks[track].stream_row_span_uv;
+    out_v = row_pointers[2] + i * file->vtracks[track].stream_row_span_uv;
+    for(j = 0; j < width; j++)
+      {
+      *out_y = in_ptr[1]; /* Y */
+      *out_u = in_ptr[2]; /* U */
+      *out_v = in_ptr[0]; /* V */
 
-            out_y++;
-            out_u++;
-            out_v++;
+      out_y++;
+      out_u++;
+      out_v++;
             
-            in_ptr += 3;
-            }
-          }
+      in_ptr += 3;
+      }
+    }
         
-	return result;
-}
-
-
-
-
-
-
+  return result;
+  }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
-{
-        uint8_t *in_y, *in_u, *in_v, *out_ptr;
-	quicktime_video_map_t *vtrack = &file->vtracks[track];
-	quicktime_v308_codec_t *codec = vtrack->codec->priv;
-	int width = vtrack->track->tkhd.track_width;
-	int height = vtrack->track->tkhd.track_height;
-	int bytes = width * height * 3;
-	int result = 0;
-	int i, j;
+  {
+  uint8_t *in_y, *in_u, *in_v, *out_ptr;
+  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_v308_codec_t *codec = vtrack->codec->priv;
+  int width = vtrack->track->tkhd.track_width;
+  int height = vtrack->track->tkhd.track_height;
+  int result = 0;
+  int i, j;
 
-        if(!row_pointers)
-          {
-          vtrack->stream_cmodel = BC_YUV444P;
-          //          vtrack->stream_cmodel = BC_VYU888;
-          return 0;
-          }
+  if(!row_pointers)
+    {
+    vtrack->stream_cmodel = BC_YUV444P;
+    //          vtrack->stream_cmodel = BC_VYU888;
+    return 0;
+    }
         
-        if(!codec->buffer)
-          {
-          lqt_set_fiel_uncompressed(file, track);
-          lqt_set_colr_yuv_uncompressed(file, track);
-          codec->buffer = malloc(width * height * 3);
-          }
-        out_ptr = codec->buffer;
-	for(i = 0; i < height; i++)
-          {
-          in_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
-          in_u = row_pointers[1] + i * file->vtracks[track].stream_row_span_uv;
-          in_v = row_pointers[2] + i * file->vtracks[track].stream_row_span_uv;
+  if(!codec->pkt.data)
+    {
+    lqt_set_fiel_uncompressed(file, track);
+    lqt_set_colr_yuv_uncompressed(file, track);
+    lqt_packet_alloc(&codec->pkt, width * height * 3);
+    codec->pkt.data_len = width * height * 3;
+    }
+  
+  out_ptr = codec->pkt.data;
+  for(i = 0; i < height; i++)
+    {
+    in_y = row_pointers[0] + i * file->vtracks[track].stream_row_span;
+    in_u = row_pointers[1] + i * file->vtracks[track].stream_row_span_uv;
+    in_v = row_pointers[2] + i * file->vtracks[track].stream_row_span_uv;
           
-          for(j = 0; j < width; j++)
-            {
-
-            out_ptr[1] = *in_y; /* Y */
-            out_ptr[2] = *in_u; /* U */
-            out_ptr[0] = *in_v; /* V */
+    for(j = 0; j < width; j++)
+      {
+      out_ptr[1] = *in_y; /* Y */
+      out_ptr[2] = *in_u; /* U */
+      out_ptr[0] = *in_v; /* V */
             
-            out_ptr += 3;
-            in_y ++;
-            in_u ++;
-            in_v ++;
-            }
-          }
+      out_ptr += 3;
+      in_y ++;
+      in_u ++;
+      in_v ++;
+      }
+    }
         
-        lqt_write_frame_header(file, track,
-                               vtrack->current_position,
-                               -1, 0);
-	result = !quicktime_write_data(file, codec->buffer, bytes);
-        lqt_write_frame_footer(file, track);
-	
-	return result;
-}
+  lqt_write_frame_header(file, track,
+                         vtrack->current_position,
+                         -1, 0);
+  result = !quicktime_write_data(file, codec->pkt.data, codec->pkt.data_len);
+  lqt_write_frame_footer(file, track);
+  
+  return result;
+  }
 
 void quicktime_init_codec_v308(quicktime_codec_t * codec_base,
                                quicktime_audio_map_t *atrack,

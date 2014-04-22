@@ -35,7 +35,6 @@ typedef struct
 
   /* Compression stuff */
   RTjpeg_t * compress_struct;
-  uint8_t * write_buffer;
   int Q;
   int K;
   int LQ;
@@ -43,12 +42,13 @@ typedef struct
 	
   /* DeCompression stuff */
   RTjpeg_t * decompress_struct;
-  uint8_t * read_buffer;
-  int read_buffer_alloc;
   int jpeg_width;
   int jpeg_height;
   int qt_width;
   int qt_height;
+
+  lqt_packet_t pkt;
+
   } quicktime_rtjpeg_codec_t;
 
 #endif

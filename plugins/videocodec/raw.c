@@ -39,19 +39,18 @@ dst[2] = pal->blue[indx] >> 8;
 
 
 typedef struct
-{
-	unsigned char *buffer;
-        int buffer_alloc;
-/* Support all possible depths */
+  {
+  lqt_packet_t pkt;
+  /* Support all possible depths */
 
-        int bytes_per_line;
-        void (*scanline_func)(uint8_t * src,
-                              uint8_t * dst,
-                              int num_pixels,
-                              quicktime_ctab_t * pal);
+  int bytes_per_line;
+  void (*scanline_func)(uint8_t * src,
+                        uint8_t * dst,
+                        int num_pixels,
+                        quicktime_ctab_t * pal);
 
 
-} quicktime_raw_codec_t;
+  } quicktime_raw_codec_t;
 
 
 static void scanline_raw_1(uint8_t * src,
@@ -202,9 +201,7 @@ static void scanline_raw_32(uint8_t * src,
 static int quicktime_delete_codec_raw(quicktime_codec_t *codec_base)
   {
   quicktime_raw_codec_t *codec = codec_base->priv;
-  if(codec->buffer)
-    free(codec->buffer);
-  
+  lqt_packet_free(&codec->pkt);
   free(codec);
   return 0;
   }
@@ -222,11 +219,11 @@ static int source_cmodel(quicktime_t *file, int track)
 static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers, int track)
   {
   int result = 0;
-  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_video_map_t * vtrack = file->vtracks + track;
+  quicktime_trak_t *trak = vtrack->track;
   int frame_depth = quicktime_video_depth(file, track);
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
-  long bytes;
   int i;
   unsigned char *ptr;
   quicktime_ctab_t * ctab;
@@ -317,15 +314,15 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 
   /* Read data */
 
-  bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                               file->vtracks[track].current_position, NULL, track);
-
-  if(bytes <= 0)
+  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                   &codec->pkt,
+                                   vtrack->track->idx_pos))
     return -1;
-        
+  vtrack->track->idx_pos++;
+  
   /* Do conversion of the scanlines */
 
-  ptr = codec->buffer;
+  ptr = codec->pkt.data;
 
   for(i = 0; i < height; i++)
     {
@@ -377,13 +374,12 @@ static int quicktime_encode_raw(quicktime_t *file,
 
   if(vtrack->stream_cmodel == BC_RGBA8888)
     {
-    if(!codec->buffer)
-      codec->buffer = calloc(codec->bytes_per_line, 1);
-
+    lqt_packet_alloc(&codec->pkt, codec->bytes_per_line);
+    
     for(i = 0; i < height; i++)
       {
       in_ptr = row_pointers[i];
-      out_ptr = codec->buffer;
+      out_ptr = codec->pkt.data;
       for(j = 0; j < width; j++)
         {
         out_ptr[1] = in_ptr[0]; /* R */
@@ -393,7 +389,8 @@ static int quicktime_encode_raw(quicktime_t *file,
         out_ptr += 4;
         in_ptr  += 4;
         }
-      result = !quicktime_write_data(file, codec->buffer, codec->bytes_per_line);
+      result = !quicktime_write_data(file, codec->pkt.data,
+                                     codec->bytes_per_line);
       }
     }
   else /* BC_RGB888 */

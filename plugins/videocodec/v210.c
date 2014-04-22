@@ -30,8 +30,7 @@
 
 typedef struct
     {
-    uint8_t *buffer;
-    int buffer_alloc;
+    lqt_packet_t pkt;
     /* The V210 codec reqires a bytes/line that is a multiple of 128 (48 pixels). */
     int64_t    bytes_per_line;
     int    initialized;
@@ -42,8 +41,7 @@ static int delete_codec(quicktime_codec_t *codec_base)
     quicktime_v210_codec_t *codec;
 
     codec = codec_base->priv;
-    if(codec->buffer)
-      free(codec->buffer);
+    lqt_packet_free(&codec->pkt);
     free(codec);
     return 0;
     }
@@ -61,10 +59,9 @@ static void initialize(quicktime_video_map_t *vtrack,
     if  (codec->initialized != 0)
         return;
     codec->bytes_per_line = ((((width + 47) / 48) * 48 * 8) / 3);;
-    codec->buffer_alloc = codec->bytes_per_line * vtrack->track->tkhd.track_height;
 
-    if  (!codec->buffer)
-        codec->buffer = malloc(codec->buffer_alloc);
+    lqt_packet_alloc(&codec->pkt,
+                     codec->bytes_per_line * vtrack->track->tkhd.track_height);
     
     codec->initialized = 1;
     }
@@ -75,7 +72,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     uint8_t *in_ptr, *iptr;
     uint16_t * out_y, * out_u, * out_v;
     int i, j;
-    int64_t bytes;
     int result = 0;
     quicktime_video_map_t *vtrack = &file->vtracks[track];
     quicktime_v210_codec_t *codec = vtrack->codec->priv;
@@ -90,13 +86,13 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
 
     initialize(vtrack, codec, width, height);
 
-    bytes = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                 vtrack->current_position, NULL, track);
-
-    if(bytes <= 0)
+    if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                     &codec->pkt,
+                                     vtrack->track->idx_pos))
       return -1;
-
-    in_ptr = codec->buffer;
+    vtrack->track->idx_pos++;
+    
+    in_ptr = codec->pkt.data;
 
     for (i = 0; i < height; i++, in_ptr += codec->bytes_per_line)
         {
@@ -185,7 +181,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
       }
     initialize(vtrack, codec, width, height);
 
-    out_ptr = codec->buffer;
+    out_ptr = codec->pkt.data;
 
     for (i = 0; i < height; i++, out_ptr += codec->bytes_per_line)
         {
@@ -296,7 +292,7 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
                            vtrack->current_position,
                            -1, 0);
     result = !quicktime_write_data(file,
-                                   codec->buffer,
+                                   codec->pkt.data,
                                    codec->bytes_per_line * height);
 
     lqt_write_frame_footer(file, track);

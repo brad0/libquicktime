@@ -40,8 +40,8 @@
 
 typedef struct
   {
-  unsigned char *buffer;
-  int buffer_alloc;
+  lqt_packet_t pkt;
+  
   mjpeg_t *mjpeg;
   int jpeg_type;
   unsigned char *temp_video;
@@ -58,8 +58,9 @@ static int delete_codec(quicktime_codec_t *codec_base)
   quicktime_jpeg_codec_t *codec = codec_base->priv;
   if(codec->mjpeg)
     mjpeg_delete(codec->mjpeg);
-  if(codec->buffer)
-    free(codec->buffer);
+
+  lqt_packet_free(&codec->pkt);
+  
   if(codec->temp_video)
     free(codec->temp_video);
   free(codec);
@@ -73,7 +74,7 @@ static int decode(quicktime_t *file,
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_jpeg_codec_t *codec = vtrack->codec->priv;
   mjpeg_t *mjpeg;
-  long size, field2_offset;
+  long field2_offset;
   int result = 0;
 
   if(!codec->initialized)
@@ -98,22 +99,22 @@ static int decode(quicktime_t *file,
    
   if(!codec->have_frame)
     {
-    size = lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                                vtrack->current_position, NULL, track);
-    
-    if(size <= 0)
+    if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                     &codec->pkt,
+                                     vtrack->track->idx_pos))
       return -1;
+    vtrack->track->idx_pos++;
+    
     
     if(mjpeg_get_fields(mjpeg) == 2)
-      {
-      field2_offset = mjpeg_get_quicktime_field2(codec->buffer, size);
-      }
+      field2_offset = mjpeg_get_quicktime_field2(codec->pkt.data,
+                                                 codec->pkt.data_len);
     else
       field2_offset = 0;
     
     mjpeg_decompress(codec->mjpeg, 
-                     codec->buffer, 
-                     size,
+                     codec->pkt.data, 
+                     codec->pkt.data_len,
                      field2_offset);
     
     if(!row_pointers)
@@ -246,13 +247,9 @@ static int set_parameter(quicktime_t *file,
   quicktime_jpeg_codec_t *codec = file->vtracks[track].codec->priv;
 	
   if(!strcasecmp(key, "jpeg_quality"))
-    {
     codec->quality = *(int*)value;
-    }
   else if(!strcasecmp(key, "jpeg_usefloat"))
-    {
     codec->usefloat = *(int*)value;
-    }
   return 0;
   }
 
