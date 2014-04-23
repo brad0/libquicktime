@@ -1235,11 +1235,13 @@ double quicktime_frame_rate(quicktime_t *file, int track)
 
 int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame)
   {
-  if(file->total_vtracks > track)
+  quicktime_video_map_t * vtrack;
+  
+  if((track < 0) || (track >= file->total_vtracks))
     return -1;
-
+  vtrack = file->vtracks + track;
   return
-    file->vtracks[track].track->idx.entries[frame].pts;
+    vtrack->track->idx.entries[frame].pts;
   }
 
 /*
@@ -1249,10 +1251,12 @@ int64_t lqt_get_frame_time(quicktime_t * file, int track, int frame)
   
 int64_t lqt_frame_time(quicktime_t * file, int track)
   {
-  if(file->total_vtracks > track)
+  quicktime_video_map_t * vtrack;
+  
+  if((track < 0) || (track >= file->total_vtracks))
     return -1;
-  return
-    file->vtracks[track].track->idx.entries[file->vtracks[track].next_display_frame].pts;
+  vtrack = file->vtracks + track;
+  return vtrack->track->idx.entries[vtrack->next_display_frame].pts;
   }
 
 /*

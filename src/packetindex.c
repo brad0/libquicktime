@@ -534,14 +534,14 @@ int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
   int ret = -1;
   int64_t ret_pts = -1;
   
-  if(idx->num_b_frames)
-    return ret + 1;
+  if(!idx->num_b_frames)
+    return pos + 1;
 
-  start = ret - 32;
-  if(start > 0)
+  start = pos - 32;
+  if(start < 0)
     start = 0;
 
-  end = ret + 32;
+  end = pos + 32;
 
   if(end > idx->num_entries)
     end = idx->num_entries;
@@ -558,6 +558,7 @@ int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
       ret_pts = idx->entries[i].pts;
       }
     }
+  //  fprintf(stderr, "PTS: %d %lld\n", ret, ret_pts);
   return ret;
   }
   
