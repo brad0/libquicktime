@@ -125,10 +125,8 @@ int lqt_schroedinger_delete(quicktime_codec_t *codec_base)
   
   if(codec->dec)
     schro_decoder_free(codec->dec);
-  if(codec->dec_buffer)
-    free(codec->dec_buffer);
-  if(codec->enc_buffer)
-    free(codec->enc_buffer);
+
+  lqt_packet_free(&codec->pkt);
   
   if(codec->enc)
     schro_encoder_free(codec->enc);

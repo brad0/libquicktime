@@ -60,28 +60,34 @@ static SchroBuffer * get_data(quicktime_t *file, int track)
   if(codec->dec_eof)
     return NULL;
   
-  if(codec->dec_buffer_size < 13)
+  if(codec->pkt.data_len < 13)
     {
     //    fprintf(stderr, "Read frame: %ld + %d\n",
     //            vtrack->current_position, codec->dec_delay);
+
+    if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                     &codec->pkt,
+                                     vtrack->track->idx_pos))
+      {
+      codec->dec_eof = 1;
+      schro_decoder_push_end_of_stream(codec->dec);
+      return NULL;
+      }
+    vtrack->track->idx_pos++;
     
-    codec->dec_buffer_size = lqt_read_video_frame(file, &codec->dec_buffer,
-                                                  &codec->dec_buffer_alloc,
-                                                  vtrack->current_position + codec->dec_delay,
-                                                  NULL, track);
-    codec->dec_buffer_ptr = codec->dec_buffer;
+    codec->dec_buffer_ptr = codec->pkt.data;
     }
 
   //  fprintf(stderr, "dec_buffer_size: %d\n", codec->dec_buffer_size);
   
-  if(!codec->dec_buffer_size)
+  if(!codec->pkt.data_len)
     {
     codec->dec_eof = 1;
     schro_decoder_push_end_of_stream(codec->dec);
     return NULL;
     }
   
-  size = next_startcode(codec->dec_buffer_ptr, codec->dec_buffer_size);
+  size = next_startcode(codec->dec_buffer_ptr, codec->pkt.data_len);
   
   if(SCHRO_PARSE_CODE_IS_PICTURE(codec->dec_buffer_ptr[4]))
     {
@@ -99,7 +105,7 @@ static SchroBuffer * get_data(quicktime_t *file, int track)
   ret->free = buffer_free;
   ret->priv = data;
          
-  codec->dec_buffer_size -= size;
+  codec->pkt.data_len -= size;
   codec->dec_buffer_ptr += size;
  
   return ret;

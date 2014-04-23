@@ -118,15 +118,12 @@ static int flush_data(quicktime_t *file, int track)
         //                parse_code, state);
         
         /* Append to enc_buffer */
-        if(codec->enc_buffer_alloc < codec->enc_buffer_size + enc_buf->length)
-          {
-          codec->enc_buffer_alloc = codec->enc_buffer_size + enc_buf->length + 1024;
-          codec->enc_buffer = realloc(codec->enc_buffer,
-                                      codec->enc_buffer_alloc);
-          }
-        memcpy(codec->enc_buffer + codec->enc_buffer_size,
+
+        lqt_packet_alloc(&codec->pkt, codec->pkt.data_len + enc_buf->length);
+        
+        memcpy(codec->pkt.data + codec->pkt.data_len,
                enc_buf->data, enc_buf->length);
-        codec->enc_buffer_size += enc_buf->length;
+        codec->pkt.data_len += enc_buf->length;
         
         if(SCHRO_PARSE_CODE_IS_PICTURE(parse_code))
           {
@@ -148,13 +145,11 @@ static int flush_data(quicktime_t *file, int track)
           lqt_write_frame_header(file, track,
                                  pic_num, -1, keyframe);
 
-          result = !quicktime_write_data(file, codec->enc_buffer,
-                                         codec->enc_buffer_size);
-
+          result = !quicktime_write_data(file, codec->pkt.data,
+                                         codec->pkt.data_len);
+          
           lqt_write_frame_footer(file, track);
-          
-          codec->enc_buffer_size = 0;
-          
+          codec->pkt.data_len = 0;
           }
         else if(SCHRO_PARSE_CODE_IS_END_OF_SEQUENCE(parse_code))
           {
@@ -175,8 +170,9 @@ static int flush_data(quicktime_t *file, int track)
               lqt_video_append_timestamp(file, track, vtrack->duration, 1);
           
             lqt_write_frame_header(file, track, vtrack->current_position, -1, 0);
-            result = !quicktime_write_data(file, codec->enc_buffer,
-                                           codec->enc_buffer_size);
+            result = !quicktime_write_data(file,
+                                           codec->pkt.data,
+                                           codec->pkt.data_len);
             lqt_write_frame_footer(file, track);
             vtrack->current_position++;
             codec->enc_eof = 1;
@@ -185,7 +181,7 @@ static int flush_data(quicktime_t *file, int track)
             lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
                     "Discarding redundant sequence end code");
           
-          codec->enc_buffer_size = 0;
+          codec->pkt.data_len = 0;
           }
         
         schro_buffer_unref (enc_buf);

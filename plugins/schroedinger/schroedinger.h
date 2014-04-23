@@ -56,10 +56,8 @@ typedef struct
   SchroDecoder * dec;
   SchroFrame * dec_frame;
 
-  uint8_t * dec_buffer;
   uint8_t * dec_buffer_ptr;
-  int dec_buffer_size;
-  int dec_buffer_alloc;
+  
   int dec_delay;
   int dec_eof;
   
@@ -76,10 +74,9 @@ typedef struct
                          unsigned char **row_pointers,
                          SchroFrame * frame,
                          int track);
+
+  lqt_packet_t pkt;
   
-  uint8_t * enc_buffer;
-  int enc_buffer_alloc;
-  int enc_buffer_size;
 
   int enc_eof; /* Don't write EOS twice */
   
