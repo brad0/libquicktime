@@ -800,7 +800,7 @@ int lqt_packet_index_get_keyframe_before(const lqt_packet_index_t * idx,
 
 void lqt_packet_index_finish(lqt_packet_index_t * idx);
 
-int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
+LQT_EXTERN int lqt_packet_index_get_next_display_frame(const lqt_packet_index_t * idx,
                                             int pos);
 
 /* Get packet fields without reading anything */
