@@ -91,6 +91,7 @@ pano.c \
 pasp.c \
 pdat.c \
 pHdr.c \
+ptscache.c \
 qtatom.c \
 qtvr.c \
 smhd.c \

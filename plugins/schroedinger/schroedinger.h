@@ -55,6 +55,7 @@ typedef struct
   /* Decoder part */
   SchroDecoder * dec;
   SchroFrame * dec_frame;
+
   uint8_t * dec_buffer;
   uint8_t * dec_buffer_ptr;
   int dec_buffer_size;

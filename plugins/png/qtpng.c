@@ -32,15 +32,14 @@
 typedef struct
   {
   int compression_level;
-  unsigned char *buffer;
+
+  lqt_packet_t pkt;
+  
   // Read position
   long buffer_position;
-  // Frame size
-  long buffer_size;
-  // Buffer allocation
-  int buffer_alloc;
+  
   unsigned char *temp_frame;
-
+  
   int initialized;
   } quicktime_png_codec_t;
 
@@ -48,8 +47,9 @@ typedef struct
 static int delete_codec(quicktime_codec_t *codec_base)
   {
   quicktime_png_codec_t *codec = codec_base->priv;
-  if(codec->buffer)
-    free(codec->buffer);
+
+  lqt_packet_free(&codec->pkt);
+  
   if(codec->temp_frame)
     free(codec->temp_frame);
   free(codec);
@@ -70,9 +70,9 @@ static void read_function(png_structp png_ptr, png_bytep data, png_uint_32 lengt
   {
   quicktime_png_codec_t *codec = png_get_io_ptr(png_ptr);
 	
-  if((long)(length + codec->buffer_position) <= codec->buffer_size)
+  if((long)(length + codec->buffer_position) <= codec->pkt.data_len)
     {
-    memcpy(data, codec->buffer + codec->buffer_position, length);
+    memcpy(data, codec->pkt.data + codec->buffer_position, length);
     codec->buffer_position += length;
     }
   }
@@ -81,13 +81,9 @@ static void write_function(png_structp png_ptr, png_bytep data, png_uint_32 leng
   {
   quicktime_png_codec_t *codec = png_get_io_ptr(png_ptr);
 
-  if((long)(length + codec->buffer_size) > codec->buffer_alloc)
-    {
-    codec->buffer_alloc += length;
-    codec->buffer = realloc(codec->buffer, codec->buffer_alloc);
-    }
-  memcpy(codec->buffer + codec->buffer_size, data, length);
-  codec->buffer_size += length;
+  lqt_packet_alloc(&codec->pkt, codec->pkt.data_len + length);
+  memcpy(codec->pkt.data + codec->pkt.data_len, data, length);
+  codec->pkt.data_len += length;
   }
 
 static void flush_function(png_structp png_ptr)
@@ -113,22 +109,22 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     return 0;
     }
 
-  codec->buffer_size =
-    lqt_read_video_frame(file, &codec->buffer, &codec->buffer_alloc,
-                         vtrack->current_position, NULL, track);
+  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
+                                   &codec->pkt,
+                                   vtrack->track->idx_pos))
+    return -1;
+  vtrack->track->idx_pos++;
   
   codec->buffer_position = 0;
-  if(codec->buffer_size > 0)
-    {
-    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-    info_ptr = png_create_info_struct(png_ptr);
-    png_set_read_fn(png_ptr, codec, (png_rw_ptr)read_function);
-    png_read_info(png_ptr, info_ptr);
 
-    /* read the image */
-    png_read_image(png_ptr, row_pointers);
-    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-    }
+  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+  info_ptr = png_create_info_struct(png_ptr);
+  png_set_read_fn(png_ptr, codec, (png_rw_ptr)read_function);
+  png_read_info(png_ptr, info_ptr);
+  
+  /* read the image */
+  png_read_image(png_ptr, row_pointers);
+  png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
   
   return result;
   }
@@ -159,8 +155,9 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
     else
       vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 24;
     }
+
+  codec->pkt.data_len = 0;
   
-  codec->buffer_size = 0;
   codec->buffer_position = 0;
 
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
@@ -194,11 +191,11 @@ static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
   lqt_write_frame_header(file, track,
                          vtrack->current_position,
                          -1, 0);
-        
+  
   result = !quicktime_write_data(file, 
-                                 codec->buffer, 
-                                 codec->buffer_size);
-
+                                 codec->pkt.data,
+                                 codec->pkt.data_len);
+  
   lqt_write_frame_footer(file, track);
   return result;
   }

@@ -11,4 +11,5 @@ lqt_codecinfo_private.h \
 lqt_fseek.h \
 lqt_funcprotos.h \
 lqt_private.h \
+ptscache.h \
 workarounds.h
