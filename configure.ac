@@ -579,7 +579,8 @@ AH_TEMPLATE([HAVE_LIBAVCODEC],
 
 have_libavcodec=false
 
-AVCODEC_BUILD="3412992"
+dnl Require libavcodec "54.2.100"
+AVCODEC_BUILD="3539556"
 
 AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
 

@@ -41,22 +41,6 @@
 
 int ffmpeg_num_audio_codecs = -1;
 int ffmpeg_num_video_codecs = -1;
-
-#if LIBAVCODEC_VERSION_MAJOR >= 53
-#define CodecType AVMediaType
-#define CODEC_TYPE_UNKNOWN    AVMEDIA_TYPE_UNKNOWN
-#define CODEC_TYPE_VIDEO      AVMEDIA_TYPE_VIDEO
-#define CODEC_TYPE_AUDIO      AVMEDIA_TYPE_AUDIO
-#define CODEC_TYPE_DATA       AVMEDIA_TYPE_DATA
-#define CODEC_TYPE_SUBTITLE   AVMEDIA_TYPE_SUBTITLE
-#define CODEC_TYPE_ATTACHMENT AVMEDIA_TYPE_ATTACHMENT
-#define CODEC_TYPE_NB         AVMEDIA_TYPE_NB
-#endif
-
-#if LIBAVCODEC_VERSION_INT > ((53<<16)|(17<<8)|0)
-#define HAVE_PRORES_SUPPORT
-#endif
-
   
 #define ENCODE_PARAM_AUDIO \
   { \
@@ -911,7 +895,6 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .encoding_colormodels = (int[]){ BC_YUV422P, LQT_COLORMODEL_NONE }
     },
-#ifdef HAVE_PRORES_SUPPORT
     {
       .id = CODEC_ID_PRORES,
       .index = -1,
@@ -927,7 +910,6 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .encoding_colormodels = (int[]){ BC_YUV422P10, LQT_COLORMODEL_NONE }
     },
-#endif
 };
 
 /* Audio */
@@ -1052,7 +1034,6 @@ static void ffmpeg_map_init(void)
     {
     if(codecidmap_v[i].do_encode)
       {
-#ifdef HAVE_PRORES_SUPPORT
       // FFMpeg has 2 different ProRes encoders, so try the better one first.
       if(codecidmap_v[i].id == CODEC_ID_PRORES)
         {
@@ -1063,7 +1044,6 @@ static void ffmpeg_map_init(void)
         }
 
       if(!codecidmap_v[i].encoder)
-#endif
         codecidmap_v[i].encoder = avcodec_find_encoder(codecidmap_v[i].id);
       }
     codecidmap_v[i].decoder = avcodec_find_decoder(codecidmap_v[i].id);
@@ -1154,12 +1134,10 @@ static void set_codec_info(struct CODECIDMAP * map)
   snprintf(ffmpeg_long_name, 256, "%s", map->name);
   snprintf(ffmpeg_description, 256, "%s", map->name);
   
-  if((map->encoder && (map->encoder->type == CODEC_TYPE_VIDEO)) ||
-     (map->decoder && (map->decoder->type == CODEC_TYPE_VIDEO))){
-       codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
-  } else {
-       codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
-  }
+  if((map->encoder || map->decoder) && (map->encoder->type == AVMEDIA_TYPE_VIDEO))
+    codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
+  else
+    codec_info_ffmpeg.type = LQT_CODEC_AUDIO;
   }
 
 static struct CODECIDMAP * find_codec(int index)

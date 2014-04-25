@@ -426,6 +426,8 @@ typedef struct
   AVCodec * encoder;
   AVCodec * decoder;
 
+  AVFrame * frame;
+  
   int initialized;
   
   /* Interleaved samples as avcodec needs them */
@@ -449,16 +451,15 @@ typedef struct
   int have_mpa_header;
 
   uint8_t * extradata;
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
   AVPacket pkt;
-#endif
 
   int64_t pts; /* For reading compressed packets */
 
   int header_written;
-#if LIBAVCODEC_VERSION_MAJOR >= 54
   AVDictionary * options;
-#endif
+
+  AVFrame * f;
+  
   } quicktime_ffmpeg_audio_codec_t;
 
 static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
@@ -476,10 +477,9 @@ static int lqt_ffmpeg_delete_audio(quicktime_codec_t *codec_base)
     free(codec->chunk_buffer);
   if(codec->extradata)
     free(codec->extradata);
-#if LIBAVCODEC_VERSION_MAJOR >= 54
   if(codec->options)
     av_dict_free(&codec->options);
-#endif
+  av_frame_free(&codec->f); 
   free(codec);
   return 0;
   }
@@ -491,9 +491,7 @@ static int set_parameter(quicktime_t *file,
   {
   quicktime_ffmpeg_audio_codec_t *codec = file->atracks[track].codec->priv;
   lqt_ffmpeg_set_parameter(codec->avctx,
-#if LIBAVCODEC_VERSION_MAJOR >= 54
                            &codec->options,
-#endif
                            key, value);
   return 0;
   }
@@ -510,10 +508,7 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
 
-#if DECODE_AUDIO4
-  AVFrame f;
   int got_frame;
-#endif
   
   chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
 
@@ -543,59 +538,28 @@ static int decode_chunk_vbr(quicktime_t * file, int track)
       (codec->sample_buffer_end - codec->sample_buffer_start);
     bytes_decoded *= 2 * track_map->channels;
 
-#if DECODE_AUDIO3 || DECODE_AUDIO4
     codec->pkt.data = codec->chunk_buffer;
     codec->pkt.size = packet_size + FF_INPUT_BUFFER_PADDING_SIZE;
 
-#if DECODE_AUDIO4
-    frame_bytes = avcodec_decode_audio4(codec->avctx, &f,
+    frame_bytes = avcodec_decode_audio4(codec->avctx, codec->f,
                                         &got_frame, &codec->pkt);
     if(frame_bytes < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio4 error");
       break;
       }
-    bytes_decoded = f.nb_samples * 2 * track_map->channels;
+    bytes_decoded = codec->f->nb_samples * 2 * track_map->channels;
     memcpy(&codec->sample_buffer[track_map->channels *
                                  (codec->sample_buffer_end -
                                   codec->sample_buffer_start)],
-           f.extended_data[0],
+           codec->f->extended_data[0],
            bytes_decoded);
     
-#else // DECODE_AUDIO3
-    frame_bytes = avcodec_decode_audio3(codec->avctx,
-                                        &codec->sample_buffer[track_map->channels *
-                                                               (codec->sample_buffer_end -
-                                                                codec->sample_buffer_start)],
-                                        &bytes_decoded,
-                                        &codec->pkt);
-    if(frame_bytes < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio3 error");
-      break;
-      }
-#endif // DECODE_AUDIO3
-    
-#else // DECODE_AUDIO2
-    frame_bytes =
-      avcodec_decode_audio2(codec->avctx,
-                  &codec->sample_buffer[track_map->channels *
-                                         (codec->sample_buffer_end - codec->sample_buffer_start)],
-                  &bytes_decoded,
-                  codec->chunk_buffer,
-                  packet_size + FF_INPUT_BUFFER_PADDING_SIZE);
-    if(frame_bytes < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio2 error");
-      break;
-      }
-#endif
     codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
     }
   track_map->cur_chunk++;
   return num_samples;
   }
-
 
 /* Decode the current chunk into the sample buffer */
 
@@ -613,10 +577,7 @@ static int decode_chunk(quicktime_t * file, int track)
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
 
-#if DECODE_AUDIO4
-  AVFrame f;
   int got_frame;
-#endif
   
   /* Read chunk */
   
@@ -759,47 +720,24 @@ static int decode_chunk(quicktime_t * file, int track)
       (codec->sample_buffer_end - codec->sample_buffer_start);
     bytes_decoded *= 2 * track_map->channels;
 
-#if DECODE_AUDIO3 || DECODE_AUDIO4
     codec->pkt.data = &codec->chunk_buffer[bytes_used];
     codec->pkt.size = codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE;
 
-#if DECODE_AUDIO4
     
-    frame_bytes = avcodec_decode_audio4(codec->avctx, &f,
+    frame_bytes = avcodec_decode_audio4(codec->avctx, codec->f,
                                         &got_frame, &codec->pkt);
     if(frame_bytes < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio4 error");
       break;
       }
-    bytes_decoded = f.nb_samples * 2 * track_map->channels;
+    bytes_decoded = codec->f->nb_samples * 2 * track_map->channels;
     memcpy(&codec->sample_buffer[track_map->channels *
                                  (codec->sample_buffer_end -
                                   codec->sample_buffer_start)],
-           f.extended_data[0],
+           codec->f->extended_data[0],
            bytes_decoded);
     
-#else // DECODE_AUDIO3
-    frame_bytes =
-      avcodec_decode_audio3(codec->avctx,
-                            &codec->sample_buffer[track_map->channels *
-                                                   (codec->sample_buffer_end - codec->sample_buffer_start)],
-                            &bytes_decoded,
-                            &codec->pkt);
-
-#endif
-
-    
-    
-#else // DECODE_AUDIO2
-    frame_bytes =
-      avcodec_decode_audio2(codec->avctx,
-                            &codec->sample_buffer[track_map->channels *
-                                                  (codec->sample_buffer_end - codec->sample_buffer_start)],
-                            &bytes_decoded,
-                            &codec->chunk_buffer[bytes_used],
-                            codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
-#endif
     if(frame_bytes < 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio error");
@@ -984,11 +922,7 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
     
     //  priv->ctx->block_align     = s->data.audio.block_align;
     //  priv->ctx->bit_rate        = s->codec_bitrate;
-#if LIBAVCODEC_VERSION_INT < ((52<<16)+(0<<8)+0)
-    codec->avctx->bits_per_sample = quicktime_audio_bits(file, track);
-#else
     codec->avctx->bits_per_coded_sample = quicktime_audio_bits(file, track);
-#endif
     /* Some codecs need extra stuff */
 
     if(codec->decoder->id == CODEC_ID_ALAC)
@@ -1019,27 +953,17 @@ static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long sample
         }
 
       }
-
     
     //    memcpy(&codec->com.ffcodec_enc, &codec->com.params, sizeof(AVCodecContext));
    
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
 
-#if LIBAVCODEC_VERSION_MAJOR < 54
-    if(avcodec_open(codec->avctx, codec->decoder) != 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open failed");
-      return 0;
-      }
-#else
     if(avcodec_open2(codec->avctx, codec->decoder, NULL) != 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open2 failed");
       return 0;
       }
-#endif
-    
     //    codec->sample_buffer_offset = 0;
     codec->initialized = 1;
     }
@@ -1195,11 +1119,8 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   int samples_done = 0;
   int samples_encoded;
   /* Initialize encoder */
-#if ENCODE_AUDIO2
-  AVFrame f;
   AVPacket pkt;
   int got_packet;
-#endif
   
   if(!codec->initialized)
     {
@@ -1212,19 +1133,11 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
     codec->avctx->sample_fmt = codec->encoder->sample_fmts[0];
 
     
-#if LIBAVCODEC_VERSION_MAJOR < 54
-    if(avcodec_open(codec->avctx, codec->encoder) != 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open failed");
-      return 0;
-      }
-#else
     if(avcodec_open2(codec->avctx, codec->encoder, NULL) != 0)
       {
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open2 failed");
       return 0;
       }
-#endif
     
     codec->initialized = 1;
 
@@ -1261,33 +1174,25 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   
   while(codec->samples_in_buffer >= codec->avctx->frame_size)
     {
-#if ENCODE_AUDIO2
     av_init_packet(&pkt);
     pkt.data = codec->chunk_buffer;
     pkt.size = codec->chunk_buffer_alloc;
 
-    avcodec_get_frame_defaults(&f);
-    f.nb_samples = codec->avctx->frame_size;
+    codec->f->nb_samples = codec->avctx->frame_size;
     
-    avcodec_fill_audio_frame(&f, channels, codec->avctx->sample_fmt,
+    avcodec_fill_audio_frame(codec->f, channels, codec->avctx->sample_fmt,
                              (uint8_t*)&codec->sample_buffer[samples_done*channels],
                              codec->avctx->frame_size * channels * 2, 
                              1);
 
     if(avcodec_encode_audio2(codec->avctx, &pkt,
-                             &f, &got_packet) < 0)
+                             codec->f, &got_packet) < 0)
       return 0;
 
     if(got_packet && pkt.size)
       frame_bytes = pkt.size;
     else
       frame_bytes = 0;
-
-#else
-    frame_bytes = avcodec_encode_audio(codec->avctx, codec->chunk_buffer,
-                                       codec->chunk_buffer_alloc,
-                                       &codec->sample_buffer[samples_done*channels]);
-#endif
     
     if(frame_bytes > 0)
       {
@@ -1486,11 +1391,9 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
   
   codec->encoder = encoder;
   codec->decoder = decoder;
-#if LIBAVCODEC_VERSION_INT < ((53<<16)|(8<<8)|0)
-  codec->avctx = avcodec_alloc_context();
-#else
   codec->avctx = avcodec_alloc_context3(NULL);
-#endif
+  codec->f = av_frame_alloc();
+  
   codec_base->priv = (void *)codec;
 
   codec_base->delete_codec = lqt_ffmpeg_delete_audio;

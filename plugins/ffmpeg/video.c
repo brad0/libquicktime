@@ -36,21 +36,10 @@
 #include SWSCALE_HEADER
 #endif
 
-
 #ifdef  PIX_FMT_YUV422P10
 #define PIX_FMT_YUV422P10_OR_DUMMY PIX_FMT_YUV422P10
 #else
 #define PIX_FMT_YUV422P10_OR_DUMMY -1234
-#endif
-
-#if LIBAVCODEC_VERSION_INT > ((53<<16)|(17<<8)|0)
-#define HAVE_PRORES_SUPPORT
-#endif
-
-#if LIBAVCODEC_VERSION_INT >= ((54<<16)|(1<<8)|0)
-#define ENCODE_VIDEO2 1
-#else
-#define ENCODE_VIDEO 1
 #endif
 
 static const struct
@@ -120,15 +109,9 @@ typedef struct
   int y_offset;
   int prores_profile; // Index into lqt_prores_profiles, for encoding only.
 
-#if LIBAVCODEC_VERSION_MAJOR < 54
-  AVPaletteControl palette;
-#else
   int palette_sent;
-#endif
 
-#if LIBAVCODEC_VERSION_MAJOR >= 54
   AVDictionary * options;
-#endif
   
   /* We decode the first frame during the init() function to
      obtain the stream colormodel */
@@ -146,9 +129,7 @@ typedef struct
   char * stats_filename;
   FILE * stats_file;
 
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
   AVPacket pkt;
-#endif
 
   /* Stuff for compressed H.264 reading */
   int nal_size_length;
@@ -362,7 +343,6 @@ static void maybe_add_sdtp_entry(quicktime_t* file, long sample, int track)
     quicktime_insert_sdtp_entry(file, sample, track, flags);
     }
   }
-
 
 #ifndef HAVE_LIBSWSCALE
 static void fill_avpicture(AVPicture * ret, unsigned char ** rows,
@@ -931,11 +911,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         return 0;
       vtrack->track->idx_pos++;
 
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
       codec->pkt.data = codec->lqt_pkt.data;
       codec->pkt.size = codec->lqt_pkt.data_len;
 
-#if LIBAVCODEC_VERSION_MAJOR >= 54
       if(!codec->palette_sent)
         {
         uint32_t * pal_i;
@@ -958,7 +936,6 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         for(i = imax; i < AVPALETTE_COUNT; i++)
           pal_i[i] = 0;
         }
-#endif
       
       if(avcodec_decode_video2(codec->avctx,
                                codec->frame,
@@ -981,20 +958,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         }
 #endif
       
-
-#else
-    
-      if(avcodec_decode_video(codec->avctx,
-                              codec->frame,
-                              &got_pic,
-                              codec->lqt_pkt.data,
-                              codec->lqt_pkt.data_len) < 0)
-        {
-        lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN, "Broken frame encountered");
-        codec->decoding_delay--;
-        return 1;
-        }
-#endif      
+      
       //      if(got_pic)
       //        codec->decoding_delay--;
       
@@ -1228,13 +1192,9 @@ static void resync_ffmpeg(quicktime_t *file, int track)
       buffer_size = 0;
       }
 
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
     codec->pkt.data = codec->buffer;
     codec->pkt.size = buffer_size;
     avcodec_decode_video2(codec->avctx, codec->frame, &got_pic, &codec->pkt);
-#else
-    avcodec_decode_video(codec->avctx, codec->frame, &got_pic, codec->buffer, buffer_size);
-#endif
 
     // Default value is necessary for normal decoding.
     codec->avctx->skip_idct = AVDISCARD_DEFAULT;
@@ -1291,15 +1251,9 @@ static void resync_ffmpeg(quicktime_t *file, int track)
     
     trak->idx_pos++;
     
-#if LIBAVCODEC_BUILD >= ((52<<16)+(26<<8)+0)
     codec->pkt.data = codec->lqt_pkt.data;
     codec->pkt.size = codec->lqt_pkt.data_len;
     avcodec_decode_video2(codec->avctx, codec->frame, &got_pic, &codec->pkt);
-#else
-    avcodec_decode_video(codec->avctx, codec->frame, &got_pic,
-                         codec->lqt_pkt.data,
-                         codec->lqt_pkt.data_len);
-#endif
 
     if(got_pic)
       {
@@ -1541,7 +1495,6 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   return -1;
   }
 
-#ifdef HAVE_PRORES_SUPPORT
 static int init_prores_encoder(quicktime_t *file, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
@@ -1589,7 +1542,6 @@ static int init_prores_encoder(quicktime_t *file, int track)
 
   return 0;
   }
-#endif
 
 static void setup_header_mpeg4(quicktime_t *file, int track,
                                const uint8_t * header, int header_len,
@@ -1695,10 +1647,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
   int height = trak->tkhd.track_height;
   int width = trak->tkhd.track_width;
   int stats_len;
-#if ENCODE_VIDEO2
   AVPacket pkt;
   int got_packet;
-#endif
   int64_t pts;
   int kf;
   uint8_t* encoded_data;
@@ -1756,11 +1706,9 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     codec->avctx->height = height;
 
     lqt_ffmpeg_setup_encoding_colormodel(vtrack);
-#if ENCODE_VIDEO2
     codec->frame->width = width;
     codec->frame->height = height;
     codec->frame->format = codec->avctx->pix_fmt;
-#endif
     
     lqt_get_pixel_aspect(file, track, &pixel_width, &pixel_height);
     codec->avctx->sample_aspect_ratio.num = pixel_width;
@@ -1843,10 +1791,8 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       init_imx_encoder(file, track);
     else if(codec->is_xdcam_hd422)
       init_xdcam_hd422_encoder(file, track);
-#ifdef HAVE_PRORES_SUPPORT
     else if(codec->encoder->id == CODEC_ID_PRORES)
       init_prores_encoder(file, track);
-#endif
     
     /* Initialize 2-pass */
     if(codec->total_passes)
@@ -1956,7 +1902,6 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     }
 #endif
 
-#if ENCODE_VIDEO2 // New
   av_init_packet(&pkt);
   pkt.data = codec->lqt_pkt.data;
   pkt.size = codec->lqt_pkt.data_len;
@@ -1972,22 +1917,6 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
   encoded_data = pkt.data; // May be different from codec->buffer!
   pts = pkt.pts * codec->encoding_pts_factor;
   kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
-    
-#else // Old
-  
-  bytes_encoded = avcodec_encode_video(codec->avctx,
-                                       codec->lqt_pkt.data,
-                                       codec->lqt_pkt.data_len,
-                                       codec->frame);
-  
-  if(bytes_encoded < 0)
-    return -1;
-  
-  encoded_data = codec->buffer;
-  pts = codec->avctx->coded_frame->pts * encoding_pts_factor;
-  kf = codec->avctx->coded_frame->key_frame;
-  
-#endif
   
   if(kf && codec->is_xdcam_hd422 && vtrack->cur_chunk)
     kf = LQT_PARTIAL_KEY_FRAME; // For XDCAM, only the first key frame is full key frame.
@@ -2012,9 +1941,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
                                    encoded_data,
                                    bytes_encoded);
 
-#if ENCODE_VIDEO2
     av_free_packet(&pkt);
-#endif
 
     // Must go before lqt_write_frame_header() which increments vtrack->cur_chunk.
     // cur_chunk is a frame number in storage order.
@@ -2062,16 +1989,13 @@ static int flush(quicktime_t *file, int track)
   int64_t pts;
   int kf;
   
-#if ENCODE_VIDEO2
   AVPacket pkt;
   int got_packet;
-#endif
   
   /* Do nothing if we didn't encode anything yet */
   if(!codec->initialized)
     return 0;
 
-#if ENCODE_VIDEO2
   av_init_packet(&pkt);
   pkt.data = codec->lqt_pkt.data;
   pkt.size = codec->lqt_pkt.data_alloc;
@@ -2088,20 +2012,6 @@ static int flush(quicktime_t *file, int track)
 
   kf = !!(pkt.flags & AV_PKT_FLAG_KEY);
   
-#else
-  
-  bytes_encoded = avcodec_encode_video(codec->avctx,
-                                       codec->buffer,
-                                       codec->buffer_alloc,
-                                       (AVFrame*)0);
-  if(bytes_encoded <= 0)
-    return 0;
-
-  pts = codec->avctx->coded_frame->pts * codec->encoding_pts_factor;
-  kf = codec->avctx->coded_frame->key_frame;
-  
-#endif
-
   if(kf && codec->is_xdcam_hd422 && vtrack->cur_chunk)
     kf = LQT_PARTIAL_KEY_FRAME; // For XDCAM, only the first key frame is full key frame.
   

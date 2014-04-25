@@ -188,9 +188,7 @@ enum_t coder_type[] =
 
 
 void lqt_ffmpeg_set_parameter(AVCodecContext * ctx,
-#if LIBAVCODEC_VERSION_MAJOR >= 54
                               AVDictionary ** options,
-#endif
                               const char * key,
                               const void * value)
   {
@@ -289,11 +287,7 @@ void lqt_ffmpeg_set_parameter(AVCodecContext * ctx,
   PARAM_FLAG("ff_flag_emu_edge",CODEC_FLAG_EMU_EDGE);
   PARAM_FLAG("ff_flag_normalize_aqp",CODEC_FLAG_NORMALIZE_AQP);
   //  PARAM_FLAG("ff_flag_alt_scan",CODEC_FLAG_ALT_SCAN); // Unused
-#if LIBAVCODEC_VERSION_INT < ((52<<16)+(0<<8)+0)
-  PARAM_FLAG("ff_flag_trellis_quant",CODEC_FLAG_TRELLIS_QUANT);
-#else
   PARAM_INT("ff_trellis",trellis);
-#endif
   PARAM_FLAG("ff_flag_bitexact",CODEC_FLAG_BITEXACT);
   PARAM_FLAG("ff_flag_ac_pred",CODEC_FLAG_AC_PRED);
   //  PARAM_FLAG("ff_flag_h263p_umv",CODEC_FLAG_H263P_UMV); // Unused
