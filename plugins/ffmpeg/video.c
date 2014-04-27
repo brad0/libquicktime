@@ -905,12 +905,9 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     {
     while(!got_pic)
       {
-      if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                       &codec->lqt_pkt,
-                                       vtrack->track->idx_pos))
+      if(!quicktime_trak_read_packet(file, vtrack->track, &codec->lqt_pkt))
         return 0;
-      vtrack->track->idx_pos++;
-
+      
       codec->pkt.data = codec->lqt_pkt.data;
       codec->pkt.size = codec->lqt_pkt.data_len;
 
@@ -1246,10 +1243,8 @@ static void resync_ffmpeg(quicktime_t *file, int track)
     
     /* Feed into ffmpeg */
 
-    if(!lqt_packet_index_read_packet(file, &trak->idx, &codec->lqt_pkt, trak->idx_pos))
+    if(!quicktime_trak_read_packet(file, trak, &codec->lqt_pkt))
       codec->lqt_pkt.data_len = 0;
-    
-    trak->idx_pos++;
     
     codec->pkt.data = codec->lqt_pkt.data;
     codec->pkt.size = codec->lqt_pkt.data_len;
@@ -2221,8 +2216,8 @@ static int read_packet_h264(quicktime_t * file, lqt_packet_t * p, int track)
   quicktime_video_map_t * vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
 
-  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                   &codec->lqt_pkt, vtrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, vtrack->track,
+                           &codec->lqt_pkt))
     return 0;
   
   ptr = codec->lqt_pkt.data;

@@ -52,10 +52,11 @@ void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in
                               void * out, int num_channels, int num_samples,
                               lqt_sample_format_t stream_format);
 
-void lqt_convert_audio_decode(quicktime_t * file, void * in, int16_t ** out_int,
-                              float ** out_float, int num_channels, int num_samples,
-                              lqt_sample_format_t stream_format);
- 
+LQT_EXTERN int lqt_sample_format_bytes(lqt_sample_format_t format);
+
+LQT_EXTERN void lqt_audio_buffer_alloc(lqt_audio_buffer_t * buf, int num_samples, int num_channels, int planar,
+                            lqt_sample_format_t fmt);
+
 
 /* avi_avih.c */
 
@@ -792,6 +793,11 @@ LQT_EXTERN int lqt_packet_index_read_packet(quicktime_t *file,
                                             const lqt_packet_index_t * idx,
                                             lqt_packet_t * p, int packetnum);
 
+LQT_EXTERN int lqt_packet_index_append_packet(quicktime_t *file,
+                                              const lqt_packet_index_t * idx,
+                                              lqt_packet_t * p, int packetnum);
+
+
 LQT_EXTERN int lqt_packet_index_seek(const lqt_packet_index_t * idx,
                                      int64_t pts);
 
@@ -1195,6 +1201,15 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak, quicktime_ato
 int quicktime_write_trak(quicktime_t *file, quicktime_trak_t *trak);
 int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak);
 long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk);
+
+LQT_EXTERN int quicktime_trak_read_packet(quicktime_t *file,
+                                          quicktime_trak_t * trak,
+                                          lqt_packet_t * p);
+
+LQT_EXTERN int quicktime_trak_append_packet(quicktime_t *file,
+                                            quicktime_trak_t * trak,
+                                            lqt_packet_t * p);
+
 
 /* translation.c */
 

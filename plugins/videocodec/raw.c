@@ -314,11 +314,9 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
 
   /* Read data */
 
-  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                   &codec->pkt,
-                                   vtrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, vtrack->track,
+                                 &codec->pkt))
     return -1;
-  vtrack->track->idx_pos++;
   
   /* Do conversion of the scanlines */
 

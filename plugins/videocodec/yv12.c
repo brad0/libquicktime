@@ -81,12 +81,9 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   y_size  = codec->coded_w;
   uv_size = codec->coded_w / 2;
 
-  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                   &codec->pkt,
-                                   vtrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, vtrack->track,
+                                 &codec->pkt))
     return -1;
-  vtrack->track->idx_pos++;
-  
   src_ptr = codec->pkt.data;
 
   /* Y */

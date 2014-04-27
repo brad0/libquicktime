@@ -273,274 +273,282 @@ static void decode_s32_swap(quicktime_pcm_codec_t*codec, int num_samples, void *
 
 static float
 float32_be_read (unsigned char *cptr)
-{       int             exponent, mantissa, negative ;
-        float   fvalue ;
+  {
+  int             exponent, mantissa, negative ;
+  float   fvalue ;
 
-        negative = cptr [0] & 0x80 ;
-        exponent = ((cptr [0] & 0x7F) << 1) | ((cptr [1] & 0x80) ? 1 : 0) ;
-        mantissa = ((cptr [1] & 0x7F) << 16) | (cptr [2] << 8) | (cptr [3]) ;
+  negative = cptr [0] & 0x80 ;
+  exponent = ((cptr [0] & 0x7F) << 1) | ((cptr [1] & 0x80) ? 1 : 0) ;
+  mantissa = ((cptr [1] & 0x7F) << 16) | (cptr [2] << 8) | (cptr [3]) ;
 
-        if (! (exponent || mantissa))
-                return 0.0 ;
+  if (! (exponent || mantissa))
+    return 0.0 ;
 
-        mantissa |= 0x800000 ;
-        exponent = exponent ? exponent - 127 : 0 ;
+  mantissa |= 0x800000 ;
+  exponent = exponent ? exponent - 127 : 0 ;
 
-        fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
+  fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
 
-        if (negative)
-                fvalue *= -1 ;
+  if (negative)
+    fvalue *= -1 ;
 
-        if (exponent > 0)
-                fvalue *= (1 << exponent) ;
-        else if (exponent < 0)
-                fvalue /= (1 << abs (exponent)) ;
+  if (exponent > 0)
+    fvalue *= (1 << exponent) ;
+  else if (exponent < 0)
+    fvalue /= (1 << abs (exponent)) ;
 
-        return fvalue ;
-} /* float32_be_read */
+  return fvalue ;
+  } /* float32_be_read */
 
 static float
 float32_le_read (unsigned char *cptr)
-{       int             exponent, mantissa, negative ;
-        float   fvalue ;
+  {
+  int             exponent, mantissa, negative ;
+  float   fvalue ;
+  
+  negative = cptr [3] & 0x80 ;
+  exponent = ((cptr [3] & 0x7F) << 1) | ((cptr [2] & 0x80) ? 1 : 0) ;
+  mantissa = ((cptr [2] & 0x7F) << 16) | (cptr [1] << 8) | (cptr [0]) ;
 
-        negative = cptr [3] & 0x80 ;
-        exponent = ((cptr [3] & 0x7F) << 1) | ((cptr [2] & 0x80) ? 1 : 0) ;
-        mantissa = ((cptr [2] & 0x7F) << 16) | (cptr [1] << 8) | (cptr [0]) ;
+  if (! (exponent || mantissa))
+    return 0.0 ;
 
-        if (! (exponent || mantissa))
-                return 0.0 ;
+  mantissa |= 0x800000 ;
+  exponent = exponent ? exponent - 127 : 0 ;
 
-        mantissa |= 0x800000 ;
-        exponent = exponent ? exponent - 127 : 0 ;
+  fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
 
-        fvalue = mantissa ? ((float) mantissa) / ((float) 0x800000) : 0.0 ;
+  if (negative)
+    fvalue *= -1 ;
 
-        if (negative)
-                fvalue *= -1 ;
+  if (exponent > 0)
+    fvalue *= (1 << exponent) ;
+  else if (exponent < 0)
+    fvalue /= (1 << abs (exponent)) ;
 
-        if (exponent > 0)
-                fvalue *= (1 << exponent) ;
-        else if (exponent < 0)
-                fvalue /= (1 << abs (exponent)) ;
-
-        return fvalue ;
-} /* float32_le_read */
+  return fvalue ;
+  } /* float32_le_read */
 
 static double
 double64_be_read (unsigned char *cptr)
-{       int             exponent, negative ;
-        double  dvalue ;
+  {
+  int             exponent, negative ;
+  double  dvalue ;
 
-        negative = (cptr [0] & 0x80) ? 1 : 0 ;
-        exponent = ((cptr [0] & 0x7F) << 4) | ((cptr [1] >> 4) & 0xF) ;
+  negative = (cptr [0] & 0x80) ? 1 : 0 ;
+  exponent = ((cptr [0] & 0x7F) << 4) | ((cptr [1] >> 4) & 0xF) ;
 
-        /* Might not have a 64 bit long, so load the mantissa into a double. */
-        dvalue = (((cptr [1] & 0xF) << 24) | (cptr [2] << 16) | (cptr [3] << 8) | cptr [4]) ;
-        dvalue += ((cptr [5] << 16) | (cptr [6] << 8) | cptr [7]) / ((double) 0x1000000) ;
+  /* Might not have a 64 bit long, so load the mantissa into a double. */
+  dvalue = (((cptr [1] & 0xF) << 24) | (cptr [2] << 16) | (cptr [3] << 8) | cptr [4]) ;
+  dvalue += ((cptr [5] << 16) | (cptr [6] << 8) | cptr [7]) / ((double) 0x1000000) ;
 
-        if (exponent == 0 && dvalue == 0.0)
-                return 0.0 ;
+  if (exponent == 0 && dvalue == 0.0)
+    return 0.0 ;
 
-        dvalue += 0x10000000 ;
+  dvalue += 0x10000000 ;
 
-        exponent = exponent - 0x3FF ;
+  exponent = exponent - 0x3FF ;
 
-        dvalue = dvalue / ((double) 0x10000000) ;
+  dvalue = dvalue / ((double) 0x10000000) ;
 
-        if (negative)
-                dvalue *= -1 ;
+  if (negative)
+    dvalue *= -1 ;
 
-        if (exponent > 0)
-                dvalue *= (1 << exponent) ;
-        else if (exponent < 0)
-                dvalue /= (1 << abs (exponent)) ;
+  if (exponent > 0)
+    dvalue *= (1 << exponent) ;
+  else if (exponent < 0)
+    dvalue /= (1 << abs (exponent)) ;
 
-        return dvalue ;
-} /* double64_be_read */
+  return dvalue ;
+  } /* double64_be_read */
 
 static double
 double64_le_read (unsigned char *cptr)
-{       int             exponent, negative ;
-        double  dvalue ;
+  {
+  int             exponent, negative ;
+  double  dvalue ;
 
-        negative = (cptr [7] & 0x80) ? 1 : 0 ;
-        exponent = ((cptr [7] & 0x7F) << 4) | ((cptr [6] >> 4) & 0xF) ;
+  negative = (cptr [7] & 0x80) ? 1 : 0 ;
+  exponent = ((cptr [7] & 0x7F) << 4) | ((cptr [6] >> 4) & 0xF) ;
 
-        /* Might not have a 64 bit long, so load the mantissa into a double. */
-        dvalue = (((cptr [6] & 0xF) << 24) | (cptr [5] << 16) | (cptr [4] << 8) | cptr [3]) ;
-        dvalue += ((cptr [2] << 16) | (cptr [1] << 8) | cptr [0]) / ((double) 0x1000000) ;
+  /* Might not have a 64 bit long, so load the mantissa into a double. */
+  dvalue = (((cptr [6] & 0xF) << 24) | (cptr [5] << 16) | (cptr [4] << 8) | cptr [3]) ;
+  dvalue += ((cptr [2] << 16) | (cptr [1] << 8) | cptr [0]) / ((double) 0x1000000) ;
 
-        if (exponent == 0 && dvalue == 0.0)
-                return 0.0 ;
+  if (exponent == 0 && dvalue == 0.0)
+    return 0.0 ;
 
-        dvalue += 0x10000000 ;
+  dvalue += 0x10000000 ;
 
-        exponent = exponent - 0x3FF ;
+  exponent = exponent - 0x3FF ;
 
-        dvalue = dvalue / ((double) 0x10000000) ;
+  dvalue = dvalue / ((double) 0x10000000) ;
 
-        if (negative)
-                dvalue *= -1 ;
+  if (negative)
+    dvalue *= -1 ;
 
-        if (exponent > 0)
-                dvalue *= (1 << exponent) ;
-        else if (exponent < 0)
-                dvalue /= (1 << abs (exponent)) ;
+  if (exponent > 0)
+    dvalue *= (1 << exponent) ;
+  else if (exponent < 0)
+    dvalue /= (1 << abs (exponent)) ;
 
-        return dvalue ;
-} /* double64_le_read */
+  return dvalue ;
+  } /* double64_le_read */
 
 static void
 float32_le_write (float in, unsigned char *out)
-{       int             exponent, mantissa, negative = 0 ;
+  {
+  int             exponent, mantissa, negative = 0 ;
 
-        memset (out, 0, sizeof (int)) ;
+  memset (out, 0, sizeof (int)) ;
 
-        if (in == 0.0)
-                return ;
+  if (in == 0.0)
+    return ;
 
-        if (in < 0.0)
-        {       in *= -1.0 ;
-                negative = 1 ;
-                } ;
+  if (in < 0.0)
+    {       in *= -1.0 ;
+    negative = 1 ;
+    } ;
 
-        in = frexp (in, &exponent) ;
+  in = frexp (in, &exponent) ;
 
-        exponent += 126 ;
+  exponent += 126 ;
 
-        in *= (float) 0x1000000 ;
-        mantissa = (((int) in) & 0x7FFFFF) ;
+  in *= (float) 0x1000000 ;
+  mantissa = (((int) in) & 0x7FFFFF) ;
 
-        if (negative)
-                out [3] |= 0x80 ;
+  if (negative)
+    out [3] |= 0x80 ;
 
-        if (exponent & 0x01)
-                out [2] |= 0x80 ;
+  if (exponent & 0x01)
+    out [2] |= 0x80 ;
 
-        out [0] = mantissa & 0xFF ;
-        out [1] = (mantissa >> 8) & 0xFF ;
-        out [2] |= (mantissa >> 16) & 0x7F ;
-        out [3] |= (exponent >> 1) & 0x7F ;
+  out [0] = mantissa & 0xFF ;
+  out [1] = (mantissa >> 8) & 0xFF ;
+  out [2] |= (mantissa >> 16) & 0x7F ;
+  out [3] |= (exponent >> 1) & 0x7F ;
 
-        return ;
-} /* float32_le_write */
+  return ;
+  } /* float32_le_write */
 
 static void
 float32_be_write (float in, unsigned char *out)
-{       int             exponent, mantissa, negative = 0 ;
+  {
+  int             exponent, mantissa, negative = 0 ;
+  
+  memset (out, 0, sizeof (int)) ;
 
-        memset (out, 0, sizeof (int)) ;
+  if (in == 0.0)
+    return ;
 
-        if (in == 0.0)
-                return ;
+  if (in < 0.0)
+    {       in *= -1.0 ;
+    negative = 1 ;
+    } ;
 
-        if (in < 0.0)
-        {       in *= -1.0 ;
-                negative = 1 ;
-                } ;
+  in = frexp (in, &exponent) ;
 
-        in = frexp (in, &exponent) ;
+  exponent += 126 ;
 
-        exponent += 126 ;
+  in *= (float) 0x1000000 ;
+  mantissa = (((int) in) & 0x7FFFFF) ;
 
-        in *= (float) 0x1000000 ;
-        mantissa = (((int) in) & 0x7FFFFF) ;
+  if (negative)
+    out [0] |= 0x80 ;
 
-        if (negative)
-                out [0] |= 0x80 ;
+  if (exponent & 0x01)
+    out [1] |= 0x80 ;
 
-        if (exponent & 0x01)
-                out [1] |= 0x80 ;
+  out [3] = mantissa & 0xFF ;
+  out [2] = (mantissa >> 8) & 0xFF ;
+  out [1] |= (mantissa >> 16) & 0x7F ;
+  out [0] |= (exponent >> 1) & 0x7F ;
 
-        out [3] = mantissa & 0xFF ;
-        out [2] = (mantissa >> 8) & 0xFF ;
-        out [1] |= (mantissa >> 16) & 0x7F ;
-        out [0] |= (exponent >> 1) & 0x7F ;
-
-        return ;
-} /* float32_be_write */
+  return ;
+  } /* float32_be_write */
 
 
 static void
 double64_be_write (double in, unsigned char *out)
-{       int             exponent, mantissa ;
+  {
+  int             exponent, mantissa ;
+  
+  memset (out, 0, sizeof (double)) ;
 
-        memset (out, 0, sizeof (double)) ;
+  if (in == 0.0)
+    return ;
 
-        if (in == 0.0)
-                return ;
+  if (in < 0.0)
+    {       in *= -1.0 ;
+    out [0] |= 0x80 ;
+    } ;
 
-        if (in < 0.0)
-        {       in *= -1.0 ;
-                out [0] |= 0x80 ;
-                } ;
+  in = frexp (in, &exponent) ;
 
-        in = frexp (in, &exponent) ;
+  exponent += 1022 ;
 
-        exponent += 1022 ;
+  out [0] |= (exponent >> 4) & 0x7F ;
+  out [1] |= (exponent << 4) & 0xF0 ;
 
-        out [0] |= (exponent >> 4) & 0x7F ;
-        out [1] |= (exponent << 4) & 0xF0 ;
+  in *= 0x20000000 ;
+  mantissa = lrint (floor (in)) ;
 
-        in *= 0x20000000 ;
-        mantissa = lrint (floor (in)) ;
+  out [1] |= (mantissa >> 24) & 0xF ;
+  out [2] = (mantissa >> 16) & 0xFF ;
+  out [3] = (mantissa >> 8) & 0xFF ;
+  out [4] = mantissa & 0xFF ;
 
-        out [1] |= (mantissa >> 24) & 0xF ;
-        out [2] = (mantissa >> 16) & 0xFF ;
-        out [3] = (mantissa >> 8) & 0xFF ;
-        out [4] = mantissa & 0xFF ;
+  in = fmod (in, 1.0) ;
+  in *= 0x1000000 ;
+  mantissa = lrint (floor (in)) ;
 
-        in = fmod (in, 1.0) ;
-        in *= 0x1000000 ;
-        mantissa = lrint (floor (in)) ;
+  out [5] = (mantissa >> 16) & 0xFF ;
+  out [6] = (mantissa >> 8) & 0xFF ;
+  out [7] = mantissa & 0xFF ;
 
-        out [5] = (mantissa >> 16) & 0xFF ;
-        out [6] = (mantissa >> 8) & 0xFF ;
-        out [7] = mantissa & 0xFF ;
-
-        return ;
-} /* double64_be_write */
+  return ;
+  } /* double64_be_write */
 
 static void
 double64_le_write (double in, unsigned char *out)
-{       int             exponent, mantissa ;
+  {
+  int             exponent, mantissa ;
+  
+  memset (out, 0, sizeof (double)) ;
 
-        memset (out, 0, sizeof (double)) ;
+  if (in == 0.0)
+    return ;
 
-        if (in == 0.0)
-                return ;
+  if (in < 0.0)
+    {       in *= -1.0 ;
+    out [7] |= 0x80 ;
+    } ;
 
-        if (in < 0.0)
-        {       in *= -1.0 ;
-                out [7] |= 0x80 ;
-                } ;
+  in = frexp (in, &exponent) ;
 
-        in = frexp (in, &exponent) ;
+  exponent += 1022 ;
 
-        exponent += 1022 ;
+  out [7] |= (exponent >> 4) & 0x7F ;
+  out [6] |= (exponent << 4) & 0xF0 ;
 
-        out [7] |= (exponent >> 4) & 0x7F ;
-        out [6] |= (exponent << 4) & 0xF0 ;
+  in *= 0x20000000 ;
+  mantissa = lrint (floor (in)) ;
 
-        in *= 0x20000000 ;
-        mantissa = lrint (floor (in)) ;
+  out [6] |= (mantissa >> 24) & 0xF ;
+  out [5] = (mantissa >> 16) & 0xFF ;
+  out [4] = (mantissa >> 8) & 0xFF ;
+  out [3] = mantissa & 0xFF ;
 
-        out [6] |= (mantissa >> 24) & 0xF ;
-        out [5] = (mantissa >> 16) & 0xFF ;
-        out [4] = (mantissa >> 8) & 0xFF ;
-        out [3] = mantissa & 0xFF ;
+  in = fmod (in, 1.0) ;
+  in *= 0x1000000 ;
+  mantissa = lrint (floor (in)) ;
 
-        in = fmod (in, 1.0) ;
-        in *= 0x1000000 ;
-        mantissa = lrint (floor (in)) ;
+  out [2] = (mantissa >> 16) & 0xFF ;
+  out [1] = (mantissa >> 8) & 0xFF ;
+  out [0] = mantissa & 0xFF ;
 
-        out [2] = (mantissa >> 16) & 0xFF ;
-        out [1] = (mantissa >> 8) & 0xFF ;
-        out [0] = mantissa & 0xFF ;
-
-        return ;
-} /* double64_le_write */
+  return ;
+  } /* double64_le_write */
 
 /* 32 bit float (Big Endian) */
 
@@ -762,8 +770,7 @@ static int read_packet_pcm(quicktime_t * file, lqt_packet_t * p, int track)
   quicktime_audio_map_t * atrack = &file->atracks[track];
   quicktime_pcm_codec_t *codec = atrack->codec->priv;
 
-  if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
-                                   p, atrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, atrack->track, p))
     return 0;
 
   bytes_from_samples = p->duration * codec->block_align;
@@ -773,10 +780,8 @@ static int read_packet_pcm(quicktime_t * file, lqt_packet_t * p, int track)
   //  fprintf(stderr, "Got packet\n");
   //  lqt_packet_dump(p);
 
-  atrack->track->idx_pos++;
   return 1;
   }
-
 
 static int decode_pcm(quicktime_t *file, void * _output, long samples, int track)
   {
@@ -869,6 +874,46 @@ static int decode_pcm(quicktime_t *file, void * _output, long samples, int track
     }
   atrack->last_position = atrack->current_position + samples_decoded;
   return samples_decoded;
+  }
+
+/* Decode packet */
+
+static int decode_packet_pcm(quicktime_t *file, int track, lqt_audio_buffer_t * buf)
+  {
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_pcm_codec_t *codec = atrack->codec->priv;
+  void * output;
+    
+  if(!codec->initialized)
+    {
+    if(codec->init_decode)
+      codec->init_decode(file, track);
+    
+    /* Read the first audio chunk */
+#if 0
+    if(!read_packet_pcm(file, &codec->pkt, track))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
+      return 0;
+      }
+    codec->pkt_ptr = codec->pkt.data;
+#endif
+    codec->initialized = 1;
+    atrack->ci.id = codec->cid;
+    }
+
+  if(!buf) /* Global initialization */
+    return 0;
+
+  if(!read_packet_pcm(file, &codec->pkt, track))
+    return 0;
+  codec->pkt_ptr = codec->pkt.data;
+  
+  lqt_audio_buffer_alloc(buf, codec->pkt.duration, atrack->channels, 0, atrack->sample_format);
+  output = buf->channels[0].u_8;
+  codec->decode(codec, codec->pkt.duration * atrack->channels, &output);
+  buf->size = codec->pkt.duration;
+  return buf->size;
   }
 
 /* Generic encode function */
@@ -987,6 +1032,7 @@ void quicktime_init_codec_twos(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   
@@ -1035,6 +1081,7 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   //  codec_base->wav_id = 0x01;
@@ -1106,6 +1153,7 @@ void quicktime_init_codec_in24(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   /* Init private items */
@@ -1169,6 +1217,7 @@ void quicktime_init_codec_in32(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
 
@@ -1233,6 +1282,7 @@ void quicktime_init_codec_fl32(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
 
@@ -1288,6 +1338,7 @@ void quicktime_init_codec_fl64(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
 
@@ -1321,6 +1372,7 @@ void quicktime_init_codec_rawaudio(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm; 
 
@@ -1379,6 +1431,7 @@ void quicktime_init_codec_ulaw(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   codec_base->writes_compressed = writes_compressed_aulaw;
@@ -1408,6 +1461,7 @@ void quicktime_init_codec_alaw(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
   codec_base->writes_compressed = writes_compressed_aulaw;
@@ -1656,6 +1710,8 @@ void quicktime_init_codec_lpcm(quicktime_codec_t *codec_base,
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
   codec_base->decode_audio = decode_pcm;
+  codec_base->decode_audio_packet = decode_packet_pcm;
+
   codec_base->encode_audio = encode_pcm;
   codec_base->read_packet = read_packet_pcm;
   

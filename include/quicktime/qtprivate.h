@@ -1368,6 +1368,25 @@ typedef struct
   int have_info;
   } quicktime_riff_t;
 
+/* Audio buffer */
+
+typedef union
+  {
+  uint8_t * u_8;
+  int8_t  * i_8;
+  int16_t * i_16;
+  int32_t * i_32;
+  float   * f;
+  double  * d;
+  } lqt_audio_ptr_t;
+
+typedef struct
+  {
+  lqt_audio_ptr_t * channels; /* One channel for interleaved audio */
+  int size;                   /* Size of the last packet decoded   */
+  int pos;                    /* Position                          */
+  int alloc;                  /* Number of allocated *samples*     */
+  } lqt_audio_buffer_t;
 
 /* table of pointers to every track */
 typedef struct
@@ -1375,11 +1394,12 @@ typedef struct
   quicktime_trak_t *track; /* real quicktime track corresponding to this table */
   
   /* Format */
-  int channels;  /* number of audio channels in the track */
+  int channels;            /* number of audio channels in the track */
   int samplerate;
   lqt_channel_t * channel_setup;
   lqt_sample_format_t sample_format; /* Set by the codec */
-
+  int planar;                        /* Format is non-interleaved */
+    
   /* Position information */
   int64_t current_position;   /* current sample in output file */
   int64_t cur_chunk;      /* current chunk in output file */
@@ -1416,6 +1436,8 @@ typedef struct
   //  int block_align;
 
   lqt_compression_info_t ci;
+  
+  lqt_audio_buffer_t buf;
   } quicktime_audio_map_t;
 
 
@@ -1720,6 +1742,12 @@ struct quicktime_codec_s
                       void * output,
                       long samples, 
                       int track);
+  
+  /* NEW decode funcion: Decode *one* packet/chunk in the native
+     format and leave the rest for the core */
+  int (*decode_audio_packet)(quicktime_t *file,
+                             int track, lqt_audio_buffer_t * buf);
+  
   int (*encode_audio)(quicktime_t *file, 
                       void * input,
                       long samples,

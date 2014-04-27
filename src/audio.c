@@ -22,7 +22,13 @@
  Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 *******************************************************************************/ 
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "lqt_private.h"
+
+#define LQT_LIBQUICKTIME
+#include <quicktime/lqt_codecapi.h>
 
 #define LOG_DOMAIN "audio"
 
@@ -547,10 +553,10 @@ static void decode_double_to_float(void * _in, float ** out,
     }
   }
 
-void lqt_convert_audio_decode(quicktime_t * file,
-                              void * in, int16_t ** out_int, float ** out_float,
-                              int num_channels, int num_samples,
-                              lqt_sample_format_t stream_format)
+static void lqt_convert_audio_decode(quicktime_t * file,
+                                     void * in, int16_t ** out_int, float ** out_float,
+                                     int num_channels, int num_samples,
+                                     lqt_sample_format_t stream_format)
   {
   switch(stream_format)
     {
@@ -594,4 +600,1064 @@ void lqt_convert_audio_decode(quicktime_t * file,
       lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
       break;
     }
+  }
+
+/* Sample format */
+
+static struct
+  {
+  lqt_sample_format_t format;
+  const char * name;
+  int size;
+  }
+sample_formats[] =
+  {
+    { LQT_SAMPLE_UNDEFINED, "Undefined",  0 }, /* If this is returned, we have an error */
+    { LQT_SAMPLE_INT8, "8 bit signed",    1 },
+    { LQT_SAMPLE_UINT8, "8 bit unsigned", 1 },
+    { LQT_SAMPLE_INT16, "16 bit signed",  2 },
+    { LQT_SAMPLE_INT32, "32 bit signed",  4 },
+    { LQT_SAMPLE_FLOAT, "Floating point", sizeof(float)     }, /* Float is ALWAYS machine native */
+    { LQT_SAMPLE_DOUBLE, "Double precision", sizeof(double) } /* Double is ALWAYS machine native */
+  };
+
+const char * lqt_sample_format_to_string(lqt_sample_format_t format)
+  {
+  int i;
+  for(i = 0; i < sizeof(sample_formats)/sizeof(sample_formats[0]); i++)
+    {
+    if(sample_formats[i].format == format)
+      return sample_formats[i].name;
+    }
+  return sample_formats[0].name;
+  }
+
+int lqt_sample_format_bytes(lqt_sample_format_t format)
+  {
+  int i;
+  for(i = 0; i < sizeof(sample_formats)/sizeof(sample_formats[0]); i++)
+    {
+    if(sample_formats[i].format == format)
+      return sample_formats[i].size;
+    }
+  return 0;
+  }
+
+void lqt_audio_buffer_alloc(lqt_audio_buffer_t * buf, int num_samples, int num_channels, int planar,
+                            lqt_sample_format_t fmt)
+  {
+  int bytes, i;
+
+  if(!buf->channels)
+    buf->channels = calloc(num_channels, sizeof(*buf->channels));
+  
+  if(buf->alloc >= num_samples)
+    return;
+  
+  bytes = lqt_sample_format_bytes(fmt) * num_samples;
+  
+  if(planar)
+    {
+    for(i = 0; i < num_channels; i++)
+      buf->channels[i].u_8 = realloc(buf->channels[i].u_8, bytes);
+    }
+  else
+    buf->channels[0].u_8 = realloc(buf->channels[0].u_8, bytes * num_channels);
+  }
+
+/* En- decode functions */
+
+/* Decode raw samples */
+
+int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int track)
+  {
+  int result;
+  quicktime_audio_map_t * atrack;
+  atrack = &file->atracks[track];
+
+  if(atrack->codec->decode_audio_packet)
+    {
+    int samples_read = 0;
+    int samples_to_copy, bytes_to_copy;
+    uint8_t * output_ptr = output;
+    int sample_size = lqt_sample_format_bytes(atrack->sample_format);
+    
+    while(samples_read < samples)
+      {
+      if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
+        {
+        atrack->buf.pos = 0;
+        result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
+        if(!result)
+          break;
+        }
+
+      samples_to_copy = samples - samples_read;
+
+      if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
+        samples_to_copy = atrack->buf.size - atrack->buf.pos;
+
+      if(atrack->planar)
+        {
+        int i, j;
+        /* Interleave */
+
+        for(i = 0; i < samples_to_copy; i++)
+          {
+          for(j = 0; j < atrack->channels; j++)
+            {
+            memcpy(output_ptr, atrack->buf.channels[j].u_8 + atrack->buf.pos * sample_size,
+                   sample_size);
+            output_ptr += sample_size;
+            }
+          atrack->buf.pos++;
+          }          
+        }
+      else
+        {
+        bytes_to_copy = samples_to_copy * sample_size * atrack->channels;
+        memcpy(output_ptr,
+               atrack->buf.channels[0].u_8 + atrack->buf.pos * sample_size * atrack->channels,
+               bytes_to_copy);
+        output_ptr += bytes_to_copy;
+        atrack->buf.pos += samples_to_copy;
+        }
+      samples_read += samples_to_copy;
+      }
+    atrack->current_position += samples_read;
+    atrack->last_position += samples_read;
+    return samples_read;
+    }
+  else
+    {
+    result = atrack->codec->decode_audio(file, output, samples, track);
+    file->atracks[track].current_position += samples;
+    return result;
+    }
+  }
+
+int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int track)
+  {
+  int result;
+  quicktime_audio_map_t * atrack;
+  if(!samples)
+    return 0;
+  atrack = &file->atracks[track];
+  lqt_start_encoding(file);
+  file->atracks[track].current_position += samples;
+  result = atrack->codec->encode_audio(file, input, samples, track);
+  if(file->io_error)
+    return 0;
+  else
+    return samples;
+  }
+
+/* Compatibility function for old decoding API */
+
+static void dec_int8_to_int16(void * _in, void * _out,
+                              int num_samples, int advance)
+  {
+  int i;
+  int8_t * in = _in;
+  int16_t * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT8_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_uint8_to_int16(void * _in, void * _out,
+                              int num_samples, int advance)
+  {
+  int i;
+  uint8_t * in = _in;
+  int16_t * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    UINT8_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_int16_to_int16(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  int16_t * in = _in;
+  int16_t * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT16_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_int32_to_int16(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  int32_t * in = _in;
+  int16_t * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT32_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_float_to_int16(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  float * in = _in;
+  int16_t * out = _out;
+  int tmp;
+  for(i = 0; i < num_samples; i++)
+    {
+    FLOAT_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_double_to_int16(void * _in, void * _out,
+                                int num_samples, int advance)
+  {
+  int i;
+  double * in = _in;
+  int16_t * out = _out;
+  int tmp;
+
+  for(i = 0; i < num_samples; i++)
+    {
+    DOUBLE_TO_INT16((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+
+static void dec_int8_to_float(void * _in, void * _out,
+                              int num_samples, int advance)
+  {
+  int i;
+  int8_t * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT8_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_uint8_to_float(void * _in, void * _out,
+                              int num_samples, int advance)
+  {
+  int i;
+  uint8_t * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    UINT8_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_int16_to_float(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  int16_t * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT16_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_int32_to_float(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  int32_t * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    INT32_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_float_to_float(void * _in, void * _out,
+                               int num_samples, int advance)
+  {
+  int i;
+  float * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    FLOAT_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+static void dec_double_to_float(void * _in, void * _out,
+                                int num_samples, int advance)
+  {
+  int i;
+  double * in = _in;
+  float * out = _out;
+  
+  for(i = 0; i < num_samples; i++)
+    {
+    DOUBLE_TO_FLOAT((*in), *out);
+    in += advance;
+    out++;
+    }
+  }
+
+
+static int decode_audio_old(quicktime_t *file, 
+                            int16_t ** output_i, 
+                            float ** output_f, 
+                            long samples, 
+                            int track)
+  {
+  int result;
+  quicktime_audio_map_t * atrack;
+  atrack = &file->atracks[track];
+  
+  /* Decode */
+
+  if(atrack->codec->decode_audio_packet)
+    {
+    int i;
+    int samples_read = 0;
+    int samples_to_copy;
+    uint8_t * src;
+    void (*convert)(void*, void*, int, int);
+    int sample_size = lqt_sample_format_bytes(atrack->sample_format);
+    
+    if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+      atrack->codec->decode_audio_packet(file, track, NULL);
+    
+    
+    /* Find converter function */
+
+    switch(atrack->sample_format)
+      {
+      case LQT_SAMPLE_INT8:
+        if(output_i)
+          convert = dec_int8_to_int16;
+        else if(output_f)
+          convert = dec_int8_to_float;
+        break;
+      case LQT_SAMPLE_UINT8:
+        if(output_i)
+          convert = dec_uint8_to_int16;
+        else if(output_f)
+          convert = dec_uint8_to_float;
+        break;
+      case LQT_SAMPLE_INT16:
+        if(output_i)
+          convert = dec_int16_to_int16;
+        else if(output_f)
+          convert = dec_int16_to_float;
+        break;
+      case LQT_SAMPLE_INT32:
+        if(output_i)
+          convert = dec_int32_to_int16;
+        else if(output_f)
+          convert = dec_int32_to_float;
+        break;
+      case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
+        if(output_i)
+          convert = dec_float_to_int16;
+        else if(output_f)
+          convert = dec_float_to_float;
+        break;
+      case LQT_SAMPLE_DOUBLE: /* Float is ALWAYS machine native */
+        if(output_i)
+          convert = dec_double_to_int16;
+        else if(output_f)
+          convert = dec_double_to_float;
+        break;
+      case LQT_SAMPLE_UNDEFINED:
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
+        break;
+      }
+    
+    while(samples_read < samples)
+      {
+      if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
+        {
+        atrack->buf.pos = 0;
+        result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
+        if(!result)
+          break;
+        }
+
+      samples_to_copy = samples - samples_read;
+
+      if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
+        samples_to_copy = atrack->buf.size - atrack->buf.pos;
+
+      if(atrack->planar)
+        {
+        for(i = 0; i < atrack->channels; i++)
+          {
+          src = atrack->buf.channels[i].u_8 + sample_size * atrack->buf.pos;
+          if(output_i)
+            convert(src, output_i[i] + samples_read, samples_to_copy, 1);
+          else if(output_f)
+            convert(src, output_f[i] + samples_read, samples_to_copy, 1);
+          }
+        }
+      else
+        {
+        for(i = 0; i < atrack->channels; i++)
+          {
+          src = atrack->buf.channels[0].u_8 + sample_size * (atrack->buf.pos * atrack->channels);
+          
+          if(output_i && output_i[i])
+            convert(src, output_i[i] + samples_read, samples_to_copy, atrack->channels);
+          else if(output_f && output_f[i])
+            convert(src, output_f[i] + samples_read, samples_to_copy, atrack->channels);
+          }
+        }
+      atrack->buf.pos += samples_to_copy;
+      samples_read += samples_to_copy;
+      }
+    atrack->current_position += samples_read;
+    atrack->last_position += samples_read;
+    return samples_read;
+    }
+  else
+    {
+    if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+      atrack->codec->decode_audio(file, (void*)0, 0, track);
+  
+    /* (Re)allocate sample buffer */
+
+    if(atrack->sample_buffer_alloc < samples)
+      {
+      atrack->sample_buffer_alloc = samples + 1024;
+      atrack->sample_buffer = realloc(atrack->sample_buffer,
+                                      atrack->sample_buffer_alloc *
+                                      atrack->channels *
+                                      lqt_sample_format_bytes(atrack->sample_format));
+      }
+
+    result = atrack->codec->decode_audio(file, atrack->sample_buffer, 
+                                         samples,
+                                         track);
+  
+    /* Convert */
+    lqt_convert_audio_decode(file, atrack->sample_buffer, output_i, output_f,
+                             atrack->channels, samples,
+                             atrack->sample_format);
+    }
+  
+  return result;
+  }
+
+int quicktime_decode_audio(quicktime_t *file, 
+                           int16_t *output_i, 
+                           float *output_f, 
+                           long samples, 
+                           int channel)
+  {
+  float   ** channels_f;
+  int16_t ** channels_i;
+
+  int quicktime_track, quicktime_channel;
+  int result = 1;
+
+  quicktime_channel_location(file, &quicktime_track,
+                             &quicktime_channel, channel);
+
+  if(file->atracks[quicktime_track].eof)
+    return 1;
+        
+  if(output_i)
+    {
+    channels_i = calloc(quicktime_track_channels(file, quicktime_track), sizeof(*channels_i));
+    channels_i[quicktime_channel] = output_i;
+    }
+  else
+    channels_i = NULL;
+        
+  if(output_f)
+    {
+    channels_f = calloc(quicktime_track_channels(file, quicktime_track), sizeof(*channels_f));
+    channels_f[quicktime_channel] = output_f;
+    }
+  else
+    channels_f = NULL;
+        
+  result = decode_audio_old(file, channels_i, channels_f, samples, quicktime_track);
+  file->atracks[quicktime_track].current_position += result;
+
+  if(channels_i)
+    free(channels_i);
+  else if(channels_f)
+    free(channels_f);
+  return ((result < 0) ? 1 : 0);
+  }
+
+/*
+ * Same as quicktime_decode_audio, but it grabs all channels at
+ * once. Or if you want only some channels you can leave the channels
+ * you don't want = NULL in the poutput array. The poutput arrays
+ * must contain at least lqt_total_channels(file) elements.
+ */
+
+int lqt_decode_audio(quicktime_t *file, 
+                     int16_t **poutput_i, 
+                     float **poutput_f, 
+                     long samples)
+  {
+  int result = 1;
+  int i = 0;
+  int16_t **output_i;
+  float   **output_f;
+
+  int total_tracks = quicktime_audio_tracks(file);
+  int track_channels;
+
+  if(poutput_i)
+    output_i = poutput_i;
+  else
+    output_i = (int16_t**)0;
+
+  if(poutput_f)
+    output_f = poutput_f;
+  else
+    output_f = (float**)0;
+        
+  for( i=0; i < total_tracks; i++ )
+    {
+    track_channels = quicktime_track_channels(file, i);
+
+    if(file->atracks[i].eof)
+      return 1;
+                    
+    result = decode_audio_old(file, output_i, output_f, samples, i);
+    if(output_f)
+      output_f += track_channels;
+    if(output_i)
+      output_i += track_channels;
+
+    //  file->atracks[i].current_position += samples;
+    }
+  return result;
+  }
+
+int lqt_decode_audio_track(quicktime_t *file, 
+                           int16_t **poutput_i, 
+                           float **poutput_f, 
+                           long samples,
+                           int track)
+  {
+  int result = 1;
+
+  if(file->atracks[track].eof)
+    return 1;
+
+  result = !decode_audio_old(file, poutput_i, poutput_f, samples, track);
+  
+  // file->atracks[track].current_position += samples;
+  
+  return result;
+  }
+
+static int encode_audio_old(quicktime_t *file, 
+                            int16_t **input_i, 
+                            float **input_f, 
+                            long samples,
+                            int track)
+  {
+  quicktime_audio_map_t * atrack;
+  atrack = &file->atracks[track];
+  lqt_start_encoding(file);
+  
+  if(!samples)
+    return 0;
+  
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    atrack->codec->encode_audio(file, (void*)0, 0, track);
+  
+  /* (Re)allocate sample buffer */
+
+  if(atrack->sample_buffer_alloc < samples)
+    {
+    atrack->sample_buffer_alloc = samples + 1024;
+    atrack->sample_buffer = realloc(atrack->sample_buffer,
+                                    atrack->sample_buffer_alloc *
+                                    atrack->channels *
+                                    lqt_sample_format_bytes(atrack->sample_format));
+    }
+
+  /* Convert */
+
+  lqt_convert_audio_encode(file, input_i, input_f, atrack->sample_buffer, atrack->channels, samples,
+                           atrack->sample_format);
+
+  /* Encode */
+
+  file->atracks[track].current_position += samples;
+  
+  return atrack->codec->encode_audio(file, atrack->sample_buffer, samples, track);
+  
+  }
+
+int lqt_encode_audio_track(quicktime_t *file, 
+                           int16_t **input_i, 
+                           float **input_f, 
+                           long samples,
+                           int track)
+  {
+  int result = 1;
+
+  result = encode_audio_old(file, input_i, input_f, samples, track);
+  return result;
+  
+  }
+
+int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f, long samples)
+  {
+  return lqt_encode_audio_track(file, input_i, input_f, samples, 0);
+  }
+
+int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
+  {
+  if((track >= 0) && (track < file->total_atracks))
+    {
+    /* We just set the current position, Codec will do the rest */
+    
+    file->atracks[track].current_position = sample;
+    file->atracks[track].eof = 0;
+    }
+  else
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+            "quicktime_set_audio_position: track >= file->total_atracks\n");
+  return 0;
+  }
+
+long quicktime_audio_position(quicktime_t *file, int track)
+  {
+  return file->atracks[track].current_position;
+  }
+
+int lqt_total_channels(quicktime_t *file)
+  {
+  int i = 0, total_channels = 0;
+  for( i=0; i < file->total_atracks; i++ )
+    total_channels += file->atracks[i].channels;
+  
+  return total_channels;
+  }
+
+int quicktime_has_audio(quicktime_t *file)
+  {
+  if(quicktime_audio_tracks(file)) return 1;
+  return 0;
+  }
+
+long quicktime_sample_rate(quicktime_t *file, int track)
+  {
+  if(file->total_atracks)
+    return file->atracks[track].samplerate;
+  return 0;
+  }
+
+int quicktime_audio_bits(quicktime_t *file, int track)
+  {
+  if(file->total_atracks)
+    return file->atracks[track].track->mdia.minf.stbl.stsd.table[0].sample_size;
+
+  return 0;
+  }
+
+char* quicktime_audio_compressor(quicktime_t *file, int track)
+  {
+  return file->atracks[track].track->mdia.minf.stbl.stsd.table[0].format;
+  }
+
+int quicktime_track_channels(quicktime_t *file, int track)
+  {
+  if(track < file->total_atracks)
+    return file->atracks[track].channels;
+
+  return 0;
+  }
+
+int quicktime_channel_location(quicktime_t *file,
+                               int *quicktime_track,
+                               int *quicktime_channel, int channel)
+  {
+  int current_channel = 0, current_track = 0;
+  *quicktime_channel = 0;
+  *quicktime_track = 0;
+  for(current_channel = 0, current_track = 0; current_track < file->total_atracks; )
+    {
+    if(channel >= current_channel)
+      {
+      *quicktime_channel = channel - current_channel;
+      *quicktime_track = current_track;
+      }
+
+    current_channel += file->atracks[current_track].channels;
+    current_track++;
+    }
+  return 0;
+  }
+
+lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t * atrack;
+
+  if(track < 0 || track > file->total_atracks)
+    return LQT_SAMPLE_UNDEFINED;
+
+  atrack = &file->atracks[track];
+
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    {
+    if(file->wr)
+      {
+      atrack->codec->encode_audio(file, (void*)0, 0, track);
+      }
+    else
+      {
+      if(atrack->codec->decode_audio_packet)
+        atrack->codec->decode_audio_packet(file, track, NULL);
+      else
+        atrack->codec->decode_audio(file, (void*)0, 0, track);
+      }
+    }
+  
+  return atrack->sample_format;
+  }
+
+void lqt_init_vbr_audio(quicktime_t * file, int track)
+  {
+  quicktime_trak_t * trak = file->atracks[track].track;
+  trak->mdia.minf.stbl.stsd.table[0].compression_id = -2;
+  trak->mdia.minf.stbl.stsz.sample_size = 0;
+  trak->mdia.minf.is_audio_vbr = 1;
+
+  if(trak->strl)
+    {
+    trak->strl->strh.dwRate = quicktime_sample_rate(file, track);
+    trak->strl->strh.dwScale = 0;
+    trak->strl->strh.dwSampleSize = 0;
+    
+    trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 0;
+    trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  18120; // Probably doesn't matter
+    trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+    }
+  }
+
+LQT_EXTERN void lqt_set_audio_bitrate(quicktime_t * file, int track, int bitrate)
+  {
+  quicktime_trak_t * trak = file->atracks[track].track;
+
+  if(!trak->strl)
+    return;
+  
+  /* strh stuff */
+  trak->strl->strh.dwRate = bitrate / 8;
+  trak->strl->strh.dwScale = 1;
+  trak->strl->strh.dwSampleSize = 1;
+  /* WAVEFORMATEX stuff */
+  
+  trak->strl->strf.wf.f.WAVEFORMAT.nBlockAlign = 1;
+  trak->strl->strf.wf.f.WAVEFORMAT.nAvgBytesPerSec =  bitrate / 8;
+  trak->strl->strf.wf.f.PCMWAVEFORMAT.wBitsPerSample = 0;
+  }
+
+
+void lqt_start_audio_vbr_frame(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  
+  /* Make chunk at maximum 10 VBR packets large */
+  if((file->write_trak == atrack->track) &&
+     (atrack->track->chunk_samples >= 10))
+    {
+    quicktime_write_chunk_footer(file, file->write_trak);
+    quicktime_write_chunk_header(file, atrack->track);
+    }
+  atrack->vbr_frame_start = quicktime_position(file);
+  
+  }
+
+void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
+  {
+  int size;
+  quicktime_stsz_t * stsz;
+  quicktime_stts_t * stts;
+  long vbr_frames_written;
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  
+  stsz = &atrack->track->mdia.minf.stbl.stsz;
+  stts = &atrack->track->mdia.minf.stbl.stts;
+
+  vbr_frames_written = stsz->total_entries;
+  
+  /* Update stsz */
+
+  size = quicktime_position(file) - atrack->vbr_frame_start;
+  
+  quicktime_update_stsz(stsz, vbr_frames_written, size);
+  
+  if(atrack->track->strl)
+    {
+    quicktime_strl_t * strl = atrack->track->strl;
+    
+    if(size > strl->strf.wf.f.WAVEFORMAT.nBlockAlign)
+      strl->strf.wf.f.WAVEFORMAT.nBlockAlign = size;
+
+    if(!strl->strh.dwScale)
+      strl->strh.dwScale = num_samples;
+
+    strl->strh.dwLength++;
+    }
+  
+  /* Update stts */
+  
+  quicktime_update_stts(stts, vbr_frames_written, num_samples);
+  
+  atrack->track->chunk_samples++;
+  }
+
+/* VBR Reading support */
+
+/* Check if VBR reading should be enabled */
+
+int lqt_audio_is_vbr(quicktime_t * file, int track)
+  {
+  return file->atracks[track].track->mdia.minf.is_audio_vbr;
+  }
+
+
+
+/* Get the index of the VBR packet (== sample) containing a specified
+   uncompressed sample */
+
+static uint64_t packet_of_sample(quicktime_stts_t * stts, int64_t sample)
+  {
+  uint32_t i;
+  int64_t packet_count = 0; 
+  int64_t sample_count = 0; 
+  
+  for(i = 0; i < stts->total_entries; i++)
+    {
+    if(sample_count + stts->table[i].sample_count * stts->table[i].sample_duration > sample)
+      {
+      return packet_count + (sample - sample_count) / stts->table[i].sample_duration;
+      }
+    sample_count += stts->table[i].sample_count * stts->table[i].sample_duration;
+    packet_count += stts->table[i].sample_count;
+    }
+  return -1;
+  }
+
+/*
+ *  Helper function: Get the "durarion of a sample range" (which means the
+ *  uncompressed samples in a range of VBR packets)
+ */
+
+static int64_t get_uncompressed_samples(quicktime_stts_t * stts, long start_sample,
+                                    long end_sample)
+  {
+  long count, i, stts_index = 0, stts_count = 0;
+
+  int64_t ret;
+  
+  count = 0;
+  ret = 0;
+  
+  for(i = 0; i < stts->total_entries; i++)
+    {
+    if(count + stts->table[i].sample_count > start_sample)
+      {
+      stts_index = i;
+      stts_count = start_sample - count;
+      break;
+      }
+    count += stts->table[i].sample_count;
+    }
+
+  ret = 0;
+  for(i = start_sample; i < end_sample; i++)
+    {
+    ret += stts->table[stts_index].sample_duration;
+    stts_count++;
+    if(stts_count >= stts->table[stts_index].sample_count)
+      {
+      stts_index++;
+      stts_count = 0;
+      }
+    }
+  return ret;
+  }
+
+/* Analog for quicktime_chunk_samples for VBR files */
+
+int lqt_chunk_of_sample_vbr(int64_t *chunk_sample, 
+                            int64_t *chunk, 
+                            quicktime_trak_t *trak, 
+                            int64_t sample)
+  {
+  int64_t packet;
+  int64_t chunk_packet;
+  
+  /* Get the index of the packet containing the uncompressed sample */
+  packet = packet_of_sample(&trak->mdia.minf.stbl.stts, sample);
+
+  /* Get the chunk of the packet */
+  
+  quicktime_chunk_of_sample(&chunk_packet, 
+                            chunk, 
+                            trak, 
+                            packet);
+
+  /* Get the first uncompressed sample of the first packet of
+     this chunk */
+  
+  *chunk_sample =
+    get_uncompressed_samples(&trak->mdia.minf.stbl.stts, 0,
+                             chunk_packet);
+  return 0;
+  }
+
+
+/* Determine the number of VBR packets (=samples) in one chunk */
+
+int lqt_audio_num_vbr_packets(quicktime_t * file,
+                              int track, long chunk, int * samples)
+  {
+  int64_t start_sample;
+  
+  quicktime_trak_t * trak;
+  long result = 0;
+  quicktime_stsc_t *stsc;
+  long i;
+
+  
+  trak = file->atracks[track].track;
+    
+  stsc = &trak->mdia.minf.stbl.stsc;
+
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
+    return 0;
+  
+  i = stsc->total_entries - 1;
+  
+  if(!stsc->total_entries)
+    return 0;
+  
+  start_sample = 0;
+
+  for(i = 0; i < stsc->total_entries; i++)
+    {
+    if(((i < stsc->total_entries - 1) && (stsc->table[i+1].chunk > chunk+1)) ||
+       (i == stsc->total_entries - 1))
+      {
+      start_sample +=
+        (chunk - stsc->table[i].chunk) * stsc->table[i].samples;
+      result = stsc->table[i].samples;
+      break;
+      }
+    else
+      start_sample +=
+        (stsc->table[i+1].chunk - stsc->table[i].chunk) * stsc->table[i].samples;
+    }
+  if(samples)
+    *samples = get_uncompressed_samples(&trak->mdia.minf.stbl.stts,
+                                        start_sample, start_sample + result);
+  
+  return result;
+  }
+
+/* Read one VBR packet */
+int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int packet,
+                              uint8_t ** buffer, int * buffer_alloc, int * samples)
+  {
+  int64_t offset;
+  long i, stsc_index;
+  quicktime_trak_t * trak;
+  quicktime_stsc_t *stsc;
+  int packet_size;
+  long first_chunk_packet; /* Index of first packet in the chunk */
+  
+  trak = file->atracks[track].track;
+  stsc = &trak->mdia.minf.stbl.stsc;
+
+  if(chunk >= trak->mdia.minf.stbl.stco.total_entries)
+    return 0;
+    
+  i = 0;
+  stsc_index = 0;
+  first_chunk_packet = 0;
+
+  for(i = 0; i < chunk; i++)
+    {
+    if((stsc_index < stsc->total_entries-1) && (stsc->table[stsc_index+1].chunk-1 == i))
+      stsc_index++;
+    first_chunk_packet += stsc->table[stsc_index].samples;
+    }
+
+  /* Get offset */
+  offset = trak->mdia.minf.stbl.stco.table[chunk].offset;
+  for(i = 0; i < packet; i++)
+    {
+    if(trak->mdia.minf.stbl.stsz.table)
+      offset += trak->mdia.minf.stbl.stsz.table[first_chunk_packet+i].size;
+    else
+      offset += trak->mdia.minf.stbl.stsz.sample_size;
+    }
+  /* Get packet size */
+  if(trak->mdia.minf.stbl.stsz.table)
+    packet_size = trak->mdia.minf.stbl.stsz.table[first_chunk_packet+packet].size;
+  else
+    packet_size = trak->mdia.minf.stbl.stsz.sample_size;
+  
+  /* Get number of audio samples */
+  if(samples)
+    *samples = get_uncompressed_samples(&trak->mdia.minf.stbl.stts,
+                                        first_chunk_packet+packet,
+                                        first_chunk_packet+packet+1);
+  
+  /* Read the data */
+  if(*buffer_alloc < packet_size+16)
+    {
+    *buffer_alloc = packet_size + 128;
+    *buffer = realloc(*buffer, *buffer_alloc);
+    }
+  quicktime_set_position(file, offset);
+  quicktime_read_data(file, *buffer, packet_size);
+  return packet_size;
   }

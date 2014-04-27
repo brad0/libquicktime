@@ -714,3 +714,27 @@ int quicktime_trak_shift_offsets(quicktime_trak_t *trak, int64_t offset)
     }
   return 0;
   }
+
+int quicktime_trak_read_packet(quicktime_t *file,
+                               quicktime_trak_t * trak,
+                               lqt_packet_t * p)
+  {
+  if(!lqt_packet_index_read_packet(file,
+                                   &trak->idx,
+                                   p, trak->idx_pos))
+    return 0;
+  trak->idx_pos++;
+  return 1;
+  }
+
+int quicktime_trak_append_packet(quicktime_t *file,
+                                 quicktime_trak_t * trak,
+                                 lqt_packet_t * p)
+  {
+  if(!lqt_packet_index_append_packet(file,
+                                     &trak->idx,
+                                     p, trak->idx_pos))
+    return 0;
+  trak->idx_pos++;
+  return 1;
+  }

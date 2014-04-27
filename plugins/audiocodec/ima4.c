@@ -147,7 +147,7 @@ static void ima4_decode_block(quicktime_audio_map_t *atrack, int16_t *output,
 
     ima4_decode_sample(&predictor, &nibble, &index, &step);
     *output = predictor;
-    output += channels;
+    output += channels; // TODO: Change this for planar output
     nibble_count ^= 1;
     }
   }
@@ -294,11 +294,9 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
           
     /* Read first chunk */
 
-    if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
-                                     &codec->pkt, atrack->track->idx_pos))
+    if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
       return 0;
 
-    atrack->track->idx_pos++;
     codec->pkt_ptr = codec->pkt.data;
     codec->packet_samples = codec->pkt.duration;
     }
@@ -316,11 +314,9 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
       //          if(1)
       {
       atrack->track->idx_pos = new_index_pos;
-      if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
-                                       &codec->pkt, atrack->track->idx_pos))
+      if(!quicktime_trak_read_packet(file, atrack->track,
+                                     &codec->pkt))
         return 0;
-
-      atrack->track->idx_pos++;
       }
 
     codec->pkt_ptr = codec->pkt.data;
@@ -370,11 +366,8 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
 
       if(codec->pkt_ptr - codec->pkt.data >= codec->pkt.data_len)
         {
-        if(!lqt_packet_index_read_packet(file, &atrack->track->idx,
-                                         &codec->pkt, atrack->track->idx_pos))
+        if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
           return 0;
-
-        atrack->track->idx_pos++;
         codec->pkt_ptr = codec->pkt.data;
         codec->packet_samples = codec->pkt.duration;
         }
@@ -416,6 +409,49 @@ static int decode(quicktime_t *file, void * _output, long samples, int track)
   return samples_decoded;
   }
 
+static int decode_packet(quicktime_t *file, int track, lqt_audio_buffer_t * buf)
+  {
+  int i;
+  /* Decode ONE ima frame */
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  quicktime_ima4_codec_t *codec = atrack->codec->priv;
+
+  if(!buf)
+    return 0;
+
+  /* Read packet */
+  if(!codec->pkt_ptr || (codec->pkt_ptr - codec->pkt.data >= codec->pkt.data_len))
+    {
+    if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
+      return 0;
+    codec->pkt_ptr = codec->pkt.data;
+    codec->packet_samples = codec->pkt.duration;
+    }
+
+  lqt_audio_buffer_alloc(buf, SAMPLES_PER_BLOCK, atrack->channels, 0, atrack->sample_format);
+  
+  /* Decode frame */
+  for(i = 0; i < atrack->channels; i++)
+    {
+    ima4_decode_block(atrack,
+                      buf->channels[0].i_16 + i,
+                      codec->pkt_ptr, atrack->channels);
+    codec->pkt_ptr += BLOCK_SIZE;
+    }
+
+  buf->size = SAMPLES_PER_BLOCK;
+  if(codec->packet_samples < SAMPLES_PER_BLOCK)
+    buf->size = codec->packet_samples;
+  codec->packet_samples -= SAMPLES_PER_BLOCK;
+  return buf->size;
+  }
+
+static void resync(quicktime_t *file, int track)
+  {
+  quicktime_audio_map_t * atrack = &file->atracks[track];
+  quicktime_ima4_codec_t *codec = atrack->codec->priv;
+  codec->pkt_ptr = NULL;
+  }
 
 static int encode(quicktime_t *file, void *_input, long samples, int track)
   {
@@ -575,9 +611,13 @@ void quicktime_init_codec_ima4(quicktime_codec_t * codec_base,
   codec_base->priv = codec;
 
   codec_base->delete_codec = delete_codec;
+
   codec_base->decode_video = 0;
   codec_base->encode_video = 0;
   codec_base->decode_audio = decode;
+  codec_base->resync = resync;
+  codec_base->decode_audio_packet = decode_packet;
+
   codec_base->encode_audio = encode;
   codec_base->flush = flush;
   

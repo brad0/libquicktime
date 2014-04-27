@@ -294,7 +294,7 @@ typedef enum
     LQT_SAMPLE_INT16,     /*!< int16_t */
     LQT_SAMPLE_INT32,     /*!< int32_t */
     LQT_SAMPLE_FLOAT,     /*!< Float (machine native) */
-    LQT_SAMPLE_DOUBLE     /*!< Double (machine native, since version 1.0.3) */
+    LQT_SAMPLE_DOUBLE,    /*!< Double (machine native, since version 1.0.3) */
   } lqt_sample_format_t;
   
 /** \ingroup general

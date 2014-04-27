@@ -111,6 +111,8 @@ typedef struct
 
   int header_read;
 
+  lqt_packet_t pkt;
+  
   } quicktime_vorbis_codec_t;
 
 
@@ -149,7 +151,9 @@ static int delete_codec(quicktime_codec_t *codec_base)
     free(codec->chunk_buffer);
   if(codec->enc_header)
     free(codec->enc_header);
-        
+
+  lqt_packet_free(&codec->pkt);
+  
   free(codec);
   return 0;
   }
@@ -219,6 +223,40 @@ static int next_chunk(quicktime_t * file, int track)
   return 1;
   }
 
+
+static int next_qt_packet(quicktime_t * file, int track)
+  {
+  char * buffer;
+  uint8_t * header;
+  uint32_t header_len;
+
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_vorbis_codec_t *codec = atrack->codec->priv;
+
+  if(!codec->header_read) /* Try OVHS atom */
+    {
+    header = quicktime_wave_get_user_atom(atrack->track, "OVHS", &header_len);
+    if(header)
+      {
+      lqt_log(file, LQT_LOG_DEBUG, LOG_DOMAIN, "Using OVHS Atom, %d bytes", header_len-8);
+      buffer = ogg_sync_buffer(&codec->dec_oy, header_len-8);
+      memcpy(buffer, header + 8, header_len-8);
+      ogg_sync_wrote(&codec->dec_oy, header_len-8);
+      return 1;
+      }
+    }
+
+  if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
+    return 0;
+
+  buffer = ogg_sync_buffer(&codec->dec_oy, codec->pkt.data_len);
+  memcpy(buffer, codec->pkt.data, codec->pkt.data_len);
+  ogg_sync_wrote(&codec->dec_oy, codec->pkt.data_len);
+  return 1;
+  }
+
+
+
 static int next_page(quicktime_t * file, int track)
   {
   quicktime_audio_map_t *track_map = &file->atracks[track];
@@ -231,10 +269,8 @@ static int next_page(quicktime_t * file, int track)
 
     if(result == 0)
       {
-      if(!next_chunk(file, track))
-        {
+      if(!next_qt_packet(file, track))
         return 0;
-        }
       }
     else
       {
@@ -248,7 +284,6 @@ static int next_page(quicktime_t * file, int track)
     }
   return 1;
   }
-
 
 static int next_packet(quicktime_t * file, int track)
   {
@@ -522,6 +557,119 @@ static int decode(quicktime_t *file,
   return samples_copied;
   }
 
+static int decode_packet(quicktime_t * file, int track, lqt_audio_buffer_t * buf)
+  {
+  int i;
+  float ** channels;
+  int samples_decoded = 0;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_vorbis_codec_t *codec = atrack->codec->priv;
+
+  /* Initialize codec */
+  if(!codec->decode_initialized)
+    {
+    codec->decode_initialized = 1;
+    codec->channels = atrack->channels;
+    
+    ogg_sync_init(&codec->dec_oy); /* Now we can read pages */
+
+    vorbis_info_init(&codec->dec_vi);
+    vorbis_comment_init(&codec->dec_vc);
+    
+    if(!next_page(file, track))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "decode: next page failed");
+      return 0;
+      }
+    if(!next_packet(file, track))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "decode: next packet failed");
+      return 0;
+      }
+    
+    if(vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc,
+                                 &codec->dec_op) < 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "decode: vorbis_synthesis_headerin: not a vorbis header");
+      return 0;
+      }
+
+    if(!next_packet(file, track))
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "decode: next packet failed");
+      return 0;
+      }
+    if(vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc, &codec->dec_op) < 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "decode: vorbis_synthesis_headerin: not a vorbis header");
+      return 0;
+      }
+    if(!next_packet(file, track))
+      return 0;
+
+    if(vorbis_synthesis_headerin(&codec->dec_vi, &codec->dec_vc, &codec->dec_op) < 0)
+      {
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
+              "decode: vorbis_synthesis_headerin: not a vorbis header");
+      return 0;
+      }
+    codec->header_read = 1;
+    vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
+    vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
+    }
+  
+  if(!buf)
+    return 0;
+  
+  while(1)
+    {
+    samples_decoded = vorbis_synthesis_pcmout(&codec->dec_vd, &channels);
+    
+    if(samples_decoded > 0)
+      break;
+
+    /* Decode new data */
+
+    if(!next_packet(file, track))
+      return 0;
+    
+    if(vorbis_synthesis(&codec->dec_vb, &codec->dec_op) == 0)
+      vorbis_synthesis_blockin(&codec->dec_vd,
+                               &codec->dec_vb);
+    }
+
+  lqt_audio_buffer_alloc(buf, samples_decoded, atrack->channels, 1, LQT_SAMPLE_FLOAT);
+  
+  for(i = 0; i < atrack->channels; i++)
+    memcpy(buf->channels[i].f, channels[i], samples_decoded * sizeof(float));
+  
+  vorbis_synthesis_read(&codec->dec_vd, samples_decoded);
+  buf->size = samples_decoded;
+  return buf->size;
+  }
+
+static void resync(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t *atrack   = &file->atracks[track];
+  quicktime_vorbis_codec_t *codec = atrack->codec->priv;
+
+  ogg_stream_clear(&codec->dec_os);
+  ogg_sync_reset(&codec->dec_oy);
+  codec->stream_initialized = 0;
+
+#ifdef HAVE_VORBIS_SYNTHESIS_RESTART
+  vorbis_synthesis_restart(&codec->dec_vd);
+#else
+  vorbis_dsp_clear(&codec->dec_vd);
+  vorbis_block_clear(&codec->dec_vb);
+  vorbis_synthesis_init(&codec->dec_vd, &codec->dec_vi);
+  vorbis_block_init(&codec->dec_vd, &codec->dec_vb);
+#endif  
+
+  }
+
 /* Encoding part */
 
 #define ENCODE_SAMPLES 4096
@@ -743,30 +891,27 @@ static int encode(quicktime_t *file,
   return result;
   }
 
-
-
-
 static int set_parameter(quicktime_t *file, 
 		int track, 
 		const char *key, 
 		const void *value)
-{
-	quicktime_audio_map_t *atrack = &file->atracks[track];
-	quicktime_vorbis_codec_t *codec = atrack->codec->priv;
+  {
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_vorbis_codec_t *codec = atrack->codec->priv;
 
-	if(!strcasecmp(key, "vorbis_vbr"))
-		codec->use_vbr = *(int*)value;
-	else
-	if(!strcasecmp(key, "vorbis_bitrate"))
-		codec->nominal_bitrate = *(int*)value;
-	else
-	if(!strcasecmp(key, "vorbis_max_bitrate"))
-		codec->max_bitrate = *(int*)value;
-	else
+  if(!strcasecmp(key, "vorbis_vbr"))
+    codec->use_vbr = *(int*)value;
+  else
+    if(!strcasecmp(key, "vorbis_bitrate"))
+      codec->nominal_bitrate = *(int*)value;
+    else
+      if(!strcasecmp(key, "vorbis_max_bitrate"))
+        codec->max_bitrate = *(int*)value;
+      else
 	if(!strcasecmp(key, "vorbis_min_bitrate"))
-		codec->min_bitrate = *(int*)value;
-        return 0;
-}
+          codec->min_bitrate = *(int*)value;
+  return 0;
+  }
 
 
 static int flush(quicktime_t *file, int track)
@@ -804,6 +949,8 @@ void quicktime_init_codec_vorbis(quicktime_codec_t *codec_base,
   codec_base->priv = codec;
   codec_base->delete_codec = delete_codec;
   codec_base->decode_audio = decode;
+  codec_base->decode_audio_packet = decode_packet;
+  codec_base->resync = resync;
   codec_base->encode_audio = encode;
   codec_base->set_parameter = set_parameter;
   codec_base->flush = flush;
@@ -816,6 +963,8 @@ void quicktime_init_codec_vorbis(quicktime_codec_t *codec_base,
     return;
   
   atrack->sample_format = LQT_SAMPLE_FLOAT;
+  atrack->planar = 1;
+  
   if(quicktime_match_32(compressor, "OggV"))
     {
     codec->write_OVHS = 1;

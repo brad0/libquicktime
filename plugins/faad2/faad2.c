@@ -78,8 +78,12 @@ typedef struct
   float * sample_buffer;
   int sample_buffer_alloc;
 
+  faacDecFrameInfo frame_info;
+    
   int upsample;
-  
+
+  lqt_packet_t pkt;
+  float * samples;
   } quicktime_faad2_codec_t;
 
 static int delete_codec(quicktime_codec_t *codec_base)
@@ -94,7 +98,8 @@ static int delete_codec(quicktime_codec_t *codec_base)
 
   if(codec->data)
     free(codec->data);
-      
+
+  lqt_packet_free(&codec->pkt);
   
   free(codec);
   return 0;
@@ -321,6 +326,69 @@ static int decode(quicktime_t *file,
   return samples_copied;
   }
 
+static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t * buf)
+  {
+  int i;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_faad2_codec_t *codec = atrack->codec->priv;
+  if(!codec->samples)
+    {
+    codec->frame_info.samples = 0;
+
+    while(!codec->frame_info.samples)
+      {
+      /* Decode packet */
+      if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
+        return 0;
+      
+      codec->samples = faacDecDecode(codec->dec, &codec->frame_info,
+                                     codec->pkt.data, codec->pkt.data_len);
+      
+      if(!codec->samples)
+        {
+        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "faacDecDecode failed %s",
+                faacDecGetErrorMessage(codec->frame_info.error));
+        return 0;
+        }
+    
+      /* Set up channel map */
+      if(!atrack->channel_setup)
+        {
+        atrack->channel_setup = calloc(atrack->channels, sizeof(*(atrack->channel_setup)));
+        for(i = 0; i < atrack->channels; i++)
+          {
+          atrack->channel_setup[i] =
+            get_channel(codec->frame_info.channel_position[i]);
+          }
+        }
+      }
+    
+    if((atrack->channels == 1) && (codec->frame_info.channels == 2))
+      {
+      for(i = 0; i < codec->frame_info.samples/2; i++)
+        codec->samples[i] = codec->samples[2*i];
+      codec->frame_info.samples/=2;
+      }
+    }
+
+  if(!buf)
+    return 0; // Init
+
+  lqt_audio_buffer_alloc(buf, codec->frame_info.samples/atrack->channels, atrack->channels, 0, LQT_SAMPLE_FLOAT);
+  memcpy(buf->channels[0].f, codec->samples, sizeof(*codec->samples) * codec->frame_info.samples);
+  buf->size = codec->frame_info.samples/atrack->channels;
+  codec->samples = NULL;
+  return buf->size;
+  }
+
+static void resync_faad2(quicktime_t * file, int track)
+  {
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_faad2_codec_t *codec = atrack->codec->priv;
+  codec->samples = NULL;
+  
+  }
+
 static int set_parameter(quicktime_t *file, 
 		int track, 
 		const char *key, 
@@ -349,6 +417,9 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   codec_base->priv = codec;
   codec_base->delete_codec = delete_codec;
   codec_base->decode_audio = decode;
+  codec_base->decode_audio_packet = decode_packet_faad2;
+  codec_base->resync = resync_faad2;
+
   codec_base->set_parameter = set_parameter;
   
   /* Ok, usually, we initialize decoders during the first

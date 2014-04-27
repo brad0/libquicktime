@@ -147,11 +147,8 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         
   initialize(vtrack, codec);
 
-  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                   &codec->pkt,
-                                   vtrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, vtrack->track, &codec->pkt))
     return -1;
-  vtrack->track->idx_pos++;
   buffer = codec->pkt.data;
         
   for(out_y = 0, in_y = 0; out_y < height; in_y++)

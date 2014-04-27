@@ -1134,7 +1134,8 @@ static void set_codec_info(struct CODECIDMAP * map)
   snprintf(ffmpeg_long_name, 256, "%s", map->name);
   snprintf(ffmpeg_description, 256, "%s", map->name);
   
-  if((map->encoder || map->decoder) && (map->encoder->type == AVMEDIA_TYPE_VIDEO))
+  if((map->encoder && (map->encoder->type == AVMEDIA_TYPE_VIDEO)) ||
+     (map->decoder && (map->decoder->type == AVMEDIA_TYPE_VIDEO)))
     codec_info_ffmpeg.type = LQT_CODEC_VIDEO;
   else
     codec_info_ffmpeg.type = LQT_CODEC_AUDIO;

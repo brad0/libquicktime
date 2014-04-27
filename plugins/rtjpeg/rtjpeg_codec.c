@@ -79,12 +79,9 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     
     }
   
-  if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                   &codec->pkt,
-                                   vtrack->track->idx_pos))
+  if(!quicktime_trak_read_packet(file, vtrack->track,
+                           &codec->pkt))
     return -1;
-  vtrack->track->idx_pos++;
-  
   RTjpeg_decompress(codec->decompress_struct, codec->pkt.data, codec->rows);
   
   lqt_rows_copy(row_pointers, codec->rows, codec->qt_width, codec->qt_height,

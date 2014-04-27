@@ -99,12 +99,9 @@ static int decode(quicktime_t *file,
    
   if(!codec->have_frame)
     {
-    if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                     &codec->pkt,
-                                     vtrack->track->idx_pos))
+    if(!quicktime_trak_read_packet(file, vtrack->track,
+                             &codec->pkt))
       return -1;
-    vtrack->track->idx_pos++;
-    
     
     if(mjpeg_get_fields(mjpeg) == 2)
       field2_offset = mjpeg_get_quicktime_field2(codec->pkt.data,

@@ -65,16 +65,13 @@ static SchroBuffer * get_data(quicktime_t *file, int track)
     //    fprintf(stderr, "Read frame: %ld + %d\n",
     //            vtrack->current_position, codec->dec_delay);
 
-    if(!lqt_packet_index_read_packet(file, &vtrack->track->idx,
-                                     &codec->pkt,
-                                     vtrack->track->idx_pos))
+    if(!quicktime_trak_read_packet(file, vtrack->track,
+                             &codec->pkt))
       {
       codec->dec_eof = 1;
       schro_decoder_push_end_of_stream(codec->dec);
       return NULL;
       }
-    vtrack->track->idx_pos++;
-    
     codec->dec_buffer_ptr = codec->pkt.data;
     }
 

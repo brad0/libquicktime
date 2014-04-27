@@ -168,13 +168,10 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
 #else
   else
     {
-    if(!lqt_packet_index_read_packet(file,
-                                     &atrack->track->idx,
-                                     p, atrack->track->idx_pos))
+    if(!quicktime_trak_read_packet(file, atrack->track, p))
       return 0;
     if(atrack->ci.flags & LQT_COMPRESSION_SBR)
       p->duration *= 2;
-    atrack->track->idx_pos++;
     }
 #endif
   
@@ -231,11 +228,8 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
     }
   else
     {
-    if(!lqt_packet_index_read_packet(file,
-                                     &vtrack->track->idx,
-                                     p, vtrack->track->idx_pos))
+    if(!quicktime_trak_read_packet(file, vtrack->track, p))
       return 0;
-    vtrack->track->idx_pos++;
     }
   
 #endif

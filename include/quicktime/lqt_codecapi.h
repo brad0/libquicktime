@@ -173,9 +173,6 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template);
 
 /* Some audio stuff */
 
-int16_t ** lqt_audio_buffer_create_int16(int num_channels, int num_samples);
-float   ** lqt_audio_buffer_create_float(int num_channels, int num_samples);
-
 /* An extremely useful function for audio decoders */
 
 /*
@@ -184,11 +181,13 @@ float   ** lqt_audio_buffer_create_float(int num_channels, int num_samples);
  *  either src_i or src_f can be NULL. Same for dst_i and 
  *  dst_f. But here, you can also set individual channels to NULL.
  */
-   
+
+#if 0
 int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
                    int16_t ** src_i, float ** src_f,
                    int dst_pos, int src_pos,
                    int dst_size, int src_size, int num_channels);
+#endif
 
 /*
  *  Read one audio chunk
@@ -205,9 +204,6 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
                            uint8_t ** buffer, int * buffer_alloc,
                            int initial_bytes);
 
-int lqt_packet_index_append_packet(quicktime_t *file,
-                                   const lqt_packet_index_t * idx,
-                                   lqt_packet_t * p, int packetnum);
 
 
 /*

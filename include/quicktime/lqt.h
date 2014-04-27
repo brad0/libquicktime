@@ -1327,12 +1327,6 @@ int lqt_decode_audio_track(quicktime_t *file,
                            float **output_f, 
                            long samples,
                            int track);
-
-/*
- *  Support for "raw" audio en-/decoding: This bypasses all
- *  internal sampleformat conversions, and allows access to audio
- *  samples in a format, which is closest to the internal representation.
- */
   
 /*
  *  Query the internal sample format. Works for decoding (call after quicktime_open)
@@ -1356,16 +1350,12 @@ const char * lqt_sample_format_to_string(lqt_sample_format_t sampleformat);
  * Use this function if you want to use \ref lqt_decode_audio_raw or
  * \ref lqt_encode_audio_raw
  * to bypass libquicktimes internal sample format conversion routines.
- *
- * *Note*
- * Some codecs call 
- * 
  */
   
 lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track);
 
 /* The following return the actual number of en-/decoded frames */
-
+  
 /** \ingroup audio_decode
  * \brief Decode audio in the native sampleformat of the codec
  * \param file A quicktime handle
