@@ -1402,15 +1402,13 @@ typedef struct
     
   /* Position information */
   int64_t current_position;   /* current sample in output file */
+  int64_t last_position;
+  
   int64_t cur_chunk;      /* current chunk in output file */
   
   int cur_vbr_packet;     // Current packet within this chunk
   int total_vbr_packets;  // Total number of VBR packets in this chunk
   
-  /* Last position if set by the codec. If last position and current position
-     differ, the codec knows, that a seek happened since the last decode call */
-  int64_t last_position;
-
   quicktime_codec_t * codec;
 
   int eof; /* This is set to 1 by the core if one tries to read beyond EOF */
@@ -1431,13 +1429,14 @@ typedef struct
 
   /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
   int wav_id;
-
-  /* PCM codecs need this */
-  //  int block_align;
-
-  lqt_compression_info_t ci;
   
+  lqt_compression_info_t ci;
   lqt_audio_buffer_t buf;
+
+  // Offset to seek before the target frame to fill the bit reservoir and
+  // avoid disturbances due to overlap tranforms
+  int preroll; 
+  
   } quicktime_audio_map_t;
 
 

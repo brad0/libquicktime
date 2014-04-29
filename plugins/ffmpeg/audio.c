@@ -883,7 +883,7 @@ static int decode_audio_packet_ffmpeg(quicktime_t *file,
       if(!atrack->codec->read_packet(file, &codec->lqt_pkt, track))
         return 0;
       }
-    else if(quicktime_trak_read_packet(file, atrack->track, &codec->lqt_pkt))
+    else if(!quicktime_trak_read_packet(file, atrack->track, &codec->lqt_pkt))
       return 0;
     
     codec->pkt.data = codec->lqt_pkt.data;

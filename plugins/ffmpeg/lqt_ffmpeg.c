@@ -1097,6 +1097,12 @@ static void set_codec_info(struct CODECIDMAP * map)
   {
   // char * capabilities = (char*)0;
 
+  /* Clear codec info */
+  memset(&codec_info_ffmpeg, 0, sizeof(codec_info_ffmpeg));
+  codec_info_ffmpeg.name = ffmpeg_name;
+  codec_info_ffmpeg.long_name = ffmpeg_long_name;
+  codec_info_ffmpeg.description = ffmpeg_description;
+    
   codec_info_ffmpeg.fourccs = map->fourccs;
   codec_info_ffmpeg.wav_ids = map->wav_ids;
   codec_info_ffmpeg.image_sizes = map->image_sizes;
@@ -1247,8 +1253,13 @@ IFUNC(37)
 IFUNC(38)
 IFUNC(39)
 IFUNC(40)
+IFUNC(41)
+IFUNC(42)
+IFUNC(43)
+IFUNC(44)
+IFUNC(45)
 #undef IFUNC
-#define MAX_FUNC 40
+#define MAX_FUNC 45
 
 LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
 {
@@ -1300,6 +1311,11 @@ LQT_EXTERN lqt_init_codec_func_t get_codec(int index)
 		case 38: return quicktime_init_codec_ffmpeg38;
 		case 39: return quicktime_init_codec_ffmpeg39;
 		case 40: return quicktime_init_codec_ffmpeg40;
+		case 41: return quicktime_init_codec_ffmpeg41;
+		case 42: return quicktime_init_codec_ffmpeg42;
+		case 43: return quicktime_init_codec_ffmpeg43;
+		case 44: return quicktime_init_codec_ffmpeg44;
+		case 45: return quicktime_init_codec_ffmpeg45;
 		default:
 			break;
 	}

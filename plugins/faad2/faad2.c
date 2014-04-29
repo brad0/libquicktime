@@ -209,7 +209,6 @@ static int decode_chunk(quicktime_t *file, int track)
     
     if((track_map->channels == 1) && (frame_info.channels == 2))
       {
-            
       for(j = 0; j < frame_info.samples/2; j++)
         samples[j] = samples[2*j];
       frame_info.samples/=2;
@@ -331,6 +330,7 @@ static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t
   int i;
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_faad2_codec_t *codec = atrack->codec->priv;
+
   if(!codec->samples)
     {
     codec->frame_info.samples = 0;
@@ -338,8 +338,11 @@ static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t
     while(!codec->frame_info.samples)
       {
       /* Decode packet */
+      // fprintf(stderr, "Read packet %d\n", atrack->track->idx_pos);
       if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
         return 0;
+
+      memset(&codec->frame_info, 0, sizeof(&codec->frame_info));
       
       codec->samples = faacDecDecode(codec->dec, &codec->frame_info,
                                      codec->pkt.data, codec->pkt.data_len);
@@ -354,12 +357,16 @@ static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t
       /* Set up channel map */
       if(!atrack->channel_setup)
         {
+        atrack->sample_format = LQT_SAMPLE_FLOAT;
         atrack->channel_setup = calloc(atrack->channels, sizeof(*(atrack->channel_setup)));
         for(i = 0; i < atrack->channels; i++)
           {
           atrack->channel_setup[i] =
             get_channel(codec->frame_info.channel_position[i]);
           }
+
+        if(codec->frame_info.sbr == 1)
+          atrack->ci.flags |= LQT_COMPRESSION_SBR;
         }
       }
     
@@ -377,6 +384,7 @@ static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t
   lqt_audio_buffer_alloc(buf, codec->frame_info.samples/atrack->channels, atrack->channels, 0, LQT_SAMPLE_FLOAT);
   memcpy(buf->channels[0].f, codec->samples, sizeof(*codec->samples) * codec->frame_info.samples);
   buf->size = codec->frame_info.samples/atrack->channels;
+
   codec->samples = NULL;
   return buf->size;
   }
@@ -386,7 +394,7 @@ static void resync_faad2(quicktime_t * file, int track)
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_faad2_codec_t *codec = atrack->codec->priv;
   codec->samples = NULL;
-  
+  faacDecPostSeekReset(codec->dec, 1); // Don't skip the first frame
   }
 
 static int set_parameter(quicktime_t *file, 
@@ -431,7 +439,6 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   if(!atrack)
     return;
   
-  atrack->sample_format = LQT_SAMPLE_FLOAT;
   stsd = &atrack->track->mdia.minf.stbl.stsd;
   
   if(stsd->table[0].has_esds)
@@ -459,7 +466,9 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   
   faacDecInit2(codec->dec, extradata, extradata_size,
                &samplerate, &channels);
-
+  
+  faacDecPostSeekReset(codec->dec, 1); // Don't skip the first frame
+  
   atrack->ci.id = LQT_COMPRESSION_AAC;
 
   lqt_compression_info_set_header(&atrack->ci,
@@ -473,6 +482,9 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
     atrack->total_samples *= 2;
     atrack->ci.flags |= LQT_COMPRESSION_SBR;
     }
+  
+  atrack->preroll = 1024;
+  
   stsd->table[0].channels = channels;
   atrack->channels = channels;
   

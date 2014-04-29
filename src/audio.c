@@ -681,6 +681,9 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
     int samples_to_copy, bytes_to_copy;
     uint8_t * output_ptr = output;
     int sample_size = lqt_sample_format_bytes(atrack->sample_format);
+
+    if(atrack->eof)
+      return 0;
     
     while(samples_read < samples)
       {
@@ -725,7 +728,9 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
       samples_read += samples_to_copy;
       }
     atrack->current_position += samples_read;
-    atrack->last_position += samples_read;
+    
+    if(samples_read < samples)
+      atrack->eof = 1;
     return samples_read;
     }
   else
@@ -956,11 +961,16 @@ static int decode_audio_old(quicktime_t *file,
     int samples_to_copy;
     uint8_t * src;
     void (*convert)(void*, void*, int, int);
-    int sample_size = lqt_sample_format_bytes(atrack->sample_format);
+    int sample_size;
+
+    if(atrack->eof)
+      return 0;
+
+    sample_size = lqt_sample_format_bytes(atrack->sample_format);
     
     if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
       atrack->codec->decode_audio_packet(file, track, NULL);
-    
+
     
     /* Find converter function */
 
@@ -1048,8 +1058,10 @@ static int decode_audio_old(quicktime_t *file,
       atrack->buf.pos += samples_to_copy;
       samples_read += samples_to_copy;
       }
+
+    if(samples_read < samples)
+      atrack->eof = 1;
     atrack->current_position += samples_read;
-    atrack->last_position += samples_read;
     return samples_read;
     }
   else
@@ -1251,17 +1263,53 @@ int quicktime_encode_audio(quicktime_t *file, int16_t **input_i, float **input_f
 
 int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
   {
-  if((track >= 0) && (track < file->total_atracks))
+  quicktime_audio_map_t * atrack;
+  if((track < 0) || (track >= file->total_atracks))
     {
-    /* We just set the current position, Codec will do the rest */
-    
-    file->atracks[track].current_position = sample;
-    file->atracks[track].eof = 0;
-    }
-  else
     lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN,
-            "quicktime_set_audio_position: track >= file->total_atracks\n");
-  return 0;
+            "quicktime_set_audio_position: No track %d", track);
+    return 1;
+    }
+
+  atrack = file->atracks + track;
+
+  /* Clear EOF */
+  atrack->eof = 0;
+  
+  if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+    sample /= 2;
+  
+  atrack->track->idx_pos = lqt_packet_index_seek(&atrack->track->idx, sample);
+  
+  if(atrack->preroll)
+    {
+    int64_t seek_sample = atrack->track->idx.entries[atrack->track->idx_pos].pts - atrack->preroll;
+    if(seek_sample < 0)
+      seek_sample = 0;
+    atrack->track->idx_pos = lqt_packet_index_seek(&atrack->track->idx, seek_sample);
+    }
+
+  /* Reset the decoder */
+  if(atrack->codec->resync)
+    atrack->codec->resync(file, track);
+  
+  atrack->current_position = atrack->track->idx.entries[atrack->track->idx_pos].pts;
+
+  /* Skip to the desired sample */
+  while(1)
+    {
+    if(!atrack->codec->decode_audio_packet(file, track, &atrack->buf))
+      break; // Unexpected EOF
+
+    if(file->atracks[track].current_position + atrack->buf.size > sample)
+      {
+      atrack->buf.pos = sample - file->atracks[track].current_position;
+      file->atracks[track].current_position += atrack->buf.pos;
+      return 0;
+      }
+    file->atracks[track].current_position += atrack->buf.size;
+    }
+  return 1;
   }
 
 long quicktime_audio_position(quicktime_t *file, int track)
@@ -1660,4 +1708,16 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   quicktime_set_position(file, offset);
   quicktime_read_data(file, *buffer, packet_size);
   return packet_size;
+  }
+
+long quicktime_audio_length(quicktime_t *file, int track)
+  {
+  if(file->total_atracks > 0) 
+    return file->atracks[track].total_samples;
+  return 0;
+  }
+
+int64_t lqt_last_audio_position(quicktime_t * file, int track)
+  {
+  return file->atracks[track].current_position;
   }

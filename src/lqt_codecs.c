@@ -220,6 +220,9 @@ int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,
       codec_info = *codec_array;
     }
 
+  if(!codec_info)
+    return 0;
+  
   atrack->codec = quicktime_load_codec(codec_info, atrack, NULL);
   
   /* We set the wav ids from our info structure, so we don't have to do this

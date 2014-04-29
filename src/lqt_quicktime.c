@@ -811,14 +811,6 @@ int quicktime_seek_start(quicktime_t *file)
   return 0;
   }
 
-long quicktime_audio_length(quicktime_t *file, int track)
-  {
-  if(file->total_atracks > 0) 
-    return file->atracks[track].total_samples;
-
-  return 0;
-  }
-
 long quicktime_video_length(quicktime_t *file, int track)
   {
   /*printf("quicktime_video_length %d %d\n", quicktime_track_samples(file, file->vtracks[track].track), track); */
@@ -1565,7 +1557,8 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
 
 int quicktime_delete_video_map(quicktime_video_map_t *vtrack)
   {
-  quicktime_delete_codec(vtrack->codec);
+  if(vtrack->codec)
+    quicktime_delete_codec(vtrack->codec);
   if(vtrack->temp_frame)
     lqt_rows_free(vtrack->temp_frame);
   if(vtrack->timecodes)
@@ -1604,7 +1597,8 @@ int quicktime_init_audio_map(quicktime_t * file,
 
 int quicktime_delete_audio_map(quicktime_audio_map_t *atrack)
   {
-  quicktime_delete_codec(atrack->codec);
+  if(atrack->codec)
+    quicktime_delete_codec(atrack->codec);
   if(atrack->sample_buffer)
     free(atrack->sample_buffer);
   if(atrack->channel_setup)
@@ -1625,6 +1619,10 @@ void quicktime_init_maps(quicktime_t * file)
 
   for(i = 0; i < file->moov.total_tracks; i++)
     {
+    if((file->moov.trak[i]->mdia.minf.is_audio) &&
+       (!strncmp(file->moov.trak[i]->mdia.minf.stbl.stsd.table[0].format, "mp4a", 4)))
+      file->moov.trak[i]->mdia.minf.is_audio_vbr = 1;
+    
     quicktime_trak_fix_counts(file, file->moov.trak[i],
                               file->moov.mvhd.time_scale);
 
@@ -1651,10 +1649,13 @@ void quicktime_init_maps(quicktime_t * file)
                                (lqt_codec_info_t*)0);
       /* Some codecs set the channel setup */
 
-      if(file->atracks[i].codec->decode_audio_packet)
-        file->atracks[i].codec->decode_audio_packet(file, i, NULL);
-      else
-        file->atracks[i].codec->decode_audio(file, (void*)0, 0, i);
+      if(file->atracks[i].codec)
+        {
+        if(file->atracks[i].codec->decode_audio_packet)
+          file->atracks[i].codec->decode_audio_packet(file, i, NULL);
+        else
+          file->atracks[i].codec->decode_audio(file, (void*)0, 0, i);
+        }
       }
     }
 
@@ -2254,10 +2255,12 @@ static void apply_default_parameters(quicktime_t * file,
   lqt_parameter_info_t * parameter_info;
   int j;
   
-  lqt_codec_info_t * codec_info = codec->info;
-
-  if(!codec_info)
+  lqt_codec_info_t * codec_info;
+  
+  if(!codec || !codec->info)
     return;
+
+  codec_info = codec->info;
   
   if(encode)
     {
@@ -2518,11 +2521,6 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   return result ? trak->chunk_sizes[chunk] : 0;
   }
 
-
-int64_t lqt_last_audio_position(quicktime_t * file, int track)
-  {
-  return file->atracks[track].last_position;
-  }
 
 /* Interlace mode */
 
