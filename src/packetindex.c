@@ -144,7 +144,7 @@ packet_index_create_video(quicktime_t *file,
   
   lqt_packet_index_alloc(idx, num);
 
-  e.position = quicktime_chunk_to_offset(file, trak, 0);
+  e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
 
   if(trak->mdia.minf.stbl.stsz.sample_size)
     e.size = trak->mdia.minf.stbl.stsz.sample_size;
@@ -310,7 +310,7 @@ packet_index_create_text(quicktime_t *file,
   
   lqt_packet_index_alloc(idx, num);
 
-  e.position = quicktime_chunk_to_offset(file, trak, 0);
+  e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
 
   if(trak->mdia.minf.stbl.stsz.sample_size)
     e.size = trak->mdia.minf.stbl.stsz.sample_size;
@@ -389,7 +389,7 @@ packet_index_create_audio(quicktime_t *file,
   chunk_sizes = lqt_get_chunk_sizes(file, trak);
 
   e.flags |= LQT_PACKET_KEYFRAME;
-  e.position = quicktime_chunk_to_offset(file, trak, 0);
+  e.position = trak->mdia.minf.stbl.stco.table[0].offset;
   
   for(i = 0; i < num; i++)
     {
@@ -445,7 +445,7 @@ packet_index_create_audio_vbr(quicktime_t *file,
   if(trak->mdia.minf.stbl.stsz.sample_size)
     e.size = trak->mdia.minf.stbl.stsz.sample_size;
 
-  e.position = quicktime_chunk_to_offset(file, trak, 0);
+  e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
   
   for(i = 0; i < num; i++)
     {

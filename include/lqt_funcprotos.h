@@ -1237,8 +1237,6 @@ void quicktime_write_user_atoms(quicktime_t * file,
                                 quicktime_user_atoms_t * u);
 void quicktime_user_atoms_dump(quicktime_user_atoms_t * u);
 
-int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
-
 LQT_EXTERN void quicktime_write_chunk_header(quicktime_t *file, 
                                              quicktime_trak_t *trak);
 

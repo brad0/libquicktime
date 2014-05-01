@@ -353,24 +353,6 @@ long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk)
   return total;
   }
 
-int64_t quicktime_chunk_to_offset(quicktime_t *file,
-                                  quicktime_trak_t *trak, long chunk)
-  {
-  quicktime_stco_table_t *table = trak->mdia.minf.stbl.stco.table;
-  int64_t result = 0;
-
-  if(trak->mdia.minf.stbl.stco.total_entries && 
-     chunk >= trak->mdia.minf.stbl.stco.total_entries)
-    result = table[trak->mdia.minf.stbl.stco.total_entries - 1].offset;
-  else
-    if(trak->mdia.minf.stbl.stco.total_entries)
-      result = table[chunk].offset;
-    else
-      result = HEADER_LENGTH * 2;
-
-  return result;
-  }
-
 void quicktime_write_chunk_header(quicktime_t *file, 
                                   quicktime_trak_t *trak)
   {
