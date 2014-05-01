@@ -783,99 +783,6 @@ static int read_packet_pcm(quicktime_t * file, lqt_packet_t * p, int track)
   return 1;
   }
 
-static int decode_pcm(quicktime_t *file, void * _output, long samples, int track)
-  {
-  quicktime_audio_map_t *atrack = &file->atracks[track];
-  quicktime_pcm_codec_t *codec = atrack->codec->priv;
-  void * output;
-  int64_t samples_to_skip = 0;
-  int samples_in_chunk;
-  int samples_decoded, samples_to_decode;
-    
-  if(!codec->initialized)
-    {
-    if(codec->init_decode)
-      codec->init_decode(file, track);
-    
-    /* Read the first audio chunk */
-
-    if(!read_packet_pcm(file, &codec->pkt, track))
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
-      return 0;
-      }
-    codec->pkt_ptr = codec->pkt.data;
-    codec->initialized = 1;
-    
-    atrack->ci.id = codec->cid;
-    
-    }
-
-  if(!_output) /* Global initialization */
-    {
-    return 0;
-    }
-  
-  if(atrack->current_position != atrack->last_position)
-    {
-    int new_index_pos;
-    new_index_pos = lqt_packet_index_seek(&atrack->track->idx,
-                                          atrack->current_position);
-
-    if(new_index_pos != atrack->track->idx_pos)
-      {
-      atrack->track->idx_pos = new_index_pos;
-      if(!read_packet_pcm(file, &codec->pkt, track))
-        return 0;
-      }
-    
-    samples_to_skip = atrack->current_position - codec->pkt.timestamp;
-    if(samples_to_skip < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot skip backwards");
-      samples_to_skip = 0;
-      }
-    
-    codec->pkt_ptr = codec->pkt.data + samples_to_skip * codec->block_align;
-    }
-
-  samples_decoded = 0;
-
-  output = _output;
-  
-  while(samples_decoded < samples)
-    {
-    /* Get new chunk if necessary */
-    if(codec->pkt_ptr - codec->pkt.data >= codec->pkt.data_len)
-      {
-      if(!read_packet_pcm(file, &codec->pkt, track))
-        return 0;
-        
-      codec->pkt_ptr = codec->pkt.data;
-      }
-
-    /* Decode */
-
-    samples_to_decode = samples - samples_decoded;
-
-    samples_in_chunk =
-      ((codec->pkt.data_len-
-        (int)(codec->pkt_ptr - codec->pkt.data)))/codec->block_align;
-    
-    if(samples_to_decode > samples_in_chunk)
-      samples_to_decode = samples_in_chunk;
-    
-    if(!samples_to_decode) // EOF
-      break;
-
-    codec->decode(codec, samples_to_decode * atrack->channels, &output);
-    samples_decoded += samples_to_decode;
-
-    }
-  atrack->last_position = atrack->current_position + samples_decoded;
-  return samples_decoded;
-  }
-
 /* Decode packet */
 
 static int decode_packet_pcm(quicktime_t *file, int track, lqt_audio_buffer_t * buf)
@@ -888,16 +795,6 @@ static int decode_packet_pcm(quicktime_t *file, int track, lqt_audio_buffer_t * 
     {
     if(codec->init_decode)
       codec->init_decode(file, track);
-    
-    /* Read the first audio chunk */
-#if 0
-    if(!read_packet_pcm(file, &codec->pkt, track))
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "EOF at the beginning of track");
-      return 0;
-      }
-    codec->pkt_ptr = codec->pkt.data;
-#endif
     codec->initialized = 1;
     atrack->ci.id = codec->cid;
     }
@@ -1031,7 +928,6 @@ void quicktime_init_codec_twos(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1080,7 +976,6 @@ void quicktime_init_codec_sowt(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1152,7 +1047,6 @@ void quicktime_init_codec_in24(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1216,7 +1110,6 @@ void quicktime_init_codec_in32(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1281,7 +1174,6 @@ void quicktime_init_codec_fl32(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1337,7 +1229,6 @@ void quicktime_init_codec_fl64(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1371,7 +1262,6 @@ void quicktime_init_codec_rawaudio(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm; 
@@ -1430,7 +1320,6 @@ void quicktime_init_codec_ulaw(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1460,7 +1349,6 @@ void quicktime_init_codec_alaw(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
   codec_base->encode_audio = encode_pcm;
   codec_base->set_parameter = set_parameter_pcm;
@@ -1709,7 +1597,6 @@ void quicktime_init_codec_lpcm(quicktime_codec_t *codec_base,
   
   /* Init public items */
   codec_base->delete_codec = delete_pcm;
-  codec_base->decode_audio = decode_pcm;
   codec_base->decode_audio_packet = decode_packet_pcm;
 
   codec_base->encode_audio = encode_pcm;

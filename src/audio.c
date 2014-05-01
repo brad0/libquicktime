@@ -324,284 +324,6 @@ void lqt_convert_audio_encode(quicktime_t * file, int16_t ** in_int, float ** in
     }
   }
 
-/* Decoding */
-
-static void decode_int8_to_int16(void * _in, int16_t ** out,
-                                 int num_channels, int num_samples)
-  {
-  int i, j;
-  int8_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int8_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT8_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_uint8_to_int16(void * _in, int16_t ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  uint8_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((uint8_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        UINT8_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_int16_to_int16(void * _in, int16_t ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  int16_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int16_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT16_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_int32_to_int16(void * _in, int16_t ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  int32_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int32_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT32_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_float_to_int16(void * _in, int16_t ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j, tmp;
-  float * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((float*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        FLOAT_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_double_to_int16(void * _in, int16_t ** out,
-                                   int num_channels, int num_samples)
-  {
-  int i, j, tmp;
-  double * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((double*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        DOUBLE_TO_INT16((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_int8_to_float(void * _in, float ** out,
-                                 int num_channels, int num_samples)
-  {
-  int i, j;
-  int8_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int8_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT8_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_uint8_to_float(void * _in, float ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  uint8_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((uint8_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        UINT8_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_int16_to_float(void * _in, float ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  int16_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int16_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT16_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_int32_to_float(void * _in, float ** out, int num_channels, int num_samples)
-  {
-  int i, j;
-  int32_t * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((int32_t*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        INT32_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_float_to_float(void * _in, float ** out,
-                                  int num_channels, int num_samples)
-  {
-  int i, j;
-  float * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((float*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        FLOAT_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void decode_double_to_float(void * _in, float ** out,
-                                   int num_channels, int num_samples)
-  {
-  int i, j;
-  double * in;
-  for(i = 0; i < num_channels; i++)
-    {
-    if(out[i])
-      {
-      in = ((double*)_in) + i;
-      for(j = 0; j < num_samples; j++)
-        {
-        DOUBLE_TO_FLOAT((*in), out[i][j]);
-        in += num_channels;
-        }
-      }
-    }
-  }
-
-static void lqt_convert_audio_decode(quicktime_t * file,
-                                     void * in, int16_t ** out_int, float ** out_float,
-                                     int num_channels, int num_samples,
-                                     lqt_sample_format_t stream_format)
-  {
-  switch(stream_format)
-    {
-    case LQT_SAMPLE_INT8:
-      if(out_int)
-        decode_int8_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_int8_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_UINT8:
-      if(out_int)
-        decode_uint8_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_uint8_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_INT16:
-      if(out_int)
-        decode_int16_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_int16_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_INT32:
-      if(out_int)
-        decode_int32_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_int32_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
-      if(out_int)
-        decode_float_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_float_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_DOUBLE: /* Float is ALWAYS machine native */
-      if(out_int)
-        decode_double_to_int16(in, out_int, num_channels, num_samples);
-      if(out_float)
-        decode_double_to_float(in, out_float, num_channels, num_samples);
-      break;
-    case LQT_SAMPLE_UNDEFINED:
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
-      break;
-    }
-  }
-
 /* Sample format */
 
 static struct
@@ -673,72 +395,65 @@ int lqt_decode_audio_raw(quicktime_t *file,  void * output, long samples, int tr
   {
   int result;
   quicktime_audio_map_t * atrack;
+  int samples_read = 0;
+  int samples_to_copy, bytes_to_copy;
+  uint8_t * output_ptr = output;
+  int sample_size;
+
   atrack = &file->atracks[track];
 
-  if(atrack->codec->decode_audio_packet)
+  sample_size = lqt_sample_format_bytes(atrack->sample_format);
+  
+  if(atrack->eof)
+    return 0;
+  
+  while(samples_read < samples)
     {
-    int samples_read = 0;
-    int samples_to_copy, bytes_to_copy;
-    uint8_t * output_ptr = output;
-    int sample_size = lqt_sample_format_bytes(atrack->sample_format);
-
-    if(atrack->eof)
-      return 0;
-    
-    while(samples_read < samples)
+    if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
       {
-      if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
-        {
-        atrack->buf.pos = 0;
-        result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
-        if(!result)
-          break;
-        }
-
-      samples_to_copy = samples - samples_read;
-
-      if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
-        samples_to_copy = atrack->buf.size - atrack->buf.pos;
-
-      if(atrack->planar)
-        {
-        int i, j;
-        /* Interleave */
-
-        for(i = 0; i < samples_to_copy; i++)
-          {
-          for(j = 0; j < atrack->channels; j++)
-            {
-            memcpy(output_ptr, atrack->buf.channels[j].u_8 + atrack->buf.pos * sample_size,
-                   sample_size);
-            output_ptr += sample_size;
-            }
-          atrack->buf.pos++;
-          }          
-        }
-      else
-        {
-        bytes_to_copy = samples_to_copy * sample_size * atrack->channels;
-        memcpy(output_ptr,
-               atrack->buf.channels[0].u_8 + atrack->buf.pos * sample_size * atrack->channels,
-               bytes_to_copy);
-        output_ptr += bytes_to_copy;
-        atrack->buf.pos += samples_to_copy;
-        }
-      samples_read += samples_to_copy;
+      atrack->buf.pos = 0;
+      result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
+      if(!result)
+        break;
       }
-    atrack->current_position += samples_read;
+
+    samples_to_copy = samples - samples_read;
+
+    if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
+      samples_to_copy = atrack->buf.size - atrack->buf.pos;
+
+    if(atrack->planar)
+      {
+      int i, j;
+      /* Interleave */
+
+      for(i = 0; i < samples_to_copy; i++)
+        {
+        for(j = 0; j < atrack->channels; j++)
+          {
+          memcpy(output_ptr, atrack->buf.channels[j].u_8 + atrack->buf.pos * sample_size,
+                 sample_size);
+          output_ptr += sample_size;
+          }
+        atrack->buf.pos++;
+        }          
+      }
+    else
+      {
+      bytes_to_copy = samples_to_copy * sample_size * atrack->channels;
+      memcpy(output_ptr,
+             atrack->buf.channels[0].u_8 + atrack->buf.pos * sample_size * atrack->channels,
+             bytes_to_copy);
+      output_ptr += bytes_to_copy;
+      atrack->buf.pos += samples_to_copy;
+      }
+    samples_read += samples_to_copy;
+    }
+  atrack->current_position += samples_read;
     
-    if(samples_read < samples)
-      atrack->eof = 1;
-    return samples_read;
-    }
-  else
-    {
-    result = atrack->codec->decode_audio(file, output, samples, track);
-    file->atracks[track].current_position += samples;
-    return result;
-    }
+  if(samples_read < samples)
+    atrack->eof = 1;
+  return samples_read;
   }
 
 int lqt_encode_audio_raw(quicktime_t *file,  void * input, long samples, int track)
@@ -950,147 +665,115 @@ static int decode_audio_old(quicktime_t *file,
   {
   int result;
   quicktime_audio_map_t * atrack;
+  
+  int i;
+  int samples_read = 0;
+  int samples_to_copy;
+  uint8_t * src;
+  void (*convert)(void*, void*, int, int);
+  int sample_size;
   atrack = &file->atracks[track];
-  
-  /* Decode */
 
-  if(atrack->codec->decode_audio_packet)
+  if(atrack->eof)
+    return 0;
+
+  sample_size = lqt_sample_format_bytes(atrack->sample_format);
+    
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+    atrack->codec->decode_audio_packet(file, track, NULL);
+
+    
+  /* Find converter function */
+
+  switch(atrack->sample_format)
     {
-    int i;
-    int samples_read = 0;
-    int samples_to_copy;
-    uint8_t * src;
-    void (*convert)(void*, void*, int, int);
-    int sample_size;
-
-    if(atrack->eof)
-      return 0;
-
-    sample_size = lqt_sample_format_bytes(atrack->sample_format);
+    case LQT_SAMPLE_INT8:
+      if(output_i)
+        convert = dec_int8_to_int16;
+      else if(output_f)
+        convert = dec_int8_to_float;
+      break;
+    case LQT_SAMPLE_UINT8:
+      if(output_i)
+        convert = dec_uint8_to_int16;
+      else if(output_f)
+        convert = dec_uint8_to_float;
+      break;
+    case LQT_SAMPLE_INT16:
+      if(output_i)
+        convert = dec_int16_to_int16;
+      else if(output_f)
+        convert = dec_int16_to_float;
+      break;
+    case LQT_SAMPLE_INT32:
+      if(output_i)
+        convert = dec_int32_to_int16;
+      else if(output_f)
+        convert = dec_int32_to_float;
+      break;
+    case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
+      if(output_i)
+        convert = dec_float_to_int16;
+      else if(output_f)
+        convert = dec_float_to_float;
+      break;
+    case LQT_SAMPLE_DOUBLE: /* Float is ALWAYS machine native */
+      if(output_i)
+        convert = dec_double_to_int16;
+      else if(output_f)
+        convert = dec_double_to_float;
+      break;
+    case LQT_SAMPLE_UNDEFINED:
+      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
+      break;
+    }
     
-    if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
-      atrack->codec->decode_audio_packet(file, track, NULL);
-
-    
-    /* Find converter function */
-
-    switch(atrack->sample_format)
+  while(samples_read < samples)
+    {
+    if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
       {
-      case LQT_SAMPLE_INT8:
-        if(output_i)
-          convert = dec_int8_to_int16;
-        else if(output_f)
-          convert = dec_int8_to_float;
-        break;
-      case LQT_SAMPLE_UINT8:
-        if(output_i)
-          convert = dec_uint8_to_int16;
-        else if(output_f)
-          convert = dec_uint8_to_float;
-        break;
-      case LQT_SAMPLE_INT16:
-        if(output_i)
-          convert = dec_int16_to_int16;
-        else if(output_f)
-          convert = dec_int16_to_float;
-        break;
-      case LQT_SAMPLE_INT32:
-        if(output_i)
-          convert = dec_int32_to_int16;
-        else if(output_f)
-          convert = dec_int32_to_float;
-        break;
-      case LQT_SAMPLE_FLOAT: /* Float is ALWAYS machine native */
-        if(output_i)
-          convert = dec_float_to_int16;
-        else if(output_f)
-          convert = dec_float_to_float;
-        break;
-      case LQT_SAMPLE_DOUBLE: /* Float is ALWAYS machine native */
-        if(output_i)
-          convert = dec_double_to_int16;
-        else if(output_f)
-          convert = dec_double_to_float;
-        break;
-      case LQT_SAMPLE_UNDEFINED:
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Cannot decode samples: Stream format undefined");
+      atrack->buf.pos = 0;
+      result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
+      if(!result)
         break;
       }
-    
-    while(samples_read < samples)
+
+    samples_to_copy = samples - samples_read;
+
+    if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
+      samples_to_copy = atrack->buf.size - atrack->buf.pos;
+
+    if(atrack->planar)
       {
-      if(!atrack->buf.size || (atrack->buf.pos >= atrack->buf.size))
+      for(i = 0; i < atrack->channels; i++)
         {
-        atrack->buf.pos = 0;
-        result = atrack->codec->decode_audio_packet(file, track, &atrack->buf);
-        if(!result)
-          break;
+        src = atrack->buf.channels[i].u_8 + sample_size * atrack->buf.pos;
+        if(output_i)
+          convert(src, output_i[i] + samples_read, samples_to_copy, 1);
+        else if(output_f)
+          convert(src, output_f[i] + samples_read, samples_to_copy, 1);
         }
-
-      samples_to_copy = samples - samples_read;
-
-      if(samples_to_copy > atrack->buf.size - atrack->buf.pos)
-        samples_to_copy = atrack->buf.size - atrack->buf.pos;
-
-      if(atrack->planar)
+      }
+    else
+      {
+      for(i = 0; i < atrack->channels; i++)
         {
-        for(i = 0; i < atrack->channels; i++)
-          {
-          src = atrack->buf.channels[i].u_8 + sample_size * atrack->buf.pos;
-          if(output_i)
-            convert(src, output_i[i] + samples_read, samples_to_copy, 1);
-          else if(output_f)
-            convert(src, output_f[i] + samples_read, samples_to_copy, 1);
-          }
-        }
-      else
-        {
-        for(i = 0; i < atrack->channels; i++)
-          {
-          src = atrack->buf.channels[0].u_8 + sample_size * (atrack->buf.pos * atrack->channels);
+        src = atrack->buf.channels[0].u_8 + sample_size * (atrack->buf.pos * atrack->channels);
           
-          if(output_i && output_i[i])
-            convert(src, output_i[i] + samples_read, samples_to_copy, atrack->channels);
-          else if(output_f && output_f[i])
-            convert(src, output_f[i] + samples_read, samples_to_copy, atrack->channels);
-          }
+        if(output_i && output_i[i])
+          convert(src, output_i[i] + samples_read, samples_to_copy, atrack->channels);
+        else if(output_f && output_f[i])
+          convert(src, output_f[i] + samples_read, samples_to_copy, atrack->channels);
         }
-      atrack->buf.pos += samples_to_copy;
-      samples_read += samples_to_copy;
       }
-
-    if(samples_read < samples)
-      atrack->eof = 1;
-    atrack->current_position += samples_read;
-    return samples_read;
+    atrack->buf.pos += samples_to_copy;
+    samples_read += samples_to_copy;
     }
-  else
-    {
-    if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
-      atrack->codec->decode_audio(file, (void*)0, 0, track);
-  
-    /* (Re)allocate sample buffer */
 
-    if(atrack->sample_buffer_alloc < samples)
-      {
-      atrack->sample_buffer_alloc = samples + 1024;
-      atrack->sample_buffer = realloc(atrack->sample_buffer,
-                                      atrack->sample_buffer_alloc *
-                                      atrack->channels *
-                                      lqt_sample_format_bytes(atrack->sample_format));
-      }
-
-    result = atrack->codec->decode_audio(file, atrack->sample_buffer, 
-                                         samples,
-                                         track);
-  
-    /* Convert */
-    lqt_convert_audio_decode(file, atrack->sample_buffer, output_i, output_f,
-                             atrack->channels, samples,
-                             atrack->sample_format);
-    }
-  
-  return result;
+  if(samples_read < samples)
+    atrack->eof = 1;
+  atrack->current_position += samples_read;
+  return samples_read;
   }
 
 int quicktime_decode_audio(quicktime_t *file, 
@@ -1397,12 +1080,7 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
       atrack->codec->encode_audio(file, (void*)0, 0, track);
       }
     else
-      {
-      if(atrack->codec->decode_audio_packet)
-        atrack->codec->decode_audio_packet(file, track, NULL);
-      else
-        atrack->codec->decode_audio(file, (void*)0, 0, track);
-      }
+      atrack->codec->decode_audio_packet(file, track, NULL);
     }
   
   return atrack->sample_format;
@@ -1510,7 +1188,6 @@ int lqt_audio_is_vbr(quicktime_t * file, int track)
   }
 
 
-
 /* Get the index of the VBR packet (== sample) containing a specified
    uncompressed sample */
 
@@ -1604,6 +1281,7 @@ int lqt_chunk_of_sample_vbr(int64_t *chunk_sample,
 
 /* Determine the number of VBR packets (=samples) in one chunk */
 
+#if 0
 int lqt_audio_num_vbr_packets(quicktime_t * file,
                               int track, long chunk, int * samples)
   {
@@ -1709,6 +1387,8 @@ int lqt_audio_read_vbr_packet(quicktime_t * file, int track, long chunk, int pac
   quicktime_read_data(file, *buffer, packet_size);
   return packet_size;
   }
+#endif
+
 
 long quicktime_audio_length(quicktime_t *file, int track)
   {

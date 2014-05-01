@@ -57,7 +57,6 @@ LQT_EXTERN int lqt_sample_format_bytes(lqt_sample_format_t format);
 LQT_EXTERN void lqt_audio_buffer_alloc(lqt_audio_buffer_t * buf, int num_samples, int num_channels, int planar,
                             lqt_sample_format_t fmt);
 
-
 /* avi_avih.c */
 
 void quicktime_read_avih(quicktime_t *file,

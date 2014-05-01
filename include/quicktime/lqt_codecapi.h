@@ -176,26 +176,13 @@ lqt_create_codec_info(const lqt_codec_info_static_t * template);
 /* An extremely useful function for audio decoders */
 
 /*
- *  It copies the smaller one of src_size and dst_size
- *  from src_pos in the source to dst_pos in the destination
- *  either src_i or src_f can be NULL. Same for dst_i and 
- *  dst_f. But here, you can also set individual channels to NULL.
- */
-
-#if 0
-int lqt_copy_audio(int16_t ** dst_i, float ** dst_f,
-                   int16_t ** src_i, float ** src_f,
-                   int dst_pos, int src_pos,
-                   int dst_size, int src_size, int num_channels);
-#endif
-
-/*
  *  Read one audio chunk
  *  buffer will be realloced if too small and buffer_alloc will be the
  *  new allocated size. Return value is the number of valid bytes,
  *  which might be smaller than buffer_alloc.
  */
 
+#if 0
 int lqt_read_audio_chunk(quicktime_t * file, int track,
                          long chunk,
                          uint8_t ** buffer, int * buffer_alloc, int * samples);
@@ -203,24 +190,10 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
                            long chunk,
                            uint8_t ** buffer, int * buffer_alloc,
                            int initial_bytes);
+#endif
 
-
-
-/*
- *  Read VBR audio packets
- */
-
-/* Check if VBR reading should be enabled */
 int lqt_audio_is_vbr(quicktime_t * file, int track);
 
-/* Determine the number of VBR packets (=samples) in one chunk */
-LQT_EXTERN int lqt_audio_num_vbr_packets(quicktime_t * file, int track, long chunk, int * samples);
-
-/* Read one VBR packet */
-int lqt_audio_read_vbr_packet(quicktime_t * file,
-                              int track, long chunk, int packet,
-                              uint8_t ** buffer, int * buffer_alloc,
-                              int * samples);
 
 #ifdef __GNUC__
 #pragma GCC visibility pop

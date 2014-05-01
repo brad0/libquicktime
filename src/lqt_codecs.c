@@ -57,13 +57,11 @@ static int quicktime_encode_video_stub(quicktime_t *file,
   return 1;
   }
 
-static int quicktime_decode_audio_stub(quicktime_t *file, 
-                                       void * output,
-                                       long samples,
-                                       int track)
+static int quicktime_decode_audio_packet_stub(quicktime_t *file, 
+                                              int track, lqt_audio_buffer_t * buf)
   {
   lqt_log(file, LQT_LOG_WARNING, LOG_DOMAIN,
-          "quicktime_decode_audio_stub called");
+          "quicktime_decode_audio_packet_stub called");
   return 0;
   }
 
@@ -99,8 +97,8 @@ quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
   codec->delete_codec = quicktime_delete_codec_stub;
   codec->decode_video = quicktime_decode_video_stub;
   codec->encode_video = quicktime_encode_video_stub;
-  codec->decode_audio = quicktime_decode_audio_stub;
   codec->encode_audio = quicktime_encode_audio_stub;
+  codec->decode_audio_packet = quicktime_decode_audio_packet_stub;
   codec->flush = quicktime_flush_codec_stub;
   
   if(!info)

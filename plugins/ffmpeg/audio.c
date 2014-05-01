@@ -94,6 +94,9 @@ static int mpa_header_check(uint32_t head);
 static int mpa_header_equal(const mpa_header * h1, const mpa_header * h2);
 static int mpa_decode_header(mpa_header * h, uint8_t * ptr,  const mpa_header * ref);
 
+static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track);
+
+
 /* AC3 header */
 
 typedef struct
@@ -116,6 +119,9 @@ typedef struct
 
 #define A52_FRAME_SAMPLES 1536
 static int a52_header_read(a52_header * ret, uint8_t * buf);
+
+static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track);
+
 
 /* Codec */
 
@@ -200,308 +206,6 @@ static int set_parameter(quicktime_t *file,
   return 0;
   }
 
-
-/* Decode VBR chunk into the sample buffer */
-
-static int decode_chunk_vbr(quicktime_t * file, int track)
-  {
-  int chunk_packets, i, num_samples, bytes_decoded;
-  int packet_size, packet_samples;
-  int frame_bytes;
-  int new_samples;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
-
-  int got_frame;
-  
-  chunk_packets = lqt_audio_num_vbr_packets(file, track, track_map->cur_chunk, &num_samples);
-
-  if(!chunk_packets)
-    return 0;
-
-  new_samples = num_samples + AVCODEC_MAX_AUDIO_FRAME_SIZE / (2 * track_map->channels);
-  
-  if(codec->sample_buffer_alloc <
-     codec->sample_buffer_end - codec->sample_buffer_start + new_samples)
-    {
-    
-    codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + new_samples;
-    codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_alloc *
-                                   track_map->channels);
-    }
-
-  for(i = 0; i < chunk_packets; i++)
-    {
-    packet_size = lqt_audio_read_vbr_packet(file, track, track_map->cur_chunk, i,
-                                            &codec->chunk_buffer, &codec->chunk_buffer_alloc,
-                                            &packet_samples);
-    if(!packet_size)
-      return 0;
-
-    bytes_decoded = codec->sample_buffer_alloc -
-      (codec->sample_buffer_end - codec->sample_buffer_start);
-    bytes_decoded *= 2 * track_map->channels;
-
-    codec->pkt.data = codec->chunk_buffer;
-    codec->pkt.size = packet_size + FF_INPUT_BUFFER_PADDING_SIZE;
-
-    frame_bytes = avcodec_decode_audio4(codec->avctx, codec->f,
-                                        &got_frame, &codec->pkt);
-    if(frame_bytes < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio4 error");
-      break;
-      }
-    bytes_decoded = codec->f->nb_samples * 2 * track_map->channels;
-    memcpy(&codec->sample_buffer[track_map->channels *
-                                 (codec->sample_buffer_end -
-                                  codec->sample_buffer_start)],
-           codec->f->extended_data[0],
-           bytes_decoded);
-    
-    codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
-    }
-  track_map->cur_chunk++;
-  return num_samples;
-  }
-
-/* Decode the current chunk into the sample buffer */
-
-static int decode_chunk(quicktime_t * file, int track)
-  {
-  mpa_header mph;
-    
-  int frame_bytes;
-  int num_samples;
-  int new_samples;
-  int samples_decoded = 0;
-  int bytes_decoded;
-  int bytes_used, bytes_skipped;
-  int64_t chunk_size;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
-
-  int got_frame;
-  
-  /* Read chunk */
-  
-  chunk_size = lqt_append_audio_chunk(file,
-                                      track, track_map->cur_chunk,
-                                      &codec->chunk_buffer,
-                                      &codec->chunk_buffer_alloc,
-                                      codec->bytes_in_chunk_buffer);
-
-  
-  if(!chunk_size)
-    {
-    /* If the codec is mp3, make sure to decode the very last frame */
-
-    if((codec->avctx->codec_id == CODEC_ID_MP3) &&
-       (codec->bytes_in_chunk_buffer >= 4))
-      {
-      if(!mpa_decode_header(&mph, codec->chunk_buffer, (const mpa_header*)0))
-        {
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Decode header failed");
-        return 0;
-        }
-      if(mph.frame_bytes <= codec->bytes_in_chunk_buffer)
-        {
-        lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "Huh, frame not decoded?");
-        return 0;
-        }
-
-      if(codec->chunk_buffer_alloc < mph.frame_bytes + FF_INPUT_BUFFER_PADDING_SIZE)
-        {
-        codec->chunk_buffer_alloc = mph.frame_bytes + FF_INPUT_BUFFER_PADDING_SIZE;
-        codec->chunk_buffer = realloc(codec->chunk_buffer, codec->chunk_buffer_alloc);
-        }
-      memset(codec->chunk_buffer + codec->bytes_in_chunk_buffer, 0,
-             mph.frame_bytes - codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE);
-      num_samples = mph.samples_per_frame;
-      codec->bytes_in_chunk_buffer = mph.frame_bytes;
-      }
-    else
-      return 0;
-    }
-  else
-    {
-    num_samples = quicktime_chunk_samples(track_map->track, track_map->cur_chunk);
-    track_map->cur_chunk++;
-    codec->bytes_in_chunk_buffer += chunk_size;
-    }
-  
-
-  if(!num_samples)
-    {
-    return 0;
-    }
-  /*
-   *  For AVIs, chunk samples are not always 100% correct.
-   *  Furthermore, there can be a complete mp3 frame from the last chunk!
-   */
-
-  num_samples += 8192;
-  new_samples = num_samples + AVCODEC_MAX_AUDIO_FRAME_SIZE / (2 * track_map->channels);
-  
-  /* Reallocate sample buffer */
-  
-  if(codec->sample_buffer_alloc < codec->sample_buffer_end - codec->sample_buffer_start + new_samples)
-    {
-    
-    codec->sample_buffer_alloc = codec->sample_buffer_end - codec->sample_buffer_start + new_samples;
-    codec->sample_buffer = realloc(codec->sample_buffer, 2 * codec->sample_buffer_alloc *
-                                   track_map->channels);
-    }
-  
-  /* Decode this */
-
-  bytes_used = 0;
-  while(1)
-    {
-
-        
-    /* BIG NOTE: We pass extra FF_INPUT_BUFFER_PADDING_SIZE for the buffer size
-       because we know, that lqt_read_audio_chunk allocates 16 extra bytes for us */
-    
-    /* Some really broken mp3 files have the header bytes split across 2 chunks */
-
-    if(codec->avctx->codec_id == CODEC_ID_MP3)
-      {
-      if(codec->bytes_in_chunk_buffer < 4)
-        {
-        
-        if(codec->bytes_in_chunk_buffer > 0)
-          memmove(codec->chunk_buffer,
-                  codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
-        return 1;
-        }
-
-      bytes_skipped = 0;
-      while(1)
-        {
-        if(!codec->have_mpa_header)
-          {
-          if(mpa_decode_header(&mph, &codec->chunk_buffer[bytes_used], NULL))
-            {
-            memcpy(&codec->mph, &mph, sizeof(mph));
-            codec->have_mpa_header = 1;
-            break;
-            }
-          }
-        else if(mpa_decode_header(&mph, &codec->chunk_buffer[bytes_used], &codec->mph))
-          break;
-        
-        bytes_used++;
-        codec->bytes_in_chunk_buffer--;
-        bytes_skipped++;
-        if(codec->bytes_in_chunk_buffer <= 4)
-          {
-
-          if(codec->bytes_in_chunk_buffer > 0)
-            memmove(codec->chunk_buffer,
-                    codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
-          return 1;
-          }
-        }
-      if(codec->bytes_in_chunk_buffer < mph.frame_bytes)
-        {
-        
-        if(codec->bytes_in_chunk_buffer > 0)
-          memmove(codec->chunk_buffer,
-                  codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
-        return 1;
-        }
-      }
-
-    /*
-     *  decode an audio frame. return -1 if error, otherwise return the
-     *  number of bytes used. If no frame could be decompressed,
-     *  frame_size_ptr is zero. Otherwise, it is the decompressed frame
-     *  size in BYTES.
-     */
-
-    bytes_decoded = codec->sample_buffer_alloc -
-      (codec->sample_buffer_end - codec->sample_buffer_start);
-    bytes_decoded *= 2 * track_map->channels;
-
-    codec->pkt.data = &codec->chunk_buffer[bytes_used];
-    codec->pkt.size = codec->bytes_in_chunk_buffer + FF_INPUT_BUFFER_PADDING_SIZE;
-
-    
-    frame_bytes = avcodec_decode_audio4(codec->avctx, codec->f,
-                                        &got_frame, &codec->pkt);
-    if(frame_bytes < 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_decode_audio4 error");
-      break;
-      }
-    bytes_decoded = codec->f->nb_samples * 2 * track_map->channels;
-    memcpy(&codec->sample_buffer[track_map->channels *
-                                 (codec->sample_buffer_end -
-                                  codec->sample_buffer_start)],
-           codec->f->extended_data[0],
-           bytes_decoded);
-    
-    bytes_used                   += frame_bytes;
-    codec->bytes_in_chunk_buffer -= frame_bytes;
-    
-    if(bytes_decoded < 0)
-      {
-      if(codec->avctx->codec_id == CODEC_ID_MP3)
-        {
-        /* For mp3, bytes_decoded < 0 means, that the frame should be muted */
-        memset(&codec->sample_buffer[track_map->channels * (codec->sample_buffer_end -
-                                                            codec->sample_buffer_start)],
-               0, 2 * mph.samples_per_frame * track_map->channels);
-        
-        codec->sample_buffer_end += mph.samples_per_frame * track_map->channels;
-
-        if(codec->bytes_in_chunk_buffer < 0)
-          codec->bytes_in_chunk_buffer = 0;
-
-        if(!codec->bytes_in_chunk_buffer)
-          break;
-
-        continue;
-        }
-      else
-        {
-        /* Incomplete frame, save the data for later use and exit here */
-        if(codec->bytes_in_chunk_buffer > 0)
-          memmove(codec->chunk_buffer,
-                  codec->chunk_buffer + bytes_used, codec->bytes_in_chunk_buffer);
-        return 1;
-        }
-      }
-    
-    /* This happens because ffmpeg adds FF_INPUT_BUFFER_PADDING_SIZE to the bytes returned */
-    
-    if(codec->bytes_in_chunk_buffer < 0)
-      codec->bytes_in_chunk_buffer = 0;
-
-    if(bytes_decoded < 0)
-      {
-      if(codec->bytes_in_chunk_buffer > 0)
-        codec->bytes_in_chunk_buffer = 0;
-      break;
-      }
-    
-    samples_decoded += (bytes_decoded / (track_map->channels * 2));
-    codec->sample_buffer_end += (bytes_decoded / (track_map->channels * 2));
-
-    if((int)(codec->sample_buffer_end - codec->sample_buffer_start) > codec->sample_buffer_alloc)
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "BUUUUG, buffer overflow, %d %d",
-              (int)(codec->sample_buffer_end - codec->sample_buffer_start),
-              codec->sample_buffer_alloc);
-    
-    if(!codec->bytes_in_chunk_buffer)
-      break;
-
-    }
-  //  track_map->current_chunk++;
-  return samples_decoded;
-  }
-
 static void init_compression_info(quicktime_t *file, int track)
   {
   quicktime_audio_map_t *track_map = &file->atracks[track];
@@ -509,255 +213,9 @@ static void init_compression_info(quicktime_t *file, int track)
 
   if((codec->decoder->id == CODEC_ID_MP2) ||
      (codec->decoder->id == CODEC_ID_MP3))
-    {
-    mpa_header h;
-    uint32_t header;
-    uint8_t * ptr;
-    int chunk_size;
-    
-    chunk_size = lqt_append_audio_chunk(file,
-                                        track, track_map->cur_chunk,
-                                        &codec->chunk_buffer,
-                                        &codec->chunk_buffer_alloc,
-                                        codec->bytes_in_chunk_buffer);
-
-    if(chunk_size + codec->bytes_in_chunk_buffer < 4)
-      return;
-
-    ptr = codec->chunk_buffer;
-    while(1)
-      {
-      header =
-        ptr[3] | (ptr[2] << 8) | (ptr[1] << 16) | (ptr[0] << 24);
-      if(mpa_header_check(header))
-        break;
-
-      ptr++;
-      if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 4)
-        return;
-      }
-    
-    if(!mpa_decode_header(&h, ptr, NULL))
-      return;
-
-    if(h.layer == 2)
-      track_map->ci.id = LQT_COMPRESSION_MP2;
-    else if(h.layer == 3)
-      track_map->ci.id = LQT_COMPRESSION_MP3;
-    
-    if(lqt_audio_is_vbr(file, track))
-      track_map->ci.bitrate = -1;
-    else
-      track_map->ci.bitrate = h.bitrate;
-    }
+    read_packet_mpa(file, NULL, track);
   else if(codec->decoder->id == CODEC_ID_AC3)
-    {
-    a52_header h;
-    uint8_t * ptr;
-    int chunk_size;
-
-    chunk_size = lqt_append_audio_chunk(file,
-                                        track, track_map->cur_chunk,
-                                        &codec->chunk_buffer,
-                                        &codec->chunk_buffer_alloc,
-                                        codec->bytes_in_chunk_buffer);
-
-    if(chunk_size + codec->bytes_in_chunk_buffer < 8)
-      return;
-    
-    ptr = codec->chunk_buffer;
-    while(1)
-      {
-      if(a52_header_read(&h, ptr))
-        break;
-      
-      ptr++;
-      if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 8)
-        return;
-      }
-    
-    track_map->ci.bitrate = h.bitrate;
-    track_map->ci.id = LQT_COMPRESSION_AC3;
-    }
-  }
-
-static int lqt_ffmpeg_decode_audio(quicktime_t *file, void * output, long samples, int track)
-  {
-  uint8_t * header;
-  uint32_t header_len;
-  
-  int samples_decoded;
-  //  int result = 0;
-  int64_t chunk_sample; /* For seeking only */
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
-  int channels = file->atracks[track].channels;
-  //  int64_t total_samples;
-
-  int samples_to_skip;
-  int samples_to_move;
-  
-  if(!output) /* Global initialization */
-    {
-    init_compression_info(file, track);
-    return 0;
-    }
-  
-  /* Initialize codec */
-  if(!codec->initialized)
-    {
-    /* Set some mandatory variables */
-    codec->avctx->channels        = quicktime_track_channels(file, track);
-    codec->avctx->sample_rate     = quicktime_sample_rate(file, track);
-
-    if(track_map->track->mdia.minf.stbl.stsd.table[0].version == 1)
-      {
-      if(track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame)
-        codec->avctx->block_align =
-          track_map->track->mdia.minf.stbl.stsd.table[0].audio_bytes_per_frame;
-      }
-    
-    //  priv->ctx->block_align     = s->data.audio.block_align;
-    //  priv->ctx->bit_rate        = s->codec_bitrate;
-    codec->avctx->bits_per_coded_sample = quicktime_audio_bits(file, track);
-    /* Some codecs need extra stuff */
-
-    if(codec->decoder->id == CODEC_ID_ALAC)
-      {
-      header = quicktime_wave_get_user_atom(track_map->track, "alac", &header_len);
-      if(header)
-        {
-        codec->avctx->extradata = header;
-        codec->avctx->extradata_size = header_len;
-        }
-      }
-    if(codec->decoder->id == CODEC_ID_QDM2)
-      {
-      header = quicktime_wave_get_user_atom(track_map->track, "QDCA", &header_len);
-      if(header)
-        {
-        codec->extradata = malloc(header_len + 12);
-        /* frma atom */
-        codec->extradata[0] = 0x00;
-        codec->extradata[1] = 0x00;
-        codec->extradata[2] = 0x00;
-        codec->extradata[3] = 0x0C;
-        memcpy(codec->extradata + 4, "frmaQDM2", 8);
-        /* QDCA atom */
-        memcpy(codec->extradata + 12, header, header_len);
-        codec->avctx->extradata = codec->extradata;
-        codec->avctx->extradata_size = header_len + 12;
-        }
-
-      }
-    
-    //    memcpy(&codec->com.ffcodec_enc, &codec->com.params, sizeof(AVCodecContext));
-   
-    codec->avctx->codec_id = codec->decoder->id;
-    codec->avctx->codec_type = codec->decoder->type;
-
-    if(avcodec_open2(codec->avctx, codec->decoder, NULL) != 0)
-      {
-      lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "avcodec_open2 failed");
-      return 0;
-      }
-    //    codec->sample_buffer_offset = 0;
-    codec->initialized = 1;
-    }
-
-  /* Check if we have to reposition the stream */
-  
-  if(track_map->last_position != track_map->current_position)
-    {
-
-    if((track_map->current_position < codec->sample_buffer_start) || 
-       (track_map->current_position + samples >= codec->sample_buffer_end))
-      {
-      if(lqt_audio_is_vbr(file, track))
-        lqt_chunk_of_sample_vbr(&chunk_sample,
-                                &track_map->cur_chunk,
-                                track_map->track,
-                                track_map->current_position);
-      else
-        quicktime_chunk_of_sample(&chunk_sample,
-                                  &track_map->cur_chunk,
-                                  track_map->track,
-                                  track_map->current_position);
-      codec->sample_buffer_start = chunk_sample;
-      codec->sample_buffer_end   = chunk_sample;
-      codec->bytes_in_chunk_buffer = 0;
-
-      if(lqt_audio_is_vbr(file, track))
-        decode_chunk_vbr(file, track);
-      else
-        decode_chunk(file, track);
-      }
-    }
-  
-  /* Flush unneeded samples */
-  samples_to_skip = 0;
-  if(track_map->current_position > codec->sample_buffer_start)
-    {
-    samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-    if(samples_to_skip > (int)(codec->sample_buffer_end - codec->sample_buffer_start))
-      samples_to_skip = (int)(codec->sample_buffer_end - codec->sample_buffer_start);
-    
-    if(codec->sample_buffer_end > track_map->current_position)
-      {
-      samples_to_move = codec->sample_buffer_end - track_map->current_position;
-
-      memmove(codec->sample_buffer,
-              &codec->sample_buffer[samples_to_skip * channels],
-              samples_to_move * channels * sizeof(int16_t));
-      }
-    codec->sample_buffer_start += samples_to_skip;
-    
-
-    }
-  samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-  
-  /* Read new chunks until we have enough samples */
-  while(codec->sample_buffer_end - codec->sample_buffer_start < samples + samples_to_skip)
-    {
-    
-    //    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
-    //      return 0;
-
-    if(lqt_audio_is_vbr(file, track))
-      {
-      if(!decode_chunk_vbr(file, track))
-        break;
-      }
-    else
-      {
-      if(!decode_chunk(file, track))
-        break;
-      }
-    }
-  samples_decoded = codec->sample_buffer_end - codec->sample_buffer_start - samples_to_skip;
-
-  
-  if(samples_decoded <= 0)
-    {
-    track_map->last_position = track_map->current_position;
-    return 0;
-    }
-  if(samples_decoded > samples)
-    samples_decoded = samples;
-  
-  /* Deinterleave into the buffer */
-  
-  
-  //  deinterleave(output_i, output_f, codec->sample_buffer + (track_map->channels * samples_to_skip),
-  //               channels, samples_decoded);
-
-  memcpy(output, codec->sample_buffer + (channels * samples_to_skip),
-         channels * samples_decoded * 2);
-  
-  track_map->last_position = track_map->current_position + samples_decoded;
-
-  return samples_decoded;
-  // #endif
+    read_packet_ac3(file, NULL, track);
   }
 
 static struct
@@ -1187,70 +645,6 @@ static int lqt_ffmpeg_encode_audio(quicktime_t *file, void * input,
   return result;
   }
 
-#if 0
-static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
-  {
-  mpa_header h;
-  uint8_t * ptr;
-  uint32_t header;
-  int chunk_size;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
-  
-  if(codec->bytes_in_chunk_buffer < 4)
-    {
-    chunk_size = lqt_append_audio_chunk(file,
-                                        track, track_map->cur_chunk,
-                                        &codec->chunk_buffer,
-                                        &codec->chunk_buffer_alloc,
-                                        codec->bytes_in_chunk_buffer);
-
-    //fprintf(stderr, "Got chunk %ld: %d bytes\n", track_map->cur_chunk, chunk_size);
-    
-    if(chunk_size + codec->bytes_in_chunk_buffer < 4)
-      return 0;
-
-    codec->bytes_in_chunk_buffer += chunk_size;
-    track_map->cur_chunk++;
-    }
-  
-  /* Check for mpa header */
-
-  ptr = codec->chunk_buffer;
-  while(1)
-    {
-    header =
-      ptr[3] | (ptr[2] << 8) | (ptr[1] << 16) | (ptr[0] << 24);
-    if(mpa_header_check(header))
-      break;
-    
-    ptr++;
-
-    if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 4)
-      return 0;
-    }
-
-  if(!mpa_decode_header(&h, ptr, NULL))
-    return 0;
-  
-  lqt_packet_alloc(p, h.frame_bytes);
-  memcpy(p->data, ptr, h.frame_bytes);
-  ptr += h.frame_bytes;
-  
-  codec->bytes_in_chunk_buffer -= (ptr - codec->chunk_buffer);
-
-  if(codec->bytes_in_chunk_buffer)
-    memmove(codec->chunk_buffer, ptr, codec->bytes_in_chunk_buffer);
-
-  p->duration = h.samples_per_frame;
-  p->timestamp = codec->pts;
-  codec->pts += p->duration;
-  p->flags = LQT_PACKET_KEYFRAME;
-  p->data_len = h.frame_bytes;
-  
-  return 1;
-  }
-#else
 
 static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
   {
@@ -1258,13 +652,12 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
   uint32_t header;
   uint8_t * ptr;
 
-  int have_header = 0;
   quicktime_audio_map_t *atrack = &file->atracks[track];
   quicktime_ffmpeg_audio_codec_t *codec = atrack->codec->priv;
 
   /* Read header */
 
-  while(!have_header)
+  while(1)
     {
     while(codec->lqt_pkt_parse.data_len < 4)
       {
@@ -1289,6 +682,24 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
     return 0;
     }
 
+  /* Initialize compression info */
+
+  if(atrack->ci.id == LQT_COMPRESSION_NONE)
+    {
+    if(h.layer == 2)
+      atrack->ci.id = LQT_COMPRESSION_MP2;
+    else if(h.layer == 3)
+      atrack->ci.id = LQT_COMPRESSION_MP3;
+  
+    if(lqt_audio_is_vbr(file, track))
+      atrack->ci.bitrate = -1;
+    else
+      atrack->ci.bitrate = h.bitrate;
+    }
+
+  if(!p)
+    return 0;
+  
   /* Make sure we have enough data */
 
   while(codec->lqt_pkt_parse.data_len < h.frame_bytes)
@@ -1313,7 +724,6 @@ static int read_packet_mpa(quicktime_t * file, lqt_packet_t * p, int track)
   lqt_packet_flush(&codec->lqt_pkt_parse, p->data_len);
   return 1;
   }
-#endif
 
 #if 0
 static int writes_compressed_mp2(lqt_file_type_t type,
@@ -1367,53 +777,56 @@ static int read_packet_ac3(quicktime_t * file, lqt_packet_t * p, int track)
   {
   a52_header h;
   uint8_t * ptr;
-  int chunk_size;
-  quicktime_audio_map_t *track_map = &file->atracks[track];
-  quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
-  
-  if(codec->bytes_in_chunk_buffer < 8)
-    {
-    chunk_size = lqt_append_audio_chunk(file,
-                                        track, track_map->cur_chunk,
-                                        &codec->chunk_buffer,
-                                        &codec->chunk_buffer_alloc,
-                                        codec->bytes_in_chunk_buffer);
 
-    if(chunk_size + codec->bytes_in_chunk_buffer < 8)
-      return 0;
+  quicktime_audio_map_t *atrack = &file->atracks[track];
+  quicktime_ffmpeg_audio_codec_t *codec = atrack->codec->priv;
 
-    codec->bytes_in_chunk_buffer += chunk_size;
-    track_map->cur_chunk++;
-    }
-
-  /* Check for mpa header */
-
-  ptr = codec->chunk_buffer;
   while(1)
     {
+    while(codec->lqt_pkt_parse.data_len < 8)
+      {
+      if(!quicktime_trak_append_packet(file, atrack->track, &codec->lqt_pkt_parse))
+        return 0;
+      }
+
+    ptr = codec->lqt_pkt_parse.data;
+
+    /* Check for ac3 header */
     if(a52_header_read(&h, ptr))
       break;
-      
-    ptr++;
+    
+    lqt_packet_flush(&codec->lqt_pkt_parse, 1);
+    }
 
-    if(ptr - codec->chunk_buffer > codec->bytes_in_chunk_buffer - 8)
+  /* Initialize compression info */
+
+  if(atrack->ci.id == LQT_COMPRESSION_NONE)
+    {
+    atrack->ci.bitrate = h.bitrate;
+    atrack->ci.id = LQT_COMPRESSION_AC3;
+    }
+  
+  if(!p)
+    return 0;
+  
+  /* Make sure we have enough data */
+  while(codec->lqt_pkt_parse.data_len < h.frame_bytes)
+    {
+    if(!quicktime_trak_append_packet(file, atrack->track, &codec->lqt_pkt_parse))
       return 0;
     }
   
   lqt_packet_alloc(p, h.frame_bytes);
   memcpy(p->data, ptr, h.frame_bytes);
-  ptr += h.frame_bytes;
-
-  codec->bytes_in_chunk_buffer -= (ptr - codec->chunk_buffer);
-
-  if(codec->bytes_in_chunk_buffer)
-    memmove(codec->chunk_buffer, ptr, codec->bytes_in_chunk_buffer);
-
+  
   p->data_len = h.frame_bytes;
   p->duration = A52_FRAME_SAMPLES;
   p->timestamp = codec->pts;
   codec->pts += p->duration;
   p->flags = LQT_PACKET_KEYFRAME;
+
+  lqt_packet_flush(&codec->lqt_pkt_parse, h.frame_bytes);
+  
   return 1;
   }
 
@@ -1441,7 +854,6 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
     codec_base->encode_audio = lqt_ffmpeg_encode_audio;
   if(decoder)
     {
-    codec_base->decode_audio = lqt_ffmpeg_decode_audio;
     codec_base->decode_audio_packet = decode_audio_packet_ffmpeg;
     codec_base->resync = resync_ffmpeg;
     }

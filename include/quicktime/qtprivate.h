@@ -1736,12 +1736,13 @@ struct quicktime_codec_s
   int (*encode_video)(quicktime_t *file, 
                       unsigned char **row_pointers, 
                       int track);
+#if 0
   /* API Change: Return value is the number of samples */
   int (*decode_audio)(quicktime_t *file, 
                       void * output,
                       long samples, 
                       int track);
-  
+#endif
   /* NEW decode funcion: Decode *one* packet/chunk in the native
      format and leave the rest for the core */
   int (*decode_audio_packet)(quicktime_t *file,

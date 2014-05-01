@@ -1650,12 +1650,7 @@ void quicktime_init_maps(quicktime_t * file)
       /* Some codecs set the channel setup */
 
       if(file->atracks[i].codec)
-        {
-        if(file->atracks[i].codec->decode_audio_packet)
-          file->atracks[i].codec->decode_audio_packet(file, i, NULL);
-        else
-          file->atracks[i].codec->decode_audio(file, (void*)0, 0, i);
-        }
+        file->atracks[i].codec->decode_audio_packet(file, i, NULL);
       }
     }
 
@@ -2436,6 +2431,7 @@ int64_t * lqt_get_chunk_sizes(quicktime_t * file, quicktime_trak_t *trak)
   return ret;
   }
 
+#if 0
 int lqt_read_audio_chunk(quicktime_t * file, int track,
                          long chunk,
                          uint8_t ** buffer, int * buffer_alloc, int * samples)
@@ -2520,7 +2516,7 @@ int lqt_append_audio_chunk(quicktime_t * file, int track,
   
   return result ? trak->chunk_sizes[chunk] : 0;
   }
-
+#endif
 
 /* Interlace mode */
 
