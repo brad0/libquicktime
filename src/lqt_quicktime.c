@@ -749,8 +749,6 @@ int quicktime_init_audio_map(quicktime_t * file,
                              int encode,
                              lqt_codec_info_t * info)
   {
-  if(!encode)
-    atrack->total_samples = quicktime_track_samples(file, atrack->track);
   atrack->channels = atrack->track->mdia.minf.stbl.stsd.table[0].channels;
   atrack->samplerate = (int)(atrack->track->mdia.minf.stbl.stsd.table[0].samplerate + 0.5);
   atrack->current_position = 0;

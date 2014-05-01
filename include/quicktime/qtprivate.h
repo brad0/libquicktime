@@ -1428,10 +1428,6 @@ typedef struct
   /* VBR stuff */
   int64_t vbr_frame_start;
   
-  /* The total samples are calculated while initializing, but they MIGHT
-     be changed by the faad decoder, in the case resampling happens. */
-  int64_t total_samples;
-
   /* WAV ID: Taken from the codec_info and saved here for writing the AVI header */
   int wav_id;
   

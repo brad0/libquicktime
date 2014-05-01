@@ -959,9 +959,6 @@ int quicktime_set_audio_position(quicktime_t *file, int64_t sample, int track)
   /* Clear EOF */
   atrack->eof = 0;
   
-  if(atrack->ci.flags & LQT_COMPRESSION_SBR)
-    sample /= 2;
-  
   atrack->track->idx_pos = lqt_packet_index_seek(&atrack->track->idx, sample);
   
   if(atrack->preroll)
@@ -1178,8 +1175,6 @@ void lqt_finish_audio_vbr_frame(quicktime_t * file, int track, int num_samples)
   atrack->track->chunk_samples++;
   }
 
-/* VBR Reading support */
-
 /* Check if VBR reading should be enabled */
 
 int lqt_audio_is_vbr(quicktime_t * file, int track)
@@ -1189,9 +1184,11 @@ int lqt_audio_is_vbr(quicktime_t * file, int track)
 
 long quicktime_audio_length(quicktime_t *file, int track)
   {
-  if(file->total_atracks > 0) 
-    return file->atracks[track].total_samples;
-  return 0;
+  long ret;
+  if(track < 0 || track > file->total_atracks)
+    return -1;
+  ret = file->atracks[track].track->idx.max_pts;
+  return ret;
   }
 
 int64_t lqt_last_audio_position(quicktime_t * file, int track)
@@ -1294,3 +1291,25 @@ void lqt_set_audio_io_mode(quicktime_t *file, int track, lqt_track_io_mode_t mod
   if(file->atracks[track].io_mode == mode)
     return;
   }
+
+/* Called by codecs */
+void lqt_audio_set_sbr(quicktime_audio_map_t *atrack)
+  {
+  int i;
+  if(atrack->ci.flags & LQT_COMPRESSION_SBR)
+    return;
+  
+  for(i = 0; i < atrack->track->idx.num_entries; i++)
+    {
+    atrack->track->idx.entries[i].pts *= 2;
+    atrack->track->idx.entries[i].dts *= 2;
+    atrack->track->idx.entries[i].duration *= 2;
+    }
+  atrack->track->idx.min_packet_duration *= 2; // Minimum packet duration
+  atrack->track->idx.max_packet_duration *= 2; // Maximum packet duration
+  atrack->track->idx.max_pts *= 2;
+  atrack->samplerate *= 2;
+  
+  atrack->ci.flags |= LQT_COMPRESSION_SBR;
+  }
+

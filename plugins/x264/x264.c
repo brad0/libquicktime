@@ -451,6 +451,9 @@ static int flush_frame(quicktime_t *file, int track,
   encoded_size = encode_nals(codec->work_buffer,
                              codec->work_buffer_size, nal, nnal);
 
+  if(encoded_size < 0)
+    return 0;
+  
   if(!vtrack->track->strl)
     {
     /* Reformat nals */
@@ -463,8 +466,6 @@ static int flush_frame(quicktime_t *file, int track,
   else
     ptr = codec->work_buffer;
   
-  if(encoded_size < 0)
-    return 0;
 
   if(encoded_size)
     {

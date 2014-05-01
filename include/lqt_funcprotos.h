@@ -57,6 +57,8 @@ LQT_EXTERN int lqt_sample_format_bytes(lqt_sample_format_t format);
 LQT_EXTERN void lqt_audio_buffer_alloc(lqt_audio_buffer_t * buf, int num_samples, int num_channels, int planar,
                             lqt_sample_format_t fmt);
 
+LQT_EXTERN void lqt_audio_set_sbr(quicktime_audio_map_t *atrack);
+
 void lqt_set_audio_io_mode(quicktime_t *file, int track, lqt_track_io_mode_t mode);
 
 /* avi_avih.c */

@@ -265,10 +265,8 @@ static int lqt_ffmpeg_delete_video(quicktime_codec_t *codec_base)
     sws_freeContext(codec->swsContext);
 #endif
 
-#if LIBAVCODEC_VERSION_MAJOR >= 54
   if(codec->options)
     av_dict_free(&codec->options);
-#endif
   
   if(codec->tmp_rows)
     lqt_rows_free(codec->tmp_rows);
@@ -781,12 +779,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     codec->avctx->width           = width;
     codec->avctx->height          = height;
 
-#if LIBAVCODEC_VERSION_INT < ((52<<16)+(0<<8)+0)
-    codec->avctx->bits_per_sample = quicktime_video_depth(file, track);
-#else
     codec->avctx->bits_per_coded_sample = quicktime_video_depth(file, track);
-#endif
-
     /* Set extradata: It's done differently for each codec */
 
     if(codec->decoder->id == CODEC_ID_SVQ3)
@@ -850,46 +843,17 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     /* Add palette info */
     
     ctab = &trak->mdia.minf.stbl.stsd.table->ctab;
-#if LIBAVCODEC_VERSION_MAJOR < 54
-    if(ctab->size)
-      {
-      codec->avctx->palctrl = &codec->palette;
-      codec->palette.palette_changed = 1;
-      imax =
-        (ctab->size > AVPALETTE_COUNT)
-        ? AVPALETTE_COUNT : ctab->size;
-
-      for(i = 0; i < imax; i++)
-        {
-        codec->palette.palette[i] =
-          ((ctab->alpha[i] >> 8) << 24) |
-          ((ctab->red[i] >> 8) << 16) |
-          ((ctab->green[i] >> 8) << 8) |
-          ((ctab->blue[i] >> 8));
-        }
-      }
-#else
     /* Palette will be sent later */
     if(!ctab->size)
       codec->palette_sent = 1;
-#endif
     //    codec->avctx->get_buffer = avcodec_default_get_buffer;
     //    codec->avctx->release_buffer = avcodec_default_release_buffer;
 
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
-
-#if LIBAVCODEC_VERSION_INT < ((52<<16)+(112<<8)+0)
-    avcodec_thread_init(codec->avctx, codec->avctx->thread_count);
-#endif
     
-#if LIBAVCODEC_VERSION_MAJOR < 54
-    if(avcodec_open(codec->avctx, codec->decoder) != 0)
-      return -1;
-#else
     if(avcodec_open2(codec->avctx, codec->decoder, NULL) != 0)
       return -1;
-#endif
     codec->frame = av_frame_alloc();
     vtrack->stream_cmodel = LQT_COLORMODEL_NONE;
     codec->initialized = 1;
@@ -1397,12 +1361,8 @@ static int init_imx_encoder(quicktime_t *file, int track)
   codec->avctx->rc_buffer_aggressivity = 0.25;
   codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_LOW_DELAY;
 
-#if (LIBAVCODEC_VERSION_MAJOR < 54)
-  codec->avctx->flags2 |= CODEC_FLAG2_INTRA_VLC|CODEC_FLAG2_NON_LINEAR_QUANT;
-#else
   av_dict_set(&codec->options, "non_linear_quant", "1", 0);
   av_dict_set(&codec->options, "intra_vlc", "1", 0);
-#endif
   
   codec->avctx->bit_rate = codec->imx_bitrate * 1000000;
   
@@ -1464,12 +1424,8 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
     codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME;
 
-#if (LIBAVCODEC_VERSION_MAJOR < 54)
-  codec->avctx->flags2 |= CODEC_FLAG2_INTRA_VLC|CODEC_FLAG2_NON_LINEAR_QUANT;
-#else
   av_dict_set(&codec->options, "non_linear_quant", "1", 0);
   av_dict_set(&codec->options, "intra_vlc", "1", 0);
-#endif
 
   codec->avctx->bit_rate = 50*1000*1000;
   codec->avctx->rc_max_rate = codec->avctx->bit_rate;
@@ -1817,18 +1773,9 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     codec->avctx->codec_id = codec->decoder->id;
     codec->avctx->codec_type = codec->decoder->type;
 
-#if LIBAVCODEC_VERSION_INT < ((52<<16)+(112<<8)+0)
-    avcodec_thread_init(codec->avctx, codec->avctx->thread_count);
-#endif
-
-#if LIBAVCODEC_VERSION_MAJOR < 54
-    if(avcodec_open(codec->avctx, codec->encoder) != 0)
-      return -1;
-#else
     if(avcodec_open2(codec->avctx, codec->encoder, &codec->options) != 0)
       return -1;
-#endif
-
+    
     lqt_packet_alloc(&codec->lqt_pkt,
                      codec->avctx->width * codec->avctx->height * 4 + 1024*256);
     codec->initialized = 1;
@@ -2072,9 +2019,7 @@ static int set_parameter_video(quicktime_t *file,
     }
   
   lqt_ffmpeg_set_parameter(codec->avctx,
-#if LIBAVCODEC_VERSION_MAJOR >= 54
                            &codec->options,
-#endif
                            key, value);
 
 
@@ -2274,11 +2219,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec = calloc(1, sizeof(*codec));
   if(!codec)
     return;
-#if LIBAVCODEC_VERSION_INT < ((53<<16)|(8<<8)|0)
-  codec->avctx = avcodec_alloc_context();
-#else
   codec->avctx = avcodec_alloc_context3((!vtrack || vtrack->do_encode) ? encoder : decoder);
-#endif
   codec->encoder = encoder;
   codec->decoder = decoder;
 

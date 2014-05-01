@@ -286,13 +286,12 @@ void quicktime_init_codec_faad2(quicktime_codec_t * codec_base,
   lqt_compression_info_set_header(&atrack->ci,
                                   extradata,
                                   extradata_size);
+
   
   if(atrack->samplerate != samplerate)
     {
-    atrack->samplerate = samplerate;
+    lqt_audio_set_sbr(atrack);
     codec->upsample = 1;
-    atrack->total_samples *= 2;
-    atrack->ci.flags |= LQT_COMPRESSION_SBR;
     }
   
   atrack->preroll = 1024;

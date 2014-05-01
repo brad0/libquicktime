@@ -113,8 +113,6 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
     {
     if(!quicktime_trak_read_packet(file, atrack->track, p))
       return 0;
-    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
-      p->duration *= 2;
     }
   return 0;
   }
@@ -125,7 +123,6 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
 
   if(vtrack->codec->read_packet)
     {
-    /* Codec will increment the index position */
     if(!vtrack->codec->read_packet(file, p, track))
       return 0;
     }
