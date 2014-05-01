@@ -1401,3 +1401,93 @@ int64_t lqt_last_audio_position(quicktime_t * file, int track)
   {
   return file->atracks[track].current_position;
   }
+
+int quicktime_audio_tracks(quicktime_t *file)
+  {
+  int i, result = 0;
+  quicktime_minf_t *minf;
+  for(i = 0; i < file->moov.total_tracks; i++)
+    {
+    minf = &file->moov.trak[i]->mdia.minf;
+    if(minf->is_audio)
+      result++;
+    }
+  return result;
+  }
+
+int lqt_set_audio_codec(quicktime_t *file, int track,
+                        lqt_codec_info_t * info)
+  {
+  quicktime_stsd_t * stsd;
+  
+  stsd = &file->atracks[track].track->mdia.minf.stbl.stsd;
+  
+  quicktime_stsd_set_audio_codec(stsd, info->fourccs[0]);
+  
+  quicktime_init_audio_map(file, &file->atracks[track],
+                           file->wr,
+                           info);
+  lqt_set_default_audio_parameters(file, track);
+  return 0;
+  }
+
+int lqt_add_audio_track_internal(quicktime_t *file,
+                                 int channels, long sample_rate, int bits,
+                                 lqt_codec_info_t * codec_info,
+                                 const lqt_compression_info_t * ci)
+  {
+  quicktime_trak_t *trak;
+  char * compressor = codec_info ? codec_info->fourccs[0] : NULL;
+  
+  file->atracks = realloc(file->atracks,
+                          (file->total_atracks+1)*sizeof(*file->atracks));
+
+  memset(&file->atracks[file->total_atracks], 0, sizeof(*file->atracks));
+  
+  if(ci)
+    lqt_compression_info_copy(&file->atracks[file->total_atracks].ci, ci);
+  
+  trak = quicktime_add_track(file);
+  quicktime_trak_init_audio(file, trak, channels,
+                            sample_rate, bits, compressor);
+  file->atracks[file->total_atracks].track = trak;
+  
+  file->total_atracks++;
+  
+  if(codec_info)
+    return lqt_set_audio_codec(file, file->total_atracks-1,
+                               codec_info);
+  return 0;
+  }
+
+int lqt_add_audio_track(quicktime_t *file,
+                        int channels, long sample_rate, int bits,
+                        lqt_codec_info_t * codec_info)
+  {
+  return lqt_add_audio_track_internal(file,
+                                      channels,
+                                      sample_rate,
+                                      bits,
+                                      codec_info, NULL);
+  }
+
+int lqt_set_audio(quicktime_t *file, int channels,
+                  long sample_rate,  int bits,
+                  lqt_codec_info_t * codec_info)
+  {
+  lqt_add_audio_track(file, channels, sample_rate, bits, codec_info);
+  return 0;
+  }
+
+int quicktime_set_audio(quicktime_t *file, 
+                        int channels,
+                        long sample_rate,
+                        int bits,
+                        char *compressor)
+  {
+  lqt_codec_info_t ** info;
+  info = lqt_find_audio_codec(compressor, 1);
+  lqt_set_audio(file, channels, sample_rate, bits, *info);
+  lqt_destroy_codec_info(info);
+  return 1;   /* Return the number of tracks created */
+  }

@@ -116,6 +116,7 @@ tref.c \
 udta.c \
 useratoms.c \
 util.c \
+video.c \
 vmhd.c \
 vrsc.c \
 vrnp.c \
