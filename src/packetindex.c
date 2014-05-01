@@ -281,6 +281,95 @@ packet_index_create_video(quicktime_t *file,
   
   }
 
+
+static void
+packet_index_create_text(quicktime_t *file,
+                         quicktime_trak_t * trak,
+                         lqt_packet_index_t * idx)
+  {
+  int i;
+
+  int stts_index = 0;
+  int stts_count = 0;
+  
+  lqt_packet_index_entry_t e;
+  int stsc_index = 0;
+  int stsc_count = 0;
+  int stsc_chunk = 1;
+
+  
+  quicktime_stts_t *stts = &trak->mdia.minf.stbl.stts;
+  quicktime_stsc_t *stsc = &trak->mdia.minf.stbl.stsc;
+  int num = 0;
+
+  /* Count frames */
+  for(i = 0; i < stts->total_entries; i++)
+    num += stts->table[i].sample_count;
+  
+  memset(&e, 0, sizeof(e));
+  
+  lqt_packet_index_alloc(idx, num);
+
+  e.position = quicktime_chunk_to_offset(file, trak, 0);
+
+  if(trak->mdia.minf.stbl.stsz.sample_size)
+    e.size = trak->mdia.minf.stbl.stsz.sample_size;
+
+  /* Text packets are always keyframes */
+  e.flags = LQT_PACKET_KEYFRAME;
+  
+  for(i = 0; i < num; i++)
+    {
+    /* Duration */
+    e.duration = stts->table[stts_index].sample_duration;;
+
+    /* PTS */
+    e.pts = e.dts;
+    
+    /* Determine size */
+    if(!trak->mdia.minf.stbl.stsz.sample_size)
+      e.size = trak->mdia.minf.stbl.stsz.table[i].size;
+    
+    /* Append entry */
+    lqt_packet_index_append(idx, &e);
+
+    if(i == num - 1)
+      break;
+    
+    /* Advance packet */
+    e.dts += e.duration;
+    e.position += e.size;
+    
+    /* Advance indices */
+
+    /* stts */
+    stts_count++;
+    if(stts_count >= stts->table[stts_index].sample_count)
+      {
+      stts_index++;
+      stts_count = 0;
+      }
+    
+    /* stsc */
+    stsc_count++;
+    if(stsc_count >= stsc->table[stsc_index].samples)
+      {
+      /* Increment chunk */
+      stsc_chunk++;
+      stsc_count = 0;
+
+      /* stsc position */
+      if((stsc_index < stsc->total_entries - 1) &&
+         (stsc_chunk == stsc->table[stsc_index+1].chunk))
+        {
+        stsc_index++;
+        e.stsd_index = stsc->table[stsc_index].id - 1;
+        }
+      e.position = trak->mdia.minf.stbl.stco.table[stsc_chunk-1].offset;
+      }
+    }
+  }
+
 static void
 packet_index_create_audio(quicktime_t *file,
                           quicktime_trak_t * trak,
@@ -423,6 +512,8 @@ lqt_packet_index_create_from_trak(quicktime_t *file,
     }
   else if(trak->mdia.minf.is_video)
     packet_index_create_video(file, trak, idx);
+  else if(trak->mdia.minf.is_text)
+    packet_index_create_text(file, trak, idx);
   }
 
 int lqt_packet_index_peek_packet(quicktime_t *file,

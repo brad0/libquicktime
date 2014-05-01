@@ -307,13 +307,9 @@ int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
   int64_t total = 0;
   
   if(trak->mdia.minf.is_audio)
-    {
-    for(i = 0; i < stts->total_entries; i++)
-      {
-      total += stts->table[i].sample_count *
-        stts->table[i].sample_duration;
-      }
-    }
+    return trak->idx.max_pts;
+  else if(trak->mdia.minf.is_video)
+    return trak->idx.num_entries;
   else
     {
     for(i = 0; i < stts->total_entries; i++)
@@ -357,72 +353,6 @@ long quicktime_sample_of_chunk(quicktime_trak_t *trak, long chunk)
   return total;
   }
 
-// For AVI
-int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak)
-  {
-  int chunk = trak->mdia.minf.stbl.stco.total_entries - 1;
-  long total_samples;
-
-  if(chunk >= 0)
-    {
-    total_samples = quicktime_sample_of_chunk(trak, chunk);
-    return total_samples / (chunk + 1);
-    }
-  else
-    {
-    total_samples = quicktime_track_samples(file, trak);
-    return total_samples;
-    }
-  }
-
-int quicktime_chunk_of_sample(int64_t *chunk_sample, 
-                              int64_t *chunk, 
-                              quicktime_trak_t *trak, 
-                              int64_t sample)
-  {
-  quicktime_stsc_table_t *table = trak->mdia.minf.stbl.stsc.table;
-  long total_entries = trak->mdia.minf.stbl.stsc.total_entries;
-  long chunk2entry;
-  long chunk1, chunk2, chunk1samples, range_samples, total = 0;
-  
-  chunk1 = 0;
-  chunk1samples = 0;
-  chunk2entry = 0;
-  
-  if(!total_entries)
-    {
-    *chunk_sample = 0;
-    *chunk = 0;
-    return 0;
-    }
-
-  do
-    {
-    chunk2 = table[chunk2entry].chunk-1;
-    *chunk = chunk2 - chunk1;
-    range_samples = *chunk * chunk1samples;
-
-    if(sample < total + range_samples) break;
-
-    chunk1samples = table[chunk2entry].samples;
-    chunk1 = chunk2;
-
-    if(chunk2entry < total_entries)
-      {
-      chunk2entry++;
-      total += range_samples;
-      }
-    }while(chunk2entry < total_entries);
-
-  if(chunk1samples)
-    *chunk = (sample - total) / chunk1samples + chunk1;
-  else
-    *chunk = 0;
-
-  *chunk_sample = total + (*chunk - chunk1) * chunk1samples;
-  return 0;
-  }
-
 int64_t quicktime_chunk_to_offset(quicktime_t *file,
                                   quicktime_trak_t *trak, long chunk)
   {
@@ -439,49 +369,6 @@ int64_t quicktime_chunk_to_offset(quicktime_t *file,
       result = HEADER_LENGTH * 2;
 
   return result;
-  }
-
-
-int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
-                                    long chunk_sample, 
-                                    long sample)
-  {
-
-  int64_t i, total;
-  /* LQT: For audio, quicktime_sample_rage_size makes no sense */
-  if(trak->mdia.minf.is_audio)
-    return 0;
-  else
-    {
-    /* All frames have the same size */
-    if(trak->mdia.minf.stbl.stsz.sample_size)
-      {
-      total = (sample - chunk_sample) *
-        trak->mdia.minf.stbl.stsz.sample_size;
-      }
-    /* probably video */
-    else
-      {
-      for(i = chunk_sample, total = 0; i < sample; i++)
-        {
-        total += trak->mdia.minf.stbl.stsz.table[i].size;
-        }
-      }
-          
-    }
-  return total;
-  }
-
-int64_t quicktime_sample_to_offset(quicktime_t *file,
-                                   quicktime_trak_t *trak, long sample)
-  {
-  int64_t chunk, chunk_sample, chunk_offset1, chunk_offset2;
-
-  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, sample);
-  chunk_offset1 = quicktime_chunk_to_offset(file, trak, chunk);
-  chunk_offset2 = chunk_offset1 +
-    quicktime_sample_range_size(trak, chunk_sample, sample);
-  return chunk_offset2;
   }
 
 void quicktime_write_chunk_header(quicktime_t *file, 

@@ -719,7 +719,8 @@ int quicktime_init_video_map(quicktime_video_map_t *vtrack,
   {
   vtrack->current_position = 0;
   vtrack->cur_chunk = 0;
-  vtrack->io_cmodel = BC_RGB888;
+  vtrack->io_cmodel = LQT_COLORMODEL_NONE;
+  vtrack->stream_cmodel = LQT_COLORMODEL_NONE;
   vtrack->do_encode = encode;
   quicktime_init_vcodec(vtrack, encode, info);
   return 0;
@@ -817,8 +818,8 @@ void quicktime_init_maps(quicktime_t * file)
       quicktime_init_audio_map(file, &file->atracks[i],
                                file->wr,
                                (lqt_codec_info_t*)0);
-      /* Some codecs set the channel setup */
 
+      /* Some codecs set the channel setup */
       if(file->atracks[i].codec)
         file->atracks[i].codec->decode_audio_packet(file, i, NULL);
       }
@@ -839,16 +840,7 @@ void quicktime_init_maps(quicktime_t * file)
       quicktime_init_video_map(&file->vtracks[i],
                                file->wr,
                                (lqt_codec_info_t*)0);
-#if 0
-      /* Get decoder colormodel */
-      file->vtracks[i].codec->decode_video(file, (uint8_t**)0, i);
-      file->vtracks[i].io_cmodel = file->vtracks[i].stream_cmodel;
-      
-      lqt_get_default_rowspan(file->vtracks[i].stream_cmodel,
-                              quicktime_video_width(file, i),
-                              &file->vtracks[i].stream_row_span,
-                              &file->vtracks[i].stream_row_span_uv);
-#endif
+
       /* Get interlace mode */
       if((file->vtracks[i].interlace_mode == LQT_INTERLACE_NONE) &&
          (file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].has_fiel))
@@ -1288,18 +1280,6 @@ static quicktime_t* do_open(const char *filename, int rd, int wr, lqt_file_type_
     for(i = 0; i < new_file->total_vtracks; i++)
       {
       lqt_set_default_video_parameters(new_file, i);
-      
-      /*
-       *  Get decoder colormodel
-       *  This might causing a first frame to be decoded, so we can't call this
-       *  before setting the parameters
-       */
-      new_file->vtracks[i].codec->decode_video(new_file, (uint8_t**)0, i);
-      new_file->vtracks[i].io_cmodel = new_file->vtracks[i].stream_cmodel;
-      lqt_get_default_rowspan(new_file->vtracks[i].stream_cmodel,
-                              quicktime_video_width(new_file, i),
-                              &new_file->vtracks[i].stream_row_span,
-                              &new_file->vtracks[i].stream_row_span_uv);
       }
     }
         

@@ -336,13 +336,16 @@ static int decode_audio_packet_ffmpeg(quicktime_t *file,
 
   while(!codec->have_frame || !codec->f->nb_samples)
     {
-    if(atrack->codec->read_packet)
+    if(!codec->lqt_pkt.data_len)
       {
-      if(!atrack->codec->read_packet(file, &codec->lqt_pkt, track))
+      if(atrack->codec->read_packet)
+        {
+        if(!atrack->codec->read_packet(file, &codec->lqt_pkt, track))
+          return 0;
+        }
+      else if(!quicktime_trak_read_packet(file, atrack->track, &codec->lqt_pkt))
         return 0;
       }
-    else if(!quicktime_trak_read_packet(file, atrack->track, &codec->lqt_pkt))
-      return 0;
     
     codec->pkt.data = codec->lqt_pkt.data;
     codec->pkt.size = codec->lqt_pkt.data_len;
@@ -387,101 +390,6 @@ static int decode_audio_packet_ffmpeg(quicktime_t *file,
   buf->size = codec->f->nb_samples;
   codec->have_frame = 0;
   return buf->size;
-  
-  /* Check if we have to reposition the stream */
-#if 0  
-  if(track_map->last_position != track_map->current_position)
-    {
-
-    if((track_map->current_position < codec->sample_buffer_start) || 
-       (track_map->current_position + samples >= codec->sample_buffer_end))
-      {
-      if(lqt_audio_is_vbr(file, track))
-        lqt_chunk_of_sample_vbr(&chunk_sample,
-                                &track_map->cur_chunk,
-                                track_map->track,
-                                track_map->current_position);
-      else
-        quicktime_chunk_of_sample(&chunk_sample,
-                                  &track_map->cur_chunk,
-                                  track_map->track,
-                                  track_map->current_position);
-      codec->sample_buffer_start = chunk_sample;
-      codec->sample_buffer_end   = chunk_sample;
-      codec->bytes_in_chunk_buffer = 0;
-
-      if(lqt_audio_is_vbr(file, track))
-        decode_chunk_vbr(file, track);
-      else
-        decode_chunk(file, track);
-      }
-    }
-  
-  /* Flush unneeded samples */
-  samples_to_skip = 0;
-  if(track_map->current_position > codec->sample_buffer_start)
-    {
-    samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-    if(samples_to_skip > (int)(codec->sample_buffer_end - codec->sample_buffer_start))
-      samples_to_skip = (int)(codec->sample_buffer_end - codec->sample_buffer_start);
-    
-    if(codec->sample_buffer_end > track_map->current_position)
-      {
-      samples_to_move = codec->sample_buffer_end - track_map->current_position;
-
-      memmove(codec->sample_buffer,
-              &codec->sample_buffer[samples_to_skip * channels],
-              samples_to_move * channels * sizeof(int16_t));
-      }
-    codec->sample_buffer_start += samples_to_skip;
-    
-
-    }
-  samples_to_skip = track_map->current_position - codec->sample_buffer_start;
-  
-  /* Read new chunks until we have enough samples */
-  while(codec->sample_buffer_end - codec->sample_buffer_start < samples + samples_to_skip)
-    {
-    
-    //    if(track_map->current_chunk >= track_map->track->mdia.minf.stbl.stco.total_entries)
-    //      return 0;
-
-    if(lqt_audio_is_vbr(file, track))
-      {
-      if(!decode_chunk_vbr(file, track))
-        break;
-      }
-    else
-      {
-      if(!decode_chunk(file, track))
-        break;
-      }
-    }
-  samples_decoded = codec->sample_buffer_end - codec->sample_buffer_start - samples_to_skip;
-
-  
-  if(samples_decoded <= 0)
-    {
-    track_map->last_position = track_map->current_position;
-    return 0;
-    }
-  if(samples_decoded > samples)
-    samples_decoded = samples;
-  
-  /* Deinterleave into the buffer */
-  
-  
-  //  deinterleave(output_i, output_f, codec->sample_buffer + (track_map->channels * samples_to_skip),
-  //               channels, samples_decoded);
-
-  memcpy(output, codec->sample_buffer + (channels * samples_to_skip),
-         channels * samples_decoded * 2);
-  
-  track_map->last_position = track_map->current_position + samples_decoded;
-
-  return samples_decoded;
-  // #endif
-#endif  
   }
 
 static void resync_ffmpeg(quicktime_t *file, int track)

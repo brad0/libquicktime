@@ -348,6 +348,9 @@ static int get_conversion_price(int in_colormodel, int out_colormodel)
 
 int lqt_get_decoder_colormodel(quicktime_t * file, int track)
   {
+  if(!lqt_ensure_stream_cmodel_decode(file, track))
+    return LQT_COLORMODEL_NONE;
+  
   return file->vtracks[track].stream_cmodel;
   }
 
@@ -424,8 +427,11 @@ int lqt_get_best_colormodel(quicktime_t * file, int track,
   if(file->wr)
     ret = lqt_get_best_source_colormodel(supported, file->vtracks[track].stream_cmodel);
   else
+    {
+    if(!lqt_ensure_stream_cmodel_decode(file, track))
+      return LQT_COLORMODEL_NONE;
     ret = lqt_get_best_target_colormodel(file->vtracks[track].stream_cmodel, supported);
-
+    }
   if(ret == LQT_COLORMODEL_NONE)
     {
     /* Backwards compatibility. */

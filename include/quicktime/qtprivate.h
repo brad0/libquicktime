@@ -138,11 +138,7 @@ typedef struct
   unsigned short int *blue;
   } quicktime_ctab_t;
 
-
-
 /* ===================== sample table ======================== // */
-
-
 
 /* sample description */
 
@@ -1368,6 +1364,15 @@ typedef struct
   int have_info;
   } quicktime_riff_t;
 
+/* IO Modes: Can be en-/decoding or raw I/O */
+
+typedef enum
+  {
+    LQT_TRACK_IO_NONE =   0,
+    LQT_TRACK_IO_CODEC =  1,
+    LQT_TRACK_IO_PACKET = 2,
+  } lqt_track_io_mode_t;
+
 /* Audio buffer */
 
 typedef union
@@ -1436,7 +1441,8 @@ typedef struct
   // Offset to seek before the target frame to fill the bit reservoir and
   // avoid disturbances due to overlap tranforms
   int preroll; 
-  
+
+  lqt_track_io_mode_t io_mode;
   } quicktime_audio_map_t;
 
 
@@ -1519,6 +1525,8 @@ typedef struct
 
   /* 1 if encoding, 0 if decoding. */
   int do_encode;
+
+  lqt_track_io_mode_t io_mode;
   
   } quicktime_video_map_t;
 
@@ -1736,13 +1744,6 @@ struct quicktime_codec_s
   int (*encode_video)(quicktime_t *file, 
                       unsigned char **row_pointers, 
                       int track);
-#if 0
-  /* API Change: Return value is the number of samples */
-  int (*decode_audio)(quicktime_t *file, 
-                      void * output,
-                      long samples, 
-                      int track);
-#endif
   /* NEW decode funcion: Decode *one* packet/chunk in the native
      format and leave the rest for the core */
   int (*decode_audio_packet)(quicktime_t *file,
@@ -1781,14 +1782,5 @@ struct quicktime_codec_s
   lqt_codec_info_t * info;
 
   };
-
-
-typedef struct
-  {
-  int64_t frame;
-  long ctts_entry_idx;
-  long sample_within_entry;
-  quicktime_ctts_t *ctts;
-  } quicktime_bframe_detector;
 
 #endif

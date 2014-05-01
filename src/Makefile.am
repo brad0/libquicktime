@@ -128,7 +128,6 @@ lqt_codecfile.c \
 lqt_color.c \
 lqt_codecinfo.c \
 lqt_divx.c \
-lqt_qtvr.c \
-bframe_detector.c
+lqt_qtvr.c
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include

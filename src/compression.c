@@ -82,6 +82,9 @@ lqt_get_video_compression_info(quicktime_t * file, int track)
   if(vtrack->ci.id == LQT_COMPRESSION_NONE)
     return NULL;
 
+  if(!lqt_ensure_stream_cmodel_decode(file, track))
+    return NULL;
+  
   if(!vtrack->ci.width)
     {
     vtrack->ci.width = quicktime_video_width(file, track);
@@ -105,67 +108,7 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
   quicktime_audio_map_t *atrack = &file->atracks[track];
 
   if(atrack->codec->read_packet)
-    {
     return atrack->codec->read_packet(file, p, track);
-    }
-#if 0
-  else if(atrack->block_align)
-    {
-    int bytes_from_samples;
-    p->data_len =
-      lqt_read_audio_chunk(file, track, atrack->cur_chunk,
-                           &p->data, &p->data_alloc, &p->duration);
-
-    if(!p->data_len)
-      return 0;
-    
-    bytes_from_samples = p->duration * atrack->block_align;
-    if(p->data_len > bytes_from_samples)
-      p->data_len = bytes_from_samples;
-
-    p->timestamp = atrack->current_position;
-    atrack->current_position += p->duration;
-    atrack->cur_chunk++;
-    return 1;
-    }
-  else if(lqt_audio_is_vbr(file, track))
-    {
-    /* First chunk */
-    if(!atrack->total_vbr_packets)
-      {
-      atrack->cur_chunk = 0;
-      atrack->total_vbr_packets =
-        lqt_audio_num_vbr_packets(file, track,
-                                  atrack->cur_chunk,
-                                  NULL);
-      atrack->cur_vbr_packet = 0;
-      }
-    /* Next chunk */
-    else if(atrack->cur_vbr_packet == atrack->total_vbr_packets)
-      {
-      atrack->cur_chunk++;
-      atrack->total_vbr_packets =
-        lqt_audio_num_vbr_packets(file, track,
-                                  atrack->cur_chunk,
-                                  NULL);
-      atrack->cur_vbr_packet = 0;
-      }
-    if(!atrack->total_vbr_packets)
-      return 0;
-    
-    p->data_len = lqt_audio_read_vbr_packet(file, track, atrack->cur_chunk,
-                                            atrack->cur_vbr_packet,
-                                            &p->data, &p->data_alloc, &p->duration);
-    
-    if(atrack->ci.flags & LQT_COMPRESSION_SBR)
-      p->duration *= 2;
-    
-    p->timestamp = atrack->current_position;
-    atrack->current_position += p->duration;
-    atrack->cur_vbr_packet++;
-    return 1;
-    }
-#else
   else
     {
     if(!quicktime_trak_read_packet(file, atrack->track, p))
@@ -173,52 +116,12 @@ int lqt_read_audio_packet(quicktime_t * file, lqt_packet_t * p, int track)
     if(atrack->ci.flags & LQT_COMPRESSION_SBR)
       p->duration *= 2;
     }
-#endif
-  
   return 0;
   }
 
 int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
   {
   quicktime_video_map_t *vtrack = &file->vtracks[track];
-
-#if 0  
-  if(vtrack->current_position >= quicktime_track_samples(file, vtrack->track))
-    return 0;
-  
-  p->flags = 0;
-  if(lqt_is_keyframe(file, track, vtrack->current_position))
-    p->flags |= LQT_PACKET_KEYFRAME;
-
-  p->data_len = 0;
-
-  if(vtrack->codec->read_packet)
-    {
-    if(!vtrack->codec->read_packet(file, p, track))
-      return 0;
-    }
-  else
-    {
-    p->data_len =
-      lqt_read_video_frame(file, &p->data, &p->data_alloc,
-                           vtrack->current_position, NULL, track);
-    }
-  
-  /* PTS = DTS if there are no B-frames */
-  p->timestamp = vtrack->timestamp;
-
-  /* PTS = DTS + CTS if there are B-frames */
-  if(vtrack->track->mdia.minf.stbl.has_ctts)
-    {
-    quicktime_ctts_t * ctts = &vtrack->track->mdia.minf.stbl.ctts;
-    p->timestamp += ctts->table[vtrack->ctts_index].sample_duration -
-      ctts->table[0].sample_duration;
-    }
-  p->duration  = vtrack->track->mdia.minf.stbl.stts.table[vtrack->stts_index].sample_duration;
-  
-  lqt_update_frame_position(vtrack);
-
-#else
 
   if(vtrack->codec->read_packet)
     {
@@ -231,9 +134,6 @@ int lqt_read_video_packet(quicktime_t * file, lqt_packet_t * p, int track)
     if(!quicktime_trak_read_packet(file, vtrack->track, p))
       return 0;
     }
-  
-#endif
-  
   return 1;
   }
 

@@ -57,6 +57,8 @@ LQT_EXTERN int lqt_sample_format_bytes(lqt_sample_format_t format);
 LQT_EXTERN void lqt_audio_buffer_alloc(lqt_audio_buffer_t * buf, int num_samples, int num_channels, int planar,
                             lqt_sample_format_t fmt);
 
+void lqt_set_audio_io_mode(quicktime_t *file, int track, lqt_track_io_mode_t mode);
+
 /* avi_avih.c */
 
 void quicktime_read_avih(quicktime_t *file,
@@ -1241,23 +1243,11 @@ void quicktime_user_atoms_dump(quicktime_user_atoms_t * u);
 
 
 /* For AVI */
-int quicktime_avg_chunk_samples(quicktime_t *file, quicktime_trak_t *trak);
 
 /* For seeking in CBR audio files: Get the chunk index for a specified sample.
    On return, chunk_sample will contain the first sample of the returned chunk */
 
-LQT_EXTERN int quicktime_chunk_of_sample(int64_t *chunk_sample, 
-                                         int64_t *chunk, 
-                                         quicktime_trak_t *trak, 
-                                         int64_t sample);
-
 int64_t quicktime_chunk_to_offset(quicktime_t *file, quicktime_trak_t *trak, long chunk);
-
-
-int64_t quicktime_sample_range_size(quicktime_trak_t *trak, 
-                                    long chunk_sample, 
-                                    long sample);
-int64_t quicktime_sample_to_offset(quicktime_t *file, quicktime_trak_t *trak, long sample);
 
 LQT_EXTERN void quicktime_write_chunk_header(quicktime_t *file, 
                                              quicktime_trak_t *trak);
@@ -1543,12 +1533,10 @@ quicktime_codec_t * quicktime_load_codec(lqt_codec_info_t * info,
                                          quicktime_video_map_t * vmap);
 
 
+/* video.c */
+
+int lqt_ensure_stream_cmodel_decode(quicktime_t *file, int track);
+void lqt_set_video_io_mode(quicktime_t *file, int track, lqt_track_io_mode_t mode);
 /* workarounds.c */
 
 int64_t quicktime_add3(int64_t a, int64_t b, int64_t c);
-
-
-/* bframe_detector.c */
-
-LQT_EXTERN void quicktime_init_bframe_detector(quicktime_bframe_detector* ctx, quicktime_video_map_t* vtrack);
-LQT_EXTERN int quicktime_is_bframe(quicktime_bframe_detector* ctx, int64_t frame);

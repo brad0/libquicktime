@@ -181,11 +181,8 @@ int quicktime_init_vcodec(quicktime_video_map_t *vtrack, int encode,
 
   if(codec_array)
     lqt_destroy_codec_info(codec_array);
-
-  //  vtrack->stream_cmodel = lqt_get_decoder_colormodel(quicktime_t * file, int track);
-  
+ 
   return 0;
-  
   }
 
 int quicktime_init_acodec(quicktime_audio_map_t *atrack, int encode,

@@ -134,8 +134,6 @@ typedef struct
   /* Stuff for compressed H.264 reading */
   int nal_size_length;
 
-  quicktime_bframe_detector bframe_detector;
-
   /* lqt_pts = ffmpeg_pts * pts_factor */
   int encoding_pts_factor;
 
@@ -2285,8 +2283,6 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
   codec->decoder = decoder;
 
   // vtrack can be NULL if called from lqt_writes_compressed
-  if(vtrack)
-    quicktime_init_bframe_detector(&codec->bframe_detector, vtrack);
 
   codec_base->priv = codec;
   codec_base->delete_codec = lqt_ffmpeg_delete_video;
@@ -2378,8 +2374,6 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     {
     vtrack->stream_cmodel = BC_YUV422P10;
     }
-  else
-    vtrack->stream_cmodel = BC_YUV420P;
   
   }
 

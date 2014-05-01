@@ -95,27 +95,25 @@ int lqt_text_time_scale(quicktime_t * file, int track)
 int lqt_read_text(quicktime_t * file, int track, char ** text, int * text_alloc,
                   int64_t * timestamp, int64_t * duration)
   {
-  int64_t file_position, stts_index = 0, stts_count = 0;
+  int64_t file_position;
   char * ptr;
   
   int string_length;
   
   quicktime_text_map_t * ttrack = &file->ttracks[track];
   quicktime_trak_t * trak = ttrack->track;
-  quicktime_stts_t * stts = &trak->mdia.minf.stbl.stts;
   
-  if(ttrack->current_position >= quicktime_track_samples(file, trak))
+  if(trak->idx_pos >= trak->idx.num_entries)
     return 0; // EOF
-  
+    
   /* Get the file position */
-  file_position = quicktime_sample_to_offset(file, trak, ttrack->current_position);
+  
+  file_position = trak->idx.entries[trak->idx_pos].position;
   quicktime_set_position(file, file_position);
-
   string_length = quicktime_read_int16(file);
 
   if(string_length)
     {
-    
     /* Read whole sample */
     if(ttrack->text_buffer_alloc < string_length)
       {
@@ -151,10 +149,9 @@ int lqt_read_text(quicktime_t * file, int track, char ** text, int * text_alloc,
     (*text)[0] = '\0';
     }
   
-  *timestamp = quicktime_sample_to_time(stts, ttrack->current_position,
-                                        &stts_index, &stts_count);
-  *duration = stts->table[stts_index].sample_duration;
-
+  *timestamp = trak->idx.entries[trak->idx_pos].pts;
+  *duration = trak->idx.entries[trak->idx_pos].duration;
+  
   /* de-macify linebreaks */
   ptr = *text;
   while(*ptr != '\0')
@@ -163,7 +160,7 @@ int lqt_read_text(quicktime_t * file, int track, char ** text, int * text_alloc,
       *ptr = '\n';
     ptr++;
     }
-  ttrack->current_position++;
+  trak->idx_pos++;
   return 1;
   }
 
@@ -205,12 +202,10 @@ int64_t lqt_text_samples(quicktime_t * file, int track)
   return quicktime_track_samples(file, file->ttracks[track].track);
   }
 
-
 void lqt_set_text_position(quicktime_t * file, int track, int64_t position)
   {
   file->ttracks[track].current_position = position;
   }
-
 
 void lqt_set_text_time(quicktime_t * file, int track, int64_t time)
   {

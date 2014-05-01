@@ -104,7 +104,10 @@ int lqt_set_video_codec(quicktime_t *file, int track,
                         lqt_codec_info_t * info)
   {
   quicktime_stsd_t *stsd;
-  
+
+  if((track < 0) || (track >= file->total_vtracks))
+    return 1;
+    
   if(!check_image_size(info,
                        quicktime_video_width(file, track),
                        quicktime_video_height(file, track)))
@@ -123,9 +126,7 @@ int lqt_set_video_codec(quicktime_t *file, int track,
   file->vtracks[file->total_vtracks-1].codec->encode_video(file,
                                                            (uint8_t**)0,
                                                            track);
-  file->vtracks[track].io_cmodel =
-    file->vtracks[track].stream_cmodel;
-  
+  file->vtracks[track].io_cmodel = file->vtracks[track].stream_cmodel;
   
   return 0;
   }
@@ -209,43 +210,21 @@ void quicktime_set_framerate(quicktime_t *file, double framerate)
 
 long quicktime_video_length(quicktime_t *file, int track)
   {
-  /*printf("quicktime_video_length %d %d\n", quicktime_track_samples(file, file->vtracks[track].track), track); */
-  if(file->total_vtracks > 0)
-    return quicktime_track_samples(file, file->vtracks[track].track);
-  return 0;
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+  return file->vtracks[track].track->idx.num_entries;
   }
 
 long quicktime_video_position(quicktime_t *file, int track)
   {
-  return file->vtracks[track].current_position;
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+  // return file->vtracks[track].current_position;
+  return file->vtracks[track].track->idx_pos;
   }
-
 
 int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
   {
-#if 0
-  int64_t chunk_sample, chunk;
-  quicktime_trak_t *trak;
-  quicktime_codec_t * codec;
-  
-  if((track < 0) || (track >= file->total_vtracks))
-    return 0;
-
-  trak = file->vtracks[track].track;
-
-  if((frame < 0) || (frame >= quicktime_track_samples(file, trak)))
-    return 0;
-  
-  file->vtracks[track].current_position = frame;
-  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
-  file->vtracks[track].cur_chunk = chunk;
-  
-  file->vtracks[track].timestamp =
-    quicktime_sample_to_time(&trak->mdia.minf.stbl.stts,
-                             frame,
-                             &file->vtracks[track].stts_index,
-                             &file->vtracks[track].stts_count);
-#else
   quicktime_video_map_t *vtrack;
   quicktime_trak_t *trak;
   quicktime_codec_t * codec;
@@ -262,9 +241,7 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
   vtrack->timestamp = trak->idx.entries[frame].pts;
   trak->idx_pos = lqt_packet_index_get_keyframe_before(&trak->idx, frame);
   vtrack->next_display_frame = trak->idx_pos;
-
-#endif
-
+  
   /* Resync codec */
   if((codec = file->vtracks[track].codec) && codec->resync)
     codec->resync(file, track);
@@ -273,25 +250,6 @@ int quicktime_set_video_position(quicktime_t *file, int64_t frame, int track)
 
 void lqt_seek_video(quicktime_t * file, int track, int64_t time)
   {
-#if 0
-  int64_t frame;
-  quicktime_trak_t *trak;
-
-  if((track < 0) || (track >= file->total_vtracks))
-    return;
-  
-  trak = file->vtracks[track].track;
-
-  file->vtracks[track].timestamp = time;
-  
-  frame =
-    quicktime_time_to_sample(&trak->mdia.minf.stbl.stts,
-                             &file->vtracks[track].timestamp,
-                             &file->vtracks[track].stts_index,
-                             &file->vtracks[track].stts_count);
-  
-  quicktime_set_video_position(file, frame, track);
-#else
   quicktime_trak_t *trak;
   int64_t pos;
   if((track < 0) || (track >= file->total_vtracks))
@@ -300,65 +258,46 @@ void lqt_seek_video(quicktime_t * file, int track, int64_t time)
   pos = lqt_packet_index_seek(&trak->idx, time);
   if(pos >= 0)
     quicktime_set_video_position(file, pos, track);
-#endif
   }
-
-
-#define FRAME_PADDING 128
 
 int lqt_read_video_frame(quicktime_t * file,
                          uint8_t ** buffer, int * buffer_alloc,
                          int64_t frame, int64_t * time, int track)
   {
-  int64_t offset, chunk_sample, chunk;
-  int result;
   quicktime_trak_t *trak;
-  int len;
+  lqt_packet_t pkt;
   
   if((track >= file->total_vtracks) || (track < 0))
     return 0;
+
+  lqt_set_video_io_mode(file, track, LQT_TRACK_IO_PACKET);
   
   trak = file->vtracks[track].track;
-
-  if((frame < 0) || (frame >= quicktime_track_samples(file, trak)))
-    return 0;
   
-  //  file->vtracks[track].current_position = frame;
-  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, frame);
-  file->vtracks[track].cur_chunk = chunk;
-  offset = quicktime_sample_to_offset(file, trak, frame);
-  quicktime_set_position(file, offset);
+  if((frame < 0) || (frame >= trak->idx.num_entries))
+    return 0;
+
+  memset(&pkt, 0, sizeof(pkt));
+  
+  pkt.data = *buffer;
+  pkt.data_alloc = *buffer_alloc;
+  
+  if(!lqt_packet_index_read_packet(file, &trak->idx,
+                                   &pkt, frame))
+    return 0;
 
   if(time)
-    *time = quicktime_sample_to_time(&trak->mdia.minf.stbl.stts,
-                                     frame,
-                                     &file->vtracks[track].stts_index,
-                                     &file->vtracks[track].stts_count);
+    *time = pkt.timestamp;
 
-  len = quicktime_frame_size(file, frame, track);
-  
-  if(len + FRAME_PADDING > *buffer_alloc)
-    {
-    *buffer_alloc = len + FRAME_PADDING + 1024;
-    *buffer = realloc(*buffer, *buffer_alloc);
-    }
-
-  result = quicktime_read_data(file, *buffer, len);
-
-
-  if(result < len)
-    {
-    return 0;
-    }
-  memset(*buffer + len, 0, FRAME_PADDING);
-  return len;
+  *buffer = pkt.data;
+  *buffer_alloc = pkt.data_alloc;
+  return pkt.data_len;
   }
-
-#undef FRAME_PADDING
 
 int quicktime_has_video(quicktime_t *file)
   {
-  if(quicktime_video_tracks(file)) return 1;
+  if(quicktime_video_tracks(file))
+    return 1;
   return 0;
   }
 
@@ -392,6 +331,9 @@ void quicktime_set_cmodel(quicktime_t *file, int colormodel)
 
 int lqt_get_cmodel(quicktime_t * file, int track)
   {
+  if(file->rd && !lqt_ensure_stream_cmodel_decode(file, track))
+    return LQT_COLORMODEL_NONE;
+  
   if((track < file->total_vtracks) && (track >= 0))
     return file->vtracks[track].io_cmodel;
   else
@@ -401,25 +343,26 @@ int lqt_get_cmodel(quicktime_t * file, int track)
 
 void lqt_set_cmodel(quicktime_t *file, int track, int colormodel)
   {
-  if((track < file->total_vtracks) && (track >= 0))
+  if((track < 0) || (track >= file->total_vtracks))
     {
-    file->vtracks[track].io_cmodel = colormodel;
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_cmodel: No track No. %d", track);
+    return;
+    }
+  
+  file->vtracks[track].io_cmodel = colormodel;
 
-    /* Maybe switch the encoding colormodel to better match the IO one. */
-    if(file->wr && !file->encoding_started)
+  /* Maybe switch the encoding colormodel to better match the IO one. */
+  if(file->wr && !file->encoding_started)
+    {
+    lqt_codec_info_t * info = file->vtracks[track].codec->info;
+    int encoding_cmodel =
+      lqt_get_best_target_colormodel(colormodel, info->encoding_colormodels);
+    
+    if (encoding_cmodel != LQT_COLORMODEL_NONE)
       {
-      lqt_codec_info_t * info = file->vtracks[track].codec->info;
-      int encoding_cmodel = lqt_get_best_target_colormodel(
-              colormodel, info->encoding_colormodels);
-      
-      if (encoding_cmodel != LQT_COLORMODEL_NONE)
-        {
-        file->vtracks[track].stream_cmodel = encoding_cmodel;
-        }
+      file->vtracks[track].stream_cmodel = encoding_cmodel;
       }
     }
-  else
-    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_cmodel: No track No. %d", track);
   }
 
 void quicktime_set_row_span(quicktime_t *file, int row_span)
@@ -431,35 +374,48 @@ void quicktime_set_row_span(quicktime_t *file, int row_span)
 
 void lqt_set_row_span(quicktime_t *file, int track, int row_span)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    {
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_row_span: No track No. %d", track);
+    return;
+    }
   file->vtracks[track].io_row_span = row_span;
   }
 
 void lqt_set_row_span_uv(quicktime_t *file, int track, int row_span_uv)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    {
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "lqt_set_row_span_uv: No track No. %d", track);
+    return;
+    }
   file->vtracks[track].io_row_span_uv = row_span_uv;
   }
 
 void quicktime_set_depth(quicktime_t *file, int depth, int track)
   {
-  int i;
-
-  for(i = 0; i < file->total_vtracks; i++)
+  if((track < 0) || (track >= file->total_vtracks))
     {
-    file->vtracks[i].track->mdia.minf.stbl.stsd.table[0].depth = depth;
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "quicktime_set_depth: No track No. %d", track);
+    return;
     }
+  file->vtracks[track].track->mdia.minf.stbl.stsd.table[0].depth = depth;
   }
 
 double quicktime_frame_rate(quicktime_t *file, int track)
   {
-  if(file->total_vtracks > track)
+  if((track < 0) || (track >= file->total_vtracks))
     {
-    if(file->vtracks[track].track->mdia.minf.stbl.stts.table)
-      return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
-        file->vtracks[track].track->mdia.minf.stbl.stts.table[0].sample_duration;
-    else
-      return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
-        file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
+    lqt_log(file, LQT_LOG_ERROR, LOG_DOMAIN, "quicktime_frame_rate: No track No. %d", track);
+    return -1.0;
     }
+
+  if(file->vtracks[track].track->mdia.minf.stbl.stts.table)
+    return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
+      file->vtracks[track].track->mdia.minf.stbl.stts.table[0].sample_duration;
+  else
+    return (float)file->vtracks[track].track->mdia.mdhd.time_scale / 
+      file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
   return 0;
   }
 
@@ -495,6 +451,8 @@ int64_t lqt_frame_time(quicktime_t * file, int track)
 
 int64_t lqt_video_duration(quicktime_t * file, int track)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
   return file->vtracks[track].track->idx.max_pts;
   }
 
@@ -507,8 +465,8 @@ int64_t lqt_video_duration(quicktime_t * file, int track)
   
 int lqt_video_time_scale(quicktime_t * file, int track)
   {
-  if(file->total_vtracks <= track)
-    return 0;
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
   return file->vtracks[track].track->mdia.mdhd.time_scale;
   }
 
@@ -521,9 +479,9 @@ int lqt_video_time_scale(quicktime_t * file, int track)
 int lqt_frame_duration(quicktime_t * file, int track, int *constant)
   {
   quicktime_video_map_t * vtrack;
-  if(file->total_vtracks <= track)
-    return 0;
-
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+  
   vtrack = file->vtracks + track;
   
   if(constant)
@@ -549,8 +507,12 @@ int quicktime_write_frame(quicktime_t *file,
                           int64_t bytes, int track)
   {
   int result = 0;
-  quicktime_video_map_t *vtrack = &file->vtracks[track];
+  quicktime_video_map_t *vtrack;
   
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+  
+  vtrack = &file->vtracks[track];
   lqt_video_append_timestamp(file, track, vtrack->timestamp,
                              file->vtracks[track].track->mdia.minf.stbl.stts.default_duration);
   vtrack->timestamp += file->vtracks[track].track->mdia.minf.stbl.stts.default_duration;
@@ -573,32 +535,35 @@ int quicktime_write_frame(quicktime_t *file,
 
 long quicktime_frame_size(quicktime_t *file, long frame, int track)
   {
-  long bytes = 0;
-  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_trak_t *trak;
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
 
-  if(trak->mdia.minf.stbl.stsz.sample_size)
-    {
-    bytes = trak->mdia.minf.stbl.stsz.sample_size;
-    }
-  else
-    {
-    long total_frames = quicktime_track_samples(file, trak);
-    if(frame < 0) frame = 0;
-    else
-      if(frame > total_frames - 1) frame = total_frames - 1;
-    bytes = trak->mdia.minf.stbl.stsz.table[frame].size;
-    }
+  trak = file->vtracks[track].track;
 
-
-  return bytes;
+  /* This is nonsense but we keep it for backwards compatibility */
+  if(frame < 0)
+    frame = 0;
+  if(frame >= trak->idx.num_entries)
+    frame = trak->idx.num_entries-1;
+  
+  return trak->idx.entries[frame].size;
   }
-
 
 int quicktime_read_frame_init(quicktime_t *file, int track)
   {
   int64_t offset;
-  quicktime_trak_t *trak = file->vtracks[track].track;
-  offset = quicktime_sample_to_offset(file, trak, file->vtracks[track].current_position);
+  quicktime_trak_t *trak;
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+
+  lqt_set_video_io_mode(file, track, LQT_TRACK_IO_PACKET);
+
+  trak = file->vtracks[track].track;
+  
+  offset = trak->idx.entries[trak->idx_pos].position;
   quicktime_set_position(file, offset);
   
   if(quicktime_ftell(file) != file->file_position) 
@@ -611,44 +576,49 @@ int quicktime_read_frame_init(quicktime_t *file, int track)
 
 int quicktime_read_frame_end(quicktime_t *file, int track)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
   file->file_position = quicktime_ftell(file);
-  file->vtracks[track].current_position++;
+  file->vtracks[track].track->idx_pos++;
   return 0;
   }
 
-
 long quicktime_read_frame(quicktime_t *file, unsigned char *video_buffer, int track)
   {
-  int64_t bytes, offset, chunk_sample, chunk;
+  int64_t bytes;
   int result = 0;
-  quicktime_trak_t *trak = file->vtracks[track].track;
-    
-  bytes = quicktime_frame_size(file, file->vtracks[track].current_position, track);
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
 
-  quicktime_chunk_of_sample(&chunk_sample, &chunk, trak, file->vtracks[track].current_position);
-  file->vtracks[track].cur_chunk = chunk;
-  offset = quicktime_sample_to_offset(file, trak, file->vtracks[track].current_position);
-  quicktime_set_position(file, offset);
-          
+  quicktime_read_frame_init(file, track);
+  bytes = quicktime_frame_size(file, file->vtracks[track].track->idx_pos, track);
   result = quicktime_read_data(file, video_buffer, bytes);
-  lqt_update_frame_position(&file->vtracks[track]);
-
-  if(!result) return 0;
+  quicktime_read_frame_end(file, track);
+  if(!result)
+    return 0;
   return bytes;
   }
 
 long quicktime_get_keyframe_before(quicktime_t *file, long frame, int track)
   {
-  quicktime_trak_t *trak = file->vtracks[track].track;
-  quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
   int i;
+  quicktime_trak_t *trak;
+  quicktime_stss_t *stss;
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+
+  trak = file->vtracks[track].track;
+  stss = &trak->mdia.minf.stbl.stss;
   
   // Offset 1
   frame++;
   
   for(i = stss->total_entries - 1; i >= 0; i--)
     {
-    if(stss->table[i].sample <= frame) return stss->table[i].sample - 1;
+    if(stss->table[i].sample <= frame)
+      return stss->table[i].sample - 1;
     }
 
   return 0;
@@ -656,10 +626,17 @@ long quicktime_get_keyframe_before(quicktime_t *file, long frame, int track)
 
 long quicktime_get_partial_keyframe_before(quicktime_t *file, long frame, int track)
   {
-  quicktime_trak_t *trak = file->vtracks[track].track;
-  quicktime_stps_t *stps = &trak->mdia.minf.stbl.stps;
+  quicktime_trak_t *trak;
+  quicktime_stps_t *stps;
   int i;
 
+  if((track < 0) || (track >= file->total_vtracks))
+    return -1;
+  
+  trak = file->vtracks[track].track;
+  stps = &trak->mdia.minf.stbl.stps;
+
+  
   // Offset 1
   frame++;
 
@@ -673,9 +650,15 @@ long quicktime_get_partial_keyframe_before(quicktime_t *file, long frame, int tr
 
 void quicktime_insert_keyframe(quicktime_t *file, long frame, int track)
   {
-  quicktime_trak_t *trak = file->vtracks[track].track;
-  quicktime_stss_t *stss = &trak->mdia.minf.stbl.stss;
+  quicktime_trak_t *trak;
+  quicktime_stss_t *stss;
 
+  if((track < 0) || (track >= file->total_vtracks))
+    return;
+
+  trak = file->vtracks[track].track;
+  stss = &trak->mdia.minf.stbl.stss;
+    
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
     // Set keyframe flag in idx1 table.
@@ -706,6 +689,13 @@ void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track)
   quicktime_trak_t *trak = file->vtracks[track].track;
   quicktime_stps_t *stps = &trak->mdia.minf.stbl.stps;
 
+  if((track < 0) || (track >= file->total_vtracks))
+    return;
+  
+  trak = file->vtracks[track].track;
+  stps = &trak->mdia.minf.stbl.stps;
+
+  
   if(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML))
     {
     // AVI doesn't support partial keyframes.
@@ -727,8 +717,14 @@ void quicktime_insert_partial_keyframe(quicktime_t *file, long frame, int track)
 
 int quicktime_has_keyframes(quicktime_t *file, int track)
   {
-  quicktime_trak_t *trak = file->vtracks[track].track;
+  quicktime_trak_t *trak;
 
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+  
+  trak = file->vtracks[track].track;
+
+  
   if(trak->idx.num_entries == trak->idx.num_key_frames)
     return 0;
   else
@@ -738,8 +734,13 @@ int quicktime_has_keyframes(quicktime_t *file, int track)
 int lqt_is_keyframe(quicktime_t *file, int track, int frame)
   {
   int i;
-  quicktime_stss_t *stss = &file->vtracks[track].track->mdia.minf.stbl.stss;
+  quicktime_stss_t *stss;
+  
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
 
+  stss = &file->vtracks[track].track->mdia.minf.stbl.stss;
+  
   if(!stss->total_entries)
     return 1;
 
@@ -752,6 +753,7 @@ int lqt_is_keyframe(quicktime_t *file, int track, int frame)
     }
   return 0;
   }
+
 void lqt_update_frame_position(quicktime_video_map_t * track)
   {
   track->timestamp +=
@@ -776,7 +778,6 @@ void lqt_update_frame_position(quicktime_video_map_t * track)
       track->ctts_index++;
       track->ctts_count = 0;
       }
-    
     }
   
   track->current_position++;
@@ -811,6 +812,13 @@ int lqt_decode_video(quicktime_t *file,
   int result;
   int height;
   int width;
+
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+
+  if(!lqt_ensure_stream_cmodel_decode(file, track))
+    return 0;
+  
   set_default_rowspan(file, track);
         
   height = quicktime_video_height(file, track);
@@ -862,11 +870,11 @@ int lqt_decode_video(quicktime_t *file,
 int quicktime_decode_video(quicktime_t *file,
                            unsigned char **row_pointers, int track)
   {
-  
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
   file->vtracks[track].io_cmodel = BC_RGB888;
   return lqt_decode_video(file, row_pointers, track);
   }
-
 
 long quicktime_decode_scaled(quicktime_t *file, 
                              int in_x,                    /* Location of input frame to take picture */
@@ -883,12 +891,17 @@ long quicktime_decode_scaled(quicktime_t *file,
 
   int height;
   int width;
-        
+
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+
+  if(!lqt_ensure_stream_cmodel_decode(file, track))
+    return 0;
+  
   set_default_rowspan(file, track);
   height = quicktime_video_height(file, track);
   width =  quicktime_video_width(file, track);
-
-        
+  
   file->vtracks[track].io_cmodel = color_model;
 
   if(!file->vtracks[track].temp_frame)
@@ -925,6 +938,8 @@ int lqt_set_video_pass(quicktime_t *file,
                        int pass, int total_passes, 
                        const char * stats_file, int track)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
   if(file->vtracks[track].codec->set_pass)
     return file->vtracks[track].codec->set_pass(file,
                                                 track,
@@ -1027,7 +1042,6 @@ void lqt_write_frame_header(quicktime_t * file, int track,
   
   quicktime_write_chunk_header(file, trak);
   }
-
 
 void lqt_write_frame_footer(quicktime_t * file, int track)
   {
@@ -1174,6 +1188,8 @@ int lqt_encode_video(quicktime_t *file,
                      unsigned char **row_pointers, 
                      int track, int64_t time)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
   return lqt_encode_video_d(file, row_pointers, track, time, -1);
   }
 
@@ -1182,8 +1198,11 @@ int lqt_encode_video_d(quicktime_t *file,
                        int track, int64_t time, int duration)
   {
   int result;
+  quicktime_video_map_t * vtrack;
 
-  quicktime_video_map_t * vtrack = &file->vtracks[track];
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+  vtrack = &file->vtracks[track];
 
   /* Must set valid timestamp for encoders */
   vtrack->timestamp = time;
@@ -1223,6 +1242,8 @@ int quicktime_encode_video(quicktime_t *file,
                            int track)
   {
   int result;
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
   
   result = lqt_encode_video_d(file, 
                               row_pointers, 
@@ -1237,6 +1258,12 @@ int quicktime_reads_cmodel(quicktime_t *file,
                            int colormodel, 
                            int track)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+
+  if(!lqt_ensure_stream_cmodel_decode(file, track))
+    return 0;
+  
   return lqt_colormodel_has_conversion(file->vtracks[track].stream_cmodel, colormodel);
   }
 
@@ -1244,5 +1271,38 @@ int quicktime_writes_cmodel(quicktime_t *file,
                             int colormodel, 
                             int track)
   {
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
   return lqt_colormodel_has_conversion(colormodel, file->vtracks[track].stream_cmodel);
+  }
+
+int lqt_ensure_stream_cmodel_decode(quicktime_t *file, int track)
+  {
+  if((track < 0) || (track >= file->total_vtracks))
+    return 0;
+
+  if(file->vtracks[track].stream_cmodel == LQT_COLORMODEL_NONE)
+    {
+    if(!file->vtracks[track].codec->decode_video(file, (uint8_t**)0, track))
+      return 0;
+    }
+  
+  if(file->vtracks[track].io_cmodel == LQT_COLORMODEL_NONE)
+    file->vtracks[track].io_cmodel = file->vtracks[track].stream_cmodel;
+
+  if(!file->vtracks[track].stream_row_span)
+    lqt_get_default_rowspan(file->vtracks[track].stream_cmodel,
+                            quicktime_video_width(file, track),
+                            &file->vtracks[track].stream_row_span,
+                            &file->vtracks[track].stream_row_span_uv);
+
+  return 1;
+  } 
+
+void lqt_set_video_io_mode(quicktime_t *file, int track, lqt_track_io_mode_t mode)
+  {
+  if(file->vtracks[track].io_mode == mode)
+    return;
+
+  
   }
