@@ -308,7 +308,7 @@ int64_t quicktime_track_samples(quicktime_t *file, quicktime_trak_t *trak)
   
   if(trak->mdia.minf.is_audio)
     return trak->idx.max_pts;
-  else if(trak->mdia.minf.is_video)
+  else if(trak->mdia.minf.is_video && file->rd)
     return trak->idx.num_entries;
   else
     {

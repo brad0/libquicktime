@@ -272,5 +272,10 @@ void quicktime_compress_stts(quicktime_stts_t *stts)
       }
     sample++;
     }
+
+//  printf("Compressed stts\n");
+//  quicktime_stts_dump(stts);
+
+
   }
 

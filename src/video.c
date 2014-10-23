@@ -1134,7 +1134,10 @@ void lqt_video_build_timestamp_tables(quicktime_t * file, int track)
 
   if(stts->table[vtrack->cur_chunk-1].sample_duration <= 0)
     stts->table[vtrack->cur_chunk-1].sample_duration = stts->default_duration;
-  
+ 
+//  printf("Built timestamp tables\n");
+//  quicktime_stts_dump(stts);
+ 
   /* If we have no B-frames, exit here */
   if(!has_b_frames)
     return;
