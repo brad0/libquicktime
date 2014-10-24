@@ -232,7 +232,7 @@ static int quicktime_decode_raw(quicktime_t *file, unsigned char **row_pointers,
   if(!row_pointers)
     {
     file->vtracks[track].stream_cmodel = source_cmodel(file, track);
-    return 0;
+    return 1;	/* do not return 0, that causes lqt_ensure_stream_cmodel_decode to not set the color model */
     }
         
   ctab = &trak->mdia.minf.stbl.stsd.table->ctab;

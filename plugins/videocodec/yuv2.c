@@ -242,7 +242,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   quicktime_yuv2_codec_t *codec = vtrack->codec->priv;
   int width = quicktime_video_width(file, track);
   int height = quicktime_video_height(file, track);
-  int result = 0;
 
   if(!row_pointers)
     {
@@ -250,7 +249,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
       vtrack->stream_cmodel = BC_YUV422;
     else
       vtrack->stream_cmodel = BC_YUVJ422P;
-    return 0;
+    return 1;	/* do not return 0, that causes lqt_ensure_stream_cmodel_decode to not set the color model */
     }
 
   initialize(vtrack, codec, width, height);
@@ -264,7 +263,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   else
     convert_decode_yuv2(file, track, codec, row_pointers);
         
-  return result;
+  return 0;
   }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)

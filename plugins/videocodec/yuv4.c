@@ -133,7 +133,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   unsigned char *buffer;
   uint8_t *input_row;
   unsigned char *row_pointer1, *row_pointer2;
-  int result = 0;
   int u, v;
   register int y1, y2, y3, y4;
   int r, g, b;
@@ -142,7 +141,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   if(!row_pointers)
     {
     vtrack->stream_cmodel = BC_RGB888;
-    return 0;
+    return 1;	/* do not return 0, that causes lqt_ensure_stream_cmodel_decode to not set the color model */
     }
         
   initialize(vtrack, codec);
@@ -242,7 +241,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         }
       }
     }
-  return result;
+  return 0;
   }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)

@@ -68,12 +68,11 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_yv12_codec_t *codec = vtrack->codec->priv;
   int y_size, uv_size;
-  int result = 0;
 
   if(!row_pointers)
     {
     file->vtracks[track].stream_cmodel = BC_YUV420P;
-    return 0;
+    return 1;	/* do not return 0, that causes lqt_ensure_stream_cmodel_decode to not set the color model */
     }
         
   initialize(vtrack);
@@ -113,7 +112,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
     dst_ptr += file->vtracks[track].stream_row_span_uv;
     }
   
-  return result;
+  return 0;
   }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)

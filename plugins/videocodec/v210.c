@@ -71,7 +71,6 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   uint8_t *in_ptr, *iptr;
   uint16_t * out_y, * out_u, * out_v;
   int i, j;
-  int result = 0;
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_v210_codec_t *codec = vtrack->codec->priv;
   int width = vtrack->track->tkhd.track_width;
@@ -80,7 +79,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
   if(!row_pointers)
     {
     vtrack->stream_cmodel = BC_YUV422P16;
-    return 0;
+    return 1;	/* do not return 0, that causes lqt_ensure_stream_cmodel_decode to not set the color model */
     }
 
   initialize(vtrack, codec, width, height);
@@ -148,7 +147,7 @@ static int decode(quicktime_t *file, unsigned char **row_pointers, int track)
         }
       }
     }
-  return result;
+  return 0;
   }
 
 static int encode(quicktime_t *file, unsigned char **row_pointers, int track)
