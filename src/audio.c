@@ -1070,14 +1070,17 @@ lqt_sample_format_t lqt_get_sample_format(quicktime_t * file, int track)
 
   atrack = &file->atracks[track];
 
-  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED)
+/* atrack->codec can be NULL if the codec is unknown as in 'drms' */
+  if(atrack->sample_format == LQT_SAMPLE_UNDEFINED && atrack->codec != NULL)
     {
     if(file->wr)
       {
       atrack->codec->encode_audio(file, (void*)0, 0, track);
       }
     else
+      {
       atrack->codec->decode_audio_packet(file, track, NULL);
+      }
     }
   
   return atrack->sample_format;
