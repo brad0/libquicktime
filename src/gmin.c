@@ -56,6 +56,7 @@ void quicktime_read_gmin(quicktime_t *file, quicktime_gmin_t *gmin)
        for(i = 0; i < 3; i++)
                gmin->opcolor[i] = quicktime_read_int16(file);
        gmin->balance = quicktime_read_int16(file);
+       gmin->reserved = quicktime_read_int16(file);
 }
 
 void quicktime_write_gmin(quicktime_t *file, quicktime_gmin_t *gmin)
