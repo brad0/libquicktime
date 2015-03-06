@@ -188,11 +188,11 @@ typedef enum
     LQT_CHANNEL_SIDE_LEFT,
     LQT_CHANNEL_SIDE_RIGHT,
     LQT_CHANNEL_LFE,
-    LQT_CHANNEL_Ls,
-    LQT_CHANNEL_Rs,
+    LQT_CHANNEL_Ls,		/* Rear Surround Left (7.1 systems) */
+    LQT_CHANNEL_Rs,		/* Rear Surround Right (7.1 systems) */
     LQT_CHANNEL_MONO,
-    LQT_CHANNEL_Lt,
-    LQT_CHANNEL_Rt
+    LQT_CHANNEL_Lt,		/* Prologic (matrixed) Left Total */
+    LQT_CHANNEL_Rt		/* Prologic (matrixed) Right Total */
   } lqt_channel_t;
 
   
