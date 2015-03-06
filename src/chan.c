@@ -266,6 +266,11 @@ lqt_channels[] =
     { LQT_CHANNEL_SIDE_LEFT,          CHANNEL_LABEL_LeftSurroundDirect },
     { LQT_CHANNEL_SIDE_RIGHT,         CHANNEL_LABEL_RightSurroundDirect },
     { LQT_CHANNEL_LFE,                CHANNEL_LABEL_LFEScreen },
+    { LQT_CHANNEL_Ls,                 CHANNEL_LABEL_RearSurroundLeft },
+    { LQT_CHANNEL_Rs,                 CHANNEL_LABEL_RearSurroundRight },
+    { LQT_CHANNEL_MONO,               CHANNEL_LABEL_Mono },
+    { LQT_CHANNEL_Lt,                 CHANNEL_LABEL_LeftTotal }, 
+    { LQT_CHANNEL_Rt,                 CHANNEL_LABEL_RightTotal },
   };
   
 static lqt_channel_t channel_label_2_channel(channel_label_t channel_label)

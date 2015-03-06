@@ -188,6 +188,11 @@ typedef enum
     LQT_CHANNEL_SIDE_LEFT,
     LQT_CHANNEL_SIDE_RIGHT,
     LQT_CHANNEL_LFE,
+    LQT_CHANNEL_Ls,
+    LQT_CHANNEL_Rs,
+    LQT_CHANNEL_MONO,
+    LQT_CHANNEL_Lt,
+    LQT_CHANNEL_Rt
   } lqt_channel_t;
 
   

@@ -50,6 +50,11 @@ channels[] =
     { LQT_CHANNEL_BACK_CENTER,        "Back Center" },
     { LQT_CHANNEL_SIDE_LEFT,          "Side Left" },
     { LQT_CHANNEL_SIDE_RIGHT,         "Side Right" },
+    { LQT_CHANNEL_Ls,                 "Rear Surround Left" },
+    { LQT_CHANNEL_Rs,                 "Rear Surround Right" },
+    { LQT_CHANNEL_MONO,               "Mono" },
+    { LQT_CHANNEL_Lt,                 "Left Total" },
+    { LQT_CHANNEL_Rt,                 "Right Total" },
 #if 0
     { LQT_CHANNEL_TOP_FRONT_LEFT,     "Top Front Left" },
     { LQT_CHANNEL_TOP_FRONT_RIGHT,    "Top Front Right" },
