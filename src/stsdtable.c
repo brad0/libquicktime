@@ -612,6 +612,10 @@ void quicktime_write_stsd_video(quicktime_t *file,
       quicktime_write_gama(file, &table->gama);
       terminate = 1;
       }
+    if (table->user_atoms.num_atoms)
+      {
+      terminate = 1;
+      }
     }
   else /* Different stsd formats for mp4 variants */
     {
