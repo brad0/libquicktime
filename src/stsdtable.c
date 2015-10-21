@@ -219,7 +219,10 @@ quicktime_stsdtable_read_timecode(quicktime_t *file,
 
   while(quicktime_position(file) < parent_atom->end)
     {
-    quicktime_atom_read_header(file, &leaf_atom);
+    if(quicktime_atom_read_header(file, &leaf_atom))
+      {
+      break;
+      }
     if(quicktime_atom_is(&leaf_atom, "name"))
       {
       int len = 0;

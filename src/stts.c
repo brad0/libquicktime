@@ -148,8 +148,8 @@ int64_t quicktime_time_to_sample(quicktime_stts_t *stts, int64_t * time,
 
   while(1)
     {
-    if(time_count + stts->table[*stts_index].sample_duration *
-       stts->table[*stts_index].sample_count >= *time)
+      if(time_count + (int64_t)stts->table[*stts_index].sample_duration *
+       (int64_t)stts->table[*stts_index].sample_count >= *time)
       {
       *stts_count = (*time - time_count) / stts->table[*stts_index].sample_duration;
 
