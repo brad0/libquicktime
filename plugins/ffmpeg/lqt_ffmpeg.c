@@ -403,7 +403,7 @@ static lqt_image_size_static_t image_sizes_dv[] =
 struct CODECIDMAP codecidmap_v[] =
   {
     {
-      .id = CODEC_ID_MPEG1VIDEO,
+      .id = AV_CODEC_ID_MPEG1VIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -414,7 +414,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE }
     },
     {
-      .id = CODEC_ID_MPEG4,
+      .id = AV_CODEC_ID_MPEG4,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -432,7 +432,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compression_id = LQT_COMPRESSION_MPEG4_ASP,
     },
     {
-      .id = CODEC_ID_MSMPEG4V1,
+      .id = AV_CODEC_ID_MSMPEG4V1,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -443,7 +443,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_MSMPEG4V2,
+      .id = AV_CODEC_ID_MSMPEG4V2,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -454,7 +454,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_MSMPEG4V3,
+      .id = AV_CODEC_ID_MSMPEG4V3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -470,7 +470,7 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
     },
     {
-      .id = CODEC_ID_MSMPEG4V3,
+      .id = AV_CODEC_ID_MSMPEG4V3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -485,7 +485,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #if 0
     {
-      .id = CODEC_ID_WMV1,
+      .id = AV_CODEC_ID_WMV1,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -498,7 +498,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #endif
     {
-      .id = CODEC_ID_H263,
+      .id = AV_CODEC_ID_H263,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -510,7 +510,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT | LQT_FILE_MP4 | LQT_FILE_3GP,
     },
     {
-      .id = CODEC_ID_H263,
+      .id = AV_CODEC_ID_H263,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -525,7 +525,7 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
     },
     {
-      .id = CODEC_ID_H264,
+      .id = AV_CODEC_ID_H264,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -536,7 +536,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_H263P,
+      .id = AV_CODEC_ID_H263P,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -550,7 +550,7 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
     },
     {
-      .id = CODEC_ID_H263I,
+      .id = AV_CODEC_ID_H263I,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -561,7 +561,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_SVQ1,
+      .id = AV_CODEC_ID_SVQ1,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -572,7 +572,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_SVQ3,
+      .id = AV_CODEC_ID_SVQ3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -583,7 +583,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_MJPEG,
+      .id = AV_CODEC_ID_MJPEG,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -597,7 +597,7 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
     },
     {
-      .id = CODEC_ID_MJPEGB,
+      .id = AV_CODEC_ID_MJPEGB,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -611,7 +611,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #if LIBAVCODEC_BUILD >= 3346688
     {
-      .id = CODEC_ID_TARGA,
+      .id = AV_CODEC_ID_TARGA,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -623,7 +623,7 @@ struct CODECIDMAP codecidmap_v[] =
 #endif
 #if LIBAVCODEC_BUILD >= 3347456
     {
-      .id = CODEC_ID_TIFF,
+      .id = AV_CODEC_ID_TIFF,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -634,7 +634,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #endif
     {
-      .id = CODEC_ID_8BPS,
+      .id = AV_CODEC_ID_8BPS,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -644,7 +644,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_INDEO3,
+      .id = AV_CODEC_ID_INDEO3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -655,7 +655,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_RPZA,
+      .id = AV_CODEC_ID_RPZA,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -665,7 +665,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_SMC,
+      .id = AV_CODEC_ID_SMC,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -675,7 +675,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_CINEPAK,
+      .id = AV_CODEC_ID_CINEPAK,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -686,7 +686,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_CYUV,
+      .id = AV_CODEC_ID_CYUV,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -697,7 +697,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_QTRLE,
+      .id = AV_CODEC_ID_QTRLE,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -711,7 +711,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoding_colormodels = (int[]){ BC_RGB888, BC_RGBA8888, LQT_COLORMODEL_NONE },
     },
     {
-      .id = CODEC_ID_MSRLE,
+      .id = AV_CODEC_ID_MSRLE,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -722,7 +722,7 @@ struct CODECIDMAP codecidmap_v[] =
       .wav_ids = { LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_DVVIDEO,
+      .id = AV_CODEC_ID_DVVIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -738,7 +738,7 @@ struct CODECIDMAP codecidmap_v[] =
       .image_sizes = image_sizes_dv,
     },
     {
-      .id = CODEC_ID_DVVIDEO,
+      .id = AV_CODEC_ID_DVVIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -754,7 +754,7 @@ struct CODECIDMAP codecidmap_v[] =
       .image_sizes = image_sizes_dv,
     },
     {
-      .id = CODEC_ID_DVVIDEO,
+      .id = AV_CODEC_ID_DVVIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -770,7 +770,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
     /* DVCPRO HD (decoding only for now) */
     {
-      .id = CODEC_ID_DVVIDEO,
+      .id = AV_CODEC_ID_DVVIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -791,7 +791,7 @@ struct CODECIDMAP codecidmap_v[] =
       // .do_encode = 1
     },
     {
-      .id = CODEC_ID_FFVHUFF,
+      .id = AV_CODEC_ID_FFVHUFF,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -804,7 +804,7 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1
     },
     {
-      .id = CODEC_ID_FFV1,
+      .id = AV_CODEC_ID_FFV1,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -820,7 +820,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #if LIBAVCODEC_BUILD >= 3352576
     {
-      .id = CODEC_ID_DNXHD,
+      .id = AV_CODEC_ID_DNXHD,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -837,7 +837,7 @@ struct CODECIDMAP codecidmap_v[] =
     },
 #endif
     {
-      .id = CODEC_ID_MPEG2VIDEO,
+      .id = AV_CODEC_ID_MPEG2VIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -853,7 +853,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compression_id = LQT_COMPRESSION_D10
     },
     {
-      .id = CODEC_ID_MPEG2VIDEO,
+      .id = AV_CODEC_ID_MPEG2VIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -867,7 +867,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT
     },
     {
-      .id = CODEC_ID_MPEG2VIDEO,
+      .id = AV_CODEC_ID_MPEG2VIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -879,7 +879,7 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT
     },
     {
-      .id = CODEC_ID_MPEG2VIDEO,
+      .id = AV_CODEC_ID_MPEG2VIDEO,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -896,7 +896,7 @@ struct CODECIDMAP codecidmap_v[] =
       .encoding_colormodels = (int[]){ BC_YUV422P, LQT_COLORMODEL_NONE }
     },
     {
-      .id = CODEC_ID_PRORES,
+      .id = AV_CODEC_ID_PRORES,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -917,7 +917,7 @@ struct CODECIDMAP codecidmap_v[] =
 struct CODECIDMAP codecidmap_a[] =
   {
     {
-      .id = CODEC_ID_MP3,
+      .id = AV_CODEC_ID_MP3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -929,7 +929,7 @@ struct CODECIDMAP codecidmap_a[] =
       .wav_ids = { 0x50, 0x55, LQT_WAV_ID_NONE },
     },
     {
-      .id = CODEC_ID_MP2,
+      .id = AV_CODEC_ID_MP2,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -944,7 +944,7 @@ struct CODECIDMAP codecidmap_a[] =
       .compression_id = LQT_COMPRESSION_MP2,
     },
     {
-      .id = CODEC_ID_AC3,
+      .id = AV_CODEC_ID_AC3,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -959,7 +959,7 @@ struct CODECIDMAP codecidmap_a[] =
       .compression_id = LQT_COMPRESSION_AC3,
     },
     {
-      .id = CODEC_ID_QDM2,
+      .id = AV_CODEC_ID_QDM2,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -974,7 +974,7 @@ struct CODECIDMAP codecidmap_a[] =
 #if 1
     /* Doesn't work as long as audio chunks are not split into VBR "Samples" */
     {
-      .id = CODEC_ID_ALAC,
+      .id = AV_CODEC_ID_ALAC,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -987,7 +987,7 @@ struct CODECIDMAP codecidmap_a[] =
 #if 1
     /* Sounds ugly */
     {
-      .id = CODEC_ID_ADPCM_MS,
+      .id = AV_CODEC_ID_ADPCM_MS,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -1000,7 +1000,7 @@ struct CODECIDMAP codecidmap_a[] =
 #if 1
     /* Sounds ugly */
     {
-      .id = CODEC_ID_ADPCM_IMA_WAV,
+      .id = AV_CODEC_ID_ADPCM_IMA_WAV,
       .index = -1,
       .encoder = NULL,
       .decoder = NULL,
@@ -1035,7 +1035,7 @@ static void ffmpeg_map_init(void)
     if(codecidmap_v[i].do_encode)
       {
       // FFMpeg has 2 different ProRes encoders, so try the better one first.
-      if(codecidmap_v[i].id == CODEC_ID_PRORES)
+      if(codecidmap_v[i].id == AV_CODEC_ID_PRORES)
         {
         // In newer versions it's called prores_ks. It used to be called prores_kostya
         codecidmap_v[i].encoder = avcodec_find_encoder_by_name("prores_ks");

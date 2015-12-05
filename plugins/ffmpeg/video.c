@@ -36,10 +36,10 @@
 #include SWSCALE_HEADER
 #endif
 
-#ifdef  PIX_FMT_YUV422P10
-#define PIX_FMT_YUV422P10_OR_DUMMY PIX_FMT_YUV422P10
+#ifdef  AV_PIX_FMT_YUV422P10
+#define AV_PIX_FMT_YUV422P10_OR_DUMMY AV_PIX_FMT_YUV422P10
 #else
-#define PIX_FMT_YUV422P10_OR_DUMMY -1234
+#define AV_PIX_FMT_YUV422P10_OR_DUMMY -1234
 #endif
 
 static const struct
@@ -100,9 +100,9 @@ typedef struct
   int imx_bitrate;
   int imx_strip_vbi;
 
-  /* In some cases FFMpeg would report something like PIX_FMT_YUV422P, while
-     we would like to treat it as PIX_FMT_YUVJ422P. It's only used for decoding */
-  enum PixelFormat reinterpret_pix_fmt;
+  /* In some cases FFMpeg would report something like AV_PIX_FMT_YUV422P, while
+     we would like to treat it as AV_PIX_FMT_YUVJ422P. It's only used for decoding */
+  enum AVPixelFormat reinterpret_pix_fmt;
   
   int is_imx;
   int is_xdcam_hd422;
@@ -146,42 +146,42 @@ typedef struct
 
 static const struct
   {
-  enum PixelFormat ffmpeg_id;
+  enum AVPixelFormat ffmpeg_id;
   int              lqt_id;
   int              exact;
   }
 colormodels[] =
   {
-    { PIX_FMT_YUV420P,   BC_YUV420P,   1 }, ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
+    { AV_PIX_FMT_YUV420P,   BC_YUV420P,   1 }, ///< Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-    { PIX_FMT_YUV422,    BC_YUV422,    1 },
+    { AV_PIX_FMT_YUV422,    BC_YUV422,    1 },
 #else
-    { PIX_FMT_YUYV422,   BC_YUV422,    1 },
+    { AV_PIX_FMT_YUYV422,   BC_YUV422,    1 },
 #endif
-    { PIX_FMT_RGB24,     BC_RGB888,    1 }, ///< Packed pixel, 3 bytes per pixel, RGBRGB...
-    { PIX_FMT_BGR24,     BC_BGR888,    1 }, ///< Packed pixel, 3 bytes per pixel, BGRBGR...
-    { PIX_FMT_YUV422P,   BC_YUV422P,   1 }, ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
-    { PIX_FMT_YUV444P,   BC_YUV444P,   1 }, ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
-    { PIX_FMT_YUV411P,   BC_YUV411P,   1 }, ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
-    { PIX_FMT_YUV422P16, BC_YUV422P16, 1 }, ///< Planar 16 bit YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
-#ifdef PIX_FMT_YUV422P10
-    { PIX_FMT_YUV422P10, BC_YUV422P10, 1 }, ///< 10 bit samples in uint16_t containers, planar 4:2:2
+    { AV_PIX_FMT_RGB24,     BC_RGB888,    1 }, ///< Packed pixel, 3 bytes per pixel, RGBRGB...
+    { AV_PIX_FMT_BGR24,     BC_BGR888,    1 }, ///< Packed pixel, 3 bytes per pixel, BGRBGR...
+    { AV_PIX_FMT_YUV422P,   BC_YUV422P,   1 }, ///< Planar YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+    { AV_PIX_FMT_YUV444P,   BC_YUV444P,   1 }, ///< Planar YUV 4:4:4 (1 Cr & Cb sample per 1x1 Y samples)
+    { AV_PIX_FMT_YUV411P,   BC_YUV411P,   1 }, ///< Planar YUV 4:1:1 (1 Cr & Cb sample per 4x1 Y samples)
+    { AV_PIX_FMT_YUV422P16, BC_YUV422P16, 1 }, ///< Planar 16 bit YUV 4:2:2 (1 Cr & Cb sample per 2x1 Y samples)
+#ifdef AV_PIX_FMT_YUV422P10
+    { AV_PIX_FMT_YUV422P10, BC_YUV422P10, 1 }, ///< 10 bit samples in uint16_t containers, planar 4:2:2
 #endif
-    { PIX_FMT_RGB565,    BC_RGB565,    1 }, ///< always stored in cpu endianness
-    { PIX_FMT_YUVJ420P,  BC_YUVJ420P,  1 }, ///< Planar YUV 4:2:0 full scale (jpeg)
-    { PIX_FMT_YUVJ422P,  BC_YUVJ422P,  1 }, ///< Planar YUV 4:2:2 full scale (jpeg)
-    { PIX_FMT_YUVJ444P,  BC_YUVJ444P,  1 }, ///< Planar YUV 4:4:4 full scale (jpeg)
+    { AV_PIX_FMT_RGB565,    BC_RGB565,    1 }, ///< always stored in cpu endianness
+    { AV_PIX_FMT_YUVJ420P,  BC_YUVJ420P,  1 }, ///< Planar YUV 4:2:0 full scale (jpeg)
+    { AV_PIX_FMT_YUVJ422P,  BC_YUVJ422P,  1 }, ///< Planar YUV 4:2:2 full scale (jpeg)
+    { AV_PIX_FMT_YUVJ444P,  BC_YUVJ444P,  1 }, ///< Planar YUV 4:4:4 full scale (jpeg)
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-    { PIX_FMT_RGBA32,    BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    { AV_PIX_FMT_RGBA32,    BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
 #else
-    { PIX_FMT_RGB32,     BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
+    { AV_PIX_FMT_RGB32,     BC_RGBA8888,  0 }, ///< Packed pixel, 4 bytes per pixel, BGRABGRA...
 #endif
-    { PIX_FMT_RGB555,    BC_RGB888,    0 }, ///< always stored in cpu endianness, most significant bit to 1
-    { PIX_FMT_GRAY8,     BC_RGB888,    0 },
-    { PIX_FMT_MONOWHITE, BC_RGB888,    0 }, ///< 0 is white
-    { PIX_FMT_MONOBLACK, BC_RGB888,    0 }, ///< 0 is black
-    { PIX_FMT_PAL8,      BC_RGB888,    0 }, ///< 8 bit with RGBA palette
-    { PIX_FMT_YUV410P,   BC_YUV420P,   0 }, ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
+    { AV_PIX_FMT_RGB555,    BC_RGB888,    0 }, ///< always stored in cpu endianness, most significant bit to 1
+    { AV_PIX_FMT_GRAY8,     BC_RGB888,    0 },
+    { AV_PIX_FMT_MONOWHITE, BC_RGB888,    0 }, ///< 0 is white
+    { AV_PIX_FMT_MONOBLACK, BC_RGB888,    0 }, ///< 0 is black
+    { AV_PIX_FMT_PAL8,      BC_RGB888,    0 }, ///< 8 bit with RGBA palette
+    { AV_PIX_FMT_YUV410P,   BC_YUV420P,   0 }, ///< Planar YUV 4:1:0 (1 Cr & Cb sample per 4x4 Y samples)
   };
 
 static const struct
@@ -333,7 +333,7 @@ static void maybe_add_sdtp_entry(quicktime_t* file, long sample, int track)
   quicktime_video_map_t *vtrack = &file->vtracks[track];
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
 
-  if (codec->encoder->id == CODEC_ID_MPEG2VIDEO && codec->avctx->gop_size > 1)
+  if (codec->encoder->id == AV_CODEC_ID_MPEG2VIDEO && codec->avctx->gop_size > 1)
     {
     uint8_t flags = generate_sdtp_flags_mpeg2(sample, codec->avctx);
     quicktime_insert_sdtp_entry(file, sample, track, flags);
@@ -392,16 +392,16 @@ static int lqt_tenbit_dnxhd_supported(AVCodec const* codec)
   if (!codec->pix_fmts)
     return 0;
 
-  for (i = 0; codec->pix_fmts[i] != PIX_FMT_NONE; ++i)
+  for (i = 0; codec->pix_fmts[i] != AV_PIX_FMT_NONE; ++i)
     {
-    if (codec->pix_fmts[i] == PIX_FMT_YUV422P10_OR_DUMMY)
+    if (codec->pix_fmts[i] == AV_PIX_FMT_YUV422P10_OR_DUMMY)
       return 1;
     }
 
   return 0;
   }
 
-static enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
+static enum AVPixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
   {
   int i;
 
@@ -410,10 +410,10 @@ static enum PixelFormat lqt_ffmpeg_get_ffmpeg_colormodel(int id)
     if(colormodels[i].lqt_id == id)
       return colormodels[i].ffmpeg_id;
     }
-  return PIX_FMT_NB;
+  return AV_PIX_FMT_NB;
   }
 
-static int lqt_ffmpeg_get_lqt_colormodel(enum PixelFormat id, int * exact)
+static int lqt_ffmpeg_get_lqt_colormodel(enum AVPixelFormat id, int * exact)
   {
   int i;
 
@@ -454,31 +454,31 @@ static void lqt_ffmpeg_setup_decoding_colormodel(quicktime_t *file, quicktime_vi
      if (lqt_ffmpeg_get_avid_yuv_range(vtrack->track) == AVID_FULL_YUV_RANGE)
        {
        vtrack->stream_cmodel = BC_YUVJ422P;
-       codec->reinterpret_pix_fmt = PIX_FMT_YUVJ422P;
+       codec->reinterpret_pix_fmt = AV_PIX_FMT_YUVJ422P;
        *exact = 1;
        return;
        }
     }
-  else if(codec->decoder->id == CODEC_ID_DNXHD)
+  else if(codec->decoder->id == AV_CODEC_ID_DNXHD)
     {
-    /* FFMpeg supports PIX_FMT_YUV422P and PIX_FMT_YUV422P10 for DNxHD, which
-       we sometimes interpret as PIX_FMT_YUVJ422P and PIX_FMT_YUVJ422P10. */
-    if (codec->avctx->pix_fmt == PIX_FMT_YUV422P || codec->avctx->pix_fmt == PIX_FMT_YUV422P10_OR_DUMMY)
+    /* FFMpeg supports AV_PIX_FMT_YUV422P and AV_PIX_FMT_YUV422P10 for DNxHD, which
+       we sometimes interpret as AV_PIX_FMT_YUVJ422P and AV_PIX_FMT_YUVJ422P10. */
+    if (codec->avctx->pix_fmt == AV_PIX_FMT_YUV422P || codec->avctx->pix_fmt == AV_PIX_FMT_YUV422P10_OR_DUMMY)
       {
-      int p10 = (codec->avctx->pix_fmt == PIX_FMT_YUV422P10_OR_DUMMY);
+      int p10 = (codec->avctx->pix_fmt == AV_PIX_FMT_YUV422P10_OR_DUMMY);
       *exact = 1;
       if (lqt_ffmpeg_get_avid_yuv_range(vtrack->track) == AVID_FULL_YUV_RANGE)
         {
         vtrack->stream_cmodel = p10 ? BC_YUVJ422P10 : BC_YUVJ422P;
-        codec->reinterpret_pix_fmt = p10 ? PIX_FMT_YUV422P10_OR_DUMMY : PIX_FMT_YUVJ422P;
-        // Note: reinterpret_pix_fmt should really be PIX_FMT_YUVJ422P10, except
+        codec->reinterpret_pix_fmt = p10 ? AV_PIX_FMT_YUV422P10_OR_DUMMY : AV_PIX_FMT_YUVJ422P;
+        // Note: reinterpret_pix_fmt should really be AV_PIX_FMT_YUVJ422P10, except
         // there is no such colormodel in FFMpeg. Fortunately, it's not a problem
         // in this case, as reinterpret_pix_fmt is only used when *exact == 0.
         }
       else
         {
         vtrack->stream_cmodel = p10 ? BC_YUV422P10 : BC_YUV422P;
-        codec->reinterpret_pix_fmt = p10 ? PIX_FMT_YUV422P10_OR_DUMMY : PIX_FMT_YUV422P;
+        codec->reinterpret_pix_fmt = p10 ? AV_PIX_FMT_YUV422P10_OR_DUMMY : AV_PIX_FMT_YUV422P;
         }
       return;
       }
@@ -497,16 +497,16 @@ static void lqt_ffmpeg_setup_encoding_colormodel(quicktime_video_map_t *vtrack)
   quicktime_ffmpeg_video_codec_t *codec = vtrack->codec->priv;
   codec->avctx->pix_fmt = lqt_ffmpeg_get_ffmpeg_colormodel(vtrack->stream_cmodel);
 
-  if (codec->encoder->id == CODEC_ID_DNXHD)
+  if (codec->encoder->id == AV_CODEC_ID_DNXHD)
     {
-    /* FFMpeg's DNxHD encoder only supports PIX_FMT_YUV422P and PIX_FMT_YUV422P10
-       and doesn't know anything about PIX_FMT_YUVJ422P and PIX_FMT_YUVJ422P10
+    /* FFMpeg's DNxHD encoder only supports AV_PIX_FMT_YUV422P and AV_PIX_FMT_YUV422P10
+       and doesn't know anything about AV_PIX_FMT_YUVJ422P and AV_PIX_FMT_YUVJ422P10
        (in fact, the latter doesn't even exist) */
-    codec->avctx->pix_fmt = PIX_FMT_YUV422P;
+    codec->avctx->pix_fmt = AV_PIX_FMT_YUV422P;
     if (vtrack->stream_cmodel == BC_YUV422P10 || vtrack->stream_cmodel == BC_YUVJ422P10)
       {
       if (lqt_tenbit_dnxhd_supported(codec->encoder))
-        codec->avctx->pix_fmt = PIX_FMT_YUV422P10_OR_DUMMY;
+        codec->avctx->pix_fmt = AV_PIX_FMT_YUV422P10_OR_DUMMY;
       }
     }
   }
@@ -517,7 +517,7 @@ static void lqt_ffmpeg_setup_encoding_colormodel(quicktime_video_map_t *vtrack)
 /* From avcodec.h: */
 
 /*
- * PIX_FMT_RGBA32 is handled in an endian-specific manner. A RGBA
+ * AV_PIX_FMT_RGBA32 is handled in an endian-specific manner. A RGBA
  * color is put together as:
  *  (A << 24) | (R << 16) | (G << 8) | B
  * This is stored as BGRA on little endian CPU architectures and ARGB on
@@ -589,7 +589,7 @@ static void convert_rgba_to_argb(uint8_t const* src, int src_bytes_per_line,
  */
 
 static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
-                                 AVFrame * in_frame, enum PixelFormat in_format,
+                                 AVFrame * in_frame, enum AVPixelFormat in_format,
                                  unsigned char ** out_frame, int out_format,
                                  int width, int height, int row_span, int row_span_uv)
   {
@@ -606,9 +606,9 @@ static void convert_image_decode(quicktime_ffmpeg_video_codec_t *codec,
    *  RGBA format like in ffmpeg??
    */
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-  if((in_format == PIX_FMT_RGBA32) && (out_format == BC_RGBA8888))
+  if((in_format == AV_PIX_FMT_RGBA32) && (out_format == BC_RGBA8888))
 #else
-    if((in_format == PIX_FMT_RGB32) && (out_format == BC_RGBA8888))
+    if((in_format == AV_PIX_FMT_RGB32) && (out_format == BC_RGBA8888))
 #endif
       {
       convert_image_decode_rgba(in_frame, out_frame, width, height, codec->y_offset);
@@ -782,13 +782,13 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     codec->avctx->bits_per_coded_sample = quicktime_video_depth(file, track);
     /* Set extradata: It's done differently for each codec */
 
-    if(codec->decoder->id == CODEC_ID_SVQ3)
+    if(codec->decoder->id == AV_CODEC_ID_SVQ3)
       {
       extradata       = trak->mdia.minf.stbl.stsd.table[0].table_raw + 4;
       extradata_size  = trak->mdia.minf.stbl.stsd.table[0].table_raw_size - 4;
       
       }
-    else if(codec->decoder->id == CODEC_ID_H264)
+    else if(codec->decoder->id == AV_CODEC_ID_H264)
       {
       user_atom = quicktime_stsd_get_user_atom(trak, "avcC", &user_atom_len);
 
@@ -807,7 +807,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
         }
       
       }
-    else if(codec->decoder->id == CODEC_ID_MPEG4)
+    else if(codec->decoder->id == AV_CODEC_ID_MPEG4)
       {
       if(trak->mdia.minf.stbl.stsd.table[0].has_esds)
         {
@@ -936,10 +936,10 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
 #ifdef HAVE_LIBSWSCALE
 
 #if LIBAVUTIL_VERSION_INT < (50<<16)
-      if(!((codec->avctx->pix_fmt == PIX_FMT_RGBA32) &&
+      if(!((codec->avctx->pix_fmt == AV_PIX_FMT_RGBA32) &&
            (vtrack->stream_cmodel == BC_RGBA8888)))
 #else
-        if(!((codec->avctx->pix_fmt == PIX_FMT_RGB32) &&
+        if(!((codec->avctx->pix_fmt == AV_PIX_FMT_RGB32) &&
              (vtrack->stream_cmodel == BC_RGBA8888)))
 #endif
           {
@@ -954,15 +954,15 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
           }
 #endif
       }
-    if(codec->decoder->id == CODEC_ID_DVVIDEO)
+    if(codec->decoder->id == AV_CODEC_ID_DVVIDEO)
       {
       if(vtrack->stream_cmodel == BC_YUV420P)
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
       vtrack->interlace_mode = LQT_INTERLACE_BOTTOM_FIRST;
       vtrack->ci.id = LQT_COMPRESSION_DV;
       }
-    else if((codec->decoder->id == CODEC_ID_MPEG4) ||
-            (codec->decoder->id == CODEC_ID_H264))
+    else if((codec->decoder->id == AV_CODEC_ID_MPEG4) ||
+            (codec->decoder->id == AV_CODEC_ID_H264))
       {
       if(vtrack->stream_cmodel == BC_YUV420P)
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
@@ -1409,7 +1409,7 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   int frame_duration = lqt_frame_duration(file, track, NULL);
   const char* fourcc;
 
-  codec->avctx->pix_fmt = PIX_FMT_YUV422P;
+  codec->avctx->pix_fmt = AV_PIX_FMT_YUV422P;
   codec->avctx->gop_size = time_scale > 25 * frame_duration ? 15 : 12;
   codec->avctx->max_b_frames = 2;
   codec->avctx->intra_dc_precision = 2;
@@ -1606,13 +1606,13 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     {
     if(vtrack->stream_cmodel == BC_YUV420P)
       {
-      if(codec->encoder->id == CODEC_ID_MPEG4)
+      if(codec->encoder->id == AV_CODEC_ID_MPEG4)
         {
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_MPEG2;
         /* enable interlaced encoding */
         vtrack->interlace_mode = LQT_INTERLACE_NONE;
         }
-      else if(codec->encoder->id == CODEC_ID_DVVIDEO)
+      else if(codec->encoder->id == AV_CODEC_ID_DVVIDEO)
         {
         vtrack->chroma_placement = LQT_CHROMA_PLACEMENT_DVPAL;
         }
@@ -1637,9 +1637,9 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     switch(codec->encoder->id)
       {
       // Variable duration frames won't work for these.
-      case CODEC_ID_MPEG2VIDEO:
-      case CODEC_ID_DVVIDEO:
-      case CODEC_ID_DNXHD:
+      case AV_CODEC_ID_MPEG2VIDEO:
+      case AV_CODEC_ID_DVVIDEO:
+      case AV_CODEC_ID_DNXHD:
           codec->encoding_pts_factor = lqt_frame_duration(file, track, NULL);
           codec->avctx->time_base.num = codec->encoding_pts_factor;
           // time_base may be reduced by a common factor by libavcodec,
@@ -1663,7 +1663,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     codec->avctx->sample_aspect_ratio.num = pixel_width;
     codec->avctx->sample_aspect_ratio.den = pixel_height;
     /* Use global headers for mp4v */
-    if(codec->encoder->id == CODEC_ID_MPEG4)
+    if(codec->encoder->id == AV_CODEC_ID_MPEG4)
       {
       if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
         {
@@ -1687,12 +1687,12 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
         }
 #endif
       }
-    else if((codec->encoder->id == CODEC_ID_MSMPEG4V3) && (trak->strl) &&
+    else if((codec->encoder->id == AV_CODEC_ID_MSMPEG4V3) && (trak->strl) &&
             !strncmp(trak->strl->strf.bh.biCompression, "DIV3", 4))
       {
       strncpy(trak->strl->strh.fccHandler, "div3", 4);
       }
-    else if((codec->encoder->id == CODEC_ID_H263) &&
+    else if((codec->encoder->id == AV_CODEC_ID_H263) &&
             (file->file_type & (LQT_FILE_MP4|LQT_FILE_3GP)))
       {
       uint8_t d263_data[] =
@@ -1706,7 +1706,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       strncpy(trak->mdia.minf.stbl.stsd.table[0].format,
               "s263", 4);
       }
-    else if(codec->encoder->id == CODEC_ID_FFVHUFF)
+    else if(codec->encoder->id == AV_CODEC_ID_FFVHUFF)
       {
       if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
         {
@@ -1714,22 +1714,22 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
         codec->write_global_header = 1;
         }
       }
-    else if(codec->encoder->id == CODEC_ID_QTRLE)
+    else if(codec->encoder->id == AV_CODEC_ID_QTRLE)
       {
       if(vtrack->stream_cmodel == BC_RGBA8888)
         {
         /* Libquicktime doesn't natively support a color model equivalent
-           to PIX_FMT_ARGB, which is required for QTRLE with alpha channel.
+           to AV_PIX_FMT_ARGB, which is required for QTRLE with alpha channel.
            So, we use BC_RGBA8888 and do ad hoc conversion below. */
-        codec->avctx->pix_fmt = PIX_FMT_ARGB;
+        codec->avctx->pix_fmt = AV_PIX_FMT_ARGB;
         vtrack->track->mdia.minf.stbl.stsd.table[0].depth = 32;
         }
       }
-    else if(codec->encoder->id == CODEC_ID_DVVIDEO)
+    else if(codec->encoder->id == AV_CODEC_ID_DVVIDEO)
       {
       set_dv_fourcc(width, height, vtrack->stream_cmodel, trak);
       }
-    else if(codec->encoder->id == CODEC_ID_DNXHD)
+    else if(codec->encoder->id == AV_CODEC_ID_DNXHD)
       {
       if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
         {
@@ -1740,7 +1740,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       init_imx_encoder(file, track);
     else if(codec->is_xdcam_hd422)
       init_xdcam_hd422_encoder(file, track);
-    else if(codec->encoder->id == CODEC_ID_PRORES)
+    else if(codec->encoder->id == AV_CODEC_ID_PRORES)
       init_prores_encoder(file, track);
     
     /* Initialize 2-pass */
@@ -1782,7 +1782,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     }
   //        codec->lqt_colormodel = ffmepg_2_lqt(codec->com.ffcodec_enc);
 
-  if(codec->y_offset != 0 || codec->avctx->pix_fmt == PIX_FMT_ARGB)
+  if(codec->y_offset != 0 || codec->avctx->pix_fmt == AV_PIX_FMT_ARGB)
     {
     if(!codec->tmp_rows)
       {
@@ -1807,7 +1807,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
                         vtrack->stream_cmodel,
                         0, 0, 0, codec->y_offset);
       }
-    else if(codec->avctx->pix_fmt == PIX_FMT_ARGB)
+    else if(codec->avctx->pix_fmt == AV_PIX_FMT_ARGB)
       {
       convert_rgba_to_argb(row_pointers[0], vtrack->stream_row_span,
                            codec->tmp_rows[0], codec->tmp_row_span,
@@ -1861,12 +1861,12 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
   if(kf && codec->is_xdcam_hd422 && vtrack->cur_chunk)
     kf = LQT_PARTIAL_KEY_FRAME; // For XDCAM, only the first key frame is full key frame.
 
-  if(!was_initialized && codec->encoder->id == CODEC_ID_DNXHD)
+  if(!was_initialized && codec->encoder->id == AV_CODEC_ID_DNXHD)
     setup_avid_atoms(file, vtrack, codec->lqt_pkt.data, bytes_encoded);
   
   if(bytes_encoded)
     {
-    if (pts == AV_NOPTS_VALUE || (codec->encoder->id == CODEC_ID_DNXHD && pts == 0))
+    if (pts == AV_NOPTS_VALUE || (codec->encoder->id == AV_CODEC_ID_DNXHD && pts == 0))
       {
       /* Some codecs don't bother generating presentation timestamps.
          FFMpeg's DNxHD encoder doesn't even bother to set it to AV_NOPTS_VALUE. */
@@ -1899,13 +1899,13 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
 
   if(codec->write_global_header && !codec->global_header_written)
     {
-    if(codec->encoder->id == CODEC_ID_FFVHUFF)
+    if(codec->encoder->id == AV_CODEC_ID_FFVHUFF)
       {
       quicktime_user_atoms_add_atom(&trak->mdia.minf.stbl.stsd.table[0].user_atoms,
                                     "glbl",
                                     codec->avctx->extradata, codec->avctx->extradata_size );
       }
-    else if(codec->encoder->id == CODEC_ID_MPEG4)
+    else if(codec->encoder->id == AV_CODEC_ID_MPEG4)
       {
       int advanced = 0;
       if(codec->avctx->max_b_frames ||
@@ -2235,13 +2235,13 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     codec_base->encode_video = lqt_ffmpeg_encode_video;
     codec_base->set_pass = set_pass_ffmpeg;
 
-    if(encoder->id == CODEC_ID_MPEG4)
+    if(encoder->id == AV_CODEC_ID_MPEG4)
       {
       codec_base->writes_compressed = writes_compressed_mpeg4;
       codec_base->init_compressed   = init_compressed_mpeg4;
       codec_base->write_packet = write_packet_mpeg4;
       }
-    else if(encoder->id == CODEC_ID_DVVIDEO)
+    else if(encoder->id == AV_CODEC_ID_DVVIDEO)
       {
       codec_base->init_compressed = init_compressed_dv;
       }
@@ -2249,7 +2249,7 @@ void quicktime_init_video_codec_ffmpeg(quicktime_codec_t * codec_base,
     }
   if(decoder)
     {
-    if(decoder->id == CODEC_ID_H264)
+    if(decoder->id == AV_CODEC_ID_H264)
       codec_base->read_packet = read_packet_h264;
     codec_base->decode_video = lqt_ffmpeg_decode_video;
     }

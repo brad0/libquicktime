@@ -211,10 +211,10 @@ static void init_compression_info(quicktime_t *file, int track)
   quicktime_audio_map_t *track_map = &file->atracks[track];
   quicktime_ffmpeg_audio_codec_t *codec = track_map->codec->priv;
 
-  if((codec->decoder->id == CODEC_ID_MP2) ||
-     (codec->decoder->id == CODEC_ID_MP3))
+  if((codec->decoder->id == AV_CODEC_ID_MP2) ||
+     (codec->decoder->id == AV_CODEC_ID_MP3))
     read_packet_mpa(file, NULL, track);
-  else if(codec->decoder->id == CODEC_ID_AC3)
+  else if(codec->decoder->id == AV_CODEC_ID_AC3)
     read_packet_ac3(file, NULL, track);
   }
 
@@ -291,7 +291,7 @@ static int decode_audio_packet_ffmpeg(quicktime_t *file,
     codec->avctx->bits_per_coded_sample = quicktime_audio_bits(file, track);
     /* Some codecs need extra stuff */
 
-    if(codec->decoder->id == CODEC_ID_ALAC)
+    if(codec->decoder->id == AV_CODEC_ID_ALAC)
       {
       header = quicktime_wave_get_user_atom(atrack->track, "alac", &header_len);
       if(header)
@@ -300,7 +300,7 @@ static int decode_audio_packet_ffmpeg(quicktime_t *file,
         codec->avctx->extradata_size = header_len;
         }
       }
-    if(codec->decoder->id == CODEC_ID_QDM2)
+    if(codec->decoder->id == AV_CODEC_ID_QDM2)
       {
       header = quicktime_wave_get_user_atom(atrack->track, "QDCA", &header_len);
       if(header)
@@ -769,9 +769,9 @@ void quicktime_init_audio_codec_ffmpeg(quicktime_codec_t * codec_base,
 
   codec_base->set_parameter = set_parameter;
 
-  if((decoder->id == CODEC_ID_MP3) || (decoder->id == CODEC_ID_MP2))
+  if((decoder->id == AV_CODEC_ID_MP3) || (decoder->id == AV_CODEC_ID_MP2))
     codec_base->read_packet = read_packet_mpa;
-  else if(decoder->id == CODEC_ID_AC3)
+  else if(decoder->id == AV_CODEC_ID_AC3)
     {
     codec_base->write_packet = write_packet_ac3;
     codec_base->read_packet = read_packet_ac3;
