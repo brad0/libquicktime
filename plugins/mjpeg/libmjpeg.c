@@ -1096,13 +1096,6 @@ static void insert_space(unsigned char **buffer,
   *buffer_size += space_len;
   }
 
-static inline int nextbyte(unsigned char *data, long *offset, long length)
-  {
-  if(length - *offset < 1) return 0;
-  *offset += 1;
-  return (unsigned char)data[*offset - 1];
-  }
-
 static inline int next_int32(unsigned char *data, long *offset, long length)
   {
   if(length - *offset < 4)
@@ -1128,18 +1121,6 @@ static inline int read_int16(unsigned char *data, long *offset, long length)
   *offset += 2;
   return ((((unsigned int)data[*offset - 2]) << 8) | 
           (((unsigned int)data[*offset - 1])));
-  }
-
-static inline int
-next_int16(unsigned char *data, long *offset, long length)
-  {
-  if(length - *offset < 2)	
-    {
-    return 0;
-    }
-
-  return ((((unsigned int)data[*offset]) << 8) | 
-          (((unsigned int)data[*offset + 1])));
   }
 
 static inline void
