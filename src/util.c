@@ -376,7 +376,7 @@ int64_t quicktime_byte_position(quicktime_t *file)
 
 void quicktime_read_pascal(quicktime_t *file, char *data)
 {
-	char len = quicktime_read_char(file);
+	uint8_t len = quicktime_read_char(file);
 	quicktime_read_data(file, (uint8_t*)data, len);
 	data[(int)len] = 0;
 }
