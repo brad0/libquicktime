@@ -195,7 +195,7 @@ packet_index_create_video(quicktime_t *file,
       e.flags |= LQT_PACKET_KEYFRAME | LQT_PACKET_REF_FRAME;
       stps_index++;
       }
-    else if(!stss)
+    else if(!stss && !stps)
       e.flags |= LQT_PACKET_KEYFRAME;
 
     if(e.flags & LQT_PACKET_KEYFRAME)
