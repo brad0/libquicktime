@@ -376,9 +376,14 @@ int64_t quicktime_byte_position(quicktime_t *file)
 
 void quicktime_read_pascal(quicktime_t *file, char *data)
 {
-	uint8_t len = quicktime_read_char(file);
-	quicktime_read_data(file, (uint8_t*)data, len);
-	data[(int)len] = 0;
+	int len = quicktime_read_char(file);
+	if ((len > 0) && (len < 256)) {
+          /* data[] is expected to be 256 bytes long */
+          quicktime_read_data(file, (uint8_t*)data, len);
+          data[len] = 0;
+        } else {
+          data[0] = 0;
+        }
 }
 
 void quicktime_write_pascal(quicktime_t *file, char *data)
