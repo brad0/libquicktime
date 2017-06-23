@@ -131,6 +131,9 @@ int quicktime_atom_read_header(quicktime_t *file, quicktime_atom_t *atom)
 			atom->size = read_size64(header);
 			atom->end = atom->start + atom->size;
 		}
+/* Avoid broken files */
+        if(atom->end > file->total_length)
+          result = 1;
 	}
 
 
