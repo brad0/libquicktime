@@ -272,6 +272,14 @@ int quicktime_read_trak(quicktime_t *file, quicktime_trak_t *trak,
     else quicktime_atom_skip(file, &leaf_atom);
     } while(quicktime_position(file) < trak_atom->end);
 
+  /* Do some sanity checks to prevent later crashes */
+  if(trak->mdia.minf.is_video || trak->mdia.minf.is_video)
+    {
+    if(!trak->mdia.minf.stbl.stsc.table ||
+       !trak->mdia.minf.stbl.stco.table)
+      return 1;
+    }
+
 #if 1 
   if(trak->mdia.minf.is_video &&
      quicktime_match_32(trak->mdia.minf.stbl.stsd.table[0].format, "drac"))

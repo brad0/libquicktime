@@ -218,7 +218,8 @@ int quicktime_read_moov(quicktime_t *file, quicktime_moov_t *moov, quicktime_ato
 		if(quicktime_atom_is(&leaf_atom, "trak"))
 		{
 			quicktime_trak_t *trak = quicktime_add_trak(file);
-			quicktime_read_trak(file, trak, &leaf_atom);
+			if(quicktime_read_trak(file, trak, &leaf_atom))
+                          return 1;
 		}
 		else
 		if(quicktime_atom_is(&leaf_atom, "udta"))

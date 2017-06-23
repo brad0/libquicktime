@@ -993,8 +993,8 @@ int quicktime_read_info(quicktime_t *file)
                 quicktime_set_position(file, start_position);
                 free(temp);
 
-                quicktime_read_moov(file, &file->moov, &leaf_atom);
-                got_header = 1;
+                if(!quicktime_read_moov(file, &file->moov, &leaf_atom))
+                  got_header = 1;
                 }
               else
                 if(((leaf_atom.type[0] | leaf_atom.type[1] | leaf_atom.type[2] | leaf_atom.type[3]) == 0) &&
