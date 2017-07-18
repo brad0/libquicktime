@@ -132,7 +132,12 @@ int quicktime_read_udta_string(quicktime_t *file,
   const char * charset_fallback;
   uint16_t language;
   
-  if(*size) free(*string);
+  if(*size)
+    {
+    free(*string);
+    *string = NULL;
+    *size = 0;
+    }
   if(!ilst)
     {
     *size = quicktime_read_int16(file);  /* Size of string */
