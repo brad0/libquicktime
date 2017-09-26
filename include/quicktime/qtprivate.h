@@ -852,10 +852,10 @@ typedef struct
   {
   int version;
   long flags;
-  unsigned long creation_time;
-  unsigned long modification_time;
+  uint64_t creation_time;
+  uint64_t modification_time;
   long time_scale;
-  long duration;
+  int64_t duration;
   int language;
   int quality;
   } quicktime_mdhd_t;
