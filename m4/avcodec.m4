@@ -33,10 +33,10 @@ AC_TRY_RUN([
     int main()
     {
     FILE * output;
-    if(LIBAVCODEC_BUILD < $1)
+    if(LIBAVCODEC_BUILD > $1)
       return -1;
     output=fopen("avcodec_version", "w");
-    fprintf(output, AV_TOSTRING(LIBAVCODEC_VERSION));
+    fprintf(output, "LIBAVCODEC_BUILD: %d\n", LIBAVCODEC_BUILD);
     fclose(output);
     return 0;
     }
