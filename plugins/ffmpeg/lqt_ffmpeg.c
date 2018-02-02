@@ -609,7 +609,6 @@ struct CODECIDMAP codecidmap_v[] =
       .compatibility_flags = LQT_FILE_QT_OLD | LQT_FILE_QT,
       .do_encode = 1,
     },
-#if LIBAVCODEC_BUILD >= 3346688
     {
       .id = AV_CODEC_ID_TARGA,
       .index = -1,
@@ -620,8 +619,6 @@ struct CODECIDMAP codecidmap_v[] =
       .fourccs = { "tga ", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
-#endif
-#if LIBAVCODEC_BUILD >= 3347456
     {
       .id = AV_CODEC_ID_TIFF,
       .index = -1,
@@ -632,7 +629,6 @@ struct CODECIDMAP codecidmap_v[] =
       .fourccs = { "tiff", (char *)0 },
       .wav_ids = { LQT_WAV_ID_NONE },
     },
-#endif
     {
       .id = AV_CODEC_ID_8BPS,
       .index = -1,
@@ -818,7 +814,6 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .encoding_colormodels = (int[]){ BC_YUV420P, BC_YUV444P, BC_YUV422P, BC_YUV411P, LQT_COLORMODEL_NONE },
     },
-#if LIBAVCODEC_BUILD >= 3352576
     {
       .id = AV_CODEC_ID_DNXHD,
       .index = -1,
@@ -835,7 +830,6 @@ struct CODECIDMAP codecidmap_v[] =
       .do_encode = 1,
       .encoding_colormodels = (int[]){ BC_YUV422P, BC_YUVJ422P, BC_YUV422P10, BC_YUVJ422P10, LQT_COLORMODEL_NONE }
     },
-#endif
     {
       .id = AV_CODEC_ID_MPEG2VIDEO,
       .index = -1,

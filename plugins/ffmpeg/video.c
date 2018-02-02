@@ -32,9 +32,7 @@
 
 #define LOG_DOMAIN "ffmpeg_video"
 
-#ifdef HAVE_LIBSWSCALE
-#include SWSCALE_HEADER
-#endif
+#include <libswscale/swscale.h>
 
 #ifdef  AV_PIX_FMT_YUV422P10
 #define AV_PIX_FMT_YUV422P10_OR_DUMMY AV_PIX_FMT_YUV422P10

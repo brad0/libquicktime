@@ -24,7 +24,7 @@
 
 #include "lqt_private.h"
 #include "params.h"
-#include AVCODEC_HEADER
+#include <libavcodec/avcodec.h>
 #include <string.h>
 #include "ffmpeg.h"
 
