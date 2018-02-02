@@ -528,13 +528,9 @@ dnl
 dnl libswscale
 dnl
 
-AH_TEMPLATE([HAVE_LIBSWSCALE],
-            [Do we have libswscale installed?])
-AH_TEMPLATE([SWSCALE_HEADER], [libswscale header])
+AH_TEMPLATE([HAVE_LIBSWSCALE], [Do we have libswscale installed?])
 
 have_libswscale=false
-
-LIBSWSCALE_REQUIRED="0.5.0"
 
 AC_ARG_ENABLE(libswscale,
 [AC_HELP_STRING([--disable-libswscale],[Disable libswscale (default: autodetect)])],
@@ -544,31 +540,9 @@ AC_ARG_ENABLE(libswscale,
 esac],[test_libswscale=true])
 
 if test x$test_libswscale = xtrue; then
-
-PKG_CHECK_MODULES(LIBSWSCALE, libswscale >= $LIBSWSCALE_REQUIRED,
-                  have_libswscale="true", have_libswscale="false")
+PKG_CHECK_MODULES(LIBSWSCALE, libswscale, have_libswscale="true", have_libswscale="false")
 fi
 
-CFLAGS_save=$CFLAGS
-CFLAGS="$CFLAGS $LIBSWSCALE_CFLAGS"
-found_header="false"
-
-AC_TRY_COMPILE([
-#include <swscale.h>],[],[found_header="true";SWSCALE_HEADER="<swscale.h>"])
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <swscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<swscale/swscale.h>" ],)
-fi
-
-if test $found_header = "false"; then
-AC_TRY_COMPILE([
-#include <libswscale/swscale.h>],[], [found_header="true";SWSCALE_HEADER="<libswscale/swscale.h>" ],)
-fi
-
-CFLAGS="$CFLAGS_save"
-
-AC_SUBST(LIBSWSCALE_REQUIRED)
 AC_SUBST(LIBSWSCALE_LIBS)
 AC_SUBST(LIBSWSCALE_CFLAGS)
 
@@ -576,11 +550,7 @@ AM_CONDITIONAL(HAVE_LIBSWSCALE, test x$have_libswscale = xtrue)
 
 if test "x$have_libswscale" = "xtrue"; then
 AC_DEFINE([HAVE_LIBSWSCALE])
-AC_DEFINE_UNQUOTED(SWSCALE_HEADER, $SWSCALE_HEADER)
 fi
-
-
-
 
 dnl
 dnl Check for libavcodec (ffmpeg)
@@ -591,22 +561,16 @@ AH_TEMPLATE([HAVE_LIBAVCODEC],
 
 have_libavcodec=false
 
-dnl Require libavcodec "54.2.100"
-AVCODEC_BUILD="3539556"
+dnl Require libavcodec less than 56.0.0
 
 AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
 
 if test "x$with_ffmpeg" != "xno"; then
-
-ACL_PATH_AVCODEC($AVCODEC_BUILD , have_libavcodec="true", have_libavcodec="false")
-
+PKG_CHECK_MODULES(LIBAVCODEC, [libavcodec < 56.0.0], have_libavcodec="true", have_libavcodec="false")
 fi
-
-AVCODEC_REQUIRED=$AVCODEC_VERSION
 
 AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
 
-AC_SUBST(AVCODEC_REQUIRED)
 AC_SUBST(AVCODEC_LIBS)
 AC_SUBST(AVCODEC_CFLAGS)
 
