@@ -1,6 +1,5 @@
 localedir = $(datadir)/locale
 EXTRA_DIST= \
-	avcodec.m4 \
 	codeset.m4 \
 	gettext.m4 \
 	glibc2.m4 \
