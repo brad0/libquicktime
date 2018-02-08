@@ -1,4 +1,10 @@
+*.o
+*.a
+*.so
+*.in
+*~
 INSTALL
+NEWS
 Makefile
 Makefile.in
 aclocal.m4
@@ -20,4 +26,3 @@ missing
 mkinstalldirs
 stamp-h1
 libquicktime.tags
-gavl.tags
