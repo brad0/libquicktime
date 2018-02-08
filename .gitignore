@@ -9,6 +9,10 @@
 *~
 INSTALL
 NEWS
+/compile
+/doc/apiref
+/doc/Doxyfile
+/include/quicktime//lqt_version.h
 Makefile
 Makefile.in
 aclocal.m4
