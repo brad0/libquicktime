@@ -561,12 +561,10 @@ AH_TEMPLATE([HAVE_LIBAVCODEC],
 
 have_libavcodec=false
 
-dnl Require libavcodec less than 56.0.0
-
 AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
 
 if test "x$with_ffmpeg" != "xno"; then
-PKG_CHECK_MODULES(LIBAVCODEC, [libavcodec < 56.0.0], have_libavcodec="true", have_libavcodec="false")
+PKG_CHECK_MODULES(LIBAVCODEC, [libavcodec], have_libavcodec="true", have_libavcodec="false")
 fi
 
 AM_CONDITIONAL(HAVE_LIBAVCODEC, test x$have_libavcodec = xtrue)
