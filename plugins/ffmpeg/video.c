@@ -833,7 +833,7 @@ static int lqt_ffmpeg_decode_video(quicktime_t *file, unsigned char **row_pointe
     if(extradata)
       {
       codec->extradata =
-        calloc(1, extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+        calloc(1, extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
       memcpy(codec->extradata, extradata, extradata_size);
       codec->avctx->extradata_size = extradata_size;
       codec->avctx->extradata = codec->extradata;
@@ -1356,8 +1356,8 @@ static int init_imx_encoder(quicktime_t *file, int track)
   codec->avctx->qmin = 1;
   codec->avctx->qmax = codec->imx_bitrate == 30 ? 8 : 3;
   codec->avctx->rtp_payload_size = 1; // ??
-  codec->avctx->rc_buffer_aggressivity = 0.25;
-  codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_LOW_DELAY;
+  av_dict_set(&codec->options, "rc_buf_aggressivity", "0.25", 0);
+  codec->avctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT|AV_CODEC_FLAG_LOW_DELAY;
 
   av_dict_set(&codec->options, "non_linear_quant", "1", 0);
   av_dict_set(&codec->options, "intra_vlc", "1", 0);
@@ -1413,14 +1413,14 @@ static int init_xdcam_hd422_encoder(quicktime_t *file, int track)
   codec->avctx->intra_dc_precision = 2;
   codec->avctx->qmin = 1;
   codec->avctx->qmax = 12; // The maximum value compatible with non_linear_quant option.
-  codec->avctx->lmin = FF_QP2LAMBDA;
+  codec->avctx->mb_lmin = FF_QP2LAMBDA;
 
   // XDCAM is meant to use open GOPs. From time to time we might want to insert closed GOPs
   // like some other encoders do, but libavcodec only checks this flag once.
-  codec->avctx->flags &= ~CODEC_FLAG_CLOSED_GOP;
+  codec->avctx->flags &= ~AV_CODEC_FLAG_CLOSED_GOP;
 
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
-    codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME;
+    codec->avctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT|AV_CODEC_FLAG_INTERLACED_ME;
 
   av_dict_set(&codec->options, "non_linear_quant", "1", 0);
   av_dict_set(&codec->options, "intra_vlc", "1", 0);
@@ -1450,7 +1450,7 @@ static int init_prores_encoder(quicktime_t *file, int track)
   int height = trak->tkhd.track_height;
 
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
-    codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT;
+    codec->avctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT;
 
   // Color parameters go into ProRes bitstream.
   if (trak->mdia.minf.stbl.stsd.table->has_colr)
@@ -1646,7 +1646,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       default:;
       }
 
-    if(codec->avctx->flags & CODEC_FLAG_QSCALE)
+    if(codec->avctx->flags & AV_CODEC_FLAG_QSCALE)
       codec->avctx->global_quality = codec->qscale;
                               
     codec->avctx->width = width;
@@ -1665,7 +1665,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       {
       if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
         {
-        codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        codec->avctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         codec->write_global_header = 1;
         }
             
@@ -1681,7 +1681,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
         {
         lqt_log(file, LQT_LOG_INFO, LOG_DOMAIN, "Enabling interlaced encoding");
         codec->avctx->flags |=
-          (CODEC_FLAG_INTERLACED_DCT|CODEC_FLAG_INTERLACED_ME|CODEC_FLAG_ALT_SCAN);
+          (AV_CODEC_FLAG_INTERLACED_DCT|AV_CODEC_FLAG_INTERLACED_ME|AV_CODEC_FLAG_ALT_SCAN);
         }
 #endif
       }
@@ -1708,7 +1708,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       {
       if(!(file->file_type & (LQT_FILE_AVI|LQT_FILE_AVI_ODML)))
         {
-        codec->avctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        codec->avctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
         codec->write_global_header = 1;
         }
       }
@@ -1731,7 +1731,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       {
       if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
         {
-        codec->avctx->flags |= CODEC_FLAG_INTERLACED_DCT;
+        codec->avctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT;
         }
       }
     else if(codec->is_imx)
@@ -1747,7 +1747,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
       if(codec->pass == 1)
         {
         codec->stats_file = fopen(codec->stats_filename, "w");
-        codec->avctx->flags |= CODEC_FLAG_PASS1;
+        codec->avctx->flags |= AV_CODEC_FLAG_PASS1;
         }
       else if(codec->pass == codec->total_passes)
         {
@@ -1763,7 +1763,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
         fclose(codec->stats_file);
         codec->stats_file = (FILE*)0;
               
-        codec->avctx->flags |= CODEC_FLAG_PASS2;
+        codec->avctx->flags |= AV_CODEC_FLAG_PASS2;
         }
       }
     /* Open codec */
@@ -1829,7 +1829,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     }
   
   codec->frame->pts = vtrack->timestamp / codec->encoding_pts_factor;
-  if(codec->avctx->flags & CODEC_FLAG_QSCALE)
+  if(codec->avctx->flags & AV_CODEC_FLAG_QSCALE)
     codec->frame->quality = codec->qscale;
 #if 1
   if(vtrack->interlace_mode != LQT_INTERLACE_NONE)
@@ -1906,8 +1906,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
     else if(codec->encoder->id == AV_CODEC_ID_MPEG4)
       {
       int advanced = 0;
-      if(codec->avctx->max_b_frames ||
-         (codec->avctx->flags & (CODEC_FLAG_QPEL|CODEC_FLAG_GMC)))
+      if(codec->avctx->max_b_frames)
         advanced = 1;
 
       setup_header_mpeg4(file, track, codec->avctx->extradata,
