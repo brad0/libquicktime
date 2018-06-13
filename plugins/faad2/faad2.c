@@ -155,7 +155,7 @@ static int decode_packet_faad2(quicktime_t * file, int track, lqt_audio_buffer_t
       if(!quicktime_trak_read_packet(file, atrack->track, &codec->pkt))
         return 0;
 
-      memset(&codec->frame_info, 0, sizeof(&codec->frame_info));
+      memset(&codec->frame_info, 0, sizeof(codec->frame_info));
       
       codec->samples = faacDecDecode(codec->dec, &codec->frame_info,
                                      codec->pkt.data, codec->pkt.data_len);
