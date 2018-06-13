@@ -4,6 +4,7 @@
 *.in
 *.lo
 *.la
+*.patch
 .deps
 .libs
 *~
