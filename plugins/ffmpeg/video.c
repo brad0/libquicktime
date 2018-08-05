@@ -1879,7 +1879,7 @@ static int lqt_ffmpeg_encode_video(quicktime_t *file,
                                    encoded_data,
                                    bytes_encoded);
 
-    av_free_packet(&pkt);
+    av_packet_free_side_data(&pkt);
 
     // Must go before lqt_write_frame_header() which increments vtrack->cur_chunk.
     // cur_chunk is a frame number in storage order.
