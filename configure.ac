@@ -661,7 +661,7 @@ AC_MSG_CHECKING(for faac)
 AC_TRY_RUN([
     #include <inttypes.h>
     #include <faac.h>
-    main()
+    int main()
     {
     int samplerate = 44100, num_channels = 2;
     unsigned long input_samples, output_bytes;
@@ -730,7 +730,7 @@ AC_MSG_CHECKING(for neaacdec.h usability for faad2)
 AC_TRY_RUN([
     #include <neaacdec.h>
     #include <stdio.h>
-    main()
+    int main()
     {
     int faad_major;
     int faad_minor;
@@ -763,7 +763,7 @@ AC_MSG_CHECKING(for faad.h usability for faad2)
 AC_TRY_RUN([
     #include <faad.h>
     #include <stdio.h>
-    main()
+    int main()
     {
     int faad_major;
     int faad_minor;
