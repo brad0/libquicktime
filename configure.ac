@@ -736,8 +736,6 @@ AC_TRY_RUN([
     int faad_minor;
     faacDecHandle dec;
 
-    if(sscanf(FAAD2_VERSION, "%d.%d", &faad_major, &faad_minor) < 2)
-      return -1;
     dec = faacDecOpen();
     if(!dec)
       return -1;
