@@ -1,6 +1,6 @@
 localedir = $(datadir)/locale
 pkglib_LTLIBRARIES = lqt_lame.la
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 lqt_lame_la_SOURCES = \
 lame_codec.c \
 lqt_lame.c

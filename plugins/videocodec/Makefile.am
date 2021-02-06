@@ -2,7 +2,7 @@ localedir = $(datadir)/locale
 AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 pkglib_LTLIBRARIES = lqt_videocodec.la
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 
 lqt_videocodec_la_SOURCES = \
 raw.c \

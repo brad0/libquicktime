@@ -1,5 +1,5 @@
 localedir = $(datadir)/locale
-INCLUDES = -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include
 AM_CFLAGS = @GTK_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
 
 bin_PROGRAMS = libquicktime_config

@@ -1,6 +1,6 @@
 localedir = $(datadir)/locale
 AM_CFLAGS = @LIBDV_CFLAGS@ -DLOCALE_DIR=\"$(localedir)\"
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include/
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include/
 pkglib_LTLIBRARIES = lqt_dv.la
 
 lqt_dv_la_SOURCES = dv.c lqt_dv.c

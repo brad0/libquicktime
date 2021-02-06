@@ -2,7 +2,7 @@ localedir = $(datadir)/locale
 AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\"
 pkglib_LTLIBRARIES = lqt_audiocodec.la
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 
 lqt_audiocodec_la_SOURCES = \
 ima4.c \

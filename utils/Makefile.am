@@ -67,7 +67,7 @@ lqtplay_LDADD=@UTIL_LIBADD@ @X_LIBS@ -lXaw -lXt @X_PRE_LIBS@ -lXext \
 	-lXv @GL_LIBS@ -lX11 @X_EXTRA_LIBS@ -lm @ALSA_LIBS@ @SNDIO_LIBS@ \
 	@OSSAUDIO_LIBS@
 
-INCLUDES = -I$(top_srcdir)/include \
+AM_CPPFLAGS = -I$(top_srcdir)/include \
 	    -I$(top_builddir)/include/quicktime \
 	    @X_CFLAGS@ @ALSA_CFLAGS@
 

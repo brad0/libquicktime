@@ -3,7 +3,7 @@ localedir = $(datadir)/locale
 AM_CFLAGS = -DLOCALE_DIR=\"$(localedir)\" @SCHROEDINGER_CFLAGS@
 
 pkglib_LTLIBRARIES = lqt_schroedinger.la
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_builddir)/include
 
 lqt_schroedinger_la_SOURCES = \
 schroedinger.c \
