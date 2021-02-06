@@ -730,8 +730,6 @@ AC_TRY_RUN([
     #include <stdio.h>
     int main()
     {
-    int faad_major;
-    int faad_minor;
     faacDecHandle dec;
 
     dec = faacDecOpen();
