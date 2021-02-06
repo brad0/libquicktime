@@ -1,5 +1,6 @@
-AC_INIT(src/lqt_quicktime.c)
-AM_INIT_AUTOMAKE(libquicktime, 1.2.4)
+AC_INIT([libquicktime],[1,2,4],[http://libquicktime.sourceforge.net])
+AC_CONFIG_MACRO_DIRS([m4])
+AM_INIT_AUTOMAKE([1.7])
 
 LQT_VERSION=$VERSION
 
@@ -9,9 +10,6 @@ LQT_VERSION_MICRO=`echo $VERSION | cut -d . -f 3 | cut -d p -f 1`
 
 USER_CFLAGS=$CFLAGS
 
-dnl AC_LANG_SOURCE(C)
-
-dnl AM_CONFIG_HEADER(config.h)
 AC_CONFIG_HEADERS(config.h)
 
 AC_CANONICAL_HOST
@@ -950,116 +948,28 @@ plugins/x264/Makefile \
 utils/Makefile \
 utils/gtk/Makefile])
 
-echo "Configuration: "
-$have_gtk
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([ libquicktime ${VERSION} build configuration:])
+AC_MSG_NOTICE([])
 
-echo -n "libdv:        "
 if test x$have_libdv = "xtrue"; then
-echo "Yes"
+AC_MSG_NOTICE([  -libdv                 : enabled])
 else
-echo "Missing / Disabled (Go to http://libdv.sourceforge.net)"
+AC_MSG_NOTICE([  -libdv                 : disabled (default) / missing])
 fi
-
-echo -n "vorbis:       "
-if test x$have_vorbis = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.vorbis.com/)"
-fi
-
-echo -n "lame:         "
-if test x$have_lame = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.mp3dev.org/)"
-fi
-
-
-echo -n "libjpeg:      "
-if test x$have_libjpeg = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.ijg.org/)"
-fi
-
-echo -n "libpng:       "
-if test x$have_libpng = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.libpng.org/pub/png/libpng.html)"
-fi
-
-echo -n "schroedinger: "
-if test x$have_schroedinger = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.diracvideo.org)"
-fi
-
-
-echo -n "libavcodec:   "
-if test x$have_libavcodec = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.ffmpeg.org/)"
-fi
-
-echo -n "libswscale:   "
-if test x$have_libswscale = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.ffmpeg.org/)"
-fi
-
-echo -n "gtk >= $GTK_REQUIRED: "
-if test x$have_gtk = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.gtk.org/)"
-fi
-
-echo -n "Alsa          "
-if test x$have_alsa = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.alsa-project.org/)"
-fi  
-
-echo -n "sndio         "
-if test x$have_sndio = "xtrue"; then
-echo "Yes"
-else
-echo "Missing"
-fi
-
-echo -n "GPL plugins   "
+AC_MSG_NOTICE([  -vorbis                : ${have_vorbis}])
+AC_MSG_NOTICE([  -lame                  : ${have_lame}])
+AC_MSG_NOTICE([  -libjpeg               : ${have_libjpeg}])
+AC_MSG_NOTICE([  -libpng                : ${have_libpng}])
+AC_MSG_NOTICE([  -nschroedinger         : ${have_schroedinger}])
+AC_MSG_NOTICE([  -libavcodec            : ${have_libavcodec}])
+AC_MSG_NOTICE([  -libswscale            : ${have_libswscale}])
+AC_MSG_NOTICE([  -gtk >= $GTK_REQUIRED          : ${have_gtk}])
+AC_MSG_NOTICE([  -Alsa                  : ${have_alsa}])
+AC_MSG_NOTICE([  -sndio                 : ${have_sndio}])
+AC_MSG_NOTICE([  -GPL plugins           : ${have_gpl}])
 if test x$have_gpl = "xtrue"; then
-echo "Enabled"
-else
-echo "Disabled"
-fi  
-
-if test x$have_gpl = "xtrue"; then
-
-echo -n "faac          "
-if test x$have_faac = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.audiocoding.com/)"
-fi  
-
-echo -n "faad2         "
-if test x$have_faad2 = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://www.audiocoding.com/)"
-fi  
-
-echo -n "x264          "
-if test x$have_x264 = "xtrue"; then
-echo "Yes"
-else
-echo "Missing (Go to http://developers.videolan.org/x264.html)"
-fi  
-
+AC_MSG_NOTICE([       faac              : ${have_faac}])
+AC_MSG_NOTICE([       faad2             : ${have_faad2}])
+AC_MSG_NOTICE([       x264              : ${have_x264}])
 fi
