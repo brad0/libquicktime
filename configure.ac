@@ -1,4 +1,4 @@
-AC_INIT([libquicktime],[1,2,4],[http://libquicktime.sourceforge.net])
+AC_INIT([libquicktime],[1.2.4],[http://libquicktime.sourceforge.net])
 AC_CONFIG_MACRO_DIRS([m4])
 AM_INIT_AUTOMAKE([1.7])
 
