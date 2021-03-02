@@ -572,35 +572,23 @@ AC_SUBST(LIBAVCODEC_CFLAGS)
 
 dnl
 dnl Check for libpng
+dnl   (creates LIBPNG_CFLAGS, LIBPNG_LIBS)
 dnl 
 
 AH_TEMPLATE([HAVE_LIBPNG], [Enable png codec])
-
-have_libpng=false
-PNG_REQUIRED="1.2.23"
 
 AC_ARG_WITH(libpng,
             AC_HELP_STRING([--without-libpng], [Do not use libpng.]),
             [], [with_libpng=yes])
 
-dnl *********************************************************************
-dnl Check for PNG library
-dnl   (creates LIBPNG_CFLAGS, LIBPNG_LIBS)
-dnl *********************************************************************
 have_libpng=false
 if test x$with_libpng != xno ; then
   PKG_CHECK_MODULES(LIBPNG, [libpng], [have_libpng=true], [have_libpng=false])
-  if test x$have_libpng = xfalse ; then
-    PKG_CHECK_MODULES(LIBPNG, [libpng12], [have_libpng=true], [have_libpng=false])
-  fi
 fi
-AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
+AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 AC_SUBST(LIBPNG_CFLAGS)
 AC_SUBST(LIBPNG_LIBS)
-AC_SUBST(PNG_REQUIRED)
-
-AM_CONDITIONAL(HAVE_LIBPNG, test x$have_libpng = xtrue)
 
 dnl
 dnl Check for libschroedinger
