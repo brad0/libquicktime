@@ -27,15 +27,12 @@
 #include <quicktime/lqt_codecapi.h>
 
 #include "faad2.h"
-
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef HAVE_NEAACDEC_H
 #include <neaacdec.h>
+
 /*
- *  Backwards compatibility names (currently in neaacdec.h,
- *  but might be removed in future versions)
+ *  Backwards compatibility names (currently in neaacdec.h but might be removed in future versions)
  */
 #ifndef faacDecHandle
 /* structs */
@@ -55,10 +52,6 @@
 #define faacDecClose                   NeAACDecClose
 #define faacDecDecode                  NeAACDecDecode
 #define AudioSpecificConfig            NeAACDecAudioSpecificConfig
-#endif
-
-#else
-#include <faad.h>
 #endif
 
 #define LOG_DOMAIN "faad2"
