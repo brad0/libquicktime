@@ -26,7 +26,7 @@ all: html
 CLEANFILES = libquicktime.tags
 
 install-data-local:
-	test -z "$(DESTDIR)$(docdir)/apiref" || $(mkdir_p) "$(DESTDIR)$(docdir)/apiref"
+	test -z "$(DESTDIR)$(docdir)/apiref" || $(MKDIR_P) "$(DESTDIR)$(docdir)/apiref"
 	$(INSTALL_DATA) apiref/* $(DESTDIR)$(docdir)/apiref
 
 
