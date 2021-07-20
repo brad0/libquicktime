@@ -486,7 +486,7 @@ have_libavcodec=false
 AC_ARG_WITH([ffmpeg], AS_HELP_STRING([--without-ffmpeg], [Build without ffmpeg library (default: test)]))
 
 if test "x$with_ffmpeg" != "xno"; then
-   PKG_CHECK_MODULES(LIBAVCODEC, [libavcodec], 
+   PKG_CHECK_MODULES(LIBAVCODEC, [libavcodec < 59.0.0], 
                                  [have_libavcodec="true"
 				  AC_DEFINE(HAVE_LIBAVCODEC)],
 				 have_libavcodec="false")
